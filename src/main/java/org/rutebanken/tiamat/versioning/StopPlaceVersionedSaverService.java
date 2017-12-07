@@ -23,6 +23,7 @@ import org.rutebanken.tiamat.repository.EntityInVersionRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.service.TariffZonesLookupService;
 import org.rutebanken.tiamat.service.TopographicPlaceLookupService;
+import org.rutebanken.tiamat.service.metrics.MetricsService;
 import org.rutebanken.tiamat.versioning.util.AccessibilityAssessmentOptimizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -130,6 +131,7 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
         if(existingVersion != null) {
            tiamatObjectDiffer.logDifference(existingVersion, newVersion);
         }
+        metricsService.registerEntitySaved(newVersion.getClass());
 
         updateQuaysCache(newVersion);
 

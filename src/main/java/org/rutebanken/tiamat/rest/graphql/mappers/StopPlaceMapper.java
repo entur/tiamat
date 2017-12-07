@@ -39,7 +39,7 @@ public class StopPlaceMapper {
     private QuayMapper quayMapper;
 
     @Autowired
-    private SiteElementMapper siteElementMapper;
+    private GroupOfEntitiesMapper groupOfEntitiesMapper;
 
     @Autowired
     private ValidBetweenMapper validBetweenMapper;
@@ -50,15 +50,10 @@ public class StopPlaceMapper {
      * @return true if StopPlace or any og the attached Quays are updated
      */
     public boolean populateStopPlaceFromInput(Map input, StopPlace stopPlace) {
-        boolean isUpdated = siteElementMapper.populate(input, stopPlace);
+        boolean isUpdated = false;
 
         if (input.get(STOP_PLACE_TYPE) != null) {
             stopPlace.setStopPlaceType((StopTypeEnumeration) input.get(STOP_PLACE_TYPE));
-            isUpdated = true;
-        }
-
-        if (input.get(VERSION_COMMENT) != null) {
-            stopPlace.setVersionComment((String) input.get(VERSION_COMMENT));
             isUpdated = true;
         }
 
@@ -91,6 +86,7 @@ public class StopPlaceMapper {
                 }
             }
         }
+        isUpdated = isUpdated | groupOfEntitiesMapper.populate(input, stopPlace);
 
         return isUpdated;
     }

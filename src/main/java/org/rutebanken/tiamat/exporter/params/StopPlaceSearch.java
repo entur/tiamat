@@ -25,7 +25,7 @@ import javax.ws.rs.QueryParam;
 import java.time.Instant;
 import java.util.List;
 
-public class StopPlaceSearch {
+public class StopPlaceSearch implements SearchObject {
 
     /**
      * zero-based page index

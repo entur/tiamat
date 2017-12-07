@@ -17,7 +17,7 @@ package org.rutebanken.tiamat.rest.dto;
 
 import io.swagger.annotations.Api;
 import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
-import org.rutebanken.tiamat.dtoassembling.dto.JbvCodeMappingDto;
+import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDtoCsvMapper;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,11 +32,9 @@ import java.io.BufferedWriter;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.time.Instant;
+import java.time.Period;
+import java.time.temporal.TemporalUnit;
 import java.util.List;
-import java.util.Set;
-
-import static org.rutebanken.tiamat.config.JerseyConfig.SERVICES_PATH;
-import static org.rutebanken.tiamat.config.JerseyConfig.SERVICES_STOP_PLACE_PATH;
 
 @Component
 @Api
@@ -49,44 +47,58 @@ public class DtoStopPlaceResource {
 
     private final StopPlaceRepository stopPlaceRepository;
 
+    private final DtoMappingSemaphore dtoMappingSemaphore;
+
+    private final IdMappingDtoCsvMapper csvMapper;
+
     @Autowired
-    public DtoStopPlaceResource(StopPlaceRepository stopPlaceRepository) {
+    public DtoStopPlaceResource(StopPlaceRepository stopPlaceRepository, DtoMappingSemaphore dtoMappingSemaphore, IdMappingDtoCsvMapper csvMapper) {
         this.stopPlaceRepository = stopPlaceRepository;
+        this.dtoMappingSemaphore = dtoMappingSemaphore;
+        this.csvMapper = csvMapper;
     }
 
     @GET
     @Path("/mapping/stop_place")
     @Produces("text/plain")
     public Response getIdMapping(@DefaultValue(value = "300000") @QueryParam(value = "recordsPerRoundTrip") int recordsPerRoundTrip,
-                                            @QueryParam("includeStopType") boolean includeStopType) {
+                                        @QueryParam("includeStopType") boolean includeStopType, @QueryParam("includeFuture") boolean includeFuture) throws InterruptedException {
 
-        logger.info("Fetching StopPlace mapping table...");
+        dtoMappingSemaphore.aquire();
+        try {
+            logger.info("Fetching StopPlace mapping table...");
 
-        return Response.ok().entity((StreamingOutput) output -> {
+            return Response.ok().entity((StreamingOutput) output -> {
 
-            int recordPosition = 0;
-            boolean lastEmpty = false;
-            Instant now = Instant.now();
-            try (PrintWriter writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(output)))) {
-                while (!lastEmpty) {
+                int recordPosition = 0;
+                boolean lastEmpty = false;
+                Instant validFrom = Instant.now();
+                Instant validTo = includeFuture ? null : validFrom;
+                try (PrintWriter writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(output)))) {
+                    while (!lastEmpty) {
 
-                    List<IdMappingDto> stopPlaceMappings = stopPlaceRepository.findKeyValueMappingsForStop(now, recordPosition, recordsPerRoundTrip);
-                    for (IdMappingDto mapping : stopPlaceMappings) {
-                        writer.println(mapping.toCsvString(includeStopType));
-                        recordPosition++;
+                        List<IdMappingDto> stopPlaceMappings = stopPlaceRepository.findKeyValueMappingsForStop(validFrom, validTo, recordPosition, recordsPerRoundTrip);
+                        for (IdMappingDto mapping : stopPlaceMappings) {
+                            writer.println(csvMapper.toCsvString(mapping, includeStopType, includeFuture));
+                            recordPosition++;
+                        }
+                        writer.flush();
+                        if (stopPlaceMappings.isEmpty()) lastEmpty = true;
                     }
-                    writer.flush();
-                    if (stopPlaceMappings.isEmpty()) lastEmpty = true;
+                    writer.close();
                 }
-                writer.close();
-            }
-        }).build();
+            }).build();
+        } finally {
+            dtoMappingSemaphore.release();
+        }
     }
 
     @GET
     @Path("/id/stop_place")
     @Produces("text/plain")
-    public String getIdUniqueStopPlaceIds() {
-        return String.join("\n", stopPlaceRepository.findUniqueStopPlaceIds(Instant.now()));
+    public String getIdUniqueStopPlaceIds(@QueryParam("includeFuture") boolean includeFuture) {
+        Instant validFrom = Instant.now();
+        Instant validTo = includeFuture ? null : validFrom;
+        return String.join("\n", stopPlaceRepository.findUniqueStopPlaceIds(validFrom, validTo));
     }
 }

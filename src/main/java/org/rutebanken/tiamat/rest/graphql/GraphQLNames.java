@@ -46,6 +46,10 @@ public class GraphQLNames {
     public static final String INPUT_TYPE_ENTITY_REF = OUTPUT_TYPE_ENTITY_REF + INPUT_TYPE_POSTFIX;
     public static final String ENTITY_REF_DESCRIPTION = "A reference to an entity with version";
 
+    public static final String OUTPUT_TYPE_VERSION_LESS_ENTITY_REF = "VersionLessEntityRef";
+    public static final String INPUT_TYPE_VERSION_LESS_ENTITY_REF = OUTPUT_TYPE_VERSION_LESS_ENTITY_REF + INPUT_TYPE_POSTFIX;
+    public static final String VERSION_LESS_ENTITY_REF_DESCRIPTION = "A reference to an entity without version";
+
     public static final String ENTITY_REF_REF = "ref";
     public static final String ENTITY_REF_REF_DESCRIPTION = "The NeTEx ID of the of the referenced entity. The reference must already exist";
     public static final String ENTITY_REF_VERSION = "version";
@@ -126,6 +130,7 @@ public class GraphQLNames {
 
     public static final String GROUP_OF_STOP_PLACES_MEMBERS = "members";
     public static final String GROUP_OF_STOP_PLACES = "groupOfStopPlaces";
+    public static final String STOP_PLACE_GROUPS = "groups";
 
 
     public static final String OUTPUT_TYPE_QUAY = "Quay";
@@ -340,6 +345,7 @@ public class GraphQLNames {
     public static final String MUTATE_PARENT_STOPPLACE = "mutateParentStopPlace";
     public static final String MUTATE_PATH_LINK = "mutatePathlink";
     public static final String MUTATE_PARKING = "mutateParking";
+    public static final String MUTATE_GROUP_OF_STOP_PLACES = "mutateGroupOfStopPlaces";
 
     public static final String QUAY_ID = "quayId";
     public static final String STOP_PLACE_ID = "stopPlaceId";

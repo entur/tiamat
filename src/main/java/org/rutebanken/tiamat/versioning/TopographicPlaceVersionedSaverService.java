@@ -38,6 +38,7 @@ public class TopographicPlaceVersionedSaverService extends VersionedSaverService
     public TopographicPlace saveNewVersion(TopographicPlace existingVersion, TopographicPlace newVersion) {
         TopographicPlace saved = super.saveNewVersion(existingVersion, newVersion);
         topographicPlaceLookupService.reset();
+        metricsService.registerEntitySaved(newVersion.getClass());
         return saved;
     }
 

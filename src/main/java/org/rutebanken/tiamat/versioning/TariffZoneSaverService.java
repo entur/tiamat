@@ -70,6 +70,7 @@ public class TariffZoneSaverService extends VersionedSaverService<TariffZone> {
         logger.info("Saved tariff zone {}, version {}, name {}", result.getNetexId(), result.getVersion(), result.getName());
 
         tariffZonesLookupService.reset();
+        metricsService.registerEntitySaved(newVersion.getClass());
         return result;
     }
 

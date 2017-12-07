@@ -1052,7 +1052,7 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         childStop.setParentSiteRef(new SiteRefStructure(parentStop.getNetexId(), String.valueOf(parentStop.getVersion())));
         stopPlaceRepository.save(childStop);
 
-        List<IdMappingDto> idMapping = stopPlaceRepository.findKeyValueMappingsForStop(now, 0, 2000);
+        List<IdMappingDto> idMapping = stopPlaceRepository.findKeyValueMappingsForStop(now,now, 0, 2000);
         assertThat(idMapping).extracting(idMappingDto -> idMappingDto.netexId).contains(childStop.getNetexId());
     }
 
@@ -1349,18 +1349,27 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         currentMatchingStop.getKeyValues().put(orgIdKey, new Value(orgId));
         stopPlaceRepository.save(currentMatchingStop);
 
-        List<IdMappingDto> currentMapping = stopPlaceRepository.findKeyValueMappingsForStop(now, 0, 2000);
+        List<IdMappingDto> currentMapping = stopPlaceRepository.findKeyValueMappingsForStop(now,now, 0, 2000);
         Assert.assertEquals(1, currentMapping.size());
         Assert.assertEquals(orgId, currentMapping.get(0).originalId);
         Assert.assertEquals(currentMatchingStop.getNetexId(), currentMapping.get(0).netexId);
+        Assert.assertEquals(currentMatchingStop.getValidBetween().getFromDate(), currentMapping.get(0).validFrom);
+        Assert.assertEquals(currentMatchingStop.getValidBetween().getToDate(), currentMapping.get(0).validTo);
 
-        List<IdMappingDto> historicMapping = stopPlaceRepository.findKeyValueMappingsForStop(now.minusSeconds(100), 0, 2000);
+        Instant hundredSecondsAgo = now.minusSeconds(100);
+        List<IdMappingDto> historicMapping = stopPlaceRepository.findKeyValueMappingsForStop(hundredSecondsAgo, hundredSecondsAgo, 0, 2000);
         Assert.assertEquals(1, historicMapping.size());
         Assert.assertEquals(orgId, historicMapping.get(0).originalId);
         Assert.assertEquals(historicMatchingStopV1.getNetexId(), historicMapping.get(0).netexId);
+        Assert.assertEquals(historicMatchingStopV1.getValidBetween().getFromDate(), historicMapping.get(0).validFrom);
+        Assert.assertEquals(historicMatchingStopV1.getValidBetween().getToDate(), historicMapping.get(0).validTo);
 
         // No imported-ids or merged-ids are valid for point in time 300 seconds ago
-        Assert.assertTrue(stopPlaceRepository.findKeyValueMappingsForStop(now.minusSeconds(300), 0, 2000).isEmpty());
+        Instant threeHundredSecondsAgo = now.minusSeconds(300);
+        Assert.assertTrue(stopPlaceRepository.findKeyValueMappingsForStop(threeHundredSecondsAgo, threeHundredSecondsAgo, 0, 2000).isEmpty());
+
+        List<IdMappingDto> allMappings = stopPlaceRepository.findKeyValueMappingsForStop(hundredSecondsAgo, now, 0, 2000);
+        Assert.assertEquals(2, allMappings.size());
     }
 
 

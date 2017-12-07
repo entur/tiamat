@@ -15,6 +15,8 @@
 
 package org.rutebanken.tiamat.model;
 
+import com.google.common.base.MoreObjects;
+
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -26,7 +28,7 @@ public class GroupOfStopPlaces extends GroupOfEntities_VersionStructure {
 
     @ElementCollection(targetClass = StopPlaceReference.class, fetch = FetchType.EAGER)
     @CollectionTable(
-            name = "group_of_stop_place_members"
+            name = "group_of_stop_places_members"
     )
     private Set<StopPlaceReference> members = new HashSet<>();
 
@@ -46,5 +48,17 @@ public class GroupOfStopPlaces extends GroupOfEntities_VersionStructure {
 
     public List<AlternativeName> getAlternativeNames() {
         return alternativeNames;
+    }
+
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .omitNullValues()
+                .add("netexId", netexId)
+                .add("version", version)
+                .add("name", name)
+                .add("members", members)
+                .toString();
     }
 }

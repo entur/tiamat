@@ -26,7 +26,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 
-public class ParkingSearch {
+public class ParkingSearch implements SearchObject{
 
     /**
      * zero-based page index

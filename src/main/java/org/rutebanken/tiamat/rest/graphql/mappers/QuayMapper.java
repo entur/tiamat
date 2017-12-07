@@ -37,7 +37,7 @@ public class QuayMapper {
     public static final Logger logger = LoggerFactory.getLogger(QuayMapper.class);
 
     @Autowired
-    private SiteElementMapper siteElementMapper;
+    private GroupOfEntitiesMapper groupOfEntitiesMapper;
 
     public boolean populateQuayFromInput(StopPlace stopPlace, Map quayInputMap) {
         Quay quay;
@@ -57,7 +57,7 @@ public class QuayMapper {
             quay = new Quay();
             logger.info("Creating new Quay");
         }
-        boolean isQuayUpdated = siteElementMapper.populate(quayInputMap, quay);
+        boolean isQuayUpdated = groupOfEntitiesMapper.populate(quayInputMap, quay);
 
         if (quayInputMap.get(COMPASS_BEARING) != null) {
             quay.setCompassBearing(((BigDecimal) quayInputMap.get(COMPASS_BEARING)).floatValue());

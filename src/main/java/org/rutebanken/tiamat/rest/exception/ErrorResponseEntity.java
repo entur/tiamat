@@ -16,6 +16,8 @@
 package org.rutebanken.tiamat.rest.exception;
 
 import javax.xml.bind.annotation.XmlRootElement;
+import java.util.ArrayList;
+import java.util.List;
 
 @XmlRootElement
 public class ErrorResponseEntity {
@@ -24,9 +26,17 @@ public class ErrorResponseEntity {
     }
 
     public ErrorResponseEntity(String message) {
-        this.message = message;
+        errors.add(new Error(message));
     }
 
-    public String message;
+    public List<Error> errors = new ArrayList<>();
 
+
+    public static class Error {
+        public String message;
+
+        public Error(String message) {
+            this.message = message;
+        }
+    }
 }

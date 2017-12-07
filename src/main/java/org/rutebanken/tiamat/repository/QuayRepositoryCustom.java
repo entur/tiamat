@@ -16,6 +16,7 @@
 package org.rutebanken.tiamat.repository;
 
 import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
+import org.rutebanken.tiamat.dtoassembling.dto.IdMappingIntervalDto;
 import org.rutebanken.tiamat.dtoassembling.dto.JbvCodeMappingDto;
 import org.rutebanken.tiamat.model.Quay;
 import org.springframework.data.domain.Page;
@@ -27,9 +28,9 @@ import java.util.Set;
 
 public interface QuayRepositoryCustom extends DataManagedObjectStructureRepository<Quay> {
 
-    List<IdMappingDto> findKeyValueMappingsForQuay(Instant pointInTime, int recordPosition, int recordsPerRoundTrip);
+    List<IdMappingDto> findKeyValueMappingsForQuay(Instant validFrom, Instant validTo, int recordPosition, int recordsPerRoundTrip);
 
-    Set<String> findUniqueQuayIds(Instant pointInTime);
+    Set<String> findUniqueQuayIds(Instant validFrom, Instant validTo);
 
     List<JbvCodeMappingDto> findJbvCodeMappingsForQuay();
 

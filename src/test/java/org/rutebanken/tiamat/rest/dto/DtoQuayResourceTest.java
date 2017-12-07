@@ -18,8 +18,10 @@ package org.rutebanken.tiamat.rest.dto;
 import org.junit.Before;
 import org.junit.Test;
 import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
+import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDtoCsvMapper;
+import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.rutebanken.tiamat.repository.QuayRepository;
-import org.rutebanken.tiamat.repository.StopPlaceRepository;
+import org.rutebanken.tiamat.time.ExportTimeZone;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
@@ -41,26 +43,26 @@ public class DtoQuayResourceTest {
 
     @Before
     public void setUp() {
-        dtoQuayResource = new DtoQuayResource(quayRepository);
+        dtoQuayResource = new DtoQuayResource(quayRepository, mock(DtoMappingSemaphore.class), new IdMappingDtoCsvMapper(new ExportTimeZone()));
     }
 
     @Test
-    public void keyValueQuayMappingWithSize() throws IOException {
+    public void keyValueQuayMappingWithSize() throws IOException, InterruptedException {
         int keyValueMappingCount = 3;
         int size = 1;
-
-        when(quayRepository.findKeyValueMappingsForQuay(any(Instant.class), anyInt(), anyInt()))
-                .thenReturn(Arrays.asList(new IdMappingDto("original id", BigInteger.ONE.toString())))
-                .thenReturn(Arrays.asList(new IdMappingDto("original id", BigInteger.TEN.toString())))
-                .thenReturn(Arrays.asList(new IdMappingDto("original id", BigInteger.ZERO.toString())))
+        Instant now = Instant.now();
+        when(quayRepository.findKeyValueMappingsForQuay(any(Instant.class), any(Instant.class), anyInt(), anyInt()))
+                .thenReturn(Arrays.asList(new IdMappingDto("original id", BigInteger.ONE.toString(), now, now, StopTypeEnumeration.FERRY_STOP)))
+                .thenReturn(Arrays.asList(new IdMappingDto("original id", BigInteger.TEN.toString(), now, now, StopTypeEnumeration.TRAM_STATION)))
+                .thenReturn(Arrays.asList(new IdMappingDto("original id", BigInteger.ZERO.toString(), now, now, StopTypeEnumeration.BUS_STATION)))
                 .thenReturn(new ArrayList<>());
 
-        Response response = dtoQuayResource.getIdMapping(size, false);
+        Response response = dtoQuayResource.getIdMapping(size, false, false);
         StreamingOutput output = (StreamingOutput) response.getEntity();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         output.write(baos);
         // plus one for the last empty call.
-        verify(quayRepository, times((keyValueMappingCount/size)+1)).findKeyValueMappingsForQuay(any(Instant.class), anyInt(), anyInt());
+        verify(quayRepository, times((keyValueMappingCount / size) + 1)).findKeyValueMappingsForQuay(any(Instant.class), any(Instant.class), anyInt(), anyInt());
     }
 
 }

@@ -15,15 +15,11 @@
 
 package org.rutebanken.tiamat.rest.graphql;
 
-import graphql.execution.ExecutionStrategy;
-import graphql.parser.antlr.GraphqlListener;
 import graphql.schema.*;
 import org.rutebanken.tiamat.model.GroupOfStopPlaces;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.rest.graphql.fetchers.AuthorizationCheckDataFetcher;
-import org.rutebanken.tiamat.rest.graphql.fetchers.GroupOfStopPlacesFetcher;
-import org.rutebanken.tiamat.rest.graphql.fetchers.StopPlaceTariffZoneFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.TagFetcher;
 import org.rutebanken.tiamat.rest.graphql.operations.MultiModalityOperationsBuilder;
 import org.rutebanken.tiamat.rest.graphql.operations.StopPlaceOperationsBuilder;
@@ -118,6 +114,12 @@ public class StopPlaceRegisterGraphQLSchema {
     private DataFetcher<Page<GroupOfStopPlaces>> groupOfStopPlacesFetcher;
 
     @Autowired
+    private DataFetcher<GroupOfStopPlaces> groupOfStopPlacesUpdater;
+
+    @Autowired
+    private DataFetcher<Boolean> groupOfStopPlacesDeleterFetcher;
+
+    @Autowired
     DataFetcher pathLinkFetcher;
 
     @Autowired
@@ -197,7 +199,7 @@ public class StopPlaceRegisterGraphQLSchema {
                     return stopPlaceObjectType;
                 }
             }
-            return null;
+            throw new IllegalArgumentException("StopPlaceTypeResolver cannot resolve type of Object " + object + ". Was expecting StopPlace");
         });
 
         GraphQLObjectType groupOfStopPlacesObjectType = groupOfStopPlaceObjectTypeCreator.create(stopPlaceInterface);
@@ -277,7 +279,7 @@ public class StopPlaceRegisterGraphQLSchema {
                         .name(GROUP_OF_STOP_PLACES)
                         .type(new GraphQLList(groupOfStopPlacesObjectType))
                         .description("Group of stop places")
-                        .argument(createFindGroupOfStopPlacesArguments(allVersionsArgument))
+                        .argument(createFindGroupOfStopPlacesArguments())
                         .dataFetcher(groupOfStopPlacesFetcher)
                         .build())
                 .build();
@@ -295,6 +297,8 @@ public class StopPlaceRegisterGraphQLSchema {
         GraphQLInputObjectType parentStopPlaceInputObjectType = parentStopPlaceInputObjectTypeCreator.create(commonInputFieldList, validBetweenInputObjectType, stopPlaceInputObjectType);
 
         GraphQLInputObjectType parkingInputObjectType = createParkingInputObjectType(validBetweenInputObjectType);
+
+        GraphQLInputObjectType groupOfStopPlacesInputObjectType = createGroupOfStopPlacesInputObjectType();
 
         GraphQLObjectType stopPlaceRegisterMutation = newObject()
                 .name("StopPlaceMutation")
@@ -316,6 +320,14 @@ public class StopPlaceRegisterGraphQLSchema {
                                 .type(parentStopPlaceInputObjectType))
                         .dataFetcher(stopPlaceUpdater))
                 .field(newFieldDefinition()
+                        .name(MUTATE_GROUP_OF_STOP_PLACES)
+                        .type(groupOfStopPlacesObjectType)
+                        .description("Mutate group of stop places")
+                        .argument(GraphQLArgument.newArgument()
+                                .name(OUTPUT_TYPE_GROUP_OF_STOPPLACES)
+                                .type(groupOfStopPlacesInputObjectType))
+                        .dataFetcher(groupOfStopPlacesUpdater))
+                .field(newFieldDefinition()
                         .type(new GraphQLList(pathLinkObjectType))
                         .name(MUTATE_PATH_LINK)
                         .description("Create new or update existing PathLink")
@@ -335,6 +347,14 @@ public class StopPlaceRegisterGraphQLSchema {
                 .fields(tagOperationsBuilder.getTagOperations())
                 .fields(stopPlaceOperationsBuilder.getStopPlaceOperations(stopPlaceInterface))
                 .fields(multiModalityOperationsBuilder.getMultiModalityOperations(parentStopPlaceObjectType, validBetweenInputObjectType))
+                .field(newFieldDefinition()
+                        .type(GraphQLBoolean)
+                        .name("deleteGroupOfStopPlaces")
+                        .argument(GraphQLArgument.newArgument()
+                                .name(ID)
+                                .type(new GraphQLNonNull(GraphQLString)))
+                        .description("Hard delete group of stop places by ID")
+                        .dataFetcher(groupOfStopPlacesDeleterFetcher))
                 .build();
 
         stopPlaceRegisterSchema = GraphQLSchema.newSchema()
@@ -382,21 +402,20 @@ public class StopPlaceRegisterGraphQLSchema {
         return arguments;
     }
 
-    private List<GraphQLArgument> createFindGroupOfStopPlacesArguments(GraphQLArgument allVersionsArgument) {
+    private List<GraphQLArgument> createFindGroupOfStopPlacesArguments() {
         List<GraphQLArgument> arguments = createPageAndSizeArguments();
         arguments.add(GraphQLArgument.newArgument()
                 .name(ID)
                 .type(GraphQLString)
                 .build());
         arguments.add(GraphQLArgument.newArgument()
-                .name(VERSION)
-                .type(GraphQLInt)
-                .build());
-        arguments.add(GraphQLArgument.newArgument()
-                .name(FIND_BY_GROUP_OF_STOP_PLACEs_ID)
+                .name(QUERY)
                 .type(GraphQLString)
                 .build());
-        arguments.add(allVersionsArgument);
+        arguments.add(GraphQLArgument.newArgument()
+                .name(FIND_BY_STOP_PLACE_ID)
+                .type(GraphQLString)
+                .build());
         return arguments;
     }
 
@@ -646,6 +665,22 @@ public class StopPlaceRegisterGraphQLSchema {
                 .field(newInputObjectField()
                         .name(VALID_BETWEEN)
                         .type(validBetweenInputObjectType))
+                .build();
+    }
+
+    private GraphQLInputObjectType createGroupOfStopPlacesInputObjectType() {
+        return newInputObject()
+                .name(INPUT_TYPE_GROUP_OF_STOPPLACES)
+                .field(newInputObjectField().name(ID).type(GraphQLString).description("Ignore ID when creating new"))
+                .field(newInputObjectField().name(NAME).type(new GraphQLNonNull(embeddableMultiLingualStringInputObjectType)))
+                .field(newInputObjectField().name(SHORT_NAME).type(embeddableMultiLingualStringInputObjectType))
+                .field(newInputObjectField().name(DESCRIPTION).type(embeddableMultiLingualStringInputObjectType))
+                .field(newInputObjectField().name(ALTERNATIVE_NAMES).type(new GraphQLList(alternativeNameInputObjectType)))
+                .field(newInputObjectField().name(VERSION_COMMENT).type(GraphQLString))
+                .field(newInputObjectField()
+                        .name(GROUP_OF_STOP_PLACES_MEMBERS)
+                        .description("References to group of stop places members. Stop place IDs.")
+                        .type(new GraphQLList(versionLessRefInputObjectType)))
                 .build();
     }
 
