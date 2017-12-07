@@ -30,7 +30,7 @@ public interface QuayRepositoryCustom extends DataManagedObjectStructureReposito
 
     List<IdMappingDto> findKeyValueMappingsForQuay(Instant validFrom, Instant validTo, int recordPosition, int recordsPerRoundTrip);
 
-    Set<String> findUniqueQuayIds(Instant pointInTime);
+    Set<String> findUniqueQuayIds(Instant validFrom, Instant validTo);
 
     List<JbvCodeMappingDto> findJbvCodeMappingsForQuay();
 

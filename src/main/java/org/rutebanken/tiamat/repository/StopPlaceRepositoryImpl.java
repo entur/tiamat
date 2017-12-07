@@ -411,17 +411,23 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
 
     @Override
-    public Set<String> findUniqueStopPlaceIds(Instant pointInTime) {
+    public Set<String> findUniqueStopPlaceIds(Instant validFrom, Instant validTo) {
         String sql = "SELECT DISTINCT s.netex_id FROM stop_place s " +
                         SQL_LEFT_JOIN_PARENT_STOP +
                         "WHERE " +
-                        SQL_STOP_PLACE_OR_PARENT_IS_VALID_AT_POINT_IN_TIME +
+                        SQL_STOP_PLACE_OR_PARENT_IS_VALID_IN_INTERVAL +
                         "ORDER BY s.netex_id";
 
 
         Query nativeQuery = entityManager.createNativeQuery(sql);
 
-        nativeQuery.setParameter("pointInTime", Date.from(pointInTime));
+        if (validTo == null) {
+            // Assuming 1000 years into the future is the same as forever
+            validTo = Instant.from(ZonedDateTime.now().plusYears(1000).toInstant());
+        }
+
+        nativeQuery.setParameter("validFrom", Date.from(validFrom));
+        nativeQuery.setParameter("validTo", Date.from(validTo));
 
         List<String> results = nativeQuery.getResultList();
 

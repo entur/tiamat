@@ -127,7 +127,7 @@ public class QuayRepositoryImpl implements QuayRepositoryCustom {
     }
 
     @Override
-    public Set<String> findUniqueQuayIds(Instant pointInTime) {
+    public Set<String> findUniqueQuayIds(Instant validFrom, Instant validTo) {
         String sql = "SELECT distinct q.netex_id " +
                 "FROM quay q " +
                 "INNER JOIN stop_place_quays spq " +
@@ -136,13 +136,19 @@ public class QuayRepositoryImpl implements QuayRepositoryCustom {
                 "   ON spq.stop_place_id = s.id " +
                 SQL_LEFT_JOIN_PARENT_STOP +
                 "WHERE " +
-                SQL_STOP_PLACE_OR_PARENT_IS_VALID_AT_POINT_IN_TIME +
+                SQL_STOP_PLACE_OR_PARENT_IS_VALID_IN_INTERVAL +
                 "ORDER BY q.netex_id";
 
 
         Query nativeQuery = entityManager.createNativeQuery(sql);
 
-        nativeQuery.setParameter("pointInTime", Date.from(pointInTime));
+        if (validTo == null) {
+            // Assuming 1000 years into the future is the same as forever
+            validTo = Instant.from(ZonedDateTime.now().plusYears(1000).toInstant());
+        }
+
+        nativeQuery.setParameter("validFrom", Date.from(validFrom));
+        nativeQuery.setParameter("validTo", Date.from(validTo));
 
         List<String> results = nativeQuery.getResultList();
 

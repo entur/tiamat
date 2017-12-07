@@ -59,7 +59,7 @@ public class DtoQuayResource {
     @Path("mapping/quay")
     @Produces("text/plain")
     public Response getIdMapping(@DefaultValue(value = "300000") @QueryParam(value = "recordsPerRoundTrip") int recordsPerRoundTrip,
-                                        @QueryParam("includeStopType") boolean includeStopType, @QueryParam("includeFutureMappings") boolean includeFutureMappings) throws InterruptedException {
+                                        @QueryParam("includeStopType") boolean includeStopType, @QueryParam("includeFuture") boolean includeFuture) throws InterruptedException {
 
         logger.info("Fetching Quay mapping table...");
 
@@ -71,12 +71,12 @@ public class DtoQuayResource {
                 int recordPosition = 0;
                 boolean lastEmpty = false;
                 Instant validFrom = Instant.now();
-                Instant validTo = includeFutureMappings ? null : validFrom;
+                Instant validTo = includeFuture ? null : validFrom;
                 try (PrintWriter writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(output)))) {
                     while (!lastEmpty) {
                         List<IdMappingDto> quayMappings = quayRepository.findKeyValueMappingsForQuay(validFrom, validTo, recordPosition, recordsPerRoundTrip);
                         for (IdMappingDto mapping : quayMappings) {
-                            writer.println(csvMapper.toCsvString(mapping, includeStopType, includeFutureMappings));
+                            writer.println(csvMapper.toCsvString(mapping, includeStopType, includeFuture));
                             recordPosition++;
                         }
                         writer.flush();
@@ -97,7 +97,9 @@ public class DtoQuayResource {
     @GET
     @Path("/id/quay")
     @Produces("text/plain")
-    public String getIdUniqueQuayIds() {
-        return String.join("\n", quayRepository.findUniqueQuayIds(Instant.now()));
+    public String getIdUniqueQuayIds(@QueryParam("includeFuture") boolean includeFuture) {
+        Instant validFrom = Instant.now();
+        Instant validTo = includeFuture ? null : validFrom;
+        return String.join("\n", quayRepository.findUniqueQuayIds(validFrom, validTo));
     }
 }
