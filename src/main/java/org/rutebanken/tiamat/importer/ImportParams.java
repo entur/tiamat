@@ -40,7 +40,7 @@ public class ImportParams {
 
     @QueryParam(value = "importType")
     public ImportType importType = ImportType.MERGE;
-    
+
     @QueryParam(value = "skipOutput")
     public boolean skipOutput = false;
 
@@ -49,6 +49,13 @@ public class ImportParams {
 
     @QueryParam(value = "allowOnlyStopTypes")
     public Set<StopTypeEnumeration> allowOnlyStopTypes;
+
+    /**
+     * Force stop point type for all stop points in file.
+     * Useful if no modality defined in the netex file.
+     */
+    @QueryParam(value = "forceStopType")
+    public StopTypeEnumeration forceStopType;
 
     @ApiParam("Specify this to erase existing topographic places with matching id and topographic place type. Example: 'OSM;PLACE_OF_INTEREST'")
     @QueryParam(value = "eraseTopographicPlaceWithIdPrefixAndType")
