@@ -24,13 +24,16 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.Query;
+import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.*;
 
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.MERGED_ID_KEY;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
 import static org.rutebanken.tiamat.repository.StopPlaceRepositoryImpl.SQL_LEFT_JOIN_PARENT_STOP;
 import static org.rutebanken.tiamat.repository.StopPlaceRepositoryImpl.SQL_STOP_PLACE_OR_PARENT_IS_VALID_AT_POINT_IN_TIME;
+import static org.rutebanken.tiamat.repository.StopPlaceRepositoryImpl.SQL_STOP_PLACE_OR_PARENT_IS_VALID_IN_INTERVAL;
 
 @Transactional
 public class QuayRepositoryImpl implements QuayRepositoryCustom {
@@ -72,8 +75,8 @@ public class QuayRepositoryImpl implements QuayRepositoryCustom {
     }
 
     @Override
-    public List<IdMappingDto> findKeyValueMappingsForQuay(Instant pointInTime, int recordPosition, int recordsPerRoundTrip) {
-        String sql = "SELECT vi.items, q.netex_id, s.stop_place_type " +
+    public List<IdMappingDto> findKeyValueMappingsForQuay(Instant validFrom, Instant validTo, int recordPosition, int recordsPerRoundTrip) {
+        String sql = "SELECT vi.items, q.netex_id, s.stop_place_type, s.from_date sFrom, s.to_date sTo, p.from_date pFrom, p.to_date pTo " +
                 "FROM quay_key_values qkv " +
                 "	INNER JOIN stop_place_quays spq " +
                 "		ON spq.quays_id = qkv.quay_id " +
@@ -85,25 +88,43 @@ public class QuayRepositoryImpl implements QuayRepositoryCustom {
                 "		ON qkv.key_values_id = vi.value_id AND vi.items NOT LIKE '' AND qkv.key_values_key in (:mappingIdKeys) " +
                 SQL_LEFT_JOIN_PARENT_STOP +
                 "WHERE " +
-                SQL_STOP_PLACE_OR_PARENT_IS_VALID_AT_POINT_IN_TIME +
+                 SQL_STOP_PLACE_OR_PARENT_IS_VALID_IN_INTERVAL +
                 "ORDER BY q.id,qkv.key_values_id";
 
 
         Query nativeQuery = entityManager.createNativeQuery(sql).setFirstResult(recordPosition).setMaxResults(recordsPerRoundTrip);
 
+        if (validTo == null) {
+            // Assuming 1000 years into the future is the same as forever
+            validTo = Instant.from(ZonedDateTime.now().plusYears(1000).toInstant());
+        }
+
         nativeQuery.setParameter("mappingIdKeys", Arrays.asList(ORIGINAL_ID_KEY, MERGED_ID_KEY));
-        nativeQuery.setParameter("pointInTime", Date.from(pointInTime));
+        nativeQuery.setParameter("validFrom", Date.from(validFrom));
+        nativeQuery.setParameter("validTo", Date.from(validTo));
         @SuppressWarnings("unchecked")
         List<Object[]> result = nativeQuery.getResultList();
 
         List<IdMappingDto> mappingResult = new ArrayList<>();
         for (Object[] row : result) {
-            mappingResult.add(new IdMappingDto(row[0].toString(), row[1].toString(), parseStopType(row[2])));
+            Instant mappingValidFrom = parseInstant(row[3]);
+            Instant mappingValidTo = parseInstant(row[4]);
+            if (mappingValidFrom == null && mappingValidTo == null) {
+                mappingValidFrom = parseInstant(row[5]);
+                mappingValidTo = parseInstant(row[6]);
+            }
+            mappingResult.add(new IdMappingDto(row[0].toString(), row[1].toString(), mappingValidFrom, mappingValidTo, parseStopType(row[2])));
         }
 
         return mappingResult;
     }
 
+    private Instant parseInstant(Object timestampObject) {
+        if (timestampObject instanceof Timestamp) {
+            return ((Timestamp)timestampObject).toInstant();
+        }
+        return null;
+    }
 
     @Override
     public Set<String> findUniqueQuayIds(Instant pointInTime) {

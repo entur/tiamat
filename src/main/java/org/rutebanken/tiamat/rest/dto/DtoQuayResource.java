@@ -17,6 +17,7 @@ package org.rutebanken.tiamat.rest.dto;
 
 import io.swagger.annotations.Api;
 import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
+import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDtoCsvMapper;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +31,7 @@ import java.io.BufferedWriter;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.time.Instant;
+import java.time.Period;
 import java.util.List;
 
 @Component
@@ -44,18 +46,20 @@ public class DtoQuayResource {
 
     private final DtoMappingSemaphore dtoMappingSemaphore;
 
+    private IdMappingDtoCsvMapper csvMapper;
 
     @Autowired
-    public DtoQuayResource(QuayRepository quayRepository, DtoMappingSemaphore dtoMappingSemaphore) {
+    public DtoQuayResource(QuayRepository quayRepository, DtoMappingSemaphore dtoMappingSemaphore, IdMappingDtoCsvMapper csvMapper) {
         this.quayRepository = quayRepository;
         this.dtoMappingSemaphore = dtoMappingSemaphore;
+        this.csvMapper = csvMapper;
     }
 
     @GET
     @Path("mapping/quay")
     @Produces("text/plain")
     public Response getIdMapping(@DefaultValue(value = "300000") @QueryParam(value = "recordsPerRoundTrip") int recordsPerRoundTrip,
-                                        @QueryParam("includeStopType") boolean includeStopType) throws InterruptedException {
+                                        @QueryParam("includeStopType") boolean includeStopType, @QueryParam("includeFutureMappings") boolean includeFutureMappings) throws InterruptedException {
 
         logger.info("Fetching Quay mapping table...");
 
@@ -66,12 +70,13 @@ public class DtoQuayResource {
 
                 int recordPosition = 0;
                 boolean lastEmpty = false;
-                Instant now = Instant.now();
+                Instant validFrom = Instant.now();
+                Instant validTo = includeFutureMappings ? null : validFrom;
                 try (PrintWriter writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(output)))) {
                     while (!lastEmpty) {
-                        List<IdMappingDto> quayMappings = quayRepository.findKeyValueMappingsForQuay(now, recordPosition, recordsPerRoundTrip);
+                        List<IdMappingDto> quayMappings = quayRepository.findKeyValueMappingsForQuay(validFrom, validTo, recordPosition, recordsPerRoundTrip);
                         for (IdMappingDto mapping : quayMappings) {
-                            writer.println(mapping.toCsvString(includeStopType));
+                            writer.println(csvMapper.toCsvString(mapping, includeStopType, includeFutureMappings));
                             recordPosition++;
                         }
                         writer.flush();
@@ -83,8 +88,7 @@ public class DtoQuayResource {
                     throw e;
                 }
             }).build();
-        }
-        finally {
+        } finally {
             dtoMappingSemaphore.release();
         }
     }

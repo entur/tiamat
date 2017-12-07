@@ -46,7 +46,9 @@ import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import java.math.BigInteger;
+import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.*;
 
 import static java.util.stream.Collectors.toSet;
@@ -71,6 +73,15 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     protected static final String SQL_STOP_PLACE_OR_PARENT_IS_VALID_AT_POINT_IN_TIME =
             " ((p.netex_id IS NOT NULL AND (p.from_date IS NULL OR p.from_date <= :pointInTime) AND (p.to_date IS NULL OR p.to_date > :pointInTime))" +
                     "  OR (p.netex_id IS NULL AND (s.from_date IS NULL OR s.from_date <= :pointInTime) AND (s.to_date IS NULL OR s.to_date > :pointInTime))) ";
+
+    /**
+     * Part of SQL that checks that either the stop place named as *s* or the parent named *p* is valid within a provided interval
+     * The parameters "validFrom" and "validTo" must be set.
+     * The parent stop must be joined in as 'p' to allow checking the validity.
+     */
+    protected static final String SQL_STOP_PLACE_OR_PARENT_IS_VALID_IN_INTERVAL =
+            " ((p.netex_id IS NOT NULL AND (p.from_date IS NULL OR p.from_date <= :validTo) AND (p.to_date IS NULL OR p.to_date > :validFrom))" +
+                    "  OR (p.netex_id IS NULL AND (s.from_date IS NULL OR s.from_date <= :validTo) AND (s.to_date IS NULL OR s.to_date > :validFrom))) ";
 
     /**
      * Left join parent stop place p with stop place s on parent site ref and parent site ref version.
@@ -351,31 +362,51 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<IdMappingDto> findKeyValueMappingsForStop(Instant pointInTime, int recordPosition, int recordsPerRoundTrip) {
-        String sql = "SELECT v.items, s.netex_id, s.stop_place_type " +
+    public List<IdMappingDto> findKeyValueMappingsForStop(Instant validFrom, Instant validTo, int recordPosition, int recordsPerRoundTrip) {
+        String sql = "SELECT v.items, s.netex_id, s.stop_place_type, s.from_date sFrom, s.to_date sTo, p.from_date pFrom, p.to_date pTo " +
                              "FROM stop_place_key_values spkv " +
                              "  INNER JOIN value_items v " +
                              "      ON spkv.key_values_key in (:mappingIdKeys) AND spkv.key_values_id = v.value_id AND v.items NOT LIKE '' " +
                              "  INNER JOIN stop_place s ON s.id = spkv.stop_place_id " +
                              SQL_LEFT_JOIN_PARENT_STOP +
                              "WHERE " +
-                              SQL_STOP_PLACE_OR_PARENT_IS_VALID_AT_POINT_IN_TIME +
+                              SQL_STOP_PLACE_OR_PARENT_IS_VALID_IN_INTERVAL +
                              "ORDER BY s.id,spkv.key_values_id";
 
 
         Query nativeQuery = entityManager.createNativeQuery(sql).setFirstResult(recordPosition).setMaxResults(recordsPerRoundTrip);
 
+        if (validTo == null) {
+            // Assuming 1000 years into the future is the same as forever
+            validTo = Instant.from(ZonedDateTime.now().plusYears(1000).toInstant());
+        }
+
         nativeQuery.setParameter("mappingIdKeys", Arrays.asList(ORIGINAL_ID_KEY, MERGED_ID_KEY));
-        nativeQuery.setParameter("pointInTime", Date.from(pointInTime));
+        nativeQuery.setParameter("validFrom", Date.from(validFrom));
+        nativeQuery.setParameter("validTo", Date.from(validTo));
 
         List<Object[]> result = nativeQuery.getResultList();
 
         List<IdMappingDto> mappingResult = new ArrayList<>();
         for (Object[] row : result) {
-            mappingResult.add(new IdMappingDto(row[0].toString(), row[1].toString(), parseStopType(row[2])));
+            Instant mappingValidFrom = parseInstant(row[3]);
+            Instant mappingValidTo = parseInstant(row[4]);
+            if (mappingValidFrom == null && mappingValidTo == null) {
+                mappingValidFrom = parseInstant(row[5]);
+                mappingValidTo = parseInstant(row[6]);
+            }
+            mappingResult.add(new IdMappingDto(row[0].toString(), row[1].toString(), mappingValidFrom, mappingValidTo, parseStopType(row[2])));
         }
 
         return mappingResult;
+    }
+
+
+    private Instant parseInstant(Object timestampObject) {
+        if (timestampObject instanceof Timestamp) {
+            return ((Timestamp)timestampObject).toInstant();
+        }
+        return null;
     }
 
 

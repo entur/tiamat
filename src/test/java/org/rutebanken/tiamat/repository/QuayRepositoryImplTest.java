@@ -23,7 +23,6 @@ import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.versioning.VersionCreator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
@@ -82,7 +81,7 @@ public class QuayRepositoryImplTest extends TiamatIntegrationTest {
         childStop.setParentSiteRef(new SiteRefStructure(parentStop.getNetexId(), String.valueOf(parentStop.getVersion())));
         stopPlaceRepository.save(childStop);
 
-        List<IdMappingDto> idMapping = quayRepository.findKeyValueMappingsForQuay(now, 0, 10);
+        List<IdMappingDto> idMapping = quayRepository.findKeyValueMappingsForQuay(now,now, 0, 10);
         assertThat(idMapping).extracting(idMappingDto -> idMappingDto.netexId).contains(quay.getNetexId());
     }
 
@@ -112,7 +111,7 @@ public class QuayRepositoryImplTest extends TiamatIntegrationTest {
         childStop.setParentSiteRef(new SiteRefStructure(notCurrentlyValidParentStop.getNetexId(), String.valueOf(notCurrentlyValidParentStop.getVersion())));
         stopPlaceRepository.save(childStop);
 
-        List<IdMappingDto> idMapping = quayRepository.findKeyValueMappingsForQuay(now, 0, 10);
+        List<IdMappingDto> idMapping = quayRepository.findKeyValueMappingsForQuay(now,now, 0, 10);
         assertThat(idMapping).extracting(idMappingDto -> idMappingDto.netexId)
                 .as("Quay " + quay.getNetexId() + " should not be returned in mapping as it belongs to a stop place with parent stop place wich is currently not valid")
                 .doesNotContain(quay.getNetexId());
@@ -120,15 +119,15 @@ public class QuayRepositoryImplTest extends TiamatIntegrationTest {
 
     @Test
     public void findKeyValueMappingsForQuayReturnsOnlyQuaysValidAtPointInTimeForImportedId() {
-        testFindKeyValueMappingsForQuayReturnsOnlyQuaysValidAtPointInTime(ORIGINAL_ID_KEY);
+        testFindKeyValueMappingsForQuayReturnsOnlyQuaysValidInInterval(ORIGINAL_ID_KEY);
     }
 
     @Test
     public void findKeyValueMappingsForQuayReturnsOnlyQuaysValidAtPointInTimeForMergedId() {
-        testFindKeyValueMappingsForQuayReturnsOnlyQuaysValidAtPointInTime(MERGED_ID_KEY);
+        testFindKeyValueMappingsForQuayReturnsOnlyQuaysValidInInterval(MERGED_ID_KEY);
     }
 
-    public void testFindKeyValueMappingsForQuayReturnsOnlyQuaysValidAtPointInTime(String orgIdKey) {
+    public void testFindKeyValueMappingsForQuayReturnsOnlyQuaysValidInInterval(String orgIdKey) {
         String orgIdSuffix = "2";
         String orgId = "XXX:Quay:" + orgIdSuffix;
         Instant now = Instant.now();
@@ -139,18 +138,28 @@ public class QuayRepositoryImplTest extends TiamatIntegrationTest {
         StopPlace currentMatchingStop = saveStop("NSR:StopPlace:2", 1l, now.minusSeconds(10), null);
         Quay currentMatchingQuay = saveQuay(currentMatchingStop, "NSR:Quay:2", 1l, orgIdKey, orgId);
 
-        List<IdMappingDto> currentMapping = quayRepository.findKeyValueMappingsForQuay(now, 0, 2000);
+        List<IdMappingDto> currentMapping = quayRepository.findKeyValueMappingsForQuay(now,now, 0, 2000);
         Assert.assertEquals(1, currentMapping.size());
         Assert.assertEquals(orgId, currentMapping.get(0).originalId);
         Assert.assertEquals(currentMatchingQuay.getNetexId(), currentMapping.get(0).netexId);
+        Assert.assertEquals(currentMatchingStop.getValidBetween().getFromDate(), currentMapping.get(0).validFrom);
+        Assert.assertEquals(currentMatchingStop.getValidBetween().getToDate(), currentMapping.get(0).validTo);
 
-        List<IdMappingDto> historicMapping = quayRepository.findKeyValueMappingsForQuay(now.minusSeconds(100), 0, 2000);
+        Instant hundredSecondsAgo = now.minusSeconds(100);
+        List<IdMappingDto> historicMapping = quayRepository.findKeyValueMappingsForQuay(hundredSecondsAgo, hundredSecondsAgo, 0, 2000);
         Assert.assertEquals(1, historicMapping.size());
         Assert.assertEquals(orgId, historicMapping.get(0).originalId);
         Assert.assertEquals(historicMatchingQuay.getNetexId(), historicMapping.get(0).netexId);
+        Assert.assertEquals(historicMatchingStopV1.getValidBetween().getFromDate(), historicMapping.get(0).validFrom);
+        Assert.assertEquals(historicMatchingStopV1.getValidBetween().getToDate(), historicMapping.get(0).validTo);
+
 
         // No imported-ids or merged-ids are valid for point in time 300 seconds ago
-        Assert.assertTrue(quayRepository.findKeyValueMappingsForQuay(now.minusSeconds(300), 0, 2000).isEmpty());
+        Instant threeHundredSecondsAgo = now.minusSeconds(300);
+        Assert.assertTrue(quayRepository.findKeyValueMappingsForQuay(threeHundredSecondsAgo, threeHundredSecondsAgo, 0, 2000).isEmpty());
+
+        List<IdMappingDto> allMappings = quayRepository.findKeyValueMappingsForQuay(hundredSecondsAgo, now, 0, 2000);
+        Assert.assertEquals(2, allMappings.size());
     }
 
     private StopPlace saveStop(String id, Long version, Instant startOfPeriod, Instant endOfPeriod) {

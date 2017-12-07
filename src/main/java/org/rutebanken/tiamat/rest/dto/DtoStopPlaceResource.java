@@ -17,6 +17,7 @@ package org.rutebanken.tiamat.rest.dto;
 
 import io.swagger.annotations.Api;
 import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
+import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDtoCsvMapper;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +32,8 @@ import java.io.BufferedWriter;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.time.Instant;
+import java.time.Period;
+import java.time.temporal.TemporalUnit;
 import java.util.List;
 
 @Component
@@ -46,17 +49,20 @@ public class DtoStopPlaceResource {
 
     private final DtoMappingSemaphore dtoMappingSemaphore;
 
+    private final IdMappingDtoCsvMapper csvMapper;
+
     @Autowired
-    public DtoStopPlaceResource(StopPlaceRepository stopPlaceRepository, DtoMappingSemaphore dtoMappingSemaphore) {
+    public DtoStopPlaceResource(StopPlaceRepository stopPlaceRepository, DtoMappingSemaphore dtoMappingSemaphore, IdMappingDtoCsvMapper csvMapper) {
         this.stopPlaceRepository = stopPlaceRepository;
         this.dtoMappingSemaphore = dtoMappingSemaphore;
+        this.csvMapper = csvMapper;
     }
 
     @GET
     @Path("/mapping/stop_place")
     @Produces("text/plain")
     public Response getIdMapping(@DefaultValue(value = "300000") @QueryParam(value = "recordsPerRoundTrip") int recordsPerRoundTrip,
-                                 @QueryParam("includeStopType") boolean includeStopType) throws InterruptedException {
+                                        @QueryParam("includeStopType") boolean includeStopType, @QueryParam("includeFutureMappings") boolean includeFutureMappings) throws InterruptedException {
 
         dtoMappingSemaphore.aquire();
         try {
@@ -66,13 +72,14 @@ public class DtoStopPlaceResource {
 
                 int recordPosition = 0;
                 boolean lastEmpty = false;
-                Instant now = Instant.now();
+                Instant validFrom = Instant.now();
+                Instant validTo = includeFutureMappings ? null : validFrom;
                 try (PrintWriter writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(output)))) {
                     while (!lastEmpty) {
 
-                        List<IdMappingDto> stopPlaceMappings = stopPlaceRepository.findKeyValueMappingsForStop(now, recordPosition, recordsPerRoundTrip);
+                        List<IdMappingDto> stopPlaceMappings = stopPlaceRepository.findKeyValueMappingsForStop(validFrom, validTo, recordPosition, recordsPerRoundTrip);
                         for (IdMappingDto mapping : stopPlaceMappings) {
-                            writer.println(mapping.toCsvString(includeStopType));
+                            writer.println(csvMapper.toCsvString(mapping, includeStopType, includeFutureMappings));
                             recordPosition++;
                         }
                         writer.flush();
