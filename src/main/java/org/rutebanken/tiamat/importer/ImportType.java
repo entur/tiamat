@@ -15,8 +15,40 @@
 
 package org.rutebanken.tiamat.importer;
 
+import org.rutebanken.tiamat.importer.matching.TransactionalMatchingAppendingStopPlaceImporter;
+import org.rutebanken.tiamat.importer.matching.StopPlaceIdMatcher;
+import org.rutebanken.tiamat.importer.merging.TransactionalMergingStopPlacesImporter;
+import org.rutebanken.tiamat.importer.initial.ParallelInitialStopPlaceImporter;
+
+/**
+ * Different netex import types. Mainly related to behaviour of stop places import.
+ * See also https://github.com/entur/tiamat-scripts/tree/master/initial_import_example_legacy
+ * for an example of initial data import.
+ */
 public enum ImportType {
+
+    /**
+     * This import type will, for stops, apply merging logic to merge nearby stops and quays.
+     * Merge was implemented because we had duplicates of stop places and quays from different providers.
+     * See {@link TransactionalMergingStopPlacesImporter}
+     */
     MERGE,
+
+    /**
+     * This import type will import everything directly without any merging logic.
+     * See {@link ParallelInitialStopPlaceImporter}
+     */
     INITIAL,
-    ID_MATCH, MATCH
+
+    /**
+     * Matching already existing stops on ID only. See imported-id.
+     * See also {@link StopPlaceIdMatcher}
+     */
+    ID_MATCH,
+
+    /**
+     * Matching already existing stops on ID or nearby location. Append tariff zones and IDs.
+     * See {@link TransactionalMatchingAppendingStopPlaceImporter}
+     */
+    MATCH
 }
