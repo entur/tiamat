@@ -178,6 +178,7 @@ public class StreamingPublicationDeliveryTest {
         String xml = byteArrayOutputStream.toString();
 
         assertThat(xml)
+                .contains("<?xml")
                 .contains("<StopPlace")
                 .contains("<PathLink")
                 .contains("</PublicationDelivery")

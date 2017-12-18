@@ -277,7 +277,6 @@ public class StreamingPublicationDelivery {
 
     private Marshaller createMarshaller() throws JAXBException, IOException, SAXException {
         Marshaller marshaller = publicationDeliveryContext.createMarshaller();
-        marshaller.setProperty(Marshaller.JAXB_FRAGMENT, true);
         marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
         marshaller.setProperty(Marshaller.JAXB_SCHEMA_LOCATION, "");
 
