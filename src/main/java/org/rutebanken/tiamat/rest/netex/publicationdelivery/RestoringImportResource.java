@@ -69,7 +69,6 @@ import static org.rutebanken.tiamat.rest.netex.publicationdelivery.async.Runnabl
  * Restore tiamat from earlier export
  */
 @Component
-@Produces("application/xml")
 @Api
 @Path("netex")
 @Transactional(propagation = Propagation.NOT_SUPPORTED)

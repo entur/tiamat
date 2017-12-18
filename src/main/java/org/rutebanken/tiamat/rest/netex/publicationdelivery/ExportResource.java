@@ -63,7 +63,7 @@ public class ExportResource {
     }
 
     @GET
-    @Produces(MediaType.APPLICATION_XML)
+    @Produces(MediaType.APPLICATION_XML + "; charset=UTF-8")
     public Response exportStopPlaces(@BeanParam ExportParams exportParams) throws JAXBException, IOException, SAXException {
         logger.info("Exporting publication delivery. {}", exportParams);
         PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryExporter.exportStopPlaces(exportParams);
@@ -72,7 +72,7 @@ public class ExportResource {
 
 
     @GET
-    @Produces(MediaType.APPLICATION_XML)
+    @Produces(MediaType.APPLICATION_XML + "; charset=UTF-8")
     @Path("changed_in_period")
     public Response exportStopPlacesWithEffectiveChangedInPeriod(@BeanParam ChangedStopPlaceSearchDto searchDTO,
                                                                         @BeanParam ExportParams exportParams,
