@@ -67,7 +67,7 @@ public class TariffZoneQueryFromSearchBuilder {
 
     public Pair<String, Map<String, Object>> buildQueryFromSearch(TariffZoneSearch search) {
 
-        StringBuilder queryString = new StringBuilder("select t.* from tariff_zone z ");
+        StringBuilder queryString = new StringBuilder("select t.* from tariff_zone t ");
         List<String> wheres = new ArrayList<>();
         List<String> operators = new ArrayList<>();
         List<String> orderByStatements = new ArrayList<>();
@@ -80,9 +80,11 @@ public class TariffZoneQueryFromSearchBuilder {
 
         if (search.getQuery() != null) {
             wheres.add("lower(t.name_value) like concat('%', lower(:query), '%')");
-            operators.add("and");
             parameters.put("query", search.getQuery());
             orderByStatements.add("similarity(t.name_value, :query) desc");
+
+            operators.add("or");
+            wheres.add("t.netex_id like concat('%', :query, '%')");
         }
 
         searchHelper.addWheres(queryString, wheres, operators);
