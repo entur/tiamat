@@ -67,7 +67,7 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
 
     @Autowired
     private EntityChangedListener entityChangedListener;
-    
+
     @Autowired
     private ReferenceResolver referenceResolver;
 
@@ -88,7 +88,7 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
                     + newVersion.getParentSiteRef());
         }
 
-        if(!newVersion.getTariffZones().isEmpty()) {
+        if(newVersion.getTariffZones() != null) {
             for(TariffZoneRef tariffZoneRef : newVersion.getTariffZones()) {
                 TariffZone tariffZone = referenceResolver.resolve(tariffZoneRef);
                 if(tariffZone == null) {
