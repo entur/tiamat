@@ -114,23 +114,28 @@ public class TariffZoneRepositoryImpl implements TariffZoneRepositoryCustom {
     }
 
     private String generateTariffZoneQueryFromStopPlaceIds(Set<Long> stopPlaceDbIds) {
-        StringBuilder sql = new StringBuilder("SELECT tz.* " +
-                "FROM (SELECT tz2.id " +
-                "      FROM stop_place_tariff_zones sptz " +
-                "            	inner join tariff_zone_ref tzr " +
-                "               	ON sptz.tariff_zones_id = tzr.id " +
-                "	                AND sptz.stop_place_id IN(");
+        StringBuilder sqlStringBuilder = new StringBuilder("SELECT tz.*" +
+                "FROM" +
+                "  ( SELECT tz1.id " +
+                "   FROM stop_place_tariff_zones sptz " +
+                "   INNER JOIN tariff_zone_ref tzr ON sptz.tariff_zones_id = tzr.id " +
+                "   AND sptz.stop_place_id IN( ");
 
-        sql.append(StringUtils.join(stopPlaceDbIds, ','));
-        sql.append(')');
+        sqlStringBuilder.append(StringUtils.join(stopPlaceDbIds, ','));
 
-        sql.append("            inner join tariff_zone tz2 " +
-                "                   ON tz2.netex_id = tzr.ref " +
-                "                   AND ( tz2.version IS NULL " +
-                "                   	OR Cast(tz2.version AS TEXT) = tzr.version ) " +
-                "        GROUP BY tz2.id) tz2 " +
-                "		 JOIN tariff_zone tz ON tz2.id = tz.id");
+        sqlStringBuilder.append(") " +
+                "   INNER JOIN tariff_zone tz1 ON tz1.netex_id = tzr.ref " +
+                "   AND (cast(tz1.version AS text) = tzr.version " +
+                "        OR tzr.version IS NULL) " +
+                "   AND tz1.version = " +
+                "     (SELECT MAX(tz2.version) " +
+                "      FROM tariff_zone tz2 " +
+                "      WHERE tz2.netex_id = tz1.netex_id ) " +
+                "   GROUP BY tz1.id ) tz1 " +
+                "JOIN tariff_zone tz ON tz.id = tz1.id");
 
-        return sql.toString();
+        String sql = sqlStringBuilder.toString();
+        logger.info(searchHelper.format(sql));
+        return sql;
     }
 }

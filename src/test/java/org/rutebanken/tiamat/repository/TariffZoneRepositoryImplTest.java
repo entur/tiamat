@@ -15,11 +15,14 @@
 
 package org.rutebanken.tiamat.repository;
 
+import com.google.common.collect.Sets;
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.exporter.params.TariffZoneSearch;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
+import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.TariffZone;
+import org.rutebanken.tiamat.model.TariffZoneRef;
 
 import java.util.List;
 
@@ -132,6 +135,34 @@ public class TariffZoneRepositoryImplTest extends TiamatIntegrationTest {
                 .hasSize(1)
                 .extracting(TariffZone::getNetexId)
                 .containsOnly(tariffZone2V.getNetexId());
+    }
+
+    @Test
+    public void getTariffZonesFromStopPlaceIds() throws Exception {
+
+        String tariffZoneNetexId = "CRI:TariffZone:1";
+
+        TariffZone v1 = new TariffZone();
+        v1.setVersion(1L);
+        v1.setNetexId(tariffZoneNetexId);
+
+        tariffZoneRepository.save(v1);
+
+        TariffZone v2 = new TariffZone();
+        v2.setVersion(2L);
+        v2.setNetexId(tariffZoneNetexId);
+
+        tariffZoneRepository.save(v2);
+
+        StopPlace stopPlace = new StopPlace();
+
+        stopPlace.getTariffZones().add(new TariffZoneRef(tariffZoneNetexId));
+        stopPlaceRepository.save(stopPlace);
+
+        List<TariffZone> tariffZones = tariffZoneRepository.getTariffZonesFromStopPlaceIds(Sets.newHashSet(stopPlace.getId()));
+
+        assertThat(tariffZones).hasSize(1);
+        assertThat(tariffZones.get(0).getVersion()).isEqualTo(v2.getVersion());
     }
 
 }
