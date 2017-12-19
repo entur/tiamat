@@ -19,6 +19,7 @@ import graphql.schema.*;
 import org.rutebanken.tiamat.model.GroupOfStopPlaces;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.TariffZone;
 import org.rutebanken.tiamat.rest.graphql.fetchers.AuthorizationCheckDataFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.TagFetcher;
 import org.rutebanken.tiamat.rest.graphql.operations.MultiModalityOperationsBuilder;
@@ -118,6 +119,9 @@ public class StopPlaceRegisterGraphQLSchema {
 
     @Autowired
     private DataFetcher<Boolean> groupOfStopPlacesDeleterFetcher;
+
+    @Autowired
+    private DataFetcher<Page<TariffZone>> tariffZonesFetcher;
 
     @Autowired
     DataFetcher pathLinkFetcher;
@@ -282,6 +286,13 @@ public class StopPlaceRegisterGraphQLSchema {
                         .argument(createFindGroupOfStopPlacesArguments())
                         .dataFetcher(groupOfStopPlacesFetcher)
                         .build())
+                .field(newFieldDefinition()
+                        .name(TARIFF_ZONES)
+                        .type(new GraphQLList(tariffZoneObjectType))
+                        .description("Tariff zones")
+                        .argument(createFindTariffZonesArguments())
+                        .dataFetcher(tariffZonesFetcher)
+                        .build())
                 .build();
 
 
@@ -414,6 +425,15 @@ public class StopPlaceRegisterGraphQLSchema {
                 .build());
         arguments.add(GraphQLArgument.newArgument()
                 .name(FIND_BY_STOP_PLACE_ID)
+                .type(GraphQLString)
+                .build());
+        return arguments;
+    }
+
+    private List<GraphQLArgument> createFindTariffZonesArguments() {
+        List<GraphQLArgument> arguments = createPageAndSizeArguments();
+        arguments.add(GraphQLArgument.newArgument()
+                .name(QUERY)
                 .type(GraphQLString)
                 .build());
         return arguments;

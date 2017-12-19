@@ -43,57 +43,45 @@
  * limitations under the Licence.
  */
 
-package org.rutebanken.tiamat.repository.search;
+package org.rutebanken.tiamat.rest.graphql.fetchers;
 
+import graphql.schema.DataFetcher;
+import graphql.schema.DataFetchingEnvironment;
 import org.rutebanken.tiamat.exporter.params.TariffZoneSearch;
+import org.rutebanken.tiamat.model.TariffZone;
+import org.rutebanken.tiamat.repository.TariffZoneRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.util.Pair;
-import org.springframework.stereotype.Component;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-@Component
-public class TariffZoneQueryFromSearchBuilder {
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 
-    private static final Logger logger = LoggerFactory.getLogger(TariffZoneQueryFromSearchBuilder.class);
+@Service("tariffZonesFetcher")
+@Transactional
+public class TariffZonesFetcher implements DataFetcher<Page<TariffZone>> {
+
+    private static final Logger logger = LoggerFactory.getLogger(TariffZonesFetcher.class);
 
     @Autowired
-    private SearchHelper searchHelper;
+    private TariffZoneRepository tariffZoneRepository;
 
-    public Pair<String, Map<String, Object>> buildQueryFromSearch(TariffZoneSearch search) {
+    @Override
+    @Transactional
+    public Page<TariffZone> get(DataFetchingEnvironment environment) {
 
-        StringBuilder queryString = new StringBuilder("select t.* from tariff_zone t ");
-        List<String> wheres = new ArrayList<>();
-        List<String> operators = new ArrayList<>();
-        List<String> orderByStatements = new ArrayList<>();
-        Map<String, Object> parameters = new HashMap<>();
+        TariffZoneSearch tariffZoneSearch = TariffZoneSearch.newTariffZoneSearchBuilder()
+                .query(environment.getArgument(QUERY))
+                .build();
 
-        if (search == null) {
-            logger.info("empty search object for tariff zone");
-            return Pair.of(queryString.toString(), parameters);
-        }
+        List<TariffZone> tariffZones = tariffZoneRepository.findTariffZones(tariffZoneSearch);
 
-        if (search.getQuery() != null) {
-            wheres.add("(lower(t.name_value) like concat('%', lower(:query), '%') or t.netex_id like concat('%', :query, '%'))");
-            parameters.put("query", search.getQuery());
-            orderByStatements.add("similarity(t.name_value, :query) desc");
-        }
-
-        // When it comes to tariff zones, max version is the current version.
-        // Previously, we did not use from_date, to_date for tariff zones.
-        // At the time of writing, we are re-saving the latest version of a tariff zone.
-        operators.add("and");
-        wheres.add("t.version = (select max(tv.version) from tariff_zone tv where tv.netex_id = t.netex_id)");
-
-        searchHelper.addWheres(queryString, wheres, operators);
-        searchHelper.addOrderByStatements(queryString, orderByStatements);
-        final String generatedSql = searchHelper.format(queryString.toString());
-        searchHelper.logIfLoggable(generatedSql, parameters, search, logger);
-        return Pair.of(generatedSql, parameters);
+        return new PageImpl<>(tariffZones, new PageRequest(environment.getArgument(PAGE), environment.getArgument(SIZE)), tariffZones.size());
     }
 }
