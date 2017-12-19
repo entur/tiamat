@@ -94,6 +94,8 @@ public class StreamingPublicationDeliveryTest {
 
         String xml = byteArrayOutputStream.toString();
 
+        validate(xml);
+
         assertThat(xml)
                 .contains("<StopPlace")
                 .contains("</PublicationDelivery")
@@ -114,6 +116,8 @@ public class StreamingPublicationDeliveryTest {
         stream(new ArrayList<>(), parkings, byteArrayOutputStream);
 
         String xml = byteArrayOutputStream.toString();
+
+        validate(xml);
 
         assertThat(xml)
                 .contains("<Parking")
@@ -140,6 +144,8 @@ public class StreamingPublicationDeliveryTest {
         stream(stopPlaces, new ArrayList<>(), new ArrayList<>(), Arrays.asList(topographicPlace) , byteArrayOutputStream);
 
         String xml = byteArrayOutputStream.toString();
+
+        validate(xml);
 
         assertThat(xml)
                 .contains("<StopPlace")
@@ -176,6 +182,8 @@ public class StreamingPublicationDeliveryTest {
         stream(stopPlaces, new ArrayList<>(), Arrays.asList(pathLink),byteArrayOutputStream);
 
         String xml = byteArrayOutputStream.toString();
+
+        validate(xml);
 
         assertThat(xml)
                 .contains("<?xml")
