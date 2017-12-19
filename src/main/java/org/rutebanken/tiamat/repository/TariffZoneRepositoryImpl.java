@@ -64,8 +64,8 @@ public class TariffZoneRepositoryImpl implements TariffZoneRepositoryCustom {
         searchHelper.addParams(query, pair.getSecond());
 
         @SuppressWarnings("unchecked")
-        List<TariffZone> groups = query.list();
-        return groups;
+        List<TariffZone> tariffZones = query.list();
+        return tariffZones;
     }
 
     @Override
