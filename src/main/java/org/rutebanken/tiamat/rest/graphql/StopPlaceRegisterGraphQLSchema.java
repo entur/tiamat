@@ -685,6 +685,10 @@ public class StopPlaceRegisterGraphQLSchema {
                 .field(newInputObjectField()
                         .name(VALID_BETWEEN)
                         .type(validBetweenInputObjectType))
+                .field(newInputObjectField()
+                        .name(TARIFF_ZONES)
+                        .description("List of tariff zone references without version")
+                        .type(new GraphQLList(versionLessRefInputObjectType)))
                 .build();
     }
 
