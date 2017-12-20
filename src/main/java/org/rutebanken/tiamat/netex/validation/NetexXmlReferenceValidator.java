@@ -74,7 +74,7 @@ public class NetexXmlReferenceValidator {
             Set<String> invalidReferences = Sets.difference(references, distinctIdentificators);
 
             if (invalidReferences.isEmpty()) {
-                logger.info("{} Is valid. {} distinct identificators. {} references", xmlNameForLogging, distinctIdentificators.size(), references.size());
+                logger.info("{} is valid. {} distinct identificators. {} references", xmlNameForLogging, distinctIdentificators.size(), references.size());
             } else {
                 throw new NetexReferenceValidatorException(xmlNameForLogging + " is NOT valid: " + invalidReferences);
 
