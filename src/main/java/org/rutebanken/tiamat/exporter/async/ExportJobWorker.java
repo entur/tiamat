@@ -68,7 +68,7 @@ public class ExportJobWorker implements Runnable {
         final File localExportZipFile = new File(localExportPath + File.separator + exportJob.getFileName());
         try {
 
-            File localExportXmlFile = File.createTempFile("local-netex-export-file", "xml");
+            File localExportXmlFile = File.createTempFile(fileNameWithoutExtention, ".xml");
             exportToLocalXmlFile(localExportXmlFile);
 
             netexXmlReferenceValidator.validateNetexReferences(localExportXmlFile);
