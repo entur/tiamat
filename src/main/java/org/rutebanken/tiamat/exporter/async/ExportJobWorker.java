@@ -15,9 +15,11 @@
 
 package org.rutebanken.tiamat.exporter.async;
 
+import com.google.api.client.util.IOUtils;
 import org.rutebanken.tiamat.exporter.StreamingPublicationDelivery;
 import org.rutebanken.tiamat.model.job.ExportJob;
 import org.rutebanken.tiamat.model.job.JobStatus;
+import org.rutebanken.tiamat.netex.validation.NetexXmlReferenceValidator;
 import org.rutebanken.tiamat.repository.ExportJobRepository;
 import org.rutebanken.tiamat.service.BlobStoreService;
 import org.slf4j.Logger;
@@ -27,11 +29,9 @@ import org.xml.sax.SAXException;
 import javax.xml.bind.JAXBException;
 import javax.xml.stream.XMLStreamException;
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.temporal.ChronoField;
-import java.time.temporal.TemporalField;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -44,29 +44,40 @@ public class ExportJobWorker implements Runnable {
     private final String fileNameWithoutExtention;
     private final BlobStoreService blobStoreService;
     private final ExportJobRepository exportJobRepository;
+    private final NetexXmlReferenceValidator netexXmlReferenceValidator;
 
     public ExportJobWorker(ExportJob exportJob,
                            StreamingPublicationDelivery streamingPublicationDelivery,
                            String localExportPath,
                            String fileNameWithoutExtention,
                            BlobStoreService blobStoreService,
-                           ExportJobRepository exportJobRepository) {
+                           ExportJobRepository exportJobRepository,
+                           NetexXmlReferenceValidator netexXmlReferenceValidator) {
         this.exportJob = exportJob;
         this.streamingPublicationDelivery = streamingPublicationDelivery;
         this.localExportPath = localExportPath;
         this.fileNameWithoutExtention = fileNameWithoutExtention;
         this.blobStoreService = blobStoreService;
         this.exportJobRepository = exportJobRepository;
+        this.netexXmlReferenceValidator = netexXmlReferenceValidator;
     }
 
 
     public void run() {
         logger.info("Started export job: {}", exportJob);
-        final File localExportFile = new File(localExportPath + File.separator + exportJob.getFileName());
+        final File localExportZipFile = new File(localExportPath + File.separator + exportJob.getFileName());
         try {
-            localExportFile.createNewFile();
-            exportToLocalZipFile(localExportFile);
-            uploadToGcp(localExportFile);
+
+            File localExportXmlFile = File.createTempFile("local-netex-export-file", "xml");
+            exportToLocalXmlFile(localExportXmlFile);
+
+            netexXmlReferenceValidator.validateNetexReferences(localExportXmlFile);
+
+            localExportZipFile.createNewFile();
+
+            exportToLocalZipFile(localExportZipFile, localExportXmlFile);
+
+            uploadToGcp(localExportZipFile);
 
             exportJob.setStatus(JobStatus.FINISHED);
             exportJob.setFinished(Instant.now());
@@ -75,7 +86,7 @@ public class ExportJobWorker implements Runnable {
         } catch (Exception e) {
             exportJob.setStatus(JobStatus.FAILED);
             String message = "Error executing export job " + exportJob.getId() + ". Cause: " + e.getClass().getSimpleName() + " - " + e.getMessage();
-            logger.error(message + " " + exportJob, e);
+            logger.error("{} {}", message, exportJob, e);
             exportJob.setMessage(message);
             if (e instanceof InterruptedException) {
                 logger.info("The export job was interrupted: {}", exportJob);
@@ -83,9 +94,15 @@ public class ExportJobWorker implements Runnable {
             }
         } finally {
             exportJobRepository.save(exportJob);
-            logger.info("Removing local file: {}", localExportFile);
-            localExportFile.delete();
+            logger.info("Removing local file: {}", localExportZipFile);
+            localExportZipFile.delete();
         }
+    }
+
+    private void exportToLocalXmlFile(File localExportXmlFile) throws InterruptedException, IOException, XMLStreamException, SAXException, JAXBException {
+        logger.info("Start streaming publication delivery to local file {}", localExportXmlFile);
+        FileOutputStream fileOutputStream = new FileOutputStream(localExportXmlFile);
+        streamingPublicationDelivery.stream(exportJob.getExportParams(), fileOutputStream);
     }
 
     private void uploadToGcp(File localExportFile) throws FileNotFoundException {
@@ -94,21 +111,24 @@ public class ExportJobWorker implements Runnable {
         blobStoreService.upload(exportJob.getSubFolder() + "/" + exportJob.getFileName(), fileInputStream);
     }
 
-    private void exportToLocalZipFile(File localExportFile) throws IOException, InterruptedException, JAXBException, XMLStreamException, SAXException {
-        final FileOutputStream fileOutputStream = new FileOutputStream(localExportFile);
+    private void exportToLocalZipFile(File localZipFile, File localExportZipFile) throws IOException, InterruptedException, JAXBException, XMLStreamException, SAXException {
+        logger.info("Adding {} to zip file: {}", localExportZipFile, localZipFile);
+
+        final FileOutputStream fileOutputStream = new FileOutputStream(localZipFile);
         final ZipOutputStream zipOutputStream = new ZipOutputStream(fileOutputStream);
 
         try {
             zipOutputStream.putNextEntry(new ZipEntry(fileNameWithoutExtention + ".xml"));
-            logger.info("Start streaming publication delivery to zip file {}", localExportFile);
-            streamingPublicationDelivery.stream(exportJob.getExportParams(), zipOutputStream);
+
+            InputStream fileInputStream = new FileInputStream(localExportZipFile);
+            IOUtils.copy(fileInputStream, zipOutputStream);
             zipOutputStream.closeEntry();
-            logger.info("Written to disk {}", localExportFile);
+            logger.info("Written to disk {}", localZipFile);
         } finally {
             try {
                 zipOutputStream.close();
             } catch (IOException e) {
-                throw new IOException("Could not close zipoutput stream for file: "+localExportFile, e);
+                throw new IOException("Could not close zipoutput stream for file: "+localZipFile, e);
             }
         }
     }
