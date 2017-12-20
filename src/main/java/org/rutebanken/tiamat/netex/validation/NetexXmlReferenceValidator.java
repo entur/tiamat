@@ -18,6 +18,7 @@ package org.rutebanken.tiamat.netex.validation;
 import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.xml.stream.XMLInputFactory;
@@ -47,7 +48,19 @@ public class NetexXmlReferenceValidator {
     public static final String ID_VERSION_SEPARATOR = "-";
     public static final String ID_ATTRIBUTE = "id";
 
+    private final boolean validate;
+
+    public NetexXmlReferenceValidator(@Value("${netexXmlReferenceValidator.validate:false}") boolean validate) {
+        this.validate = validate;
+    }
+
     public void validateNetexReferences(File file) throws NetexReferenceValidatorException {
+
+        if(!validate) {
+            logger.warn("Validation is disabled. Will not validate {}", file.getName());
+            return;
+        }
+
         try {
             validateNetexReferences(new FileInputStream(file), file.getName());
         } catch (FileNotFoundException e) {
@@ -56,6 +69,11 @@ public class NetexXmlReferenceValidator {
     }
 
     public void validateNetexReferences(InputStream inputStream, String xmlNameForLogging) throws NetexReferenceValidatorException {
+
+        if(!validate) {
+            logger.warn("Validation is disabled. Will not validate {}", xmlNameForLogging);
+            return;
+        }
 
         long start = System.currentTimeMillis();
 
