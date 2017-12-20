@@ -72,6 +72,11 @@ public class StreamingPublicationDelivery {
     private final TariffZoneRepository tariffZoneRepository;
     private final TopographicPlaceRepository topographicPlaceRepository;
     private final NeTExValidator neTExValidator = new NeTExValidator();
+
+    /**
+     * Validate against netex schema using the {@link NeTExValidator}
+     * Enabling this for large xml files can lead to high memory consumption and/or massive performance impact.
+     */
     private final boolean validateAgainstSchema;
 
     @Autowired
