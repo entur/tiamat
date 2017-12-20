@@ -48,19 +48,13 @@ public class NetexXmlReferenceValidator {
     public static final String ID_VERSION_SEPARATOR = "-";
     public static final String ID_ATTRIBUTE = "id";
 
-    private final boolean validate;
+    private final boolean throwOnValidationError;
 
-    public NetexXmlReferenceValidator(@Value("${netexXmlReferenceValidator.validate:false}") boolean validate) {
-        this.validate = validate;
+    public NetexXmlReferenceValidator(@Value("${netexXmlReferenceValidator.throwOnValidationError:false}") boolean throwOnValidationError) {
+        this.throwOnValidationError = throwOnValidationError;
     }
 
     public void validateNetexReferences(File file) throws NetexReferenceValidatorException {
-
-        if(!validate) {
-            logger.warn("Validation is disabled. Will not validate {}", file.getName());
-            return;
-        }
-
         try {
             validateNetexReferences(new FileInputStream(file), file.getName());
         } catch (FileNotFoundException e) {
@@ -69,11 +63,6 @@ public class NetexXmlReferenceValidator {
     }
 
     public void validateNetexReferences(InputStream inputStream, String xmlNameForLogging) throws NetexReferenceValidatorException {
-
-        if(!validate) {
-            logger.warn("Validation is disabled. Will not validate {}", xmlNameForLogging);
-            return;
-        }
 
         long start = System.currentTimeMillis();
 
@@ -94,8 +83,13 @@ public class NetexXmlReferenceValidator {
             if (invalidReferences.isEmpty()) {
                 logger.info("{} is valid. {} distinct identificators. {} references", xmlNameForLogging, distinctIdentificators.size(), references.size());
             } else {
-                throw new NetexReferenceValidatorException(xmlNameForLogging + " is NOT valid. Invalid references detected: " + invalidReferences);
+                String message = xmlNameForLogging + " is NOT valid. Invalid references detected: " + invalidReferences.size();
 
+                if (throwOnValidationError) {
+                    throw new NetexReferenceValidatorException(message);
+                } else {
+                    logger.warn("{}: {}", message, invalidReferences);
+                }
             }
 
         } catch (XMLStreamException e) {
