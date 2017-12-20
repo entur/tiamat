@@ -66,9 +66,9 @@ public class ExportJobWorker implements Runnable {
     public void run() {
         logger.info("Started export job: {}", exportJob);
         final File localExportZipFile = new File(localExportPath + File.separator + exportJob.getFileName());
+        File localExportXmlFile = new File(fileNameWithoutExtention + ".xml");
         try {
 
-            File localExportXmlFile = File.createTempFile(fileNameWithoutExtention, ".xml");
             exportToLocalXmlFile(localExportXmlFile);
 
             netexXmlReferenceValidator.validateNetexReferences(localExportXmlFile);
@@ -94,8 +94,9 @@ public class ExportJobWorker implements Runnable {
             }
         } finally {
             exportJobRepository.save(exportJob);
-            logger.info("Removing local file: {}", localExportZipFile);
+            logger.info("Removing local files: {},{}", localExportZipFile, localExportXmlFile);
             localExportZipFile.delete();
+            localExportXmlFile.delete();
         }
     }
 
