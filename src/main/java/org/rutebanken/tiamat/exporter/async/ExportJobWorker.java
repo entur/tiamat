@@ -66,7 +66,7 @@ public class ExportJobWorker implements Runnable {
     public void run() {
         logger.info("Started export job: {}", exportJob);
         final File localExportZipFile = new File(localExportPath + File.separator + exportJob.getFileName());
-        File localExportXmlFile = new File(fileNameWithoutExtention + ".xml");
+        File localExportXmlFile = new File(localExportPath + File.separator + fileNameWithoutExtention + ".xml");
         try {
 
             exportToLocalXmlFile(localExportXmlFile);
