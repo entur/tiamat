@@ -50,7 +50,7 @@ public class NetexXmlReferenceValidator {
 
     private final boolean throwOnValidationError;
 
-    public NetexXmlReferenceValidator(@Value("${netexXmlReferenceValidator.throwOnValidationError:true}") boolean throwOnValidationError) {
+    public NetexXmlReferenceValidator(@Value("${netexXmlReferenceValidator.throwOnValidationError:false}") boolean throwOnValidationError) {
         this.throwOnValidationError = throwOnValidationError;
     }
 
