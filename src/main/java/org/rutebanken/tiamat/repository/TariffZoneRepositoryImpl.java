@@ -114,8 +114,8 @@ public class TariffZoneRepositoryImpl implements TariffZoneRepositoryCustom {
     }
 
     private String generateTariffZoneQueryFromStopPlaceIds(Set<Long> stopPlaceDbIds) {
-        StringBuilder sqlStringBuilder = new StringBuilder("SELECT tz.*" +
-                "FROM" +
+        StringBuilder sqlStringBuilder = new StringBuilder("SELECT tz.* " +
+                "FROM " +
                 "  ( SELECT tz1.id " +
                 "   FROM stop_place_tariff_zones sptz " +
                 "   INNER JOIN tariff_zone_ref tzr ON sptz.tariff_zones_id = tzr.id " +
@@ -125,17 +125,19 @@ public class TariffZoneRepositoryImpl implements TariffZoneRepositoryCustom {
 
         sqlStringBuilder.append(") " +
                 "   INNER JOIN tariff_zone tz1 ON tz1.netex_id = tzr.ref " +
-                "   AND (cast(tz1.version AS text) = tzr.version " +
-                "        OR tzr.version IS NULL) " +
-                "   AND tz1.version = " +
-                "     (SELECT MAX(tz2.version) " +
-                "      FROM tariff_zone tz2 " +
-                "      WHERE tz2.netex_id = tz1.netex_id ) " +
+                "   AND (" +
+                "      (" +
+                "        tzr.version IS NOT NULL AND cast(tz1.version AS text) = tzr.version" +
+                "      )" +
+                "      OR (    " +
+                "        tzr.version IS NULL AND tz1.version = (SELECT MAX(tz2.version) FROM tariff_zone tz2 WHERE tz2.netex_id = tz1.netex_id)" +
+                "      )" +
+                "    ) " +
                 "   GROUP BY tz1.id ) tz1 " +
                 "JOIN tariff_zone tz ON tz.id = tz1.id");
 
         String sql = sqlStringBuilder.toString();
-        logger.info(searchHelper.format(sql));
+        logger.info(sql);
         return sql;
     }
 }
