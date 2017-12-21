@@ -51,7 +51,7 @@ See also http://stackoverflow.com/a/26514779
 
 #### Run postgres/gis for tiamat in docker for development
 ```
-docker run -p 5435:5432 -e POSTGRES_USER=tiamat -e POSTGRES_PASSWORD=<insertpasswordhere>" -e POSTGRES_INITDB_ARGS="-d" mdillon/postgis:9.4
+docker run -p 5435:5432 -e POSTGRES_USER=tiamat -e POSTGRES_PASSWORD=<insertpasswordhere>" -e POSTGRES_INITDB_ARGS="-d" mdillon/postgis:9.6
 ```
 
 #### Database creation in google cloud / kubernetes
