@@ -50,7 +50,7 @@ public class NetexXmlReferenceValidator {
 
     private final boolean throwOnValidationError;
 
-    public NetexXmlReferenceValidator(@Value("${netexXmlReferenceValidator.throwOnValidationError:false}") boolean throwOnValidationError) {
+    public NetexXmlReferenceValidator(@Value("${netexXmlReferenceValidator.throwOnValidationError:true}") boolean throwOnValidationError) {
         this.throwOnValidationError = throwOnValidationError;
     }
 
@@ -84,11 +84,9 @@ public class NetexXmlReferenceValidator {
                 logger.info("{} is valid. {} distinct identificators. {} references", xmlNameForLogging, distinctIdentificators.size(), references.size());
             } else {
                 String message = xmlNameForLogging + " is NOT valid. Invalid references detected: " + invalidReferences.size();
-
+                logger.warn("{}: {}", message, invalidReferences);
                 if (throwOnValidationError) {
                     throw new NetexReferenceValidatorException(message);
-                } else {
-                    logger.warn("{}: {}", message, invalidReferences);
                 }
             }
 
