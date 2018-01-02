@@ -48,7 +48,7 @@ public class ValidationTest {
     @Test
     public void test() throws IOException, SAXException {
 
-        String file = "/path/to/tiamat-export-20171220-003817-1663839.xml";
+        String file = "/home/cristoffer/tiamat-export-20171220-162956-911283.xml";
         System.out.println("loading file "+file);
         Source xmlFile = new StreamSource(new File(file));
 
