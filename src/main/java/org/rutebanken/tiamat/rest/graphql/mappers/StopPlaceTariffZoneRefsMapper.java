@@ -36,6 +36,8 @@ public class StopPlaceTariffZoneRefsMapper {
         if(input.get(TARIFF_ZONES) != null) {
             List refList = (List) input.get(TARIFF_ZONES);
 
+            stopPlace.getTariffZones().clear();
+
             for(Object refObject : refList) {
                 Map memberMap = (Map) refObject;
                 String ref = (String) memberMap.get(ENTITY_REF_REF);
