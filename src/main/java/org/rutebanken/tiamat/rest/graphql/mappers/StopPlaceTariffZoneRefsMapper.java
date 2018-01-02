@@ -37,12 +37,12 @@ public class StopPlaceTariffZoneRefsMapper {
             List refList = (List) input.get(TARIFF_ZONES);
 
             stopPlace.getTariffZones().clear();
+            isUpdated = true;
 
             for(Object refObject : refList) {
                 Map memberMap = (Map) refObject;
                 String ref = (String) memberMap.get(ENTITY_REF_REF);
                 stopPlace.getTariffZones().add(new TariffZoneRef(ref));
-                isUpdated = true;
             }
         }
 
