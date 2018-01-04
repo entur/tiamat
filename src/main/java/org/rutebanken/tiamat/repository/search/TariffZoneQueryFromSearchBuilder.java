@@ -15,7 +15,7 @@
 
 package org.rutebanken.tiamat.repository.search;
 
-import org.rutebanken.tiamat.exporter.params.GroupOfStopPlacesSearch;
+import org.rutebanken.tiamat.exporter.params.TariffZoneSearch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,54 +28,42 @@ import java.util.List;
 import java.util.Map;
 
 @Component
-public class GroupOfStopPlacesQueryFromSearchBuilder {
+public class TariffZoneQueryFromSearchBuilder {
 
-    private static final Logger logger = LoggerFactory.getLogger(GroupOfStopPlacesQueryFromSearchBuilder.class);
+    private static final Logger logger = LoggerFactory.getLogger(TariffZoneQueryFromSearchBuilder.class);
 
     @Autowired
     private SearchHelper searchHelper;
 
-    public Pair<String, Map<String, Object>> buildQueryFromSearch(GroupOfStopPlacesSearch search) {
+    public Pair<String, Map<String, Object>> buildQueryFromSearch(TariffZoneSearch search) {
 
-        StringBuilder queryString = new StringBuilder("select g.* from group_of_stop_places g ");
+        StringBuilder queryString = new StringBuilder("select t.* from tariff_zone t ");
         List<String> wheres = new ArrayList<>();
         List<String> operators = new ArrayList<>();
         List<String> orderByStatements = new ArrayList<>();
         Map<String, Object> parameters = new HashMap<>();
 
-        if(search == null) {
-            logger.info("empty search object for group of stop places");
+        if (search == null) {
+            logger.info("empty search object for tariff zone");
             return Pair.of(queryString.toString(), parameters);
         }
 
-        if(search.getStopPlaceId() != null) {
-            queryString.append(" join group_of_stop_places_members m on m.group_of_stop_places_id = g.id ");
-        }
-
-        if(search.getIdList() != null && !search.getIdList().isEmpty()) {
-            wheres.add(" g.netex_id in (:idList)");
-            operators.add("and");
-            parameters.put("idList", search.getIdList());
-        }
-
-        if(search.getQuery() != null) {
-            wheres.add("lower(g.name_value) like concat('%', lower(:query), '%')");
-            operators.add("and");
+        if (search.getQuery() != null) {
+            wheres.add("(lower(t.name_value) like concat('%', lower(:query), '%') or t.netex_id like concat('%', :query, '%'))");
             parameters.put("query", search.getQuery());
-            orderByStatements.add("similarity(g.name_value, :query) desc");
+            orderByStatements.add("similarity(t.name_value, :query) desc");
         }
 
-        if(search.getStopPlaceId() != null) {
-            wheres.add("m.ref in (:stopPlaceIds)");
-            operators.add("and");
-            parameters.put("stopPlaceIds", search.getStopPlaceId());
-        }
+        // When it comes to tariff zones, max version is the current version.
+        // Previously, we did not use from_date, to_date for tariff zones.
+        // At the time of writing, we are re-saving the latest version of a tariff zone.
+        operators.add("and");
+        wheres.add("t.version = (select max(tv.version) from tariff_zone tv where tv.netex_id = t.netex_id)");
 
         searchHelper.addWheres(queryString, wheres, operators);
         searchHelper.addOrderByStatements(queryString, orderByStatements);
         final String generatedSql = searchHelper.format(queryString.toString());
         searchHelper.logIfLoggable(generatedSql, parameters, search, logger);
         return Pair.of(generatedSql, parameters);
-
     }
 }

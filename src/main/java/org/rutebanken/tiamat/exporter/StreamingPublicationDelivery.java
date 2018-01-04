@@ -72,6 +72,11 @@ public class StreamingPublicationDelivery {
     private final TariffZoneRepository tariffZoneRepository;
     private final TopographicPlaceRepository topographicPlaceRepository;
     private final NeTExValidator neTExValidator = new NeTExValidator();
+
+    /**
+     * Validate against netex schema using the {@link NeTExValidator}
+     * Enabling this for large xml files can lead to high memory consumption and/or massive performance impact.
+     */
     private final boolean validateAgainstSchema;
 
     @Autowired
@@ -134,7 +139,11 @@ public class StreamingPublicationDelivery {
 
         logger.info("Start marshalling publication delivery");
         marshaller.marshal(netexObjectFactory.createPublicationDelivery(publicationDeliveryStructure), outputStream);
-        logger.info("Mapped {} stop places and {} parkings to netex", mappedStopPlaceCount.get(), mappedParkingCount.get());
+        logger.info("Mapped {} stop places, {} parkings, {} topographic places and {} tariff zones to netex",
+                mappedStopPlaceCount.get(),
+                mappedParkingCount.get(),
+                mappedTopographicPlacesCount,
+                mappedTariffZonesCount);
     }
 
     private void prepareTariffZones(ExportParams exportParams, Set<Long> stopPlacePrimaryIds, AtomicInteger mappedTariffZonesCount, SiteFrame netexSiteFrame, EntitiesEvictor evicter) {
@@ -277,7 +286,6 @@ public class StreamingPublicationDelivery {
 
     private Marshaller createMarshaller() throws JAXBException, IOException, SAXException {
         Marshaller marshaller = publicationDeliveryContext.createMarshaller();
-        marshaller.setProperty(Marshaller.JAXB_FRAGMENT, true);
         marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
         marshaller.setProperty(Marshaller.JAXB_SCHEMA_LOCATION, "");
 

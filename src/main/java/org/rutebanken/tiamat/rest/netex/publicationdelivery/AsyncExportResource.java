@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.InputStream;
 import java.util.Collection;
@@ -38,7 +39,7 @@ import static org.rutebanken.tiamat.rest.netex.publicationdelivery.AsyncExportRe
  * Export publication delivery data to google cloud storage. Some parts like stops and parking asynchronously
  */
 @Api
-@Produces("application/xml")
+@Produces(MediaType.APPLICATION_XML + "; charset=UTF-8")
 @Path("/netex/" + ASYNC_JOB_PATH)
 public class AsyncExportResource {
 

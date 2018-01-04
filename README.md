@@ -31,9 +31,6 @@ spring.profiles.active=default
 spring.jpa.properties.hibernate.dialect=org.hibernate.spatial.dialect.postgis.PostgisDialect
 security.basic.enabled=false
 
-peliasReverseLookupEndpoint=https://beta.rutebanken.org/apiman-gateway/rutebanken/geocoder/1.0/reverse
-logging.level.no.rutebanken.tiamat.pelias=TRACE
-
 keycloak.realm=rutebanken
 keycloak.auth-server-url=https://beta.rutebanken.org/admin/neti/api
 keycloak.resource=Tiamat
@@ -256,6 +253,15 @@ Tiamat will return the modified NeTEx structure with it's own NSR IDs. Original 
 curl  -XPOST -H"Content-Type: application/xml" -d@chouette-netex.xml http://localhost:1997/services/stop_places/netex
 ```
 
+### Importing with importType=INITIAL
+
+When importing with _importType=INITIAL_, a parallel stream will be created, spawning the original process. During import, user authorizations is checked, thus accessing SecurityContextHolder. 
+By default, SecurityContextHolder use DEFAULT\_LOCAL\_STRATEGY. When using INITIAL importType, you should tell Spring to use MODE\_INHERITABLETHREADLOCAL for SecurityContextHolder, allowing Spring to duplicate Security Context in spawned threads.
+This can be done setting env variable : 
+    
+    -Dspring.security.strategy=MODE_INHERITABLETHREADLOCAL
+
+If not, the application may complain about user not being authenticated if Spring tries to check authorization in a spawned process
 
 ## See also
 https://rutebanken.atlassian.net/wiki/display/REIS/Holdeplassregister

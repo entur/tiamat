@@ -21,6 +21,8 @@ import org.rutebanken.tiamat.importer.finder.StopPlaceByQuayOriginalIdFinder;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.repository.EntityInVersionRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
+import org.rutebanken.tiamat.repository.TariffZoneRepository;
+import org.rutebanken.tiamat.repository.reference.ReferenceResolver;
 import org.rutebanken.tiamat.service.TariffZonesLookupService;
 import org.rutebanken.tiamat.service.TopographicPlaceLookupService;
 import org.rutebanken.tiamat.service.metrics.MetricsService;
@@ -66,6 +68,9 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
     @Autowired
     private EntityChangedListener entityChangedListener;
 
+    @Autowired
+    private ReferenceResolver referenceResolver;
+
     @Override
     public EntityInVersionRepository<StopPlace> getRepository() {
         return stopPlaceRepository;
@@ -81,6 +86,15 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
                     newVersion.getNetexId() +
                     " seems to be a child stop. Save the parent stop place instead: "
                     + newVersion.getParentSiteRef());
+        }
+
+        if(newVersion.getTariffZones() != null) {
+            for(TariffZoneRef tariffZoneRef : newVersion.getTariffZones()) {
+                TariffZone tariffZone = referenceResolver.resolve(tariffZoneRef);
+                if(tariffZone == null) {
+                    throw new IllegalArgumentException("StopPlace refers to non existing tariff zone: " + tariffZoneRef);
+                }
+            }
         }
 
         authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(newVersion));

@@ -123,11 +123,20 @@ public class TopographicPlaceRepositoryImpl implements TopographicPlaceRepositor
 
 	private String generateTopographicPlacesQueryFromStopPlaceIds(Set<Long> stopPlaceDbIds) {
 
-		StringBuilder sql = new StringBuilder("select  distinct on(tp.id) tp.* from topographic_place tp inner join stop_place sp on sp.topographic_place_id = tp.id where sp.id in(");
-
 		Set<String> stopPlaceStringDbIds = stopPlaceDbIds.stream().map(lvalue -> String.valueOf(lvalue)).collect(Collectors.toSet());
-		sql.append(String.join(",", stopPlaceStringDbIds));
-		sql.append(")");
+		String joinedStopPlaceDbIds = String.join(",", stopPlaceStringDbIds);
+		StringBuilder sql = new StringBuilder("SELECT tp.* " +
+				"FROM ( " +
+				"  SELECT tp1.id " +
+				"  FROM topographic_place tp1 " +
+				"  INNER JOIN stop_place sp " +
+				"    ON sp.topographic_place_id = tp1.id " +
+				"  WHERE sp.id IN(");
+		sql.append(joinedStopPlaceDbIds);
+		sql.append(") " +
+				"  GROUP BY tp1.id " +
+				") tp1 " +
+				"JOIN topographic_place tp ON tp.id = tp1.id");
 		return sql.toString();
 	}
 }

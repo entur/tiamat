@@ -20,6 +20,7 @@ import org.rutebanken.tiamat.exporter.async.ExportJobWorker;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.model.job.ExportJob;
 import org.rutebanken.tiamat.model.job.JobStatus;
+import org.rutebanken.tiamat.netex.validation.NetexXmlReferenceValidator;
 import org.rutebanken.tiamat.repository.ExportJobRepository;
 import org.rutebanken.tiamat.service.BlobStoreService;
 import org.rutebanken.tiamat.time.ExportTimeZone;
@@ -57,6 +58,8 @@ public class AsyncPublicationDeliveryExporter {
 
     private final StreamingPublicationDelivery streamingPublicationDelivery;
 
+    private final NetexXmlReferenceValidator netexXmlReferenceValidator;
+
     private final ExportTimeZone exportTimeZone;
 
     private final String localExportPath;
@@ -65,11 +68,12 @@ public class AsyncPublicationDeliveryExporter {
     public AsyncPublicationDeliveryExporter(ExportJobRepository exportJobRepository,
                                             BlobStoreService blobStoreService,
                                             StreamingPublicationDelivery streamingPublicationDelivery,
-                                            ExportTimeZone exportTimeZone,
+                                            NetexXmlReferenceValidator netexXmlReferenceValidator, ExportTimeZone exportTimeZone,
                                             @Value("${async.export.path:/deployments/data/}") String localExportPath) {
         this.exportJobRepository = exportJobRepository;
         this.blobStoreService = blobStoreService;
         this.streamingPublicationDelivery = streamingPublicationDelivery;
+        this.netexXmlReferenceValidator = netexXmlReferenceValidator;
         this.exportTimeZone = exportTimeZone;
         this.localExportPath = localExportPath;
 
@@ -101,7 +105,7 @@ public class AsyncPublicationDeliveryExporter {
         String fileNameWithoutExtention = createFileNameWithoutExtention(exportJob.getId(), exportJob.getStarted());
         exportJob.setFileName(fileNameWithoutExtention + ".zip");
 
-        ExportJobWorker exportJobWorker = new ExportJobWorker(exportJob, streamingPublicationDelivery, localExportPath, fileNameWithoutExtention, blobStoreService, exportJobRepository);
+        ExportJobWorker exportJobWorker = new ExportJobWorker(exportJob, streamingPublicationDelivery, localExportPath, fileNameWithoutExtention, blobStoreService, exportJobRepository, netexXmlReferenceValidator);
         exportService.submit(exportJobWorker);
         logger.info("Returning started export job {}", exportJob);
         setJobUrl(exportJob);

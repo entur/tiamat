@@ -175,10 +175,15 @@ public class StopPlaceMergerTest extends TiamatIntegrationTest {
         StopPlace fromStopPlace = new StopPlace();
         fromStopPlace.setName(new EmbeddableMultilingualString("Name"));
 
+        TariffZone tariffZone1 = new TariffZone();
+        tariffZone1.setNetexId("NSR:TariffZone:1");
+        tariffZone1.setVersion(1L);
+        tariffZoneRepository.save(tariffZone1);
+
         Set<TariffZoneRef> fromTzSet = new HashSet<>();
         TariffZoneRef fromTz = new TariffZoneRef();
-        fromTz.setRef("NSR:TZ:1");
-        fromTz.setVersion("1");
+        fromTz.setRef(tariffZone1.getNetexId());
+        fromTz.setVersion(String.valueOf(tariffZone1.getVersion()));
         fromTzSet.add(fromTz);
         fromStopPlace.setTariffZones(fromTzSet);
 
@@ -186,10 +191,16 @@ public class StopPlaceMergerTest extends TiamatIntegrationTest {
         StopPlace toStopPlace = new StopPlace();
         toStopPlace.setName(new EmbeddableMultilingualString("Name 2"));
 
+        TariffZone tariffZone2 = new TariffZone();
+        tariffZone2.setNetexId("NSR:TariffZone:2");
+        tariffZone2.setVersion(2L);
+        tariffZoneRepository.save(tariffZone2);
+
+
         Set<TariffZoneRef> toTzSet = new HashSet<>();
         TariffZoneRef toTz = new TariffZoneRef();
-        toTz.setRef("NSR:TZ:2");
-        toTz.setVersion("2");
+        toTz.setRef(tariffZone2.getNetexId());
+        toTz.setVersion(String.valueOf(tariffZone2.getVersion()));
         toTzSet.add(toTz);
         toStopPlace.setTariffZones(toTzSet);
 
@@ -237,10 +248,16 @@ public class StopPlaceMergerTest extends TiamatIntegrationTest {
         StopPlace fromStopPlace = new StopPlace();
         fromStopPlace.setName(new EmbeddableMultilingualString("Name"));
 
+        TariffZone tariffZone1 = new TariffZone();
+        tariffZone1.setNetexId("NSR:TariffZone:1");
+        tariffZone1.setVersion(1L);
+        tariffZoneRepository.save(tariffZone1);
+
+
         Set<TariffZoneRef> fromTzSet = new HashSet<>();
         TariffZoneRef fromTz = new TariffZoneRef();
-        fromTz.setRef("NSR:TZ:1");
-        fromTz.setVersion("1");
+        fromTz.setRef(tariffZone1.getNetexId());
+        fromTz.setVersion(String.valueOf(tariffZone1.getVersion()));
         fromTzSet.add(fromTz);
         fromStopPlace.setTariffZones(fromTzSet);
 
@@ -251,10 +268,16 @@ public class StopPlaceMergerTest extends TiamatIntegrationTest {
         StopPlace toStopPlace = new StopPlace();
         toStopPlace.setName(new EmbeddableMultilingualString("Name 2"));
 
+        TariffZone tariffZone2 = new TariffZone();
+        tariffZone2.setNetexId("NSR:TariffZone:2");
+        tariffZone2.setVersion(2L);
+        tariffZoneRepository.save(tariffZone2);
+
+
         Set<TariffZoneRef> toTzSet = new HashSet<>();
         TariffZoneRef toTz = new TariffZoneRef();
-        toTz.setRef("NSR:TZ:2");
-        toTz.setVersion("2");
+        toTz.setRef(tariffZone2.getNetexId());
+        toTz.setVersion(String.valueOf(tariffZone2.getVersion()));
         toTzSet.add(toTz);
         toStopPlace.setTariffZones(toTzSet);
 

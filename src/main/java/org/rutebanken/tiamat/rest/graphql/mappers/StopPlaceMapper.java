@@ -42,6 +42,9 @@ public class StopPlaceMapper {
     private GroupOfEntitiesMapper groupOfEntitiesMapper;
 
     @Autowired
+    private StopPlaceTariffZoneRefsMapper stopPlaceTariffZoneRefsMapper;
+
+    @Autowired
     private ValidBetweenMapper validBetweenMapper;
 
     /**
@@ -71,6 +74,8 @@ public class StopPlaceMapper {
             stopPlace.setParentSiteRef(parentSiteRef);
             isUpdated = true;
         }
+
+        isUpdated |= stopPlaceTariffZoneRefsMapper.populate(input, stopPlace);
 
         isUpdated = isUpdated | setTransportModeSubMode(stopPlace, input.get(TRANSPORT_MODE), input.get(SUBMODE));
 

@@ -740,6 +740,35 @@ def class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourc
         assertThat(entityChangedJMSListener.hasReceivedEvent(null, 1l, EntityChangedEvent.CrudAction.CREATE)).isTrue()
     }
 
+    @Test
+    void testMutateStopWithTariffZoneRef() throws Exception {
+
+        def tariffZone = new TariffZone()
+        tariffZone.name = new EmbeddableMultilingualString("tariff zone")
+        tariffZone.netexId = "CRI:TariffZone:1"
+        tariffZoneRepository.save(tariffZone)
+
+        String graphqlQuery = """
+            mutation {
+              stopPlace:mutateStopPlace(StopPlace: {name: {value: "Name", lang:"nor"}, tariffZones: [{ref: "${tariffZone.netexId}"}]}) {
+                id
+                tariffZones {
+                  id
+                  name {
+                    value
+                  }
+                }
+              }
+            }
+            """
+
+        executeGraphqQLQueryOnly(graphqlQuery)
+        .root("data.stopPlace[0]")
+            .body("tariffZones", is(not(empty())))
+            .body("tariffZones[0].id", equalTo(tariffZone.netexId))
+            .body("tariffZones[0].name.value", equalTo(tariffZone.name.value))
+    }
+
 
     /**
      * Test added for NRP-1851

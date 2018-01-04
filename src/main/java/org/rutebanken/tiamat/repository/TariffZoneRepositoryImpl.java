@@ -16,17 +16,18 @@
 package org.rutebanken.tiamat.repository;
 
 
-import com.google.api.client.repackaged.com.google.common.base.Strings;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.SQLQuery;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
+import org.hibernate.internal.SessionImpl;
+import org.rutebanken.tiamat.exporter.params.TariffZoneSearch;
 import org.rutebanken.tiamat.model.TariffZone;
-import org.rutebanken.tiamat.model.TopographicPlace;
-import org.rutebanken.tiamat.model.TopographicPlaceTypeEnumeration;
 import org.rutebanken.tiamat.repository.iterator.ScrollableResultIterator;
+import org.rutebanken.tiamat.repository.search.SearchHelper;
+import org.rutebanken.tiamat.repository.search.TariffZoneQueryFromSearchBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,85 +36,108 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
 import javax.persistence.Query;
-import javax.persistence.TypedQuery;
-import java.math.BigInteger;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Repository
 @Transactional
 public class TariffZoneRepositoryImpl implements TariffZoneRepositoryCustom {
 
-	private static final Logger logger = LoggerFactory.getLogger(TariffZoneRepositoryImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(TariffZoneRepositoryImpl.class);
 
-	@Autowired
-	private EntityManager entityManager;
+    @Autowired
+    private EntityManager entityManager;
 
-	@Override
-	public String findFirstByKeyValues(String key, Set<String> originalIds) {
-		throw new NotImplementedException("findFirstByKeyValues not implemented for " + this.getClass().getSimpleName());
-	}
+    @Autowired
+    private SearchHelper searchHelper;
 
-	@Override
-	public List<TariffZone> getTariffZonesFromStopPlaceIds(Set<Long> stopPlaceIds) {
-		if(stopPlaceIds == null || stopPlaceIds.isEmpty()) {
-			return new ArrayList<>();
-		}
+    @Autowired
+    private TariffZoneQueryFromSearchBuilder tariffZoneQueryFromSearchBuilder;
 
-		Query query = entityManager.createNativeQuery(generateTariffZoneQueryFromStopPlaceIds(stopPlaceIds), TariffZone.class);
+    @Override
+    public List<TariffZone> findTariffZones(TariffZoneSearch search) {
+        Pair<String, Map<String, Object>> pair = tariffZoneQueryFromSearchBuilder.buildQueryFromSearch(search);
+        Session session = entityManager.unwrap(SessionImpl.class);
+        SQLQuery query = session.createSQLQuery(pair.getFirst());
+        query.addEntity(TariffZone.class);
 
-		@SuppressWarnings("unchecked")
-		List<TariffZone> tariffZones = query.getResultList();
-		return tariffZones;
-	}
+        searchHelper.addParams(query, pair.getSecond());
 
-	@Override
-	public Iterator<TariffZone> scrollTariffZones(Set<Long> stopPlaceDbIds) {
+        @SuppressWarnings("unchecked")
+        List<TariffZone> tariffZones = query.list();
+        return tariffZones;
+    }
 
-		if(stopPlaceDbIds == null || stopPlaceDbIds.isEmpty()) {
-			return new ArrayList<TariffZone>().iterator();
-		}
-		return scrollTariffZones(generateTariffZoneQueryFromStopPlaceIds(stopPlaceDbIds));
-	}
+    @Override
+    public String findFirstByKeyValues(String key, Set<String> originalIds) {
+        throw new NotImplementedException("findFirstByKeyValues not implemented for " + this.getClass().getSimpleName());
+    }
 
-	public Iterator<TariffZone> scrollTariffZones(String sql) {
-		Session session = entityManager.unwrap(Session.class);
-		SQLQuery sqlQuery = session.createSQLQuery(sql);
+    @Override
+    public List<TariffZone> getTariffZonesFromStopPlaceIds(Set<Long> stopPlaceIds) {
+        if (stopPlaceIds == null || stopPlaceIds.isEmpty()) {
+            return new ArrayList<>();
+        }
 
-		sqlQuery.addEntity(TariffZone.class);
-		sqlQuery.setReadOnly(true);
-		sqlQuery.setFetchSize(100);
-		sqlQuery.setCacheable(false);
-		ScrollableResults results = sqlQuery.scroll(ScrollMode.FORWARD_ONLY);
-		ScrollableResultIterator<TariffZone> tariffZoneIterator = new ScrollableResultIterator<>(results, 100, session);
-		return tariffZoneIterator;
-	}
+        Query query = entityManager.createNativeQuery(generateTariffZoneQueryFromStopPlaceIds(stopPlaceIds), TariffZone.class);
 
-	@Override
-	public Iterator<TariffZone> scrollTariffZones() {
-		return scrollTariffZones("select tz.* from tariff_zone tz");
-	}
+        @SuppressWarnings("unchecked")
+        List<TariffZone> tariffZones = query.getResultList();
+        return tariffZones;
+    }
 
-	private String generateTariffZoneQueryFromStopPlaceIds(Set<Long> stopPlaceDbIds) {
-		StringBuilder sql = new StringBuilder("SELECT tz.* " +
-				"FROM (SELECT tz2.id " +
-				"      FROM stop_place_tariff_zones sptz " +
-				"            	inner join tariff_zone_ref tzr " +
-				"               	ON sptz.tariff_zones_id = tzr.id " +
-				"	                AND sptz.stop_place_id IN(");
+    @Override
+    public Iterator<TariffZone> scrollTariffZones(Set<Long> stopPlaceDbIds) {
 
-		sql.append(StringUtils.join(stopPlaceDbIds, ','));
-		sql.append(')');
+        if (stopPlaceDbIds == null || stopPlaceDbIds.isEmpty()) {
+            return new ArrayList<TariffZone>().iterator();
+        }
+        return scrollTariffZones(generateTariffZoneQueryFromStopPlaceIds(stopPlaceDbIds));
+    }
 
-		sql.append("            inner join tariff_zone tz2 " +
-				"                   ON tz2.netex_id = tzr.ref " +
-				"                   AND ( tz2.version IS NULL " +
-				"                   	OR Cast(tz2.version AS TEXT) = tzr.version ) " +
-				"        GROUP BY tz2.id) tz2 " +
-				"		 JOIN tariff_zone tz ON tz2.id = tz.id");
+    public Iterator<TariffZone> scrollTariffZones(String sql) {
+        Session session = entityManager.unwrap(Session.class);
+        SQLQuery sqlQuery = session.createSQLQuery(sql);
 
-		return sql.toString();
-	}
+        sqlQuery.addEntity(TariffZone.class);
+        sqlQuery.setReadOnly(true);
+        sqlQuery.setFetchSize(100);
+        sqlQuery.setCacheable(false);
+        ScrollableResults results = sqlQuery.scroll(ScrollMode.FORWARD_ONLY);
+        ScrollableResultIterator<TariffZone> tariffZoneIterator = new ScrollableResultIterator<>(results, 100, session);
+        return tariffZoneIterator;
+    }
+
+    @Override
+    public Iterator<TariffZone> scrollTariffZones() {
+        return scrollTariffZones("select tz.* from tariff_zone tz");
+    }
+
+    private String generateTariffZoneQueryFromStopPlaceIds(Set<Long> stopPlaceDbIds) {
+        StringBuilder sqlStringBuilder = new StringBuilder("SELECT tz.* " +
+                "FROM " +
+                "  ( SELECT tz1.id " +
+                "   FROM stop_place_tariff_zones sptz " +
+                "   INNER JOIN tariff_zone_ref tzr ON sptz.tariff_zones_id = tzr.id " +
+                "   AND sptz.stop_place_id IN( ");
+
+        sqlStringBuilder.append(StringUtils.join(stopPlaceDbIds, ','));
+
+        sqlStringBuilder.append(") " +
+                "   INNER JOIN tariff_zone tz1 ON tz1.netex_id = tzr.ref " +
+                "   AND (" +
+                "      (" +
+                "        tzr.version IS NOT NULL AND cast(tz1.version AS text) = tzr.version" +
+                "      )" +
+                "      OR (    " +
+                "        tzr.version IS NULL AND tz1.version = (SELECT MAX(tz2.version) FROM tariff_zone tz2 WHERE tz2.netex_id = tz1.netex_id)" +
+                "      )" +
+                "    ) " +
+                "   GROUP BY tz1.id ) tz1 " +
+                "JOIN tariff_zone tz ON tz.id = tz1.id");
+
+        String sql = sqlStringBuilder.toString();
+        logger.info(sql);
+        return sql;
+    }
 }
