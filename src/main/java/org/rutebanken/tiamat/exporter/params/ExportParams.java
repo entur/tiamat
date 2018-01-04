@@ -156,6 +156,7 @@ public class ExportParams {
 
         public Builder setGroupOfStopPlacesExportMode(ExportMode groupOfStopPlacesExportMode) {
             this.groupOfStopPlacesExportMode = groupOfStopPlacesExportMode;
+            return this;
         }
 
         public ExportParams build() {
