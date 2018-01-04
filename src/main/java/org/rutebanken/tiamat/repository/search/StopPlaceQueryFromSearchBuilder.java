@@ -24,6 +24,7 @@ import org.rutebanken.tiamat.netex.id.NetexIdHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 
@@ -114,6 +115,15 @@ public class StopPlaceQueryFromSearchBuilder {
     // Together with distinct and nearby search, the next line slows everything down too much:
 //                     "  AND similarity(s.name_value , s2.name_value) > :similarityThreshold ";
 
+
+    private static final String WHITE_SPACE = " ";
+    private static final String JOKER = "%";
+
+    /**
+     * Configure some common words to be skipped during stop place search by name.
+     */
+    @Value("#{'${stopPlaces.search.commonWordsToIgnore}'.split(',')}")
+    Set<String> commonWordsToIgnore = new LinkedHashSet<>();
 
     @Autowired
     private SearchHelper searchHelper;
@@ -218,7 +228,7 @@ public class StopPlaceQueryFromSearchBuilder {
             wheres.add("not exists (select sq.quays_id from stop_place_quays sq where sq.stop_place_id = s.id)");
         }
 
-        if(stopPlaceSearch.isWithTags()) {
+        if (stopPlaceSearch.isWithTags()) {
             operators.add("and");
             wheres.add(SQL_WITH_TAGS);
         }
@@ -255,19 +265,21 @@ public class StopPlaceQueryFromSearchBuilder {
     private void createAndAddQueryCondition(StopPlaceSearch stopPlaceSearch, List<String> operators, Map<String, Object> parameters, List<String> wheres, List<String> orderByStatements) {
         operators.add("and");
 
-        if (stopPlaceSearch.getQuery().startsWith("#") && !stopPlaceSearch.getQuery().contains(" ")) {
+        String query = stopPlaceSearch.getQuery();
+
+        if (query.startsWith("#") && !query.contains(" ")) {
             // Seems like we are searching for tags
-            String hashRemoved = stopPlaceSearch.getQuery().substring(1);
+            String hashRemoved = query.substring(1);
             parameters.put("query", hashRemoved);
             wheres.add("(s." + SQL_SINGLE_TAG_QUERY + " OR p." + SQL_SINGLE_TAG_QUERY + ")");
 
-        } else if (NetexIdHelper.isNetexId(stopPlaceSearch.getQuery())) {
-            String netexId = stopPlaceSearch.getQuery();
+        } else if (NetexIdHelper.isNetexId(query)) {
+            String netexId = query;
 
             String netexIdType = NetexIdHelper.extractIdType(netexId);
-            parameters.put("query", stopPlaceSearch.getQuery());
+            parameters.put("query", query);
 
-            if (!NetexIdHelper.isNsrId(stopPlaceSearch.getQuery())) {
+            if (!NetexIdHelper.isNsrId(query)) {
 
                 // Detect non NSR NetexId and search in original ID
                 parameters.put("originalIdKey", ORIGINAL_ID_KEY);
@@ -293,13 +305,14 @@ public class StopPlaceQueryFromSearchBuilder {
                 }
             }
         } else {
-            parameters.put("query", stopPlaceSearch.getQuery());
+
+            parameters.put("query", handleCommonWordsInQuery(query));
 
             final String startingWithLowerMatchQuerySql = "concat(lower(:query), '%') ";
             final String containsLowerMatchQuerySql = "concat('%', lower(:query), '%') ";
             final String orNameMatchInParentStopSql = "or lower(p.name_value) like ";
-            if (stopPlaceSearch.getQuery().length() <= 3) {
-                wheres.add("(lower(s.name_value) like " + startingWithLowerMatchQuerySql + orNameMatchInParentStopSql + startingWithLowerMatchQuerySql + ")");
+            if (query.length() <= 3) {
+                wheres.add("(lower (s.name_value) like " + startingWithLowerMatchQuerySql + orNameMatchInParentStopSql + startingWithLowerMatchQuerySql + ")");
             } else {
                 wheres.add("(lower(s.name_value) like " + containsLowerMatchQuerySql + orNameMatchInParentStopSql + containsLowerMatchQuerySql + ")");
             }
@@ -307,6 +320,28 @@ public class StopPlaceQueryFromSearchBuilder {
             orderByStatements.add("similarity(concat(s.name_value, p.name_value), :query) desc");
         }
     }
+
+
+    /**
+     * Replaces common words and white spaces in query by % sign, allowing a more flexible comparison.
+     * A Stop place with the name "Train station of Dax" (common case in french) for example would then match against the "Train station Dax" query.
+     * <p>
+     * Common words to skip in search to be configured with the "stopPlaces.search.commonWordsToIgnore" property
+     *
+     * @param query original query
+     * @return modified query
+     */
+    String handleCommonWordsInQuery(final String query) {
+        if (!commonWordsToIgnore.isEmpty()) {
+            return commonWordsToIgnore.stream()
+                    .reduce(query, (string, word) ->
+                            string.replaceFirst("\\s*" + word + "\\s*", JOKER))
+                    .replace(WHITE_SPACE, JOKER);
+        } else {
+            return query;
+        }
+    }
+
 
     private String createPointInTimeCondition(String stopPlaceAlias, String parentStopPlaceAlias) {
         String pointInTimeQueryTemplate = "((%s.from_date IS NULL AND %s.to_date IS NULL) OR (%s.from_date <= :pointInTime AND (%s.to_date IS NULL OR %s.to_date > :pointInTime)))";

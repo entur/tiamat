@@ -1336,6 +1336,25 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         testFindKeyValueMappingsForStopPlaceReturnsOnlyStopPlacesValidAtPointInTime(MERGED_ID_KEY);
     }
 
+
+    @Test
+    public void findStopPlaceNameIgnoreCommonWords() throws Exception {
+        String stopPlaceName = "Gare de Dax";
+
+        createStopPlaceWithMunicipality(stopPlaceName, null);
+
+        ExportParams exportParams = newExportParamsBuilder().setStopPlaceSearch(
+                newStopPlaceSearchBuilder()
+                        .setQuery("gare dax")
+                        .build())
+                .build();
+        Page<StopPlace> result = stopPlaceRepository.findStopPlace(exportParams);
+        assertThat(result).isNotEmpty();
+        System.out.println(result.getContent().get(0));
+    }
+
+
+
     public void testFindKeyValueMappingsForStopPlaceReturnsOnlyStopPlacesValidAtPointInTime(String orgIdKey) {
         String orgIdSuffix = "2";
         String orgId = "XXX:StopPlace:" + orgIdSuffix;
