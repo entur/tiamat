@@ -72,8 +72,9 @@ public class StreamingPublicationDeliveryTest {
             tariffZonesFromStopsExporter, parentStopPlacesFetcher, childStopPlacesFetcher);
 
     private TariffZoneRepository tariffZoneRepository = mock(TariffZoneRepository.class);
+    private GroupOfStopPlacesRepository groupOfStopPlacesRepository = mock(GroupOfStopPlacesRepository.class);
     private StreamingPublicationDelivery streamingPublicationDelivery = new StreamingPublicationDelivery(stopPlaceRepository,
-            parkingRepository, publicationDeliveryExporter, tiamatSiteFrameExporter, netexMapper, tariffZoneRepository, topographicPlaceRepository, true);
+            parkingRepository, publicationDeliveryExporter, tiamatSiteFrameExporter, netexMapper, tariffZoneRepository, topographicPlaceRepository, groupOfStopPlacesRepository, true);
 
     public StreamingPublicationDeliveryTest() throws IOException, SAXException {
     }
