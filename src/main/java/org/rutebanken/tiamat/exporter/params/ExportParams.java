@@ -65,6 +65,7 @@ public class ExportParams {
     private ExportParams(ExportMode topographicPlaceExportMode, ExportMode tariffZoneExportMode, ExportMode groupOfStopPlacesExportMode, List<String> municipalityReferences, List<String> countyReferences, StopPlaceSearch stopPlaceSearch) {
         this.topographicPlaceExportMode = topographicPlaceExportMode;
         this.tariffZoneExportMode = tariffZoneExportMode;
+        this.groupOfStopPlacesExportMode = groupOfStopPlacesExportMode;
         this.municipalityReferences = municipalityReferences;
         this.countyReferences = countyReferences;
         this.stopPlaceSearch = stopPlaceSearch;
@@ -74,12 +75,18 @@ public class ExportParams {
         this.stopPlaceSearch = stopPlaceSearch;
     }
 
+    public ExportParams() {}
+
     public ExportMode getTopographicPlaceExportMode() {
         return topographicPlaceExportMode;
     }
 
     public ExportMode getTariffZoneExportMode() {
         return tariffZoneExportMode;
+    }
+
+    public ExportMode getGroupOfStopPlacesExportMode() {
+        return groupOfStopPlacesExportMode;
     }
 
     public List<String> getMunicipalityReferences() {
