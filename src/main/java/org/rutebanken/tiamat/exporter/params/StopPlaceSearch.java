@@ -45,6 +45,9 @@ public class StopPlaceSearch implements SearchObject {
     @QueryParam(value = "stopPlaceType")
     private List<StopTypeEnumeration> stopTypeEnumerations;
 
+    @QueryParam(value = "submode")
+    private String submode;
+
     @QueryParam(value = "idList")
     private List<String> netexIdList;
 
@@ -93,6 +96,7 @@ public class StopPlaceSearch implements SearchObject {
                             ExportParams.VersionValidity versionValidity,
                             List<String> tags,
                             boolean withTags,
+                            String submode,
                             int page, int size) {
         this.query = query;
         this.stopTypeEnumerations = stopTypeEnumerations;
@@ -107,6 +111,7 @@ public class StopPlaceSearch implements SearchObject {
         this.versionValidity = versionValidity;
         this.tags = tags;
         this.withTags = withTags;
+        this.submode = submode;
         this.page = page;
         this.size = size;
     }
@@ -117,6 +122,10 @@ public class StopPlaceSearch implements SearchObject {
 
     public List<StopTypeEnumeration> getStopTypeEnumerations() {
         return stopTypeEnumerations;
+    }
+
+    public String getSubmode() {
+        return submode;
     }
 
     public Pageable getPageable() {
@@ -172,6 +181,7 @@ public class StopPlaceSearch implements SearchObject {
         return MoreObjects.toStringHelper(this)
                 .add("q", getQuery())
                 .add("stopPlaceType", getStopTypeEnumerations())
+                .add("submode", getSubmode())
                 .add("netexIdList", getNetexIdList())
                 .add("allVersions", isAllVersions())
                 .add("versionValidity", getVersionValidity())
@@ -193,6 +203,7 @@ public class StopPlaceSearch implements SearchObject {
 
         private String query;
         private List<StopTypeEnumeration> stopTypeEnumerations;
+        private String submode;
         private List<String> idList;
         private boolean allVersions;
         private boolean withoutLocationOnly;
@@ -217,6 +228,11 @@ public class StopPlaceSearch implements SearchObject {
 
         public Builder setStopTypeEnumerations(List<StopTypeEnumeration> stopTypeEnumerations) {
             this.stopTypeEnumerations = stopTypeEnumerations;
+            return this;
+        }
+
+        public Builder setSubmode(String submode) {
+            this.submode = submode;
             return this;
         }
 
@@ -297,6 +313,7 @@ public class StopPlaceSearch implements SearchObject {
                     versionValidity,
                     tags,
                     withTags,
+                    submode,
                     page,
                     size);
         }
