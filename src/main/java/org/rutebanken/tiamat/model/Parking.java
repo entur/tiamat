@@ -310,6 +310,11 @@ public class Parking
     public String toString() {
         return MoreObjects.toStringHelper(this)
                 .omitNullValues()
+                .add("netexId", netexId)
+                .add("version", version)
+                .add("created", created)
+                .add("changed", changed)
+                .add("centroid", centroid)
                 .add("accesses", accesses)
                 .add("publicCode", publicCode)
                 .add("label", label)
