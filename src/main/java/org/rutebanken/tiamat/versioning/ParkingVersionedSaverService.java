@@ -19,13 +19,20 @@ package org.rutebanken.tiamat.versioning;
 import org.rutebanken.tiamat.model.Parking;
 import org.rutebanken.tiamat.repository.EntityInVersionRepository;
 import org.rutebanken.tiamat.repository.ParkingRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
+
 @Transactional
 @Service
 public class ParkingVersionedSaverService extends VersionedSaverService<Parking> {
+
+    private static final Logger logger = LoggerFactory.getLogger(ParkingVersionedSaverService.class);
 
     @Autowired
     private ParkingRepository parkingRepository;
@@ -33,5 +40,33 @@ public class ParkingVersionedSaverService extends VersionedSaverService<Parking>
     @Override
     public EntityInVersionRepository<Parking> getRepository() {
         return parkingRepository;
+    }
+
+    @Override
+    public Parking saveNewVersion(Parking newVersion) {
+
+        Parking existing = parkingRepository.findFirstByNetexIdOrderByVersionDesc(newVersion.getNetexId());
+
+        Parking result;
+        if(existing != null) {
+            logger.trace("existing: {}", existing);
+            logger.trace("new: {}", newVersion);
+
+            newVersion.setCreated(existing.getCreated());
+            newVersion.setChanged(Instant.now());
+            newVersion.setVersion(existing.getVersion());
+
+            parkingRepository.delete(existing);
+        } else {
+            newVersion.setCreated(Instant.now());
+        }
+        newVersion.setValidBetween(null);
+        versionIncrementor.incrementVersion(newVersion);
+        result = parkingRepository.save(newVersion);
+
+        logger.info("Saved parking {}, version {}, name {}", result.getNetexId(), result.getVersion(), result.getName());
+
+        metricsService.registerEntitySaved(newVersion.getClass());
+        return result;
     }
 }
