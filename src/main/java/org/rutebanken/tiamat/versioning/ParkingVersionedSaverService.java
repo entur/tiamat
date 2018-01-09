@@ -16,6 +16,7 @@
 package org.rutebanken.tiamat.versioning;
 
 
+import org.rutebanken.tiamat.auth.UsernameFetcher;
 import org.rutebanken.tiamat.model.Parking;
 import org.rutebanken.tiamat.repository.EntityInVersionRepository;
 import org.rutebanken.tiamat.repository.ParkingRepository;
@@ -36,6 +37,9 @@ public class ParkingVersionedSaverService extends VersionedSaverService<Parking>
 
     @Autowired
     private ParkingRepository parkingRepository;
+
+    @Autowired
+    private UsernameFetcher usernameFetcher;
 
     @Override
     public EntityInVersionRepository<Parking> getRepository() {
@@ -62,6 +66,7 @@ public class ParkingVersionedSaverService extends VersionedSaverService<Parking>
         }
         newVersion.setValidBetween(null);
         versionIncrementor.incrementVersion(newVersion);
+        newVersion.setChangedBy(usernameFetcher.getUserNameForAuthenticatedUser());
         result = parkingRepository.save(newVersion);
 
         logger.info("Saved parking {}, version {}, name {}", result.getNetexId(), result.getVersion(), result.getName());
