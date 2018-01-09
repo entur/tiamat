@@ -29,6 +29,7 @@ class GraphQLResourceParkingIntegrationTest extends AbstractGraphQLResourceInteg
         Parking parking = new Parking()
         parking.setCentroid(geometryFactory.createPoint(new Coordinate(10.533212, 59.678080)))
         parking.setParkingType(ParkingTypeEnumeration.PARK_AND_RIDE)
+        parking.setParentSiteRef(new SiteRefStructure(stopPlaceRepository.save(new StopPlace()).getNetexId()))
 
         parkingVersionedSaverService.saveNewVersion(parking)
 
@@ -54,6 +55,7 @@ class GraphQLResourceParkingIntegrationTest extends AbstractGraphQLResourceInteg
         parking.setCentroid(geometryFactory.createPoint(new Coordinate(10.533212, 59.678080)))
         ParkingTypeEnumeration originalParkingType = ParkingTypeEnumeration.PARK_AND_RIDE
         parking.setParkingType(originalParkingType)
+        parking.setParentSiteRef(new SiteRefStructure(stopPlaceRepository.save(new StopPlace()).netexId))
 
         parking = parkingVersionedSaverService.saveNewVersion(parking)
 
@@ -121,7 +123,7 @@ class GraphQLResourceParkingIntegrationTest extends AbstractGraphQLResourceInteg
                 "    totalCapacity:1234, " +
                 "    parkingType:parkAndRide, " +
                 "    parkingVehicleTypes: [car, pedalCycle]" +
-                "    parentSiteRef:\\\"" + stopPlace.getNetexId() + "\\\"" +
+                "    parentSiteRef:\\\"${stopPlace.netexId}\\\"" +
                 "    parkingLayout:covered " +
                 "    principalCapacity:22 " +
                 "    overnightParkingPermitted:true, " +
@@ -231,13 +233,17 @@ class GraphQLResourceParkingIntegrationTest extends AbstractGraphQLResourceInteg
     @Test
     void testMutateParkingWithoutParentSiteRef() throws Exception {
 
+        StopPlace stopPlace = stopPlaceRepository.save(new StopPlace());
+
         String graphQlQuery = "{\n" +
                 "\"query\": \"mutation { " +
                 "  parking: " + GraphQLNames.MUTATE_PARKING + " (Parking : {" +
+
                 "     name: {" +
                 "      value: \\\"Parking name\\\" " +
                 "      lang: \\\"no\\\" " +
                 "    }" +
+                "    parentSiteRef:\\\"${stopPlace.netexId}\\\"" +
                 "    geometry: { " +
                 "      type:Point " +
                 "      coordinates:[[59.0, 10.5]] " +
@@ -328,7 +334,7 @@ class GraphQLResourceParkingIntegrationTest extends AbstractGraphQLResourceInteg
                     .body("name.lang", notNullValue())
                     .body("geometry.type", notNullValue())
                     .body("geometry.coordinates", notNullValue())
-                    .body("parentSiteRef", nullValue())
+                    .body("parentSiteRef", equalTo(stopPlace.netexId))
                     .body("parkingType", notNullValue())
                     .body("parkingVehicleTypes", notNullValue())
                     .body("parkingVehicleTypes", notNullValue())
@@ -354,6 +360,8 @@ class GraphQLResourceParkingIntegrationTest extends AbstractGraphQLResourceInteg
     @Test
     void testMutateMultipleParkings() throws Exception {
 
+        StopPlace stopPlace = stopPlaceRepository.save(new StopPlace());
+
         String graphQlQuery = "{\n" +
                 "\"query\": \"mutation { " +
                 "  parking: " + GraphQLNames.MUTATE_PARKING + " (Parking : [{" +
@@ -361,6 +369,7 @@ class GraphQLResourceParkingIntegrationTest extends AbstractGraphQLResourceInteg
                 "      value: \\\"Parking name\\\" " +
                 "      lang: \\\"no\\\" " +
                 "    }" +
+                "    parentSiteRef:\\\"${stopPlace.netexId}\\\"" +
                 "    geometry: { " +
                 "      type:Point " +
                 "      coordinates:[[59.0, 10.5]] " +
@@ -370,6 +379,7 @@ class GraphQLResourceParkingIntegrationTest extends AbstractGraphQLResourceInteg
                 "      value: \\\"Parking name\\\" " +
                 "      lang: \\\"no\\\" " +
                 "    }" +
+                "    parentSiteRef:\\\"${stopPlace.netexId}\\\"" +
                 "    geometry: { " +
                 "      type:Point " +
                 "      coordinates:[[59.0, 10.5]] " +

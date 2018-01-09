@@ -16,10 +16,14 @@
 package org.rutebanken.tiamat.versioning;
 
 
+import com.google.api.client.util.Preconditions;
 import org.rutebanken.tiamat.auth.UsernameFetcher;
+import org.rutebanken.tiamat.model.DataManagedObjectStructure;
 import org.rutebanken.tiamat.model.Parking;
+import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.EntityInVersionRepository;
 import org.rutebanken.tiamat.repository.ParkingRepository;
+import org.rutebanken.tiamat.repository.reference.ReferenceResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -28,6 +32,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.Arrays;
+
+import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
 
 @Transactional
 @Service
@@ -41,6 +48,9 @@ public class ParkingVersionedSaverService extends VersionedSaverService<Parking>
     @Autowired
     private UsernameFetcher usernameFetcher;
 
+    @Autowired
+    private ReferenceResolver referenceResolver;
+
     @Override
     public EntityInVersionRepository<Parking> getRepository() {
         return parkingRepository;
@@ -49,13 +59,18 @@ public class ParkingVersionedSaverService extends VersionedSaverService<Parking>
     @Override
     public Parking saveNewVersion(Parking newVersion) {
 
+        Preconditions.checkArgument(newVersion.getParentSiteRef() != null, "Parent site ref cannot be null for parking");
+
         Parking existing = parkingRepository.findFirstByNetexIdOrderByVersionDesc(newVersion.getNetexId());
+
+        resolveAndAuthorizeParkingSiteRef(newVersion);
 
         Parking result;
         if(existing != null) {
             logger.trace("existing: {}", existing);
             logger.trace("new: {}", newVersion);
 
+            resolveAndAuthorizeParkingSiteRef(existing);
             newVersion.setCreated(existing.getCreated());
             newVersion.setChanged(Instant.now());
             newVersion.setVersion(existing.getVersion());
@@ -64,8 +79,10 @@ public class ParkingVersionedSaverService extends VersionedSaverService<Parking>
         } else {
             newVersion.setCreated(Instant.now());
         }
+
+
         newVersion.setValidBetween(null);
-        versionIncrementor.incrementVersion(newVersion);
+        versionIncrementor.initiateOrIncrement(newVersion);
         newVersion.setChangedBy(usernameFetcher.getUserNameForAuthenticatedUser());
         result = parkingRepository.save(newVersion);
 
@@ -73,5 +90,23 @@ public class ParkingVersionedSaverService extends VersionedSaverService<Parking>
 
         metricsService.registerEntitySaved(newVersion.getClass());
         return result;
+    }
+
+    /**
+     * A parking must refer to a stop place.
+     * And the user must be authorized to edit this stop place.
+     * In NeTEx, a parking can refer to any site. But this implementation is for now limited to stop place.
+     *
+     * @param parking
+     */
+    private void resolveAndAuthorizeParkingSiteRef(Parking parking) {
+        DataManagedObjectStructure parentSite = referenceResolver.resolve(parking.getParentSiteRef());
+        if(parentSite == null) {
+            throw new IllegalArgumentException("Cannot save parking without resolvable parent site ref: " + parking.toString());
+        }
+        if(!(parentSite instanceof StopPlace)) {
+            throw new IllegalArgumentException("Parking must have a parentSiteRef pointing to stop place. Parking: " + parking.toString() + " Parent site: " + parentSite);
+        }
+        authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(parentSite));
     }
 }

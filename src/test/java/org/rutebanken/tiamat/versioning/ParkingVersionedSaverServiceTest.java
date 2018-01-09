@@ -22,6 +22,8 @@ import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.Parking;
+import org.rutebanken.tiamat.model.SiteRefStructure;
+import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.id.NetexIdHelper;
 import org.rutebanken.tiamat.repository.ParkingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +51,7 @@ public class ParkingVersionedSaverServiceTest extends TiamatIntegrationTest {
 
         Point point = geometryFactory.createPoint(new Coordinate(9.84, 59.26));
         newVersion.setCentroid(point);
+        newVersion.setParentSiteRef(new SiteRefStructure(stopPlaceRepository.save(new StopPlace()).getNetexId()));
 
         Parking actual = parkingVersionedSaverService.saveNewVersion(newVersion);
         assertThat(actual.getVersion()).isOne();
@@ -58,17 +61,22 @@ public class ParkingVersionedSaverServiceTest extends TiamatIntegrationTest {
     @Test
     public void saveExistingParking() {
 
+        StopPlace stopPlace = new StopPlace();
+        stopPlaceRepository.save(stopPlace);
+
         Parking existingParking = new Parking();
         Point point = geometryFactory.createPoint(new Coordinate(9.84, 59.26));
         existingParking.setCentroid(point);
         existingParking.setVersion(2L);
         existingParking.setCreated(Instant.now());
+        existingParking.setParentSiteRef(new SiteRefStructure(stopPlace.getNetexId()));
         parkingRepository.save(existingParking);
 
         Parking newParking = new Parking();
         newParking.setNetexId(existingParking.getNetexId());
         newParking.setName(new EmbeddableMultilingualString("name"));
         newParking.setCentroid(null);
+        newParking.setParentSiteRef(new SiteRefStructure(stopPlace.getNetexId()));
 
         Parking actual = parkingVersionedSaverService.saveNewVersion(newParking);
         assertThat(actual.getCentroid()).isNull();

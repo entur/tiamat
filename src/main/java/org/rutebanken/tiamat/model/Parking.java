@@ -315,6 +315,7 @@ public class Parking
                 .add("created", created)
                 .add("changed", changed)
                 .add("centroid", centroid)
+                .add("parentSiteRef", parentSiteRef)
                 .add("accesses", accesses)
                 .add("publicCode", publicCode)
                 .add("label", label)
