@@ -45,6 +45,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
@@ -101,11 +103,14 @@ public class ParkingDeleter {
         }
 
         parkingRepository.delete(parkings);
-        entityChangedListener.onDelete(parkings.get(0));
+        notifyDeleted(parkings);
 
         logger.warn("All versions ({}) of parking {} deleted by user {}", parkings.size(), parkingId, usernameForAuthenticatedUser);
 
         return true;
+    }
 
+    private void notifyDeleted(List<Parking> parkings) {
+        entityChangedListener.onDelete(Collections.max(parkings, Comparator.comparing(c -> c.getVersion())));
     }
 }
