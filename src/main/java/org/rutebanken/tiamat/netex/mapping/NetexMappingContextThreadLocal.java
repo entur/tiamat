@@ -15,7 +15,18 @@
 
 package org.rutebanken.tiamat.netex.mapping;
 
+import org.rutebanken.netex.model.LocaleStructure;
+import org.rutebanken.netex.model.SiteFrame;
+import org.rutebanken.netex.model.VersionFrameDefaultsStructure;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.time.ZoneId;
+import java.util.Optional;
+
 public class NetexMappingContextThreadLocal {
+
+    private static final Logger logger = LoggerFactory.getLogger(NetexMappingContextThreadLocal.class);
 
     private static final InheritableThreadLocal<NetexMappingContext> threadLocalMappingContext = new InheritableThreadLocal<>();
 
@@ -25,5 +36,19 @@ public class NetexMappingContextThreadLocal {
 
     public static NetexMappingContext get() {
         return threadLocalMappingContext.get();
+    }
+
+
+    public static void updateMappingContext(SiteFrame netexSiteFrame) {
+        String timeZoneString = Optional.of(netexSiteFrame)
+                .map(SiteFrame::getFrameDefaults)
+                .map(VersionFrameDefaultsStructure::getDefaultLocale)
+                .map(LocaleStructure::getTimeZone)
+                .orElseThrow(() -> new NetexMappingException("Cannot resolve time zone from FrameDefaults in site frame " + netexSiteFrame.getId()));
+
+        NetexMappingContext netexMappingContext = new NetexMappingContext();
+        netexMappingContext.defaultTimeZone = ZoneId.of(timeZoneString);
+        NetexMappingContextThreadLocal.set(netexMappingContext);
+        logger.info("Setting default time zone for netex mapping context to {}", NetexMappingContextThreadLocal.get().defaultTimeZone);
     }
 }

@@ -19,6 +19,11 @@
   <ParticipantRef>NSR</ParticipantRef>
   <dataObjects>
     <SiteFrame created="2017-05-19T10:24:25.948+02:00" modification="new" version="1" id="NSR:SiteFrame:1492439233">
+      <FrameDefaults>
+        <DefaultLocale>
+          <TimeZone>Europe/Paris</TimeZone>
+        </DefaultLocale>
+      </FrameDefaults>
       <topographicPlaces modificationSet="all">
         <TopographicPlace created="2017-05-19T10:21:42.75+02:00" modification="new" version="1" id="KVE:TopographicPlace:20">
           <ns2:Polygon ns2:id="GEN-PolygonType-464">

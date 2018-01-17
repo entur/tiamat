@@ -35,6 +35,8 @@ import java.util.Timer;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
+import static org.rutebanken.tiamat.netex.mapping.NetexMappingContextThreadLocal.updateMappingContext;
+
 @Service
 public class PublicationDeliveryImporter {
 
@@ -127,18 +129,6 @@ public class PublicationDeliveryImporter {
         }
     }
 
-    private void updateMappingContext(SiteFrame netexSiteFrame) {
-        String timeZoneString = Optional.of(netexSiteFrame)
-                .map(SiteFrame::getFrameDefaults)
-                .map(VersionFrameDefaultsStructure::getDefaultLocale)
-                .map(LocaleStructure::getTimeZone)
-                .orElseThrow(() -> new NetexMappingException("Cannot resolve time zone from FrameDefaults in site frame " + netexSiteFrame.getId()));
-
-        NetexMappingContext netexMappingContext = new NetexMappingContext();
-        netexMappingContext.defaultTimeZone = ZoneId.of(timeZoneString);
-        NetexMappingContextThreadLocal.set(netexMappingContext);
-        logger.info("Setting default time zone for netex mapping context to {}", NetexMappingContextThreadLocal.get().defaultTimeZone);
-    }
 
     private void validate(ImportParams importParams) {
         if (importParams.targetTopographicPlaces != null && importParams.onlyMatchOutsideTopographicPlaces != null) {

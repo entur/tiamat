@@ -16,9 +16,7 @@
 package org.rutebanken.tiamat.rest.netex.publicationdelivery.async;
 
 import org.junit.Test;
-import org.rutebanken.tiamat.rest.netex.publicationdelivery.async.EntityQueueProcessor;
-import org.rutebanken.tiamat.rest.netex.publicationdelivery.async.PublicationDeliveryPartialUnmarshaller;
-import org.rutebanken.tiamat.rest.netex.publicationdelivery.async.UnmarshalResult;
+import org.rutebanken.tiamat.netex.mapping.PublicationDeliveryHelper;
 import org.xml.sax.SAXException;
 
 import java.io.*;
@@ -31,7 +29,7 @@ import static org.rutebanken.tiamat.rest.netex.publicationdelivery.async.Runnabl
 
 public class PublicationDeliveryPartialUnmarshallerTest {
 
-    private PublicationDeliveryPartialUnmarshaller publicationDeliveryPartialUnmarshaller = new PublicationDeliveryPartialUnmarshaller();
+    private PublicationDeliveryPartialUnmarshaller publicationDeliveryPartialUnmarshaller = new PublicationDeliveryPartialUnmarshaller(new PublicationDeliveryHelper());
 
     public PublicationDeliveryPartialUnmarshallerTest() throws IOException, SAXException {
     }
@@ -46,6 +44,11 @@ public class PublicationDeliveryPartialUnmarshallerTest {
                 "    <ParticipantRef>NSR</ParticipantRef>\n" +
                 "    <dataObjects>\n" +
                 "        <SiteFrame created=\"2017-01-07T15:28:29.376+01:00\" modification=\"new\" version=\"any\" id=\"NSR:SiteFrame:1\">\n" +
+                "           <FrameDefaults>\n" +
+                "                <DefaultLocale>\n" +
+                "                    <TimeZone>Europe/Paris</TimeZone>\n" +
+                "                </DefaultLocale>\n" +
+                "            </FrameDefaults>\n" +
                 "            <topographicPlaces modificationSet=\"all\">\n" +
                 "                <TopographicPlace modification=\"new\" version=\"any\" id=\"NSR:TopographicPlace:1\">\n" +
                 "                    <Name lang=\"no\">Oslo</Name>\n" +
