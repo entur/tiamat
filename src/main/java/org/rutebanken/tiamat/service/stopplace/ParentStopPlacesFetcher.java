@@ -15,6 +15,7 @@
 
 package org.rutebanken.tiamat.service.stopplace;
 
+import com.google.common.base.Strings;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.slf4j.Logger;
@@ -58,6 +59,11 @@ public class ParentStopPlacesFetcher {
                         Long.parseLong(nonParentStop.getParentSiteRef().getVersion()));
                 if (parent != null) {
                     logger.info("Resolved parent: {} {} from child {}", parent.getNetexId(), parent.getName(), nonParentStop.getNetexId());
+
+                    if(nonParentStop.getName() == null || Strings.isNullOrEmpty(nonParentStop.getName().getValue())) {
+                        logger.info("Copying name from parent {} to child stop: {}", parent.getId(), parent.getName());
+                        nonParentStop.setName(parent.getName());
+                    }
 
                     if (result.stream().noneMatch(stopPlace -> stopPlace.getNetexId() != null
                                                                        && (stopPlace.getNetexId().equals(parent.getNetexId()) && stopPlace.getVersion() == parent.getVersion()))) {

@@ -15,6 +15,7 @@
 
 package org.rutebanken.tiamat.exporter.async;
 
+import com.google.common.base.Strings;
 import org.rutebanken.tiamat.model.SiteRefStructure;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -64,6 +65,10 @@ public class ParentStopFetchingIterator implements Iterator<StopPlace> {
                 parent = stopPlaceRepository.findFirstByNetexIdAndVersion(stopPlace.getParentSiteRef().getRef(), Long.parseLong(stopPlace.getParentSiteRef().getVersion()));
                 logger.info("Fetched parent during iteration: {} - {}", parent.getNetexId(), parent.getVersion());
                 fetchedParents.add(parentRefString);
+                if(stopPlace.getName() == null || Strings.isNullOrEmpty(stopPlace.getName().getValue())) {
+                    logger.info("Copying name from parent {} to child stop: {}", parent.getId(), parent.getName());
+                    stopPlace.setName(parent.getName());
+                }
             }
         }
 

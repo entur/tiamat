@@ -16,14 +16,15 @@
 package org.rutebanken.tiamat.service.stopplace;
 
 import org.junit.Test;
-import org.rutebanken.tiamat.model.EntityInVersionStructure;
-import org.rutebanken.tiamat.model.SiteRefStructure;
-import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.service.stopplace.ParentStopPlacesFetcher;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static java.util.Comparator.comparing;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -69,13 +70,17 @@ public class ParentStopPlacesFetcherTest {
     @Test
     public void resolveParentsKeepChilds() throws Exception {
 
+        final String parentStopPlaceName = "name";
+
         int counter = 10;
         StopPlace parent = createAndMockStopPlaceWithNetexIdAndVersion(++counter);
+        parent.setName(new EmbeddableMultilingualString(parentStopPlaceName, "nor"));
         parent.setParentStopPlace(true);
 
         StopPlace parentSecondVersion = new StopPlace();
         parentSecondVersion.setParentStopPlace(true);
         parentSecondVersion.setNetexId(parent.getNetexId());
+        parentSecondVersion.setName(new EmbeddableMultilingualString(parentStopPlaceName, "nor"));
         parentSecondVersion.setVersion(2L);
 
         StopPlace child1 = createAndMockStopPlaceWithNetexIdAndVersion(++counter);
@@ -96,6 +101,15 @@ public class ParentStopPlacesFetcherTest {
                 .contains(concatenateNetexIdVersion(parentSecondVersion));
         assertThat(result).extracting(stopPlace -> stopPlace.getNetexId()).contains(child1.getNetexId());
         assertThat(result).extracting(stopPlace -> stopPlace.getNetexId()).contains(child2.getNetexId());
+
+        Set<EmbeddableMultilingualString> childrensNames = result.stream()
+                .filter(stopPlace -> !stopPlace.isParentStopPlace())
+                .map(StopPlace::getName)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
+        assertThat(childrensNames).extracting(MultilingualString::getValue).containsOnly(parentStopPlaceName, parentStopPlaceName);
+
     }
 
     private void addParentRef(StopPlace child, StopPlace parent) {

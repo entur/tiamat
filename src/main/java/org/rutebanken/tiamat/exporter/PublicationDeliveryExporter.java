@@ -139,6 +139,7 @@ public class PublicationDeliveryExporter {
             stopPlaces = parentStopPlacesFetcher.resolveParents(stopPlaces, true);
         }
 
+
         org.rutebanken.tiamat.model.SiteFrame siteFrame = tiamatSiteFrameExporter.createTiamatSiteFrame("Site frame with stops");
 
         tiamatSiteFrameExporter.addStopsToTiamatSiteFrame(siteFrame, stopPlaces);

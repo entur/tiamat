@@ -16,6 +16,7 @@
 package org.rutebanken.tiamat.exporter.async;
 
 import org.junit.Test;
+import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.SiteRefStructure;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -43,6 +44,9 @@ public class ParentStopFetchingIteratorTest {
         parent.setNetexId("NSR:StopPlace:2");
         parent.setVersion(1L);
 
+        final String parentName = "parent name";
+        parent.setName(new EmbeddableMultilingualString(parentName));
+
         stopPlace.setParentSiteRef(new SiteRefStructure(parent.getNetexId(), String.valueOf(parent.getVersion())));
 
         when(stopPlaceRepository.findFirstByNetexIdAndVersion(parent.getNetexId(), parent.getVersion())).thenReturn(parent);
@@ -55,6 +59,7 @@ public class ParentStopFetchingIteratorTest {
 
         StopPlace actual = parentStopFetchingIterator.next();
         assertThat(actual.getNetexId()).isEqualTo(stopPlace.getNetexId());
+        assertThat(actual.getName()).isEqualTo(parent.getName());
 
         assertThat(parentStopFetchingIterator.hasNext()).isTrue();
 
