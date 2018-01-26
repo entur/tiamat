@@ -15,7 +15,8 @@
 
 package org.rutebanken.tiamat.service.stopplace;
 
-import org.hibernate.jpa.internal.EntityManagerImpl;
+import org.hibernate.Session;
+import org.junit.Before;
 import org.junit.Test;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -27,8 +28,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static java.util.Comparator.comparing;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -36,7 +37,13 @@ public class ParentStopPlacesFetcherTest {
 
     private StopPlaceRepository stopPlaceRepository = mock(StopPlaceRepository.class);
 
-    private ParentStopPlacesFetcher parentStopPlacesFetcher = new ParentStopPlacesFetcher(stopPlaceRepository, mock(EntityManager.class));
+    private EntityManager entityManager = mock(EntityManager.class);
+    private ParentStopPlacesFetcher parentStopPlacesFetcher = new ParentStopPlacesFetcher(stopPlaceRepository, entityManager);
+
+    @Before
+    public void before() {
+        when(entityManager.unwrap(any())).thenReturn(mock(Session.class));
+    }
 
     @Test
     public void resolveParents() throws Exception {
@@ -118,13 +125,13 @@ public class ParentStopPlacesFetcherTest {
     }
 
     private String concatenateNetexIdVersion(EntityInVersionStructure entity) {
-        return entity.getVersion()+entity.getNetexId();
+        return entity.getVersion() + entity.getNetexId();
     }
 
     private StopPlace createAndMockStopPlaceWithNetexIdAndVersion(int counter) {
 
         StopPlace stopPlace = new StopPlace();
-        stopPlace.setNetexId("XYZ:StopPlace:"+counter);
+        stopPlace.setNetexId("XYZ:StopPlace:" + counter);
         stopPlace.setVersion(1L);
         when(stopPlaceRepository.findFirstByNetexIdAndVersion(stopPlace.getNetexId(), stopPlace.getVersion())).thenReturn(stopPlace);
         return stopPlace;
