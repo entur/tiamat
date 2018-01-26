@@ -15,11 +15,12 @@
 
 package org.rutebanken.tiamat.service.stopplace;
 
+import org.hibernate.jpa.internal.EntityManagerImpl;
 import org.junit.Test;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
-import org.rutebanken.tiamat.service.stopplace.ParentStopPlacesFetcher;
 
+import javax.persistence.EntityManager;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -35,7 +36,7 @@ public class ParentStopPlacesFetcherTest {
 
     private StopPlaceRepository stopPlaceRepository = mock(StopPlaceRepository.class);
 
-    private ParentStopPlacesFetcher parentStopPlacesFetcher = new ParentStopPlacesFetcher(stopPlaceRepository);
+    private ParentStopPlacesFetcher parentStopPlacesFetcher = new ParentStopPlacesFetcher(stopPlaceRepository, mock(EntityManager.class));
 
     @Test
     public void resolveParents() throws Exception {

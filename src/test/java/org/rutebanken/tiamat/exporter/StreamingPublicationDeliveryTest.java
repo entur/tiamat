@@ -29,6 +29,7 @@ import org.rutebanken.tiamat.service.stopplace.ParentStopPlacesFetcher;
 import org.rutebanken.tiamat.time.ExportTimeZone;
 import org.xml.sax.SAXException;
 
+import javax.persistence.EntityManager;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
@@ -65,7 +66,7 @@ public class StreamingPublicationDeliveryTest {
 
     private TopographicPlacesExporter topographicPlacesExporter = new TopographicPlacesExporter(topographicPlaceRepository, netexMapper);
     private TariffZonesFromStopsExporter tariffZonesFromStopsExporter = mock(TariffZonesFromStopsExporter.class);
-    private ParentStopPlacesFetcher parentStopPlacesFetcher = new ParentStopPlacesFetcher(stopPlaceRepository);
+    private ParentStopPlacesFetcher parentStopPlacesFetcher = new ParentStopPlacesFetcher(stopPlaceRepository, mock(EntityManager.class));
     private ChildStopPlacesFetcher childStopPlacesFetcher = new ChildStopPlacesFetcher();
     private PublicationDeliveryExporter publicationDeliveryExporter = new PublicationDeliveryExporter(stopPlaceRepository,
             netexMapper, tiamatSiteFrameExporter, topographicPlacesExporter,

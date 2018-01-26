@@ -15,6 +15,11 @@
 
 package org.rutebanken.tiamat.exporter;
 
+import org.aspectj.lang.annotation.Before;
+import org.hibernate.FlushMode;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.jpa.HibernateEntityManagerFactory;
 import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
@@ -36,6 +41,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
+import javax.persistence.FlushModeType;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
