@@ -66,7 +66,7 @@ public class ParentStopFetchingIterator implements Iterator<StopPlace> {
                 logger.info("Fetched parent during iteration: {} - {}", parent.getNetexId(), parent.getVersion());
                 fetchedParents.add(parentRefString);
                 if(stopPlace.getName() == null || Strings.isNullOrEmpty(stopPlace.getName().getValue())) {
-                    logger.info("Copying name from parent {} to child stop: {}", parent.getId(), parent.getName());
+                    logger.info("Copying name: {} from parent {} to child stop: {}", parent.getName(), parent.getNetexId(), stopPlace.getNetexId());
                     stopPlace.setName(parent.getName());
                 }
             }
