@@ -17,6 +17,7 @@ package org.rutebanken.tiamat.exporter.async;
 
 import org.junit.Test;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
+import org.rutebanken.tiamat.model.MultilingualString;
 import org.rutebanken.tiamat.model.SiteRefStructure;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -25,6 +26,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -81,6 +83,7 @@ public class ParentStopFetchingIteratorTest {
         StopPlace parent = new StopPlace();
         parent.setNetexId("NSR:StopPlace:2");
         parent.setVersion(1L);
+        parent.setName(new EmbeddableMultilingualString("Name of the parent stop place"));
 
         stopPlace.setParentSiteRef(new SiteRefStructure(parent.getNetexId(), String.valueOf(parent.getVersion())));
         stopPlace2.setParentSiteRef(new SiteRefStructure(parent.getNetexId(), String.valueOf(parent.getVersion())));
@@ -95,7 +98,11 @@ public class ParentStopFetchingIteratorTest {
 
         StopPlace actual = parentStopFetchingIterator.next();
         assertThat(actual.getNetexId()).isEqualTo(stopPlace.getNetexId());
-
+        assertThat(actual.getName())
+                .as("first child name")
+                .isNotNull()
+                .extracting(MultilingualString::getValue)
+                .containsExactly(parent.getName().getValue());
         assertThat(parentStopFetchingIterator.hasNext()).isTrue();
 
         StopPlace actualParent = parentStopFetchingIterator.next();
@@ -103,6 +110,11 @@ public class ParentStopFetchingIteratorTest {
 
         StopPlace actual2 = parentStopFetchingIterator.next();
         assertThat(actual2.getNetexId()).isEqualTo(stopPlace2.getNetexId());
+        assertThat(actual2.getName())
+                .as("second child name")
+                .isNotNull()
+                .extracting(MultilingualString::getValue)
+                .containsExactly(parent.getName().getValue());
 
         assertThat(parentStopFetchingIterator.hasNext()).isFalse();
 

@@ -16,15 +16,16 @@
 package org.rutebanken.tiamat.exporter.async;
 
 import com.google.common.base.Strings;
+import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.SiteRefStructure;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Set;
+import java.util.Map;
 
 public class ParentStopFetchingIterator implements Iterator<StopPlace> {
 
@@ -34,7 +35,8 @@ public class ParentStopFetchingIterator implements Iterator<StopPlace> {
 
     private final StopPlaceRepository stopPlaceRepository;
 
-    private final Set<String> fetchedParents = new HashSet<>();
+
+    private final Map<String, EmbeddableMultilingualString> parents = new HashMap<>();
 
     private StopPlace parent = null;
 
@@ -51,7 +53,7 @@ public class ParentStopFetchingIterator implements Iterator<StopPlace> {
     @Override
     public StopPlace next() {
 
-        if(parent != null) {
+        if (parent != null) {
             StopPlace next = parent;
             parent = null;
             return next;
@@ -59,23 +61,29 @@ public class ParentStopFetchingIterator implements Iterator<StopPlace> {
 
 
         StopPlace stopPlace = iterator.next();
-        if(stopPlace.getParentSiteRef() != null) {
+        if (stopPlace.getParentSiteRef() != null) {
             String parentRefString = refString(stopPlace.getParentSiteRef());
-            if(!fetchedParents.contains(parentRefString)) {
+            if (!parents.containsKey(parentRefString)) {
                 parent = stopPlaceRepository.findFirstByNetexIdAndVersion(stopPlace.getParentSiteRef().getRef(), Long.parseLong(stopPlace.getParentSiteRef().getVersion()));
                 logger.info("Fetched parent during iteration: {} - {}", parent.getNetexId(), parent.getVersion());
-                fetchedParents.add(parentRefString);
-                if(stopPlace.getName() == null || Strings.isNullOrEmpty(stopPlace.getName().getValue())) {
-                    logger.info("Copying name: {} from parent {} to child stop: {}", parent.getName(), parent.getNetexId(), stopPlace.getNetexId());
-                    stopPlace.setName(parent.getName());
-                }
+                parents.put(parentRefString, parent.getName());
             }
+            copyNameFromParentIfMissing(parentRefString, parents.get(parentRefString), stopPlace);
+
         }
 
         return stopPlace;
     }
 
+    public void copyNameFromParentIfMissing(String parentRefString, EmbeddableMultilingualString parentName, StopPlace childStopPlace) {
+        if (childStopPlace.getName() == null || Strings.isNullOrEmpty(childStopPlace.getName().getValue())) {
+            logger.info("Copying name: {} from parent {} to child stop: {}", parentName, parentRefString, childStopPlace.getNetexId());
+            childStopPlace.setName(parentName);
+        }
+    }
+
+
     private String refString(SiteRefStructure siteRefStructure) {
-        return siteRefStructure.getRef()+"-"+siteRefStructure.getVersion();
+        return siteRefStructure.getRef() + "-" + siteRefStructure.getVersion();
     }
 }
