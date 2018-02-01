@@ -23,6 +23,7 @@ import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.exporter.params.StopPlaceSearch;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.netex.mapping.PublicationDeliveryHelper;
+import org.rutebanken.tiamat.netex.validation.NetexReferenceValidatorException;
 import org.rutebanken.tiamat.netex.validation.NetexXmlReferenceValidator;
 import org.rutebanken.tiamat.rest.netex.publicationdelivery.PublicationDeliveryUnmarshaller;
 import org.rutebanken.tiamat.versioning.TariffZoneSaverService;
@@ -34,6 +35,7 @@ import org.xml.sax.SAXException;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.stream.XMLStreamException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -67,6 +69,46 @@ public class StreamingPublicationDeliveryIntegrationTest extends TiamatIntegrati
 
     private NetexXmlReferenceValidator netexXmlReferenceValidator = new NetexXmlReferenceValidator(true);
 
+
+    @Test
+    public void avoidDuplicateTopographicPlaceWhenExportModeAll() throws InterruptedException, IOException, XMLStreamException, SAXException, JAXBException, NetexReferenceValidatorException {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
+        TopographicPlace county = new TopographicPlace(new EmbeddableMultilingualString("county"));
+        county.setTopographicPlaceType(TopographicPlaceTypeEnumeration.COUNTY);
+        county = topographicPlaceVersionedSaverService.saveNewVersion(county);
+
+        TopographicPlace municipality = new TopographicPlace(new EmbeddableMultilingualString("Some municipality"));
+        municipality.setTopographicPlaceType(TopographicPlaceTypeEnumeration.MUNICIPALITY);
+        municipality.setParentTopographicPlaceRef(new TopographicPlaceRefStructure(county.getNetexId(), String.valueOf(county.getVersion()  )));
+        municipality = topographicPlaceVersionedSaverService.saveNewVersion(municipality);
+
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("stop place"));
+        stopPlace.setTopographicPlace(municipality);
+        stopPlaceRepository.save(stopPlace);
+
+        stopPlaceRepository.flush();
+
+        ExportParams exportParams = ExportParams.newExportParamsBuilder()
+                .setStopPlaceSearch(
+                        StopPlaceSearch.newStopPlaceSearchBuilder()
+                                .setVersionValidity(ExportParams.VersionValidity.CURRENT_FUTURE)
+                                .build())
+                .setTopographicPlaceExportMode(ExportParams.ExportMode.ALL)
+                .setTariffZoneExportMode(ExportParams.ExportMode.RELEVANT)
+                .build();
+
+        streamingPublicationDelivery.stream(exportParams, byteArrayOutputStream);
+
+        String xml = byteArrayOutputStream.toString();
+
+        System.out.println(xml);
+
+        validate(xml);
+        netexXmlReferenceValidator.validateNetexReferences(new ByteArrayInputStream(xml.getBytes()), "publicationDelivery");
+
+
+    }
 
     @Test
     public void streamStopPlaceIntoPublicationDelivery() throws Exception {

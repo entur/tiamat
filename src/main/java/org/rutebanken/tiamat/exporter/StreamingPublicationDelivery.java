@@ -233,17 +233,16 @@ public class StreamingPublicationDelivery {
 
         } else if (exportParams.getTopographicPlaceExportMode().equals(ExportParams.ExportMode.RELEVANT)) {
             logger.info("Prepare scrolling relevant topographic places");
-            relevantTopographicPlacesIterator = topographicPlaceRepository.scrollTopographicPlaces(stopPlacePrimaryIds);
+            relevantTopographicPlacesIterator = new ParentTreeTopographicPlaceFetchingIterator(topographicPlaceRepository.scrollTopographicPlaces(stopPlacePrimaryIds), topographicPlaceRepository);
         } else {
             logger.info("Topographic export mode is {}. Will not export topographic places", exportParams.getTopographicPlaceExportMode());
             relevantTopographicPlacesIterator = Collections.emptyIterator();
         }
 
         if (relevantTopographicPlacesIterator.hasNext()) {
-            ParentTreeTopographicPlaceFetchingIterator parentTreeTopographicPlaceFetchingIterator = new ParentTreeTopographicPlaceFetchingIterator(relevantTopographicPlacesIterator, topographicPlaceRepository);
 
             NetexMappingIterator<TopographicPlace, org.rutebanken.netex.model.TopographicPlace> topographicPlaceNetexMappingIterator = new NetexMappingIterator<>(
-                    netexMapper, parentTreeTopographicPlaceFetchingIterator, org.rutebanken.netex.model.TopographicPlace.class, mappedTopographicPlacesCount, evicter);
+                    netexMapper, relevantTopographicPlacesIterator, org.rutebanken.netex.model.TopographicPlace.class, mappedTopographicPlacesCount, evicter);
 
             List<org.rutebanken.netex.model.TopographicPlace> topographicPlaces = new NetexMappingIteratorList<>(() -> topographicPlaceNetexMappingIterator);
 
