@@ -553,6 +553,12 @@ public class StopPlaceRegisterGraphQLSchema {
                 .defaultValue(Boolean.FALSE)
                 .description("If set to true, only stop places with valid tags are returned. If false, filter does not apply.")
                 .build());
+        arguments.add(GraphQLArgument.newArgument()
+                .name(SEARCH_WITH_CODE)
+                .type(GraphQLString)
+                .defaultValue(null)
+                .description("Search with code")
+                .build());
         return arguments;
     }
 

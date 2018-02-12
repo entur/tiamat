@@ -52,7 +52,7 @@ class StopPlaceFetcher implements DataFetcher {
 
     private static final Logger logger = LoggerFactory.getLogger(StopPlaceFetcher.class);
 
-    private static final Page<StopPlace> EMPTY_STOPS_RESULT = new PageImpl<>(new ArrayList<>());;
+    private static final Page<StopPlace> EMPTY_STOPS_RESULT = new PageImpl<>(new ArrayList<>());
 
     /**
      * Wether to keep childs when resolving parent stop places. False, because with graphql it's possible to fetch children from parent.
@@ -169,6 +169,11 @@ class StopPlaceFetcher implements DataFetcher {
                     );
                 }
 
+                if (environment.getArgument(SEARCH_WITH_CODE) != null) {
+                    String code = environment.getArgument(SEARCH_WITH_CODE);
+                    exportParamsBuilder.setCode(code.toLowerCase());
+                }
+
                 setIfNonNull(environment, TAGS, stopPlaceSearchBuilder::setTags);
 
                 stopPlaceSearchBuilder.setQuery(environment.getArgument(QUERY));
@@ -196,7 +201,6 @@ class StopPlaceFetcher implements DataFetcher {
                 if (environment.getArgument(INCLUDE_EXPIRED)) {
                     pointInTime = null;
                 }
-
                 stopPlacesPage = stopPlaceRepository.findStopPlacesWithin(boundingBox.xMin, boundingBox.yMin, boundingBox.xMax,
                         boundingBox.yMax, ignoreStopPlaceId, pointInTime, new PageRequest(environment.getArgument(PAGE), environment.getArgument(SIZE)));
             } else {

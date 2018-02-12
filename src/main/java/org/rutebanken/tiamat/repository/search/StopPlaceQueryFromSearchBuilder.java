@@ -120,6 +120,15 @@ public class StopPlaceQueryFromSearchBuilder {
     private static final String JOKER = "%";
 
     /**
+     * Check in imported name for filter by trigram
+     */
+    private static final String SQL_SEARCH_BY_CODE = "s.id in (select id from stop_place sp" +
+            " join stop_place_key_values spkv on sp.id = spkv.stop_place_id " +
+            " join value_items vi on vi.value_id = spkv.key_values_id" +
+            " where substring(vi.items, 4, 1) = ':' and lower(substring(vi.items, 1, 3)) = :dataProducerCode)";
+
+
+    /**
      * Configure some common words to be skipped during stop place search by name.
      */
     @Value("#{'${stopPlaces.search.commonWordsToIgnore}'.split(',')}")
@@ -190,6 +199,15 @@ public class StopPlaceQueryFromSearchBuilder {
                 wheres.add("(s." + countyQuery + " or " + "p." + countyQuery + ")" + suffix);
                 parameters.put("countyId", exportParams.getCountyReferences());
             }
+
+            boolean hasCode = exportParams.getCode() != null;
+
+            if(hasCode) {
+                operators.add("and");
+                wheres.add(SQL_SEARCH_BY_CODE);
+                parameters.put("dataProducerCode", exportParams.getCode());
+            }
+
         }
 
         if (stopPlaceSearch.getVersion() != null) {
