@@ -99,9 +99,9 @@ public class StreamingPublicationDeliveryTest {
         validate(xml);
 
         assertThat(xml)
-                .contains("<StopPlace")
-                .contains("</PublicationDelivery")
-                .contains("</dataObjects>");
+                .contains("StopPlace>")
+                .contains("PublicationDelivery>")
+                .contains("dataObjects>");
     }
 
     @Test
@@ -122,9 +122,9 @@ public class StreamingPublicationDeliveryTest {
         validate(xml);
 
         assertThat(xml)
-                .contains("<Parking")
-                .contains("</PublicationDelivery")
-                .contains("</dataObjects>");
+                .contains("Parking")
+                .contains("PublicationDelivery")
+                .contains("dataObjects>");
     }
 
     @Test
@@ -150,11 +150,10 @@ public class StreamingPublicationDeliveryTest {
         validate(xml);
 
         assertThat(xml)
-                .contains("<StopPlace")
-                .contains("<topographicPlaces")
-                .contains("</topographicPlaces>")
-                .contains("</PublicationDelivery")
-                .contains("</dataObjects>");
+                .contains("StopPlace")
+                .contains("topographicPlaces")
+                .contains("PublicationDelivery")
+                .contains("dataObjects>");
     }
 
     @Test
@@ -189,10 +188,10 @@ public class StreamingPublicationDeliveryTest {
 
         assertThat(xml)
                 .contains("<?xml")
-                .contains("<StopPlace")
-                .contains("<PathLink")
-                .contains("</PublicationDelivery")
-                .contains("</dataObjects>");
+                .contains("StopPlace")
+                .contains("PathLink")
+                .contains("PublicationDelivery")
+                .contains("dataObjects>");
     }
 
     @Test
