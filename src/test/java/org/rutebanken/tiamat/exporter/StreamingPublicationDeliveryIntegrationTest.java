@@ -26,6 +26,7 @@ import org.rutebanken.tiamat.netex.mapping.PublicationDeliveryHelper;
 import org.rutebanken.tiamat.netex.validation.NetexReferenceValidatorException;
 import org.rutebanken.tiamat.netex.validation.NetexXmlReferenceValidator;
 import org.rutebanken.tiamat.rest.netex.publicationdelivery.PublicationDeliveryUnmarshaller;
+import org.rutebanken.tiamat.versioning.GroupOfStopPlacesSaverService;
 import org.rutebanken.tiamat.versioning.TariffZoneSaverService;
 import org.rutebanken.tiamat.versioning.TopographicPlaceVersionedSaverService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,6 +58,9 @@ public class StreamingPublicationDeliveryIntegrationTest extends TiamatIntegrati
 
     @Autowired
     private TariffZoneSaverService tariffZoneSaverService;
+
+    @Autowired
+    private GroupOfStopPlacesSaverService groupOfStopPlacesSaverService;
 
     @Autowired
     private TopographicPlaceVersionedSaverService topographicPlaceVersionedSaverService;
@@ -111,7 +115,7 @@ public class StreamingPublicationDeliveryIntegrationTest extends TiamatIntegrati
     }
 
     @Test
-    public void streamStopPlaceIntoPublicationDelivery() throws Exception {
+    public void streamStopPlacesAndRelatedEntitiesIntoPublicationDelivery() throws Exception {
 
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
@@ -147,6 +151,18 @@ public class StreamingPublicationDeliveryIntegrationTest extends TiamatIntegrati
         stopPlace2 = stopPlaceVersionedSaverService.saveNewVersion(stopPlace2);
         final String stopPlace2NetexId = stopPlace2.getNetexId();
 
+        GroupOfStopPlaces groupOfStopPlaces1 = new GroupOfStopPlaces(new EmbeddableMultilingualString("group of stop places"));
+        groupOfStopPlaces1.getMembers().add(new StopPlaceReference(stopPlace1.getNetexId()));
+
+        groupOfStopPlacesSaverService.saveNewVersion(groupOfStopPlaces1);
+
+        GroupOfStopPlaces groupOfStopPlaces2 = new GroupOfStopPlaces(new EmbeddableMultilingualString("group of stop places number two"));
+        groupOfStopPlaces2.getMembers().add(new StopPlaceReference(stopPlace1.getNetexId()));
+
+        groupOfStopPlacesSaverService.saveNewVersion(groupOfStopPlaces2);
+
+        groupOfStopPlacesRepository.flush();
+
         // Allows setting topographic place without lookup.
         // To have the lookup work, topographic place polygon must exist
         stopPlace1.setTopographicPlace(topographicPlace);
@@ -162,6 +178,7 @@ public class StreamingPublicationDeliveryIntegrationTest extends TiamatIntegrati
                                 .build())
                 .setTopographicPlaceExportMode(ExportParams.ExportMode.RELEVANT)
                 .setTariffZoneExportMode(ExportParams.ExportMode.RELEVANT)
+                .setGroupOfStopPlacesExportMode(ExportParams.ExportMode.RELEVANT)
                 .build();
 
         streamingPublicationDelivery.stream(exportParams, byteArrayOutputStream);
