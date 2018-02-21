@@ -225,23 +225,6 @@ If you are running this from `spring:run`, then you need to make sure that you h
 export MAVEN_OPTS='-Xms256m -Xmx1712m -Xss256m -XX:NewSize=64m -XX:MaxNewSize=128m -Dfile.encoding=UTF-8'
 ```
 
-### Import previously exported NeTEx file into emtpy Tiamat
-This NeTEx file contains stop places with IDs starting with *NSR*. Tiamat will bypass the ID sequence and insert these IDs as primary keys into the database.
-```
-curl  -XPOST -H"Content-Type: application/xml" -d@tiamat-export-130117-20170109-094137.xml http://localhost:1997/services/admin/netex/restoring_import
-```
-
-### Initial import from previously exported tiamat data with kubernetes
-```
-pod=`kc get pods  |grep tiamat | awk '{print $1}' | head -n1`
-kc exec -i $pod -- bash -c 'cat > /tmp/import' < tiamat-export-124268-20170313-160049.xml
-kc exec -it $pod bash
-cd /tmp
-curl -XPOST -H "Content-type: application/xml" -d@import http://localhost:8777/services/admin/netex/restoring_import
-```
-See https://github.com/rutebanken/devsetup/blob/master/docs/stolon.md#stolon-tiamat-setup
-
-
 ### Import NeTEx file without *NSR* IDs
 This NeTEx file should not contain NSR ID.
 * Tiamat will match existing stops based on name and coordinates.
@@ -305,7 +288,7 @@ Successfully applied 1 migration to schema "public" (execution time 00:04.220s).
 
 ## Baseline existing database
 To baseline an existing database that does not contain the table `schema_version`.
-The schema of this database must be exactly equivalent to the first migration file. If not, you might be better off by starting from scratch and using the restoring_import to repopulate the new database.
+The schema of this database must be exactly equivalent to the first migration file. If not, you might be better off by starting from scratch and import an sql dump.
 
 ```
 ./flyway -url=jdbc:postgresql://localhost:6432/tiamat -locations=filesystem:/path/to/tiamat/src/main/resources/db/migration baseline

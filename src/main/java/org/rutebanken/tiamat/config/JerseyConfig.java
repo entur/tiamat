@@ -31,7 +31,6 @@ import org.rutebanken.tiamat.rest.health.HealthResource;
 import org.rutebanken.tiamat.rest.netex.publicationdelivery.AsyncExportResource;
 import org.rutebanken.tiamat.rest.netex.publicationdelivery.ExportResource;
 import org.rutebanken.tiamat.rest.netex.publicationdelivery.ImportResource;
-import org.rutebanken.tiamat.rest.netex.publicationdelivery.RestoringImportResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
@@ -152,7 +151,6 @@ public class JerseyConfig {
 
         Set<Class<?>> adminResources = new HashSet<>();
         adminResources.add(DtoJbvCodeMappingResource.class);
-        adminResources.add(RestoringImportResource.class);
         adminResources.add(GeneralExceptionMapper.class);
 
         adminResources.add(ApiListingResource.class);

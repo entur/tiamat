@@ -132,9 +132,9 @@ public class PublicationDeliveryPartialUnmarshallerTest {
     }
 
     @Test
-    public void testImportingPublicationDeliveryFromFile() throws Exception {
+    public void testPartialUnmarshallingPublicationDeliveryFromFile() throws Exception {
         ClassLoader classLoader = getClass().getClassLoader();
-        File file = new File(classLoader.getResource("publication_delivery/restoring_import.xml").getFile());
+        File file = new File(classLoader.getResource("publication_delivery/tiamat_publication_delivery.xml").getFile());
 
         UnmarshalResult unmarshalResult = publicationDeliveryPartialUnmarshaller.unmarshal(new FileInputStream(file));
         assertThat(unmarshalResult).isNotNull();
