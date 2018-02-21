@@ -36,19 +36,19 @@ public class StopPlaceMapper extends CustomMapper<StopPlace, org.rutebanken.tiam
     }
 
     @Override
-    public void mapAtoB(StopPlace stopPlace, org.rutebanken.tiamat.model.StopPlace stopPlace2, MappingContext context) {
-        super.mapAtoB(stopPlace, stopPlace2, context);
-        if (stopPlace.getPlaceEquipments() != null &&
-                stopPlace.getPlaceEquipments().getInstalledEquipmentRefOrInstalledEquipment() != null &&
-                stopPlace.getPlaceEquipments().getInstalledEquipmentRefOrInstalledEquipment().isEmpty()) {
+    public void mapAtoB(StopPlace netexStopPlace, org.rutebanken.tiamat.model.StopPlace stopPlace, MappingContext context) {
+        super.mapAtoB(netexStopPlace, stopPlace, context);
+        if (netexStopPlace.getPlaceEquipments() != null &&
+                netexStopPlace.getPlaceEquipments().getInstalledEquipmentRefOrInstalledEquipment() != null &&
+                netexStopPlace.getPlaceEquipments().getInstalledEquipmentRefOrInstalledEquipment().isEmpty()) {
+            netexStopPlace.setPlaceEquipments(null);
             stopPlace.setPlaceEquipments(null);
-            stopPlace2.setPlaceEquipments(null);
         }
-        if (stopPlace.getAlternativeNames() != null &&
-                stopPlace.getAlternativeNames().getAlternativeName() != null &&
-                !stopPlace.getAlternativeNames().getAlternativeName().isEmpty()) {
+        if (netexStopPlace.getAlternativeNames() != null &&
+                netexStopPlace.getAlternativeNames().getAlternativeName() != null &&
+                !netexStopPlace.getAlternativeNames().getAlternativeName().isEmpty()) {
 
-            List<AlternativeName> netexAlternativeName = stopPlace.getAlternativeNames().getAlternativeName();
+            List<AlternativeName> netexAlternativeName = netexStopPlace.getAlternativeNames().getAlternativeName();
             List<org.rutebanken.tiamat.model.AlternativeName> alternativeNames = new ArrayList<>();
 
             for (AlternativeName netexAltName : netexAlternativeName) {
@@ -64,27 +64,27 @@ public class StopPlaceMapper extends CustomMapper<StopPlace, org.rutebanken.tiam
             }
 
             if (!alternativeNames.isEmpty()) {
-                stopPlace2.getAlternativeNames().addAll(alternativeNames);
+                stopPlace.getAlternativeNames().addAll(alternativeNames);
             }
         }
 
-        String isParentStopPlaceStringValue = publicationDeliveryHelper.getValueByKey(stopPlace, IS_PARENT_STOP_PLACE);
+        String isParentStopPlaceStringValue = publicationDeliveryHelper.getValueByKey(netexStopPlace, IS_PARENT_STOP_PLACE);
         if(isParentStopPlaceStringValue != null) {
             if(isParentStopPlaceStringValue.equalsIgnoreCase("true")) {
-                stopPlace2.setParentStopPlace(true);
+                stopPlace.setParentStopPlace(true);
             }
         }
 
     }
 
     @Override
-    public void mapBtoA(org.rutebanken.tiamat.model.StopPlace stopPlace, StopPlace stopPlace2, MappingContext context) {
-        super.mapBtoA(stopPlace, stopPlace2, context);
+    public void mapBtoA(org.rutebanken.tiamat.model.StopPlace stopPlace, StopPlace netexStopPlace, MappingContext context) {
+        super.mapBtoA(stopPlace, netexStopPlace, context);
         if (stopPlace.getPlaceEquipments() != null &&
                 stopPlace.getPlaceEquipments().getInstalledEquipment() != null &&
                 stopPlace.getPlaceEquipments().getInstalledEquipment().isEmpty()) {
             stopPlace.setPlaceEquipments(null);
-            stopPlace2.setPlaceEquipments(null);
+            netexStopPlace.setPlaceEquipments(null);
         }
 
         if (stopPlace.getAlternativeNames() != null &&
@@ -108,16 +108,16 @@ public class StopPlaceMapper extends CustomMapper<StopPlace, org.rutebanken.tiam
             if (!netexAlternativeNames.isEmpty()) {
                 AlternativeNames_RelStructure altName = new AlternativeNames_RelStructure();
                 altName.getAlternativeName().addAll(netexAlternativeNames);
-                stopPlace2.setAlternativeNames(altName);
+                netexStopPlace.setAlternativeNames(altName);
             }
         } else {
-            stopPlace2.setAlternativeNames(null);
+            netexStopPlace.setAlternativeNames(null);
         }
 
-        if(stopPlace2.getKeyList() == null) {
-            stopPlace2.withKeyList(new KeyListStructure());
+        if(netexStopPlace.getKeyList() == null) {
+            netexStopPlace.withKeyList(new KeyListStructure());
         }
-        stopPlace2.getKeyList()
+        netexStopPlace.getKeyList()
                 .withKeyValue(new KeyValueStructure()
                         .withKey(IS_PARENT_STOP_PLACE)
                         .withValue(String.valueOf(stopPlace.isParentStopPlace())));
