@@ -19,9 +19,9 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
 @Component
-public class SetOfStopPlacesConverter extends BidirectionalConverter<Set<StopPlace>, StopPlaceRefs_RelStructure> {
+public class SetOfStopPlacesStopPlaceRefsConverter extends BidirectionalConverter<Set<StopPlace>, StopPlaceRefs_RelStructure> {
 
-    private static final Logger logger = LoggerFactory.getLogger(SetOfStopPlacesConverter.class);
+    private static final Logger logger = LoggerFactory.getLogger(SetOfStopPlacesStopPlaceRefsConverter.class);
 
     @Autowired
     private ReferenceResolver referenceResolver;
