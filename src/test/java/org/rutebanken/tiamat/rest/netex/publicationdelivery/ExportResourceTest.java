@@ -90,40 +90,6 @@ public class ExportResourceTest extends TiamatIntegrationTest {
         System.out.println(byteArrayOutputStream.toString());
     }
 
-
-    @Test
-    public void importStopPlaceWithMultipleValidBetweenPeriodsIgnoresAllButFirst() throws Exception {
-        LocalDateTime firstValidFrom = LocalDateTime.now().plusSeconds(10);
-        LocalDateTime secondValidFrom = LocalDateTime.now().plusSeconds(12);
-        StopPlace stopPlace1 = new StopPlace()
-                                       .withId("XYZ:Stopplace:1")
-                                       .withVersion("1")
-                                       .withName(new MultilingualString().withValue("New stop1"))
-                                       .withValidBetween(new ValidBetween().withFromDate(firstValidFrom).withToDate(secondValidFrom), new ValidBetween().withFromDate(secondValidFrom))
-                                       .withCentroid(new SimplePoint_VersionStructure()
-                                                             .withLocation(new LocationStructure()
-                                                                                   .withLatitude(new BigDecimal("59.914353"))
-                                                                                   .withLongitude(new BigDecimal("10.806387"))));
-
-        PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace1);
-        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery);
-
-        List<StopPlace> changedStopPlaces = publicationDeliveryTestHelper.extractStopPlaces(response);
-        Assert.assertEquals(1, changedStopPlaces.size());
-        StopPlace stopPlace = changedStopPlaces.get(0);
-
-        List<ValidBetween> actualValidBetween = stopPlace.getValidBetween();
-
-        assertThat(actualValidBetween)
-                .as("Stop Place should have actualValidBetween set")
-                .isNotNull()
-                .isNotEmpty()
-                .hasSize(1);
-
-        assertThat(actualValidBetween.get(0).getFromDate()).isEqualTo(firstValidFrom);
-    }
-
-
     @Test
     public void exportStopPlacesWithEffectiveChangedInPeriod() throws Exception {
         LocalDateTime validFrom = LocalDateTime.now().minusDays(3);
