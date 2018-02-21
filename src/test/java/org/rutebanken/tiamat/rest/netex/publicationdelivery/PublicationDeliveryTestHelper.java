@@ -43,6 +43,7 @@ import java.util.stream.Stream;
 import static java.util.stream.Collectors.toList;
 import static javax.xml.bind.JAXBContext.newInstance;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
 
 @Component
@@ -129,7 +130,14 @@ public class PublicationDeliveryTestHelper {
     }
 
     public List<StopPlace> extractStopPlaces(PublicationDeliveryStructure publicationDeliveryStructure, boolean verifyNotNull) {
-        SiteFrame siteFrame = findSiteFrame(publicationDeliveryStructure);
+        return extractStopPlaces(findSiteFrame(publicationDeliveryStructure), verifyNotNull);
+    }
+
+    public List<StopPlace> extractStopPlaces(SiteFrame siteFrame) {
+        return extractStopPlaces(siteFrame, true);
+    }
+
+    public List<StopPlace> extractStopPlaces(SiteFrame siteFrame, boolean verifyNotNull) {
         if(verifyNotNull) {
             assertThat(siteFrame.getStopPlaces()).as("Site frame stop places").isNotNull();
             assertThat(siteFrame.getStopPlaces().getStopPlace()).as("Site frame stop places getStopPlace").isNotNull();
@@ -137,6 +145,16 @@ public class PublicationDeliveryTestHelper {
             return new ArrayList<>();
         }
         return siteFrame.getStopPlaces().getStopPlace();
+    }
+
+    public List<GroupOfStopPlaces> extractGroupOfStopPlaces(SiteFrame siteFrame) {
+        assertThat(siteFrame.getGroupsOfStopPlaces()).as("site frame groups of stop places").isNotNull();
+        assertThat(siteFrame.getGroupsOfStopPlaces().getGroupOfStopPlaces())
+                .as("groups of stop places list")
+                .isNotNull()
+                .isNotEmpty();
+
+        return siteFrame.getGroupsOfStopPlaces().getGroupOfStopPlaces();
     }
 
     public List<PathLink> extractPathLinks(PublicationDeliveryStructure publicationDeliveryStructure) {

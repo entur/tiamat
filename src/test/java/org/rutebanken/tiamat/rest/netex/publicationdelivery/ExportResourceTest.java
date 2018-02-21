@@ -24,6 +24,8 @@ import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.dtoassembling.dto.ChangedStopPlaceSearchDto;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.exporter.params.StopPlaceSearch;
+import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
+import org.rutebanken.tiamat.model.StopPlaceReference;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.xml.sax.SAXException;
@@ -36,6 +38,7 @@ import javax.xml.bind.JAXBException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -44,6 +47,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.rutebanken.tiamat.exporter.params.ExportParams.newExportParamsBuilder;
 import static org.rutebanken.tiamat.exporter.params.StopPlaceSearch.newStopPlaceSearchBuilder;
 
+/**
+ * Tests synchronous export
+ */
 public class ExportResourceTest extends TiamatIntegrationTest {
 
     @Autowired
@@ -88,6 +94,74 @@ public class ExportResourceTest extends TiamatIntegrationTest {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         streamingOutput.write(byteArrayOutputStream);
         System.out.println(byteArrayOutputStream.toString());
+    }
+
+    @Test
+    public void mapGroupOfStopPlacesToNetex() throws Exception {
+
+        org.rutebanken.tiamat.model.StopPlace stopPlace = new org.rutebanken.tiamat.model.StopPlace();
+        stopPlace.setName(new EmbeddableMultilingualString("stopPlace"));
+        stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+
+        org.rutebanken.tiamat.model.GroupOfStopPlaces groupOfStopPlaces = new org.rutebanken.tiamat.model.GroupOfStopPlaces();
+        groupOfStopPlaces.getMembers().add(new StopPlaceReference(stopPlace.getNetexId()));
+        groupOfStopPlaces.setChangedBy("Solem");
+        groupOfStopPlaces.setCreated(Instant.now());
+        groupOfStopPlaces.setChanged(Instant.now());
+        groupOfStopPlaces.setName(new EmbeddableMultilingualString("oh my gosp"));
+
+
+        org.rutebanken.tiamat.model.AlternativeName alternativeName = new org.rutebanken.tiamat.model.AlternativeName();
+        alternativeName.setName(new EmbeddableMultilingualString("alternative name alias"));
+        alternativeName.setNameType(org.rutebanken.tiamat.model.NameTypeEnumeration.ALIAS);
+        groupOfStopPlaces.getAlternativeNames().add(alternativeName);
+
+        groupOfStopPlacesSaverService.saveNewVersion(groupOfStopPlaces);
+
+        stopPlaceRepository.flush();
+        groupOfStopPlacesRepository.flush();
+
+
+        ExportParams exportParams = ExportParams.newExportParamsBuilder()
+                .setStopPlaceSearch(StopPlaceSearch.newStopPlaceSearchBuilder().build())
+                .setGroupOfStopPlacesExportMode(ExportParams.ExportMode.RELEVANT)
+                .build();
+
+        Response response = exportResource.exportStopPlaces(exportParams);
+
+        PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryTestHelper.fromResponse(response);
+        SiteFrame siteFrame = publicationDeliveryTestHelper.findSiteFrame(publicationDeliveryStructure);
+
+        List<StopPlace> stopPlaces = publicationDeliveryTestHelper.extractStopPlaces(siteFrame);
+        Assert.assertEquals(1, stopPlaces.size());
+
+        GroupOfStopPlaces netexGroupOfStopPlaces = publicationDeliveryTestHelper.extractGroupOfStopPlaces(siteFrame).get(0);
+
+        assertThat(netexGroupOfStopPlaces).isNotNull();
+
+        assertThat(netexGroupOfStopPlaces.getName().getValue())
+                .as("name.value")
+                .isEqualTo(groupOfStopPlaces.getName().getValue());
+
+        assertThat(netexGroupOfStopPlaces.getAlternativeNames())
+                .as("alternativeNames")
+                .isNotNull();
+
+        assertThat(netexGroupOfStopPlaces.getMembers())
+                .as("members")
+                .isNotNull();
+
+
+        assertThat(netexGroupOfStopPlaces.getMembers().getStopPlaceRef())
+                .as("stop place ref list")
+                .isNotNull()
+                .isNotEmpty()
+                .extracting(StopPlaceRefStructure::getRef)
+                .as("reference to stop place id")
+                .containsOnly(stopPlace.getNetexId());
+
+        assertThat(netexGroupOfStopPlaces.getChanged()).as("changed").isNotNull();
+        assertThat(netexGroupOfStopPlaces.getVersion()).as("version").isEqualTo(String.valueOf(groupOfStopPlaces.getVersion()));
     }
 
     @Test
