@@ -243,6 +243,8 @@ public class StreamingPublicationDeliveryTest {
         when(topographicPlaceRepository.scrollTopographicPlaces(any())).thenReturn(topographicPlaces.iterator());
         when(tariffZoneRepository.scrollTariffZones(any())).thenReturn(new ArrayList<TariffZone>().iterator());
         when(tariffZoneRepository.scrollTariffZones()).thenReturn(new ArrayList<TariffZone>().iterator());
+        when(groupOfStopPlacesRepository.scrollGroupOfStopPlaces()).thenReturn(new ArrayList<GroupOfStopPlaces>().iterator());
+        when(groupOfStopPlacesRepository.scrollGroupOfStopPlaces(anySetOf(Long.class))).thenReturn(new ArrayList<GroupOfStopPlaces>().iterator());
 
         streamingPublicationDelivery.stream(ExportParams.newExportParamsBuilder().build(), byteArrayOutputStream);
     }
