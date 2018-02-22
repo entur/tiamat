@@ -47,6 +47,7 @@ import static javax.xml.bind.JAXBContext.newInstance;
 import static org.assertj.core.api.Assertions.anyOf;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anySetOf;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -239,7 +240,7 @@ public class StreamingPublicationDeliveryTest {
         when(stopPlaceRepository.scrollStopPlaces(any(ExportParams.class))).thenReturn(stopPlaces.iterator());
         when(stopPlaceRepository.scrollStopPlaces(anySetOf(Long.class))).thenReturn(stopPlaces.iterator());
 
-        when(stopPlaceRepository.getDatabaseIds(any(), false)).thenReturn(stopPlaces.stream().map(stopPlace -> getField(IdentifiedEntity.class, "id", stopPlace, Long.class)).collect(toSet()));
+        when(stopPlaceRepository.getDatabaseIds(any(), anyBoolean())).thenReturn(stopPlaces.stream().map(stopPlace -> getField(IdentifiedEntity.class, "id", stopPlace, Long.class)).collect(toSet()));
         when(pathLinkRepository.findAll()).thenReturn(pathLinks);
         when(pathLinkRepository.findByStopPlaceIds(anySetOf(Long.class))).thenReturn(pathLinks);
         when(topographicPlaceRepository.scrollTopographicPlaces(any())).thenReturn(topographicPlaces.iterator());

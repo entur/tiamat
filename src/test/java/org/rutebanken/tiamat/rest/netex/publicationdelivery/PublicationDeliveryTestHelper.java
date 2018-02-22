@@ -242,7 +242,7 @@ public class PublicationDeliveryTestHelper {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         output.write(outputStream);
 
-        return fromString(output.toString());
+        return fromString(new String(outputStream.toByteArray()));
     }
 
     public Response postPublicationDelivery(PublicationDeliveryStructure publicationDeliveryStructure, ImportParams importParams) throws JAXBException, IOException, SAXException {
