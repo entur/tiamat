@@ -321,7 +321,9 @@ public class StreamingPublicationDelivery {
 
     private static JAXBContext createContext(Class clazz) {
         try {
-            return newInstance(clazz);
+            JAXBContext jaxbContext = newInstance(clazz);
+            logger.info("Created context {}", jaxbContext.getClass());
+            return jaxbContext;
         } catch (JAXBException e) {
             String message = "Could not create instance of jaxb context for class " + clazz;
             logger.warn(message, e);
