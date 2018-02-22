@@ -38,6 +38,11 @@ import java.util.zip.ZipOutputStream;
 public class ExportJobWorker implements Runnable {
 
     private static final Logger logger = LoggerFactory.getLogger(ExportJobWorker.class);
+
+    /**
+     * Ignore paging for async export, to not let the default value interfer.
+     */
+    public static final boolean IGNORE_PAGING = true;
     private final ExportJob exportJob;
     private final StreamingPublicationDelivery streamingPublicationDelivery;
     private final String localExportPath;
@@ -103,7 +108,7 @@ public class ExportJobWorker implements Runnable {
     private void exportToLocalXmlFile(File localExportXmlFile) throws InterruptedException, IOException, XMLStreamException, SAXException, JAXBException {
         logger.info("Start streaming publication delivery to local file {}", localExportXmlFile);
         FileOutputStream fileOutputStream = new FileOutputStream(localExportXmlFile);
-        streamingPublicationDelivery.stream(exportJob.getExportParams(), fileOutputStream);
+        streamingPublicationDelivery.stream(exportJob.getExportParams(), fileOutputStream, IGNORE_PAGING);
     }
 
     private void uploadToGcp(File localExportFile) throws FileNotFoundException {
