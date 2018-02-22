@@ -44,6 +44,7 @@ import java.util.List;
 
 import static javax.xml.bind.JAXBContext.newInstance;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.rutebanken.tiamat.exporter.params.ExportParams.newExportParamsBuilder;
 import static org.rutebanken.tiamat.exporter.params.StopPlaceSearch.newStopPlaceSearchBuilder;
 
@@ -77,7 +78,7 @@ public class ExportResourceTest extends TiamatIntegrationTest {
         // Import stop to make sure we have something to export, although other tests might have populated the test database.
         // Make ids and search string unique
 
-        insertTestStopWithTopographicPlace();
+        insertTestStopsWithTopographicPlace();
 
         StopPlaceSearch stopPlaceSearch = newStopPlaceSearchBuilder()
                 .setQuery("Østre gravlund")
@@ -89,11 +90,10 @@ public class ExportResourceTest extends TiamatIntegrationTest {
 
         Response response = exportResource.exportStopPlaces(exportParams);
         assertThat(response.getStatus()).isEqualTo(200);
-        // TODO Response is empty. Inserted stop place is somehow not found
-        StreamingOutput streamingOutput = (StreamingOutput) response.getEntity();
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        streamingOutput.write(byteArrayOutputStream);
-        System.out.println(byteArrayOutputStream.toString());
+
+        PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryTestHelper.fromResponse(response);
+        List<StopPlace> stopPlaces = publicationDeliveryTestHelper.extractStopPlaces(publicationDeliveryStructure);
+        assertThat(stopPlaces).hasSize(1);
     }
 
     @Test
@@ -217,7 +217,7 @@ public class ExportResourceTest extends TiamatIntegrationTest {
 
     private boolean testStopInserted = false;
 
-    private void insertTestStopWithTopographicPlace() throws JAXBException, IOException, SAXException {
+    private void insertTestStopsWithTopographicPlace() throws JAXBException, IOException, SAXException {
         if (testStopInserted) {
             return;
         }
