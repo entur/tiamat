@@ -40,8 +40,15 @@ import java.util.stream.StreamSupport;
 
 import static java.util.stream.Collectors.toSet;
 
+/**
+ * This class should be removed.
+ * The reason is that we have two ways of exporting betex (sync and async) in Tiamat, but we want to maintain only one, for reduced complexity.
+ * So, the regular synchronous export has been pointed at @{{@link StreamingPublicationDelivery}}, which also is used for async export.
+ * The remeaining code to migrate is ChangedStopPlaceSearch and the ability to fetch children as @{{@link ChildStopPlacesFetcher}}.
+ */
 @Component
 @Transactional
+@Deprecated
 public class PublicationDeliveryExporter {
     private static final Logger logger = LoggerFactory.getLogger(PublicationDeliveryExporter.class);
     private final StopPlaceRepository stopPlaceRepository;
