@@ -292,7 +292,12 @@ public class StreamingPublicationDelivery {
             Session currentSession = entityManager.unwrap(Session.class);
             return new SessionEntitiesEvictor((SessionImpl) currentSession);
         } else {
-            return null;
+            return new EntitiesEvictor() {
+                @Override
+                public void evictKnownEntitiesFromSession(Object entity) {
+                    // Intentionally left blank
+                }
+            };
         }
     }
 
