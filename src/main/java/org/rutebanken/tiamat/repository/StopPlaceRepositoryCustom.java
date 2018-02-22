@@ -65,7 +65,7 @@ public interface StopPlaceRepositoryCustom extends DataManagedObjectStructureRep
 
     Set<String> getNetexIds(ExportParams exportParams);
 
-    Set<Long> getDatabaseIds(ExportParams exportParams);
+    Set<Long> getDatabaseIds(ExportParams exportParams, boolean ignorePaging);
 
     Page<StopPlace> findStopPlace(ExportParams exportParams);
 

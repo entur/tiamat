@@ -225,20 +225,24 @@ public class PublicationDeliveryTestHelper {
         return fromResponse(response);
     }
 
+    public PublicationDeliveryStructure fromString(String xml) throws IOException, JAXBException {
+        Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+        unmarshaller.setEventHandler(new javax.xml.bind.helpers.DefaultValidationEventHandler());
+
+        logger.info("Printing received response publication delivery \n--------------\n{}\n--------------", xml);
+
+        InputStream inputStream = new ByteArrayInputStream(xml.getBytes());
+        JAXBElement element = (JAXBElement) unmarshaller.unmarshal(inputStream);
+        return (PublicationDeliveryStructure) element.getValue();
+    }
+
     public PublicationDeliveryStructure fromResponse(Response response) throws IOException, JAXBException {
+
         StreamingOutput output = (StreamingOutput) response.getEntity();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         output.write(outputStream);
 
-        Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-        unmarshaller.setEventHandler(new javax.xml.bind.helpers.DefaultValidationEventHandler());
-
-        byte[] bytes = outputStream.toByteArray();
-        logger.info("Printing received publication delivery\n--------------\n{}\n--------------", new String(bytes));
-
-        InputStream inputStream = new ByteArrayInputStream(bytes);
-        JAXBElement element = (JAXBElement) unmarshaller.unmarshal(inputStream);
-        return (PublicationDeliveryStructure) element.getValue();
+        return fromString(output.toString());
     }
 
     public Response postPublicationDelivery(PublicationDeliveryStructure publicationDeliveryStructure, ImportParams importParams) throws JAXBException, IOException, SAXException {

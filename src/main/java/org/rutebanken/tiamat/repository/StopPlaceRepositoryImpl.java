@@ -551,13 +551,15 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     }
 
     @Override
-    public Set<Long> getDatabaseIds(ExportParams exportParams) {
+    public Set<Long> getDatabaseIds(ExportParams exportParams, boolean ignorePaging) {
         Pair<String, Map<String, Object>> pair = stopPlaceQueryFromSearchBuilder.buildQueryString(exportParams);
         Session session = entityManager.unwrap(Session.class);
         SQLQuery query = session.createSQLQuery("SELECT sub.id from (" + pair.getFirst() + ") sub");
-        query.setFirstResult(exportParams.getStopPlaceSearch().getPageable().getOffset());
-        query.setMaxResults(exportParams.getStopPlaceSearch().getPageable().getPageSize());
 
+        if(!ignorePaging) {
+            query.setFirstResult(exportParams.getStopPlaceSearch().getPageable().getOffset());
+            query.setMaxResults(exportParams.getStopPlaceSearch().getPageable().getPageSize());
+        }
         searchHelper.addParams(query, pair.getSecond());
 
         Set<Long> result = new HashSet<>();

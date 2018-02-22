@@ -105,6 +105,10 @@ public class StreamingPublicationDelivery {
     }
 
     public void stream(ExportParams exportParams, OutputStream outputStream) throws JAXBException, XMLStreamException, IOException, InterruptedException, SAXException {
+        stream(exportParams, outputStream, false);
+    }
+
+    public void stream(ExportParams exportParams, OutputStream outputStream, boolean ignorePaging) throws JAXBException, XMLStreamException, IOException, InterruptedException, SAXException {
 
         org.rutebanken.tiamat.model.SiteFrame siteFrame = tiamatSiteFrameExporter.createTiamatSiteFrame("Site frame " + exportParams);
 
@@ -123,7 +127,7 @@ public class StreamingPublicationDelivery {
         // To avoid marshalling empty parking element and to be able to gather relevant topographic places
         // The primary ID represents a stop place with a certain version
 
-        final Set<Long> stopPlacePrimaryIds = stopPlaceRepository.getDatabaseIds(exportParams);
+        final Set<Long> stopPlacePrimaryIds = stopPlaceRepository.getDatabaseIds(exportParams, ignorePaging);
         logger.info("Got {} stop place IDs from stop place search", stopPlacePrimaryIds.size());
 
         //TODO: stream path links, handle export mode

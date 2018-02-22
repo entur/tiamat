@@ -239,7 +239,7 @@ public class StreamingPublicationDeliveryTest {
         when(stopPlaceRepository.scrollStopPlaces(any(ExportParams.class))).thenReturn(stopPlaces.iterator());
         when(stopPlaceRepository.scrollStopPlaces(anySetOf(Long.class))).thenReturn(stopPlaces.iterator());
 
-        when(stopPlaceRepository.getDatabaseIds(any())).thenReturn(stopPlaces.stream().map(stopPlace -> getField(IdentifiedEntity.class, "id", stopPlace, Long.class)).collect(toSet()));
+        when(stopPlaceRepository.getDatabaseIds(any(), false)).thenReturn(stopPlaces.stream().map(stopPlace -> getField(IdentifiedEntity.class, "id", stopPlace, Long.class)).collect(toSet()));
         when(pathLinkRepository.findAll()).thenReturn(pathLinks);
         when(pathLinkRepository.findByStopPlaceIds(anySetOf(Long.class))).thenReturn(pathLinks);
         when(topographicPlaceRepository.scrollTopographicPlaces(any())).thenReturn(topographicPlaces.iterator());
