@@ -15,6 +15,7 @@
 
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
+import org.assertj.core.api.AbstractListAssert;
 import org.glassfish.jersey.uri.internal.JerseyUriBuilder;
 import org.junit.Assert;
 import org.junit.Test;
@@ -59,20 +60,10 @@ public class ExportResourceTest extends TiamatIntegrationTest {
     @Autowired
     private PublicationDeliveryTestHelper publicationDeliveryTestHelper;
 
-    /**
-     * Make stop places exported in publication deliveries are valid according to the xsd.
-     * It should be validated when streaming out.
-     */
-    @Test
-    public void exportStopPlacesWithRelevantTopographicPlaces() throws JAXBException, IOException, SAXException {
-        exportStopPlacesAndVerify(ExportParams.ExportMode.RELEVANT);
-    }
-
     @Test
     public void exportStopPlacesWithoutTopographicPlaces() throws JAXBException, IOException, SAXException {
         exportStopPlacesAndVerify(ExportParams.ExportMode.NONE);
     }
-
 
     private void exportStopPlacesAndVerify(ExportParams.ExportMode includeTopographicPlaces) throws JAXBException, IOException, SAXException {
         // Import stop to make sure we have something to export, although other tests might have populated the test database.
@@ -222,27 +213,11 @@ public class ExportResourceTest extends TiamatIntegrationTest {
             return;
         }
         testStopInserted = true;
-        TopographicPlace topographicParent = new TopographicPlace()
-                .withId("KVE:TopographicPlace:1")
-                .withVersion("1")
-                .withDescriptor(new TopographicPlaceDescriptor_VersionedChildStructure().withName(new MultilingualString().withValue("Fylke")));
-
-        TopographicPlace topographicPlace = new TopographicPlace()
-                .withId("KVE:TopographicPlace:3")
-                .withVersion("1")
-                .withDescriptor(new TopographicPlaceDescriptor_VersionedChildStructure().withName(new MultilingualString().withValue("Kommune")))
-                .withParentTopographicPlaceRef(new TopographicPlaceRefStructure()
-                        .withRef(topographicParent.getId()));
-        PublicationDeliveryStructure topographicPlacesForImport = publicationDeliveryTestHelper.createPublicationDeliveryTopographicPlace(topographicParent, topographicPlace);
-        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(topographicPlacesForImport);
-
 
         StopPlace stopPlace = new StopPlace()
                 .withId("XYZ:Stopplace:1")
                 .withVersion("1")
                 .withName(new MultilingualString().withValue("Østre gravlund"))
-                .withTopographicPlaceRef(new TopographicPlaceRefStructure()
-                        .withRef(topographicPlace.getId()))
                 .withCentroid(new SimplePoint_VersionStructure()
                         .withLocation(new LocationStructure()
                                 .withLatitude(new BigDecimal("59.914353"))
