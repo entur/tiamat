@@ -236,7 +236,9 @@ public class StreamingPublicationDeliveryTest {
         when(parkingRepository.scrollParkings()).thenReturn(parkings.iterator());
         when(parkingRepository.scrollParkings(anySetOf(Long.class))).thenReturn(parkings.iterator());
         when(parkingRepository.countResult(anySetOf(Long.class))).thenReturn(parkings.size());
-        when(stopPlaceRepository.scrollStopPlaces(any())).thenReturn(stopPlaces.iterator());
+        when(stopPlaceRepository.scrollStopPlaces(any(ExportParams.class))).thenReturn(stopPlaces.iterator());
+        when(stopPlaceRepository.scrollStopPlaces(anySetOf(Long.class))).thenReturn(stopPlaces.iterator());
+
         when(stopPlaceRepository.getDatabaseIds(any())).thenReturn(stopPlaces.stream().map(stopPlace -> getField(IdentifiedEntity.class, "id", stopPlace, Long.class)).collect(toSet()));
         when(pathLinkRepository.findAll()).thenReturn(pathLinks);
         when(pathLinkRepository.findByStopPlaceIds(anySetOf(Long.class))).thenReturn(pathLinks);

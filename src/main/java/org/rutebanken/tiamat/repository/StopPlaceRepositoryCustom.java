@@ -76,4 +76,6 @@ public interface StopPlaceRepositoryCustom extends DataManagedObjectStructureRep
     StopPlace findByQuay(Quay quay);
 
     List<JbvCodeMappingDto> findJbvCodeMappingsForStopPlace();
+
+    Iterator<StopPlace> scrollStopPlaces(Set<Long> stopPlacePrimaryIds);
 }

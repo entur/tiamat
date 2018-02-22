@@ -208,9 +208,9 @@ public class StreamingPublicationDelivery {
     private void prepareStopPlaces(ExportParams exportParams, Set<Long> stopPlacePrimaryIds, AtomicInteger mappedStopPlaceCount, SiteFrame netexSiteFrame, EntitiesEvictor evicter) {
         // Override lists with custom iterator to be able to scroll database results on the fly.
         if (!stopPlacePrimaryIds.isEmpty()) {
-
-            final Iterator<org.rutebanken.tiamat.model.StopPlace> stopPlaceIterator = stopPlaceRepository.scrollStopPlaces(exportParams);
             logger.info("There are stop places to export");
+
+            final Iterator<org.rutebanken.tiamat.model.StopPlace> stopPlaceIterator = stopPlaceRepository.scrollStopPlaces(stopPlacePrimaryIds);
             StopPlacesInFrame_RelStructure stopPlacesInFrame_relStructure = new StopPlacesInFrame_RelStructure();
 
             // Use Listening iterator to collect stop place IDs.
