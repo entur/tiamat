@@ -16,11 +16,11 @@
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
 import io.swagger.annotations.Api;
-import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.tiamat.dtoassembling.disassembler.ChangedStopPlaceSearchDisassembler;
 import org.rutebanken.tiamat.dtoassembling.dto.ChangedStopPlaceSearchDto;
 import org.rutebanken.tiamat.exporter.PublicationDeliveryExporter;
 import org.rutebanken.tiamat.exporter.PublicationDeliveryStructurePage;
+import org.rutebanken.tiamat.exporter.StreamingPublicationDelivery;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.repository.search.ChangedStopPlaceSearch;
 import org.slf4j.Logger;
@@ -29,14 +29,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.xml.sax.SAXException;
 
-import javax.ws.rs.*;
+import javax.ws.rs.BeanParam;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.*;
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.net.URI;
-
-import static org.rutebanken.tiamat.config.JerseyConfig.SERVICES_PATH;
-import static org.rutebanken.tiamat.config.JerseyConfig.SERVICES_STOP_PLACE_PATH;
 
 @Component
 @Api
@@ -53,9 +53,12 @@ public class ExportResource {
     private final ChangedStopPlaceSearchDisassembler changedStopPlaceSearchDisassembler;
 
     @Autowired
+    private StreamingPublicationDelivery streamingPublicationDelivery;
+
+    @Autowired
     public ExportResource(PublicationDeliveryStreamingOutput publicationDeliveryStreamingOutput,
-                                 PublicationDeliveryExporter publicationDeliveryExporter,
-                                 ChangedStopPlaceSearchDisassembler changedStopPlaceSearchDisassembler) {
+                          PublicationDeliveryExporter publicationDeliveryExporter,
+                          ChangedStopPlaceSearchDisassembler changedStopPlaceSearchDisassembler) {
 
         this.publicationDeliveryStreamingOutput = publicationDeliveryStreamingOutput;
         this.publicationDeliveryExporter = publicationDeliveryExporter;
@@ -66,17 +69,26 @@ public class ExportResource {
     @Produces(MediaType.APPLICATION_XML + "; charset=UTF-8")
     public Response exportStopPlaces(@BeanParam ExportParams exportParams) throws JAXBException, IOException, SAXException {
         logger.info("Exporting publication delivery. {}", exportParams);
-        PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryExporter.exportStopPlaces(exportParams);
-        return Response.ok(publicationDeliveryStreamingOutput.stream(publicationDeliveryStructure)).build();
-    }
 
+
+        StreamingOutput streamingOutput = outputStream -> {
+            try {
+                streamingPublicationDelivery.stream(exportParams, outputStream);
+            } catch (Exception e) {
+                logger.warn("Could not stream site frame. {}", e.getMessage(), e);
+                throw new RuntimeException(e);
+            }
+        };
+
+        return Response.ok(streamingOutput).build();
+    }
 
     @GET
     @Produces(MediaType.APPLICATION_XML + "; charset=UTF-8")
     @Path("changed_in_period")
     public Response exportStopPlacesWithEffectiveChangedInPeriod(@BeanParam ChangedStopPlaceSearchDto searchDTO,
-                                                                        @BeanParam ExportParams exportParams,
-                                                                        @Context UriInfo uriInfo)
+                                                                 @BeanParam ExportParams exportParams,
+                                                                 @Context UriInfo uriInfo)
             throws JAXBException, IOException, SAXException {
 
         ChangedStopPlaceSearch search = changedStopPlaceSearchDisassembler.disassemble(searchDTO);
@@ -101,10 +113,10 @@ public class ExportResource {
 
     private URI createLinkToNextPage(String from, String to, int page, int perPage, ExportParams.ExportMode topographicPlaceExportMode, ExportParams.ExportMode tariffZoneExportMode, UriInfo uriInfo) {
         UriBuilder linkBuilder = uriInfo.getAbsolutePathBuilder()
-                                         .queryParam("page", page)
-                                         .queryParam("per_page", perPage)
-                                         .queryParam("topographicPlaceExportMode", topographicPlaceExportMode)
-                                         .queryParam("tariffZoneExportMode", tariffZoneExportMode);
+                .queryParam("page", page)
+                .queryParam("per_page", perPage)
+                .queryParam("topographicPlaceExportMode", topographicPlaceExportMode)
+                .queryParam("tariffZoneExportMode", tariffZoneExportMode);
 
         if (from != null) linkBuilder.queryParam("from", from);
         if (to != null) linkBuilder.queryParam("to", to);
