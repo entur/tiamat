@@ -88,7 +88,34 @@ public class ExportResourceTest extends TiamatIntegrationTest {
     }
 
     @Test
-    public void mapGroupOfStopPlacesToNetex() throws Exception {
+    public void verifyPaging() throws Exception {
+        org.rutebanken.tiamat.model.StopPlace stopPlace = new org.rutebanken.tiamat.model.StopPlace();
+        stopPlace.setName(new EmbeddableMultilingualString("stopPlace"));
+        stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+
+        org.rutebanken.tiamat.model.StopPlace stopPlace2 = new org.rutebanken.tiamat.model.StopPlace();
+        stopPlace2.setName(new EmbeddableMultilingualString("stopPlace 2"));
+        stopPlaceVersionedSaverService.saveNewVersion(stopPlace2);
+        stopPlaceRepository.flush();
+
+        final int size = 1;
+
+        ExportParams exportParams = ExportParams.newExportParamsBuilder()
+                .setStopPlaceSearch(
+                        StopPlaceSearch.newStopPlaceSearchBuilder()
+                                .setSize(size)
+                                .build())
+                .build();
+
+        Response response = exportResource.exportStopPlaces(exportParams);
+
+        PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryTestHelper.fromResponse(response);
+        List<StopPlace> stopPlaces = publicationDeliveryTestHelper.extractStopPlaces(publicationDeliveryStructure);
+        assertThat(stopPlaces).as("stop places returned").hasSize(size);
+    }
+
+    @Test
+    public void exportGroupOfStopPlacesToNetex() throws Exception {
 
         org.rutebanken.tiamat.model.StopPlace stopPlace = new org.rutebanken.tiamat.model.StopPlace();
         stopPlace.setName(new EmbeddableMultilingualString("stopPlace"));
