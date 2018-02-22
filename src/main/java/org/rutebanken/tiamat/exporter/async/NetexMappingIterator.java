@@ -15,6 +15,7 @@
 
 package org.rutebanken.tiamat.exporter.async;
 
+import org.rutebanken.tiamat.exporter.eviction.EntitiesEvictor;
 import org.rutebanken.tiamat.model.EntityStructure;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.slf4j.Logger;

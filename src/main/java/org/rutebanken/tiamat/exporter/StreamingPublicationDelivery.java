@@ -20,6 +20,8 @@ import org.hibernate.internal.SessionImpl;
 import org.rutebanken.netex.model.*;
 import org.rutebanken.netex.validation.NeTExValidator;
 import org.rutebanken.tiamat.exporter.async.*;
+import org.rutebanken.tiamat.exporter.eviction.EntitiesEvictor;
+import org.rutebanken.tiamat.exporter.eviction.SessionEntitiesEvictor;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.model.GroupOfStopPlaces;
@@ -288,7 +290,7 @@ public class StreamingPublicationDelivery {
     private EntitiesEvictor instantiateEvictor() {
         if (entityManager != null) {
             Session currentSession = entityManager.unwrap(Session.class);
-            return new EntitiesEvictor((SessionImpl) currentSession);
+            return new SessionEntitiesEvictor((SessionImpl) currentSession);
         } else {
             return null;
         }
