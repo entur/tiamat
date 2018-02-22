@@ -69,11 +69,6 @@ public class PublicationDeliveryExporter {
     }
 
     @Transactional(readOnly = true)
-    public PublicationDeliveryStructure exportStopPlaces(ExportParams exportParams) {
-        return exportPublicationDeliveryWithStops(stopPlaceRepository.findStopPlace(exportParams).getContent(), exportParams);
-    }
-
-    @Transactional(readOnly = true)
     public PublicationDeliveryStructurePage exportStopPlacesWithEffectiveChangeInPeriod(ChangedStopPlaceSearch search, ExportParams exportParams) {
         logger.info("Finding changed stop places with search params: {}", search);
         Page<StopPlace> stopPlacePage = stopPlaceRepository.findStopPlacesWithEffectiveChangeInPeriod(search);
@@ -108,12 +103,6 @@ public class PublicationDeliveryExporter {
         logger.info("Returning publication delivery {} with site frame", publicationDeliveryStructure);
         return publicationDeliveryStructure;
     }
-
-    public PublicationDeliveryStructure exportPublicationDeliveryWithStops(List<StopPlace> stopPlaces, ExportParams exportParams) {
-        return exportPublicationDeliveryWithStops(stopPlaces, exportParams, MultiModalFetchMode.PARENTS);
-    }
-
-
 
     /**
      *
