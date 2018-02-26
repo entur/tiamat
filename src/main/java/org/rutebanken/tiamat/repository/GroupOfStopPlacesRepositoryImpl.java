@@ -108,19 +108,23 @@ public class GroupOfStopPlacesRepositoryImpl implements GroupOfStopPlacesReposit
     }
 
     private String generateGroupOfStopPlacesQueryFromStopPlaceIds(Set<Long> stopPlaceDbIds) {
-        StringBuilder sqlStringBuilder = new StringBuilder("SELECT gosp.* " +
-                "FROM stop_place s " +
-                "INNER JOIN group_of_stop_places_members members ON members.ref = s.netex_id " +
-                "INNER JOIN group_of_stop_places gosp ON members.group_of_stop_places_id = gosp.id " +
-                "WHERE s.id IN (");
+        StringBuilder sqlStringBuilder = new StringBuilder("SELECT g.* FROM " +
+                "   (SELECT gosp1.id, gosp1.netex_id " +
+                "       FROM stop_place s " +
+                "       INNER JOIN group_of_stop_places_members members ON members.ref = s.netex_id " +
+                "       INNER JOIN group_of_stop_places gosp1 ON members.group_of_stop_places_id = gosp1.id " +
+                "       WHERE s.id IN (");
 
         sqlStringBuilder.append(StringUtils.join(stopPlaceDbIds, ','));
 
-        sqlStringBuilder.append(") " +
-                "AND gosp.version = " +
-                "    (SELECT max(gospv.version) " +
-                "     FROM group_of_stop_places gospv " +
-                "     WHERE gospv.netex_id = gosp.netex_id)");
+        sqlStringBuilder.append("   ) " +
+                "      AND gosp1.version = " +
+                "       (SELECT max(gospv.version) " +
+                "           FROM group_of_stop_places gospv " +
+                "           WHERE gospv.netex_id = gosp1.netex_id) " +
+                "      GROUP BY gosp1.netex_id " +
+                "  ) gosp " +
+                "JOIN group_of_stop_places g ON gosp.netex_id = g.netex_id");
 
         String sql = sqlStringBuilder.toString();
         logger.info(sql);

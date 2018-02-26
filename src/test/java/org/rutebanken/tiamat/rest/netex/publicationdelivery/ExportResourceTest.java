@@ -121,9 +121,14 @@ public class ExportResourceTest extends TiamatIntegrationTest {
         stopPlace.setName(new EmbeddableMultilingualString("stopPlace"));
         stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
 
+        org.rutebanken.tiamat.model.StopPlace stopPlace2 = new org.rutebanken.tiamat.model.StopPlace();
+        stopPlace2.setName(new EmbeddableMultilingualString("stopPlace 2"));
+        stopPlaceVersionedSaverService.saveNewVersion(stopPlace2);
+
         org.rutebanken.tiamat.model.GroupOfStopPlaces groupOfStopPlaces = new org.rutebanken.tiamat.model.GroupOfStopPlaces();
         groupOfStopPlaces.getMembers().add(new StopPlaceReference(stopPlace.getNetexId()));
-        groupOfStopPlaces.setChangedBy("Solem");
+        groupOfStopPlaces.getMembers().add(new StopPlaceReference(stopPlace2.getNetexId()));
+        groupOfStopPlaces.setChangedBy("mr. Solem");
         groupOfStopPlaces.setCreated(Instant.now());
         groupOfStopPlaces.setChanged(Instant.now());
         groupOfStopPlaces.setName(new EmbeddableMultilingualString("oh my gosp"));
@@ -151,7 +156,7 @@ public class ExportResourceTest extends TiamatIntegrationTest {
         SiteFrame siteFrame = publicationDeliveryTestHelper.findSiteFrame(publicationDeliveryStructure);
 
         List<StopPlace> stopPlaces = publicationDeliveryTestHelper.extractStopPlaces(siteFrame);
-        Assert.assertEquals(1, stopPlaces.size());
+        Assert.assertEquals(2, stopPlaces.size());
 
         GroupOfStopPlaces netexGroupOfStopPlaces = publicationDeliveryTestHelper.extractGroupOfStopPlaces(siteFrame).get(0);
 
@@ -176,7 +181,7 @@ public class ExportResourceTest extends TiamatIntegrationTest {
                 .isNotEmpty()
                 .extracting(StopPlaceRefStructure::getRef)
                 .as("reference to stop place id")
-                .containsOnly(stopPlace.getNetexId());
+                .containsOnly(stopPlace.getNetexId(), stopPlace2.getNetexId());
 
         assertThat(netexGroupOfStopPlaces.getChanged()).as("changed").isNotNull();
         assertThat(netexGroupOfStopPlaces.getVersion()).as("version").isEqualTo(String.valueOf(groupOfStopPlaces.getVersion()));
