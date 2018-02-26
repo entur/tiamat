@@ -15,6 +15,8 @@
 
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Point;
 import org.assertj.core.api.AbstractListAssert;
 import org.glassfish.jersey.uri.internal.JerseyUriBuilder;
 import org.junit.Assert;
@@ -119,10 +121,12 @@ public class ExportResourceTest extends TiamatIntegrationTest {
 
         org.rutebanken.tiamat.model.StopPlace stopPlace = new org.rutebanken.tiamat.model.StopPlace();
         stopPlace.setName(new EmbeddableMultilingualString("stopPlace"));
+        stopPlace.setCentroid(point(60.000, 10.78));
         stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
 
         org.rutebanken.tiamat.model.StopPlace stopPlace2 = new org.rutebanken.tiamat.model.StopPlace();
         stopPlace2.setName(new EmbeddableMultilingualString("stopPlace 2"));
+        stopPlace2.setCentroid(point(61.000, 11.78));
         stopPlaceVersionedSaverService.saveNewVersion(stopPlace2);
 
         org.rutebanken.tiamat.model.GroupOfStopPlaces groupOfStopPlaces = new org.rutebanken.tiamat.model.GroupOfStopPlaces();
@@ -259,5 +263,9 @@ public class ExportResourceTest extends TiamatIntegrationTest {
         publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery);
     }
 
-
+    private Point point(double longitude, double latitude) {
+        return
+                geometryFactory.createPoint(
+                        new Coordinate(longitude, latitude));
+    }
 }
