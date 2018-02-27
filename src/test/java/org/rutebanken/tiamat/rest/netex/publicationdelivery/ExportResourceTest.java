@@ -187,6 +187,8 @@ public class ExportResourceTest extends TiamatIntegrationTest {
                 .as("reference to stop place id")
                 .containsOnly(stopPlace.getNetexId(), stopPlace2.getNetexId());
 
+        assertThat(netexGroupOfStopPlaces.getCentroid()).as("centroid").isNotNull();
+
         assertThat(netexGroupOfStopPlaces.getChanged()).as("changed").isNotNull();
         assertThat(netexGroupOfStopPlaces.getVersion()).as("version").isEqualTo(String.valueOf(groupOfStopPlaces.getVersion()));
     }

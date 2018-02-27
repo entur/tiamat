@@ -15,6 +15,7 @@
 
 package org.rutebanken.tiamat.netex.mapping;
 
+import com.vividsolutions.jts.geom.Coordinate;
 import ma.glasnost.orika.MappingContext;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -135,7 +136,7 @@ public class NetexMapperTest extends TiamatIntegrationTest {
         groupOfStopPlaces.setCreated(Instant.now());
         groupOfStopPlaces.setChanged(Instant.now());
         groupOfStopPlaces.setName(new EmbeddableMultilingualString("oh my gosp"));
-
+        groupOfStopPlaces.setCentroid(geometryFactory.createPoint(new Coordinate(16,17)));
 
         AlternativeName alternativeName = new AlternativeName();
         alternativeName.setName(new EmbeddableMultilingualString("alternative name alias"));
