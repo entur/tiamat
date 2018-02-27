@@ -16,32 +16,35 @@
 package org.rutebanken.tiamat.service.groupofstopplaces;
 
 import com.vividsolutions.jts.geom.Point;
-import org.rutebanken.tiamat.exporter.params.ExportParams;
-import org.rutebanken.tiamat.exporter.params.StopPlaceSearch;
+import org.rutebanken.netex.model.GroupCheckInEnumeration;
+import org.rutebanken.tiamat.geo.CentroidComputer;
 import org.rutebanken.tiamat.model.GroupOfStopPlaces;
-import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.repository.StopPlaceRepository;
-import org.rutebanken.tiamat.repository.reference.ReferenceResolver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
+import java.util.HashSet;
 import java.util.Optional;
 
 @Service
 public class GroupOfStopPlacesCentroidComputer {
 
-    private final StopPlaceRepository stopPlaceRepository;
+    private static final Logger logger = LoggerFactory.getLogger(GroupOfStopPlacesCentroidComputer.class);
+
+    private final CentroidComputer centroidComputer;
+
+    private final GroupOfStopPlacesMembersResolver groupOfStopPlacesMembersResolver;
 
     @Autowired
-    public GroupOfStopPlacesCentroidComputer(StopPlaceRepository stopPlaceRepository) {
-        this.stopPlaceRepository = stopPlaceRepository;
+    public GroupOfStopPlacesCentroidComputer(CentroidComputer centroidComputer, GroupOfStopPlacesMembersResolver groupOfStopPlacesMembersResolver) {
+        this.centroidComputer = centroidComputer;
+        this.groupOfStopPlacesMembersResolver = groupOfStopPlacesMembersResolver;
     }
 
     public Optional<Point> compute(GroupOfStopPlaces groupOfStopPlaces) {
-
-        return Optional.empty();
-
+        logger.info("Computing centroid for group of stop places: {}", groupOfStopPlaces.getNetexId());
+        return centroidComputer.compute(new HashSet<>(groupOfStopPlacesMembersResolver.resolve(groupOfStopPlaces)));
     }
 
 }

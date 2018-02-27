@@ -22,11 +22,13 @@ import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.EntityInVersionRepository;
 import org.rutebanken.tiamat.repository.GroupOfStopPlacesRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
+import org.rutebanken.tiamat.service.groupofstopplaces.GroupOfStopPlacesCentroidComputer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.Arrays;
@@ -36,6 +38,7 @@ import java.util.Arrays;
  * Version is incremented and changed date is updated, but the history will not be kept.
  * Valid between must not be polulated
  */
+@Transactional
 @Service
 public class GroupOfStopPlacesSaverService extends VersionedSaverService<GroupOfStopPlaces> {
 
@@ -46,6 +49,9 @@ public class GroupOfStopPlacesSaverService extends VersionedSaverService<GroupOf
 
     @Autowired
     private StopPlaceRepository stopPlaceRepository;
+
+    @Autowired
+    private GroupOfStopPlacesCentroidComputer groupOfStopPlacesCentroidComputer;
 
 
     @Override
@@ -66,18 +72,18 @@ public class GroupOfStopPlacesSaverService extends VersionedSaverService<GroupOf
             BeanUtils.copyProperties(newVersion, existing, "id", "created", "version");
             existing.getMembers().clear();
             existing.getMembers().addAll(newVersion.getMembers());
-            existing.setValidBetween(null);
             existing.setChanged(Instant.now());
-            existing.setChangedBy(usernameForAuthenticatedUser);
-            versionIncrementor.incrementVersion(existing);
-            result = groupOfStopPlacesRepository.save(existing);
+            result = existing;
 
         } else {
             newVersion.setCreated(Instant.now());
-            newVersion.setChangedBy(usernameForAuthenticatedUser);
-            versionIncrementor.incrementVersion(newVersion);
-            result = groupOfStopPlacesRepository.save(newVersion);
+            result = newVersion;
         }
+        result.setValidBetween(null);
+        result.setChangedBy(usernameForAuthenticatedUser);
+        groupOfStopPlacesCentroidComputer.compute(result);
+        versionIncrementor.incrementVersion(result);
+        result = groupOfStopPlacesRepository.save(result);
 
         metricsService.registerEntitySaved(newVersion.getClass());
         logger.info("Saved {}", result);
