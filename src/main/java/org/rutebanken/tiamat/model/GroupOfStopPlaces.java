@@ -16,6 +16,7 @@
 package org.rutebanken.tiamat.model;
 
 import com.google.common.base.MoreObjects;
+import com.vividsolutions.jts.geom.Point;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -32,6 +33,8 @@ public class GroupOfStopPlaces extends GroupOfEntities_VersionStructure {
     )
     private Set<StopPlaceReference> members = new HashSet<>();
 
+    private Point centroid;
+
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<AlternativeName> alternativeNames = new ArrayList<>();
 
@@ -40,6 +43,14 @@ public class GroupOfStopPlaces extends GroupOfEntities_VersionStructure {
     }
 
     public GroupOfStopPlaces() {
+    }
+
+    public Point getCentroid() {
+        return centroid;
+    }
+
+    public void setCentroid(Point centroid) {
+        this.centroid = centroid;
     }
 
     public Set<StopPlaceReference> getMembers() {

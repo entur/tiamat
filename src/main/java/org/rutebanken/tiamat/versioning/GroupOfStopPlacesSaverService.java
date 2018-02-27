@@ -82,6 +82,7 @@ public class GroupOfStopPlacesSaverService extends VersionedSaverService<GroupOf
         result.setValidBetween(null);
         result.setChangedBy(usernameForAuthenticatedUser);
         groupOfStopPlacesCentroidComputer.compute(result);
+
         versionIncrementor.incrementVersion(result);
         result = groupOfStopPlacesRepository.save(result);
 
