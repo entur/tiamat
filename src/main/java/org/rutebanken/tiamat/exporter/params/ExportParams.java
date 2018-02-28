@@ -16,6 +16,7 @@
 package org.rutebanken.tiamat.exporter.params;
 
 import com.google.common.base.MoreObjects;
+import io.swagger.annotations.ApiParam;
 
 import javax.ws.rs.BeanParam;
 import javax.ws.rs.DefaultValue;
@@ -41,14 +42,17 @@ public class ExportParams {
 
     public static final ExportMode DEFAULT_GROUP_OF_STOP_PLACES_EXPORT_MODE = ExportMode.RELEVANT;
 
+    @ApiParam(value = "Controls exported topographic places. If set to relevant, only topographic places relevant to exported stop places are exported.")
     @DefaultValue(value = "RELEVANT")
     @QueryParam(value = "topographicPlaceExportMode")
     private ExportMode topographicPlaceExportMode = DEFAULT_TOPOGRAPHIC_PLACE_EXPORT_MODE;
 
+    @ApiParam(value = "Controls exported tariff zones. If set to relevant, only tariff zones relevant to exported stop places are exported.")
     @DefaultValue(value = "RELEVANT")
     @QueryParam(value = "tariffZoneExportMode")
     private ExportMode tariffZoneExportMode = DEFAULT_TARIFF_ZONE_EXPORT_MODE;
 
+    @ApiParam(value = "Controls exported group of stop places. If set to relevant, only group of stop places relevant to exported stop places are exported.")
     @DefaultValue(value = "RELEVANT")
     @QueryParam(value = "groupOfStopPlacesExportMode")
     private ExportMode groupOfStopPlacesExportMode = DEFAULT_GROUP_OF_STOP_PLACES_EXPORT_MODE;
