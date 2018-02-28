@@ -167,12 +167,17 @@ Use the paramter: ```withoutLocationOnly=true```
 
 
 ### Topographic export mode
-The parameter ```topographicPlaceExportMode``` can be set to *RELEVANT* or *ALL*
+The parameter ```topographicPlaceExportMode``` can be set to *NONE*, *RELEVANT* or *ALL*
 Relevant topographic places will be found from the exported list of stop places.
 
 ### Tariff Zone export mode
-The parameter ```tariffZoneExportMode``` can be set to *RELEVANT* or *ALL*
+The parameter ```tariffZoneExportMode``` can be set to *NONE*, *RELEVANT* or *ALL*
 Relevant tariff zones with be found from the exported list of stop places. Because stop places can have a list of tariff zone refs.
+
+### Group of stop places export mode
+The parameter ```groupOfStopPlacesExportMode``` can be set to *NONE*, *RELEVANT* or *ALL*
+Relevant group of stop places can be found from the exported list of stop places.
+
 
 ### Version validity
 The ```versionValidity``` parameter controls what stop places to return.
@@ -182,7 +187,7 @@ The ```versionValidity``` parameter controls what stop places to return.
 
 ### Example
 ```
-https://api-test.entur.org/stop_places/1.0/netex?tariffZoneExportMode=RELEVANT&topographicPlaceExportMode=RELEVANT&q=Nesbru&versionValidity=CURRENT&municipalityReference=KVE:TopographicPlace:0220
+https://api-test.entur.org/stop_places/1.0/netex?tariffZoneExportMode=RELEVANT&topographicPlaceExportMode=RELEVANT&groupOfStopPlacesExportMode=NONE&q=Nesbru&versionValidity=CURRENT&municipalityReference=KVE:TopographicPlace:0220
 ```
 
 Returns stop places with current version validity now, matching the query 'Nesbru' and exists in municipality 0220. Fetches relevant tariff zones and topographic places.
@@ -195,12 +200,16 @@ When the job is finished, you can download the exported data.
 
 ### Start async export:
 ```
+curl https://api-test.entur.org/stop_places/1.0/netex/export/initiate
+```
+Pro tip: Pipe the output from curl to xmllint to format the output:
+```
 curl https://api-test.entur.org/stop_places/1.0/netex/export/initiate | xmllint --format -
 ```
 
 ### Check job status:
 ```
-curl https://api-test.entur.org/stop_places/1.0/netex/export | xmllint --format -
+curl https://api-test.entur.org/stop_places/1.0/netex/export
 ```
 
 ### When job is done. Download it:
