@@ -16,6 +16,7 @@
 package org.rutebanken.tiamat.versioning;
 
 import com.google.api.client.util.Preconditions;
+import com.vividsolutions.jts.geom.Point;
 import org.rutebanken.helper.organisation.AuthorizationConstants;
 import org.rutebanken.tiamat.model.GroupOfStopPlaces;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -32,6 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.Optional;
 
 /**
  * No history for group of stop places.
@@ -81,7 +83,11 @@ public class GroupOfStopPlacesSaverService extends VersionedSaverService<GroupOf
         }
         result.setValidBetween(null);
         result.setChangedBy(usernameForAuthenticatedUser);
-        groupOfStopPlacesCentroidComputer.compute(result);
+        Optional<Point> point = groupOfStopPlacesCentroidComputer.compute(result);
+        if(point.isPresent()) {
+            logger.info("Setting centroid for group of stop place {} to {}", result.getNetexId(), point.get());
+            result.setCentroid(point.get());
+        }
 
         versionIncrementor.incrementVersion(result);
         result = groupOfStopPlacesRepository.save(result);
