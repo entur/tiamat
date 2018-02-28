@@ -122,7 +122,7 @@ public class GroupOfStopPlacesRepositoryImpl implements GroupOfStopPlacesReposit
                 "       (SELECT max(gospv.version) " +
                 "           FROM group_of_stop_places gospv " +
                 "           WHERE gospv.netex_id = gosp1.netex_id) " +
-                "      GROUP BY gosp1.netex_id " +
+                "      GROUP BY gosp1.id, gosp1.netex_id " +
                 "  ) gosp " +
                 "JOIN group_of_stop_places g ON gosp.netex_id = g.netex_id");
 
