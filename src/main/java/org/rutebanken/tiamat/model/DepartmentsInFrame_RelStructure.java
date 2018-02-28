@@ -26,7 +26,7 @@ public class DepartmentsInFrame_RelStructure
 
     public List<Department> getDepartment() {
         if (department == null) {
-            department = new ArrayList<Department>();
+            department = new ArrayList<>();
         }
         return this.department;
     }

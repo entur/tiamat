@@ -27,7 +27,7 @@ public class NetworkRestrictionsInFrame_RelStructure
 
     public List<JAXBElement<? extends NetworkRestriction_VersionStructure>> getNetworkRestriction() {
         if (networkRestriction == null) {
-            networkRestriction = new ArrayList<JAXBElement<? extends NetworkRestriction_VersionStructure>>();
+            networkRestriction = new ArrayList<>();
         }
         return this.networkRestriction;
     }

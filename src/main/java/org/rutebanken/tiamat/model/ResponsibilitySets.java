@@ -25,7 +25,7 @@ public class ResponsibilitySets {
 
     public List<ResponsibilitySet> getResponsibilitySet() {
         if (responsibilitySet == null) {
-            responsibilitySet = new ArrayList<ResponsibilitySet>();
+            responsibilitySet = new ArrayList<>();
         }
         return this.responsibilitySet;
     }

@@ -26,7 +26,7 @@ public class CrewBaseRefs_RelStructure
 
     public List<CrewBaseRefStructure> getCrewBaseRef() {
         if (crewBaseRef == null) {
-            crewBaseRef = new ArrayList<CrewBaseRefStructure>();
+            crewBaseRef = new ArrayList<>();
         }
         return this.crewBaseRef;
     }

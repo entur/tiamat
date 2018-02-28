@@ -26,7 +26,7 @@ public class PurposesOfGroupingInFrame_RelStructure
 
     public List<PurposeOfGrouping> getPurposeOfGrouping() {
         if (purposeOfGrouping == null) {
-            purposeOfGrouping = new ArrayList<PurposeOfGrouping>();
+            purposeOfGrouping = new ArrayList<>();
         }
         return this.purposeOfGrouping;
     }

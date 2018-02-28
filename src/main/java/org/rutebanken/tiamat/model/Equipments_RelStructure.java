@@ -27,7 +27,7 @@ public class Equipments_RelStructure
 
     public List<JAXBElement<?>> getEquipmentRefOrEquipment() {
         if (equipmentRefOrEquipment == null) {
-            equipmentRefOrEquipment = new ArrayList<JAXBElement<?>>();
+            equipmentRefOrEquipment = new ArrayList<>();
         }
         return this.equipmentRefOrEquipment;
     }

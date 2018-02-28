@@ -26,7 +26,7 @@ public class ModeRefs_RelStructure
 
     public List<ModeRefStructure> getModeRef() {
         if (modeRef == null) {
-            modeRef = new ArrayList<ModeRefStructure>();
+            modeRef = new ArrayList<>();
         }
         return this.modeRef;
     }

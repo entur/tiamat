@@ -68,7 +68,7 @@ public class SanitaryEquipment_VersionStructure
 
     public List<SanitaryFacilityEnumeration> getSanitaryFacilityList() {
         if (sanitaryFacilityList == null) {
-            sanitaryFacilityList = new ArrayList<SanitaryFacilityEnumeration>();
+            sanitaryFacilityList = new ArrayList<>();
         }
         return this.sanitaryFacilityList;
     }
@@ -107,7 +107,7 @@ public class SanitaryEquipment_VersionStructure
 
     public List<PaymentMethodEnumeration> getPaymentMethods() {
         if (paymentMethods == null) {
-            paymentMethods = new ArrayList<PaymentMethodEnumeration>();
+            paymentMethods = new ArrayList<>();
         }
         return this.paymentMethods;
     }

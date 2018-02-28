@@ -26,7 +26,7 @@ public class DayTypeRefs_RelStructure
 
     public List<DayTypeRefStructure> getDayTypeRef() {
         if (dayTypeRef == null) {
-            dayTypeRef = new ArrayList<DayTypeRefStructure>();
+            dayTypeRef = new ArrayList<>();
         }
         return this.dayTypeRef;
     }

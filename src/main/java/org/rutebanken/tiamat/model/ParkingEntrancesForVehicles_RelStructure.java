@@ -26,7 +26,7 @@ public class ParkingEntrancesForVehicles_RelStructure
 
     public List<Object> getParkingEntranceForVehiclesRefOrParkingEntranceForVehicles() {
         if (parkingEntranceForVehiclesRefOrParkingEntranceForVehicles == null) {
-            parkingEntranceForVehiclesRefOrParkingEntranceForVehicles = new ArrayList<Object>();
+            parkingEntranceForVehiclesRefOrParkingEntranceForVehicles = new ArrayList<>();
         }
         return this.parkingEntranceForVehiclesRefOrParkingEntranceForVehicles;
     }

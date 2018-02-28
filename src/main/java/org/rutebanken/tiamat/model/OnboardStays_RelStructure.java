@@ -26,7 +26,7 @@ public class OnboardStays_RelStructure
 
     public List<OnboardStay> getOnboardStay() {
         if (onboardStay == null) {
-            onboardStay = new ArrayList<OnboardStay>();
+            onboardStay = new ArrayList<>();
         }
         return this.onboardStay;
     }

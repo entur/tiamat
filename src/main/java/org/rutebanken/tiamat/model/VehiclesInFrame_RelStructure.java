@@ -26,7 +26,7 @@ public class VehiclesInFrame_RelStructure
 
     public List<DataManagedObjectStructure> getTrainElementOrVehicle() {
         if (trainElementOrVehicle == null) {
-            trainElementOrVehicle = new ArrayList<DataManagedObjectStructure>();
+            trainElementOrVehicle = new ArrayList<>();
         }
         return this.trainElementOrVehicle;
     }

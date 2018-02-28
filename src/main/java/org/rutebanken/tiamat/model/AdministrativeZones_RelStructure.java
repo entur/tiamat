@@ -26,7 +26,7 @@ public class AdministrativeZones_RelStructure
 
     public List<Object> getAdministrativeZoneRefOrAdministrativeZone() {
         if (administrativeZoneRefOrAdministrativeZone == null) {
-            administrativeZoneRefOrAdministrativeZone = new ArrayList<Object>();
+            administrativeZoneRefOrAdministrativeZone = new ArrayList<>();
         }
         return this.administrativeZoneRefOrAdministrativeZone;
     }

@@ -26,7 +26,7 @@ public class TrainsInCompoundTrain_RelStructure
 
     public List<TrainInCompoundTrain_VersionedChildStructure> getTrainInCompoundTrain() {
         if (trainInCompoundTrain == null) {
-            trainInCompoundTrain = new ArrayList<TrainInCompoundTrain_VersionedChildStructure>();
+            trainInCompoundTrain = new ArrayList<>();
         }
         return this.trainInCompoundTrain;
     }

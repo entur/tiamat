@@ -27,7 +27,7 @@ public class DayTypes_RelStructure
 
     public List<JAXBElement<?>> getDayTypeRefOrDayType_() {
         if (dayTypeRefOrDayType_ == null) {
-            dayTypeRefOrDayType_ = new ArrayList<JAXBElement<?>>();
+            dayTypeRefOrDayType_ = new ArrayList<>();
         }
         return this.dayTypeRefOrDayType_;
     }

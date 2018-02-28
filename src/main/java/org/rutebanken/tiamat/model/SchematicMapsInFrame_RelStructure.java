@@ -26,7 +26,7 @@ public class SchematicMapsInFrame_RelStructure
 
     public List<SchematicMap> getSchematicMap() {
         if (schematicMap == null) {
-            schematicMap = new ArrayList<SchematicMap>();
+            schematicMap = new ArrayList<>();
         }
         return this.schematicMap;
     }

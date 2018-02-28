@@ -27,7 +27,7 @@ public class CommonSectionPointMembers_RelStructure
 
     public List<JAXBElement<? extends CommonSectionPointMember_VersionedChildStructure>> getCommonSectionPointMember() {
         if (commonSectionPointMember == null) {
-            commonSectionPointMember = new ArrayList<JAXBElement<? extends CommonSectionPointMember_VersionedChildStructure>>();
+            commonSectionPointMember = new ArrayList<>();
         }
         return this.commonSectionPointMember;
     }

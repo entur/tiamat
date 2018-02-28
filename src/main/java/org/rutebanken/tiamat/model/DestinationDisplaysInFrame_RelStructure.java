@@ -26,7 +26,7 @@ public class DestinationDisplaysInFrame_RelStructure
 
     public List<DestinationDisplay> getDestinationDisplay() {
         if (destinationDisplay == null) {
-            destinationDisplay = new ArrayList<DestinationDisplay>();
+            destinationDisplay = new ArrayList<>();
         }
         return this.destinationDisplay;
     }

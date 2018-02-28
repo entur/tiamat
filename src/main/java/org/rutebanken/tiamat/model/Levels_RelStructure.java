@@ -26,7 +26,7 @@ public class Levels_RelStructure
 
     public List<Object> getLevelRefOrLevel() {
         if (levelRefOrLevel == null) {
-            levelRefOrLevel = new ArrayList<Object>();
+            levelRefOrLevel = new ArrayList<>();
         }
         return this.levelRefOrLevel;
     }

@@ -26,7 +26,7 @@ public class PointsInJourneyPattern_RelStructure
 
     public List<PointInLinkSequence_VersionedChildStructure> getPointInJourneyPatternOrStopPointInJourneyPatternOrTimingPointInJourneyPattern() {
         if (pointInJourneyPatternOrStopPointInJourneyPatternOrTimingPointInJourneyPattern == null) {
-            pointInJourneyPatternOrStopPointInJourneyPatternOrTimingPointInJourneyPattern = new ArrayList<PointInLinkSequence_VersionedChildStructure>();
+            pointInJourneyPatternOrStopPointInJourneyPatternOrTimingPointInJourneyPattern = new ArrayList<>();
         }
         return this.pointInJourneyPatternOrStopPointInJourneyPatternOrTimingPointInJourneyPattern;
     }

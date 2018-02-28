@@ -27,7 +27,7 @@ public class OrganisationRefs_RelStructure
 
     public List<JAXBElement<? extends OrganisationRefStructure>> getOrganisationRef() {
         if (organisationRef == null) {
-            organisationRef = new ArrayList<JAXBElement<? extends OrganisationRefStructure>>();
+            organisationRef = new ArrayList<>();
         }
         return this.organisationRef;
     }

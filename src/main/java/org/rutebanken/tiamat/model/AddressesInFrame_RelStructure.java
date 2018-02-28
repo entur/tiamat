@@ -27,7 +27,7 @@ public class AddressesInFrame_RelStructure
 
     public List<JAXBElement<? extends Address_VersionStructure>> getAddress() {
         if (address == null) {
-            address = new ArrayList<JAXBElement<? extends Address_VersionStructure>>();
+            address = new ArrayList<>();
         }
         return this.address;
     }

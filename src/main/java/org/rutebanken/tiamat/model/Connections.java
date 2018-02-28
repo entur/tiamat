@@ -27,21 +27,21 @@ public class Connections {
 
     public List<Access> getAccess() {
         if (access == null) {
-            access = new ArrayList<Access>();
+            access = new ArrayList<>();
         }
         return this.access;
     }
 
     public List<Connection> getConnection() {
         if (connection == null) {
-            connection = new ArrayList<Connection>();
+            connection = new ArrayList<>();
         }
         return this.connection;
     }
 
     public List<SiteConnection> getSiteConnection() {
         if (siteConnection == null) {
-            siteConnection = new ArrayList<SiteConnection>();
+            siteConnection = new ArrayList<>();
         }
         return this.siteConnection;
     }

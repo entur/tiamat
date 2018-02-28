@@ -26,7 +26,7 @@ public class QuayRefs_RelStructure
 
     public List<QuayReference> getQuayRef() {
         if (quayRef == null) {
-            quayRef = new ArrayList<QuayReference>();
+            quayRef = new ArrayList<>();
         }
         return this.quayRef;
     }

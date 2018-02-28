@@ -26,7 +26,7 @@ public class LinksInJourneyPattern_RelStructure
 
     public List<LinkInLinkSequence_VersionedChildStructure> getServiceLinkInJourneyPatternOrTimingLinkInJourneyPattern() {
         if (serviceLinkInJourneyPatternOrTimingLinkInJourneyPattern == null) {
-            serviceLinkInJourneyPatternOrTimingLinkInJourneyPattern = new ArrayList<LinkInLinkSequence_VersionedChildStructure>();
+            serviceLinkInJourneyPatternOrTimingLinkInJourneyPattern = new ArrayList<>();
         }
         return this.serviceLinkInJourneyPatternOrTimingLinkInJourneyPattern;
     }

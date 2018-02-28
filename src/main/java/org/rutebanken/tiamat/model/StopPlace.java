@@ -205,7 +205,7 @@ public class StopPlace
     @JsonIgnore
     public List<VehicleModeEnumeration> getOtherTransportModes() {
         if (otherTransportModes == null) {
-            otherTransportModes = new ArrayList<VehicleModeEnumeration>();
+            otherTransportModes = new ArrayList<>();
         }
         return this.otherTransportModes;
     }

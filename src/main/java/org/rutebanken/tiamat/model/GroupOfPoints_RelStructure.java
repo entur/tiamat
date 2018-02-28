@@ -26,7 +26,7 @@ public class GroupOfPoints_RelStructure
 
     public List<GroupOfPoints> getGroupOfPoints() {
         if (groupOfPoints == null) {
-            groupOfPoints = new ArrayList<GroupOfPoints>();
+            groupOfPoints = new ArrayList<>();
         }
         return this.groupOfPoints;
     }

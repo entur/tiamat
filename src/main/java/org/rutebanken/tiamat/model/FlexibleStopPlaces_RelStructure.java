@@ -26,7 +26,7 @@ public class FlexibleStopPlaces_RelStructure
 
     public List<Object> getFlexibleStopPlaceRefOrFlexibleStopPlace() {
         if (flexibleStopPlaceRefOrFlexibleStopPlace == null) {
-            flexibleStopPlaceRefOrFlexibleStopPlace = new ArrayList<Object>();
+            flexibleStopPlaceRefOrFlexibleStopPlace = new ArrayList<>();
         }
         return this.flexibleStopPlaceRefOrFlexibleStopPlace;
     }

@@ -33,7 +33,7 @@ public class LuggageService_VersionStructure
 
     public List<LuggageServiceFacilityEnumeration> getLuggageServiceFacilityList() {
         if (luggageServiceFacilityList == null) {
-            luggageServiceFacilityList = new ArrayList<LuggageServiceFacilityEnumeration>();
+            luggageServiceFacilityList = new ArrayList<>();
         }
         return this.luggageServiceFacilityList;
     }

@@ -27,7 +27,7 @@ public class NoticeAssignments_RelStructure
 
     public List<JAXBElement<?>> getNoticeAssignment_OrNoticeAssignmentView() {
         if (noticeAssignment_OrNoticeAssignmentView == null) {
-            noticeAssignment_OrNoticeAssignmentView = new ArrayList<JAXBElement<?>>();
+            noticeAssignment_OrNoticeAssignmentView = new ArrayList<>();
         }
         return this.noticeAssignment_OrNoticeAssignmentView;
     }

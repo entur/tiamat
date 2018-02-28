@@ -26,7 +26,7 @@ public class TrafficControlPointsInFrame_RelStructure
 
     public List<TrafficControlPoint> getTrafficControlPoint() {
         if (trafficControlPoint == null) {
-            trafficControlPoint = new ArrayList<TrafficControlPoint>();
+            trafficControlPoint = new ArrayList<>();
         }
         return this.trafficControlPoint;
     }

@@ -26,7 +26,7 @@ public class CheckConstraintInFrame_RelStructure
 
     public List<CheckConstraint> getCheckConstraint() {
         if (checkConstraint == null) {
-            checkConstraint = new ArrayList<CheckConstraint>();
+            checkConstraint = new ArrayList<>();
         }
         return this.checkConstraint;
     }

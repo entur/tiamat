@@ -26,7 +26,7 @@ public class DirectionsInFrame_RelStructure
 
     public List<Direction> getDirection() {
         if (direction == null) {
-            direction = new ArrayList<Direction>();
+            direction = new ArrayList<>();
         }
         return this.direction;
     }

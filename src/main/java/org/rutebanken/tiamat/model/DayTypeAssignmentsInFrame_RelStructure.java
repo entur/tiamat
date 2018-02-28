@@ -26,7 +26,7 @@ public class DayTypeAssignmentsInFrame_RelStructure
 
     public List<DayTypeAssignment> getDayTypeAssignment() {
         if (dayTypeAssignment == null) {
-            dayTypeAssignment = new ArrayList<DayTypeAssignment>();
+            dayTypeAssignment = new ArrayList<>();
         }
         return this.dayTypeAssignment;
     }

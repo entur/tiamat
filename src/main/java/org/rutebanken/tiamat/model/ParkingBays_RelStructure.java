@@ -26,7 +26,7 @@ public class ParkingBays_RelStructure
 
     public List<Object> getParkingBayRefOrParkingBay() {
         if (parkingBayRefOrParkingBay == null) {
-            parkingBayRefOrParkingBay = new ArrayList<Object>();
+            parkingBayRefOrParkingBay = new ArrayList<>();
         }
         return this.parkingBayRefOrParkingBay;
     }

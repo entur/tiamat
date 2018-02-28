@@ -26,7 +26,7 @@ public class SiteFacilitySets_RelStructure
 
     public List<Object> getSiteFacilitySetRefOrSiteFacilitySet() {
         if (siteFacilitySetRefOrSiteFacilitySet == null) {
-            siteFacilitySetRefOrSiteFacilitySet = new ArrayList<Object>();
+            siteFacilitySetRefOrSiteFacilitySet = new ArrayList<>();
         }
         return this.siteFacilitySetRefOrSiteFacilitySet;
     }

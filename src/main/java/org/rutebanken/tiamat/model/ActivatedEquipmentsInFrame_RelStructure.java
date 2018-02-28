@@ -26,7 +26,7 @@ public class ActivatedEquipmentsInFrame_RelStructure
 
     public List<ActivatedEquipment> getActivatedEquipment() {
         if (activatedEquipment == null) {
-            activatedEquipment = new ArrayList<ActivatedEquipment>();
+            activatedEquipment = new ArrayList<>();
         }
         return this.activatedEquipment;
     }

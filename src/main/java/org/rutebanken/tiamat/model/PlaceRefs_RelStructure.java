@@ -26,7 +26,7 @@ public class PlaceRefs_RelStructure
 
     public List<PlaceRef> getPlaceRef() {
         if (placeRef == null) {
-            placeRef = new ArrayList<PlaceRef>();
+            placeRef = new ArrayList<>();
         }
         return this.placeRef;
     }

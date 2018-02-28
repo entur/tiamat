@@ -28,7 +28,7 @@ public class SitePathLinks_RelStructure
 
     public List<PathLinkRefStructure> getPathLinkRefOrSitePathLink() {
         if (pathLinkRefOrSitePathLink == null) {
-            pathLinkRefOrSitePathLink = new ArrayList<PathLinkRefStructure>();
+            pathLinkRefOrSitePathLink = new ArrayList<>();
         }
         return this.pathLinkRefOrSitePathLink;
     }

@@ -26,7 +26,7 @@ public class Versions_RelStructure
 
     public List<Object> getVersionRefOrVersion() {
         if (versionRefOrVersion == null) {
-            versionRefOrVersion = new ArrayList<Object>();
+            versionRefOrVersion = new ArrayList<>();
         }
         return this.versionRefOrVersion;
     }

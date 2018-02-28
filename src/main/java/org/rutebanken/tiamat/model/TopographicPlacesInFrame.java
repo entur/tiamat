@@ -26,7 +26,7 @@ public class TopographicPlacesInFrame
 
     public List<TopographicPlace> getTopographicPlace() {
         if (topographicPlace == null) {
-            topographicPlace = new ArrayList<TopographicPlace>();
+            topographicPlace = new ArrayList<>();
         }
         return this.topographicPlace;
     }

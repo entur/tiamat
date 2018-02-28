@@ -26,7 +26,7 @@ public class VehicleEquipments_RelStructure
 
     public List<ActualVehicleEquipment_VersionStructure> getAccessVehicleEquipmentOrWheelchairVehicleEquipment() {
         if (accessVehicleEquipmentOrWheelchairVehicleEquipment == null) {
-            accessVehicleEquipmentOrWheelchairVehicleEquipment = new ArrayList<ActualVehicleEquipment_VersionStructure>();
+            accessVehicleEquipmentOrWheelchairVehicleEquipment = new ArrayList<>();
         }
         return this.accessVehicleEquipmentOrWheelchairVehicleEquipment;
     }

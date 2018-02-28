@@ -26,7 +26,7 @@ public class TopographicPlaces_RelStructure
 
     public List<Object> getTopographicPlaceRefAndTopographicPlace() {
         if (topographicPlaceRefAndTopographicPlace == null) {
-            topographicPlaceRefAndTopographicPlace = new ArrayList<Object>();
+            topographicPlaceRefAndTopographicPlace = new ArrayList<>();
         }
         return this.topographicPlaceRefAndTopographicPlace;
     }

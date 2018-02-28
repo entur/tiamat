@@ -26,7 +26,7 @@ public class CommonSectionsInFrame_RelStructure
 
     public List<CommonSection> getCommonSection() {
         if (commonSection == null) {
-            commonSection = new ArrayList<CommonSection>();
+            commonSection = new ArrayList<>();
         }
         return this.commonSection;
     }

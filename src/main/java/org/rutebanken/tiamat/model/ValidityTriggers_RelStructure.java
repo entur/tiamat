@@ -26,7 +26,7 @@ public class ValidityTriggers_RelStructure
 
     public List<ValidityTrigger> getValidityTrigger() {
         if (validityTrigger == null) {
-            validityTrigger = new ArrayList<ValidityTrigger>();
+            validityTrigger = new ArrayList<>();
         }
         return this.validityTrigger;
     }

@@ -26,7 +26,7 @@ public class AccessZones_RelStructure
 
     public List<Object> getAccessZoneRefOrAccessZone() {
         if (accessZoneRefOrAccessZone == null) {
-            accessZoneRefOrAccessZone = new ArrayList<Object>();
+            accessZoneRefOrAccessZone = new ArrayList<>();
         }
         return this.accessZoneRefOrAccessZone;
     }

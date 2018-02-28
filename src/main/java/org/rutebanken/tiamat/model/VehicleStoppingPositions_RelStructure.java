@@ -26,7 +26,7 @@ public class VehicleStoppingPositions_RelStructure
 
     public List<Object> getVehicleStoppingPositionRefOrVehicleStoppingPosition() {
         if (vehicleStoppingPositionRefOrVehicleStoppingPosition == null) {
-            vehicleStoppingPositionRefOrVehicleStoppingPosition = new ArrayList<Object>();
+            vehicleStoppingPositionRefOrVehicleStoppingPosition = new ArrayList<>();
         }
         return this.vehicleStoppingPositionRefOrVehicleStoppingPosition;
     }

@@ -26,7 +26,7 @@ public class ValidityTriggerRefs_RelStructure
 
     public List<ValidityTriggerRefStructure> getValidityTriggerRef() {
         if (validityTriggerRef == null) {
-            validityTriggerRef = new ArrayList<ValidityTriggerRefStructure>();
+            validityTriggerRef = new ArrayList<>();
         }
         return this.validityTriggerRef;
     }

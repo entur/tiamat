@@ -25,7 +25,7 @@ public class Suitabilities {
 
     public List<Suitability> getSuitability() {
         if (suitability == null) {
-            suitability = new ArrayList<Suitability>();
+            suitability = new ArrayList<>();
         }
         return this.suitability;
     }

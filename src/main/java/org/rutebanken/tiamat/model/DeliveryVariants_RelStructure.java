@@ -26,7 +26,7 @@ public class DeliveryVariants_RelStructure
 
     public List<DeliveryVariant> getDeliveryVariant() {
         if (deliveryVariant == null) {
-            deliveryVariant = new ArrayList<DeliveryVariant>();
+            deliveryVariant = new ArrayList<>();
         }
         return this.deliveryVariant;
     }

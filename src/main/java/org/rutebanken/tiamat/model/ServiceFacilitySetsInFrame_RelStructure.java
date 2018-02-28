@@ -26,7 +26,7 @@ public class ServiceFacilitySetsInFrame_RelStructure
 
     public List<ServiceFacilitySet> getServiceFacilitySet() {
         if (serviceFacilitySet == null) {
-            serviceFacilitySet = new ArrayList<ServiceFacilitySet>();
+            serviceFacilitySet = new ArrayList<>();
         }
         return this.serviceFacilitySet;
     }

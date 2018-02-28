@@ -26,7 +26,7 @@ public class OperatingDaysInFrame_RelStructure
 
     public List<OperatingDay> getOperatingDay() {
         if (operatingDay == null) {
-            operatingDay = new ArrayList<OperatingDay>();
+            operatingDay = new ArrayList<>();
         }
         return this.operatingDay;
     }

@@ -26,7 +26,7 @@ public class ServiceExclusionsInFrame_RelStructure
 
     public List<ServiceExclusion> getServiceExclusion() {
         if (serviceExclusion == null) {
-            serviceExclusion = new ArrayList<ServiceExclusion>();
+            serviceExclusion = new ArrayList<>();
         }
         return this.serviceExclusion;
     }

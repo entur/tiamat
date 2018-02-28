@@ -59,7 +59,7 @@ public class TicketingEquipment_VersionStructure
 
     public List<VehicleModeEnumeration> getVehicleModes() {
         if (vehicleModes == null) {
-            vehicleModes = new ArrayList<VehicleModeEnumeration>();
+            vehicleModes = new ArrayList<>();
         }
         return this.vehicleModes;
     }
@@ -90,14 +90,14 @@ public class TicketingEquipment_VersionStructure
 
     public List<TicketingFacilityEnumeration> getTicketingFacilityList() {
         if (ticketingFacilityList == null) {
-            ticketingFacilityList = new ArrayList<TicketingFacilityEnumeration>();
+            ticketingFacilityList = new ArrayList<>();
         }
         return this.ticketingFacilityList;
     }
 
     public List<TicketingServiceFacilityEnumeration> getTicketingServiceFacilityList() {
         if (ticketingServiceFacilityList == null) {
-            ticketingServiceFacilityList = new ArrayList<TicketingServiceFacilityEnumeration>();
+            ticketingServiceFacilityList = new ArrayList<>();
         }
         return this.ticketingServiceFacilityList;
     }
@@ -136,21 +136,21 @@ public class TicketingEquipment_VersionStructure
 
     public List<PaymentMethodEnumeration> getPaymentMethods() {
         if (paymentMethods == null) {
-            paymentMethods = new ArrayList<PaymentMethodEnumeration>();
+            paymentMethods = new ArrayList<>();
         }
         return this.paymentMethods;
     }
 
     public List<TicketTypeEnumeration> getTicketTypesAvailable() {
         if (ticketTypesAvailable == null) {
-            ticketTypesAvailable = new ArrayList<TicketTypeEnumeration>();
+            ticketTypesAvailable = new ArrayList<>();
         }
         return this.ticketTypesAvailable;
     }
 
     public List<TicketingFacilityEnumeration> getScopeOfTicketsAvailable() {
         if (scopeOfTicketsAvailable == null) {
-            scopeOfTicketsAvailable = new ArrayList<TicketingFacilityEnumeration>();
+            scopeOfTicketsAvailable = new ArrayList<>();
         }
         return this.scopeOfTicketsAvailable;
     }

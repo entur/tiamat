@@ -27,7 +27,7 @@ public class TransportOrganisationRefs_RelStructure
 
     public List<JAXBElement<? extends OrganisationRefStructure>> getTransportOrganisationRef() {
         if (transportOrganisationRef == null) {
-            transportOrganisationRef = new ArrayList<JAXBElement<? extends OrganisationRefStructure>>();
+            transportOrganisationRef = new ArrayList<>();
         }
         return this.transportOrganisationRef;
     }

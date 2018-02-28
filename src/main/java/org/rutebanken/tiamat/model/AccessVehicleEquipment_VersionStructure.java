@@ -139,7 +139,7 @@ public class AccessVehicleEquipment_VersionStructure
 
     public List<MobilityEnumeration> getSuitableFor() {
         if (suitableFor == null) {
-            suitableFor = new ArrayList<MobilityEnumeration>();
+            suitableFor = new ArrayList<>();
         }
         return this.suitableFor;
     }

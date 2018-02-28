@@ -68,7 +68,7 @@ public class NavigationPath_VersionStructure
 
     public List<AccessModeEnumeration> getAccessModes() {
         if (accessModes == null) {
-            accessModes = new ArrayList<AccessModeEnumeration>();
+            accessModes = new ArrayList<>();
         }
         return this.accessModes;
     }
@@ -147,7 +147,7 @@ public class NavigationPath_VersionStructure
 
     public List<AccessFeatureEnumeration> getAccessFeatureList() {
         if (accessFeatureList == null) {
-            accessFeatureList = new ArrayList<AccessFeatureEnumeration>();
+            accessFeatureList = new ArrayList<>();
         }
         return this.accessFeatureList;
     }

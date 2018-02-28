@@ -26,7 +26,7 @@ public class TypesOfEquipment_RelStructure
 
     public List<Object> getTypeOfEquipmentRefOrTypeOfEquipment() {
         if (typeOfEquipmentRefOrTypeOfEquipment == null) {
-            typeOfEquipmentRefOrTypeOfEquipment = new ArrayList<Object>();
+            typeOfEquipmentRefOrTypeOfEquipment = new ArrayList<>();
         }
         return this.typeOfEquipmentRefOrTypeOfEquipment;
     }

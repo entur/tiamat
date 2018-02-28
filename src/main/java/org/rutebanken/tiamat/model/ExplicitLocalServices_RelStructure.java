@@ -27,7 +27,7 @@ public class ExplicitLocalServices_RelStructure
 
     public List<JAXBElement<?>> getLocalServiceRefOrLocalService() {
         if (localServiceRefOrLocalService == null) {
-            localServiceRefOrLocalService = new ArrayList<JAXBElement<?>>();
+            localServiceRefOrLocalService = new ArrayList<>();
         }
         return this.localServiceRefOrLocalService;
     }

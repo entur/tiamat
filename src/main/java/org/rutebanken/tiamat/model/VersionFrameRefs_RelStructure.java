@@ -27,7 +27,7 @@ public class VersionFrameRefs_RelStructure
 
     public List<JAXBElement<? extends VersionFrameRefStructure>> getVersionFrameRef() {
         if (versionFrameRef == null) {
-            versionFrameRef = new ArrayList<JAXBElement<? extends VersionFrameRefStructure>>();
+            versionFrameRef = new ArrayList<>();
         }
         return this.versionFrameRef;
     }

@@ -26,7 +26,7 @@ public class FeatureTypeRefs_RelStructure
 
     public List<TypeOfFeatureRefStructure> getTypeOfFeatureRef() {
         if (typeOfFeatureRef == null) {
-            typeOfFeatureRef = new ArrayList<TypeOfFeatureRefStructure>();
+            typeOfFeatureRef = new ArrayList<>();
         }
         return this.typeOfFeatureRef;
     }

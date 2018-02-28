@@ -26,7 +26,7 @@ public class RetailService_VersionStructure
 
     public List<RetailServiceEnumeration> getServiceList() {
         if (serviceList == null) {
-            serviceList = new ArrayList<RetailServiceEnumeration>();
+            serviceList = new ArrayList<>();
         }
         return this.serviceList;
     }

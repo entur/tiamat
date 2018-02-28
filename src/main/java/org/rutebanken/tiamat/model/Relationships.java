@@ -25,7 +25,7 @@ public class Relationships {
 
     public List<ClassRelationshipInFrameStructure> getClassRelationshipInFrame() {
         if (classRelationshipInFrame == null) {
-            classRelationshipInFrame = new ArrayList<ClassRelationshipInFrameStructure>();
+            classRelationshipInFrame = new ArrayList<>();
         }
         return classRelationshipInFrame;
     }

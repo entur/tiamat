@@ -64,14 +64,14 @@ public class PassengerInformationEquipment_VersionStructure
 
     public List<PassengerInformationFacilityEnumeration> getPassengerInformationFacilityList() {
         if (passengerInformationFacilityList == null) {
-            passengerInformationFacilityList = new ArrayList<PassengerInformationFacilityEnumeration>();
+            passengerInformationFacilityList = new ArrayList<>();
         }
         return this.passengerInformationFacilityList;
     }
 
     public List<AccessibilityInfoFacilityEnumeration> getAccessibilityInfoFacilityList() {
         if (accessibilityInfoFacilityList == null) {
-            accessibilityInfoFacilityList = new ArrayList<AccessibilityInfoFacilityEnumeration>();
+            accessibilityInfoFacilityList = new ArrayList<>();
         }
         return this.accessibilityInfoFacilityList;
     }

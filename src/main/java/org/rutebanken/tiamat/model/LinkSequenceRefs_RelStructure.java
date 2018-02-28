@@ -27,7 +27,7 @@ public class LinkSequenceRefs_RelStructure
 
     public List<JAXBElement<? extends LinkSequenceRefStructure>> getLinkSequenceRef() {
         if (linkSequenceRef == null) {
-            linkSequenceRef = new ArrayList<JAXBElement<? extends LinkSequenceRefStructure>>();
+            linkSequenceRef = new ArrayList<>();
         }
         return this.linkSequenceRef;
     }

@@ -27,7 +27,7 @@ public class ValidityConditionRefs_RelStructure
 
     public List<JAXBElement<? extends ValidityConditionRefStructure>> getValidityConditionRef() {
         if (validityConditionRef == null) {
-            validityConditionRef = new ArrayList<JAXBElement<? extends ValidityConditionRefStructure>>();
+            validityConditionRef = new ArrayList<>();
         }
         return this.validityConditionRef;
     }

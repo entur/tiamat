@@ -26,7 +26,7 @@ public class ActivationTypeRefs_RelStructure
 
     public List<TypeOfActivationRefStructure> getTypeOfActivationRef() {
         if (typeOfActivationRef == null) {
-            typeOfActivationRef = new ArrayList<TypeOfActivationRefStructure>();
+            typeOfActivationRef = new ArrayList<>();
         }
         return this.typeOfActivationRef;
     }

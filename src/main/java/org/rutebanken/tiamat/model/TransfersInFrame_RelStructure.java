@@ -27,7 +27,7 @@ public class TransfersInFrame_RelStructure
 
     public List<JAXBElement<? extends Transfer_VersionStructure>> getTransfer() {
         if (transfer == null) {
-            transfer = new ArrayList<JAXBElement<? extends Transfer_VersionStructure>>();
+            transfer = new ArrayList<>();
         }
         return this.transfer;
     }

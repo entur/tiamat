@@ -26,7 +26,7 @@ public class NoticesInFrame_RelStructure
 
     public List<Notice> getNotice() {
         if (notice == null) {
-            notice = new ArrayList<Notice>();
+            notice = new ArrayList<>();
         }
         return this.notice;
     }

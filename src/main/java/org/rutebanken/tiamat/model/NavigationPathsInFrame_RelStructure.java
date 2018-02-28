@@ -26,7 +26,7 @@ public class NavigationPathsInFrame_RelStructure
 
     public List<NavigationPath> getNavigationPath() {
         if (navigationPath == null) {
-            navigationPath = new ArrayList<NavigationPath>();
+            navigationPath = new ArrayList<>();
         }
         return this.navigationPath;
     }

@@ -26,7 +26,7 @@ public class TypeOfServiceFeatureRefs_RelStructure
 
     public List<TypeOfServiceFeatureRefStructure> getTypeOfServiceFeatureRef() {
         if (typeOfServiceFeatureRef == null) {
-            typeOfServiceFeatureRef = new ArrayList<TypeOfServiceFeatureRefStructure>();
+            typeOfServiceFeatureRef = new ArrayList<>();
         }
         return this.typeOfServiceFeatureRef;
     }

@@ -26,7 +26,7 @@ public class FlexibleStopPlaceRefs_RelStructure
 
     public List<FlexibleStopPlaceRefStructure> getFlexibleStopPlaceRef() {
         if (flexibleStopPlaceRef == null) {
-            flexibleStopPlaceRef = new ArrayList<FlexibleStopPlaceRefStructure>();
+            flexibleStopPlaceRef = new ArrayList<>();
         }
         return this.flexibleStopPlaceRef;
     }

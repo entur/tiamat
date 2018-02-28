@@ -25,7 +25,7 @@ public class PointsOfInterest {
 
     public List<PointOfInterest> getPointOfInterest() {
         if (pointOfInterest == null) {
-            pointOfInterest = new ArrayList<PointOfInterest>();
+            pointOfInterest = new ArrayList<>();
         }
         return this.pointOfInterest;
     }

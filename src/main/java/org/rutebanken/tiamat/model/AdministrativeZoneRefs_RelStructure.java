@@ -26,7 +26,7 @@ public class AdministrativeZoneRefs_RelStructure
 
     public List<AdministrativeZoneRef> getAdministrativeZoneRef() {
         if (administrativeZoneRef == null) {
-            administrativeZoneRef = new ArrayList<AdministrativeZoneRef>();
+            administrativeZoneRef = new ArrayList<>();
         }
         return this.administrativeZoneRef;
     }

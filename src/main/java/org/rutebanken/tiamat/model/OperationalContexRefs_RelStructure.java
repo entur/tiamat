@@ -26,7 +26,7 @@ public class OperationalContexRefs_RelStructure
 
     public List<OperationalContextRefStructure> getOperationalContextRef() {
         if (operationalContextRef == null) {
-            operationalContextRef = new ArrayList<OperationalContextRefStructure>();
+            operationalContextRef = new ArrayList<>();
         }
         return this.operationalContextRef;
     }

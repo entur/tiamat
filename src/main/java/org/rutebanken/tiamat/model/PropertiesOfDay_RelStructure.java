@@ -26,7 +26,7 @@ public class PropertiesOfDay_RelStructure
 
     public List<PropertyOfDay> getPropertyOfDay() {
         if (propertyOfDay == null) {
-            propertyOfDay = new ArrayList<PropertyOfDay>();
+            propertyOfDay = new ArrayList<>();
         }
         return this.propertyOfDay;
     }

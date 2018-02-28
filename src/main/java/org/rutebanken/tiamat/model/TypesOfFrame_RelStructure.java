@@ -26,7 +26,7 @@ public class TypesOfFrame_RelStructure
 
     public List<Object> getTypeOfFrameRefOrTypeOfFrame() {
         if (typeOfFrameRefOrTypeOfFrame == null) {
-            typeOfFrameRefOrTypeOfFrame = new ArrayList<Object>();
+            typeOfFrameRefOrTypeOfFrame = new ArrayList<>();
         }
         return this.typeOfFrameRefOrTypeOfFrame;
     }

@@ -26,7 +26,7 @@ public class ActivationAssignments_RelStructure
 
     public List<Object> getActivationAssignmentRefOrActivationAssignment() {
         if (activationAssignmentRefOrActivationAssignment == null) {
-            activationAssignmentRefOrActivationAssignment = new ArrayList<Object>();
+            activationAssignmentRefOrActivationAssignment = new ArrayList<>();
         }
         return this.activationAssignmentRefOrActivationAssignment;
     }

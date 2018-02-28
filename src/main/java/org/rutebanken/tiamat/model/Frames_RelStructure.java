@@ -26,7 +26,7 @@ public class Frames_RelStructure
 
     public List<Common_VersionFrameStructure> getCommonFrame() {
         if (commonFrame == null) {
-            commonFrame = new ArrayList<Common_VersionFrameStructure>();
+            commonFrame = new ArrayList<>();
         }
         return this.commonFrame;
     }

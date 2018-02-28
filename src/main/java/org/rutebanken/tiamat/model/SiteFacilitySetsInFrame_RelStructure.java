@@ -26,7 +26,7 @@ public class SiteFacilitySetsInFrame_RelStructure
 
     public List<SiteFacilitySet> getSiteFacilitySet() {
         if (siteFacilitySet == null) {
-            siteFacilitySet = new ArrayList<SiteFacilitySet>();
+            siteFacilitySet = new ArrayList<>();
         }
         return this.siteFacilitySet;
     }

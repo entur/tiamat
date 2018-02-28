@@ -26,7 +26,7 @@ public class GroupsOfOperatorsInFrame_RelStructure
 
     public List<GroupOfOperators> getGroupOfOperators() {
         if (groupOfOperators == null) {
-            groupOfOperators = new ArrayList<GroupOfOperators>();
+            groupOfOperators = new ArrayList<>();
         }
         return this.groupOfOperators;
     }

@@ -26,7 +26,7 @@ public class FlexibleLinkProperties_RelStructure
 
     public List<FlexibleLinkProperties> getFlexibleLinkProperties() {
         if (flexibleLinkProperties == null) {
-            flexibleLinkProperties = new ArrayList<FlexibleLinkProperties>();
+            flexibleLinkProperties = new ArrayList<>();
         }
         return this.flexibleLinkProperties;
     }

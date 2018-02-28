@@ -26,7 +26,7 @@ public class PlacesInSequence_RelStructure
 
     public List<PlaceInSequence> getPlaceInSequence() {
         if (placeInSequence == null) {
-            placeInSequence = new ArrayList<PlaceInSequence>();
+            placeInSequence = new ArrayList<>();
         }
         return this.placeInSequence;
     }

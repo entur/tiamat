@@ -25,7 +25,7 @@ public class Traces_RelStructure {
 
     public List<Trace> getTrace() {
         if (trace == null) {
-            trace = new ArrayList<Trace>();
+            trace = new ArrayList<>();
         }
         return this.trace;
     }

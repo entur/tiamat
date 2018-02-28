@@ -26,7 +26,7 @@ public class TimebandsInFrame_RelStructure
 
     public List<Timeband> getTimeband() {
         if (timeband == null) {
-            timeband = new ArrayList<Timeband>();
+            timeband = new ArrayList<>();
         }
         return this.timeband;
     }

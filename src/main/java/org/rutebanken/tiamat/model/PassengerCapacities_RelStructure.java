@@ -26,7 +26,7 @@ public class PassengerCapacities_RelStructure
 
     public List<Object> getPassengerCapacityRefOrPassengerCapacity() {
         if (passengerCapacityRefOrPassengerCapacity == null) {
-            passengerCapacityRefOrPassengerCapacity = new ArrayList<Object>();
+            passengerCapacityRefOrPassengerCapacity = new ArrayList<>();
         }
         return this.passengerCapacityRefOrPassengerCapacity;
     }

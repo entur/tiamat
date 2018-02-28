@@ -26,7 +26,7 @@ public class GroupOfTimebandsInFrame_RelStructure
 
     public List<GroupOfTimebands> getGroupOfTimebands() {
         if (groupOfTimebands == null) {
-            groupOfTimebands = new ArrayList<GroupOfTimebands>();
+            groupOfTimebands = new ArrayList<>();
         }
         return this.groupOfTimebands;
     }

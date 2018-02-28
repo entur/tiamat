@@ -26,7 +26,7 @@ public class OperatingPeriods_RelStructure
 
     public List<Object> getOperatingPeriodRefOrOperatingPeriodOrUicOperatingPeriod() {
         if (operatingPeriodRefOrOperatingPeriodOrUicOperatingPeriod == null) {
-            operatingPeriodRefOrOperatingPeriodOrUicOperatingPeriod = new ArrayList<Object>();
+            operatingPeriodRefOrOperatingPeriodOrUicOperatingPeriod = new ArrayList<>();
         }
         return this.operatingPeriodRefOrOperatingPeriodOrUicOperatingPeriod;
     }

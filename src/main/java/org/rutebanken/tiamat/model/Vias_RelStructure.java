@@ -35,7 +35,7 @@ public class Vias_RelStructure
 
     public List<Via_VersionedChildStructure> getVia() {
         if (via == null) {
-            via = new ArrayList<Via_VersionedChildStructure>();
+            via = new ArrayList<>();
         }
         return this.via;
     }

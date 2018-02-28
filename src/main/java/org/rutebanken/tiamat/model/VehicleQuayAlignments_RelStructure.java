@@ -26,7 +26,7 @@ public class VehicleQuayAlignments_RelStructure
 
     public List<VehicleQuayAlignment> getVehicleQuayAlignment() {
         if (vehicleQuayAlignment == null) {
-            vehicleQuayAlignment = new ArrayList<VehicleQuayAlignment>();
+            vehicleQuayAlignment = new ArrayList<>();
         }
         return this.vehicleQuayAlignment;
     }

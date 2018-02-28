@@ -26,7 +26,7 @@ public class PointOfInterestClassificationHierarchyMembers_RelStructure
 
     public List<PointOfInterestClassificationHierarchyMemberStructure> getClassificationHierarchyMember() {
         if (classificationHierarchyMember == null) {
-            classificationHierarchyMember = new ArrayList<PointOfInterestClassificationHierarchyMemberStructure>();
+            classificationHierarchyMember = new ArrayList<>();
         }
         return this.classificationHierarchyMember;
     }

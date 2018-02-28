@@ -26,7 +26,7 @@ public class StairFlights_RelStructure
 
     public List<StairFlight> getStairFlight() {
         if (stairFlight == null) {
-            stairFlight = new ArrayList<StairFlight>();
+            stairFlight = new ArrayList<>();
         }
         return this.stairFlight;
     }

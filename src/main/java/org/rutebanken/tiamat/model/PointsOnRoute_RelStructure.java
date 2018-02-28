@@ -26,7 +26,7 @@ public class PointsOnRoute_RelStructure
 
     public List<PointOnRoute> getPointOnRoute() {
         if (pointOnRoute == null) {
-            pointOnRoute = new ArrayList<PointOnRoute>();
+            pointOnRoute = new ArrayList<>();
         }
         return this.pointOnRoute;
     }

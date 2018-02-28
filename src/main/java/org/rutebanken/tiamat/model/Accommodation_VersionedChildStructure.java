@@ -109,14 +109,14 @@ public class Accommodation_VersionedChildStructure
 
     public List<NuisanceFacilityEnumeration> getNuisanceFacilityList() {
         if (nuisanceFacilityList == null) {
-            nuisanceFacilityList = new ArrayList<NuisanceFacilityEnumeration>();
+            nuisanceFacilityList = new ArrayList<>();
         }
         return this.nuisanceFacilityList;
     }
 
     public List<PassengerCommsFacilityEnumeration> getPassengerCommsFacilityList() {
         if (passengerCommsFacilityList == null) {
-            passengerCommsFacilityList = new ArrayList<PassengerCommsFacilityEnumeration>();
+            passengerCommsFacilityList = new ArrayList<>();
         }
         return this.passengerCommsFacilityList;
     }

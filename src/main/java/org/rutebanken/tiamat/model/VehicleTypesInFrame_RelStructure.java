@@ -26,7 +26,7 @@ public class VehicleTypesInFrame_RelStructure
 
     public List<VehicleType_VersionStructure> getCompoundTrainOrTrainOrVehicleType() {
         if (compoundTrainOrTrainOrVehicleType == null) {
-            compoundTrainOrTrainOrVehicleType = new ArrayList<VehicleType_VersionStructure>();
+            compoundTrainOrTrainOrVehicleType = new ArrayList<>();
         }
         return this.compoundTrainOrTrainOrVehicleType;
     }

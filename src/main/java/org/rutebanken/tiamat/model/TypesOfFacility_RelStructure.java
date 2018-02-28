@@ -26,7 +26,7 @@ public class TypesOfFacility_RelStructure
 
     public List<Object> getTypeOfFacilityRefOrTypeOfFacility() {
         if (typeOfFacilityRefOrTypeOfFacility == null) {
-            typeOfFacilityRefOrTypeOfFacility = new ArrayList<Object>();
+            typeOfFacilityRefOrTypeOfFacility = new ArrayList<>();
         }
         return this.typeOfFacilityRefOrTypeOfFacility;
     }

@@ -26,7 +26,7 @@ public class FlexiblePointProperties_RelStructure
 
     public List<FlexiblePointProperties> getFlexiblePointProperties() {
         if (flexiblePointProperties == null) {
-            flexiblePointProperties = new ArrayList<FlexiblePointProperties>();
+            flexiblePointProperties = new ArrayList<>();
         }
         return this.flexiblePointProperties;
     }

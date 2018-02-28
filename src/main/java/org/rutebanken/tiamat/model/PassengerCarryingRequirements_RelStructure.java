@@ -26,7 +26,7 @@ public class PassengerCarryingRequirements_RelStructure
 
     public List<Object> getPassengerCarryingRequirementRefOrPassengerCarryingRequirement() {
         if (passengerCarryingRequirementRefOrPassengerCarryingRequirement == null) {
-            passengerCarryingRequirementRefOrPassengerCarryingRequirement = new ArrayList<Object>();
+            passengerCarryingRequirementRefOrPassengerCarryingRequirement = new ArrayList<>();
         }
         return this.passengerCarryingRequirementRefOrPassengerCarryingRequirement;
     }

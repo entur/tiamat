@@ -27,7 +27,7 @@ public class PassengerEquipments_RelStructure
 
     public List<JAXBElement<?>> getPassengerEquipmentRefOrPassengerEquipment() {
         if (passengerEquipmentRefOrPassengerEquipment == null) {
-            passengerEquipmentRefOrPassengerEquipment = new ArrayList<JAXBElement<?>>();
+            passengerEquipmentRefOrPassengerEquipment = new ArrayList<>();
         }
         return this.passengerEquipmentRefOrPassengerEquipment;
     }

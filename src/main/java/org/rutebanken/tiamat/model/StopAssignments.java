@@ -25,7 +25,7 @@ public class StopAssignments {
 
     public List<PassengerStopAssignment> getPassengerStopAssignment() {
         if (passengerStopAssignment == null) {
-            passengerStopAssignment = new ArrayList<PassengerStopAssignment>();
+            passengerStopAssignment = new ArrayList<>();
         }
         return this.passengerStopAssignment;
     }

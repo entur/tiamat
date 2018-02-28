@@ -25,7 +25,7 @@ public class Codespaces_RelStructure
 
     public List<Object> getCodespaceRefOrCodespace() {
         if (codespaceRefOrCodespace == null) {
-            codespaceRefOrCodespace = new ArrayList<Object>();
+            codespaceRefOrCodespace = new ArrayList<>();
         }
         return this.codespaceRefOrCodespace;
     }

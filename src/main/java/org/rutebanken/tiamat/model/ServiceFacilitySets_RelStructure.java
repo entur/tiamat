@@ -26,7 +26,7 @@ public class ServiceFacilitySets_RelStructure
 
     public List<Object> getServiceFacilitySetRefOrServiceFacilitySet() {
         if (serviceFacilitySetRefOrServiceFacilitySet == null) {
-            serviceFacilitySetRefOrServiceFacilitySet = new ArrayList<Object>();
+            serviceFacilitySetRefOrServiceFacilitySet = new ArrayList<>();
         }
         return this.serviceFacilitySetRefOrServiceFacilitySet;
     }

@@ -26,7 +26,7 @@ public class CodespaceAssignment_VersionedChildStructure
 
     public List<Object> getRest() {
         if (rest == null) {
-            rest = new ArrayList<Object>();
+            rest = new ArrayList<>();
         }
         return this.rest;
     }

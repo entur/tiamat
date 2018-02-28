@@ -26,7 +26,7 @@ public class OperatingDays_RelStructure
 
     public List<Object> getOperatingDayRefOrOperatingDay() {
         if (operatingDayRefOrOperatingDay == null) {
-            operatingDayRefOrOperatingDay = new ArrayList<Object>();
+            operatingDayRefOrOperatingDay = new ArrayList<>();
         }
         return this.operatingDayRefOrOperatingDay;
     }

@@ -26,7 +26,7 @@ public class CountryRefs_RelStructure
 
     public List<CountryRef> getCountryRef() {
         if (countryRef == null) {
-            countryRef = new ArrayList<CountryRef>();
+            countryRef = new ArrayList<>();
         }
         return this.countryRef;
     }

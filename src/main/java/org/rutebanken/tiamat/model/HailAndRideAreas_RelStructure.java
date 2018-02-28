@@ -26,7 +26,7 @@ public class HailAndRideAreas_RelStructure
 
     public List<Object> getHailAndRideAreaRefOrHailAndRideArea() {
         if (hailAndRideAreaRefOrHailAndRideArea == null) {
-            hailAndRideAreaRefOrHailAndRideArea = new ArrayList<Object>();
+            hailAndRideAreaRefOrHailAndRideArea = new ArrayList<>();
         }
         return this.hailAndRideAreaRefOrHailAndRideArea;
     }

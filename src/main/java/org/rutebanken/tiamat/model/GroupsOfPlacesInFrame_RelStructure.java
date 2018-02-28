@@ -26,7 +26,7 @@ public class GroupsOfPlacesInFrame_RelStructure
 
     public List<GroupOfPlaces> getGroupOfPlaces() {
         if (groupOfPlaces == null) {
-            groupOfPlaces = new ArrayList<GroupOfPlaces>();
+            groupOfPlaces = new ArrayList<>();
         }
         return this.groupOfPlaces;
     }

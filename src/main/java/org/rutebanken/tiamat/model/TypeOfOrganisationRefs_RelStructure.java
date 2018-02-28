@@ -26,7 +26,7 @@ public class TypeOfOrganisationRefs_RelStructure
 
     public List<TypeOfOrganisationRefStructure> getTypeOfOrganisationRef() {
         if (typeOfOrganisationRef == null) {
-            typeOfOrganisationRef = new ArrayList<TypeOfOrganisationRefStructure>();
+            typeOfOrganisationRef = new ArrayList<>();
         }
         return this.typeOfOrganisationRef;
     }

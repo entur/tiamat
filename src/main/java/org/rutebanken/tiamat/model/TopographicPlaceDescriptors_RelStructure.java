@@ -26,7 +26,7 @@ public class TopographicPlaceDescriptors_RelStructure
 
     public List<TopographicPlaceDescriptor_VersionedChildStructure> getTopographicPlaceDescriptor() {
         if (topographicPlaceDescriptor == null) {
-            topographicPlaceDescriptor = new ArrayList<TopographicPlaceDescriptor_VersionedChildStructure>();
+            topographicPlaceDescriptor = new ArrayList<>();
         }
         return this.topographicPlaceDescriptor;
     }

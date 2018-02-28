@@ -26,7 +26,7 @@ public class DataSources_RelStructure
 
     public List<Object> getDataSourceRefOrDataSource() {
         if (dataSourceRefOrDataSource == null) {
-            dataSourceRefOrDataSource = new ArrayList<Object>();
+            dataSourceRefOrDataSource = new ArrayList<>();
         }
         return this.dataSourceRefOrDataSource;
     }

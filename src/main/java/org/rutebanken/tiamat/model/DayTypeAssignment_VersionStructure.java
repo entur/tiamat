@@ -73,7 +73,7 @@ public class DayTypeAssignment_VersionStructure
 
     public List<TimebandRefStructure> getTimebandRef() {
         if (timebandRef == null) {
-            timebandRef = new ArrayList<TimebandRefStructure>();
+            timebandRef = new ArrayList<>();
         }
         return this.timebandRef;
     }

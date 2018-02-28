@@ -144,7 +144,7 @@ public class PathLink extends Link {
 
     public List<AccessModeEnumeration> getAccessModes() {
         if (accessModes == null) {
-            accessModes = new ArrayList<AccessModeEnumeration>();
+            accessModes = new ArrayList<>();
         }
         return this.accessModes;
     }

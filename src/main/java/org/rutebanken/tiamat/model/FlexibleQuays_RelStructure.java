@@ -27,7 +27,7 @@ public class FlexibleQuays_RelStructure
 
     public List<JAXBElement<?>> getFlexibleQuayRefOrFlexibleQuay() {
         if (flexibleQuayRefOrFlexibleQuay == null) {
-            flexibleQuayRefOrFlexibleQuay = new ArrayList<JAXBElement<?>>();
+            flexibleQuayRefOrFlexibleQuay = new ArrayList<>();
         }
         return this.flexibleQuayRefOrFlexibleQuay;
     }

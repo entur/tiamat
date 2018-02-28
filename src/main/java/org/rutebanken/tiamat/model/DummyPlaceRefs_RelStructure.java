@@ -27,7 +27,7 @@ public class DummyPlaceRefs_RelStructure
 
     public List<JAXBElement<? extends VersionOfObjectRefStructure>> getPlaceRef_() {
         if (placeRef_ == null) {
-            placeRef_ = new ArrayList<JAXBElement<? extends VersionOfObjectRefStructure>>();
+            placeRef_ = new ArrayList<>();
         }
         return this.placeRef_;
     }

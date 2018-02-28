@@ -80,7 +80,7 @@ public abstract class SiteElement extends AddressablePlace {
 
     public List<AccessModeEnumeration> getAccessModes() {
         if (accessModes == null) {
-            accessModes = new ArrayList<AccessModeEnumeration>();
+            accessModes = new ArrayList<>();
         }
         return this.accessModes;
     }

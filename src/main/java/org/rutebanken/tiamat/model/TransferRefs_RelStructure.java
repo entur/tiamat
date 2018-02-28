@@ -27,7 +27,7 @@ public class TransferRefs_RelStructure
 
     public List<JAXBElement<? extends TransferRefStructure>> getTransferRef() {
         if (transferRef == null) {
-            transferRef = new ArrayList<JAXBElement<? extends TransferRefStructure>>();
+            transferRef = new ArrayList<>();
         }
         return this.transferRef;
     }

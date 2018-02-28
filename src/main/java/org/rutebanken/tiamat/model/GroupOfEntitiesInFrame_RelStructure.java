@@ -26,7 +26,7 @@ public class GroupOfEntitiesInFrame_RelStructure
 
     public List<GeneralGroupOfEntities> getGeneralGroupOfEntities() {
         if (generalGroupOfEntities == null) {
-            generalGroupOfEntities = new ArrayList<GeneralGroupOfEntities>();
+            generalGroupOfEntities = new ArrayList<>();
         }
         return this.generalGroupOfEntities;
     }

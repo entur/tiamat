@@ -26,7 +26,7 @@ public class VehicleManoeuvringRequirements_RelStructure
 
     public List<Object> getVehicleManoeuvringRequirementRefOrVehicleManoeuvringRequirement() {
         if (vehicleManoeuvringRequirementRefOrVehicleManoeuvringRequirement == null) {
-            vehicleManoeuvringRequirementRefOrVehicleManoeuvringRequirement = new ArrayList<Object>();
+            vehicleManoeuvringRequirementRefOrVehicleManoeuvringRequirement = new ArrayList<>();
         }
         return this.vehicleManoeuvringRequirementRefOrVehicleManoeuvringRequirement;
     }

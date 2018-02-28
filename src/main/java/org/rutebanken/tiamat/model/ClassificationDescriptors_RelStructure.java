@@ -26,7 +26,7 @@ public class ClassificationDescriptors_RelStructure
 
     public List<ClassificationDescriptor_VersionStructure> getClassificationDescriptor() {
         if (classificationDescriptor == null) {
-            classificationDescriptor = new ArrayList<ClassificationDescriptor_VersionStructure>();
+            classificationDescriptor = new ArrayList<>();
         }
         return classificationDescriptor;
     }

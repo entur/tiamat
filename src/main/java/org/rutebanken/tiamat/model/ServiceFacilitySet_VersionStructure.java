@@ -37,14 +37,14 @@ public class ServiceFacilitySet_VersionStructure
 
     public List<AccommodationAccessEnumeration> getAccommodationAccessList() {
         if (accommodationAccessList == null) {
-            accommodationAccessList = new ArrayList<AccommodationAccessEnumeration>();
+            accommodationAccessList = new ArrayList<>();
         }
         return this.accommodationAccessList;
     }
 
     public List<AccommodationFacilityEnumeration> getAccommodationFacilityList() {
         if (accommodationFacilityList == null) {
-            accommodationFacilityList = new ArrayList<AccommodationFacilityEnumeration>();
+            accommodationFacilityList = new ArrayList<>();
         }
         return this.accommodationFacilityList;
     }
@@ -59,14 +59,14 @@ public class ServiceFacilitySet_VersionStructure
 
     public List<BookingProcessEnumeration> getBookingProcessFacilityList() {
         if (bookingProcessFacilityList == null) {
-            bookingProcessFacilityList = new ArrayList<BookingProcessEnumeration>();
+            bookingProcessFacilityList = new ArrayList<>();
         }
         return this.bookingProcessFacilityList;
     }
 
     public List<CouchetteFacilityEnumeration> getCouchetteFacilityList() {
         if (couchetteFacilityList == null) {
-            couchetteFacilityList = new ArrayList<CouchetteFacilityEnumeration>();
+            couchetteFacilityList = new ArrayList<>();
         }
         return this.couchetteFacilityList;
     }
@@ -81,21 +81,21 @@ public class ServiceFacilitySet_VersionStructure
 
     public List<LuggageCarriageEnumeration> getLuggageCarriageFacilityList() {
         if (luggageCarriageFacilityList == null) {
-            luggageCarriageFacilityList = new ArrayList<LuggageCarriageEnumeration>();
+            luggageCarriageFacilityList = new ArrayList<>();
         }
         return this.luggageCarriageFacilityList;
     }
 
     public List<ReservationEnumeration> getServiceReservationFacilityList() {
         if (serviceReservationFacilityList == null) {
-            serviceReservationFacilityList = new ArrayList<ReservationEnumeration>();
+            serviceReservationFacilityList = new ArrayList<>();
         }
         return this.serviceReservationFacilityList;
     }
 
     public List<UicProductCharacteristicEnumeration> getUicProductCharacteristicList() {
         if (uicProductCharacteristicList == null) {
-            uicProductCharacteristicList = new ArrayList<UicProductCharacteristicEnumeration>();
+            uicProductCharacteristicList = new ArrayList<>();
         }
         return this.uicProductCharacteristicList;
     }

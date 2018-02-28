@@ -26,7 +26,7 @@ public class PassengerInformationEquipmentsInFrame_RelStructure
 
     public List<PassengerInformationEquipment> getPassengerInformationEquipment() {
         if (passengerInformationEquipment == null) {
-            passengerInformationEquipment = new ArrayList<PassengerInformationEquipment>();
+            passengerInformationEquipment = new ArrayList<>();
         }
         return this.passengerInformationEquipment;
     }

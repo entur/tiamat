@@ -27,7 +27,7 @@ public class GroupMembershipRefs_RelStructure
 
     public List<JAXBElement<? extends GroupOfEntitiesRefStructure>> getGroupOfPointsRef_() {
         if (groupOfPointsRef_ == null) {
-            groupOfPointsRef_ = new ArrayList<JAXBElement<? extends GroupOfEntitiesRefStructure>>();
+            groupOfPointsRef_ = new ArrayList<>();
         }
         return this.groupOfPointsRef_;
     }

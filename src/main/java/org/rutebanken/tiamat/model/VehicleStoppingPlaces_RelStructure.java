@@ -25,7 +25,7 @@ public class VehicleStoppingPlaces_RelStructure extends ContainmentAggregationSt
 
     public List<VehicleStoppingPlaceRefStructure> getVehicleStoppingPlaceRefOrVehicleStoppingPlace() {
         if (vehicleStoppingPlaceRefOrVehicleStoppingPlace == null) {
-            vehicleStoppingPlaceRefOrVehicleStoppingPlace = new ArrayList<VehicleStoppingPlaceRefStructure>();
+            vehicleStoppingPlaceRefOrVehicleStoppingPlace = new ArrayList<>();
         }
         return this.vehicleStoppingPlaceRefOrVehicleStoppingPlace;
     }

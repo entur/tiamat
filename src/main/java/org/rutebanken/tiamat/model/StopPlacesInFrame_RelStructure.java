@@ -26,7 +26,7 @@ public class StopPlacesInFrame_RelStructure
 
     public List<StopPlace> getStopPlace() {
         if (stopPlace == null) {
-            stopPlace = new ArrayList<StopPlace>();
+            stopPlace = new ArrayList<>();
         }
         return this.stopPlace;
     }

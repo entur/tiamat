@@ -27,7 +27,7 @@ public class OrganisationsInFrame_RelStructure
 
     public List<JAXBElement<? extends DataManagedObjectStructure>> getOrganisation_() {
         if (organisation_ == null) {
-            organisation_ = new ArrayList<JAXBElement<? extends DataManagedObjectStructure>>();
+            organisation_ = new ArrayList<>();
         }
         return this.organisation_;
     }

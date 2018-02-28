@@ -26,7 +26,7 @@ public class MoneyService_VersionStructure
 
     public List<MoneyServiceEnumeration> getServiceList() {
         if (serviceList == null) {
-            serviceList = new ArrayList<MoneyServiceEnumeration>();
+            serviceList = new ArrayList<>();
         }
         return this.serviceList;
     }

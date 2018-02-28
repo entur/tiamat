@@ -26,7 +26,7 @@ public class GroupOfTimebands_RelStructure
 
     public List<Object> getGroupOfTimebandsRefOrGroupOfTimebands() {
         if (groupOfTimebandsRefOrGroupOfTimebands == null) {
-            groupOfTimebandsRefOrGroupOfTimebands = new ArrayList<Object>();
+            groupOfTimebandsRefOrGroupOfTimebands = new ArrayList<>();
         }
         return this.groupOfTimebandsRefOrGroupOfTimebands;
     }

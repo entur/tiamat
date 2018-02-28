@@ -26,7 +26,7 @@ public class AccessSummaries_RelStructure
 
     public List<AccessSummary> getAccessSummary() {
         if (accessSummary == null) {
-            accessSummary = new ArrayList<AccessSummary>();
+            accessSummary = new ArrayList<>();
         }
         return this.accessSummary;
     }

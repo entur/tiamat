@@ -27,7 +27,7 @@ public class HireService_VersionStructure
 
     public List<JAXBElement<List<HireServiceEnumeration>>> getServiceList() {
         if (serviceList == null) {
-            serviceList = new ArrayList<JAXBElement<List<HireServiceEnumeration>>>();
+            serviceList = new ArrayList<>();
         }
         return this.serviceList;
     }

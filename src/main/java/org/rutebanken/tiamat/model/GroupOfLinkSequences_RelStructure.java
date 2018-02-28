@@ -26,7 +26,7 @@ public class GroupOfLinkSequences_RelStructure
 
     public List<GroupOfLinkSequences> getGroupOfLinkSequences() {
         if (groupOfLinkSequences == null) {
-            groupOfLinkSequences = new ArrayList<GroupOfLinkSequences>();
+            groupOfLinkSequences = new ArrayList<>();
         }
         return this.groupOfLinkSequences;
     }

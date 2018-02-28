@@ -31,7 +31,7 @@ public class NavigationPaths_RelStructure extends ContainmentAggregationStructur
 
     public List<Property> getNavigationPathRefOrNavigationPath() {
         if (navigationPathRefOrNavigationPath == null) {
-            navigationPathRefOrNavigationPath = new ArrayList<Property>();
+            navigationPathRefOrNavigationPath = new ArrayList<>();
         }
         return this.navigationPathRefOrNavigationPath;
     }

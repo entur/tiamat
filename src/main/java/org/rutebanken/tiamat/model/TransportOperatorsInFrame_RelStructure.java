@@ -26,7 +26,7 @@ public class TransportOperatorsInFrame_RelStructure
 
     public List<Organisation_VersionStructure> getAuthorityOrOperator() {
         if (authorityOrOperator == null) {
-            authorityOrOperator = new ArrayList<Organisation_VersionStructure>();
+            authorityOrOperator = new ArrayList<>();
         }
         return this.authorityOrOperator;
     }

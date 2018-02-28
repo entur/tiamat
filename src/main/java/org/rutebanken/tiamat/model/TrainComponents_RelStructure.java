@@ -26,7 +26,7 @@ public class TrainComponents_RelStructure
 
     public List<Object> getTrainComponentRefOrTrainComponent() {
         if (trainComponentRefOrTrainComponent == null) {
-            trainComponentRefOrTrainComponent = new ArrayList<Object>();
+            trainComponentRefOrTrainComponent = new ArrayList<>();
         }
         return this.trainComponentRefOrTrainComponent;
     }

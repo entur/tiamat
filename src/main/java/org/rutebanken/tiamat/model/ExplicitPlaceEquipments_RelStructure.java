@@ -26,7 +26,7 @@ public class ExplicitPlaceEquipments_RelStructure
 
     public List<InstalledEquipment_VersionStructure> getOtherPlaceEquipmentOrRoughSurfaceOrEntranceEquipment() {
         if (otherPlaceEquipmentOrRoughSurfaceOrEntranceEquipment == null) {
-            otherPlaceEquipmentOrRoughSurfaceOrEntranceEquipment = new ArrayList<InstalledEquipment_VersionStructure>();
+            otherPlaceEquipmentOrRoughSurfaceOrEntranceEquipment = new ArrayList<>();
         }
         return this.otherPlaceEquipmentOrRoughSurfaceOrEntranceEquipment;
     }

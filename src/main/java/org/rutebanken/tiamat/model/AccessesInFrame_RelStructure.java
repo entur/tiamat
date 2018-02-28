@@ -26,7 +26,7 @@ public class AccessesInFrame_RelStructure
 
     public List<Access> getAccess() {
         if (access == null) {
-            access = new ArrayList<Access>();
+            access = new ArrayList<>();
         }
         return this.access;
     }

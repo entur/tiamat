@@ -26,7 +26,7 @@ public class NoticeAssignmentViews_RelStructure
 
     public List<NoticeAssignmentView> getNoticeAssignmentView() {
         if (noticeAssignmentView == null) {
-            noticeAssignmentView = new ArrayList<NoticeAssignmentView>();
+            noticeAssignmentView = new ArrayList<>();
         }
         return this.noticeAssignmentView;
     }

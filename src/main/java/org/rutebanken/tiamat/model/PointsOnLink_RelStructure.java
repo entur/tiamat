@@ -26,7 +26,7 @@ public class PointsOnLink_RelStructure
 
     public List<PointOnLink> getPointOnLink() {
         if (pointOnLink == null) {
-            pointOnLink = new ArrayList<PointOnLink>();
+            pointOnLink = new ArrayList<>();
         }
         return this.pointOnLink;
     }

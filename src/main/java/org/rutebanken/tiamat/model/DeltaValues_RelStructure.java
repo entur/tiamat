@@ -25,7 +25,7 @@ public class DeltaValues_RelStructure {
 
     public List<DeltaValueStructure> getDeltaValue() {
         if (deltaValue == null) {
-            deltaValue = new ArrayList<DeltaValueStructure>();
+            deltaValue = new ArrayList<>();
         }
         return this.deltaValue;
     }

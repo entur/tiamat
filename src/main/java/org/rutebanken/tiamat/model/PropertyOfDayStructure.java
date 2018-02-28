@@ -53,14 +53,14 @@ public class PropertyOfDayStructure {
 
     public List<DayOfWeekEnumeration> getDaysOfWeek() {
         if (daysOfWeek == null) {
-            daysOfWeek = new ArrayList<DayOfWeekEnumeration>();
+            daysOfWeek = new ArrayList<>();
         }
         return this.daysOfWeek;
     }
 
     public List<String> getWeeksOfMonth() {
         if (weeksOfMonth == null) {
-            weeksOfMonth = new ArrayList<String>();
+            weeksOfMonth = new ArrayList<>();
         }
         return this.weeksOfMonth;
     }
@@ -91,21 +91,21 @@ public class PropertyOfDayStructure {
 
     public List<HolidayTypeEnumeration> getHolidayTypes() {
         if (holidayTypes == null) {
-            holidayTypes = new ArrayList<HolidayTypeEnumeration>();
+            holidayTypes = new ArrayList<>();
         }
         return this.holidayTypes;
     }
 
     public List<SeasonEnumeration> getSeasons() {
         if (seasons == null) {
-            seasons = new ArrayList<SeasonEnumeration>();
+            seasons = new ArrayList<>();
         }
         return this.seasons;
     }
 
     public List<TideEnumeration> getTides() {
         if (tides == null) {
-            tides = new ArrayList<TideEnumeration>();
+            tides = new ArrayList<>();
         }
         return this.tides;
     }

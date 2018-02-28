@@ -26,7 +26,7 @@ public class ControlCentres_RelStructure
 
     public List<Object> getControlCentreRefOrControlCentre() {
         if (controlCentreRefOrControlCentre == null) {
-            controlCentreRefOrControlCentre = new ArrayList<Object>();
+            controlCentreRefOrControlCentre = new ArrayList<>();
         }
         return this.controlCentreRefOrControlCentre;
     }

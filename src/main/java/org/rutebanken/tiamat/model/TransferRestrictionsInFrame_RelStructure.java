@@ -26,7 +26,7 @@ public class TransferRestrictionsInFrame_RelStructure
 
     public List<TransferRestriction> getTransferRestriction() {
         if (transferRestriction == null) {
-            transferRestriction = new ArrayList<TransferRestriction>();
+            transferRestriction = new ArrayList<>();
         }
         return this.transferRestriction;
     }

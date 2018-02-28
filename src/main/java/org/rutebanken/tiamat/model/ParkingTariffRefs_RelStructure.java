@@ -26,7 +26,7 @@ public class ParkingTariffRefs_RelStructure
 
     public List<VersionOfObjectRefStructure> getParkingTariffRef_() {
         if (parkingTariffRef_ == null) {
-            parkingTariffRef_ = new ArrayList<VersionOfObjectRefStructure>();
+            parkingTariffRef_ = new ArrayList<>();
         }
         return this.parkingTariffRef_;
     }

@@ -26,7 +26,7 @@ public class EquipmentPlaces_RelStructure
 
     public List<Object> getEquipmentPlaceRefOrEquipmentPlace() {
         if (equipmentPlaceRefOrEquipmentPlace == null) {
-            equipmentPlaceRefOrEquipmentPlace = new ArrayList<Object>();
+            equipmentPlaceRefOrEquipmentPlace = new ArrayList<>();
         }
         return this.equipmentPlaceRefOrEquipmentPlace;
     }

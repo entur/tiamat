@@ -26,7 +26,7 @@ public class CodespacesInFrame_RelStructure
 
     public List<Codespace> getCodespace() {
         if (codespace == null) {
-            codespace = new ArrayList<Codespace>();
+            codespace = new ArrayList<>();
         }
         return this.codespace;
     }

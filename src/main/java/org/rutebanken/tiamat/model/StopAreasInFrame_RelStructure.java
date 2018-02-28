@@ -26,7 +26,7 @@ public class StopAreasInFrame_RelStructure
 
     public List<StopArea> getStopArea() {
         if (stopArea == null) {
-            stopArea = new ArrayList<StopArea>();
+            stopArea = new ArrayList<>();
         }
         return this.stopArea;
     }

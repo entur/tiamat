@@ -26,7 +26,7 @@ public class LogicalDisplaysInFrame_RelStructure
 
     public List<LogicalDisplay> getLogicalDisplay() {
         if (logicalDisplay == null) {
-            logicalDisplay = new ArrayList<LogicalDisplay>();
+            logicalDisplay = new ArrayList<>();
         }
         return this.logicalDisplay;
     }

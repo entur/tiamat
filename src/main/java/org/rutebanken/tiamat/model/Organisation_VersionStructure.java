@@ -27,7 +27,7 @@ public abstract class Organisation_VersionStructure
 
     public List<JAXBElement<?>> getRest() {
         if (rest == null) {
-            rest = new ArrayList<JAXBElement<?>>();
+            rest = new ArrayList<>();
         }
         return this.rest;
     }

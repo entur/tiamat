@@ -27,7 +27,7 @@ public class EquipmentsInFrame_RelStructure
 
     public List<JAXBElement<? extends Equipment_VersionStructure>> getEquipment() {
         if (equipment == null) {
-            equipment = new ArrayList<JAXBElement<? extends Equipment_VersionStructure>>();
+            equipment = new ArrayList<>();
         }
         return this.equipment;
     }

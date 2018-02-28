@@ -25,7 +25,7 @@ public class UserNeeds {
 
     public List<UserNeed> getUserNeed() {
         if (userNeed == null) {
-            userNeed = new ArrayList<UserNeed>();
+            userNeed = new ArrayList<>();
         }
         return this.userNeed;
     }

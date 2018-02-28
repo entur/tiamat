@@ -26,7 +26,7 @@ public class SpatialFeaturesInFrame_RelStructure
 
     public List<GroupOfPoints_VersionStructure> getSimpleFeatureOrComplexFeature() {
         if (simpleFeatureOrComplexFeature == null) {
-            simpleFeatureOrComplexFeature = new ArrayList<GroupOfPoints_VersionStructure>();
+            simpleFeatureOrComplexFeature = new ArrayList<>();
         }
         return this.simpleFeatureOrComplexFeature;
     }

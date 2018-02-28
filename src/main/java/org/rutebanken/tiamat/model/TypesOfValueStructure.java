@@ -27,7 +27,7 @@ public class TypesOfValueStructure
 
     public List<JAXBElement<? extends TypeOfValue_VersionStructure>> getTypeOfValue() {
         if (typeOfValue == null) {
-            typeOfValue = new ArrayList<JAXBElement<? extends TypeOfValue_VersionStructure>>();
+            typeOfValue = new ArrayList<>();
         }
         return this.typeOfValue;
     }

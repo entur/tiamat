@@ -26,7 +26,7 @@ public class OperationalContextsInFrame_RelStructure
 
     public List<OperationalContext> getOperationalContext() {
         if (operationalContext == null) {
-            operationalContext = new ArrayList<OperationalContext>();
+            operationalContext = new ArrayList<>();
         }
         return this.operationalContext;
     }

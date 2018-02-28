@@ -26,7 +26,7 @@ public class FlexibleStopPlacesInFrame_RelStructure
 
     public List<FlexibleStopPlace> getFlexibleStopPlace() {
         if (flexibleStopPlace == null) {
-            flexibleStopPlace = new ArrayList<FlexibleStopPlace>();
+            flexibleStopPlace = new ArrayList<>();
         }
         return this.flexibleStopPlace;
     }

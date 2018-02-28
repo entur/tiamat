@@ -26,7 +26,7 @@ public class NavigationPathRefs_RelStructure
 
     public List<NavigationPathRefStructure> getNavigationPathRef() {
         if (navigationPathRef == null) {
-            navigationPathRef = new ArrayList<NavigationPathRefStructure>();
+            navigationPathRef = new ArrayList<>();
         }
         return this.navigationPathRef;
     }

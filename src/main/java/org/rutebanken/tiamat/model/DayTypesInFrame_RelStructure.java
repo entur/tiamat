@@ -27,7 +27,7 @@ public class DayTypesInFrame_RelStructure
 
     public List<JAXBElement<? extends DataManagedObjectStructure>> getDayType_() {
         if (dayType_ == null) {
-            dayType_ = new ArrayList<JAXBElement<? extends DataManagedObjectStructure>>();
+            dayType_ = new ArrayList<>();
         }
         return this.dayType_;
     }

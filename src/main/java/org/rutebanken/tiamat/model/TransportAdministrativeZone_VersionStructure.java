@@ -26,7 +26,7 @@ public class TransportAdministrativeZone_VersionStructure
 
     public List<AllVehicleModesOfTransportEnumeration> getVehicleModes() {
         if (vehicleModes == null) {
-            vehicleModes = new ArrayList<AllVehicleModesOfTransportEnumeration>();
+            vehicleModes = new ArrayList<>();
         }
         return this.vehicleModes;
     }

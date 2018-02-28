@@ -26,7 +26,7 @@ public class OrganisationalUnits_RelStructure
 
     public List<Object> getOrganisationalUnitRefOrOrganisationalUnit() {
         if (organisationalUnitRefOrOrganisationalUnit == null) {
-            organisationalUnitRefOrOrganisationalUnit = new ArrayList<Object>();
+            organisationalUnitRefOrOrganisationalUnit = new ArrayList<>();
         }
         return this.organisationalUnitRefOrOrganisationalUnit;
     }

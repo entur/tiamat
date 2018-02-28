@@ -26,7 +26,7 @@ public class FacilityRequirements_RelStructure
 
     public List<Object> getFacilityRequirementRefOrFacilityRequirement() {
         if (facilityRequirementRefOrFacilityRequirement == null) {
-            facilityRequirementRefOrFacilityRequirement = new ArrayList<Object>();
+            facilityRequirementRefOrFacilityRequirement = new ArrayList<>();
         }
         return this.facilityRequirementRefOrFacilityRequirement;
     }

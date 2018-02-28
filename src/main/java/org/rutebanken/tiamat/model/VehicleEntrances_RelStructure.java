@@ -26,7 +26,7 @@ public class VehicleEntrances_RelStructure
 
     public List<Object> getVehicleEntranceRefOrVehicleEntrance() {
         if (vehicleEntranceRefOrVehicleEntrance == null) {
-            vehicleEntranceRefOrVehicleEntrance = new ArrayList<Object>();
+            vehicleEntranceRefOrVehicleEntrance = new ArrayList<>();
         }
         return this.vehicleEntranceRefOrVehicleEntrance;
     }

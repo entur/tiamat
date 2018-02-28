@@ -26,7 +26,7 @@ public class VehicleModelsInFrame_RelStructure
 
     public List<VehicleModel> getVehicleModel() {
         if (vehicleModel == null) {
-            vehicleModel = new ArrayList<VehicleModel>();
+            vehicleModel = new ArrayList<>();
         }
         return this.vehicleModel;
     }

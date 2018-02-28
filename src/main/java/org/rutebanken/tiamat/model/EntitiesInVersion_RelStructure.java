@@ -27,7 +27,7 @@ public class EntitiesInVersion_RelStructure
 
     public List<JAXBElement<? extends EntityInVersionStructure>> getEntityInVersion() {
         if (entityInVersion == null) {
-            entityInVersion = new ArrayList<JAXBElement<? extends EntityInVersionStructure>>();
+            entityInVersion = new ArrayList<>();
         }
         return this.entityInVersion;
     }

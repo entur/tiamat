@@ -26,7 +26,7 @@ public class ValidityConditions_RelStructure
 
     public List<Object> getValidityConditionRefOrValidBetweenOrValidityCondition_() {
         if (validityConditionRefOrValidBetweenOrValidityCondition_ == null) {
-            validityConditionRefOrValidBetweenOrValidityCondition_ = new ArrayList<Object>();
+            validityConditionRefOrValidBetweenOrValidityCondition_ = new ArrayList<>();
         }
         return this.validityConditionRefOrValidBetweenOrValidityCondition_;
     }

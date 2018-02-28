@@ -27,7 +27,7 @@ public class TypesOfValueInFrame_RelStructure
 
     public List<JAXBElement<? extends DataManagedObjectStructure>> getValueSetOrTypeOfValue() {
         if (valueSetOrTypeOfValue == null) {
-            valueSetOrTypeOfValue = new ArrayList<JAXBElement<? extends DataManagedObjectStructure>>();
+            valueSetOrTypeOfValue = new ArrayList<>();
         }
         return this.valueSetOrTypeOfValue;
     }

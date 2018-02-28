@@ -34,7 +34,7 @@ public class BookingArrangementsStructure {
 
     public List<BookingMethodEnumeration> getBookingMethods() {
         if (bookingMethods == null) {
-            bookingMethods = new ArrayList<BookingMethodEnumeration>();
+            bookingMethods = new ArrayList<>();
         }
         return this.bookingMethods;
     }
@@ -57,7 +57,7 @@ public class BookingArrangementsStructure {
 
     public List<PurchaseMomentEnumeration> getBuyWhen() {
         if (buyWhen == null) {
-            buyWhen = new ArrayList<PurchaseMomentEnumeration>();
+            buyWhen = new ArrayList<>();
         }
         return this.buyWhen;
     }

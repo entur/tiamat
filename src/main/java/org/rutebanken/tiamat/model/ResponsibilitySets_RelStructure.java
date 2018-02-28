@@ -26,7 +26,7 @@ public class ResponsibilitySets_RelStructure
 
     public List<Object> getResponsibilitySetRefOrResponsibilitySet() {
         if (responsibilitySetRefOrResponsibilitySet == null) {
-            responsibilitySetRefOrResponsibilitySet = new ArrayList<Object>();
+            responsibilitySetRefOrResponsibilitySet = new ArrayList<>();
         }
         return this.responsibilitySetRefOrResponsibilitySet;
     }

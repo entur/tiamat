@@ -26,7 +26,7 @@ public class Timebands_RelStructure
 
     public List<Object> getTimebandRefOrTimeband() {
         if (timebandRefOrTimeband == null) {
-            timebandRefOrTimeband = new ArrayList<Object>();
+            timebandRefOrTimeband = new ArrayList<>();
         }
         return this.timebandRefOrTimeband;
     }

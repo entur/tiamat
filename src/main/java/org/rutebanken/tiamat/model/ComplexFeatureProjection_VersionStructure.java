@@ -46,7 +46,7 @@ public class ComplexFeatureProjection_VersionStructure
 
     public List<JAXBElement<? extends PointRefStructure>> getPointRef() {
         if (pointRef == null) {
-            pointRef = new ArrayList<JAXBElement<? extends PointRefStructure>>();
+            pointRef = new ArrayList<>();
         }
         return this.pointRef;
     }

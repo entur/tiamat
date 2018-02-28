@@ -27,7 +27,7 @@ public class ObjectRefs_RelStructure
 
     public List<JAXBElement<? extends VersionOfObjectRefStructure>> getVersionOfObjectRef() {
         if (versionOfObjectRef == null) {
-            versionOfObjectRef = new ArrayList<JAXBElement<? extends VersionOfObjectRefStructure>>();
+            versionOfObjectRef = new ArrayList<>();
         }
         return this.versionOfObjectRef;
     }

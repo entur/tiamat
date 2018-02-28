@@ -26,7 +26,7 @@ public class DataSourcesInFrame_RelStructure
 
     public List<DataSource> getDataSource() {
         if (dataSource == null) {
-            dataSource = new ArrayList<DataSource>();
+            dataSource = new ArrayList<>();
         }
         return this.dataSource;
     }

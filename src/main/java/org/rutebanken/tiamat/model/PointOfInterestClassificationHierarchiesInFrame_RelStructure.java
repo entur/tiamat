@@ -26,7 +26,7 @@ public class PointOfInterestClassificationHierarchiesInFrame_RelStructure
 
     public List<PointOfInterestClassificationHierarchy> getPointOfInterestClassificationHierarchy() {
         if (pointOfInterestClassificationHierarchy == null) {
-            pointOfInterestClassificationHierarchy = new ArrayList<PointOfInterestClassificationHierarchy>();
+            pointOfInterestClassificationHierarchy = new ArrayList<>();
         }
         return this.pointOfInterestClassificationHierarchy;
     }

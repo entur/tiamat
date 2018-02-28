@@ -26,7 +26,7 @@ public class DepartmentRefs_RelStructure
 
     public List<DepartmentRefStructure> getDepartmentRef() {
         if (departmentRef == null) {
-            departmentRef = new ArrayList<DepartmentRefStructure>();
+            departmentRef = new ArrayList<>();
         }
         return this.departmentRef;
     }

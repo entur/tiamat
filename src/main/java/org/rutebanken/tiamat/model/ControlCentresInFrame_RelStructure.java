@@ -26,7 +26,7 @@ public class ControlCentresInFrame_RelStructure
 
     public List<ControlCentre> getControlCentre() {
         if (controlCentre == null) {
-            controlCentre = new ArrayList<ControlCentre>();
+            controlCentre = new ArrayList<>();
         }
         return this.controlCentre;
     }

@@ -26,7 +26,7 @@ public class DestinationDisplayRefs_RelStructure
 
     public List<DestinationDisplayRefStructure> getDestinationDisplayRef() {
         if (destinationDisplayRef == null) {
-            destinationDisplayRef = new ArrayList<DestinationDisplayRefStructure>();
+            destinationDisplayRef = new ArrayList<>();
         }
         return this.destinationDisplayRef;
     }

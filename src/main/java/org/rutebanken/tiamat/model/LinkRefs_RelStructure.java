@@ -27,7 +27,7 @@ public class LinkRefs_RelStructure
 
     public List<JAXBElement<?>> getLinkRefOrLinkRefByValue() {
         if (linkRefOrLinkRefByValue == null) {
-            linkRefOrLinkRefByValue = new ArrayList<JAXBElement<?>>();
+            linkRefOrLinkRefByValue = new ArrayList<>();
         }
         return this.linkRefOrLinkRefByValue;
     }

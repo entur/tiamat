@@ -91,14 +91,14 @@ public class OperatingPeriod_VersionStructure
 
     public List<HolidayTypeEnumeration> getHolidayType() {
         if (holidayType == null) {
-            holidayType = new ArrayList<HolidayTypeEnumeration>();
+            holidayType = new ArrayList<>();
         }
         return this.holidayType;
     }
 
     public List<SeasonEnumeration> getSeason() {
         if (season == null) {
-            season = new ArrayList<SeasonEnumeration>();
+            season = new ArrayList<>();
         }
         return this.season;
     }

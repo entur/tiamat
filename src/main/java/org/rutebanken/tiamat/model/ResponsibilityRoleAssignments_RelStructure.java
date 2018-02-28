@@ -26,7 +26,7 @@ public class ResponsibilityRoleAssignments_RelStructure
 
     public List<ResponsibilityRoleAssignment_VersionedChildStructure> getResponsibilityRoleAssignment() {
         if (responsibilityRoleAssignment == null) {
-            responsibilityRoleAssignment = new ArrayList<ResponsibilityRoleAssignment_VersionedChildStructure>();
+            responsibilityRoleAssignment = new ArrayList<>();
         }
         return this.responsibilityRoleAssignment;
     }

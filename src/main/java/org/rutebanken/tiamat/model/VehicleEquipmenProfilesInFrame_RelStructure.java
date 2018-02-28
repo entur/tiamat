@@ -26,7 +26,7 @@ public class VehicleEquipmenProfilesInFrame_RelStructure
 
     public List<VehicleEquipmentProfile> getVehicleEquipmentProfile() {
         if (vehicleEquipmentProfile == null) {
-            vehicleEquipmentProfile = new ArrayList<VehicleEquipmentProfile>();
+            vehicleEquipmentProfile = new ArrayList<>();
         }
         return this.vehicleEquipmentProfile;
     }

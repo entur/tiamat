@@ -26,7 +26,7 @@ public class AssistanceBookingServices_RelStructure
 
     public List<Object> getAssistanceBookingServiceRefOrAssistanceBookingService() {
         if (assistanceBookingServiceRefOrAssistanceBookingService == null) {
-            assistanceBookingServiceRefOrAssistanceBookingService = new ArrayList<Object>();
+            assistanceBookingServiceRefOrAssistanceBookingService = new ArrayList<>();
         }
         return this.assistanceBookingServiceRefOrAssistanceBookingService;
     }

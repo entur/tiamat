@@ -26,7 +26,7 @@ public class PointOfInterestEntrances_RelStructure
 
     public List<Object> getPointOfInterestEntranceRefOrPointOfInterestEntrance() {
         if (pointOfInterestEntranceRefOrPointOfInterestEntrance == null) {
-            pointOfInterestEntranceRefOrPointOfInterestEntrance = new ArrayList<Object>();
+            pointOfInterestEntranceRefOrPointOfInterestEntrance = new ArrayList<>();
         }
         return this.pointOfInterestEntranceRefOrPointOfInterestEntrance;
     }

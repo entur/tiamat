@@ -26,7 +26,7 @@ public class FlexibleAreas_RelStructure
 
     public List<Object> getFlexibleAreaRefOrFlexibleArea() {
         if (flexibleAreaRefOrFlexibleArea == null) {
-            flexibleAreaRefOrFlexibleArea = new ArrayList<Object>();
+            flexibleAreaRefOrFlexibleArea = new ArrayList<>();
         }
         return this.flexibleAreaRefOrFlexibleArea;
     }

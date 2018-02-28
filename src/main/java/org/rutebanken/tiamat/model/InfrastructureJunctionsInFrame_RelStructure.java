@@ -26,7 +26,7 @@ public class InfrastructureJunctionsInFrame_RelStructure
 
     public List<InfrastructurePoint_> getRailwayJunctionOrRoadJunctionOrWireJunction() {
         if (railwayJunctionOrRoadJunctionOrWireJunction == null) {
-            railwayJunctionOrRoadJunctionOrWireJunction = new ArrayList<InfrastructurePoint_>();
+            railwayJunctionOrRoadJunctionOrWireJunction = new ArrayList<>();
         }
         return this.railwayJunctionOrRoadJunctionOrWireJunction;
     }

@@ -26,7 +26,7 @@ public class ComplexFeatureMembers_RelStructure
 
     public List<ComplexFeatureMember_VersionedChildStructure> getComplexFeatureMember() {
         if (complexFeatureMember == null) {
-            complexFeatureMember = new ArrayList<ComplexFeatureMember_VersionedChildStructure>();
+            complexFeatureMember = new ArrayList<>();
         }
         return this.complexFeatureMember;
     }

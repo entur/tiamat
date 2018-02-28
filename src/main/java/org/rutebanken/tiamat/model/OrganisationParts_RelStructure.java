@@ -27,7 +27,7 @@ public class OrganisationParts_RelStructure
 
     public List<JAXBElement<?>> getOrganisationPartRefOrOrganisationPart_() {
         if (organisationPartRefOrOrganisationPart_ == null) {
-            organisationPartRefOrOrganisationPart_ = new ArrayList<JAXBElement<?>>();
+            organisationPartRefOrOrganisationPart_ = new ArrayList<>();
         }
         return this.organisationPartRefOrOrganisationPart_;
     }

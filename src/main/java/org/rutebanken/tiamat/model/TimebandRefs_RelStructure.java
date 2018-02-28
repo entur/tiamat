@@ -26,7 +26,7 @@ public class TimebandRefs_RelStructure
 
     public List<TimebandRefStructure> getTimebandRef() {
         if (timebandRef == null) {
-            timebandRef = new ArrayList<TimebandRefStructure>();
+            timebandRef = new ArrayList<>();
         }
         return this.timebandRef;
     }

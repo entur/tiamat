@@ -26,7 +26,7 @@ public class TypeOfZoneRefs_RelStructure
 
     public List<TypeOfZoneRefStructure> getTypeOfZoneRef() {
         if (typeOfZoneRef == null) {
-            typeOfZoneRef = new ArrayList<TypeOfZoneRefStructure>();
+            typeOfZoneRef = new ArrayList<>();
         }
         return this.typeOfZoneRef;
     }

@@ -25,7 +25,7 @@ public class InfoLinks_RelStructure {
 
     public List<InfoLinkStructure> getInfoLink() {
         if (infoLink == null) {
-            infoLink = new ArrayList<InfoLinkStructure>();
+            infoLink = new ArrayList<>();
         }
         return this.infoLink;
     }

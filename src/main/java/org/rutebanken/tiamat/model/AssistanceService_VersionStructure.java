@@ -33,7 +33,7 @@ public class AssistanceService_VersionStructure
 
     public List<AssistanceFacilityEnumeration> getAssistanceFacilityList() {
         if (assistanceFacilityList == null) {
-            assistanceFacilityList = new ArrayList<AssistanceFacilityEnumeration>();
+            assistanceFacilityList = new ArrayList<>();
         }
         return this.assistanceFacilityList;
     }
@@ -56,14 +56,14 @@ public class AssistanceService_VersionStructure
 
     public List<AccessibilityToolEnumeration> getAccessibilityToolList() {
         if (accessibilityToolList == null) {
-            accessibilityToolList = new ArrayList<AccessibilityToolEnumeration>();
+            accessibilityToolList = new ArrayList<>();
         }
         return this.accessibilityToolList;
     }
 
     public List<String> getLanguages() {
         if (languages == null) {
-            languages = new ArrayList<String>();
+            languages = new ArrayList<>();
         }
         return this.languages;
     }
@@ -78,14 +78,14 @@ public class AssistanceService_VersionStructure
 
     public List<EmergencyServiceEnumeration> getEmergencyServiceList() {
         if (emergencyServiceList == null) {
-            emergencyServiceList = new ArrayList<EmergencyServiceEnumeration>();
+            emergencyServiceList = new ArrayList<>();
         }
         return this.emergencyServiceList;
     }
 
     public List<SafetyFacilityEnumeration> getSafetyFacilityList() {
         if (safetyFacilityList == null) {
-            safetyFacilityList = new ArrayList<SafetyFacilityEnumeration>();
+            safetyFacilityList = new ArrayList<>();
         }
         return this.safetyFacilityList;
     }

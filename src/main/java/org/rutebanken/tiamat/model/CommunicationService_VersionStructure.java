@@ -26,7 +26,7 @@ public class CommunicationService_VersionStructure
 
     public List<CommunicationServiceEnumeration> getServiceList() {
         if (serviceList == null) {
-            serviceList = new ArrayList<CommunicationServiceEnumeration>();
+            serviceList = new ArrayList<>();
         }
         return this.serviceList;
     }

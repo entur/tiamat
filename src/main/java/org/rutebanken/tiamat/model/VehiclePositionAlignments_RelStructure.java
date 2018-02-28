@@ -26,7 +26,7 @@ public class VehiclePositionAlignments_RelStructure
 
     public List<VehiclePositionAlignment> getVehiclePositionAlignment() {
         if (vehiclePositionAlignment == null) {
-            vehiclePositionAlignment = new ArrayList<VehiclePositionAlignment>();
+            vehiclePositionAlignment = new ArrayList<>();
         }
         return this.vehiclePositionAlignment;
     }

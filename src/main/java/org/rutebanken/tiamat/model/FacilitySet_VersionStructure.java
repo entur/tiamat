@@ -82,42 +82,42 @@ public class FacilitySet_VersionStructure
 
     public List<AccessibilityInfoFacilityEnumeration> getAccessibilityInfoFacilityList() {
         if (accessibilityInfoFacilityList == null) {
-            accessibilityInfoFacilityList = new ArrayList<AccessibilityInfoFacilityEnumeration>();
+            accessibilityInfoFacilityList = new ArrayList<>();
         }
         return this.accessibilityInfoFacilityList;
     }
 
     public List<AssistanceFacilityEnumeration> getAssistanceFacilityList() {
         if (assistanceFacilityList == null) {
-            assistanceFacilityList = new ArrayList<AssistanceFacilityEnumeration>();
+            assistanceFacilityList = new ArrayList<>();
         }
         return this.assistanceFacilityList;
     }
 
     public List<AccessibilityToolEnumeration> getAccessibilityToolList() {
         if (accessibilityToolList == null) {
-            accessibilityToolList = new ArrayList<AccessibilityToolEnumeration>();
+            accessibilityToolList = new ArrayList<>();
         }
         return this.accessibilityToolList;
     }
 
     public List<CarServiceFacilityEnumeration> getCarServiceFacilityList() {
         if (carServiceFacilityList == null) {
-            carServiceFacilityList = new ArrayList<CarServiceFacilityEnumeration>();
+            carServiceFacilityList = new ArrayList<>();
         }
         return this.carServiceFacilityList;
     }
 
     public List<CateringFacilityEnumeration> getCateringFacilityList() {
         if (cateringFacilityList == null) {
-            cateringFacilityList = new ArrayList<CateringFacilityEnumeration>();
+            cateringFacilityList = new ArrayList<>();
         }
         return this.cateringFacilityList;
     }
 
     public List<FamilyFacilityEnumeration> getFamilyFacilityList() {
         if (familyFacilityList == null) {
-            familyFacilityList = new ArrayList<FamilyFacilityEnumeration>();
+            familyFacilityList = new ArrayList<>();
         }
         return this.familyFacilityList;
     }
@@ -132,35 +132,35 @@ public class FacilitySet_VersionStructure
 
     public List<MealFacilityEnumeration> getMealFacilityList() {
         if (mealFacilityList == null) {
-            mealFacilityList = new ArrayList<MealFacilityEnumeration>();
+            mealFacilityList = new ArrayList<>();
         }
         return this.mealFacilityList;
     }
 
     public List<MedicalFacilityEnumeration> getMedicalFacilityList() {
         if (medicalFacilityList == null) {
-            medicalFacilityList = new ArrayList<MedicalFacilityEnumeration>();
+            medicalFacilityList = new ArrayList<>();
         }
         return this.medicalFacilityList;
     }
 
     public List<MobilityFacilityEnumeration> getMobilityFacilityList() {
         if (mobilityFacilityList == null) {
-            mobilityFacilityList = new ArrayList<MobilityFacilityEnumeration>();
+            mobilityFacilityList = new ArrayList<>();
         }
         return this.mobilityFacilityList;
     }
 
     public List<NuisanceFacilityEnumeration> getNuisanceFacilityList() {
         if (nuisanceFacilityList == null) {
-            nuisanceFacilityList = new ArrayList<NuisanceFacilityEnumeration>();
+            nuisanceFacilityList = new ArrayList<>();
         }
         return this.nuisanceFacilityList;
     }
 
     public List<PassengerCommsFacilityEnumeration> getPassengerCommsFacilityList() {
         if (passengerCommsFacilityList == null) {
-            passengerCommsFacilityList = new ArrayList<PassengerCommsFacilityEnumeration>();
+            passengerCommsFacilityList = new ArrayList<>();
         }
         return this.passengerCommsFacilityList;
     }
@@ -175,42 +175,42 @@ public class FacilitySet_VersionStructure
 
     public List<PassengerInformationFacilityEnumeration> getPassengerInformationFacilityList() {
         if (passengerInformationFacilityList == null) {
-            passengerInformationFacilityList = new ArrayList<PassengerInformationFacilityEnumeration>();
+            passengerInformationFacilityList = new ArrayList<>();
         }
         return this.passengerInformationFacilityList;
     }
 
     public List<RetailFacilityEnumeration> getRetailFacilityList() {
         if (retailFacilityList == null) {
-            retailFacilityList = new ArrayList<RetailFacilityEnumeration>();
+            retailFacilityList = new ArrayList<>();
         }
         return this.retailFacilityList;
     }
 
     public List<SafetyFacilityEnumeration> getSafetyFacilityList() {
         if (safetyFacilityList == null) {
-            safetyFacilityList = new ArrayList<SafetyFacilityEnumeration>();
+            safetyFacilityList = new ArrayList<>();
         }
         return this.safetyFacilityList;
     }
 
     public List<SanitaryFacilityEnumeration> getSanitaryFacilityList() {
         if (sanitaryFacilityList == null) {
-            sanitaryFacilityList = new ArrayList<SanitaryFacilityEnumeration>();
+            sanitaryFacilityList = new ArrayList<>();
         }
         return this.sanitaryFacilityList;
     }
 
     public List<TicketingFacilityEnumeration> getTicketingFacilityList() {
         if (ticketingFacilityList == null) {
-            ticketingFacilityList = new ArrayList<TicketingFacilityEnumeration>();
+            ticketingFacilityList = new ArrayList<>();
         }
         return this.ticketingFacilityList;
     }
 
     public List<TicketingServiceFacilityEnumeration> getTicketingServiceFacilityList() {
         if (ticketingServiceFacilityList == null) {
-            ticketingServiceFacilityList = new ArrayList<TicketingServiceFacilityEnumeration>();
+            ticketingServiceFacilityList = new ArrayList<>();
         }
         return this.ticketingServiceFacilityList;
     }

@@ -26,7 +26,7 @@ public class ActivationLinksInFrame_RelStructure
 
     public List<ActivationLink> getActivationLink() {
         if (activationLink == null) {
-            activationLink = new ArrayList<ActivationLink>();
+            activationLink = new ArrayList<>();
         }
         return this.activationLink;
     }

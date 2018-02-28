@@ -26,7 +26,7 @@ public class BoardingPositionRefs_RelStructure
 
     public List<BoardingPositionRefStructure> getBoardingPositionRef() {
         if (boardingPositionRef == null) {
-            boardingPositionRef = new ArrayList<BoardingPositionRefStructure>();
+            boardingPositionRef = new ArrayList<>();
         }
         return this.boardingPositionRef;
     }

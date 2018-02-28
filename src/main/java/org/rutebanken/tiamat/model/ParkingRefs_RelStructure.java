@@ -26,7 +26,7 @@ public class ParkingRefs_RelStructure
 
     public List<ParkingRefStructure> getParkingRef() {
         if (parkingRef == null) {
-            parkingRef = new ArrayList<ParkingRefStructure>();
+            parkingRef = new ArrayList<>();
         }
         return this.parkingRef;
     }

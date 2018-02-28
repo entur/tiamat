@@ -26,7 +26,7 @@ public class DestinationDisplayVariantRefs_RelStructure
 
     public List<DestinationDisplayVariantRefStructure> getDestinationDisplayVariantRef() {
         if (destinationDisplayVariantRef == null) {
-            destinationDisplayVariantRef = new ArrayList<DestinationDisplayVariantRefStructure>();
+            destinationDisplayVariantRef = new ArrayList<>();
         }
         return this.destinationDisplayVariantRef;
     }

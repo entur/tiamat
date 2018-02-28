@@ -26,7 +26,7 @@ public class CateringService_VersionStructure
 
     public List<CateringServiceEnumeration> getServiceList() {
         if (serviceList == null) {
-            serviceList = new ArrayList<CateringServiceEnumeration>();
+            serviceList = new ArrayList<>();
         }
         return this.serviceList;
     }

@@ -26,7 +26,7 @@ public class OpenTransportModeRefs_RelStructure
 
     public List<OpenTransportModeRefStructure> getOpenTransportModeRef() {
         if (openTransportModeRef == null) {
-            openTransportModeRef = new ArrayList<OpenTransportModeRefStructure>();
+            openTransportModeRef = new ArrayList<>();
         }
         return this.openTransportModeRef;
     }

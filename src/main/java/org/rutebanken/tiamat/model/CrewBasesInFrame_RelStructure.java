@@ -26,7 +26,7 @@ public class CrewBasesInFrame_RelStructure
 
     public List<CrewBase> getCrewBase() {
         if (crewBase == null) {
-            crewBase = new ArrayList<CrewBase>();
+            crewBase = new ArrayList<>();
         }
         return this.crewBase;
     }

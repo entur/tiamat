@@ -25,7 +25,7 @@ public class Attributes {
 
     public List<ClassAttributeInFrame> getClassAttributeInFrame() {
         if (classAttributeInFrame == null) {
-            classAttributeInFrame = new ArrayList<ClassAttributeInFrame>();
+            classAttributeInFrame = new ArrayList<>();
         }
         return classAttributeInFrame;
     }

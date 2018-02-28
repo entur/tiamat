@@ -25,7 +25,7 @@ public class Areas {
 
     public List<Object> getFlexibleAreaOrFlexibleAreaRefOrHailAndRideArea() {
         if (flexibleAreaOrFlexibleAreaRefOrHailAndRideArea == null) {
-            flexibleAreaOrFlexibleAreaRefOrHailAndRideArea = new ArrayList<Object>();
+            flexibleAreaOrFlexibleAreaRefOrHailAndRideArea = new ArrayList<>();
         }
         return this.flexibleAreaOrFlexibleAreaRefOrHailAndRideArea;
     }

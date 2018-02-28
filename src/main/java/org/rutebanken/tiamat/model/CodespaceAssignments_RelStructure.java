@@ -26,7 +26,7 @@ public class CodespaceAssignments_RelStructure
 
     public List<CodespaceAssignment_VersionedChildStructure> getCodespaceAssignment() {
         if (codespaceAssignment == null) {
-            codespaceAssignment = new ArrayList<CodespaceAssignment_VersionedChildStructure>();
+            codespaceAssignment = new ArrayList<>();
         }
         return this.codespaceAssignment;
     }

@@ -49,14 +49,14 @@ public class ResponsibilityRoleAssignment_VersionedChildStructure
 
     public List<DataRoleTypeEnumeration> getDataRoleType() {
         if (dataRoleType == null) {
-            dataRoleType = new ArrayList<DataRoleTypeEnumeration>();
+            dataRoleType = new ArrayList<>();
         }
         return this.dataRoleType;
     }
 
     public List<StakeholderRoleTypeEnumeration> getStakeholderRoleType() {
         if (stakeholderRoleType == null) {
-            stakeholderRoleType = new ArrayList<StakeholderRoleTypeEnumeration>();
+            stakeholderRoleType = new ArrayList<>();
         }
         return this.stakeholderRoleType;
     }

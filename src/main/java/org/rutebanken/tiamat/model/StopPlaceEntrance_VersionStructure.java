@@ -116,7 +116,7 @@ public class StopPlaceEntrance_VersionStructure
 
     public List<VehicleModeEnumeration> getOtherTransportModes() {
         if (otherTransportModes == null) {
-            otherTransportModes = new ArrayList<VehicleModeEnumeration>();
+            otherTransportModes = new ArrayList<>();
         }
         return this.otherTransportModes;
     }

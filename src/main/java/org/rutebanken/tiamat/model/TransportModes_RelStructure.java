@@ -26,7 +26,7 @@ public class TransportModes_RelStructure
 
     public List<Object> getOpenTransportModeRefOrTransportMode() {
         if (openTransportModeRefOrTransportMode == null) {
-            openTransportModeRefOrTransportMode = new ArrayList<Object>();
+            openTransportModeRefOrTransportMode = new ArrayList<>();
         }
         return this.openTransportModeRefOrTransportMode;
     }

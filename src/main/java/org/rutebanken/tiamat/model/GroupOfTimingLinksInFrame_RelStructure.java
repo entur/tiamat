@@ -26,7 +26,7 @@ public class GroupOfTimingLinksInFrame_RelStructure
 
     public List<GroupOfTimingLinks> getGroupOfTimingLinks() {
         if (groupOfTimingLinks == null) {
-            groupOfTimingLinks = new ArrayList<GroupOfTimingLinks>();
+            groupOfTimingLinks = new ArrayList<>();
         }
         return this.groupOfTimingLinks;
     }

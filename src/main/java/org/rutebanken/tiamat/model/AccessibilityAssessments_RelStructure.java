@@ -26,7 +26,7 @@ public class AccessibilityAssessments_RelStructure
 
     public List<AccessibilityAssessment> getAccessibilityAssessment() {
         if (accessibilityAssessment == null) {
-            accessibilityAssessment = new ArrayList<AccessibilityAssessment>();
+            accessibilityAssessment = new ArrayList<>();
         }
         return this.accessibilityAssessment;
     }

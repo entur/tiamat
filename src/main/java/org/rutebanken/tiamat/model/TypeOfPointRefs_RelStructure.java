@@ -26,7 +26,7 @@ public class TypeOfPointRefs_RelStructure
 
     public List<TypeOfPointRefStructure> getTypeOfPointRef() {
         if (typeOfPointRef == null) {
-            typeOfPointRef = new ArrayList<TypeOfPointRefStructure>();
+            typeOfPointRef = new ArrayList<>();
         }
         return this.typeOfPointRef;
     }

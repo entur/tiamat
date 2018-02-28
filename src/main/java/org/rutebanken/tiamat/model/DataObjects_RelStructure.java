@@ -25,7 +25,7 @@ public class DataObjects_RelStructure {
 
     public List<Common_VersionFrameStructure> getCompositeFrameOrCommonFrame() {
         if (compositeFrameOrCommonFrame == null) {
-            compositeFrameOrCommonFrame = new ArrayList<Common_VersionFrameStructure>();
+            compositeFrameOrCommonFrame = new ArrayList<>();
         }
         return this.compositeFrameOrCommonFrame;
     }

@@ -26,7 +26,7 @@ public class TrainStopAssignments_RelStructure
 
     public List<Object> getTrainStopAssignmentRefOrTrainStopAssignment() {
         if (trainStopAssignmentRefOrTrainStopAssignment == null) {
-            trainStopAssignmentRefOrTrainStopAssignment = new ArrayList<Object>();
+            trainStopAssignmentRefOrTrainStopAssignment = new ArrayList<>();
         }
         return this.trainStopAssignmentRefOrTrainStopAssignment;
     }

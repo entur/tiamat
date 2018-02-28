@@ -137,7 +137,7 @@ public class Parking
 
     public List<ParkingVehicleEnumeration> getParkingVehicleTypes() {
         if (parkingVehicleTypes == null) {
-            parkingVehicleTypes = new ArrayList<ParkingVehicleEnumeration>();
+            parkingVehicleTypes = new ArrayList<>();
         }
         return this.parkingVehicleTypes;
     }
@@ -216,14 +216,14 @@ public class Parking
 
     public List<ParkingPaymentProcessEnumeration> getParkingPaymentProcess() {
         if (parkingPaymentProcess == null) {
-            parkingPaymentProcess = new ArrayList<ParkingPaymentProcessEnumeration>();
+            parkingPaymentProcess = new ArrayList<>();
         }
         return this.parkingPaymentProcess;
     }
 
     public List<PaymentMethodEnumeration> getPaymentMethods() {
         if (paymentMethods == null) {
-            paymentMethods = new ArrayList<PaymentMethodEnumeration>();
+            paymentMethods = new ArrayList<>();
         }
         return this.paymentMethods;
     }
@@ -238,14 +238,14 @@ public class Parking
 
     public List<String> getCurrenciesAccepted() {
         if (currenciesAccepted == null) {
-            currenciesAccepted = new ArrayList<String>();
+            currenciesAccepted = new ArrayList<>();
         }
         return this.currenciesAccepted;
     }
 
     public List<String> getCardsAccepted() {
         if (cardsAccepted == null) {
-            cardsAccepted = new ArrayList<String>();
+            cardsAccepted = new ArrayList<>();
         }
         return this.cardsAccepted;
     }

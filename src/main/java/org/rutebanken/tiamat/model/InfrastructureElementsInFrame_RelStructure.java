@@ -26,7 +26,7 @@ public class InfrastructureElementsInFrame_RelStructure
 
     public List<InfrastructureLink_> getRailwayElementOrRoadElementOrWireElement() {
         if (railwayElementOrRoadElementOrWireElement == null) {
-            railwayElementOrRoadElementOrWireElement = new ArrayList<InfrastructureLink_>();
+            railwayElementOrRoadElementOrWireElement = new ArrayList<>();
         }
         return this.railwayElementOrRoadElementOrWireElement;
     }

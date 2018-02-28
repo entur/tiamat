@@ -26,7 +26,7 @@ public class LinkTypeRefs_RelStructure
 
     public List<TypeOfLinkRefStructure> getTypeOfLinkRef() {
         if (typeOfLinkRef == null) {
-            typeOfLinkRef = new ArrayList<TypeOfLinkRefStructure>();
+            typeOfLinkRef = new ArrayList<>();
         }
         return this.typeOfLinkRef;
     }

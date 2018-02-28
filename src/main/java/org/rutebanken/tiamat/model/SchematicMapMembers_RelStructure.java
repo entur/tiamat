@@ -26,7 +26,7 @@ public class SchematicMapMembers_RelStructure
 
     public List<SchematicMapMember_VersionedChildStructure> getSchematicMapMember() {
         if (schematicMapMember == null) {
-            schematicMapMember = new ArrayList<SchematicMapMember_VersionedChildStructure>();
+            schematicMapMember = new ArrayList<>();
         }
         return this.schematicMapMember;
     }

@@ -26,7 +26,7 @@ public class DestinationDisplayVariants_RelStructure
 
     public List<DestinationDisplayVariant> getDestinationDisplayVariant() {
         if (destinationDisplayVariant == null) {
-            destinationDisplayVariant = new ArrayList<DestinationDisplayVariant>();
+            destinationDisplayVariant = new ArrayList<>();
         }
         return this.destinationDisplayVariant;
     }

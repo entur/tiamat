@@ -27,7 +27,7 @@ public class ActivationPointsInFrame_RelStructure
 
     public List<JAXBElement<? extends Point>> getActivationPoint_() {
         if (activationPoint_ == null) {
-            activationPoint_ = new ArrayList<JAXBElement<? extends Point>>();
+            activationPoint_ = new ArrayList<>();
         }
         return this.activationPoint_;
     }

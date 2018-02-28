@@ -35,21 +35,21 @@ public class TicketingService_VersionStructure
 
     public List<VehicleModeEnumeration> getVehicleModes() {
         if (vehicleModes == null) {
-            vehicleModes = new ArrayList<VehicleModeEnumeration>();
+            vehicleModes = new ArrayList<>();
         }
         return this.vehicleModes;
     }
 
     public List<TicketingServiceFacilityEnumeration> getTicketingServiceList() {
         if (ticketingServiceList == null) {
-            ticketingServiceList = new ArrayList<TicketingServiceFacilityEnumeration>();
+            ticketingServiceList = new ArrayList<>();
         }
         return this.ticketingServiceList;
     }
 
     public List<JAXBElement<List<TicketTypeEnumeration>>> getTicketTypeList() {
         if (ticketTypeList == null) {
-            ticketTypeList = new ArrayList<JAXBElement<List<TicketTypeEnumeration>>>();
+            ticketTypeList = new ArrayList<>();
         }
         return this.ticketTypeList;
     }
@@ -96,7 +96,7 @@ public class TicketingService_VersionStructure
 
     public List<PaymentMethodEnumeration> getPaymentMethods() {
         if (paymentMethods == null) {
-            paymentMethods = new ArrayList<PaymentMethodEnumeration>();
+            paymentMethods = new ArrayList<>();
         }
         return this.paymentMethods;
     }

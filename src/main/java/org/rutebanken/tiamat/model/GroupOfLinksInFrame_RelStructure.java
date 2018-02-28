@@ -26,7 +26,7 @@ public class GroupOfLinksInFrame_RelStructure
 
     public List<GroupOfLinks> getGroupOfLinks() {
         if (groupOfLinks == null) {
-            groupOfLinks = new ArrayList<GroupOfLinks>();
+            groupOfLinks = new ArrayList<>();
         }
         return this.groupOfLinks;
     }

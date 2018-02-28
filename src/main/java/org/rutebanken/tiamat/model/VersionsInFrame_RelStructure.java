@@ -26,7 +26,7 @@ public class VersionsInFrame_RelStructure
 
     public List<Version> getVersion() {
         if (version == null) {
-            version = new ArrayList<Version>();
+            version = new ArrayList<>();
         }
         return this.version;
     }

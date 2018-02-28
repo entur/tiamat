@@ -26,7 +26,7 @@ public class ParkingCapacities_RelStructure
 
     public List<Object> getParkingCapacityRefOrParkingCapacity() {
         if (parkingCapacityRefOrParkingCapacity == null) {
-            parkingCapacityRefOrParkingCapacity = new ArrayList<Object>();
+            parkingCapacityRefOrParkingCapacity = new ArrayList<>();
         }
         return this.parkingCapacityRefOrParkingCapacity;
     }

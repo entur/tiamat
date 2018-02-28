@@ -26,7 +26,7 @@ public class ParkingsInFrame_RelStructure
 
     public List<Parking> getParking() {
         if (parking == null) {
-            parking = new ArrayList<Parking>();
+            parking = new ArrayList<>();
         }
         return this.parking;
     }

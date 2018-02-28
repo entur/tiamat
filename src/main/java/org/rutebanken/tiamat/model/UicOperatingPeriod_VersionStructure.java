@@ -35,7 +35,7 @@ public class UicOperatingPeriod_VersionStructure
 
     public List<DayOfWeekEnumeration> getDaysOfWeek() {
         if (daysOfWeek == null) {
-            daysOfWeek = new ArrayList<DayOfWeekEnumeration>();
+            daysOfWeek = new ArrayList<>();
         }
         return this.daysOfWeek;
     }

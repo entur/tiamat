@@ -32,42 +32,42 @@ public class SiteFacilitySetStructure
 
     public List<EmergencyServiceEnumeration> getEmergencyServiceList() {
         if (emergencyServiceList == null) {
-            emergencyServiceList = new ArrayList<EmergencyServiceEnumeration>();
+            emergencyServiceList = new ArrayList<>();
         }
         return this.emergencyServiceList;
     }
 
     public List<HireFacilityEnumeration> getHireFacilityList() {
         if (hireFacilityList == null) {
-            hireFacilityList = new ArrayList<HireFacilityEnumeration>();
+            hireFacilityList = new ArrayList<>();
         }
         return this.hireFacilityList;
     }
 
     public List<LuggageLockerFacilityEnumeration> getLuggageLockerFacilityList() {
         if (luggageLockerFacilityList == null) {
-            luggageLockerFacilityList = new ArrayList<LuggageLockerFacilityEnumeration>();
+            luggageLockerFacilityList = new ArrayList<>();
         }
         return this.luggageLockerFacilityList;
     }
 
     public List<LuggageServiceFacilityEnumeration> getLuggageServiceFacilityList() {
         if (luggageServiceFacilityList == null) {
-            luggageServiceFacilityList = new ArrayList<LuggageServiceFacilityEnumeration>();
+            luggageServiceFacilityList = new ArrayList<>();
         }
         return this.luggageServiceFacilityList;
     }
 
     public List<MoneyFacilityEnumeration> getMoneyFacilityList() {
         if (moneyFacilityList == null) {
-            moneyFacilityList = new ArrayList<MoneyFacilityEnumeration>();
+            moneyFacilityList = new ArrayList<>();
         }
         return this.moneyFacilityList;
     }
 
     public List<ParkingFacilityEnumeration> getParkingFacilityList() {
         if (parkingFacilityList == null) {
-            parkingFacilityList = new ArrayList<ParkingFacilityEnumeration>();
+            parkingFacilityList = new ArrayList<>();
         }
         return this.parkingFacilityList;
     }

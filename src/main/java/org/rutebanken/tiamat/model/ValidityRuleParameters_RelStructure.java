@@ -26,7 +26,7 @@ public class ValidityRuleParameters_RelStructure
 
     public List<ValidityRuleParameter> getValidityRuleParameter() {
         if (validityRuleParameter == null) {
-            validityRuleParameter = new ArrayList<ValidityRuleParameter>();
+            validityRuleParameter = new ArrayList<>();
         }
         return this.validityRuleParameter;
     }

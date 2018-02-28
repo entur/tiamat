@@ -26,7 +26,7 @@ public class StopAreaRefs_RelStructure
 
     public List<StopAreaRefStructure> getStopAreaRef() {
         if (stopAreaRef == null) {
-            stopAreaRef = new ArrayList<StopAreaRefStructure>();
+            stopAreaRef = new ArrayList<>();
         }
         return this.stopAreaRef;
     }

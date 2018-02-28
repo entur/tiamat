@@ -26,7 +26,7 @@ public class PathLinkRefs_RelStructure
 
     public List<Object> getPathLinkRefOrPathLinkRefByValue() {
         if (pathLinkRefOrPathLinkRefByValue == null) {
-            pathLinkRefOrPathLinkRefByValue = new ArrayList<Object>();
+            pathLinkRefOrPathLinkRefByValue = new ArrayList<>();
         }
         return this.pathLinkRefOrPathLinkRefByValue;
     }

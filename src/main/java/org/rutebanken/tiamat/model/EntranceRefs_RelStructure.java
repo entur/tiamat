@@ -27,7 +27,7 @@ public class EntranceRefs_RelStructure
 
     public List<JAXBElement<? extends EntranceRefStructure>> getEntranceRef() {
         if (entranceRef == null) {
-            entranceRef = new ArrayList<JAXBElement<? extends EntranceRefStructure>>();
+            entranceRef = new ArrayList<>();
         }
         return this.entranceRef;
     }

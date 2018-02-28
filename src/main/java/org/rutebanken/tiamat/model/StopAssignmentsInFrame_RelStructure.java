@@ -27,7 +27,7 @@ public class StopAssignmentsInFrame_RelStructure
 
     public List<JAXBElement<? extends StopAssignment_VersionStructure>> getStopAssignment() {
         if (stopAssignment == null) {
-            stopAssignment = new ArrayList<JAXBElement<? extends StopAssignment_VersionStructure>>();
+            stopAssignment = new ArrayList<>();
         }
         return this.stopAssignment;
     }

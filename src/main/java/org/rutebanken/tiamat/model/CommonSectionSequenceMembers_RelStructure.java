@@ -26,7 +26,7 @@ public class CommonSectionSequenceMembers_RelStructure
 
     public List<CommonSectionSequenceMemberStructure> getCommonSectionSequenceMember() {
         if (commonSectionSequenceMember == null) {
-            commonSectionSequenceMember = new ArrayList<CommonSectionSequenceMemberStructure>();
+            commonSectionSequenceMember = new ArrayList<>();
         }
         return this.commonSectionSequenceMember;
     }

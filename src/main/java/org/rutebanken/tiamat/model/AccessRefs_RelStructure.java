@@ -26,7 +26,7 @@ public class AccessRefs_RelStructure
 
     public List<AccessRefStructure> getAccessRef() {
         if (accessRef == null) {
-            accessRef = new ArrayList<AccessRefStructure>();
+            accessRef = new ArrayList<>();
         }
         return this.accessRef;
     }

@@ -26,7 +26,7 @@ public class ClassInFrameRefs_RelStructure
 
     public List<ClassInFrameRefStructure> getClassInFrameRef() {
         if (classInFrameRef == null) {
-            classInFrameRef = new ArrayList<ClassInFrameRefStructure>();
+            classInFrameRef = new ArrayList<>();
         }
         return classInFrameRef;
     }

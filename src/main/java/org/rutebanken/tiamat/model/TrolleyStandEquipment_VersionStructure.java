@@ -54,7 +54,7 @@ public class TrolleyStandEquipment_VersionStructure
 
     public List<PaymentMethodEnumeration> getPaymentMethods() {
         if (paymentMethods == null) {
-            paymentMethods = new ArrayList<PaymentMethodEnumeration>();
+            paymentMethods = new ArrayList<>();
         }
         return this.paymentMethods;
     }

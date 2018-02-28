@@ -27,7 +27,7 @@ public class NoticeAssignmentsInFrame_RelStructure
 
     public List<JAXBElement<? extends DataManagedObjectStructure>> getNoticeAssignment_() {
         if (noticeAssignment_ == null) {
-            noticeAssignment_ = new ArrayList<JAXBElement<? extends DataManagedObjectStructure>>();
+            noticeAssignment_ = new ArrayList<>();
         }
         return this.noticeAssignment_;
     }

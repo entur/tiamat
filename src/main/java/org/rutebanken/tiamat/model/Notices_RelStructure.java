@@ -26,7 +26,7 @@ public class Notices_RelStructure
 
     public List<Object> getNoticeRefOrNotice() {
         if (noticeRefOrNotice == null) {
-            noticeRefOrNotice = new ArrayList<Object>();
+            noticeRefOrNotice = new ArrayList<>();
         }
         return this.noticeRefOrNotice;
     }

@@ -26,7 +26,7 @@ public class Accommodations_RelStructure
 
     public List<Object> getAccommodationRefOrAccommodation() {
         if (accommodationRefOrAccommodation == null) {
-            accommodationRefOrAccommodation = new ArrayList<Object>();
+            accommodationRefOrAccommodation = new ArrayList<>();
         }
         return this.accommodationRefOrAccommodation;
     }

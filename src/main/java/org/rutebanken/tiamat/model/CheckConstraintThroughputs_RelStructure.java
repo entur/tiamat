@@ -26,7 +26,7 @@ public class CheckConstraintThroughputs_RelStructure
 
     public List<Object> getCheckConstraintThroughputRefOrCheckConstraintThroughput() {
         if (checkConstraintThroughputRefOrCheckConstraintThroughput == null) {
-            checkConstraintThroughputRefOrCheckConstraintThroughput = new ArrayList<Object>();
+            checkConstraintThroughputRefOrCheckConstraintThroughput = new ArrayList<>();
         }
         return this.checkConstraintThroughputRefOrCheckConstraintThroughput;
     }

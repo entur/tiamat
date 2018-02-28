@@ -26,7 +26,7 @@ public class PointOfInterestClassificationsViews_RelStructure
 
     public List<Object> getPointOfInterestClassificationRefOrPointOfInterestClassificationView() {
         if (pointOfInterestClassificationRefOrPointOfInterestClassificationView == null) {
-            pointOfInterestClassificationRefOrPointOfInterestClassificationView = new ArrayList<Object>();
+            pointOfInterestClassificationRefOrPointOfInterestClassificationView = new ArrayList<>();
         }
         return this.pointOfInterestClassificationRefOrPointOfInterestClassificationView;
     }
