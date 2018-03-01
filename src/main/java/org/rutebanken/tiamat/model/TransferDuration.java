@@ -15,7 +15,6 @@
 
 package org.rutebanken.tiamat.model;
 
-import javax.persistence.Transient;
 import java.time.Duration;
 
 

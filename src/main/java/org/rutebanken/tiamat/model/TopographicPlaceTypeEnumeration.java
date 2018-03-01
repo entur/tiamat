@@ -15,8 +15,6 @@
 
 package org.rutebanken.tiamat.model;
 
-import javax.xml.bind.annotation.XmlEnumValue;
-
 public enum TopographicPlaceTypeEnumeration {
 
     CONTINENT("continent"),

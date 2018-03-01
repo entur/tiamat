@@ -16,10 +16,9 @@
 package org.rutebanken.tiamat.model;
 
 import com.google.common.base.MoreObjects;
-import org.hibernate.annotations.*;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import javax.persistence.*;
-import javax.persistence.CascadeType;
 import java.util.List;
 
 

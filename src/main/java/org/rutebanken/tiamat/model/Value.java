@@ -16,12 +16,10 @@
 package org.rutebanken.tiamat.model;
 
 import com.google.common.base.MoreObjects;
-import org.hibernate.annotations.*;
 import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import javax.persistence.*;
-import javax.persistence.Entity;
-import javax.persistence.Index;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashSet;

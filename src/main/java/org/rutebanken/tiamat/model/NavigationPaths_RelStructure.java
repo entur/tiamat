@@ -15,12 +15,8 @@
 
 package org.rutebanken.tiamat.model;
 
-import org.hibernate.annotations.AnyMetaDef;
-import org.hibernate.annotations.ManyToAny;
-import org.hibernate.annotations.MetaValue;
 import org.hibernate.mapping.Property;
 
-import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
