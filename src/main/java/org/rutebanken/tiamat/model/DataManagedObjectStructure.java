@@ -40,9 +40,6 @@ public abstract class DataManagedObjectStructure
     protected ExtensionsStructure extensions;
 
     @Transient
-    protected BrandingRefStructure brandingRef;
-
-    @Transient
     protected String responsibilitySetRef;
 
     private String versionComment;
@@ -55,14 +52,6 @@ public abstract class DataManagedObjectStructure
 
     public void setExtensions(ExtensionsStructure value) {
         this.extensions = value;
-    }
-
-    public BrandingRefStructure getBrandingRef() {
-        return brandingRef;
-    }
-
-    public void setBrandingRef(BrandingRefStructure value) {
-        this.brandingRef = value;
     }
 
     public String getResponsibilitySetRef() {
