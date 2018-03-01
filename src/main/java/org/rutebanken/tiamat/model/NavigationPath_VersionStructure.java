@@ -27,7 +27,6 @@ public class NavigationPath_VersionStructure
     protected PathLinkEnd to;
     protected AccessibilityAssessment accessibilityAssessment;
     protected List<AccessModeEnumeration> accessModes;
-    protected AccessSummaries_RelStructure summaries;
     protected TransferDuration transferDuration;
     protected PublicUseEnumeration publicUse;
     protected CoveredEnumeration covered;
@@ -35,7 +34,6 @@ public class NavigationPath_VersionStructure
     protected LightingEnumeration lighting;
     protected Boolean allAreasWheelchairAccessible;
     protected BigInteger personCapacity;
-    protected SiteFacilitySets_RelStructure facilities;
     protected List<AccessFeatureEnumeration> accessFeatureList;
     protected NavigationTypeEnumeration navigationType;
     protected PlacesInSequence_RelStructure placesInSequence;
@@ -71,14 +69,6 @@ public class NavigationPath_VersionStructure
             accessModes = new ArrayList<>();
         }
         return this.accessModes;
-    }
-
-    public AccessSummaries_RelStructure getSummaries() {
-        return summaries;
-    }
-
-    public void setSummaries(AccessSummaries_RelStructure value) {
-        this.summaries = value;
     }
 
     public TransferDuration getTransferDuration() {
@@ -135,14 +125,6 @@ public class NavigationPath_VersionStructure
 
     public void setPersonCapacity(BigInteger value) {
         this.personCapacity = value;
-    }
-
-    public SiteFacilitySets_RelStructure getFacilities() {
-        return facilities;
-    }
-
-    public void setFacilities(SiteFacilitySets_RelStructure value) {
-        this.facilities = value;
     }
 
     public List<AccessFeatureEnumeration> getAccessFeatureList() {

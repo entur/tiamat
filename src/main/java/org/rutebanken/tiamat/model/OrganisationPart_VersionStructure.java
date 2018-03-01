@@ -30,7 +30,6 @@ public class OrganisationPart_VersionStructure
 
     protected JAXBElement<? extends OrganisationRefStructure> organisationRef;
     protected TypeOfOrganisationPartRef typeOfOrganisationPartRef;
-    protected AdministrativeZones_RelStructure administrativeZones;
 
     public MultilingualStringEntity getName() {
         return name;
@@ -94,14 +93,6 @@ public class OrganisationPart_VersionStructure
 
     public void setTypeOfOrganisationPartRef(TypeOfOrganisationPartRef value) {
         this.typeOfOrganisationPartRef = value;
-    }
-
-    public AdministrativeZones_RelStructure getAdministrativeZones() {
-        return administrativeZones;
-    }
-
-    public void setAdministrativeZones(AdministrativeZones_RelStructure value) {
-        this.administrativeZones = value;
     }
 
 }

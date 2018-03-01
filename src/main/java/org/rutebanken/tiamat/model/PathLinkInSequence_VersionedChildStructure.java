@@ -24,7 +24,6 @@ public class PathLinkInSequence_VersionedChildStructure
     protected PathHeadingEnumeration heading;
     protected TransitionEnumeration transition;
     protected MultilingualStringEntity label;
-    protected Views views;
 
     public PathLinkRefStructure getPathLinkRef() {
         return pathLinkRef;
@@ -72,14 +71,6 @@ public class PathLinkInSequence_VersionedChildStructure
 
     public void setLabel(MultilingualStringEntity value) {
         this.label = value;
-    }
-
-    public Views getViews() {
-        return views;
-    }
-
-    public void setViews(Views value) {
-        this.views = value;
     }
 
 }

@@ -26,8 +26,7 @@ public class DestinationDisplay_VersionStructure
     protected String shortCode;
     protected String publicCode;
     protected PrivateCodeStructure privateCode;
-    protected Vias_RelStructure vias;
-    protected Variants variants;
+
 
     public MultilingualStringEntity getName() {
         return name;
@@ -91,22 +90,6 @@ public class DestinationDisplay_VersionStructure
 
     public void setPrivateCode(PrivateCodeStructure value) {
         this.privateCode = value;
-    }
-
-    public Vias_RelStructure getVias() {
-        return vias;
-    }
-
-    public void setVias(Vias_RelStructure value) {
-        this.vias = value;
-    }
-
-    public Variants getVariants() {
-        return variants;
-    }
-
-    public void setVariants(Variants value) {
-        this.variants = value;
     }
 
 }

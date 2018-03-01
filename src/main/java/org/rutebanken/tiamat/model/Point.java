@@ -22,7 +22,6 @@ public class Point
     protected String pointNumber;
     protected TypeOfPointRefs_RelStructure types;
     protected Projections_RelStructure projections;
-    protected GroupMembershipRefs_RelStructure groupMemberships;
 
     public MultilingualStringEntity getName() {
         return name;
@@ -54,14 +53,6 @@ public class Point
 
     public void setProjections(Projections_RelStructure value) {
         this.projections = value;
-    }
-
-    public GroupMembershipRefs_RelStructure getGroupMemberships() {
-        return groupMemberships;
-    }
-
-    public void setGroupMemberships(GroupMembershipRefs_RelStructure value) {
-        this.groupMemberships = value;
     }
 
 }

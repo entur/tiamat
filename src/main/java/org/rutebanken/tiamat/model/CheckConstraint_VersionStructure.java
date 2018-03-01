@@ -49,9 +49,6 @@ public class CheckConstraint_VersionStructure
     protected TypeOfEquipmentRefStructure typeOfEquipmentRef;
 
     @Transient
-    protected FacilityRefStructure facilityRef;
-
-    @Transient
     protected JAXBElement<? extends EquipmentRefStructure> equipmentRef;
 
     @Transient
@@ -121,14 +118,6 @@ public class CheckConstraint_VersionStructure
 
     public void setTypeOfEquipmentRef(TypeOfEquipmentRefStructure value) {
         this.typeOfEquipmentRef = value;
-    }
-
-    public FacilityRefStructure getFacilityRef() {
-        return facilityRef;
-    }
-
-    public void setFacilityRef(FacilityRefStructure value) {
-        this.facilityRef = value;
     }
 
     public JAXBElement<? extends EquipmentRefStructure> getEquipmentRef() {

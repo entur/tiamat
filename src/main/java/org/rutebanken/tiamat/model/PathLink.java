@@ -68,9 +68,6 @@ public class PathLink extends Link {
     protected BigInteger personCapacity;
 
     @Transient
-    protected SiteFacilitySets_RelStructure facilities;
-
-    @Transient
     protected MultilingualStringEntity towards;
 
     @Transient
@@ -195,14 +192,6 @@ public class PathLink extends Link {
 
     public void setPersonCapacity(BigInteger value) {
         this.personCapacity = value;
-    }
-
-    public SiteFacilitySets_RelStructure getFacilities() {
-        return facilities;
-    }
-
-    public void setFacilities(SiteFacilitySets_RelStructure value) {
-        this.facilities = value;
     }
 
     public MultilingualStringEntity getTowards() {

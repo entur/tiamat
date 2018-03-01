@@ -59,9 +59,6 @@ public abstract class SiteElement extends AddressablePlace {
     @Transient
     protected BigInteger personCapacity;
 
-    @Transient
-    protected SiteFacilitySets_RelStructure facilities;
-
     public SiteElement(EmbeddableMultilingualString name) {
         super(name);
     }
@@ -158,14 +155,6 @@ public abstract class SiteElement extends AddressablePlace {
 
     public void setPersonCapacity(BigInteger value) {
         this.personCapacity = value;
-    }
-
-    public SiteFacilitySets_RelStructure getFacilities() {
-        return facilities;
-    }
-
-    public void setFacilities(SiteFacilitySets_RelStructure value) {
-        this.facilities = value;
     }
 
 }

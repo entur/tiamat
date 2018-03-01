@@ -24,7 +24,6 @@ public class SiteFrame
     protected AddressesInFrame_RelStructure addresses;
     protected AccessesInFrame_RelStructure accesses;
     protected StopPlacesInFrame_RelStructure stopPlaces;
-    protected FlexibleStopPlacesInFrame_RelStructure flexibleStopPlaces;
     protected PointsOfInterestInFrame_RelStructure pointsOfInterest;
     protected ParkingsInFrame_RelStructure parkings;
     protected NavigationPathsInFrame_RelStructure navigationPaths;
@@ -36,7 +35,6 @@ public class SiteFrame
     protected PointOfInterestClassifications pointOfInterestClassifications;
     protected PointOfInterestClassificationHierarchiesInFrame_RelStructure pointOfInterestClassificationHierarchies;
     protected TariffZonesInFrame_RelStructure tariffZones;
-    protected SiteFacilitySetsInFrame_RelStructure siteFacilitySets;
 
     public TopographicPlacesInFrame getTopographicPlaces() {
         return topographicPlaces;
@@ -68,14 +66,6 @@ public class SiteFrame
 
     public void setStopPlaces(StopPlacesInFrame_RelStructure value) {
         this.stopPlaces = value;
-    }
-
-    public FlexibleStopPlacesInFrame_RelStructure getFlexibleStopPlaces() {
-        return flexibleStopPlaces;
-    }
-
-    public void setFlexibleStopPlaces(FlexibleStopPlacesInFrame_RelStructure value) {
-        this.flexibleStopPlaces = value;
     }
 
     public PointsOfInterestInFrame_RelStructure getPointsOfInterest() {
@@ -166,13 +156,6 @@ public class SiteFrame
         this.tariffZones = tariffZones;
     }
 
-    public SiteFacilitySetsInFrame_RelStructure getSiteFacilitySets() {
-        return siteFacilitySets;
-    }
-
-    public void setSiteFacilitySets(SiteFacilitySetsInFrame_RelStructure value) {
-        this.siteFacilitySets = value;
-    }
 
     @Override
     public String toString() {
