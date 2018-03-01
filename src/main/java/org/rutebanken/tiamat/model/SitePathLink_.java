@@ -23,7 +23,6 @@ public class SitePathLink_ extends PathLink {
     protected CheckConstraints_RelStructure checkConstraints;
     protected EquipmentPlaces_RelStructure equipmentPlaces;
     protected PlaceEquipment placeEquipments;
-    protected LocalServices_RelStructure localServices;
     protected MultilingualStringEntity label;
 
     public SiteRefStructure getSiteRef() {
@@ -71,14 +70,6 @@ public class SitePathLink_ extends PathLink {
 
     public void setPlaceEquipments(PlaceEquipment value) {
         this.placeEquipments = value;
-    }
-
-    public LocalServices_RelStructure getLocalServices() {
-        return localServices;
-    }
-
-    public void setLocalServices(LocalServices_RelStructure value) {
-        this.localServices = value;
     }
 
     public MultilingualStringEntity getLabel() {

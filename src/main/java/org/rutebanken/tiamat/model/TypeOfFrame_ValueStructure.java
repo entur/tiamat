@@ -18,20 +18,11 @@ package org.rutebanken.tiamat.model;
 public class TypeOfFrame_ValueStructure
         extends TypeOfEntity_VersionStructure {
 
-    protected TypeOfValidityRefStructure typeOfValidityRef;
     protected ClassRefStructure frameClassRef;
     protected ClassesInRepository_RelStructure classes;
     protected TypesOfFrame_RelStructure includes;
     protected String locatingSystemRef;
     protected ModificationSetEnumeration modificationSet;
-
-    public TypeOfValidityRefStructure getTypeOfValidityRef() {
-        return typeOfValidityRef;
-    }
-
-    public void setTypeOfValidityRef(TypeOfValidityRefStructure value) {
-        this.typeOfValidityRef = value;
-    }
 
     public ClassRefStructure getFrameClassRef() {
         return frameClassRef;

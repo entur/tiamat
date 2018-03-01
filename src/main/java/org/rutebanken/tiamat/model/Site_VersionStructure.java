@@ -43,11 +43,7 @@ public abstract class Site_VersionStructure
     @Transient
     protected LocaleStructure locale;
 
-    @Transient
     protected JAXBElement<? extends OrganisationRefStructure> organisationRef;
-
-    @Transient
-    protected Organisation_DerivedViewStructure operatingOrganisationView;
 
     @AttributeOverrides({
             @AttributeOverride(name = "ref", column = @Column(name = "parent_site_ref")),
@@ -64,9 +60,6 @@ public abstract class Site_VersionStructure
 
     @OneToOne(cascade = CascadeType.ALL)
     protected PlaceEquipment placeEquipments;
-
-    @Transient
-    protected LocalServices_RelStructure localServices;
 
     @OneToMany(cascade = CascadeType.ALL)
     private List<EquipmentPlace> equipmentPlaces;
@@ -118,13 +111,6 @@ public abstract class Site_VersionStructure
         this.organisationRef = value;
     }
 
-    public Organisation_DerivedViewStructure getOperatingOrganisationView() {
-        return operatingOrganisationView;
-    }
-
-    public void setOperatingOrganisationView(Organisation_DerivedViewStructure value) {
-        this.operatingOrganisationView = value;
-    }
 
     public SiteRefStructure getParentSiteRef() {
         return parentSiteRef;
@@ -157,14 +143,6 @@ public abstract class Site_VersionStructure
 
     public void setPlaceEquipments(PlaceEquipment value) {
         this.placeEquipments = value;
-    }
-
-    public LocalServices_RelStructure getLocalServices() {
-        return localServices;
-    }
-
-    public void setLocalServices(LocalServices_RelStructure value) {
-        this.localServices = value;
     }
 
     public List<Level> getLevels() {

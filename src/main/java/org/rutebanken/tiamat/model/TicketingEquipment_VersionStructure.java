@@ -36,8 +36,7 @@ public class TicketingEquipment_VersionStructure
     protected BigDecimal heightOfMachineInterface;
     @Transient
     protected List<TicketingFacilityEnumeration> ticketingFacilityList;
-    @Transient
-    protected List<TicketingServiceFacilityEnumeration> ticketingServiceFacilityList;
+
     @Transient
     protected Boolean ticketCounter;
     @Transient
@@ -93,13 +92,6 @@ public class TicketingEquipment_VersionStructure
             ticketingFacilityList = new ArrayList<>();
         }
         return this.ticketingFacilityList;
-    }
-
-    public List<TicketingServiceFacilityEnumeration> getTicketingServiceFacilityList() {
-        if (ticketingServiceFacilityList == null) {
-            ticketingServiceFacilityList = new ArrayList<>();
-        }
-        return this.ticketingServiceFacilityList;
     }
 
     public Boolean isTicketOffice() {

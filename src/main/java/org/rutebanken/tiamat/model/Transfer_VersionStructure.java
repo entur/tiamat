@@ -22,7 +22,7 @@ public abstract class Transfer_VersionStructure
         extends DataManagedObjectStructure {
 
     protected MultilingualStringEntity name;
-    protected TypeOfTransferRefStructure typeOfTransferRef;
+
     protected MultilingualStringEntity description;
     protected BigDecimal distance;
     protected TransferDuration transferDuration;
@@ -35,14 +35,6 @@ public abstract class Transfer_VersionStructure
 
     public void setName(MultilingualStringEntity value) {
         this.name = value;
-    }
-
-    public TypeOfTransferRefStructure getTypeOfTransferRef() {
-        return typeOfTransferRef;
-    }
-
-    public void setTypeOfTransferRef(TypeOfTransferRefStructure value) {
-        this.typeOfTransferRef = value;
     }
 
     public MultilingualStringEntity getDescription() {

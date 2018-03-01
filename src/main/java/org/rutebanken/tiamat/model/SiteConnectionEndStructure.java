@@ -30,8 +30,6 @@ public class SiteConnectionEndStructure {
     protected ParkingRefStructure parkingRef;
     protected ParkingAreaRefStructure parkingAreaRef;
     protected ParkingEntranceRefStructure parkingEntranceRef;
-    protected OperatorRefStructure operatorRef;
-    protected OperatorView operatorView;
     protected MultilingualStringEntity label;
 
     public AllVehicleModesOfTransportEnumeration getTransportMode() {
@@ -136,22 +134,6 @@ public class SiteConnectionEndStructure {
 
     public void setParkingEntranceRef(ParkingEntranceRefStructure value) {
         this.parkingEntranceRef = value;
-    }
-
-    public OperatorRefStructure getOperatorRef() {
-        return operatorRef;
-    }
-
-    public void setOperatorRef(OperatorRefStructure value) {
-        this.operatorRef = value;
-    }
-
-    public OperatorView getOperatorView() {
-        return operatorView;
-    }
-
-    public void setOperatorView(OperatorView value) {
-        this.operatorView = value;
     }
 
     public MultilingualStringEntity getLabel() {
