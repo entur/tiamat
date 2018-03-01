@@ -21,10 +21,8 @@ import java.util.List;
 public class FlexibleQuay_VersionStructure
         extends Place {
 
-    protected MultilingualStringEntity nameSuffix;
-
     private final List<AlternativeName> alternativeNames = new ArrayList<>();
-
+    protected MultilingualStringEntity nameSuffix;
     protected FlexibleStopPlaceRefStructure flexibleStopPlaceRef;
     protected VehicleModeEnumeration transportMode;
     protected Boolean boardingUse;

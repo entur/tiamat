@@ -21,13 +21,12 @@ import java.util.List;
 public class Operator_DerivedViewStructure
         extends DerivedViewStructure {
 
+    private final List<AlternativeName> alternativeNames = new ArrayList<>();
     protected OperatorRefStructure operatorRef;
     protected MultilingualStringEntity name;
     protected MultilingualStringEntity shortName;
     protected MultilingualStringEntity legalName;
     protected MultilingualStringEntity tradingName;
-
-    private final List<AlternativeName> alternativeNames = new ArrayList<>();
 
     public OperatorRefStructure getOperatorRef() {
         return operatorRef;

@@ -21,10 +21,9 @@ import java.util.List;
 public class Country_VersionStructure
         extends Place {
 
+    private final List<AlternativeName> alternativeNames = new ArrayList<>();
     protected PrivateCodeStructure uicCode;
     protected MultilingualStringEntity countryName;
-
-    private final List<AlternativeName> alternativeNames = new ArrayList<>();
 
     public PrivateCodeStructure getUicCode() {
         return uicCode;

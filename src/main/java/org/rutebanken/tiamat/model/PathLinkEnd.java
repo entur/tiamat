@@ -50,7 +50,8 @@ public class PathLinkEnd extends IdentifiedEntity {
     @Transient
     private Level level;
 
-    public PathLinkEnd() {}
+    public PathLinkEnd() {
+    }
 
     public PathLinkEnd(AddressablePlaceRefStructure placeRef) {
         this.placeRef = placeRef;
@@ -97,7 +98,6 @@ public class PathLinkEnd extends IdentifiedEntity {
     public void setLevel(Level level) {
         this.level = level;
     }
-
 
 
     public PathJunction getPathJunction() {

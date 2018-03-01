@@ -37,7 +37,7 @@ public class Value implements Serializable {
     @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     @ElementCollection
     @CollectionTable(
-            name="value_items",
+            name = "value_items",
             indexes = @Index(name = "items_index", columnList = "items")
     )
     private Set<String> items = new HashSet<>();

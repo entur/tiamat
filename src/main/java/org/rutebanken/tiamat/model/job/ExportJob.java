@@ -131,12 +131,12 @@ public class ExportJob {
         this.message = message;
     }
 
-    public void setExportParams(ExportParams exportParams) {
-        this.exportParams = exportParams;
-    }
-
     public ExportParams getExportParams() {
         return exportParams;
+    }
+
+    public void setExportParams(ExportParams exportParams) {
+        this.exportParams = exportParams;
     }
 
     public String getSubFolder() {

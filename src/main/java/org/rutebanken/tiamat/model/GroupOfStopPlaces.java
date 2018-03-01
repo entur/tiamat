@@ -27,16 +27,14 @@ import java.util.Set;
 @Entity
 public class GroupOfStopPlaces extends GroupOfEntities_VersionStructure {
 
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    private final List<AlternativeName> alternativeNames = new ArrayList<>();
     @ElementCollection(targetClass = StopPlaceReference.class, fetch = FetchType.EAGER)
     @CollectionTable(
             name = "group_of_stop_places_members"
     )
     private Set<StopPlaceReference> members = new HashSet<>();
-
     private Point centroid;
-
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    private final List<AlternativeName> alternativeNames = new ArrayList<>();
 
     public GroupOfStopPlaces(EmbeddableMultilingualString embeddableMultilingualString) {
         super(embeddableMultilingualString);

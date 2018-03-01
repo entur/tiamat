@@ -24,7 +24,7 @@ import javax.persistence.MappedSuperclass;
 public class RelationshipStructure {
 
     @Id
-    @GeneratedValue(generator="sequence_per_table_generator")
+    @GeneratedValue(generator = "sequence_per_table_generator")
     protected String id;
 
     public String getId() {

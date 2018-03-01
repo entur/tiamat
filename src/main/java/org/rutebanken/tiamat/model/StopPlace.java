@@ -37,67 +37,47 @@ import java.util.*;
 public class StopPlace
         extends Site_VersionStructure implements Serializable {
 
-    private boolean parentStopPlace;
-
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<AccessSpace> accessSpaces = new ArrayList<>();
-
     protected String publicCode;
-
     @Enumerated(EnumType.STRING)
     protected VehicleModeEnumeration transportMode;
-
     @Enumerated(EnumType.STRING)
     protected AirSubmodeEnumeration airSubmode = AirSubmodeEnumeration.UNKNOWN;
-
     @Enumerated(EnumType.STRING)
     protected BusSubmodeEnumeration busSubmode;
-
     @Enumerated(EnumType.STRING)
     protected CoachSubmodeEnumeration coachSubmode;
-
     @Enumerated(EnumType.STRING)
     protected FunicularSubmodeEnumeration funicularSubmode;
-
     @Enumerated(EnumType.STRING)
     protected MetroSubmodeEnumeration metroSubmode;
-
     @Enumerated(EnumType.STRING)
     protected TramSubmodeEnumeration tramSubmode;
-
     @Enumerated(EnumType.STRING)
     protected TelecabinSubmodeEnumeration telecabinSubmode;
-
     @Enumerated(EnumType.STRING)
     protected RailSubmodeEnumeration railSubmode;
-
     @Enumerated(EnumType.STRING)
     protected WaterSubmodeEnumeration waterSubmode;
-
     @Enumerated(EnumType.STRING)
     @Transient
     protected List<VehicleModeEnumeration> otherTransportModes;
-
     @Enumerated(EnumType.STRING)
     protected StopTypeEnumeration stopPlaceType;
-
     protected Boolean borderCrossing;
-
     @Enumerated(value = EnumType.STRING)
     protected InterchangeWeightingEnumeration weighting;
-
     @OneToOne(fetch = FetchType.LAZY)
     @Transient
     protected SitePathLinks_RelStructure pathLinks;
-
     @OneToOne(fetch = FetchType.LAZY)
     @Transient
     protected PathJunctions_RelStructure pathJunctions;
-
     @OneToOne(fetch = FetchType.LAZY)
     @Transient
     protected NavigationPaths_RelStructure navigationPaths;
-
+    private boolean parentStopPlace;
     @OneToMany(cascade = CascadeType.ALL)
     private Set<Quay> quays = new HashSet<>();
 

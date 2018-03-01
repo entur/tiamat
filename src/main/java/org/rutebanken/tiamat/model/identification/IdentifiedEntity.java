@@ -28,13 +28,14 @@ import javax.persistence.MappedSuperclass;
 public abstract class IdentifiedEntity {
 
     @Id
-    @GeneratedValue(generator="sequence_per_table_generator")
+    @GeneratedValue(generator = "sequence_per_table_generator")
     protected Long id;
 
     protected String netexId;
 
     /**
      * This is the primary identificator. Usually, you should relate to ${getNetexId}
+     *
      * @return the primary long value of this identitifed entity.
      */
     public Long getId() {
@@ -49,6 +50,7 @@ public abstract class IdentifiedEntity {
     /**
      * Public ID.
      * Typically a NeTEx ID like NSR:StopPlace:123
+     *
      * @return the public ID
      */
     public String getNetexId() {

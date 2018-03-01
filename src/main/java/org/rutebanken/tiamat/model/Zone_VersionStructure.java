@@ -47,6 +47,10 @@ public class Zone_VersionStructure
     public Zone_VersionStructure() {
     }
 
+    public Zone_VersionStructure(EmbeddableMultilingualString name) {
+        super(name);
+    }
+
     public Polygon getPolygon() {
         if (polygon != null) {
             return polygon.getPolygon();
@@ -59,10 +63,6 @@ public class Zone_VersionStructure
             this.polygon = new PersistablePolygon();
         }
         this.polygon.setPolygon(polygon);
-    }
-
-    public Zone_VersionStructure(EmbeddableMultilingualString name) {
-        super(name);
     }
 
     public TypeOfZoneRefs_RelStructure getTypes() {

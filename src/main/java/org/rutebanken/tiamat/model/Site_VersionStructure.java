@@ -62,7 +62,7 @@ public abstract class Site_VersionStructure
     @Transient
     protected SiteEntrances_RelStructure entrances;
 
-    @OneToOne (cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL)
     protected PlaceEquipment placeEquipments;
 
     @Transient
@@ -142,7 +142,7 @@ public abstract class Site_VersionStructure
         this.adjacentSites = value;
     }
 
-     public SiteEntrances_RelStructure getEntrances() {
+    public SiteEntrances_RelStructure getEntrances() {
         return entrances;
     }
 

@@ -41,7 +41,7 @@ public abstract class SiteComponent_VersionStructure
     protected ClassOfUseRef classOfUseRef;
     @OneToMany(cascade = CascadeType.ALL)
     protected List<EquipmentPlace> equipmentPlaces;
-    @OneToOne (cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL)
     protected PlaceEquipment placeEquipments;
     @Transient
     protected LocalServices_RelStructure localServices;

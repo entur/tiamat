@@ -27,7 +27,7 @@ import java.io.Serializable;
 public class PersistablePolygon implements Serializable {
 
     @Id
-    @GeneratedValue(generator="sequence_per_table_generator")
+    @GeneratedValue(generator = "sequence_per_table_generator")
     protected Long id;
 
     private Polygon polygon;

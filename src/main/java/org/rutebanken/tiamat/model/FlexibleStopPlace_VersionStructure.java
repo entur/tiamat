@@ -21,10 +21,8 @@ import java.util.List;
 public class FlexibleStopPlace_VersionStructure
         extends Place {
 
-    protected MultilingualStringEntity nameSuffix;
-
     private final List<AlternativeName> alternativeNames = new ArrayList<>();
-
+    protected MultilingualStringEntity nameSuffix;
     protected VehicleModeEnumeration transportMode;
     protected String publicCode;
     protected Areas areas;

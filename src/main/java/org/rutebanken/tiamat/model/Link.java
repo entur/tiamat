@@ -24,6 +24,16 @@ import java.math.BigDecimal;
 @MappedSuperclass
 public abstract class Link extends DataManagedObjectStructure {
 
+    @Transient
+    protected MultilingualStringEntity name;
+    @Transient
+    protected BigDecimal distance;
+    @Transient
+    protected LinkTypeRefs_RelStructure types;
+    @Transient
+    protected Projections_RelStructure projections;
+    @Transient
+    protected PointsOnLink_RelStructure passingThrough;
     private LineString lineString;
 
     public Link() {
@@ -32,21 +42,6 @@ public abstract class Link extends DataManagedObjectStructure {
     public Link(LineString lineString) {
         this.lineString = lineString;
     }
-
-    @Transient
-    protected MultilingualStringEntity name;
-
-    @Transient
-    protected BigDecimal distance;
-
-    @Transient
-    protected LinkTypeRefs_RelStructure types;
-
-    @Transient
-    protected Projections_RelStructure projections;
-
-    @Transient
-    protected PointsOnLink_RelStructure passingThrough;
 
     public MultilingualStringEntity getName() {
         return name;
