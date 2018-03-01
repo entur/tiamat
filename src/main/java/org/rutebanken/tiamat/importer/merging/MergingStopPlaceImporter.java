@@ -22,7 +22,7 @@ import org.rutebanken.tiamat.importer.finder.NearbyStopsWithSameTypeFinder;
 import org.rutebanken.tiamat.importer.finder.StopPlaceFromOriginalIdFinder;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.model.ZoneDistanceChecker;
+import org.rutebanken.tiamat.geo.ZoneDistanceChecker;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.versioning.StopPlaceVersionedSaverService;
