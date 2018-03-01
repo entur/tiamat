@@ -22,7 +22,6 @@ public class VersionFrame_VersionStructure
     protected MultilingualStringEntity description;
     protected TypeOfFrameRefStructure typeOfFrameRef;
     protected VersionRefStructure baselineVersionFrameRef;
-    protected Codespaces_RelStructure codespaces;
     protected VersionFrameDefaultsStructure frameDefaults;
     protected Versions_RelStructure versions;
     protected Traces_RelStructure traces;
@@ -58,14 +57,6 @@ public class VersionFrame_VersionStructure
 
     public void setBaselineVersionFrameRef(VersionRefStructure value) {
         this.baselineVersionFrameRef = value;
-    }
-
-    public Codespaces_RelStructure getCodespaces() {
-        return codespaces;
-    }
-
-    public void setCodespaces(Codespaces_RelStructure value) {
-        this.codespaces = value;
     }
 
     public VersionFrameDefaultsStructure getFrameDefaults() {

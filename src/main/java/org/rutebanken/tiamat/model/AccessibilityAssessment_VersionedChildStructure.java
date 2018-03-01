@@ -41,9 +41,6 @@ public class AccessibilityAssessment_VersionedChildStructure
     protected List<AccessibilityLimitation> limitations;
 
     @Transient
-    protected Suitabilities_RelStructure suitabilities;
-
-    @Transient
     protected MultilingualStringEntity comment;
 
     public LimitationStatusEnumeration getMobilityImpairedAccess() {
@@ -60,14 +57,6 @@ public class AccessibilityAssessment_VersionedChildStructure
 
     public void setLimitations(List<AccessibilityLimitation> value) {
         this.limitations = value;
-    }
-
-    public Suitabilities_RelStructure getSuitabilities() {
-        return suitabilities;
-    }
-
-    public void setSuitabilities(Suitabilities_RelStructure value) {
-        this.suitabilities = value;
     }
 
     public MultilingualStringEntity getComment() {

@@ -17,21 +17,13 @@ package org.rutebanken.tiamat.model;
 
 public class VersionFrameDefaultsStructure {
 
-    protected CodespaceRefStructure defaultCodespaceRef;
+
     protected DataSourceRefStructure defaultDataSourceRef;
     protected ResponsibilitySetRefStructure defaultResponsibilitySetRef;
     protected LocaleStructure defaultLocale;
     protected String defaultLocationSystem;
     protected SystemOfUnits defaultSystemOfUnits;
     protected String defaultCurrency;
-
-    public CodespaceRefStructure getDefaultCodespaceRef() {
-        return defaultCodespaceRef;
-    }
-
-    public void setDefaultCodespaceRef(CodespaceRefStructure value) {
-        this.defaultCodespaceRef = value;
-    }
 
     public DataSourceRefStructure getDefaultDataSourceRef() {
         return defaultDataSourceRef;
