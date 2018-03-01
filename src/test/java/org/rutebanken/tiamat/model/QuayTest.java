@@ -84,26 +84,6 @@ public class QuayTest extends TiamatIntegrationTest {
         assertThat(actual.getPrivateCode()).isEqualTo(quay.getPrivateCode());
     }
 
-    @Ignore
-    @Test
-    public void persistQuayWithRoadAddress() {
-        Quay quay = new Quay();
-        RoadAddress roadAddress = new RoadAddress();
-        roadAddress.setVersion(1L);
-        roadAddress.setRoadName(new MultilingualStringEntity("Wimbledon Bridge", "en"));
-        roadAddress.setBearingCompass("W");
-        quay.setRoadAddress(roadAddress);
-        quayRepository.save(quay);
-
-        Quay actualQuay = quayRepository.findFirstByNetexIdOrderByVersionDesc(quay.getNetexId());
-
-        assertThat(actualQuay.getRoadAddress()).isNotNull();
-        assertThat(actualQuay.getRoadAddress().getNetexId()).isEqualTo(quay.getRoadAddress().getNetexId());
-        assertThat(actualQuay.getRoadAddress().getVersion()).isEqualTo(quay.getRoadAddress().getVersion());
-        assertThat(actualQuay.getRoadAddress().getRoadName().getValue()).isEqualTo(quay.getRoadAddress().getRoadName().getValue());
-        assertThat(actualQuay.getRoadAddress().getBearingCompass()).isEqualTo(quay.getRoadAddress().getBearingCompass());
-    }
-
     @Test
     public void persistQuayWithCentroid() {
         Quay quay = new Quay();

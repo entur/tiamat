@@ -222,20 +222,6 @@ public class StopPlaceTest extends TiamatIntegrationTest {
         assertThat(actualStopPlace.getLevels().get(0).getVersion()).isEqualTo(level.getVersion());
     }
 
-    @Ignore
-    @Test
-    public void persistStopPlaceWithRoadAddress() {
-        StopPlace stopPlace = new StopPlace();
-        RoadAddress roadAddress = new RoadAddress();
-        stopPlace.setRoadAddress(roadAddress);
-
-        stopPlaceRepository.save(stopPlace);
-        StopPlace actualStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId());
-
-        assertThat(actualStopPlace.getRoadAddress()).isNotNull();
-        assertThat(actualStopPlace.getRoadAddress().getNetexId()).isEqualTo(roadAddress.getNetexId());
-    }
-
     @Test
     public void persistStopPlaceWithValidBetween() {
 

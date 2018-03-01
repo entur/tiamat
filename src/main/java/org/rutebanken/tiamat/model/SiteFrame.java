@@ -21,7 +21,6 @@ public class SiteFrame
         extends Common_VersionFrameStructure {
 
     protected TopographicPlacesInFrame topographicPlaces = new TopographicPlacesInFrame();
-    protected AddressesInFrame_RelStructure addresses;
     protected AccessesInFrame_RelStructure accesses;
     protected StopPlacesInFrame_RelStructure stopPlaces;
     protected PointsOfInterestInFrame_RelStructure pointsOfInterest;
@@ -42,14 +41,6 @@ public class SiteFrame
 
     public void setTopographicPlaces(TopographicPlacesInFrame value) {
         this.topographicPlaces = value;
-    }
-
-    public AddressesInFrame_RelStructure getAddresses() {
-        return addresses;
-    }
-
-    public void setAddresses(AddressesInFrame_RelStructure value) {
-        this.addresses = value;
     }
 
     public AccessesInFrame_RelStructure getAccesses() {
