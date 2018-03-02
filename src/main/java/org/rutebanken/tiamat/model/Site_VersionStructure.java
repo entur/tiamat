@@ -43,6 +43,7 @@ public abstract class Site_VersionStructure
     @Transient
     protected LocaleStructure locale;
 
+    @Transient
     protected JAXBElement<? extends OrganisationRefStructure> organisationRef;
 
     @AttributeOverrides({
