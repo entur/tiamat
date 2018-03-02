@@ -15,19 +15,31 @@
 
 package org.rutebanken.tiamat.versioning;
 
+import org.rutebanken.tiamat.config.Messages;
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
 import org.rutebanken.tiamat.model.ValidBetween;
+import org.rutebanken.tiamat.time.ExportTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.Optional;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
+import static org.rutebanken.tiamat.config.Messages.*;
 
 @Service
 public class ValidityUpdater {
 
     private static final Logger logger = LoggerFactory.getLogger(ValidityUpdater.class);
+
+    @Autowired
+    private Messages messages;
+
+    @Autowired
+    private ExportTimeZone defaultTimeZone;
 
     protected <T extends EntityInVersionStructure> Instant updateValidBetween(T newVersion, Instant defaultFromTime) {
         return updateValidBetween(null, newVersion, defaultFromTime);
@@ -37,7 +49,7 @@ public class ValidityUpdater {
      * Updates the validity of the new version.
      * If validity or validbetween from date not set, a default value will be set.
      *
-     * @param newVersion the version to update valid between on
+     * @param newVersion      the version to update valid between on
      * @param defaultFromTime
      * @return the new version's valid from date
      */
@@ -45,24 +57,36 @@ public class ValidityUpdater {
 
         instantiateValidBetween(newVersion);
 
-        if(newVersion.getValidBetween().getFromDate() != null
+        if (newVersion.getValidBetween().getFromDate() != null
                 && newVersion.getValidBetween().getToDate() != null
                 && newVersion.getValidBetween().getFromDate().isAfter(newVersion.getValidBetween().getToDate())) {
-            throw new IllegalArgumentException("Entity " + newVersion.getNetexId() + " has from date " + newVersion.getValidBetween().getFromDate() + " after to date " + newVersion.getValidBetween().getToDate());
+            throw new IllegalArgumentException(messages.get(VALIDATION_FROM_DATE_AFTER_TO_DATE, newVersion.getNetexId(), formatToLocalDateTime(newVersion.getValidBetween().getFromDate()), formatToLocalDateTime(newVersion.getValidBetween().getToDate())));
         }
 
-        if(newVersion.getValidBetween().getFromDate() == null) {
-            logger.info("From date not set for new version of entity with ID: {}. Setting default from time: {}", newVersion.getNetexId(), defaultFromTime);
+        if (newVersion.getValidBetween().getFromDate() == null) {
+            logger.info(messages.get(VALIDATION_FROM_DATE_NOT_SET, newVersion.getNetexId(), formatToLocalDateTime(defaultFromTime)));
             newVersion.getValidBetween().setFromDate(defaultFromTime);
         }
 
-        if(existingVersion != null && existingVersion.getValidBetween() != null) {
-            String entityString = existingVersion.getNetexId() + " " +existingVersion.getVersion();
-            validateNewVersionDateAfter("Existing version " + entityString + " to date", existingVersion.getValidBetween().getToDate(), newVersion.getValidBetween().getFromDate());
-            validateNewVersionDateAfter("Existing version " + entityString + " from date", existingVersion.getValidBetween().getFromDate(), newVersion.getValidBetween().getFromDate());
+        if (existingVersion != null && existingVersion.getValidBetween() != null) {
+            String entityString = existingVersion.getNetexId() + " " + existingVersion.getVersion();
+            validateNewVersionDateAfter(VALIDATION_TO_DATE_AFTER_NEXT_VERSION_FROM_DATE, entityString, existingVersion.getValidBetween().getToDate(), newVersion.getValidBetween().getFromDate());
+            validateNewVersionDateAfter(VALIDATION_FROM_DATE_AFTER_NEXT_VERSION_FROM_DATE, entityString, existingVersion.getValidBetween().getFromDate(), newVersion.getValidBetween().getFromDate());
         }
 
         return newVersion.getValidBetween().getFromDate();
+    }
+
+    /**
+     * FIXME : any way to have incoming TZ instead of relying on default TZ ?
+     *
+     * Format an instant to human readable string. Used in error messages.
+     *
+     * @param dateToConvert instant to convert, UTC.
+     * @return instant converte to LocalDateTime using default time zone.
+     */
+    private String formatToLocalDateTime(Instant dateToConvert) {
+        return LocalDateTime.from(dateToConvert.atZone(defaultTimeZone.getDefaultTimeZoneId())).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
     }
 
     /**
@@ -73,12 +97,12 @@ public class ValidityUpdater {
         Instant fromDate = null;
 
         if (existingVersion != null && existingVersion.getValidBetween() != null) {
-            if(existingVersion.getValidBetween().getToDate() != null) {
+            if (existingVersion.getValidBetween().getToDate() != null) {
                 logger.info("From date not set for new version of entity with ID: {}. Using existing version to date: {}",
                         netexVersion,
                         existingVersion.getValidBetween().getToDate());
                 fromDate = existingVersion.getValidBetween().getToDate().plusMillis(1);
-            } else if(existingVersion != null && existingVersion.getValidBetween().getFromDate() != null) {
+            } else if (existingVersion != null && existingVersion.getValidBetween().getFromDate() != null) {
                 logger.info("From date not set for new version of entity with ID: {}. Using existing version from date: {}",
                         netexVersion,
                         existingVersion.getValidBetween().getFromDate());
@@ -86,11 +110,11 @@ public class ValidityUpdater {
             }
         }
 
-        if( fromDate == null) {
+        if (fromDate == null) {
             logger.info("From date not set and cannot be detected from previous version for new version of entity with ID: {}. Setting default from time: {}",
                     netexVersion, defaultFromTime);
             fromDate = defaultFromTime;
-        } else if(fromDate.isBefore(defaultFromTime)) {
+        } else if (fromDate.isBefore(defaultFromTime)) {
             logger.info("Detected from date (from previous version) is before default from time for entity with ID: {}. Setting default from time: {}",
                     netexVersion, defaultFromTime);
             fromDate = defaultFromTime;
@@ -98,14 +122,14 @@ public class ValidityUpdater {
         return fromDate;
     }
 
-    private void validateNewVersionDateAfter(String description, Instant previousVersionDate, Instant newVersionFromDate) {
-        if(previousVersionDate != null && previousVersionDate.isAfter(newVersionFromDate)) {
-            throw new IllegalArgumentException(description + " " + previousVersionDate + " is after new version's fromdate " + newVersionFromDate);
+    private void validateNewVersionDateAfter(String messageKey, String entityId, Instant previousVersionDate, Instant newVersionFromDate) {
+        if (previousVersionDate != null && previousVersionDate.isAfter(newVersionFromDate)) {
+            throw new IllegalArgumentException(messages.get(messageKey, entityId, formatToLocalDateTime(previousVersionDate), formatToLocalDateTime(newVersionFromDate)));
         }
     }
 
     private void instantiateValidBetween(EntityInVersionStructure entity) {
-        if(entity != null && entity.getValidBetween() == null) {
+        if (entity != null && entity.getValidBetween() == null) {
             entity.setValidBetween(new ValidBetween());
         }
     }
@@ -114,16 +138,16 @@ public class ValidityUpdater {
      * Terminate valid between for entity. Typically the old version, or when the entity should be terminated for "good".
      *
      * @param versionToTerminate the old version of entity to terminate
-     * @param terminateAt the instant when this version should be terminated
-     * @param <T> Versioned entity type
+     * @param terminateAt        the instant when this version should be terminated
+     * @param <T>                Versioned entity type
      * @return the updated entity
      */
     public <T extends EntityInVersionStructure> void terminateVersion(T versionToTerminate, Instant terminateAt) {
-        if(versionToTerminate == null) {
-            throw new IllegalArgumentException("Cannot terminate version for null object");
+        if (versionToTerminate == null) {
+            throw new IllegalArgumentException(messages.get(VALIDATION_CANNOT_TERMINATE_FOR_NULL));
         }
 
-        if(versionToTerminate.getValidBetween() == null) {
+        if (versionToTerminate.getValidBetween() == null) {
             logger.warn("Entity {} does not have valid between. Setting toDate.", versionToTerminate.getNetexId());
             versionToTerminate.setValidBetween(new ValidBetween(null, terminateAt));
         } else if (versionToTerminate.getValidBetween().getToDate() == null) {
