@@ -492,7 +492,7 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         stopPlaceRepository.save(brunesset);
 
         ExportParams exportParams = newExportParamsBuilder().setStopPlaceSearch(newStopPlaceSearchBuilder()
-                                                                                        .setQuery("nesset").build())
+                                                            .setQuery("nesset").build())
                                             .build();
         Page<StopPlace> result = stopPlaceRepository.findStopPlace(exportParams);
         assertThat(result).isNotEmpty();

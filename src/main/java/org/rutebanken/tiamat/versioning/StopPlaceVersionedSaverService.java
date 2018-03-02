@@ -15,6 +15,7 @@
 
 package org.rutebanken.tiamat.versioning;
 
+import com.google.common.collect.Sets;
 import org.rutebanken.tiamat.changelog.EntityChangedListener;
 import org.rutebanken.tiamat.importer.finder.NearbyStopPlaceFinder;
 import org.rutebanken.tiamat.importer.finder.StopPlaceByQuayOriginalIdFinder;
@@ -32,11 +33,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.Arrays;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
-import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
 
 
 @Transactional
@@ -75,6 +75,9 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
     @Autowired
     private SubmodeValidator submodeValidator;
 
+    @Autowired
+    private StopPlaceAuthorizationService stopPlaceAuthorizationService;
+
     @Override
     public EntityInVersionRepository<StopPlace> getRepository() {
         return stopPlaceRepository;
@@ -101,8 +104,6 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
             }
         }
 
-        authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(newVersion));
-
         submodeValidator.validate(newVersion);
 
         Instant changed = Instant.now();
@@ -110,23 +111,21 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
         logger.debug("Rearrange accessibility assessments for: {}", newVersion);
         accessibilityAssessmentOptimizer.optimizeAccessibilityAssessments(newVersion);
 
-
-
         Instant newVersionValidFrom = validityUpdater.updateValidBetween(existingVersion, newVersion, defaultValidFrom);
 
         if (existingVersion == null) {
             logger.debug("Existing version is not present, which means new entity. {}", newVersion);
             newVersion.setCreated(changed);
+            stopPlaceAuthorizationService.assertAuthorizedToEdit(null, newVersion);
         } else {
             newVersion.setChanged(changed);
             logger.debug("About to terminate previous version for {},{}", existingVersion.getNetexId(), existingVersion.getVersion());
-            StopPlace existingStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(existingVersion.getNetexId());
-            authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(existingStopPlace));
-            logger.debug("Found previous version {},{}. Terminating it.", existingStopPlace.getNetexId(), existingStopPlace.getVersion());
-            validityUpdater.terminateVersion(existingStopPlace, newVersionValidFrom.minusMillis(MILLIS_BETWEEN_VERSIONS));
+            StopPlace existingVersionRefetched = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(existingVersion.getNetexId());
+            logger.debug("Found previous version {},{}. Terminating it.", existingVersionRefetched.getNetexId(), existingVersionRefetched.getVersion());
+            validityUpdater.terminateVersion(existingVersionRefetched, newVersionValidFrom.minusMillis(MILLIS_BETWEEN_VERSIONS));
+            stopPlaceAuthorizationService.assertAuthorizedToEdit(existingVersionRefetched, newVersion);
         }
 
-        // Save latest version
         newVersion =  versionIncrementor.initiateOrIncrementVersions(newVersion);
 
         newVersion.setChangedBy(usernameFetcher.getUserNameForAuthenticatedUser());

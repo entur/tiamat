@@ -1,0 +1,1 @@
+ALTER TABLE export_job ALTER COLUMN message TYPE text;

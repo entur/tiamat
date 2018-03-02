@@ -20,7 +20,6 @@ import com.google.api.client.util.Preconditions;
 import graphql.language.Field;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
-import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.rest.graphql.helpers.CleanupHelper;
@@ -51,9 +50,6 @@ class StopPlaceUpdater implements DataFetcher {
 
     @Autowired
     private StopPlaceRepository stopPlaceRepository;
-
-    @Autowired
-    private ReflectionAuthorizationService authorizationService;
 
     @Autowired
     private StopPlaceMapper stopPlaceMapper;
@@ -128,8 +124,6 @@ class StopPlaceUpdater implements DataFetcher {
                 }
 
                 if (hasValuesChanged) {
-                    authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(existingVersion, updatedStopPlace));
-
                     if (updatedStopPlace.getName() == null || Strings.isNullOrEmpty(updatedStopPlace.getName().getValue())) {
                         throw new IllegalArgumentException("Updated stop place must have name set: " + updatedStopPlace);
                     }
@@ -166,13 +160,9 @@ class StopPlaceUpdater implements DataFetcher {
                 // Next line is not strictly required. As the child will alway belong to the parent.
                 verifyCorrectParentSet(existingChildStopPlace, updatedParentStopPlace);
 
-                authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(existingChildStopPlace));
-
                 logger.info("Populating changes for child stop {} (parent: {})", childNetexId, updatedParentStopPlace.getNetexId());
                 updated |= stopPlaceMapper.populateStopPlaceFromInput((Map) childStopMap, existingChildStopPlace);
                 updatedCount++;
-                // Verify after changes applied as well
-                authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(existingChildStopPlace));
             }
 
             logger.info("Applied changes for {} child stops. Parent stop contains {} child stops", updatedCount, updatedParentStopPlace.getChildren().size());
