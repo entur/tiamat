@@ -36,7 +36,7 @@ public class TiamatOriganisationChecker implements OrganisationChecker {
             Site_VersionStructure site = (Site_VersionStructure) entity;
 
             if (site.getOrganisationRef() != null) {
-                String orgRef = site.getOrganisationRef().getValue().getRef();
+                String orgRef = site.getOrganisationRef().getRef();
                 if (orgRef != null) {
                     logger.debug("Found org ref {} for entity. Returning true if it matches role assignment organisation :{}", orgRef, roleAssignment.getOrganisation());
                     return orgRef.endsWith(":" + roleAssignment.getOrganisation());

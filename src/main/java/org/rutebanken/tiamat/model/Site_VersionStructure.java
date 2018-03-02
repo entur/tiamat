@@ -44,7 +44,7 @@ public abstract class Site_VersionStructure
     protected LocaleStructure locale;
 
     @Transient
-    protected JAXBElement<? extends OrganisationRefStructure> organisationRef;
+    protected OrganisationRefStructure organisationRef;
 
     @AttributeOverrides({
             @AttributeOverride(name = "ref", column = @Column(name = "parent_site_ref")),
@@ -104,12 +104,12 @@ public abstract class Site_VersionStructure
         this.locale = value;
     }
 
-    public JAXBElement<? extends OrganisationRefStructure> getOrganisationRef() {
+    public OrganisationRefStructure getOrganisationRef() {
         return organisationRef;
     }
 
-    public void setOrganisationRef(JAXBElement<? extends OrganisationRefStructure> value) {
-        this.organisationRef = value;
+    public void setOrganisationRef(OrganisationRefStructure organisationRef) {
+        this.organisationRef = organisationRef;
     }
 
 
