@@ -27,8 +27,6 @@ public class Parking
         extends Site_VersionStructure {
 
     @Transient
-    protected Accesses_RelStructure accesses;
-    @Transient
     protected String publicCode;
     @Transient
     protected MultilingualStringEntity label;
@@ -93,14 +91,6 @@ public class Parking
 
     public void setPathJunctions(PathJunctions_RelStructure value) {
         this.pathJunctions = value;
-    }
-
-    public Accesses_RelStructure getAccesses() {
-        return accesses;
-    }
-
-    public void setAccesses(Accesses_RelStructure value) {
-        this.accesses = value;
     }
 
     public NavigationPaths_RelStructure getNavigationPaths() {
@@ -316,7 +306,6 @@ public class Parking
                 .add("changed", changed)
                 .add("centroid", centroid)
                 .add("parentSiteRef", parentSiteRef)
-                .add("accesses", accesses)
                 .add("publicCode", publicCode)
                 .add("label", label)
                 .add("parkingPaymentProcess", parkingPaymentProcess)

@@ -37,9 +37,6 @@ public class CheckConstraint_VersionStructure
     protected CheckServiceEnumeration checkService;
 
     @Transient
-    protected AccessFeatureEnumeration accessFeatureType;
-
-    @Transient
     protected CongestionEnumeration congestion;
 
     @Transient
@@ -87,14 +84,6 @@ public class CheckConstraint_VersionStructure
 
     public void setCheckService(CheckServiceEnumeration value) {
         this.checkService = value;
-    }
-
-    public AccessFeatureEnumeration getAccessFeatureType() {
-        return accessFeatureType;
-    }
-
-    public void setAccessFeatureType(AccessFeatureEnumeration value) {
-        this.accessFeatureType = value;
     }
 
     public CongestionEnumeration getCongestion() {

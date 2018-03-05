@@ -34,7 +34,6 @@ public class NavigationPath_VersionStructure
     protected LightingEnumeration lighting;
     protected Boolean allAreasWheelchairAccessible;
     protected BigInteger personCapacity;
-    protected List<AccessFeatureEnumeration> accessFeatureList;
     protected NavigationTypeEnumeration navigationType;
     protected PlacesInSequence_RelStructure placesInSequence;
     protected PathLinksInSequence_RelStructure pathLinksInSequence;
@@ -125,13 +124,6 @@ public class NavigationPath_VersionStructure
 
     public void setPersonCapacity(BigInteger value) {
         this.personCapacity = value;
-    }
-
-    public List<AccessFeatureEnumeration> getAccessFeatureList() {
-        if (accessFeatureList == null) {
-            accessFeatureList = new ArrayList<>();
-        }
-        return this.accessFeatureList;
     }
 
     public NavigationTypeEnumeration getNavigationType() {

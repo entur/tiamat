@@ -83,9 +83,6 @@ public class PathLink extends Link {
     protected TransitionEnumeration transition;
 
     @Transient
-    protected AccessFeatureEnumeration accessFeatureType;
-
-    @Transient
     protected PassageTypeEnumeration passageType;
 
     @Transient
@@ -232,14 +229,6 @@ public class PathLink extends Link {
 
     public void setTransition(TransitionEnumeration value) {
         this.transition = value;
-    }
-
-    public AccessFeatureEnumeration getAccessFeatureType() {
-        return accessFeatureType;
-    }
-
-    public void setAccessFeatureType(AccessFeatureEnumeration value) {
-        this.accessFeatureType = value;
     }
 
     public PassageTypeEnumeration getPassageType() {
