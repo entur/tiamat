@@ -19,6 +19,9 @@ import javax.persistence.*;
 import java.math.BigInteger;
 
 
+/**
+ * TODO: Remove "Assignment_VersionStructure_": Flatten model.
+ */
 @MappedSuperclass
 public abstract class Assignment_VersionStructure_
         extends DataManagedObjectStructure {
