@@ -15,6 +15,8 @@
 
 package org.rutebanken.tiamat.model;
 
+import org.apache.commons.lang.BooleanUtils;
+
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Transient;
 import java.math.BigDecimal;
@@ -74,6 +76,12 @@ public class TicketingEquipment_VersionStructure
     }
 
     public Boolean isTicketMachines() {
+        if(ticketMachines == null) {
+            if (numberOfMachines != null) {
+                return numberOfMachines.intValue() > 0;
+            }
+            return false;
+        }
         return ticketMachines;
     }
 
@@ -105,7 +113,7 @@ public class TicketingEquipment_VersionStructure
     }
 
     public Boolean isTicketOffice() {
-        return ticketOffice;
+        return BooleanUtils.isTrue(ticketOffice);
     }
 
     public void setTicketOffice(Boolean value) {
