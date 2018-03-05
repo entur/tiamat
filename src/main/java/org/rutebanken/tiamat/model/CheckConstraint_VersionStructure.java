@@ -51,8 +51,6 @@ public class CheckConstraint_VersionStructure
     @Transient
     protected Delays delays;
 
-    @Transient
-    protected Throughput throughput;
 
     public PlaceRef getPlaceRef() {
         return placeRef;
@@ -123,14 +121,6 @@ public class CheckConstraint_VersionStructure
 
     public void setDelays(Delays value) {
         this.delays = value;
-    }
-
-    public Throughput getThroughput() {
-        return throughput;
-    }
-
-    public void setThroughput(Throughput value) {
-        this.throughput = value;
     }
 
 }

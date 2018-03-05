@@ -29,7 +29,6 @@ public class SiteFrame
     protected PathJunctionsInFrame_RelStructure pathJunctions;
     protected CheckConstraintInFrame_RelStructure checkConstraints;
     protected CheckConstraintDelaysInFrame_RelStructure checkConstraintDelays;
-    protected CheckConstraintThroughputsInFrame_RelStructure checkConstraintThroughputs;
     protected PointOfInterestClassifications pointOfInterestClassifications;
     protected PointOfInterestClassificationHierarchiesInFrame_RelStructure pointOfInterestClassificationHierarchies;
     protected TariffZonesInFrame_RelStructure tariffZones;
@@ -105,15 +104,7 @@ public class SiteFrame
     public void setCheckConstraintDelays(CheckConstraintDelaysInFrame_RelStructure value) {
         this.checkConstraintDelays = value;
     }
-
-    public CheckConstraintThroughputsInFrame_RelStructure getCheckConstraintThroughputs() {
-        return checkConstraintThroughputs;
-    }
-
-    public void setCheckConstraintThroughputs(CheckConstraintThroughputsInFrame_RelStructure value) {
-        this.checkConstraintThroughputs = value;
-    }
-
+    
     public PointOfInterestClassifications getPointOfInterestClassifications() {
         return pointOfInterestClassifications;
     }
