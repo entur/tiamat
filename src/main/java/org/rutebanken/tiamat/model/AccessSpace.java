@@ -16,14 +16,20 @@
 package org.rutebanken.tiamat.model;
 
 import javax.persistence.Entity;
+import javax.persistence.Transient;
 
 
 @Entity
 public class AccessSpace
         extends StopPlaceSpace_VersionStructure {
 
+    @Transient
     protected AccessSpaceTypeEnumeration accessSpaceType;
+
+    @Transient
     protected PassageTypeEnumeration passageType;
+
+    @Transient
     protected AccessSpaceRefStructure parentAccessSpaceRef;
 
     public AccessSpaceTypeEnumeration getAccessSpaceType() {
