@@ -18,6 +18,9 @@ package org.rutebanken.tiamat.model;
 import javax.persistence.Embeddable;
 import java.io.Serializable;
 
+/**
+ * MultilingualString is extended to make it possible to embed.
+ */
 @Embeddable
 public class EmbeddableMultilingualString extends MultilingualString implements Serializable {
     public EmbeddableMultilingualString() {
