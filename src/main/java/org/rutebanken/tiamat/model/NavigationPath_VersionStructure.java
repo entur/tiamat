@@ -36,7 +36,6 @@ public class NavigationPath_VersionStructure
     protected NavigationTypeEnumeration navigationType;
     protected PlacesInSequence_RelStructure placesInSequence;
     protected PathLinksInSequence_RelStructure pathLinksInSequence;
-    protected TransferRefs_RelStructure transfers;
 
     public PathLinkEnd getFrom() {
         return from;
@@ -141,13 +140,5 @@ public class NavigationPath_VersionStructure
     public void setPathLinksInSequence(PathLinksInSequence_RelStructure value) {
         this.pathLinksInSequence = value;
     }
-
-    public TransferRefs_RelStructure getTransfers() {
-        return transfers;
-    }
-
-    public void setTransfers(TransferRefs_RelStructure value) {
-        this.transfers = value;
-    }
-
+    
 }

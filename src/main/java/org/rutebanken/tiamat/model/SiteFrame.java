@@ -104,7 +104,7 @@ public class SiteFrame
     public void setCheckConstraintDelays(CheckConstraintDelaysInFrame_RelStructure value) {
         this.checkConstraintDelays = value;
     }
-    
+
     public PointOfInterestClassifications getPointOfInterestClassifications() {
         return pointOfInterestClassifications;
     }
