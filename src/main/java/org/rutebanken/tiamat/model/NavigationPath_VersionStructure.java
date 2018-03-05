@@ -26,7 +26,6 @@ public class NavigationPath_VersionStructure
     protected PathLinkEnd from;
     protected PathLinkEnd to;
     protected AccessibilityAssessment accessibilityAssessment;
-    protected List<AccessModeEnumeration> accessModes;
     protected TransferDuration transferDuration;
     protected PublicUseEnumeration publicUse;
     protected CoveredEnumeration covered;
@@ -61,13 +60,6 @@ public class NavigationPath_VersionStructure
 
     public void setAccessibilityAssessment(AccessibilityAssessment value) {
         this.accessibilityAssessment = value;
-    }
-
-    public List<AccessModeEnumeration> getAccessModes() {
-        if (accessModes == null) {
-            accessModes = new ArrayList<>();
-        }
-        return this.accessModes;
     }
 
     public TransferDuration getTransferDuration() {

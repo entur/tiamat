@@ -47,9 +47,6 @@ public class PathLink extends Link {
     protected AccessibilityAssessment accessibilityAssessment;
 
     @Transient
-    protected List<AccessModeEnumeration> accessModes;
-
-    @Transient
     protected PublicUseEnumeration publicUse;
 
     @Transient
@@ -134,13 +131,6 @@ public class PathLink extends Link {
 
     public void setAccessibilityAssessment(AccessibilityAssessment value) {
         this.accessibilityAssessment = value;
-    }
-
-    public List<AccessModeEnumeration> getAccessModes() {
-        if (accessModes == null) {
-            accessModes = new ArrayList<>();
-        }
-        return this.accessModes;
     }
 
     public PublicUseEnumeration getPublicUse() {
