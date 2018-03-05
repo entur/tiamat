@@ -18,7 +18,6 @@ package org.rutebanken.tiamat.model;
 public class SiteConnectionEndStructure {
 
     protected AllVehicleModesOfTransportEnumeration transportMode;
-    protected StopAreaRefStructure stopAreaRef;
     protected StopPlaceReference stopPlaceRef;
     protected AccessSpaceRefStructure accessSpaceRef;
     protected BoardingPositionRefStructure boardingPositionRef;
@@ -38,14 +37,6 @@ public class SiteConnectionEndStructure {
 
     public void setTransportMode(AllVehicleModesOfTransportEnumeration value) {
         this.transportMode = value;
-    }
-
-    public StopAreaRefStructure getStopAreaRef() {
-        return stopAreaRef;
-    }
-
-    public void setStopAreaRef(StopAreaRefStructure value) {
-        this.stopAreaRef = value;
     }
 
     public StopPlaceReference getStopPlaceRef() {
