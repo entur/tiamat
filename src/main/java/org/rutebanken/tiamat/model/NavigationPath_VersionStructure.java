@@ -140,5 +140,5 @@ public class NavigationPath_VersionStructure
     public void setPathLinksInSequence(PathLinksInSequence_RelStructure value) {
         this.pathLinksInSequence = value;
     }
-    
+
 }
