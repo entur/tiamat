@@ -32,27 +32,37 @@ public class TicketingEquipment_VersionStructure
 
     @Transient
     protected List<VehicleModeEnumeration> vehicleModes;
+
     @Transient
     protected BigDecimal heightOfMachineInterface;
+
     @Transient
     protected List<TicketingFacilityEnumeration> ticketingFacilityList;
 
     @Transient
     protected Boolean ticketCounter;
+
     @Transient
     protected BigInteger numberOfTills;
+
     @Transient
     protected QueueManagementEnumeration queueManagement;
+
     @Transient
     protected List<PaymentMethodEnumeration> paymentMethods;
+
     @Transient
     protected List<TicketTypeEnumeration> ticketTypesAvailable;
+
     @Transient
     protected List<TicketingFacilityEnumeration> scopeOfTicketsAvailable;
+
     @Transient
     protected Boolean lowCounterAccess;
+
     @Transient
     protected BigDecimal heightOfLowCounter;
+
     @Transient
     protected Boolean inductionLoops;
 
