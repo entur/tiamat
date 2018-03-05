@@ -22,7 +22,6 @@ public class SiteConnectionEndStructure {
     protected AccessSpaceRefStructure accessSpaceRef;
     protected BoardingPositionRefStructure boardingPositionRef;
     protected QuayReference quayRef;
-    protected StopPlaceEntranceRefStructure stopPlaceEntranceRef;
     protected PointOfInterestRefStructure pointOfInterestRef;
     protected PointOfInterestSpaceRefStructure pointOfInterestSpaceRef;
     protected PointOfInterestEntranceRefStructure pointOfInterestEntranceRef;
@@ -69,14 +68,6 @@ public class SiteConnectionEndStructure {
 
     public void setQuayRef(QuayReference value) {
         this.quayRef = value;
-    }
-
-    public StopPlaceEntranceRefStructure getStopPlaceEntranceRef() {
-        return stopPlaceEntranceRef;
-    }
-
-    public void setStopPlaceEntranceRef(StopPlaceEntranceRefStructure value) {
-        this.stopPlaceEntranceRef = value;
     }
 
     public PointOfInterestRefStructure getPointOfInterestRef() {
