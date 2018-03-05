@@ -24,7 +24,6 @@ public class VersionFrame_VersionStructure
     protected VersionRefStructure baselineVersionFrameRef;
     protected VersionFrameDefaultsStructure frameDefaults;
     protected Versions_RelStructure versions;
-    protected ValidityConditions_RelStructure contentValidityConditions;
 
     public MultilingualStringEntity getName() {
         return name;
@@ -72,14 +71,6 @@ public class VersionFrame_VersionStructure
 
     public void setVersions(Versions_RelStructure value) {
         this.versions = value;
-    }
-
-    public ValidityConditions_RelStructure getContentValidityConditions() {
-        return contentValidityConditions;
-    }
-
-    public void setContentValidityConditions(ValidityConditions_RelStructure value) {
-        this.contentValidityConditions = value;
     }
 
 }
