@@ -71,7 +71,7 @@ public abstract class SiteElement extends AddressablePlace {
     public void setAccessibilityAssessment(AccessibilityAssessment value) {
         this.accessibilityAssessment = value;
     }
-    
+
     public MultilingualStringEntity getNameSuffix() {
         return nameSuffix;
     }
