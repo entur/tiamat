@@ -63,15 +63,17 @@ public class StreamingPublicationDeliveryConfig {
 
     @Bean("asyncStreamingPublicationDelivery")
     public StreamingPublicationDelivery asyncStreamingPublicationDelivery() throws IOException, SAXException {
-        return new StreamingPublicationDelivery(stopPlaceRepository, parkingRepository, publicationDeliveryExporter,
-                tiamatSiteFrameExporter, netexMapper, tariffZoneRepository, topographicPlaceRepository,
-                groupOfStopPlacesRepository, validateAsyncExport);
+        return createStreamingPublicationDelivery(validateAsyncExport);
     }
 
     @Bean("syncStreamingPublicationDelivery")
     public StreamingPublicationDelivery syncStreamingPublicationDelivery() throws IOException, SAXException {
+        return createStreamingPublicationDelivery(validateSyncExport);
+    }
+
+    private StreamingPublicationDelivery createStreamingPublicationDelivery(boolean validate) throws IOException, SAXException {
         return new StreamingPublicationDelivery(stopPlaceRepository, parkingRepository, publicationDeliveryExporter,
                 tiamatSiteFrameExporter, netexMapper, tariffZoneRepository, topographicPlaceRepository,
-                groupOfStopPlacesRepository, validateSyncExport);
+                groupOfStopPlacesRepository, validate);
     }
 }
