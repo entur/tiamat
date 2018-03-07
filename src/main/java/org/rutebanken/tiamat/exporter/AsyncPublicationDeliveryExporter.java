@@ -27,6 +27,7 @@ import org.rutebanken.tiamat.time.ExportTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -67,7 +68,7 @@ public class AsyncPublicationDeliveryExporter {
     @Autowired
     public AsyncPublicationDeliveryExporter(ExportJobRepository exportJobRepository,
                                             BlobStoreService blobStoreService,
-                                            StreamingPublicationDelivery streamingPublicationDelivery,
+                                            @Qualifier("asyncStreamingPublicationDelivery") StreamingPublicationDelivery streamingPublicationDelivery,
                                             NetexXmlReferenceValidator netexXmlReferenceValidator, ExportTimeZone exportTimeZone,
                                             @Value("${async.export.path:/deployments/data/}") String localExportPath) {
         this.exportJobRepository = exportJobRepository;

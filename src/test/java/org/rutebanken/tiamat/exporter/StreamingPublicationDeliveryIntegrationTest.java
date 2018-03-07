@@ -31,6 +31,7 @@ import org.rutebanken.tiamat.versioning.GroupOfStopPlacesSaverService;
 import org.rutebanken.tiamat.versioning.TariffZoneSaverService;
 import org.rutebanken.tiamat.versioning.TopographicPlaceVersionedSaverService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.transaction.annotation.Transactional;
 import org.xml.sax.SAXException;
 
@@ -54,6 +55,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Transactional
 public class StreamingPublicationDeliveryIntegrationTest extends TiamatIntegrationTest {
 
+    @Qualifier("syncStreamingPublicationDelivery")
     @Autowired
     private StreamingPublicationDelivery streamingPublicationDelivery;
 
