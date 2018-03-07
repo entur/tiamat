@@ -26,7 +26,7 @@ public class CheckConstraintDelays_RelStructure
 
     public List<Object> getCheckConstraintDelayRefOrCheckConstraintDelay() {
         if (checkConstraintDelayRefOrCheckConstraintDelay == null) {
-            checkConstraintDelayRefOrCheckConstraintDelay = new ArrayList<Object>();
+            checkConstraintDelayRefOrCheckConstraintDelay = new ArrayList<>();
         }
         return this.checkConstraintDelayRefOrCheckConstraintDelay;
     }

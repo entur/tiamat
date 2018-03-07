@@ -21,14 +21,43 @@ import ma.glasnost.orika.metadata.Type;
 import org.rutebanken.netex.model.AlternativeNames_RelStructure;
 import org.rutebanken.tiamat.model.AlternativeName;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
 public class AlternativeNamesConverter extends BidirectionalConverter<List<AlternativeName>, AlternativeNames_RelStructure> {
+
     @Override
     public AlternativeNames_RelStructure convertTo(List<AlternativeName> alternativeNames, Type<AlternativeNames_RelStructure> type, MappingContext mappingContext) {
+
+
+        if (!CollectionUtils.isEmpty(alternativeNames)) {
+
+            List<org.rutebanken.netex.model.AlternativeName> netexAlternativeNames = new ArrayList<>();
+
+            for (org.rutebanken.tiamat.model.AlternativeName alternativeName : alternativeNames) {
+                if (alternativeName != null
+                        && alternativeName.getName() != null
+                        && alternativeName.getName().getValue() != null
+                        && !alternativeName.getName().getValue().isEmpty()) {
+                    //Only include non-empty alternative names
+                    org.rutebanken.netex.model.AlternativeName netexAlternativeName = new org.rutebanken.netex.model.AlternativeName();
+                    mapperFacade.map(alternativeName, netexAlternativeName);
+                    netexAlternativeName.setId(alternativeName.getNetexId());
+                    netexAlternativeNames.add(netexAlternativeName);
+                }
+            }
+
+            if (!netexAlternativeNames.isEmpty()) {
+                AlternativeNames_RelStructure alternativeNamesRelStructure = new AlternativeNames_RelStructure();
+                alternativeNamesRelStructure.getAlternativeName().addAll(netexAlternativeNames);
+                return alternativeNamesRelStructure;
+            }
+        }
         return null;
+
     }
 
     @Override

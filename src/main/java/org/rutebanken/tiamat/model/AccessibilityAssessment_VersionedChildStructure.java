@@ -16,10 +16,9 @@
 package org.rutebanken.tiamat.model;
 
 import com.google.common.base.MoreObjects;
-import org.hibernate.annotations.*;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import javax.persistence.*;
-import javax.persistence.CascadeType;
 import java.util.List;
 
 
@@ -42,9 +41,6 @@ public class AccessibilityAssessment_VersionedChildStructure
     protected List<AccessibilityLimitation> limitations;
 
     @Transient
-    protected Suitabilities_RelStructure suitabilities;
-
-    @Transient
     protected MultilingualStringEntity comment;
 
     public LimitationStatusEnumeration getMobilityImpairedAccess() {
@@ -61,14 +57,6 @@ public class AccessibilityAssessment_VersionedChildStructure
 
     public void setLimitations(List<AccessibilityLimitation> value) {
         this.limitations = value;
-    }
-
-    public Suitabilities_RelStructure getSuitabilities() {
-        return suitabilities;
-    }
-
-    public void setSuitabilities(Suitabilities_RelStructure value) {
-        this.suitabilities = value;
     }
 
     public MultilingualStringEntity getComment() {

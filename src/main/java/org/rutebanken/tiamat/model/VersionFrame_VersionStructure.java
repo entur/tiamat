@@ -22,11 +22,8 @@ public class VersionFrame_VersionStructure
     protected MultilingualStringEntity description;
     protected TypeOfFrameRefStructure typeOfFrameRef;
     protected VersionRefStructure baselineVersionFrameRef;
-    protected Codespaces_RelStructure codespaces;
     protected VersionFrameDefaultsStructure frameDefaults;
     protected Versions_RelStructure versions;
-    protected Traces_RelStructure traces;
-    protected ValidityConditions_RelStructure contentValidityConditions;
 
     public MultilingualStringEntity getName() {
         return name;
@@ -60,14 +57,6 @@ public class VersionFrame_VersionStructure
         this.baselineVersionFrameRef = value;
     }
 
-    public Codespaces_RelStructure getCodespaces() {
-        return codespaces;
-    }
-
-    public void setCodespaces(Codespaces_RelStructure value) {
-        this.codespaces = value;
-    }
-
     public VersionFrameDefaultsStructure getFrameDefaults() {
         return frameDefaults;
     }
@@ -82,22 +71,6 @@ public class VersionFrame_VersionStructure
 
     public void setVersions(Versions_RelStructure value) {
         this.versions = value;
-    }
-
-    public Traces_RelStructure getTraces() {
-        return traces;
-    }
-
-    public void setTraces(Traces_RelStructure value) {
-        this.traces = value;
-    }
-
-    public ValidityConditions_RelStructure getContentValidityConditions() {
-        return contentValidityConditions;
-    }
-
-    public void setContentValidityConditions(ValidityConditions_RelStructure value) {
-        this.contentValidityConditions = value;
     }
 
 }

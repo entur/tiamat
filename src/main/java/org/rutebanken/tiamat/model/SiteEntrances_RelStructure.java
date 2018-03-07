@@ -27,7 +27,7 @@ public class SiteEntrances_RelStructure
 
     public List<JAXBElement<?>> getEntranceRefOrEntrance() {
         if (entranceRefOrEntrance == null) {
-            entranceRefOrEntrance = new ArrayList<JAXBElement<?>>();
+            entranceRefOrEntrance = new ArrayList<>();
         }
         return this.entranceRefOrEntrance;
     }

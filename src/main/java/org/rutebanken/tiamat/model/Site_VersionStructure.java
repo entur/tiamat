@@ -44,10 +44,7 @@ public abstract class Site_VersionStructure
     protected LocaleStructure locale;
 
     @Transient
-    protected JAXBElement<? extends OrganisationRefStructure> organisationRef;
-
-    @Transient
-    protected Organisation_DerivedViewStructure operatingOrganisationView;
+    protected OrganisationRefStructure organisationRef;
 
     @AttributeOverrides({
             @AttributeOverride(name = "ref", column = @Column(name = "parent_site_ref")),
@@ -62,11 +59,8 @@ public abstract class Site_VersionStructure
     @Transient
     protected SiteEntrances_RelStructure entrances;
 
-    @OneToOne (cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL)
     protected PlaceEquipment placeEquipments;
-
-    @Transient
-    protected LocalServices_RelStructure localServices;
 
     @OneToMany(cascade = CascadeType.ALL)
     private List<EquipmentPlace> equipmentPlaces;
@@ -110,21 +104,14 @@ public abstract class Site_VersionStructure
         this.locale = value;
     }
 
-    public JAXBElement<? extends OrganisationRefStructure> getOrganisationRef() {
+    public OrganisationRefStructure getOrganisationRef() {
         return organisationRef;
     }
 
-    public void setOrganisationRef(JAXBElement<? extends OrganisationRefStructure> value) {
-        this.organisationRef = value;
+    public void setOrganisationRef(OrganisationRefStructure organisationRef) {
+        this.organisationRef = organisationRef;
     }
 
-    public Organisation_DerivedViewStructure getOperatingOrganisationView() {
-        return operatingOrganisationView;
-    }
-
-    public void setOperatingOrganisationView(Organisation_DerivedViewStructure value) {
-        this.operatingOrganisationView = value;
-    }
 
     public SiteRefStructure getParentSiteRef() {
         return parentSiteRef;
@@ -142,7 +129,7 @@ public abstract class Site_VersionStructure
         this.adjacentSites = value;
     }
 
-     public SiteEntrances_RelStructure getEntrances() {
+    public SiteEntrances_RelStructure getEntrances() {
         return entrances;
     }
 
@@ -157,14 +144,6 @@ public abstract class Site_VersionStructure
 
     public void setPlaceEquipments(PlaceEquipment value) {
         this.placeEquipments = value;
-    }
-
-    public LocalServices_RelStructure getLocalServices() {
-        return localServices;
-    }
-
-    public void setLocalServices(LocalServices_RelStructure value) {
-        this.localServices = value;
     }
 
     public List<Level> getLevels() {

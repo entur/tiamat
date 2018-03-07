@@ -23,7 +23,8 @@ import javax.persistence.MappedSuperclass;
 @Embeddable
 public class AddressablePlaceRefStructure extends PlaceRefStructure {
 
-    public AddressablePlaceRefStructure() {}
+    public AddressablePlaceRefStructure() {
+    }
 
     public AddressablePlaceRefStructure(AddressablePlace addressablePlace) {
         super(addressablePlace.getNetexId(), String.valueOf(addressablePlace.getVersion()));

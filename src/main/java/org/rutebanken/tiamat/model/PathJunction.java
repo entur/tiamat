@@ -44,9 +44,6 @@ public class PathJunction extends Point {
     protected BigInteger personCapacity;
 
     @Transient
-    protected SiteFacilitySets_RelStructure facilities;
-
-    @Transient
     protected MultilingualStringEntity label;
 
     @Transient
@@ -106,14 +103,6 @@ public class PathJunction extends Point {
 
     public void setPersonCapacity(BigInteger value) {
         this.personCapacity = value;
-    }
-
-    public SiteFacilitySets_RelStructure getFacilities() {
-        return facilities;
-    }
-
-    public void setFacilities(SiteFacilitySets_RelStructure value) {
-        this.facilities = value;
     }
 
     public MultilingualStringEntity getLabel() {

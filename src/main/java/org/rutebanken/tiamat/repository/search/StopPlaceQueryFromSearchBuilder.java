@@ -157,6 +157,12 @@ public class StopPlaceQueryFromSearchBuilder {
                 operators.add("and");
             }
 
+            if(stopPlaceSearch.getSubmode() != null) {
+                wheres.add("(s.air_submode = :submode OR s.bus_submode = :submode OR s.coach_submode = :submode OR s.funicular_submode = :submode OR s.metro_submode = :submode OR s.rail_submode = :submode OR s.telecabin_submode = :submode OR s.tram_submode = :submode OR s.water_submode = :submode)");
+                parameters.put("submode", stopPlaceSearch.getSubmode());
+                operators.add("and");
+            }
+
             if (stopPlaceSearch.getTags() != null && !stopPlaceSearch.getTags().isEmpty()) {
                 wheres.add("(s." + SQL_MULTIPLE_TAG_QUERY + " OR p." + SQL_MULTIPLE_TAG_QUERY + ")");
                 parameters.put("tags", stopPlaceSearch.getTags());

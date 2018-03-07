@@ -26,7 +26,7 @@ public class PathLinksInFrame_RelStructure
 
     public List<PathLink> getPathLink() {
         if (pathLink == null) {
-            pathLink = new ArrayList<PathLink>();
+            pathLink = new ArrayList<>();
         }
         return this.pathLink;
     }

@@ -15,12 +15,15 @@
 
 package org.rutebanken.tiamat.service.stopplace;
 
+import com.google.common.base.Strings;
+import org.hibernate.Session;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.EntityManager;
 import java.util.List;
 
 import static java.util.Comparator.comparing;
@@ -36,12 +39,16 @@ public class ParentStopPlacesFetcher {
 
     private final StopPlaceRepository stopPlaceRepository;
 
-    public ParentStopPlacesFetcher(StopPlaceRepository stopPlaceRepository) {
+    private final EntityManager entityManager;
+
+    public ParentStopPlacesFetcher(StopPlaceRepository stopPlaceRepository, EntityManager entityManager) {
         this.stopPlaceRepository = stopPlaceRepository;
+        this.entityManager = entityManager;
     }
 
     public List<StopPlace> resolveParents(List<StopPlace> stopPlaceList, boolean keepChilds) {
 
+        Session session = entityManager.unwrap(Session.class);
 
         if (stopPlaceList == null || stopPlaceList.stream().noneMatch(sp -> sp != null)) {
             return stopPlaceList;
@@ -58,6 +65,12 @@ public class ParentStopPlacesFetcher {
                         Long.parseLong(nonParentStop.getParentSiteRef().getVersion()));
                 if (parent != null) {
                     logger.info("Resolved parent: {} {} from child {}", parent.getNetexId(), parent.getName(), nonParentStop.getNetexId());
+
+                    if(nonParentStop.getName() == null || Strings.isNullOrEmpty(nonParentStop.getName().getValue())) {
+                        logger.info("Copying name from parent {} to child stop: {}", parent.getId(), parent.getName());
+                        nonParentStop.setName(parent.getName());
+                        session.setReadOnly(nonParentStop, true);
+                    }
 
                     if (result.stream().noneMatch(stopPlace -> stopPlace.getNetexId() != null
                                                                        && (stopPlace.getNetexId().equals(parent.getNetexId()) && stopPlace.getVersion() == parent.getVersion()))) {

@@ -26,7 +26,7 @@ public class ParkingProperties_RelStructure
 
     public List<ParkingProperties> getParkingProperties() {
         if (parkingProperties == null) {
-            parkingProperties = new ArrayList<ParkingProperties>();
+            parkingProperties = new ArrayList<>();
         }
         return this.parkingProperties;
     }

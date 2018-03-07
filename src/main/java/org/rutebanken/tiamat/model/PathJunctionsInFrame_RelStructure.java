@@ -26,7 +26,7 @@ public class PathJunctionsInFrame_RelStructure
 
     public List<PathJunction> getPathJunction() {
         if (pathJunction == null) {
-            pathJunction = new ArrayList<PathJunction>();
+            pathJunction = new ArrayList<>();
         }
         return this.pathJunction;
     }

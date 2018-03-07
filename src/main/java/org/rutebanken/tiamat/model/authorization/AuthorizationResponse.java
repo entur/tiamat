@@ -19,9 +19,8 @@ import java.util.Set;
 
 public class AuthorizationResponse {
 
-    private String id;
-
     private final Set<String> roles;
+    private String id;
 
     public AuthorizationResponse(String id, Set<String> roles) {
         this.id = id;

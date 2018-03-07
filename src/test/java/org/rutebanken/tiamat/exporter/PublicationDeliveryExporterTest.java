@@ -47,22 +47,6 @@ public class PublicationDeliveryExporterTest extends TiamatIntegrationTest {
     private PublicationDeliveryTestHelper publicationDeliveryTestHelper;
 
     @Test
-    public void exportPublicationDeliveryWithStopPlace() throws JAXBException {
-        org.rutebanken.tiamat.model.StopPlace stopPlace = new org.rutebanken.tiamat.model.StopPlace();
-        stopPlace.setNetexId("NSR:StopPlace:987");
-        stopPlaceRepository.save(stopPlace);
-
-        PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryExporter.exportStopPlaces(
-                newExportParamsBuilder()
-                        .setStopPlaceSearch(new StopPlaceSearch())
-                        .build());
-
-        String expectedId = "NSR:StopPlace:987";
-        StopPlace actual = publicationDeliveryTestHelper.findStopPlace(publicationDeliveryStructure, expectedId);
-        assertThat(actual).isNotNull();
-    }
-
-    @Test
     public void exportPlacesWithEffectiveChangeInPeriodWithChildren() throws JAXBException {
 
         Instant now = Instant.now();

@@ -38,7 +38,7 @@ public class StopPlaceAuthorizationCheck extends PlaceAuthorizationCheck<StopPla
 	@Override
 	protected boolean matchesOrganisation() {
 		if (entity.getOrganisationRef() != null) {
-			String orgRef = entity.getOrganisationRef().getValue().getRef();
+			String orgRef = entity.getOrganisationRef().getRef();
 			if (orgRef != null) {
 				return orgRef.endsWith(":" + roleAssignment.o);
 			}

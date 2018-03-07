@@ -30,6 +30,7 @@ import java.util.List;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.rutebanken.helper.organisation.AuthorizationConstants.ENTITY_TYPE;
+import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
 
 @Transactional // Because of the authorization service logs entities which could read lazy loaded fields
 public class TiamatAuthorizationServiceTest extends TiamatIntegrationTest {
@@ -47,7 +48,7 @@ public class TiamatAuthorizationServiceTest extends TiamatIntegrationTest {
     public void authorizedForStopPlaceTypeWhenOthersBlacklisted() {
 
         RoleAssignment roleAssignment = RoleAssignment.builder()
-                .withRole("editStops")
+                .withRole(ROLE_EDIT_STOPS)
 //                .withAdministrativeZone("01")
                 .withOrganisation("OST")
                 .withEntityClassification(ENTITY_TYPE, "StopPlace")
@@ -66,7 +67,7 @@ public class TiamatAuthorizationServiceTest extends TiamatIntegrationTest {
     public void authorizedByQuay() {
 
         RoleAssignment roleAssignment = RoleAssignment.builder()
-                .withRole("editStops")
+                .withRole(ROLE_EDIT_STOPS)
                 .withOrganisation("OST")
                 .withEntityClassification(ENTITY_TYPE, "StopPlace")
                 .withEntityClassification("StopPlaceType", "onstreetBus")
@@ -88,7 +89,7 @@ public class TiamatAuthorizationServiceTest extends TiamatIntegrationTest {
     public void notAuthorizedForBlacklistedStopPlaceTypes() {
 
         RoleAssignment roleAssignment = RoleAssignment.builder()
-                .withRole("editStops")
+                .withRole(ROLE_EDIT_STOPS)
                 .withOrganisation("OST")
                 .withEntityClassification(ENTITY_TYPE, "StopPlace")
                 .withEntityClassification("StopPlaceType", "!airport")
@@ -107,7 +108,7 @@ public class TiamatAuthorizationServiceTest extends TiamatIntegrationTest {
     @Test
     public void notAuthorizedWithSubmodeAndType() {
         RoleAssignment roleAssignment = RoleAssignment.builder()
-                .withRole("editStops")
+                .withRole(ROLE_EDIT_STOPS)
                 .withOrganisation("OST")
                 .withEntityClassification(ENTITY_TYPE, "StopPlace")
                 .withEntityClassification("StopPlaceType", "!airport")
@@ -125,7 +126,7 @@ public class TiamatAuthorizationServiceTest extends TiamatIntegrationTest {
     @Test
     public void authorizedWithSubmodeAndType() {
         RoleAssignment roleAssignment = RoleAssignment.builder()
-                .withRole("editStops")
+                .withRole(ROLE_EDIT_STOPS)
                 .withOrganisation("OST")
                 .withEntityClassification(ENTITY_TYPE, "StopPlace")
                 .withEntityClassification("StopPlaceType", "!airport")
@@ -145,7 +146,7 @@ public class TiamatAuthorizationServiceTest extends TiamatIntegrationTest {
      */
     @Test
     public void testNSBEditStopsRoleAssignmentsOnlyRail() {
-        String role = "editStops";
+        String role = ROLE_EDIT_STOPS;
         roleAssignmentsForRailAndRailReplacementMocked(role);
         StopPlace stopPlace = new StopPlace();
         stopPlace.setStopPlaceType(StopTypeEnumeration.RAIL_STATION);
@@ -155,7 +156,7 @@ public class TiamatAuthorizationServiceTest extends TiamatIntegrationTest {
 
     @Test
     public void testNSBEditStopsRoleAssignmentsOnlyRailReplacementBus() {
-        String role = "editStops";
+        String role = ROLE_EDIT_STOPS;
         roleAssignmentsForRailAndRailReplacementMocked(role);
         StopPlace stopPlace = new StopPlace();
         stopPlace.setBusSubmode(BusSubmodeEnumeration.RAIL_REPLACEMENT_BUS);
@@ -165,7 +166,7 @@ public class TiamatAuthorizationServiceTest extends TiamatIntegrationTest {
 
     @Test
     public void testNSBEditStopsRoleAssignmentsRailAndReplacementBus() {
-        String role = "editStops";
+        String role = ROLE_EDIT_STOPS;
         roleAssignmentsForRailAndRailReplacementMocked(role);
         StopPlace stopPlace = new StopPlace();
         stopPlace.setBusSubmode(BusSubmodeEnumeration.RAIL_REPLACEMENT_BUS);
@@ -176,7 +177,7 @@ public class TiamatAuthorizationServiceTest extends TiamatIntegrationTest {
 
     @Test
     public void testNSBEditStopsRoleAssignmentsWaterSubmode() {
-        String role = "editStops";
+        String role = ROLE_EDIT_STOPS;
         roleAssignmentsForRailAndRailReplacementMocked(role);
         StopPlace stopPlace = new StopPlace();
         stopPlace.setWaterSubmode(WaterSubmodeEnumeration.AIRPORT_BOAT_LINK);
@@ -186,7 +187,7 @@ public class TiamatAuthorizationServiceTest extends TiamatIntegrationTest {
 
     @Test
     public void testNSBEditStopsRoleAssignmentsBusStation() {
-        String role = "editStops";
+        String role = ROLE_EDIT_STOPS;
         roleAssignmentsForRailAndRailReplacementMocked(role);
         StopPlace stopPlace = new StopPlace();
         stopPlace.setStopPlaceType(StopTypeEnumeration.BUS_STATION);

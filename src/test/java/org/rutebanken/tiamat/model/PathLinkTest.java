@@ -33,18 +33,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class PathLinkTest extends TiamatIntegrationTest {
 
     @Test
-    public void simplePersistTest() {
-        PathLink pathLink = new PathLink();
-        pathLinkRepository.save(pathLink);
-        assertThat(pathLink.getNetexId()).describedAs("Path link should get ID when saved").isNotNull();
-    }
-
-    @Test
     public void persistPathLinkWithPathLinkEnd() {
-        PathLink pathLink = new PathLink();
-        PathLinkEnd from = new PathLinkEnd(new AddressablePlaceRefStructure(createAndSaveStop("A stop place that is referenced to by a path link")));
-
-        pathLink.setFrom(from);
+        PathLink pathLink = createPathLinkWithFromAndTo();
 
         pathLinkRepository.save(pathLink);
 
@@ -115,7 +105,7 @@ public class PathLinkTest extends TiamatIntegrationTest {
 
         LineString lineString = new LineString(points, geometryFactory);
 
-        PathLink pathLink = new PathLink();
+        PathLink pathLink = createPathLinkWithFromAndTo();
         pathLink.setLineString(lineString);
 
         pathLinkRepository.save(pathLink);
@@ -129,7 +119,7 @@ public class PathLinkTest extends TiamatIntegrationTest {
     @Test
     public void pathLinkWithTransferDuration() {
 
-        PathLink pathLink = new PathLink();
+        PathLink pathLink = createPathLinkWithFromAndTo();
 
         TransferDuration transferDuration = new TransferDuration();
         transferDuration.setDefaultDuration(Duration.ofMillis(10000));
@@ -153,7 +143,7 @@ public class PathLinkTest extends TiamatIntegrationTest {
 
     @Test
     public void testKeyValueStructure() throws Exception {
-        PathLink pathLink = new PathLink();
+        PathLink pathLink = createPathLinkWithFromAndTo();
         List<String> ids = Arrays.asList("OPP:PathLink:123123", "TEL:PathLink:3251321");
         Value value = new Value(ids);
         pathLink.getKeyValues().put("ORIGINAL_ID", value);
@@ -162,6 +152,12 @@ public class PathLinkTest extends TiamatIntegrationTest {
         PathLink actual = pathLinkRepository.findFirstByNetexIdOrderByVersionDesc(pathLink.getNetexId());
 
         assertThat(actual.getKeyValues().get("ORIGINAL_ID").getItems().containsAll(ids));
+    }
+
+    private PathLink createPathLinkWithFromAndTo() {
+        return new PathLink(
+                new PathLinkEnd(new AddressablePlaceRefStructure(createAndSaveStop("from"))),
+                new PathLinkEnd(new AddressablePlaceRefStructure(createAndSaveStop("to"))));
     }
 
     private StopPlace createAndSaveStop(String name) {

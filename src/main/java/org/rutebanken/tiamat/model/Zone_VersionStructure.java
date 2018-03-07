@@ -26,9 +26,6 @@ import javax.persistence.*;
 public class Zone_VersionStructure
         extends GroupOfPoints_VersionStructure {
 
-    @Transient
-    protected TypeOfZoneRefs_RelStructure types;
-
     protected Point centroid;
 
     /**
@@ -47,6 +44,10 @@ public class Zone_VersionStructure
     public Zone_VersionStructure() {
     }
 
+    public Zone_VersionStructure(EmbeddableMultilingualString name) {
+        super(name);
+    }
+
     public Polygon getPolygon() {
         if (polygon != null) {
             return polygon.getPolygon();
@@ -59,18 +60,6 @@ public class Zone_VersionStructure
             this.polygon = new PersistablePolygon();
         }
         this.polygon.setPolygon(polygon);
-    }
-
-    public Zone_VersionStructure(EmbeddableMultilingualString name) {
-        super(name);
-    }
-
-    public TypeOfZoneRefs_RelStructure getTypes() {
-        return types;
-    }
-
-    public void setTypes(TypeOfZoneRefs_RelStructure value) {
-        this.types = value;
     }
 
     public Point getCentroid() {

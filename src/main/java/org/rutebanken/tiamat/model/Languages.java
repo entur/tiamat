@@ -25,7 +25,7 @@ public class Languages {
 
     public List<LanguageUsageStructure> getLanguageUsage() {
         if (languageUsage == null) {
-            languageUsage = new ArrayList<LanguageUsageStructure>();
+            languageUsage = new ArrayList<>();
         }
         return this.languageUsage;
     }

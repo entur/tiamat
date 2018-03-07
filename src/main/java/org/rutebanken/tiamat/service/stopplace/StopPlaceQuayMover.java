@@ -15,7 +15,7 @@
 
 package org.rutebanken.tiamat.service.stopplace;
 
-import org.rutebanken.tiamat.geo.CentroidComputer;
+import org.rutebanken.tiamat.geo.StopPlaceCentroidComputer;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.QuayRepository;
@@ -50,7 +50,7 @@ public class StopPlaceQuayMover {
     private QuayRepository quayRepository;
 
     @Autowired
-    private CentroidComputer centroidComputer;
+    private StopPlaceCentroidComputer stopPlaceCentroidComputer;
 
     @Autowired
     private StopPlaceVersionedSaverService stopPlaceVersionedSaverService;
@@ -99,7 +99,7 @@ public class StopPlaceQuayMover {
         StopPlace stopPlaceToAddQuaysTo = destination.getCopiedEntity();
 
         stopPlaceToAddQuaysTo.getQuays().addAll(quaysToMove);
-        centroidComputer.computeCentroidForStopPlace(stopPlaceToAddQuaysTo);
+        stopPlaceCentroidComputer.computeCentroidForStopPlace(stopPlaceToAddQuaysTo);
         stopPlaceToAddQuaysTo.setVersionComment(toVersionComment);
 
         logger.debug("Saved stop place with new quays {} {}", quaysToMove.stream().map(q -> q.getNetexId()).collect(toList()), destinationStopPlace);

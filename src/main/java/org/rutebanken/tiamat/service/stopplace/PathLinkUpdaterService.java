@@ -21,7 +21,6 @@ import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.repository.PathLinkRepository;
 import org.rutebanken.tiamat.repository.reference.ReferenceResolver;
-import org.rutebanken.tiamat.repository.reference.ReferenceResolver;
 import org.rutebanken.tiamat.service.MutateLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +33,9 @@ import java.util.HashSet;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
+/**
+ * A service for updating path links.
+ */
 @Transactional
 @Service
 public class PathLinkUpdaterService {
@@ -56,69 +58,14 @@ public class PathLinkUpdaterService {
 
         return mutateLock.executeInLock(() -> {
 
-            Set<EntityStructure> entitiesRequiringAuthorization = new HashSet<>();
-            PathLink resultPathLink;
-
-            boolean updatedExisting;
+            final Set<EntityStructure> entitiesRequiringAuthorization = new HashSet<>();
+            final PathLink resultPathLink;
+            final boolean updatedExisting;
 
             if (incomingPathLink.getNetexId() != null) {
                 // Update?
 
-                logger.debug("Looking for PathLink with ID: {} and version: {}", incomingPathLink.getNetexId(), incomingPathLink.getVersion());
-
-                PathLink existingPathLink = pathLinkRepository.findFirstByNetexIdOrderByVersionDesc(incomingPathLink.getNetexId());
-
-                if (existingPathLink == null) {
-                    throw new NoSuchElementException("Specified path link with ID: " + incomingPathLink.getNetexId() + " does not exist");
-                }
-
-                if (incomingPathLink.getVersion() > 0 && existingPathLink.getVersion() != incomingPathLink.getVersion()) {
-                    throw new GraphQLException("Incoming PathLink version differs from existing path link with id " + incomingPathLink.getNetexId() + ", version: " + existingPathLink.getVersion() + " != " + incomingPathLink.getVersion());
-                }
-
-                logger.debug("Found existing path link: {}", existingPathLink);
-
-                boolean changed = false;
-                if (incomingPathLink.getLineString() != null) {
-                    existingPathLink.setLineString(incomingPathLink.getLineString());
-                    changed = true;
-                }
-                if (incomingPathLink.getAllowedUse() != null) {
-                    existingPathLink.setAllowedUse(incomingPathLink.getAllowedUse());
-                    changed = true;
-                }
-                if (incomingPathLink.getTransferDuration() != null) {
-                    TransferDuration incomingTransferDuration = incomingPathLink.getTransferDuration();
-
-                    if (existingPathLink.getTransferDuration() != null) {
-                        if (incomingTransferDuration.getDefaultDuration() != null) {
-                            existingPathLink.getTransferDuration().setDefaultDuration(incomingTransferDuration.getDefaultDuration());
-                            changed = true;
-                        }
-                        if (incomingTransferDuration.getFrequentTravellerDuration() != null) {
-                            existingPathLink.getTransferDuration().setFrequentTravellerDuration(incomingTransferDuration.getFrequentTravellerDuration());
-                            changed = true;
-                        }
-                        if (incomingTransferDuration.getOccasionalTravellerDuration() != null) {
-                            existingPathLink.getTransferDuration().setOccasionalTravellerDuration(incomingTransferDuration.getOccasionalTravellerDuration());
-                            changed = true;
-                        }
-                        if (incomingTransferDuration.getMobilityRestrictedTravellerDuration() != null) {
-                            existingPathLink.getTransferDuration().setMobilityRestrictedTravellerDuration(incomingTransferDuration.getMobilityRestrictedTravellerDuration());
-                            changed = true;
-                        }
-                    } else {
-                        existingPathLink.setTransferDuration(incomingTransferDuration);
-                        changed = true;
-                    }
-
-                    if (changed) {
-                        logger.debug("Existing pathLink changed");
-                        existingPathLink.setChanged(Instant.now());
-                    }
-                }
-
-                resultPathLink = existingPathLink;
+                resultPathLink = updatePathLink(incomingPathLink);
                 updatedExisting = true;
 
             } else {
@@ -127,13 +74,16 @@ public class PathLinkUpdaterService {
                 updatedExisting = false;
             }
 
+            if (resultPathLink.getFrom() == null || resultPathLink.getTo() == null) {
+                throw new IllegalArgumentException("PathLink (id: " + resultPathLink.getNetexId() + ") must have PathLinkEnd From and To set.");
+            }
 
-            if (incomingPathLink.getFrom() != null) {
-                EntityInVersionStructure from = verifyPathLinkReferences(incomingPathLink.getFrom());
+            if (resultPathLink.getFrom() != null) {
+                EntityInVersionStructure from = verifyPathLinkReferences(resultPathLink.getFrom());
                 entitiesRequiringAuthorization.add(from);
             }
-            if (incomingPathLink.getTo() != null) {
-                EntityInVersionStructure to = verifyPathLinkReferences(incomingPathLink.getTo());
+            if (resultPathLink.getTo() != null) {
+                EntityInVersionStructure to = verifyPathLinkReferences(resultPathLink.getTo());
                 entitiesRequiringAuthorization.add(to);
             }
 
@@ -144,6 +94,64 @@ public class PathLinkUpdaterService {
 
             return resultPathLink;
         });
+    }
+
+    private PathLink updatePathLink(PathLink incomingPathLink) {
+        logger.debug("Looking for PathLink with ID: {} and version: {}", incomingPathLink.getNetexId(), incomingPathLink.getVersion());
+
+        PathLink existingPathLink = pathLinkRepository.findFirstByNetexIdOrderByVersionDesc(incomingPathLink.getNetexId());
+
+        if (existingPathLink == null) {
+            throw new NoSuchElementException("Specified path link with ID: " + incomingPathLink.getNetexId() + " does not exist");
+        }
+
+        if (incomingPathLink.getVersion() > 0 && existingPathLink.getVersion() != incomingPathLink.getVersion()) {
+            throw new GraphQLException("Incoming PathLink version differs from existing path link with id " + incomingPathLink.getNetexId() + ", version: " + existingPathLink.getVersion() + " != " + incomingPathLink.getVersion());
+        }
+
+        logger.debug("Found existing path link: {}", existingPathLink);
+
+        boolean changed = false;
+        if (incomingPathLink.getLineString() != null) {
+            existingPathLink.setLineString(incomingPathLink.getLineString());
+            changed = true;
+        }
+        if (incomingPathLink.getAllowedUse() != null) {
+            existingPathLink.setAllowedUse(incomingPathLink.getAllowedUse());
+            changed = true;
+        }
+        if (incomingPathLink.getTransferDuration() != null) {
+            TransferDuration incomingTransferDuration = incomingPathLink.getTransferDuration();
+
+            if (existingPathLink.getTransferDuration() != null) {
+                if (incomingTransferDuration.getDefaultDuration() != null) {
+                    existingPathLink.getTransferDuration().setDefaultDuration(incomingTransferDuration.getDefaultDuration());
+                    changed = true;
+                }
+                if (incomingTransferDuration.getFrequentTravellerDuration() != null) {
+                    existingPathLink.getTransferDuration().setFrequentTravellerDuration(incomingTransferDuration.getFrequentTravellerDuration());
+                    changed = true;
+                }
+                if (incomingTransferDuration.getOccasionalTravellerDuration() != null) {
+                    existingPathLink.getTransferDuration().setOccasionalTravellerDuration(incomingTransferDuration.getOccasionalTravellerDuration());
+                    changed = true;
+                }
+                if (incomingTransferDuration.getMobilityRestrictedTravellerDuration() != null) {
+                    existingPathLink.getTransferDuration().setMobilityRestrictedTravellerDuration(incomingTransferDuration.getMobilityRestrictedTravellerDuration());
+                    changed = true;
+                }
+            } else {
+                existingPathLink.setTransferDuration(incomingTransferDuration);
+                changed = true;
+            }
+
+            if (changed) {
+                logger.debug("Existing pathLink changed");
+                existingPathLink.setChanged(Instant.now());
+            }
+        }
+
+        return existingPathLink;
     }
 
     private EntityInVersionStructure verifyPathLinkReferences(PathLinkEnd pathLinkEnd) {

@@ -41,10 +41,9 @@ public abstract class SiteComponent_VersionStructure
     protected ClassOfUseRef classOfUseRef;
     @OneToMany(cascade = CascadeType.ALL)
     protected List<EquipmentPlace> equipmentPlaces;
-    @OneToOne (cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL)
     protected PlaceEquipment placeEquipments;
-    @Transient
-    protected LocalServices_RelStructure localServices;
+
     @OneToMany(cascade = CascadeType.ALL)
     private List<CheckConstraint> checkConstraints;
 
@@ -102,16 +101,6 @@ public abstract class SiteComponent_VersionStructure
 
     public void setPlaceEquipments(PlaceEquipment value) {
         this.placeEquipments = value;
-    }
-
-
-    public LocalServices_RelStructure getLocalServices() {
-        return localServices;
-    }
-
-
-    public void setLocalServices(LocalServices_RelStructure value) {
-        this.localServices = value;
     }
 
     public List<CheckConstraint> getCheckConstraints() {

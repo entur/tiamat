@@ -34,7 +34,7 @@ public class LanguageUsageStructure {
 
     public List<LanguageUseEnumeration> getLanguageUse() {
         if (languageUse == null) {
-            languageUse = new ArrayList<LanguageUseEnumeration>();
+            languageUse = new ArrayList<>();
         }
         return this.languageUse;
     }

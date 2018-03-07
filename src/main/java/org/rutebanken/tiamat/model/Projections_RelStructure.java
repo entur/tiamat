@@ -27,7 +27,7 @@ public class Projections_RelStructure
 
     public List<JAXBElement<?>> getProjectionRefOrProjection() {
         if (projectionRefOrProjection == null) {
-            projectionRefOrProjection = new ArrayList<JAXBElement<?>>();
+            projectionRefOrProjection = new ArrayList<>();
         }
         return this.projectionRefOrProjection;
     }

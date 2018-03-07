@@ -15,16 +15,15 @@
 
 package org.rutebanken.tiamat.repository;
 
-import com.google.api.client.util.Joiner;
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang.StringUtils;
 import org.hibernate.SQLQuery;
+import org.hibernate.ScrollMode;
+import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
-import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
 import org.hibernate.internal.SessionImpl;
 import org.rutebanken.tiamat.exporter.params.GroupOfStopPlacesSearch;
-import org.rutebanken.tiamat.exporter.params.ParkingSearch;
 import org.rutebanken.tiamat.model.GroupOfStopPlaces;
-import org.rutebanken.tiamat.model.TopographicPlace;
+import org.rutebanken.tiamat.repository.iterator.ScrollableResultIterator;
 import org.rutebanken.tiamat.repository.search.GroupOfStopPlacesQueryFromSearchBuilder;
 import org.rutebanken.tiamat.repository.search.SearchHelper;
 import org.slf4j.Logger;
@@ -37,6 +36,8 @@ import javax.persistence.Query;
 import java.util.*;
 
 public class GroupOfStopPlacesRepositoryImpl implements GroupOfStopPlacesRepositoryCustom {
+
+    private static final Logger logger = LoggerFactory.getLogger(GroupOfStopPlaces.class);
 
     @Autowired
     private EntityManager entityManager;
@@ -62,5 +63,72 @@ public class GroupOfStopPlacesRepositoryImpl implements GroupOfStopPlacesReposit
         return groups;
     }
 
+    @Override
+    public List<GroupOfStopPlaces> getGroupOfStopPlacesFromStopPlaceIds(Set<Long> stopPlaceIds) {
+        if (stopPlaceIds == null || stopPlaceIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        Query query = entityManager.createNativeQuery(generateGroupOfStopPlacesQueryFromStopPlaceIds(stopPlaceIds), GroupOfStopPlaces.class);
+
+        @SuppressWarnings("unchecked")
+        List<GroupOfStopPlaces> groupOfStopPlaces = query.getResultList();
+        return groupOfStopPlaces;
+    }
+
+    @Override
+    public Iterator<GroupOfStopPlaces> scrollGroupOfStopPlaces() {
+
+        return scrollGroupOfStopPlaces("select gosp.* from group_of_stop_places gosp where " +
+                "gosp.version = (select max(gospv.version) from group_of_stop_places gospv where gospv.netex_id = gosp.netex_id");
+    }
+
+    @Override
+    public Iterator<GroupOfStopPlaces> scrollGroupOfStopPlaces(Set<Long> stopPlaceDbIds) {
+
+        if (stopPlaceDbIds == null || stopPlaceDbIds.isEmpty()) {
+            return new ArrayList<GroupOfStopPlaces>().iterator();
+        }
+        return scrollGroupOfStopPlaces(generateGroupOfStopPlacesQueryFromStopPlaceIds(stopPlaceDbIds));
+    }
+
+    private Iterator<GroupOfStopPlaces> scrollGroupOfStopPlaces(String sql) {
+        Session session = entityManager.unwrap(Session.class);
+        SQLQuery sqlQuery = session.createSQLQuery(sql);
+
+        final int fetchSize = 100;
+
+        sqlQuery.addEntity(GroupOfStopPlaces.class);
+        sqlQuery.setReadOnly(true);
+        sqlQuery.setFetchSize(fetchSize);
+        sqlQuery.setCacheable(false);
+        ScrollableResults results = sqlQuery.scroll(ScrollMode.FORWARD_ONLY);
+        ScrollableResultIterator<GroupOfStopPlaces> groupOfStopPlacesIterator = new ScrollableResultIterator<>(results, fetchSize, session);
+        return groupOfStopPlacesIterator;
+    }
+
+    private String generateGroupOfStopPlacesQueryFromStopPlaceIds(Set<Long> stopPlaceDbIds) {
+        StringBuilder sqlStringBuilder = new StringBuilder("SELECT g.* FROM " +
+                "   (SELECT gosp1.id, gosp1.netex_id " +
+                "       FROM stop_place s " +
+                "       INNER JOIN group_of_stop_places_members members ON members.ref = s.netex_id " +
+                "       INNER JOIN group_of_stop_places gosp1 ON members.group_of_stop_places_id = gosp1.id " +
+                "       WHERE s.id IN (");
+
+        sqlStringBuilder.append(StringUtils.join(stopPlaceDbIds, ','));
+
+        sqlStringBuilder.append("   ) " +
+                "      AND gosp1.version = " +
+                "       (SELECT max(gospv.version) " +
+                "           FROM group_of_stop_places gospv " +
+                "           WHERE gospv.netex_id = gosp1.netex_id) " +
+                "      GROUP BY gosp1.id, gosp1.netex_id " +
+                "  ) gosp " +
+                "JOIN group_of_stop_places g ON gosp.netex_id = g.netex_id");
+
+        String sql = sqlStringBuilder.toString();
+        logger.info(sql);
+        return sql;
+    }
 }
 

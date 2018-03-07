@@ -15,9 +15,6 @@
 
 package org.rutebanken.tiamat.model;
 
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.SequenceGenerator;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,7 +25,7 @@ public class SitePathLinks_RelStructure
 
     public List<PathLinkRefStructure> getPathLinkRefOrSitePathLink() {
         if (pathLinkRefOrSitePathLink == null) {
-            pathLinkRefOrSitePathLink = new ArrayList<PathLinkRefStructure>();
+            pathLinkRefOrSitePathLink = new ArrayList<>();
         }
         return this.pathLinkRefOrSitePathLink;
     }

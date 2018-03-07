@@ -81,6 +81,8 @@ public class DataManagedObjectStructureMapper extends CustomMapper<DataManagedOb
     public void mapAtoB(DataManagedObjectStructure netexEntity, org.rutebanken.tiamat.model.DataManagedObjectStructure tiamatEntity, MappingContext context) {
         netexIdMapper.toTiamatModel(netexEntity, tiamatEntity);
 
+        // Version is a field of superclass EntityInVersionStructure. Should strictly be mapped in an EntityInVersionStructureMapper or Converter.
+
         if (netexEntity.getVersion() != null) {
             if (netexEntity.getVersion().equals("any")) {
                 tiamatEntity.setVersion(-1L); // Need to handle this value in import.

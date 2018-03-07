@@ -15,6 +15,7 @@
 
 package org.rutebanken.tiamat.exporter.async;
 
+import org.rutebanken.tiamat.exporter.eviction.EntitiesEvictor;
 import org.rutebanken.tiamat.model.EntityStructure;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.slf4j.Logger;
@@ -48,6 +49,10 @@ public class NetexMappingIterator<T extends EntityStructure, N extends org.ruteb
         this.netexClass = netexClass;
         this.mappedCount = mappedCount;
         this.entitiesEvictor = entitiesEvictor;
+
+        if(entitiesEvictor == null) {
+            throw new IllegalArgumentException("entitiesEvictor cannot be null");
+        }
     }
 
     @Override
@@ -61,10 +66,7 @@ public class NetexMappingIterator<T extends EntityStructure, N extends org.ruteb
 
         T next = iterator.next();
         N mapped = netexMapper.getFacade().map(next, netexClass);
-        if (entitiesEvictor != null) {
-            entitiesEvictor.evictKnownEntitiesFromSession(next);
-
-        }
+        entitiesEvictor.evictKnownEntitiesFromSession(next);
         logStatus();
         mappedCount.incrementAndGet();
         return mapped;

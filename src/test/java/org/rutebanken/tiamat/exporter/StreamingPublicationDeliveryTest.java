@@ -29,6 +29,7 @@ import org.rutebanken.tiamat.service.stopplace.ParentStopPlacesFetcher;
 import org.rutebanken.tiamat.time.ExportTimeZone;
 import org.xml.sax.SAXException;
 
+import javax.persistence.EntityManager;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
@@ -46,6 +47,7 @@ import static javax.xml.bind.JAXBContext.newInstance;
 import static org.assertj.core.api.Assertions.anyOf;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anySetOf;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -65,15 +67,16 @@ public class StreamingPublicationDeliveryTest {
 
     private TopographicPlacesExporter topographicPlacesExporter = new TopographicPlacesExporter(topographicPlaceRepository, netexMapper);
     private TariffZonesFromStopsExporter tariffZonesFromStopsExporter = mock(TariffZonesFromStopsExporter.class);
-    private ParentStopPlacesFetcher parentStopPlacesFetcher = new ParentStopPlacesFetcher(stopPlaceRepository);
+    private ParentStopPlacesFetcher parentStopPlacesFetcher = new ParentStopPlacesFetcher(stopPlaceRepository, mock(EntityManager.class));
     private ChildStopPlacesFetcher childStopPlacesFetcher = new ChildStopPlacesFetcher();
     private PublicationDeliveryExporter publicationDeliveryExporter = new PublicationDeliveryExporter(stopPlaceRepository,
             netexMapper, tiamatSiteFrameExporter, topographicPlacesExporter,
             tariffZonesFromStopsExporter, parentStopPlacesFetcher, childStopPlacesFetcher);
 
     private TariffZoneRepository tariffZoneRepository = mock(TariffZoneRepository.class);
+    private GroupOfStopPlacesRepository groupOfStopPlacesRepository = mock(GroupOfStopPlacesRepository.class);
     private StreamingPublicationDelivery streamingPublicationDelivery = new StreamingPublicationDelivery(stopPlaceRepository,
-            parkingRepository, publicationDeliveryExporter, tiamatSiteFrameExporter, netexMapper, tariffZoneRepository, topographicPlaceRepository, true);
+            parkingRepository, publicationDeliveryExporter, tiamatSiteFrameExporter, netexMapper, tariffZoneRepository, topographicPlaceRepository, groupOfStopPlacesRepository, true);
 
     public StreamingPublicationDeliveryTest() throws IOException, SAXException {
     }
@@ -97,9 +100,9 @@ public class StreamingPublicationDeliveryTest {
         validate(xml);
 
         assertThat(xml)
-                .contains("<StopPlace")
-                .contains("</PublicationDelivery")
-                .contains("</dataObjects>");
+                .contains("StopPlace>")
+                .contains("PublicationDelivery>")
+                .contains("dataObjects>");
     }
 
     @Test
@@ -120,9 +123,9 @@ public class StreamingPublicationDeliveryTest {
         validate(xml);
 
         assertThat(xml)
-                .contains("<Parking")
-                .contains("</PublicationDelivery")
-                .contains("</dataObjects>");
+                .contains("Parking")
+                .contains("PublicationDelivery")
+                .contains("dataObjects>");
     }
 
     @Test
@@ -148,11 +151,10 @@ public class StreamingPublicationDeliveryTest {
         validate(xml);
 
         assertThat(xml)
-                .contains("<StopPlace")
-                .contains("<topographicPlaces")
-                .contains("</topographicPlaces>")
-                .contains("</PublicationDelivery")
-                .contains("</dataObjects>");
+                .contains("StopPlace")
+                .contains("topographicPlaces")
+                .contains("PublicationDelivery")
+                .contains("dataObjects>");
     }
 
     @Test
@@ -187,10 +189,10 @@ public class StreamingPublicationDeliveryTest {
 
         assertThat(xml)
                 .contains("<?xml")
-                .contains("<StopPlace")
-                .contains("<PathLink")
-                .contains("</PublicationDelivery")
-                .contains("</dataObjects>");
+                .contains("StopPlace")
+                .contains("PathLink")
+                .contains("PublicationDelivery")
+                .contains("dataObjects>");
     }
 
     @Test
@@ -235,13 +237,17 @@ public class StreamingPublicationDeliveryTest {
         when(parkingRepository.scrollParkings()).thenReturn(parkings.iterator());
         when(parkingRepository.scrollParkings(anySetOf(Long.class))).thenReturn(parkings.iterator());
         when(parkingRepository.countResult(anySetOf(Long.class))).thenReturn(parkings.size());
-        when(stopPlaceRepository.scrollStopPlaces(any())).thenReturn(stopPlaces.iterator());
-        when(stopPlaceRepository.getDatabaseIds(any())).thenReturn(stopPlaces.stream().map(stopPlace -> getField(IdentifiedEntity.class, "id", stopPlace, Long.class)).collect(toSet()));
+        when(stopPlaceRepository.scrollStopPlaces(any(ExportParams.class))).thenReturn(stopPlaces.iterator());
+        when(stopPlaceRepository.scrollStopPlaces(anySetOf(Long.class))).thenReturn(stopPlaces.iterator());
+
+        when(stopPlaceRepository.getDatabaseIds(any(), anyBoolean())).thenReturn(stopPlaces.stream().map(stopPlace -> getField(IdentifiedEntity.class, "id", stopPlace, Long.class)).collect(toSet()));
         when(pathLinkRepository.findAll()).thenReturn(pathLinks);
         when(pathLinkRepository.findByStopPlaceIds(anySetOf(Long.class))).thenReturn(pathLinks);
         when(topographicPlaceRepository.scrollTopographicPlaces(any())).thenReturn(topographicPlaces.iterator());
         when(tariffZoneRepository.scrollTariffZones(any())).thenReturn(new ArrayList<TariffZone>().iterator());
         when(tariffZoneRepository.scrollTariffZones()).thenReturn(new ArrayList<TariffZone>().iterator());
+        when(groupOfStopPlacesRepository.scrollGroupOfStopPlaces()).thenReturn(new ArrayList<GroupOfStopPlaces>().iterator());
+        when(groupOfStopPlacesRepository.scrollGroupOfStopPlaces(anySetOf(Long.class))).thenReturn(new ArrayList<GroupOfStopPlaces>().iterator());
 
         streamingPublicationDelivery.stream(ExportParams.newExportParamsBuilder().build(), byteArrayOutputStream);
     }

@@ -18,20 +18,24 @@ package org.rutebanken.tiamat.model.identification;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.rutebanken.tiamat.repository.listener.IdentifiedEntityListener;
 
-import javax.persistence.*;
+import javax.persistence.EntityListeners;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.MappedSuperclass;
 
 @MappedSuperclass
 @EntityListeners(IdentifiedEntityListener.class)
 public abstract class IdentifiedEntity {
 
     @Id
-    @GeneratedValue(generator="sequence_per_table_generator")
+    @GeneratedValue(generator = "sequence_per_table_generator")
     protected Long id;
 
     protected String netexId;
 
     /**
      * This is the primary identificator. Usually, you should relate to ${getNetexId}
+     *
      * @return the primary long value of this identitifed entity.
      */
     public Long getId() {
@@ -46,6 +50,7 @@ public abstract class IdentifiedEntity {
     /**
      * Public ID.
      * Typically a NeTEx ID like NSR:StopPlace:123
+     *
      * @return the public ID
      */
     public String getNetexId() {

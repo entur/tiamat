@@ -23,6 +23,7 @@ import org.rutebanken.tiamat.model.TariffZone;
 import org.rutebanken.tiamat.rest.graphql.fetchers.AuthorizationCheckDataFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.TagFetcher;
 import org.rutebanken.tiamat.rest.graphql.operations.MultiModalityOperationsBuilder;
+import org.rutebanken.tiamat.rest.graphql.operations.ParkingOperationsBuilder;
 import org.rutebanken.tiamat.rest.graphql.operations.StopPlaceOperationsBuilder;
 import org.rutebanken.tiamat.rest.graphql.operations.TagOperationsBuilder;
 import org.rutebanken.tiamat.rest.graphql.resolvers.MutableTypeResolver;
@@ -71,6 +72,9 @@ public class StopPlaceRegisterGraphQLSchema {
 
     @Autowired
     private StopPlaceOperationsBuilder stopPlaceOperationsBuilder;
+
+    @Autowired
+    private ParkingOperationsBuilder parkingOperationsBuilder;
 
     @Autowired
     private ZoneCommonFieldListCreator zoneCommonFieldListCreator;
@@ -357,6 +361,7 @@ public class StopPlaceRegisterGraphQLSchema {
                         .dataFetcher(parkingUpdater))
                 .fields(tagOperationsBuilder.getTagOperations())
                 .fields(stopPlaceOperationsBuilder.getStopPlaceOperations(stopPlaceInterface))
+                .fields(parkingOperationsBuilder.getParkingOperations())
                 .fields(multiModalityOperationsBuilder.getMultiModalityOperations(parentStopPlaceObjectType, validBetweenInputObjectType))
                 .field(newFieldDefinition()
                         .type(GraphQLBoolean)

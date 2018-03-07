@@ -129,7 +129,11 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
         clearUnwantedChildFields(newVersion);
 
         if(newVersion.getChildren() != null) {
-            newVersion.getChildren().forEach(child -> child.setChanged(changed));
+            newVersion.getChildren().forEach(child -> {
+                child.setChanged(changed);
+                tariffZonesLookupService.populateTariffZone(child);
+            });
+
             stopPlaceRepository.save(newVersion.getChildren());
             if(logger.isDebugEnabled()) {
                 logger.debug("Saved children: {}", newVersion.getChildren().stream()

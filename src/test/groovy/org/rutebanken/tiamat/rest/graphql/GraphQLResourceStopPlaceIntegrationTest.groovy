@@ -1476,6 +1476,43 @@ def class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourc
         assertThat(entityChangedJMSListener.hasReceivedEvent(stopPlace.getNetexId(), stopPlace.getVersion() + 1, EntityChangedEvent.CrudAction.UPDATE)).isTrue()
     }
 
+    @Test
+    void testTicketMachineTicketOfficeTrueFalse() {
+
+        def stopPlace = new StopPlace();
+        TicketingEquipment ticketingEquipment = new TicketingEquipment()
+        ticketingEquipment.setTicketMachines(null)
+        ticketingEquipment.setTicketOffice(null)
+        ticketingEquipment.setNumberOfMachines(BigInteger.valueOf(7))
+
+        PlaceEquipment placeEquipment = new PlaceEquipment()
+
+        placeEquipment.getInstalledEquipment().add(ticketingEquipment)
+
+        stopPlace.setPlaceEquipments(placeEquipment)
+        stopPlaceVersionedSaverService.saveNewVersion(stopPlace)
+
+        def query = """{
+                  stopPlace(
+                      query:"${stopPlace.netexId}"
+                    ) {
+                  placeEquipments {
+                    ticketingEquipment {
+                        ticketMachines
+                        numberOfMachines
+                        ticketOffice
+                      }
+                    }
+                  }
+                }
+        """
+
+        executeGraphqQLQueryOnly(query)
+                .body("data.stopPlace[0].placeEquipments.ticketingEquipment[0].ticketMachines", is(true))
+                .body("data.stopPlace[0].placeEquipments.ticketingEquipment[0].ticketOffice", Matchers.is(false))
+
+    }
+
     /**
      * Test that reproduces NRP-1433
      *

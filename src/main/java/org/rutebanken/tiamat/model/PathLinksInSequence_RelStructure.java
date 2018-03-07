@@ -26,7 +26,7 @@ public class PathLinksInSequence_RelStructure
 
     public List<PathLinkInSequence> getPathLinkInSequence() {
         if (pathLinkInSequence == null) {
-            pathLinkInSequence = new ArrayList<PathLinkInSequence>();
+            pathLinkInSequence = new ArrayList<>();
         }
         return this.pathLinkInSequence;
     }

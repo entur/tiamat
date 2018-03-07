@@ -18,11 +18,18 @@ package org.rutebanken.tiamat.repository;
 import org.rutebanken.tiamat.exporter.params.GroupOfStopPlacesSearch;
 import org.rutebanken.tiamat.model.GroupOfStopPlaces;
 
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 public interface GroupOfStopPlacesRepositoryCustom {
 
     List<GroupOfStopPlaces> findGroupOfStopPlaces(GroupOfStopPlacesSearch search);
 
+    List<GroupOfStopPlaces> getGroupOfStopPlacesFromStopPlaceIds(Set<Long> stopPlaceIds);
+
+    Iterator<GroupOfStopPlaces> scrollGroupOfStopPlaces();
+
+    Iterator<GroupOfStopPlaces> scrollGroupOfStopPlaces(Set<Long> stopPlaceDbIds);
 }
 

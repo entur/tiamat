@@ -65,7 +65,7 @@ public interface StopPlaceRepositoryCustom extends DataManagedObjectStructureRep
 
     Set<String> getNetexIds(ExportParams exportParams);
 
-    Set<Long> getDatabaseIds(ExportParams exportParams);
+    Set<Long> getDatabaseIds(ExportParams exportParams, boolean ignorePaging);
 
     Page<StopPlace> findStopPlace(ExportParams exportParams);
 
@@ -76,4 +76,6 @@ public interface StopPlaceRepositoryCustom extends DataManagedObjectStructureRep
     StopPlace findByQuay(Quay quay);
 
     List<JbvCodeMappingDto> findJbvCodeMappingsForStopPlace();
+
+    Iterator<StopPlace> scrollStopPlaces(Set<Long> stopPlacePrimaryIds);
 }

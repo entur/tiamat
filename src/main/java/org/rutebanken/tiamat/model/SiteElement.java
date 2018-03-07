@@ -15,10 +15,9 @@
 
 package org.rutebanken.tiamat.model;
 
-import org.hibernate.annotations.*;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import javax.persistence.*;
-import javax.persistence.CascadeType;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,8 +33,6 @@ public abstract class SiteElement extends AddressablePlace {
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     protected AccessibilityAssessment accessibilityAssessment;
 
-    @Transient
-    protected List<AccessModeEnumeration> accessModes;
     @Transient
     protected MultilingualStringEntity nameSuffix;
     @Transient
@@ -60,9 +57,6 @@ public abstract class SiteElement extends AddressablePlace {
     @Transient
     protected BigInteger personCapacity;
 
-    @Transient
-    protected SiteFacilitySets_RelStructure facilities;
-
     public SiteElement(EmbeddableMultilingualString name) {
         super(name);
     }
@@ -76,13 +70,6 @@ public abstract class SiteElement extends AddressablePlace {
 
     public void setAccessibilityAssessment(AccessibilityAssessment value) {
         this.accessibilityAssessment = value;
-    }
-
-    public List<AccessModeEnumeration> getAccessModes() {
-        if (accessModes == null) {
-            accessModes = new ArrayList<AccessModeEnumeration>();
-        }
-        return this.accessModes;
     }
 
     public MultilingualStringEntity getNameSuffix() {
@@ -159,14 +146,6 @@ public abstract class SiteElement extends AddressablePlace {
 
     public void setPersonCapacity(BigInteger value) {
         this.personCapacity = value;
-    }
-
-    public SiteFacilitySets_RelStructure getFacilities() {
-        return facilities;
-    }
-
-    public void setFacilities(SiteFacilitySets_RelStructure value) {
-        this.facilities = value;
     }
 
 }

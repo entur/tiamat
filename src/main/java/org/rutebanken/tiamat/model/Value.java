@@ -16,12 +16,10 @@
 package org.rutebanken.tiamat.model;
 
 import com.google.common.base.MoreObjects;
-import org.hibernate.annotations.*;
 import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import javax.persistence.*;
-import javax.persistence.Entity;
-import javax.persistence.Index;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashSet;
@@ -39,7 +37,7 @@ public class Value implements Serializable {
     @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     @ElementCollection
     @CollectionTable(
-            name="value_items",
+            name = "value_items",
             indexes = @Index(name = "items_index", columnList = "items")
     )
     private Set<String> items = new HashSet<>();

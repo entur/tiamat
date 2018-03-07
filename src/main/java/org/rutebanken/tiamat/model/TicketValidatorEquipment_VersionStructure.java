@@ -26,7 +26,7 @@ public class TicketValidatorEquipment_VersionStructure
 
     public List<TicketValidatorEnumeration> getTicketValidatorType() {
         if (ticketValidatorType == null) {
-            ticketValidatorType = new ArrayList<TicketValidatorEnumeration>();
+            ticketValidatorType = new ArrayList<>();
         }
         return this.ticketValidatorType;
     }

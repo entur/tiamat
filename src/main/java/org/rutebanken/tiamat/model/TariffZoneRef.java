@@ -23,7 +23,7 @@ import javax.persistence.Id;
 public class TariffZoneRef extends ZoneRefStructure {
 
     @Id
-    @GeneratedValue(generator="sequence_per_table_generator")
+    @GeneratedValue(generator = "sequence_per_table_generator")
     private Long id;
 
     public TariffZoneRef() {

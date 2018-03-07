@@ -26,8 +26,6 @@ public class NavigationPath_VersionStructure
     protected PathLinkEnd from;
     protected PathLinkEnd to;
     protected AccessibilityAssessment accessibilityAssessment;
-    protected List<AccessModeEnumeration> accessModes;
-    protected AccessSummaries_RelStructure summaries;
     protected TransferDuration transferDuration;
     protected PublicUseEnumeration publicUse;
     protected CoveredEnumeration covered;
@@ -35,12 +33,9 @@ public class NavigationPath_VersionStructure
     protected LightingEnumeration lighting;
     protected Boolean allAreasWheelchairAccessible;
     protected BigInteger personCapacity;
-    protected SiteFacilitySets_RelStructure facilities;
-    protected List<AccessFeatureEnumeration> accessFeatureList;
     protected NavigationTypeEnumeration navigationType;
     protected PlacesInSequence_RelStructure placesInSequence;
     protected PathLinksInSequence_RelStructure pathLinksInSequence;
-    protected TransferRefs_RelStructure transfers;
 
     public PathLinkEnd getFrom() {
         return from;
@@ -64,21 +59,6 @@ public class NavigationPath_VersionStructure
 
     public void setAccessibilityAssessment(AccessibilityAssessment value) {
         this.accessibilityAssessment = value;
-    }
-
-    public List<AccessModeEnumeration> getAccessModes() {
-        if (accessModes == null) {
-            accessModes = new ArrayList<AccessModeEnumeration>();
-        }
-        return this.accessModes;
-    }
-
-    public AccessSummaries_RelStructure getSummaries() {
-        return summaries;
-    }
-
-    public void setSummaries(AccessSummaries_RelStructure value) {
-        this.summaries = value;
     }
 
     public TransferDuration getTransferDuration() {
@@ -137,21 +117,6 @@ public class NavigationPath_VersionStructure
         this.personCapacity = value;
     }
 
-    public SiteFacilitySets_RelStructure getFacilities() {
-        return facilities;
-    }
-
-    public void setFacilities(SiteFacilitySets_RelStructure value) {
-        this.facilities = value;
-    }
-
-    public List<AccessFeatureEnumeration> getAccessFeatureList() {
-        if (accessFeatureList == null) {
-            accessFeatureList = new ArrayList<AccessFeatureEnumeration>();
-        }
-        return this.accessFeatureList;
-    }
-
     public NavigationTypeEnumeration getNavigationType() {
         return navigationType;
     }
@@ -174,14 +139,6 @@ public class NavigationPath_VersionStructure
 
     public void setPathLinksInSequence(PathLinksInSequence_RelStructure value) {
         this.pathLinksInSequence = value;
-    }
-
-    public TransferRefs_RelStructure getTransfers() {
-        return transfers;
-    }
-
-    public void setTransfers(TransferRefs_RelStructure value) {
-        this.transfers = value;
     }
 
 }

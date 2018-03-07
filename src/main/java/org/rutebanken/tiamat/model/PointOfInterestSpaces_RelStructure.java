@@ -26,7 +26,7 @@ public class PointOfInterestSpaces_RelStructure
 
     public List<Object> getPointOfInterestSpaceRefOrPointOfInterestSpace() {
         if (pointOfInterestSpaceRefOrPointOfInterestSpace == null) {
-            pointOfInterestSpaceRefOrPointOfInterestSpace = new ArrayList<Object>();
+            pointOfInterestSpaceRefOrPointOfInterestSpace = new ArrayList<>();
         }
         return this.pointOfInterestSpaceRefOrPointOfInterestSpace;
     }

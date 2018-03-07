@@ -37,9 +37,6 @@ public class CheckConstraint_VersionStructure
     protected CheckServiceEnumeration checkService;
 
     @Transient
-    protected AccessFeatureEnumeration accessFeatureType;
-
-    @Transient
     protected CongestionEnumeration congestion;
 
     @Transient
@@ -49,16 +46,11 @@ public class CheckConstraint_VersionStructure
     protected TypeOfEquipmentRefStructure typeOfEquipmentRef;
 
     @Transient
-    protected FacilityRefStructure facilityRef;
-
-    @Transient
     protected JAXBElement<? extends EquipmentRefStructure> equipmentRef;
 
     @Transient
     protected Delays delays;
 
-    @Transient
-    protected Throughput throughput;
 
     public PlaceRef getPlaceRef() {
         return placeRef;
@@ -92,14 +84,6 @@ public class CheckConstraint_VersionStructure
         this.checkService = value;
     }
 
-    public AccessFeatureEnumeration getAccessFeatureType() {
-        return accessFeatureType;
-    }
-
-    public void setAccessFeatureType(AccessFeatureEnumeration value) {
-        this.accessFeatureType = value;
-    }
-
     public CongestionEnumeration getCongestion() {
         return congestion;
     }
@@ -123,14 +107,6 @@ public class CheckConstraint_VersionStructure
         this.typeOfEquipmentRef = value;
     }
 
-    public FacilityRefStructure getFacilityRef() {
-        return facilityRef;
-    }
-
-    public void setFacilityRef(FacilityRefStructure value) {
-        this.facilityRef = value;
-    }
-
     public JAXBElement<? extends EquipmentRefStructure> getEquipmentRef() {
         return equipmentRef;
     }
@@ -145,14 +121,6 @@ public class CheckConstraint_VersionStructure
 
     public void setDelays(Delays value) {
         this.delays = value;
-    }
-
-    public Throughput getThroughput() {
-        return throughput;
-    }
-
-    public void setThroughput(Throughput value) {
-        this.throughput = value;
     }
 
 }

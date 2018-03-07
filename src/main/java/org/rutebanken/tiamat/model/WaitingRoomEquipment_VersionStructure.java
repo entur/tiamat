@@ -39,7 +39,7 @@ public class WaitingRoomEquipment_VersionStructure
 
     public List<SanitaryFacilityEnumeration> getSanitary() {
         if (sanitary == null) {
-            sanitary = new ArrayList<SanitaryFacilityEnumeration>();
+            sanitary = new ArrayList<>();
         }
         return this.sanitary;
     }

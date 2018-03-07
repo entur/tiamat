@@ -22,36 +22,27 @@ import java.time.Instant;
 public class EntityInVersionStructure extends EntityStructure {
 
 
+    @Transient
+    protected String dataSourceRef;
+    protected Instant created;
+    protected Instant changed;
+    @Transient
+    protected ModificationEnumeration modification;
+    protected long version;
+    @Transient
+    protected StatusEnumeration status;
+    @Transient
+    protected String derivedFromVersionRef;
+    @Transient
+    protected String compatibleWithVersionFrameVersionRef;
+    @Transient
+    protected String derivedFromObjectRef;
     @AttributeOverrides({
             @AttributeOverride(name = "fromDate", column = @Column(name = "from_date")),
             @AttributeOverride(name = "toDate", column = @Column(name = "to_date"))
     })
     @Embedded
     private ValidBetween validBetween;
-
-    @Transient
-    protected String dataSourceRef;
-
-    protected Instant created;
-
-    protected Instant changed;
-
-    @Transient
-    protected ModificationEnumeration modification;
-
-    protected long version;
-
-    @Transient
-    protected StatusEnumeration status;
-
-    @Transient
-    protected String derivedFromVersionRef;
-
-    @Transient
-    protected String compatibleWithVersionFrameVersionRef;
-
-    @Transient
-    protected String derivedFromObjectRef;
 
     public String getDataSourceRef() {
         return dataSourceRef;

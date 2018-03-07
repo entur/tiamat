@@ -46,21 +46,21 @@ public class ParkingProperties
 
     public List<ParkingUserEnumeration> getParkingUserTypes() {
         if (parkingUserTypes == null) {
-            parkingUserTypes = new ArrayList<ParkingUserEnumeration>();
+            parkingUserTypes = new ArrayList<>();
         }
         return this.parkingUserTypes;
     }
 
     public List<ParkingVehicleEnumeration> getParkingVehicleTypes() {
         if (parkingVehicleTypes == null) {
-            parkingVehicleTypes = new ArrayList<ParkingVehicleEnumeration>();
+            parkingVehicleTypes = new ArrayList<>();
         }
         return this.parkingVehicleTypes;
     }
 
     public List<ParkingStayEnumeration> getParkingStayList() {
         if (parkingStayList == null) {
-            parkingStayList = new ArrayList<ParkingStayEnumeration>();
+            parkingStayList = new ArrayList<>();
         }
         return this.parkingStayList;
     }

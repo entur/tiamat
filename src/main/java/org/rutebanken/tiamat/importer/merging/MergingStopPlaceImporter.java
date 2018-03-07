@@ -15,14 +15,14 @@
 
 package org.rutebanken.tiamat.importer.merging;
 
-import org.rutebanken.tiamat.geo.CentroidComputer;
+import org.rutebanken.tiamat.geo.StopPlaceCentroidComputer;
 import org.rutebanken.tiamat.importer.KeyValueListAppender;
 import org.rutebanken.tiamat.importer.finder.NearbyStopPlaceFinder;
 import org.rutebanken.tiamat.importer.finder.NearbyStopsWithSameTypeFinder;
 import org.rutebanken.tiamat.importer.finder.StopPlaceFromOriginalIdFinder;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.model.ZoneDistanceChecker;
+import org.rutebanken.tiamat.geo.ZoneDistanceChecker;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.versioning.StopPlaceVersionedSaverService;
@@ -63,7 +63,7 @@ public class MergingStopPlaceImporter {
 
     private final NearbyStopPlaceFinder nearbyStopPlaceFinder;
 
-    private final CentroidComputer centroidComputer;
+    private final StopPlaceCentroidComputer stopPlaceCentroidComputer;
 
     private final KeyValueListAppender keyValueListAppender;
 
@@ -78,13 +78,13 @@ public class MergingStopPlaceImporter {
     @Autowired
     public MergingStopPlaceImporter(StopPlaceFromOriginalIdFinder stopPlaceFromOriginalIdFinder,
                                     NearbyStopsWithSameTypeFinder nearbyStopsWithSameTypeFinder, NearbyStopPlaceFinder nearbyStopPlaceFinder,
-                                    CentroidComputer centroidComputer,
+                                    StopPlaceCentroidComputer stopPlaceCentroidComputer,
                                     KeyValueListAppender keyValueListAppender, QuayMerger quayMerger, NetexMapper netexMapper,
                                     StopPlaceVersionedSaverService stopPlaceVersionedSaverService, ZoneDistanceChecker zoneDistanceChecker) {
         this.stopPlaceFromOriginalIdFinder = stopPlaceFromOriginalIdFinder;
         this.nearbyStopsWithSameTypeFinder = nearbyStopsWithSameTypeFinder;
         this.nearbyStopPlaceFinder = nearbyStopPlaceFinder;
-        this.centroidComputer = centroidComputer;
+        this.stopPlaceCentroidComputer = stopPlaceCentroidComputer;
         this.keyValueListAppender = keyValueListAppender;
         this.quayMerger = quayMerger;
         this.netexMapper = netexMapper;
@@ -145,7 +145,7 @@ public class MergingStopPlaceImporter {
             logger.trace("Importing quays for new stop place {}", incomingStopPlace);
         }
 
-        centroidComputer.computeCentroidForStopPlace(incomingStopPlace);
+        stopPlaceCentroidComputer.computeCentroidForStopPlace(incomingStopPlace);
         // Ignore incoming version. Always set version to 1 for new stop places.
         logger.debug("New stop place: {}. Setting version to \"1\"", incomingStopPlace.getName());
         stopPlaceVersionedSaverService.createCopy(incomingStopPlace, StopPlace.class);
@@ -161,7 +161,7 @@ public class MergingStopPlaceImporter {
 
         boolean quayChanged = quayMerger.appendImportIds(incomingStopPlace, copy, ADD_NEW_QUAYS, EXISTING_STOP_QUAY_MERGE_SHORT_DISTANCE_CHECK_BEFORE_ID_MATCH);
         boolean keyValuesChanged = keyValueListAppender.appendToOriginalId(NetexIdMapper.ORIGINAL_ID_KEY, incomingStopPlace, copy);
-        boolean centroidChanged = centroidComputer.computeCentroidForStopPlace(copy);
+        boolean centroidChanged = stopPlaceCentroidComputer.computeCentroidForStopPlace(copy);
 
         boolean typeChanged = false;
         if (copy.getStopPlaceType() == null && incomingStopPlace.getStopPlaceType() != null) {

@@ -16,6 +16,7 @@
 package org.rutebanken.tiamat.model;
 
 import com.google.common.base.MoreObjects;
+import com.vividsolutions.jts.geom.Point;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -26,20 +27,28 @@ import java.util.Set;
 @Entity
 public class GroupOfStopPlaces extends GroupOfEntities_VersionStructure {
 
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    private final List<AlternativeName> alternativeNames = new ArrayList<>();
     @ElementCollection(targetClass = StopPlaceReference.class, fetch = FetchType.EAGER)
     @CollectionTable(
             name = "group_of_stop_places_members"
     )
     private Set<StopPlaceReference> members = new HashSet<>();
-
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    private final List<AlternativeName> alternativeNames = new ArrayList<>();
+    private Point centroid;
 
     public GroupOfStopPlaces(EmbeddableMultilingualString embeddableMultilingualString) {
         super(embeddableMultilingualString);
     }
 
     public GroupOfStopPlaces() {
+    }
+
+    public Point getCentroid() {
+        return centroid;
+    }
+
+    public void setCentroid(Point centroid) {
+        this.centroid = centroid;
     }
 
     public Set<StopPlaceReference> getMembers() {

@@ -26,7 +26,7 @@ public class TypeOfPlaceRefs_RelStructure
 
     public List<TypeOfPlaceRefStructure> getTypeOfPlaceRef() {
         if (typeOfPlaceRef == null) {
-            typeOfPlaceRef = new ArrayList<TypeOfPlaceRefStructure>();
+            typeOfPlaceRef = new ArrayList<>();
         }
         return this.typeOfPlaceRef;
     }

@@ -27,7 +27,7 @@ public class SiteRefs_RelStructure
 
     public List<JAXBElement<? extends SiteRefStructure>> getSiteRef() {
         if (siteRef == null) {
-            siteRef = new ArrayList<JAXBElement<? extends SiteRefStructure>>();
+            siteRef = new ArrayList<>();
         }
         return this.siteRef;
     }

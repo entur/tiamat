@@ -43,6 +43,7 @@ import java.util.stream.Stream;
 import static java.util.stream.Collectors.toList;
 import static javax.xml.bind.JAXBContext.newInstance;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
 
 @Component
@@ -129,7 +130,14 @@ public class PublicationDeliveryTestHelper {
     }
 
     public List<StopPlace> extractStopPlaces(PublicationDeliveryStructure publicationDeliveryStructure, boolean verifyNotNull) {
-        SiteFrame siteFrame = findSiteFrame(publicationDeliveryStructure);
+        return extractStopPlaces(findSiteFrame(publicationDeliveryStructure), verifyNotNull);
+    }
+
+    public List<StopPlace> extractStopPlaces(SiteFrame siteFrame) {
+        return extractStopPlaces(siteFrame, true);
+    }
+
+    public List<StopPlace> extractStopPlaces(SiteFrame siteFrame, boolean verifyNotNull) {
         if(verifyNotNull) {
             assertThat(siteFrame.getStopPlaces()).as("Site frame stop places").isNotNull();
             assertThat(siteFrame.getStopPlaces().getStopPlace()).as("Site frame stop places getStopPlace").isNotNull();
@@ -137,6 +145,16 @@ public class PublicationDeliveryTestHelper {
             return new ArrayList<>();
         }
         return siteFrame.getStopPlaces().getStopPlace();
+    }
+
+    public List<GroupOfStopPlaces> extractGroupOfStopPlaces(SiteFrame siteFrame) {
+        assertThat(siteFrame.getGroupsOfStopPlaces()).as("site frame groups of stop places").isNotNull();
+        assertThat(siteFrame.getGroupsOfStopPlaces().getGroupOfStopPlaces())
+                .as("groups of stop places list")
+                .isNotNull()
+                .isNotEmpty();
+
+        return siteFrame.getGroupsOfStopPlaces().getGroupOfStopPlaces();
     }
 
     public List<PathLink> extractPathLinks(PublicationDeliveryStructure publicationDeliveryStructure) {
@@ -207,20 +225,24 @@ public class PublicationDeliveryTestHelper {
         return fromResponse(response);
     }
 
+    public PublicationDeliveryStructure fromString(String xml) throws IOException, JAXBException {
+        Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+        unmarshaller.setEventHandler(new javax.xml.bind.helpers.DefaultValidationEventHandler());
+
+        logger.info("Printing received response publication delivery \n--------------\n{}\n--------------", xml);
+
+        InputStream inputStream = new ByteArrayInputStream(xml.getBytes());
+        JAXBElement element = (JAXBElement) unmarshaller.unmarshal(inputStream);
+        return (PublicationDeliveryStructure) element.getValue();
+    }
+
     public PublicationDeliveryStructure fromResponse(Response response) throws IOException, JAXBException {
+
         StreamingOutput output = (StreamingOutput) response.getEntity();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         output.write(outputStream);
 
-        Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-        unmarshaller.setEventHandler(new javax.xml.bind.helpers.DefaultValidationEventHandler());
-
-        byte[] bytes = outputStream.toByteArray();
-        logger.info("Printing received publication delivery\n--------------\n{}\n--------------", new String(bytes));
-
-        InputStream inputStream = new ByteArrayInputStream(bytes);
-        JAXBElement element = (JAXBElement) unmarshaller.unmarshal(inputStream);
-        return (PublicationDeliveryStructure) element.getValue();
+        return fromString(new String(outputStream.toByteArray()));
     }
 
     public Response postPublicationDelivery(PublicationDeliveryStructure publicationDeliveryStructure, ImportParams importParams) throws JAXBException, IOException, SAXException {

@@ -21,10 +21,7 @@ public class SiteFrame
         extends Common_VersionFrameStructure {
 
     protected TopographicPlacesInFrame topographicPlaces = new TopographicPlacesInFrame();
-    protected AddressesInFrame_RelStructure addresses;
-    protected AccessesInFrame_RelStructure accesses;
     protected StopPlacesInFrame_RelStructure stopPlaces;
-    protected FlexibleStopPlacesInFrame_RelStructure flexibleStopPlaces;
     protected PointsOfInterestInFrame_RelStructure pointsOfInterest;
     protected ParkingsInFrame_RelStructure parkings;
     protected NavigationPathsInFrame_RelStructure navigationPaths;
@@ -32,11 +29,9 @@ public class SiteFrame
     protected PathJunctionsInFrame_RelStructure pathJunctions;
     protected CheckConstraintInFrame_RelStructure checkConstraints;
     protected CheckConstraintDelaysInFrame_RelStructure checkConstraintDelays;
-    protected CheckConstraintThroughputsInFrame_RelStructure checkConstraintThroughputs;
     protected PointOfInterestClassifications pointOfInterestClassifications;
     protected PointOfInterestClassificationHierarchiesInFrame_RelStructure pointOfInterestClassificationHierarchies;
     protected TariffZonesInFrame_RelStructure tariffZones;
-    protected SiteFacilitySetsInFrame_RelStructure siteFacilitySets;
 
     public TopographicPlacesInFrame getTopographicPlaces() {
         return topographicPlaces;
@@ -46,36 +41,12 @@ public class SiteFrame
         this.topographicPlaces = value;
     }
 
-    public AddressesInFrame_RelStructure getAddresses() {
-        return addresses;
-    }
-
-    public void setAddresses(AddressesInFrame_RelStructure value) {
-        this.addresses = value;
-    }
-
-    public AccessesInFrame_RelStructure getAccesses() {
-        return accesses;
-    }
-
-    public void setAccesses(AccessesInFrame_RelStructure value) {
-        this.accesses = value;
-    }
-
     public StopPlacesInFrame_RelStructure getStopPlaces() {
         return stopPlaces;
     }
 
     public void setStopPlaces(StopPlacesInFrame_RelStructure value) {
         this.stopPlaces = value;
-    }
-
-    public FlexibleStopPlacesInFrame_RelStructure getFlexibleStopPlaces() {
-        return flexibleStopPlaces;
-    }
-
-    public void setFlexibleStopPlaces(FlexibleStopPlacesInFrame_RelStructure value) {
-        this.flexibleStopPlaces = value;
     }
 
     public PointsOfInterestInFrame_RelStructure getPointsOfInterest() {
@@ -134,14 +105,6 @@ public class SiteFrame
         this.checkConstraintDelays = value;
     }
 
-    public CheckConstraintThroughputsInFrame_RelStructure getCheckConstraintThroughputs() {
-        return checkConstraintThroughputs;
-    }
-
-    public void setCheckConstraintThroughputs(CheckConstraintThroughputsInFrame_RelStructure value) {
-        this.checkConstraintThroughputs = value;
-    }
-
     public PointOfInterestClassifications getPointOfInterestClassifications() {
         return pointOfInterestClassifications;
     }
@@ -166,13 +129,6 @@ public class SiteFrame
         this.tariffZones = tariffZones;
     }
 
-    public SiteFacilitySetsInFrame_RelStructure getSiteFacilitySets() {
-        return siteFacilitySets;
-    }
-
-    public void setSiteFacilitySets(SiteFacilitySetsInFrame_RelStructure value) {
-        this.siteFacilitySets = value;
-    }
 
     @Override
     public String toString() {

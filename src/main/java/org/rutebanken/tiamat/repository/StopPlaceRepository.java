@@ -26,6 +26,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 public interface StopPlaceRepository extends StopPlaceRepositoryCustom, EntityInVersionRepository<StopPlace> {
 
@@ -44,5 +45,7 @@ public interface StopPlaceRepository extends StopPlaceRepositoryCustom, EntityIn
     @Override
     Iterator<StopPlace> scrollStopPlaces(ExportParams exportParams);
 
+    @Override
+    Iterator<StopPlace> scrollStopPlaces(Set<Long> stopPlacePrimaryIds);
 }
 

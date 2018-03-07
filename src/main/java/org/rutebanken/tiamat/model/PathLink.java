@@ -28,10 +28,10 @@ import java.util.List;
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class PathLink extends Link {
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, optional = false)
     protected PathLinkEnd from;
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, optional = false)
     protected PathLinkEnd to;
 
     @Embedded
@@ -45,9 +45,6 @@ public class PathLink extends Link {
 
     @Transient
     protected AccessibilityAssessment accessibilityAssessment;
-
-    @Transient
-    protected List<AccessModeEnumeration> accessModes;
 
     @Transient
     protected PublicUseEnumeration publicUse;
@@ -68,9 +65,6 @@ public class PathLink extends Link {
     protected BigInteger personCapacity;
 
     @Transient
-    protected SiteFacilitySets_RelStructure facilities;
-
-    @Transient
     protected MultilingualStringEntity towards;
 
     @Transient
@@ -84,9 +78,6 @@ public class PathLink extends Link {
 
     @Transient
     protected TransitionEnumeration transition;
-
-    @Transient
-    protected AccessFeatureEnumeration accessFeatureType;
 
     @Transient
     protected PassageTypeEnumeration passageType;
@@ -142,13 +133,6 @@ public class PathLink extends Link {
         this.accessibilityAssessment = value;
     }
 
-    public List<AccessModeEnumeration> getAccessModes() {
-        if (accessModes == null) {
-            accessModes = new ArrayList<AccessModeEnumeration>();
-        }
-        return this.accessModes;
-    }
-
     public PublicUseEnumeration getPublicUse() {
         return publicUse;
     }
@@ -197,14 +181,6 @@ public class PathLink extends Link {
         this.personCapacity = value;
     }
 
-    public SiteFacilitySets_RelStructure getFacilities() {
-        return facilities;
-    }
-
-    public void setFacilities(SiteFacilitySets_RelStructure value) {
-        this.facilities = value;
-    }
-
     public MultilingualStringEntity getTowards() {
         return towards;
     }
@@ -243,14 +219,6 @@ public class PathLink extends Link {
 
     public void setTransition(TransitionEnumeration value) {
         this.transition = value;
-    }
-
-    public AccessFeatureEnumeration getAccessFeatureType() {
-        return accessFeatureType;
-    }
-
-    public void setAccessFeatureType(AccessFeatureEnumeration value) {
-        this.accessFeatureType = value;
     }
 
     public PassageTypeEnumeration getPassageType() {

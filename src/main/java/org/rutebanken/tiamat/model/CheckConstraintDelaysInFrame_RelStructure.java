@@ -26,7 +26,7 @@ public class CheckConstraintDelaysInFrame_RelStructure
 
     public List<CheckConstraintDelay> getCheckConstraintDelay() {
         if (checkConstraintDelay == null) {
-            checkConstraintDelay = new ArrayList<CheckConstraintDelay>();
+            checkConstraintDelay = new ArrayList<>();
         }
         return this.checkConstraintDelay;
     }

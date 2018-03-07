@@ -38,7 +38,7 @@ public class ParkingAuthorizationCheck extends PlaceAuthorizationCheck<Parking> 
 	@Override
 	protected boolean matchesOrganisation() {
 		if (entity.getOrganisationRef() != null) {
-			String orgRef = entity.getOrganisationRef().getValue().getRef();
+			String orgRef = entity.getOrganisationRef().getRef();
 			if (orgRef != null) {
 				return orgRef.endsWith(":" + roleAssignment.o);
 			}

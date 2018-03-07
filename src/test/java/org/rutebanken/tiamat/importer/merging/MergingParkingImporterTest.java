@@ -19,10 +19,7 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Point;
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
-import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
-import org.rutebanken.tiamat.model.Parking;
-import org.rutebanken.tiamat.model.ParkingTypeEnumeration;
-import org.rutebanken.tiamat.model.ParkingVehicleEnumeration;
+import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.versioning.ParkingVersionedSaverService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,11 +44,14 @@ public class MergingParkingImporterTest extends TiamatIntegrationTest {
     private ParkingVersionedSaverService parkingVersionedSaverService;
 
     /**
-     * Two parkingss with the same name and coordinates should become one stop place.
+     * Two parkingss with the same name and coordinates should become one parking.
      */
     @Test
     public void parkingsWithSameCoordinatesMustNotBeAddedMultipleTimes() throws ExecutionException, InterruptedException {
         String name = "Ski stasjon";
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlaceRepository.save(stopPlace);
 
         double parkingLatitude = 59.422556;
         double parkingLongitude = 5.265704;
@@ -60,8 +60,9 @@ public class MergingParkingImporterTest extends TiamatIntegrationTest {
                 parkingLongitude, parkingLatitude, null);
         firstParking.setParkingType(ParkingTypeEnumeration.PARK_AND_RIDE);
         firstParking.getParkingVehicleTypes().add(ParkingVehicleEnumeration.CAR);
+        firstParking.setParentSiteRef(new SiteRefStructure(stopPlace.getNetexId()));
 
-        // Import first stop place.
+        // Import first parking
         Parking firstImportResult = mergingParkingImporter.importParkingWithoutNetexMapping(firstParking);
 
         Parking secondParking = createParking(name,
@@ -69,8 +70,9 @@ public class MergingParkingImporterTest extends TiamatIntegrationTest {
         secondParking.setParkingType(ParkingTypeEnumeration.PARK_AND_RIDE);
         secondParking.getParkingVehicleTypes().add(ParkingVehicleEnumeration.CAR);
         secondParking.getParkingVehicleTypes().add(ParkingVehicleEnumeration.MINIBUS);
+        secondParking.setParentSiteRef(new SiteRefStructure(stopPlace.getNetexId()));
 
-        // Import second stop place
+        // Import second parking
         Parking importResult = mergingParkingImporter.importParkingWithoutNetexMapping(secondParking);
 
         assertThat(importResult.getNetexId()).isEqualTo(firstImportResult.getNetexId());
@@ -85,6 +87,9 @@ public class MergingParkingImporterTest extends TiamatIntegrationTest {
     @Test
     public void updateParkingType() throws ExecutionException, InterruptedException {
 
+        StopPlace stopPlace = new StopPlace();
+        stopPlaceRepository.save(stopPlace);
+
         Point point = point(10.7096245, 59.9086885);
 
         Parking firstParking = new Parking();
@@ -93,6 +98,7 @@ public class MergingParkingImporterTest extends TiamatIntegrationTest {
         firstParking.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("original-id-ski");
         firstParking.setParkingType(ParkingTypeEnumeration.ROADSIDE);
         firstParking.setVersion(1L);
+        firstParking.setParentSiteRef(new SiteRefStructure(stopPlace.getNetexId()));
 
         parkingVersionedSaverService.saveNewVersion(firstParking);
 
@@ -101,6 +107,7 @@ public class MergingParkingImporterTest extends TiamatIntegrationTest {
         newParking.setName(new EmbeddableMultilingualString("Ski stasjon", "no"));
         newParking.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("original-id-ski");
         newParking.setParkingType(ParkingTypeEnumeration.PARK_AND_RIDE);
+        newParking.setParentSiteRef(new SiteRefStructure(stopPlace.getNetexId()));
 
         Parking importResult = mergingParkingImporter.importParkingWithoutNetexMapping(newParking);
 
@@ -111,12 +118,16 @@ public class MergingParkingImporterTest extends TiamatIntegrationTest {
     @Test
     public void detectAndMergeParkingVehicleTypesFromTwoSimilarParkings() throws ExecutionException, InterruptedException {
 
+        StopPlace stopPlace = new StopPlace();
+        stopPlaceRepository.save(stopPlace);
+
         Parking firstParking = new Parking();
         firstParking.setCentroid(point(60.000, 10.78));
         firstParking.setName(new EmbeddableMultilingualString("Andalsnes", "no"));
         firstParking.setVersion(1L);
         firstParking.getParkingVehicleTypes().add(ParkingVehicleEnumeration.PEDAL_CYCLE);
         firstParking.setParkingType(ParkingTypeEnumeration.PARK_AND_RIDE);
+        firstParking.setParentSiteRef(new SiteRefStructure(stopPlace.getNetexId()));
 
         parkingVersionedSaverService.saveNewVersion(firstParking);
 
@@ -126,6 +137,7 @@ public class MergingParkingImporterTest extends TiamatIntegrationTest {
         secondParking.getParkingVehicleTypes().add(ParkingVehicleEnumeration.CAR);
         secondParking.getParkingVehicleTypes().add(ParkingVehicleEnumeration.PEDAL_CYCLE);
         secondParking.setParkingType(ParkingTypeEnumeration.PARK_AND_RIDE);
+        secondParking.setParentSiteRef(new SiteRefStructure(stopPlace.getNetexId()));
 
         Parking importResult = mergingParkingImporter.importParkingWithoutNetexMapping(secondParking);
 
@@ -137,6 +149,9 @@ public class MergingParkingImporterTest extends TiamatIntegrationTest {
     @Test
     public void testHandleAlreadyExistingParkingNoChange() {
 
+        StopPlace stopPlace = new StopPlace();
+        stopPlaceRepository.save(stopPlace);
+
         Parking firstParking = new Parking();
         firstParking.setCentroid(point(60.000, 10.78));
         firstParking.setName(new EmbeddableMultilingualString("Andalsnes", "no"));
@@ -144,6 +159,8 @@ public class MergingParkingImporterTest extends TiamatIntegrationTest {
         firstParking.getParkingVehicleTypes().add(ParkingVehicleEnumeration.CAR);
         firstParking.getParkingVehicleTypes().add(ParkingVehicleEnumeration.PEDAL_CYCLE);
         firstParking.setParkingType(ParkingTypeEnumeration.PARK_AND_RIDE);
+        firstParking.setParentSiteRef(new SiteRefStructure(stopPlace.getNetexId()));
+
 
         Parking secondParking = new Parking();
         secondParking.setCentroid(point(60.000, 10.78));
@@ -151,6 +168,7 @@ public class MergingParkingImporterTest extends TiamatIntegrationTest {
         secondParking.getParkingVehicleTypes().add(ParkingVehicleEnumeration.CAR);
         secondParking.getParkingVehicleTypes().add(ParkingVehicleEnumeration.PEDAL_CYCLE);
         secondParking.setParkingType(ParkingTypeEnumeration.PARK_AND_RIDE);
+        secondParking.setParentSiteRef(new SiteRefStructure(stopPlace.getNetexId()));
 
         Parking parking = mergingParkingImporter.handleAlreadyExistingParking(firstParking, secondParking);
 
@@ -162,11 +180,16 @@ public class MergingParkingImporterTest extends TiamatIntegrationTest {
     @Test
     public void testHandleAlreadyExistingParkingNullParkingType() {
 
+        StopPlace stopPlace = new StopPlace();
+        stopPlaceRepository.save(stopPlace);
+
         Parking firstParking = new Parking();
         firstParking.setParkingType(null);
+        firstParking.setParentSiteRef(new SiteRefStructure(stopPlace.getNetexId()));
 
         Parking secondParking = new Parking();
         secondParking.setParkingType(null);
+        secondParking.setParentSiteRef(new SiteRefStructure(stopPlace.getNetexId()));
 
         Parking parking = mergingParkingImporter.handleAlreadyExistingParking(firstParking, secondParking);
 
@@ -177,12 +200,17 @@ public class MergingParkingImporterTest extends TiamatIntegrationTest {
     @Test
     public void testHandleAlreadyExistingParkingUpdatedParkingVehicleTypes() {
 
+        StopPlace stopPlace = new StopPlace();
+        stopPlaceRepository.save(stopPlace);
+
         Parking firstParking = new Parking();
         firstParking.getParkingVehicleTypes().add(ParkingVehicleEnumeration.CAR);
+        firstParking.setParentSiteRef(new SiteRefStructure(stopPlace.getNetexId()));
 
         Parking secondParking = new Parking();
         secondParking.getParkingVehicleTypes().add(ParkingVehicleEnumeration.CAR);
         secondParking.getParkingVehicleTypes().add(ParkingVehicleEnumeration.PEDAL_CYCLE);
+        secondParking.setParentSiteRef(new SiteRefStructure(stopPlace.getNetexId()));
 
         Parking parking = mergingParkingImporter.handleAlreadyExistingParking(firstParking, secondParking);
 

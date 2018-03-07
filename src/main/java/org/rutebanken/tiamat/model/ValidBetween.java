@@ -19,8 +19,9 @@ import com.google.common.base.MoreObjects;
 
 import javax.persistence.Embeddable;
 import java.time.Instant;
+
 @Embeddable
-public class ValidBetween  {
+public class ValidBetween {
 
     private Instant fromDate;
 

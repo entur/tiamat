@@ -26,7 +26,7 @@ public class ParkingAreas_RelStructure
 
     public List<Object> getParkingAreaRefOrParkingArea() {
         if (parkingAreaRefOrParkingArea == null) {
-            parkingAreaRefOrParkingArea = new ArrayList<Object>();
+            parkingAreaRefOrParkingArea = new ArrayList<>();
         }
         return this.parkingAreaRefOrParkingArea;
     }

@@ -23,6 +23,7 @@ import org.junit.runner.RunWith;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.id.GeneratedIdState;
 import org.rutebanken.tiamat.repository.*;
+import org.rutebanken.tiamat.versioning.GroupOfStopPlacesSaverService;
 import org.rutebanken.tiamat.versioning.ParkingVersionedSaverService;
 import org.rutebanken.tiamat.versioning.StopPlaceVersionedSaverService;
 import org.slf4j.Logger;
@@ -50,6 +51,9 @@ public abstract class TiamatIntegrationTest {
 
     @Autowired
     protected GroupOfStopPlacesRepository groupOfStopPlacesRepository;
+
+    @Autowired
+    protected GroupOfStopPlacesSaverService groupOfStopPlacesSaverService;
 
     @Autowired
     protected StopPlaceRepository stopPlaceRepository;

@@ -15,9 +15,6 @@
 
 package org.rutebanken.tiamat.model;
 
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.SequenceGenerator;
 import java.util.ArrayList;
 import java.util.List;
 

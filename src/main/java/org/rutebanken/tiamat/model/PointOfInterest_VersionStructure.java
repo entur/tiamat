@@ -23,7 +23,6 @@ public class PointOfInterest_VersionStructure
     protected TopographicPlaceRefs_RelStructure nearTopographicPlaces;
     protected SitePathLinks_RelStructure pathLinks;
     protected PathJunctions_RelStructure pathJunctions;
-    protected Accesses_RelStructure accesses;
     protected NavigationPaths_RelStructure navigationPaths;
 
     public PointOfInterestClassificationsViews_RelStructure getClassifications() {
@@ -63,14 +62,6 @@ public class PointOfInterest_VersionStructure
 
     public void setPathJunctions(PathJunctions_RelStructure value) {
         this.pathJunctions = value;
-    }
-
-    public Accesses_RelStructure getAccesses() {
-        return accesses;
-    }
-
-    public void setAccesses(Accesses_RelStructure value) {
-        this.accesses = value;
     }
 
     public NavigationPaths_RelStructure getNavigationPaths() {

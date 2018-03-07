@@ -51,7 +51,7 @@ See also http://stackoverflow.com/a/26514779
 
 #### Run postgres/gis for tiamat in docker for development
 ```
-docker run -p 5435:5432 -e POSTGRES_USER=tiamat -e POSTGRES_PASSWORD=<insertpasswordhere>" -e POSTGRES_INITDB_ARGS="-d" mdillon/postgis:9.4
+docker run -p 5435:5432 -e POSTGRES_USER=tiamat -e POSTGRES_PASSWORD=<insertpasswordhere>" -e POSTGRES_INITDB_ARGS="-d" mdillon/postgis:9.6
 ```
 
 #### Database creation in google cloud / kubernetes
@@ -167,12 +167,17 @@ Use the paramter: ```withoutLocationOnly=true```
 
 
 ### Topographic export mode
-The parameter ```topographicPlaceExportMode``` can be set to *RELEVANT* or *ALL*
+The parameter ```topographicPlaceExportMode``` can be set to *NONE*, *RELEVANT* or *ALL*
 Relevant topographic places will be found from the exported list of stop places.
 
 ### Tariff Zone export mode
-The parameter ```tariffZoneExportMode``` can be set to *RELEVANT* or *ALL*
+The parameter ```tariffZoneExportMode``` can be set to *NONE*, *RELEVANT* or *ALL*
 Relevant tariff zones with be found from the exported list of stop places. Because stop places can have a list of tariff zone refs.
+
+### Group of stop places export mode
+The parameter ```groupOfStopPlacesExportMode``` can be set to *NONE*, *RELEVANT* or *ALL*
+Relevant group of stop places can be found from the exported list of stop places.
+
 
 ### Version validity
 The ```versionValidity``` parameter controls what stop places to return.
@@ -182,7 +187,7 @@ The ```versionValidity``` parameter controls what stop places to return.
 
 ### Example
 ```
-https://api-test.entur.org/stop_places/1.0/netex?tariffZoneExportMode=RELEVANT&topographicPlaceExportMode=RELEVANT&q=Nesbru&versionValidity=CURRENT&municipalityReference=KVE:TopographicPlace:0220
+https://api-test.entur.org/stop_places/1.0/netex?tariffZoneExportMode=RELEVANT&topographicPlaceExportMode=RELEVANT&groupOfStopPlacesExportMode=NONE&q=Nesbru&versionValidity=CURRENT&municipalityReference=KVE:TopographicPlace:0220
 ```
 
 Returns stop places with current version validity now, matching the query 'Nesbru' and exists in municipality 0220. Fetches relevant tariff zones and topographic places.
@@ -195,12 +200,16 @@ When the job is finished, you can download the exported data.
 
 ### Start async export:
 ```
+curl https://api-test.entur.org/stop_places/1.0/netex/export/initiate
+```
+Pro tip: Pipe the output from curl to xmllint to format the output:
+```
 curl https://api-test.entur.org/stop_places/1.0/netex/export/initiate | xmllint --format -
 ```
 
 ### Check job status:
 ```
-curl https://api-test.entur.org/stop_places/1.0/netex/export | xmllint --format -
+curl https://api-test.entur.org/stop_places/1.0/netex/export
 ```
 
 ### When job is done. Download it:
@@ -224,23 +233,6 @@ If you are running this from `spring:run`, then you need to make sure that you h
 ```
 export MAVEN_OPTS='-Xms256m -Xmx1712m -Xss256m -XX:NewSize=64m -XX:MaxNewSize=128m -Dfile.encoding=UTF-8'
 ```
-
-### Import previously exported NeTEx file into emtpy Tiamat
-This NeTEx file contains stop places with IDs starting with *NSR*. Tiamat will bypass the ID sequence and insert these IDs as primary keys into the database.
-```
-curl  -XPOST -H"Content-Type: application/xml" -d@tiamat-export-130117-20170109-094137.xml http://localhost:1997/services/admin/netex/restoring_import
-```
-
-### Initial import from previously exported tiamat data with kubernetes
-```
-pod=`kc get pods  |grep tiamat | awk '{print $1}' | head -n1`
-kc exec -i $pod -- bash -c 'cat > /tmp/import' < tiamat-export-124268-20170313-160049.xml
-kc exec -it $pod bash
-cd /tmp
-curl -XPOST -H "Content-type: application/xml" -d@import http://localhost:8777/services/admin/netex/restoring_import
-```
-See https://github.com/rutebanken/devsetup/blob/master/docs/stolon.md#stolon-tiamat-setup
-
 
 ### Import NeTEx file without *NSR* IDs
 This NeTEx file should not contain NSR ID.
@@ -285,12 +277,12 @@ https://flywaydb.org/documentation/commandline/
 Execute the migration. Point to the migration files in tiamat.
 
 ```
-./flyway -url=jdbc:postgresql://localhost:5433/tiamat -locations=filesystem:/path/to/tiamat/src/main/resources/db/migrations migrate
+./flyway -url=jdbc:postgresql://localhost:5433/tiamat -locations=filesystem:/path/to/tiamat/src/main/resources/db/migration migrate
 ```
 
 ### Example migration
 ```
-./flyway -url=jdbc:postgresql://localhost:5433/tiamat -locations=filesystem:/path/to/tiamat/src/main/resources/db/migrations migrate
+./flyway -url=jdbc:postgresql://localhost:5433/tiamat -locations=filesystem:/path/to/tiamat/src/main/resources/db/migration migrate
 Flyway 4.2.0 by Boxfuse
 
 Database password: 
@@ -305,10 +297,10 @@ Successfully applied 1 migration to schema "public" (execution time 00:04.220s).
 
 ## Baseline existing database
 To baseline an existing database that does not contain the table `schema_version`.
-The schema of this database must be exactly equivalent to the first migration file. If not, you might be better off by starting from scratch and using the restoring_import to repopulate the new database.
+The schema of this database must be exactly equivalent to the first migration file. If not, you might be better off by starting from scratch and import an sql dump.
 
 ```
-./flyway -url=jdbc:postgresql://localhost:6432/tiamat -locations=filesystem:/path/to/tiamat/src/main/resources/db/migrations baseline
+./flyway -url=jdbc:postgresql://localhost:6432/tiamat -locations=filesystem:/path/to/tiamat/src/main/resources/db/migration baseline
 ```
 
 

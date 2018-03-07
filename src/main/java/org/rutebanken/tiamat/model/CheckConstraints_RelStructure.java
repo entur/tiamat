@@ -26,7 +26,7 @@ public class CheckConstraints_RelStructure
 
     public List<Object> getCheckConstraintRefOrCheckConstraint() {
         if (checkConstraintRefOrCheckConstraint == null) {
-            checkConstraintRefOrCheckConstraint = new ArrayList<Object>();
+            checkConstraintRefOrCheckConstraint = new ArrayList<>();
         }
         return this.checkConstraintRefOrCheckConstraint;
     }

@@ -24,7 +24,7 @@ import java.io.Serializable;
 
 
 @Embeddable
-public class CountryRef implements Serializable{
+public class CountryRef implements Serializable {
 
     protected String value;
 

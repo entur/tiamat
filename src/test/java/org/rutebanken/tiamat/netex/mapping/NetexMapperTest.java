@@ -15,6 +15,7 @@
 
 package org.rutebanken.tiamat.netex.mapping;
 
+import com.vividsolutions.jts.geom.Coordinate;
 import ma.glasnost.orika.MappingContext;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -24,10 +25,13 @@ import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.AccessibilityAssessment;
 import org.rutebanken.tiamat.model.AccessibilityLimitation;
 import org.rutebanken.tiamat.model.AddressablePlaceRefStructure;
+import org.rutebanken.tiamat.model.AlternativeName;
 import org.rutebanken.tiamat.model.CountryRef;
 import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.model.GroupOfStopPlaces;
 import org.rutebanken.tiamat.model.IanaCountryTldEnumeration;
 import org.rutebanken.tiamat.model.LimitationStatusEnumeration;
+import org.rutebanken.tiamat.model.NameTypeEnumeration;
 import org.rutebanken.tiamat.model.PathLink;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.SiteFrame;
@@ -38,10 +42,12 @@ import org.rutebanken.tiamat.model.TopographicPlaceRefStructure;
 import org.rutebanken.tiamat.netex.mapping.mapper.QuayMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
 
@@ -99,11 +105,10 @@ public class NetexMapperTest extends TiamatIntegrationTest {
         org.rutebanken.netex.model.StopPlacesInFrame_RelStructure stopPlacesInFrame_relStructure = new org.rutebanken.netex.model.StopPlacesInFrame_RelStructure();
 
         org.rutebanken.netex.model.StopPlace stopPlace = new org.rutebanken.netex.model.StopPlace();
-        org.rutebanken.netex.model.MultilingualString name = new org.rutebanken.netex.model.MultilingualString();
-        name.setValue("stop place");
-        name.setLang("no");
-        name.setTextIdType("");
-        stopPlace.setName(name);
+        stopPlace.setName(new org.rutebanken.netex.model.MultilingualString()
+                .withValue("stop place")
+                .withLang("no"));
+
         String stopPlaceId = "1337";
         stopPlace.setId("AVI:StopPlace:" + stopPlaceId);
 
@@ -114,6 +119,60 @@ public class NetexMapperTest extends TiamatIntegrationTest {
 
         assertThat(actualSiteFrame).isNotNull();
         assertThat(actualSiteFrame.getStopPlaces().getStopPlace().get(0).getName().getValue()).isEqualTo(stopPlace.getName().getValue());
+    }
+
+    @Test
+    public void mapGroupOfStopPlacesToNetex() throws Exception {
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setNetexId("NSR:StopPlace:1");
+        stopPlace.setName(new EmbeddableMultilingualString("stopPlace"));
+
+        GroupOfStopPlaces groupOfStopPlaces = new GroupOfStopPlaces();
+        groupOfStopPlaces.setNetexId("NSR:GroupOfStopPlaces:1");
+        groupOfStopPlaces.getMembers().add(new StopPlaceReference(stopPlace.getNetexId()));
+        groupOfStopPlaces.setChangedBy("Solem");
+        groupOfStopPlaces.setVersion(2L);
+        groupOfStopPlaces.setCreated(Instant.now());
+        groupOfStopPlaces.setChanged(Instant.now());
+        groupOfStopPlaces.setName(new EmbeddableMultilingualString("oh my gosp"));
+        groupOfStopPlaces.setCentroid(geometryFactory.createPoint(new Coordinate(16,17)));
+
+        AlternativeName alternativeName = new AlternativeName();
+        alternativeName.setName(new EmbeddableMultilingualString("alternative name alias"));
+        alternativeName.setNameType(NameTypeEnumeration.ALIAS);
+        groupOfStopPlaces.getAlternativeNames().add(alternativeName);
+
+
+
+
+        org.rutebanken.netex.model.GroupOfStopPlaces netexGroupOfStopPlaces = netexMapper.getFacade().map(groupOfStopPlaces, org.rutebanken.netex.model.GroupOfStopPlaces.class);
+
+        assertThat(netexGroupOfStopPlaces).isNotNull();
+
+        assertThat(netexGroupOfStopPlaces.getName().getValue())
+                .as("name.value")
+                .isEqualTo(groupOfStopPlaces.getName().getValue());
+
+        assertThat(netexGroupOfStopPlaces.getAlternativeNames())
+                .as("alternativeNames")
+                .isNotNull();
+
+        assertThat(netexGroupOfStopPlaces.getMembers())
+                .as("members")
+                .isNotNull();
+
+
+        assertThat(netexGroupOfStopPlaces.getMembers().getStopPlaceRef())
+                .as("stop place ref list")
+                .isNotNull()
+                .isNotEmpty()
+                .extracting(StopPlaceRefStructure::getRef)
+                    .as("reference to stop place id")
+                    .containsOnly(stopPlace.getNetexId());
+
+        assertThat(netexGroupOfStopPlaces.getChanged()).as("changed").isNotNull();
+        assertThat(netexGroupOfStopPlaces.getVersion()).as("version").isEqualTo(String.valueOf(groupOfStopPlaces.getVersion()));
     }
 
 

@@ -15,18 +15,21 @@
 
 package org.rutebanken.tiamat.service.stopplace;
 
+import org.hibernate.Session;
+import org.junit.Before;
 import org.junit.Test;
-import org.rutebanken.tiamat.model.EntityInVersionStructure;
-import org.rutebanken.tiamat.model.SiteRefStructure;
-import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
-import org.rutebanken.tiamat.service.stopplace.ParentStopPlacesFetcher;
 
+import javax.persistence.EntityManager;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
-import static java.util.Comparator.comparing;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -34,7 +37,13 @@ public class ParentStopPlacesFetcherTest {
 
     private StopPlaceRepository stopPlaceRepository = mock(StopPlaceRepository.class);
 
-    private ParentStopPlacesFetcher parentStopPlacesFetcher = new ParentStopPlacesFetcher(stopPlaceRepository);
+    private EntityManager entityManager = mock(EntityManager.class);
+    private ParentStopPlacesFetcher parentStopPlacesFetcher = new ParentStopPlacesFetcher(stopPlaceRepository, entityManager);
+
+    @Before
+    public void before() {
+        when(entityManager.unwrap(any())).thenReturn(mock(Session.class));
+    }
 
     @Test
     public void resolveParents() throws Exception {
@@ -69,13 +78,17 @@ public class ParentStopPlacesFetcherTest {
     @Test
     public void resolveParentsKeepChilds() throws Exception {
 
+        final String parentStopPlaceName = "name";
+
         int counter = 10;
         StopPlace parent = createAndMockStopPlaceWithNetexIdAndVersion(++counter);
+        parent.setName(new EmbeddableMultilingualString(parentStopPlaceName, "nor"));
         parent.setParentStopPlace(true);
 
         StopPlace parentSecondVersion = new StopPlace();
         parentSecondVersion.setParentStopPlace(true);
         parentSecondVersion.setNetexId(parent.getNetexId());
+        parentSecondVersion.setName(new EmbeddableMultilingualString(parentStopPlaceName, "nor"));
         parentSecondVersion.setVersion(2L);
 
         StopPlace child1 = createAndMockStopPlaceWithNetexIdAndVersion(++counter);
@@ -96,6 +109,15 @@ public class ParentStopPlacesFetcherTest {
                 .contains(concatenateNetexIdVersion(parentSecondVersion));
         assertThat(result).extracting(stopPlace -> stopPlace.getNetexId()).contains(child1.getNetexId());
         assertThat(result).extracting(stopPlace -> stopPlace.getNetexId()).contains(child2.getNetexId());
+
+        Set<EmbeddableMultilingualString> childrensNames = result.stream()
+                .filter(stopPlace -> !stopPlace.isParentStopPlace())
+                .map(StopPlace::getName)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
+        assertThat(childrensNames).extracting(MultilingualString::getValue).containsOnly(parentStopPlaceName, parentStopPlaceName);
+
     }
 
     private void addParentRef(StopPlace child, StopPlace parent) {
@@ -103,13 +125,13 @@ public class ParentStopPlacesFetcherTest {
     }
 
     private String concatenateNetexIdVersion(EntityInVersionStructure entity) {
-        return entity.getVersion()+entity.getNetexId();
+        return entity.getVersion() + entity.getNetexId();
     }
 
     private StopPlace createAndMockStopPlaceWithNetexIdAndVersion(int counter) {
 
         StopPlace stopPlace = new StopPlace();
-        stopPlace.setNetexId("XYZ:StopPlace:"+counter);
+        stopPlace.setNetexId("XYZ:StopPlace:" + counter);
         stopPlace.setVersion(1L);
         when(stopPlaceRepository.findFirstByNetexIdAndVersion(stopPlace.getNetexId(), stopPlace.getVersion())).thenReturn(stopPlace);
         return stopPlace;
