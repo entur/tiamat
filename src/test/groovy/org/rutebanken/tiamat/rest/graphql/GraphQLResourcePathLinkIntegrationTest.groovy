@@ -235,9 +235,22 @@ class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResourceInte
 
     @Test
     void updatePathLinkWithTransferDurationWithoutClearingLineString() throws Exception {
+        def firstQuay = new Quay()
+        firstQuay.setCentroid(geometryFactory.createPoint(new Coordinate(5, 60)))
+        firstQuay.setVersion(INITIAL_VERSION)
+
+        def secondQuay = new Quay()
+        secondQuay.setVersion(INITIAL_VERSION + 1)
+        secondQuay.setCentroid(geometryFactory.createPoint(new Coordinate(5.1, 60.1)))
+
+        def stop = new StopPlace()
+        stop.setQuays([firstQuay, secondQuay] as Set)
+        stopPlaceRepository.save(stop)
 
         String graphQlJsonQuery = """mutation {
                 pathLink: ${MUTATE_PATH_LINK} (PathLink: [{
+                    from: {placeRef: {ref: "${firstQuay.getNetexId()}", version:"${firstQuay.getVersion()}"}},
+                    to: {placeRef: {ref: "${secondQuay.getNetexId()}"}},
                     geometry: {
                         type: LineString,
                         coordinates: [[10.3, 59.9], [10.3, 59.9], [10.3, 59.9], [10.3, 59.9], [10.3, 59.9]]
@@ -257,7 +270,7 @@ class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResourceInte
                     .body("geometry", notNullValue())
                 .extract().path("data.pathLink[0].id")
 
-        System.out.println("Got path link ID: " + pathLinkId)
+        println("Got path link ID: " + pathLinkId + ". Will send another mutation were only the transfer duration will be changed")
 
         String secondGraphQlJsonQuery = """mutation {
                     pathLink: ${MUTATE_PATH_LINK} (PathLink: {
@@ -280,6 +293,7 @@ class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResourceInte
                 }"""
 
         executeGraphqQLQueryOnly(secondGraphQlJsonQuery)
+                .body("errors", nullValue())
                 .root("data.pathLink[0]")
                     .body("id", notNullValue())
                     .body("geometry", notNullValue())
