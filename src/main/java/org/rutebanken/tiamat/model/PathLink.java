@@ -28,9 +28,11 @@ import java.util.List;
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class PathLink extends Link {
 
+    @Column(nullable = false)
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     protected PathLinkEnd from;
 
+    @Column(nullable = false)
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     protected PathLinkEnd to;
 
