@@ -127,15 +127,20 @@ public class PathLinkUpdaterService {
                 updatedExisting = false;
             }
 
+            if(resultPathLink.getFrom() == null || resultPathLink.getTo() == null) {
+                throw new IllegalArgumentException("PathLink (id: " + resultPathLink.getNetexId() + ") must have PathLinkEnd From and To set.");
+            }
 
-            if (incomingPathLink.getFrom() != null) {
+            if (resultPathLink.getFrom() != null) {
                 EntityInVersionStructure from = verifyPathLinkReferences(incomingPathLink.getFrom());
                 entitiesRequiringAuthorization.add(from);
             }
-            if (incomingPathLink.getTo() != null) {
+            if (resultPathLink.getTo() != null) {
                 EntityInVersionStructure to = verifyPathLinkReferences(incomingPathLink.getTo());
                 entitiesRequiringAuthorization.add(to);
             }
+
+
 
             authorizationService.assertAuthorized(AuthorizationConstants.ROLE_EDIT_STOPS, entitiesRequiringAuthorization);
             pathLinkRepository.save(resultPathLink);
