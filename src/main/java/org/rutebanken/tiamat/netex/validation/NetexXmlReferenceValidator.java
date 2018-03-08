@@ -117,9 +117,7 @@ public class NetexXmlReferenceValidator {
         String value = getAttributeValue(REF_ATTRIBUTE, xmlStreamReader);
         if (value != null) {
             String version = getAttributeValue(VERSION_ATTRIBUTE, xmlStreamReader);
-            if (version == null) {
-                references.add(value);
-            } else {
+            if (version != null) {
                 references.add(value + ID_VERSION_SEPARATOR + version);
             }
         }

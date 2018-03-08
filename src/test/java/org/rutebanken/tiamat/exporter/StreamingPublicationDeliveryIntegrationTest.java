@@ -154,6 +154,55 @@ public class StreamingPublicationDeliveryIntegrationTest extends TiamatIntegrati
 
     }
 
+    /**
+     * Set export modes to none, to see that export netex is valid
+     */
+    @Test
+    public void handleExportModeSetToNone() throws InterruptedException, IOException, XMLStreamException, SAXException, JAXBException, NetexReferenceValidatorException {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
+        TopographicPlace county = new TopographicPlace(new EmbeddableMultilingualString("county"));
+        county.setTopographicPlaceType(TopographicPlaceTypeEnumeration.COUNTY);
+        county = topographicPlaceVersionedSaverService.saveNewVersion(county);
+
+        TopographicPlace municipality = new TopographicPlace(new EmbeddableMultilingualString("Some municipality"));
+        municipality.setTopographicPlaceType(TopographicPlaceTypeEnumeration.MUNICIPALITY);
+        municipality.setParentTopographicPlaceRef(new TopographicPlaceRefStructure(county.getNetexId(), String.valueOf(county.getVersion()  )));
+        municipality = topographicPlaceVersionedSaverService.saveNewVersion(municipality);
+
+        TariffZone tariffZone = new TariffZone();
+        tariffZone.setVersion(1L);
+        tariffZone = tariffZoneRepository.save(tariffZone);
+
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("stop place"));
+        stopPlace.setTopographicPlace(municipality);
+        stopPlace.getTariffZones().add(new TariffZoneRef(tariffZone));
+        stopPlaceRepository.save(stopPlace);
+
+        stopPlaceRepository.flush();
+
+        GroupOfStopPlaces groupOfStopPlaces = new GroupOfStopPlaces(new EmbeddableMultilingualString("group"));
+        groupOfStopPlaces.getMembers().add(new StopPlaceReference(stopPlace.getNetexId()));
+        groupOfStopPlacesSaverService.saveNewVersion(groupOfStopPlaces);
+
+        ExportParams exportParams = ExportParams.newExportParamsBuilder()
+                .setStopPlaceSearch(
+                        StopPlaceSearch.newStopPlaceSearchBuilder()
+                                .setVersionValidity(ExportParams.VersionValidity.CURRENT_FUTURE)
+                                .build())
+                .setTopographicPlaceExportMode(ExportParams.ExportMode.NONE)
+                .setTariffZoneExportMode(ExportParams.ExportMode.NONE)
+                .setGroupOfStopPlacesExportMode(ExportParams.ExportMode.NONE)
+                .build();
+
+        streamingPublicationDelivery.stream(exportParams, byteArrayOutputStream);
+
+        String xml = byteArrayOutputStream.toString();
+        System.out.println(xml);
+
+        netexXmlReferenceValidator.validateNetexReferences(new ByteArrayInputStream(xml.getBytes()), "publicationDelivery");
+    }
+
     @Test
     public void streamStopPlacesAndRelatedEntitiesIntoPublicationDelivery() throws Exception {
 
