@@ -170,6 +170,23 @@ public class ImportResourceTest extends TiamatIntegrationTest {
     }
 
     @Test
+    public void forceStopPlaceType() throws Exception {
+
+        StopPlace stopPlace = new StopPlace()
+                .withId("XYZ:StopPlace:3231")
+                .withVersion("2");
+
+        ImportParams importParams = new ImportParams();
+        importParams.forceStopType = org.rutebanken.tiamat.model.StopTypeEnumeration.BUS_STATION;
+        PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace);
+        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery, importParams);
+        List<StopPlace> result = publicationDeliveryTestHelper.extractStopPlaces(response);
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getStopPlaceType()).isEqualTo(StopTypeEnumeration.BUS_STATION);
+    }
+
+    @Test
     public void allowOtherWhenMatchingExistingStopPlacesWithImportTypeMATCH() throws Exception {
 
         StopPlace stopPlaceToBeMatched = new StopPlace()
@@ -381,7 +398,7 @@ public class ImportResourceTest extends TiamatIntegrationTest {
 
     /**
      * When importing a stop place witch is a direct match with import type MERGE. No changes should be made to the stop place.
-     *
+     * <p>
      * https://rutebanken.atlassian.net/browse/NRP-1587
      */
     @Test
@@ -1003,14 +1020,14 @@ public class ImportResourceTest extends TiamatIntegrationTest {
         LocalDateTime firstValidFrom = LocalDateTime.now().plusSeconds(1);
         LocalDateTime secondValidFrom = LocalDateTime.now().plusSeconds(2);
         StopPlace stopPlace1 = new StopPlace()
-                                       .withId("XYZ:Stopplace:1")
-                                       .withVersion("1")
-                                       .withName(new MultilingualString().withValue("New stop1"))
-                                       .withValidBetween(new ValidBetween().withFromDate(firstValidFrom).withToDate(secondValidFrom), new ValidBetween().withFromDate(secondValidFrom))
-                                       .withCentroid(new SimplePoint_VersionStructure()
-                                                             .withLocation(new LocationStructure()
-                                                                                   .withLatitude(new BigDecimal("59.914353"))
-                                                                                   .withLongitude(new BigDecimal("10.806387"))));
+                .withId("XYZ:Stopplace:1")
+                .withVersion("1")
+                .withName(new MultilingualString().withValue("New stop1"))
+                .withValidBetween(new ValidBetween().withFromDate(firstValidFrom).withToDate(secondValidFrom), new ValidBetween().withFromDate(secondValidFrom))
+                .withCentroid(new SimplePoint_VersionStructure()
+                        .withLocation(new LocationStructure()
+                                .withLatitude(new BigDecimal("59.914353"))
+                                .withLongitude(new BigDecimal("10.806387"))));
 
         PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace1);
         PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery);
