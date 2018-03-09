@@ -22,6 +22,7 @@ import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.SiteFrame;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
+import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,10 +34,13 @@ public class NetexIdHelper {
 
     private static final Logger logger = LoggerFactory.getLogger(NetexIdHelper.class);
 
+    // TODO: make it configurable, maybe in ValidPrefixList
+    public static final String NSR = "NSR";
+
     private static Pattern NETEX_ID_PATTERN = Pattern.compile("\\w{3}:\\w{3,}:\\w+");
 
     public static String getNetexId(String type, long id) {
-        return ValidPrefixList.VALID_NETEX_PREFIX + ":" + type + ":" + id;
+        return NSR + ":" + type + ":" + id;
     }
 
     /**
@@ -48,8 +52,8 @@ public class NetexIdHelper {
     }
 
     public static boolean isNsrId(String netexId) {
-        if(!netexId.contains(ValidPrefixList.VALID_NETEX_PREFIX)) {
-            logger.debug("The netexId: {} does not start with {}", netexId, ValidPrefixList.VALID_NETEX_PREFIX);
+        if(!netexId.contains(NSR)) {
+            logger.debug("The netexId: {} does not start with {}", netexId, NSR);
             return false;
         }
 

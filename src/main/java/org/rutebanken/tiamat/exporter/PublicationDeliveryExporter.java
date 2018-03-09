@@ -19,7 +19,7 @@ import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.netex.id.ValidPrefixList;
+import org.rutebanken.tiamat.netex.id.NetexIdHelper;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.repository.search.ChangedStopPlaceSearch;
@@ -96,7 +96,7 @@ public class PublicationDeliveryExporter {
         PublicationDeliveryStructure publicationDeliveryStructure = new PublicationDeliveryStructure()
                 .withVersion(String.valueOf(publicationDeliveryId.incrementAndGet()))
                 .withPublicationTimestamp(LocalDateTime.now())
-                .withParticipantRef(ValidPrefixList.VALID_NETEX_PREFIX);
+                .withParticipantRef(NetexIdHelper.NSR);
         return publicationDeliveryStructure;
     }
 
