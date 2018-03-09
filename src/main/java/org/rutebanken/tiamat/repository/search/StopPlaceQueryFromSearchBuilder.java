@@ -363,7 +363,7 @@ public class StopPlaceQueryFromSearchBuilder {
         if (!commonWordsToIgnore.isEmpty()) {
             return commonWordsToIgnore.stream()
                     .reduce(query, (string, word) ->
-                            string.replaceFirst("\\s*" + word + "\\s*", JOKER))
+                            string.replaceFirst("\\s+" + word + "\\s+", JOKER))
                     .replace(WHITE_SPACE, JOKER);
         } else {
             return query;
