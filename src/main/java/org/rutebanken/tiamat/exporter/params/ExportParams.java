@@ -24,8 +24,6 @@ import javax.ws.rs.QueryParam;
 import java.util.Arrays;
 import java.util.List;
 
-import static java.lang.String.valueOf;
-
 /**
  * Export parameters.
  * Parameters specific for search related to a certain type like StopPlace does not necessary belong here.
@@ -63,23 +61,29 @@ public class ExportParams {
     @QueryParam(value = "countyReference")
     private List<String> countyReferences;
 
+    @ApiParam(value = "Filter results by data producer code space - i.e. code from original imported ID")
+    @QueryParam(value = "codeSpace")
+    private String codeSpace;
+
     @BeanParam
     private StopPlaceSearch stopPlaceSearch;
 
-    private ExportParams(ExportMode topographicPlaceExportMode, ExportMode tariffZoneExportMode, ExportMode groupOfStopPlacesExportMode, List<String> municipalityReferences, List<String> countyReferences, StopPlaceSearch stopPlaceSearch) {
+    private ExportParams(ExportMode topographicPlaceExportMode, ExportMode tariffZoneExportMode, ExportMode groupOfStopPlacesExportMode, List<String> municipalityReferences, List<String> countyReferences, StopPlaceSearch stopPlaceSearch, String codeSpace) {
         this.topographicPlaceExportMode = topographicPlaceExportMode;
         this.tariffZoneExportMode = tariffZoneExportMode;
         this.groupOfStopPlacesExportMode = groupOfStopPlacesExportMode;
         this.municipalityReferences = municipalityReferences;
         this.countyReferences = countyReferences;
         this.stopPlaceSearch = stopPlaceSearch;
+        this.codeSpace = codeSpace;
     }
 
     public ExportParams(StopPlaceSearch stopPlaceSearch) {
         this.stopPlaceSearch = stopPlaceSearch;
     }
 
-    public ExportParams() {}
+    public ExportParams() {
+    }
 
     public ExportMode getTopographicPlaceExportMode() {
         return topographicPlaceExportMode;
@@ -105,8 +109,12 @@ public class ExportParams {
         return stopPlaceSearch;
     }
 
+    public String getCodeSpace() {
+        return codeSpace;
+    }
+
     public static ExportParams.Builder newExportParamsBuilder() {
-       return new Builder();
+        return new Builder();
     }
 
     @Override
@@ -117,6 +125,7 @@ public class ExportParams {
                 .add("countyReferences", countyReferences)
                 .add("stopPlaceSearch", stopPlaceSearch)
                 .add("tariffZoneExportMode", tariffZoneExportMode)
+                .add("codeSpace", codeSpace)
                 .toString();
     }
 
@@ -127,8 +136,10 @@ public class ExportParams {
         private List<String> municipalityReferences;
         private List<String> countyReferences;
         private StopPlaceSearch stopPlaceSearch;
+        private String codeSpace;
 
-        private Builder() { }
+        private Builder() {
+        }
 
         public Builder setTopographicPlaceExportMode(ExportMode topographicPlaceExportMode) {
             this.topographicPlaceExportMode = topographicPlaceExportMode;
@@ -140,7 +151,7 @@ public class ExportParams {
             return this;
         }
 
-        public Builder setMunicipalityReference(String ... municipalityReference) {
+        public Builder setMunicipalityReference(String... municipalityReference) {
             this.municipalityReferences = Arrays.asList(municipalityReference);
             return this;
         }
@@ -150,7 +161,7 @@ public class ExportParams {
             return this;
         }
 
-        public Builder setCountyReference(String ... countyReference) {
+        public Builder setCountyReference(String... countyReference) {
             this.countyReferences = Arrays.asList(countyReference);
             return this;
         }
@@ -162,7 +173,7 @@ public class ExportParams {
 
         public Builder setTariffZoneExportMode(ExportMode tariffZoneExportMode) {
             this.tariffZoneExportMode = tariffZoneExportMode;
-            return  this;
+            return this;
         }
 
         public Builder setGroupOfStopPlacesExportMode(ExportMode groupOfStopPlacesExportMode) {
@@ -170,8 +181,13 @@ public class ExportParams {
             return this;
         }
 
+        public Builder setCodeSpace(String codeSpace) {
+            this.codeSpace = codeSpace;
+            return this;
+        }
+
         public ExportParams build() {
-            return new ExportParams(topographicPlaceExportMode, tariffZoneExportMode, groupOfStopPlacesExportMode, municipalityReferences, countyReferences, stopPlaceSearch);
+            return new ExportParams(topographicPlaceExportMode, tariffZoneExportMode, groupOfStopPlacesExportMode, municipalityReferences, countyReferences, stopPlaceSearch, codeSpace);
         }
     }
 }

@@ -15,14 +15,6 @@
 
 package org.rutebanken.tiamat.importer.handler;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.Lock;
-import java.util.stream.Collectors;
-
 import com.hazelcast.core.HazelcastInstance;
 import org.apache.commons.lang.NotImplementedException;
 import org.rutebanken.netex.model.SiteFrame;
@@ -31,8 +23,8 @@ import org.rutebanken.netex.model.TopographicPlace;
 import org.rutebanken.netex.model.TopographicPlacesInFrame_RelStructure;
 import org.rutebanken.tiamat.exporter.TariffZonesFromStopsExporter;
 import org.rutebanken.tiamat.exporter.TopographicPlacesExporter;
-import org.rutebanken.tiamat.importer.ImportType;
 import org.rutebanken.tiamat.importer.ImportParams;
+import org.rutebanken.tiamat.importer.ImportType;
 import org.rutebanken.tiamat.importer.filter.StopPlaceTypeFilter;
 import org.rutebanken.tiamat.importer.filter.ZoneTopographicPlaceFilter;
 import org.rutebanken.tiamat.importer.initial.ParallelInitialStopPlaceImporter;
@@ -49,6 +41,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Lock;
+import java.util.stream.Collectors;
 
 @Component
 public class StopPlaceImportHandler {
@@ -138,6 +138,11 @@ public class StopPlaceImportHandler {
                 tiamatStops = stopPlacePostFilterSteps.run(tiamatStops);
             }
 
+            if (importParams.forceStopType != null) {
+                logger.info("Forcing stop type to " + importParams.forceStopType);
+                tiamatStops.forEach(stopPlace -> stopPlace.setStopPlaceType(importParams.forceStopType));
+            }
+
             Collection<org.rutebanken.netex.model.StopPlace> importedOrMatchedNetexStopPlaces;
             logger.info("The import type is: {}", importParams.importType);
 
@@ -160,12 +165,12 @@ public class StopPlaceImportHandler {
                     lock.unlock();
                 }
             }
-            
-    		// Filter uniques by StopPlace.id#version
-            Map<String,org.rutebanken.netex.model.StopPlace> uniqueById = new HashMap<>();
-            importedOrMatchedNetexStopPlaces.stream().forEach(e -> uniqueById.put(e.getId()+"#"+e.getVersion(), e));
-            importedOrMatchedNetexStopPlaces =  uniqueById.values();
-            
+
+            // Filter uniques by StopPlace.id#version
+            Map<String, org.rutebanken.netex.model.StopPlace> uniqueById = new HashMap<>();
+            importedOrMatchedNetexStopPlaces.stream().forEach(e -> uniqueById.put(e.getId() + "#" + e.getVersion(), e));
+            importedOrMatchedNetexStopPlaces = uniqueById.values();
+
             logger.info("Imported/matched/updated {} stop places", stopPlacesCreatedMatchedOrUpdated);
 
             tariffZonesFromStopsExporter.resolveTariffZones(importedOrMatchedNetexStopPlaces, responseSiteframe);

@@ -28,9 +28,8 @@ import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.exporter.params.StopPlaceSearch;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
-import org.rutebanken.tiamat.repository.search.ChangedStopPlaceSearch;
-import org.rutebanken.tiamat.service.stopplace.MultiModalStopPlaceEditor;
 import org.rutebanken.tiamat.model.tag.Tag;
+import org.rutebanken.tiamat.repository.search.ChangedStopPlaceSearch;
 import org.rutebanken.tiamat.service.stopplace.MultiModalStopPlaceEditor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -42,7 +41,6 @@ import org.springframework.util.CollectionUtils;
 import java.time.Instant;
 import java.util.*;
 
-import static org.assertj.core.api.AssertionsForClassTypes.setRemoveAssertJRelatedElementsFromStackTrace;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.rutebanken.tiamat.exporter.params.ExportParams.newExportParamsBuilder;
 import static org.rutebanken.tiamat.exporter.params.StopPlaceSearch.newStopPlaceSearchBuilder;
@@ -1336,6 +1334,25 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         testFindKeyValueMappingsForStopPlaceReturnsOnlyStopPlacesValidAtPointInTime(MERGED_ID_KEY);
     }
 
+
+    @Test
+    public void findStopPlaceNameIgnoreCommonWords() throws Exception {
+        String stopPlaceName = "Gare de Dax";
+
+        createStopPlaceWithMunicipality(stopPlaceName, null);
+
+        ExportParams exportParams = newExportParamsBuilder().setStopPlaceSearch(
+                newStopPlaceSearchBuilder()
+                        .setQuery("gare dax")
+                        .build())
+                .build();
+        Page<StopPlace> result = stopPlaceRepository.findStopPlace(exportParams);
+        assertThat(result).isNotEmpty();
+        System.out.println(result.getContent().get(0));
+    }
+
+
+
     public void testFindKeyValueMappingsForStopPlaceReturnsOnlyStopPlacesValidAtPointInTime(String orgIdKey) {
         String orgIdSuffix = "2";
         String orgId = "XXX:StopPlace:" + orgIdSuffix;
@@ -1370,6 +1387,32 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
 
         List<IdMappingDto> allMappings = stopPlaceRepository.findKeyValueMappingsForStop(hundredSecondsAgo, now, 0, 2000);
         Assert.assertEquals(2, allMappings.size());
+    }
+
+    @Test
+    public void findByCodeParamEmpty() {
+
+        // GIVEN
+        StopPlace stopPlace = new StopPlace();
+        String stopPlaceName = "exemple";
+        stopPlace.setVersion(2L);
+        stopPlace.setName(new EmbeddableMultilingualString(stopPlaceName, ""));
+
+        stopPlaceRepository.save(stopPlace);
+
+        String code = "test";
+
+        ExportParams exportParams = newExportParamsBuilder().setStopPlaceSearch(newStopPlaceSearchBuilder()
+                .setQuery(stopPlaceName)
+                .build())
+                .setCodeSpace(code)
+                .build();
+
+        // WHEN
+        Page<StopPlace> searchResult = stopPlaceRepository.findStopPlace(exportParams);
+
+        // THEN
+        assertThat(searchResult).isEmpty();
     }
 
 
