@@ -29,8 +29,8 @@ public class ValidPrefixList {
 
     public static final String ANY_PREFIX = "*";
 
-    @Value("${netex.validPrefix}")
-    public static final String VALID_NETEX_PREFIX = "NSR";
+    @Value("${netex.validPrefix:NSR}")
+    public static String VALID_NETEX_PREFIX;
 
 
     private static final Logger logger = LoggerFactory.getLogger(ValidPrefixList.class);

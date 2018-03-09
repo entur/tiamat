@@ -15,6 +15,7 @@
 
 package org.rutebanken.tiamat.repository.search;
 
+import org.apache.commons.lang3.StringUtils;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.exporter.params.StopPlaceSearch;
 import org.rutebanken.tiamat.model.Quay;
@@ -120,22 +121,25 @@ public class StopPlaceQueryFromSearchBuilder {
     private static final String JOKER = "%";
 
     /**
-     * Check in imported name for filter by trigram
+     * Check in imported name to filter by data space code
      */
     private static final String SQL_SEARCH_BY_CODE = "s.id in (select id from stop_place sp" +
             " join stop_place_key_values spkv on sp.id = spkv.stop_place_id " +
             " join value_items vi on vi.value_id = spkv.key_values_id" +
-            " where substring(vi.items, 4, 1) = ':' and lower(substring(vi.items, 1, 3)) = :dataProducerCode)";
+            " where substring(vi.items, 4, 1) = ':' and lower(substring(vi.items, 1, 3)) = :codeSpace)";
 
+
+    @Autowired
+    private SearchHelper searchHelper;
 
     /**
      * Configure some common words to be skipped during stop place search by name.
      */
-    @Value("#{'${stopPlaces.search.commonWordsToIgnore}'.split(',')}")
-    Set<String> commonWordsToIgnore = new LinkedHashSet<>();
+    private Set<String> commonWordsToIgnore = new HashSet<>();
 
-    @Autowired
-    private SearchHelper searchHelper;
+    public StopPlaceQueryFromSearchBuilder(@Value(" ${stopPlaces.search.commonWordsToIgnore:}") String commonWordsToIgnore) {
+        this.commonWordsToIgnore = StringUtils.isNotEmpty(commonWordsToIgnore) ? new HashSet<>(Arrays.asList(commonWordsToIgnore.split(","))) : new HashSet<>();
+    }
 
     public Pair<String, Map<String, Object>> buildQueryString(ExportParams exportParams) {
 
@@ -166,7 +170,7 @@ public class StopPlaceQueryFromSearchBuilder {
                 operators.add("and");
             }
 
-            if(stopPlaceSearch.getSubmode() != null) {
+            if (stopPlaceSearch.getSubmode() != null) {
                 wheres.add("(s.air_submode = :submode OR s.bus_submode = :submode OR s.coach_submode = :submode OR s.funicular_submode = :submode OR s.metro_submode = :submode OR s.rail_submode = :submode OR s.telecabin_submode = :submode OR s.tram_submode = :submode OR s.water_submode = :submode)");
                 parameters.put("submode", stopPlaceSearch.getSubmode());
                 operators.add("and");
@@ -200,12 +204,12 @@ public class StopPlaceQueryFromSearchBuilder {
                 parameters.put("countyId", exportParams.getCountyReferences());
             }
 
-            boolean hasCode = exportParams.getCode() != null;
+            boolean hasCode = exportParams.getCodeSpace() != null;
 
-            if(hasCode) {
+            if (hasCode) {
                 operators.add("and");
                 wheres.add(SQL_SEARCH_BY_CODE);
-                parameters.put("dataProducerCode", exportParams.getCode());
+                parameters.put("codeSpace", exportParams.getCodeSpace());
             }
 
         }

@@ -289,7 +289,7 @@ public class GraphQLNames {
     public static final String ADDRESSABLE_PLACE = "addressablePlace";
     public static final String PLACE_REF = "placeRef";
     public static final String INCLUDE_EXPIRED = "includeExpired";
-    public static final String SEARCH_WITH_CODE = "code";
+    public static final String SEARCH_WITH_CODE_SPACE = "code";
 
     public static final String NAME = "name";
     public static final String NAME_TYPE = "nameType";

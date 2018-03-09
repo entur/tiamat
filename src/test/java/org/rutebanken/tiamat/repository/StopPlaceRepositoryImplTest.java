@@ -1405,7 +1405,7 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         ExportParams exportParams = newExportParamsBuilder().setStopPlaceSearch(newStopPlaceSearchBuilder()
                 .setQuery(stopPlaceName)
                 .build())
-                .setCode(code)
+                .setCodeSpace(code)
                 .build();
 
         // WHEN

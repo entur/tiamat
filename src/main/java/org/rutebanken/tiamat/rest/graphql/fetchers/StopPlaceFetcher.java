@@ -169,9 +169,9 @@ class StopPlaceFetcher implements DataFetcher {
                     );
                 }
 
-                if (environment.getArgument(SEARCH_WITH_CODE) != null) {
-                    String code = environment.getArgument(SEARCH_WITH_CODE);
-                    exportParamsBuilder.setCode(code.toLowerCase());
+                if (environment.getArgument(SEARCH_WITH_CODE_SPACE) != null) {
+                    String code = environment.getArgument(SEARCH_WITH_CODE_SPACE);
+                    exportParamsBuilder.setCodeSpace(code.toLowerCase());
                 }
 
                 setIfNonNull(environment, TAGS, stopPlaceSearchBuilder::setTags);
