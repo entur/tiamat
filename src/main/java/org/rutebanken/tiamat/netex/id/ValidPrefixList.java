@@ -30,7 +30,7 @@ public class ValidPrefixList {
     public static final String ANY_PREFIX = "*";
 
     @Value("${netex.validPrefix:NSR}")
-    public static String VALID_NETEX_PREFIX;
+    public static String VALID_NETEX_PREFIX = "NSR";
 
 
     private static final Logger logger = LoggerFactory.getLogger(ValidPrefixList.class);
