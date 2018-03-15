@@ -67,6 +67,8 @@ public class TopographicPlaceRepositoryImpl implements TopographicPlaceRepositor
 			parameters.put("topographicPlaceType", topographicPlaceType);
 		}
 
+		sql.append("ORDER BY SIMILARITY(tp.name_value, :name) DESC");
+
 		TypedQuery<TopographicPlace> query = entityManager.createQuery(sql.toString(), TopographicPlace.class);
 		parameters.forEach(query::setParameter);
 
