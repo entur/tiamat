@@ -475,6 +475,47 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         }
     }
 
+    @Override
+    public Map<String, Set<String>> listStopPlaceIdsAndQuayIds(Instant validFrom, Instant validTo) {
+        String sql = "SELECT DISTINCT s.netex_id as stop_place_id, q.netex_id as quay_id " +
+                "FROM stop_place s " +
+                "  INNER JOIN stop_place_quays spq " +
+                "    ON s.id = spq.stop_place_id " +
+                "  INNER JOIN quay q " +
+                "    ON spq.quays_id = q.id " +
+                SQL_LEFT_JOIN_PARENT_STOP +
+                " WHERE " +
+                SQL_STOP_PLACE_OR_PARENT_IS_VALID_IN_INTERVAL;
+
+        if (validTo == null) {
+            // Assuming 1000 years into the future is the same as forever
+            validTo = Instant.from(ZonedDateTime.now().plusYears(1000).toInstant());
+        }
+
+        Query query = entityManager.createNativeQuery(sql);
+        query.setParameter("validTo", Date.from(validTo));
+        query.setParameter("validFrom",  Date.from(validFrom));
+
+        try {
+            @SuppressWarnings("unchecked")
+            List<String[]> results = query.getResultList();
+            if (results.isEmpty()) {
+                return Collections.emptyMap();
+            } else {
+                HashMap<String, Set<String>> result = new HashMap<>();
+                for (Object[] strings : results) {
+                    String stopplaceId = (String) strings[0];
+                    String quayId = (String) strings[1];
+                    Set<String> quays = result.computeIfAbsent(stopplaceId, s -> new HashSet<>());
+                    quays.add(quayId);
+                }
+                return result;
+            }
+        } catch (NoResultException noResultException) {
+            return null;
+        }
+    }
+
 
     @Override
     public Iterator<StopPlace> scrollStopPlaces() {
