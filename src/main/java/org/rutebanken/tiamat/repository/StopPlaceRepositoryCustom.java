@@ -29,6 +29,7 @@ import org.springframework.data.domain.Pageable;
 import java.time.Instant;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 
@@ -78,4 +79,6 @@ public interface StopPlaceRepositoryCustom extends DataManagedObjectStructureRep
     List<JbvCodeMappingDto> findJbvCodeMappingsForStopPlace();
 
     Iterator<StopPlace> scrollStopPlaces(Set<Long> stopPlacePrimaryIds);
+
+    Map<String, Set<String>> listStopPlaceIdsAndQuayIds(Instant validFrom, Instant validTo);
 }
