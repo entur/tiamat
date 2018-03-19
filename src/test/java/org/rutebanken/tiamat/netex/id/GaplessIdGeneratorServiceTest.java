@@ -43,6 +43,9 @@ public class GaplessIdGeneratorServiceTest extends TiamatIntegrationTest {
     @Autowired
     private HibernateEntityManagerFactory hibernateEntityManagerFactory;
 
+    @Autowired
+    private NetexIdHelper netexIdHelper;
+
     @Test
     public void verifyNetexIdAssignedToStop() {
         StopPlace stopPlace = new StopPlace();
@@ -93,7 +96,7 @@ public class GaplessIdGeneratorServiceTest extends TiamatIntegrationTest {
     }
 
     private Quay insertQuay(long wantedId, Quay quay) {
-        String wantedNetexIdId = NetexIdHelper.getNetexId("Quay", wantedId);
+        String wantedNetexIdId = netexIdHelper.getNetexId("Quay", wantedId);
         quay.setNetexId(wantedNetexIdId);
         quayRepository.save(quay);
         return quay;
@@ -105,14 +108,14 @@ public class GaplessIdGeneratorServiceTest extends TiamatIntegrationTest {
         // Use first 500 IDs
         for (long explicitId = 1; explicitId <= 30; explicitId++) {
             Quay quay = new Quay();
-            quay.setNetexId(NetexIdHelper.getNetexId(Quay.class.getSimpleName(), explicitId));
+            quay.setNetexId(netexIdHelper.getNetexId(Quay.class.getSimpleName(), explicitId));
             quayRepository.save(quay);
             System.out.println("Saved quay: " + quay.getNetexId());
         }
 
         Quay quay = new Quay();
         quayRepository.save(quay);
-        assertThat(NetexIdHelper.extractIdPostfixNumeric(quay.getNetexId())).isEqualTo(31);
+        assertThat(netexIdHelper.extractIdPostfixNumeric(quay.getNetexId())).isEqualTo(31);
     }
 
     @Test

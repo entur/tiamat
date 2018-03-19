@@ -132,6 +132,9 @@ public class StopPlaceQueryFromSearchBuilder {
     @Autowired
     private SearchHelper searchHelper;
 
+    @Autowired
+    private NetexIdHelper netexIdHelper;
+
     /**
      * Configure some common words to be skipped during stop place search by name.
      */
@@ -304,10 +307,10 @@ public class StopPlaceQueryFromSearchBuilder {
         } else if (NetexIdHelper.isNetexId(query)) {
             String netexId = query;
 
-            String netexIdType = NetexIdHelper.extractIdType(netexId);
+            String netexIdType = netexIdHelper.extractIdType(netexId);
             parameters.put("query", query);
 
-            if (!NetexIdHelper.isNsrId(query)) {
+            if (!netexIdHelper.isNsrId(query)) {
 
                 // Detect non NSR NetexId and search in original ID
                 parameters.put("originalIdKey", ORIGINAL_ID_KEY);
@@ -319,7 +322,7 @@ public class StopPlaceQueryFromSearchBuilder {
                 } else if (Quay.class.getSimpleName().equals(netexIdType)) {
                     wheres.add("s.id in (select spq.stop_place_id from stop_place_quays spq inner join quay_key_values qkv on spq.quays_id = qkv.quay_id inner join value_items v on qkv.key_values_id = v.value_id where (qkv.key_values_key = :originalIdKey OR qkv.key_values_key = :mergedIdKey) and v.items = :query)");
                 } else {
-                    logger.warn("Detected NeTEx ID {}, but type is not supported: {}", netexId, NetexIdHelper.extractIdType(netexId));
+                    logger.warn("Detected NeTEx ID {}, but type is not supported: {}", netexId, netexIdHelper.extractIdType(netexId));
                 }
             } else {
                 // NSR ID detected
@@ -329,7 +332,7 @@ public class StopPlaceQueryFromSearchBuilder {
                 } else if (Quay.class.getSimpleName().equals(netexIdType)) {
                     wheres.add("s.id in (select spq.stop_place_id from stop_place_quays spq inner join quay q on spq.quays_id = q.id and q.netex_id = :query)");
                 } else {
-                    logger.warn("Detected NeTEx ID {}, but type is not supported: {}", netexId, NetexIdHelper.extractIdType(netexId));
+                    logger.warn("Detected NeTEx ID {}, but type is not supported: {}", netexId, netexIdHelper.extractIdType(netexId));
                 }
             }
         } else {

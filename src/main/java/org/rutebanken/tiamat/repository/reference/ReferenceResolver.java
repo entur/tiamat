@@ -50,6 +50,9 @@ public class ReferenceResolver {
     @Autowired
     private TypeFromIdResolver typeFromIdResolver;
 
+    @Autowired
+    private NetexIdHelper netexIdHelper;
+
     public <T extends DataManagedObjectStructure> T resolve(VersionOfObjectRefStructure versionOfObjectRefStructure) {
 
         logger.debug("Received reference: {}", versionOfObjectRefStructure);
@@ -61,11 +64,11 @@ public class ReferenceResolver {
             throw new IllegalArgumentException("Expected two number of colons in ref. Got: '" + ref + "'");
 
         }
-        String memberClass = NetexIdHelper.extractIdType(ref);
+        String memberClass = netexIdHelper.extractIdType(ref);
 
         Class<T> clazz = typeFromIdResolver.resolveClassFromId(ref);
 
-        String prefix = NetexIdHelper.extractIdPrefix(ref);
+        String prefix = netexIdHelper.extractIdPrefix(ref);
 
         final String netexId;
         if (!validPrefixList.isValidPrefixForType(prefix, memberClass)) {

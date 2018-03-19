@@ -16,16 +16,20 @@
 package org.rutebanken.tiamat.importer.matching;
 
 import org.junit.Test;
-import org.rutebanken.tiamat.importer.matching.OriginalIdMatcher;
 import org.rutebanken.tiamat.model.DataManagedObjectStructure;
 import org.rutebanken.tiamat.model.Quay;
+import org.rutebanken.tiamat.netex.id.NetexIdHelper;
+import org.rutebanken.tiamat.netex.id.ValidPrefixList;
+
+import java.util.HashMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 
 public class OriginalIdMatcherTest {
 
-    private final OriginalIdMatcher originalIdMatcher = new OriginalIdMatcher();
+    private NetexIdHelper netexIdHelper = new NetexIdHelper(new ValidPrefixList("NSR", new HashMap<>()));
+    private final OriginalIdMatcher originalIdMatcher = new OriginalIdMatcher(netexIdHelper);
 
     @Test
     public void matchesOnOriginalId() throws Exception {

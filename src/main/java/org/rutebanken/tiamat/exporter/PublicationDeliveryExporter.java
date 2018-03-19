@@ -50,7 +50,10 @@ import static java.util.stream.Collectors.toSet;
 @Transactional
 @Deprecated
 public class PublicationDeliveryExporter {
+
     private static final Logger logger = LoggerFactory.getLogger(PublicationDeliveryExporter.class);
+    private static final AtomicLong publicationDeliveryId = new AtomicLong();
+
     private final StopPlaceRepository stopPlaceRepository;
     private final NetexMapper netexMapper;
     private final TiamatSiteFrameExporter tiamatSiteFrameExporter;
@@ -58,14 +61,19 @@ public class PublicationDeliveryExporter {
     private final TariffZonesFromStopsExporter tariffZonesFromStopsExporter;
     private final ParentStopPlacesFetcher parentStopPlacesFetcher;
     private final ChildStopPlacesFetcher childStopPlacesFetcher;
-
-    private static final AtomicLong publicationDeliveryId = new AtomicLong();
+    private final ValidPrefixList validPrefixList;
 
     public enum MultiModalFetchMode {CHILDREN, PARENTS}
 
     @Autowired
     public PublicationDeliveryExporter(StopPlaceRepository stopPlaceRepository,
-                                       NetexMapper netexMapper, TiamatSiteFrameExporter tiamatSiteFrameExporter, TopographicPlacesExporter topographicPlacesExporter, TariffZonesFromStopsExporter tariffZonesFromStopsExporter, ParentStopPlacesFetcher parentStopPlacesFetcher, ChildStopPlacesFetcher childStopPlacesFetcher) {
+                                       NetexMapper netexMapper,
+                                       TiamatSiteFrameExporter tiamatSiteFrameExporter,
+                                       TopographicPlacesExporter topographicPlacesExporter,
+                                       TariffZonesFromStopsExporter tariffZonesFromStopsExporter,
+                                       ParentStopPlacesFetcher parentStopPlacesFetcher,
+                                       ChildStopPlacesFetcher childStopPlacesFetcher,
+                                       ValidPrefixList validPrefixList) {
         this.stopPlaceRepository = stopPlaceRepository;
         this.netexMapper = netexMapper;
         this.tiamatSiteFrameExporter = tiamatSiteFrameExporter;
@@ -73,6 +81,7 @@ public class PublicationDeliveryExporter {
         this.tariffZonesFromStopsExporter = tariffZonesFromStopsExporter;
         this.parentStopPlacesFetcher = parentStopPlacesFetcher;
         this.childStopPlacesFetcher = childStopPlacesFetcher;
+        this.validPrefixList = validPrefixList;
     }
 
     @Transactional(readOnly = true)
@@ -96,7 +105,7 @@ public class PublicationDeliveryExporter {
         PublicationDeliveryStructure publicationDeliveryStructure = new PublicationDeliveryStructure()
                 .withVersion(String.valueOf(publicationDeliveryId.incrementAndGet()))
                 .withPublicationTimestamp(LocalDateTime.now())
-                .withParticipantRef(ValidPrefixList.VALID_NETEX_PREFIX);
+                .withParticipantRef(validPrefixList.getValidNetexPrefix());
         return publicationDeliveryStructure;
     }
 

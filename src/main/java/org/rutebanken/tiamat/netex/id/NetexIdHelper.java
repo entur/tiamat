@@ -24,32 +24,38 @@ import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.Optional;
-import java.util.Random;
 import java.util.regex.Pattern;
 
+@Component
 public class NetexIdHelper {
 
     private static final Logger logger = LoggerFactory.getLogger(NetexIdHelper.class);
 
     private static Pattern NETEX_ID_PATTERN = Pattern.compile("\\w{3}:\\w{3,}:\\w+");
 
-    public static String getNetexId(String type, long id) {
-        return ValidPrefixList.VALID_NETEX_PREFIX + ":" + type + ":" + id;
+    private final ValidPrefixList validPrefixList;
+
+    @Autowired
+    public NetexIdHelper(ValidPrefixList validPrefixList) {
+        this.validPrefixList = validPrefixList;
     }
 
-    /**
-     * Creates random NSR-ID.
-     * TODO: Move to test
-     */
-    public static String generateRandomizedNetexId(IdentifiedEntity identifiedEntity) {
-        return getNetexId(determineIdType(identifiedEntity), new Random().nextInt());
+    public String getNetexId(String type, long id) {
+        return validPrefixList.getValidNetexPrefix() + ":" + type + ":" + id;
     }
 
-    public static boolean isNsrId(String netexId) {
-        if(!netexId.contains(ValidPrefixList.VALID_NETEX_PREFIX)) {
-            logger.debug("The netexId: {} does not start with {}", netexId, ValidPrefixList.VALID_NETEX_PREFIX);
+    public String getNetexId(IdentifiedEntity identifiedEntity, long id) {
+        String type = determineIdType(identifiedEntity);
+        return getNetexId(type, id);
+    }
+
+    public boolean isNsrId(String netexId) {
+        if(!netexId.contains(validPrefixList.getValidNetexPrefix())) {
+            logger.debug("The netexId: {} does not start with {}", netexId, validPrefixList.getValidNetexPrefix());
             return false;
         }
 
@@ -66,7 +72,7 @@ public class NetexIdHelper {
      * @param netexId Id with long value after last colon.
      * @return long value
      */
-    public static long extractIdPostfixNumeric(String netexId) {
+    public long extractIdPostfixNumeric(String netexId) {
         try {
             return Long.valueOf(extractIdPostfix(netexId));
         } catch (NumberFormatException e) {
@@ -74,11 +80,11 @@ public class NetexIdHelper {
         }
     }
 
-    public static String extractIdPostfix(String netexId) {
+    public String extractIdPostfix(String netexId) {
         return netexId.substring(netexId.lastIndexOf(':') + 1).trim();
     }
 
-    public static String extractIdType(String netexId) {
+    public String extractIdType(String netexId) {
         try {
             return netexId.substring(netexId.indexOf(':') + 1, netexId.lastIndexOf(':'));
         } catch (StringIndexOutOfBoundsException e) {
@@ -88,7 +94,7 @@ public class NetexIdHelper {
         }
     }
 
-    public static String extractIdPrefix(String netexId) {
+    public String extractIdPrefix(String netexId) {
         if(StringUtils.countMatches(netexId, ":") != 2) {
             throw new IllegalArgumentException("Number of colons in ID is not two: " + netexId);
         }
@@ -96,11 +102,11 @@ public class NetexIdHelper {
         return netexId.substring(0, netexId.indexOf(':'));
     }
 
-    public static String stripLeadingZeros(String originalIdValue) {
+    public String stripLeadingZeros(String originalIdValue) {
         try {
-            long numeric = NetexIdHelper.extractIdPostfixNumeric(originalIdValue);
-            String type = NetexIdHelper.extractIdType(originalIdValue);
-            String prefix = NetexIdHelper.extractIdPrefix(originalIdValue);
+            long numeric = extractIdPostfixNumeric(originalIdValue);
+            String type = extractIdType(originalIdValue);
+            String prefix = extractIdPrefix(originalIdValue);
             if(numeric == 0L || Strings.isNullOrEmpty(type) || Strings.isNullOrEmpty(prefix)) {
                 logger.warn("Cannot parse original ID '{}' into preifx:type:number. Keeping value as is", originalIdValue);
             }
@@ -114,20 +120,11 @@ public class NetexIdHelper {
         }
     }
 
-    public static Optional<String> getOptionalTiamatId(String netexId) {
-        if (isNsrId(netexId)) {
-            logger.debug("Detected tiamat ID from {}", netexId);
-            return Optional.of(netexId);
-        } else {
-            return Optional.empty();
-        }
-    }
-
     public static boolean isNetexId(String string) {
         return NETEX_ID_PATTERN.matcher(string).matches();
     }
 
-    private static String determineIdType(IdentifiedEntity identifiedEntity) {
+    public static String determineIdType(IdentifiedEntity identifiedEntity) {
 
         if(identifiedEntity instanceof StopPlace) {
             return "StopPlace";

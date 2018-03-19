@@ -19,10 +19,13 @@ import com.google.common.collect.Sets;
 import org.junit.Test;
 import org.rutebanken.tiamat.general.PeriodicCacheLogger;
 import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.netex.id.NetexIdHelper;
+import org.rutebanken.tiamat.netex.id.ValidPrefixList;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -35,11 +38,13 @@ import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_
 
 public class StopPlaceFromOriginalIdFinderTest {
 
+    private NetexIdHelper netexIdHelper = new NetexIdHelper(new ValidPrefixList("NSR", new HashMap<>()));
+
     @Test
     public void findShouldSearchForAllIdsInKeyVal() throws Exception {
 
         StopPlaceRepository stopPlaceRepository = mock(StopPlaceRepository.class);
-        StopPlaceFromOriginalIdFinder stopPlaceFromOriginalIdFinder = new StopPlaceFromOriginalIdFinder(stopPlaceRepository, 0, 0, TimeUnit.DAYS, new PeriodicCacheLogger());
+        StopPlaceFromOriginalIdFinder stopPlaceFromOriginalIdFinder = new StopPlaceFromOriginalIdFinder(stopPlaceRepository, 0, 0, TimeUnit.DAYS, new PeriodicCacheLogger(), netexIdHelper);
 
         StopPlace stopPlace = new StopPlace();
         stopPlace.setNetexId("100L");
@@ -60,7 +65,7 @@ public class StopPlaceFromOriginalIdFinderTest {
     public void findShouldHandleEmptyValues() throws Exception {
 
         StopPlaceRepository stopPlaceRepository = mock(StopPlaceRepository.class);
-        StopPlaceFromOriginalIdFinder stopPlaceFromOriginalIdFinder = new StopPlaceFromOriginalIdFinder(stopPlaceRepository, 0, 0, TimeUnit.DAYS, new PeriodicCacheLogger());
+        StopPlaceFromOriginalIdFinder stopPlaceFromOriginalIdFinder = new StopPlaceFromOriginalIdFinder(stopPlaceRepository, 0, 0, TimeUnit.DAYS, new PeriodicCacheLogger(), netexIdHelper);
 
         StopPlace stopPlace = new StopPlace();
         stopPlace.setNetexId("101L");

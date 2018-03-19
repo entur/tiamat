@@ -48,6 +48,9 @@ public class StopPlaceByIdFinder {
     @Autowired
     private StopPlaceFromOriginalIdFinder stopPlaceFromOriginalIdFinder;
 
+    @Autowired
+    private NetexIdHelper netexIdHelper;
+
     private List<Function<StopPlace, Function<Boolean, List<StopPlace>>>> findFunctionList = Arrays.asList(
             stopPlace -> hasQuays -> stopPlaceByQuayOriginalIdFinder.find(stopPlace, hasQuays),
             stopPlace -> hasQuays -> findByStopPlaceOriginalId(stopPlace),
@@ -55,7 +58,7 @@ public class StopPlaceByIdFinder {
             stopPlace -> hasQuays -> findByQuayNetexId(stopPlace, hasQuays));
 
     public List<StopPlace> findByNetexId(StopPlace incomingStopPlace) {
-        if (incomingStopPlace.getNetexId() != null && NetexIdHelper.isNsrId(incomingStopPlace.getNetexId())) {
+        if (incomingStopPlace.getNetexId() != null && netexIdHelper.isNsrId(incomingStopPlace.getNetexId())) {
             logger.debug("Looking for stop by netex id {}", incomingStopPlace.getNetexId());
             return Arrays.asList(stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(incomingStopPlace.getNetexId()));
         }
@@ -76,7 +79,7 @@ public class StopPlaceByIdFinder {
         if (hasQuays) {
             logger.debug("Looking for stop by quay netex ID");
             return incomingStopPlace.getQuays().stream()
-                    .filter(quay -> quay.getNetexId() != null && NetexIdHelper.isNsrId(quay.getNetexId()))
+                    .filter(quay -> quay.getNetexId() != null && netexIdHelper.isNsrId(quay.getNetexId()))
                     .map(quay -> quayRepository.findFirstByNetexIdOrderByVersionDesc(quay.getNetexId()))
                     .filter(quay -> quay != null)
                     .map(quay -> stopPlaceRepository.findByQuay(quay))

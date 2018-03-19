@@ -26,6 +26,8 @@ import org.rutebanken.tiamat.importer.matching.OriginalIdMatcher;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.netex.id.NetexIdHelper;
+import org.rutebanken.tiamat.netex.id.ValidPrefixList;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 
 import java.awt.geom.Point2D;
@@ -39,7 +41,8 @@ public class QuayMergerTest {
 
     private GeometryFactory geometryFactory = new GeometryFactoryConfig().geometryFactory();
 
-    private QuayMerger quayMerger = new QuayMerger(new OriginalIdMatcher());
+    private NetexIdHelper netexIdHelper = new NetexIdHelper(new ValidPrefixList("NSR", new HashMap<>()));
+    private QuayMerger quayMerger = new QuayMerger(new OriginalIdMatcher(netexIdHelper));
 
     @Test
     public void disableMatchingQuaysWithinLowDistanceBeforeIdMatch() {

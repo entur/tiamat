@@ -50,7 +50,15 @@ public class NetexIdMapper {
     private static final List<String> IGNORE_KEYS = Arrays.asList(CHANGED_BY, VERSION_COMMENT, IS_PARENT_STOP_PLACE);
 
     @Autowired
-    private ValidPrefixList validPrefixList;
+    private final ValidPrefixList validPrefixList;
+
+    @Autowired
+    private final NetexIdHelper netexIdHelper;
+
+    public NetexIdMapper(ValidPrefixList validPrefixList, NetexIdHelper netexIdHelper) {
+        this.validPrefixList = validPrefixList;
+        this.netexIdHelper = netexIdHelper;
+    }
 
     public void toNetexModel(EntityStructure internalEntity, org.rutebanken.netex.model.EntityStructure netexEntity) {
         if(internalEntity.getNetexId() == null) {
@@ -65,7 +73,7 @@ public class NetexIdMapper {
 
         if(netexEntity.getId() == null) {
             tiamatEntity.setNetexId(null);
-        } else if(validPrefixList.isValidPrefixForType(NetexIdHelper.extractIdPrefix(netexEntity.getId()), tiamatEntity.getClass())) {
+        } else if(validPrefixList.isValidPrefixForType(netexIdHelper.extractIdPrefix(netexEntity.getId()), tiamatEntity.getClass())) {
             logger.debug("Detected ID with valid prefix: {}. ", netexEntity.getId());
             tiamatEntity.setNetexId(netexEntity.getId().trim());
         } else {
@@ -122,7 +130,7 @@ public class NetexIdMapper {
         String valueToAdd = value.trim();
 
         if(ignoreEmptyPostfix) {
-            if(Strings.isNullOrEmpty(NetexIdHelper.extractIdPostfix(valueToAdd))) {
+            if(Strings.isNullOrEmpty(netexIdHelper.extractIdPostfix(valueToAdd))) {
                 logger.debug("Ignoring empty postfix for key value: key {} and value '{}'", keytoAdd, valueToAdd);
                 return;
             }

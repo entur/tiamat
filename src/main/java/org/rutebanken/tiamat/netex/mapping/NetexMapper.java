@@ -19,6 +19,8 @@ import ma.glasnost.orika.*;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
 import org.rutebanken.netex.model.*;
 import org.rutebanken.tiamat.config.GeometryFactoryConfig;
+import org.rutebanken.tiamat.netex.id.NetexIdHelper;
+import org.rutebanken.tiamat.netex.id.ValidPrefixList;
 import org.rutebanken.tiamat.netex.mapping.converter.*;
 import org.rutebanken.tiamat.netex.mapping.mapper.*;
 import org.rutebanken.tiamat.repository.TagRepository;
@@ -29,6 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 @Component
@@ -167,39 +170,6 @@ public class NetexMapper {
                 .register();
 
         facade = mapperFactory.getMapperFacade();
-    }
-
-    public NetexMapper(TagRepository tagRepository) {
-        this(getDefaultConverters(),
-                new KeyListToKeyValuesMapMapper(),
-                new DataManagedObjectStructureMapper(tagRepository, new NetexIdMapper(), new TagKeyValuesMapper(tagRepository)),
-                new PublicationDeliveryHelper(),
-                new AccessibilityAssessmentMapper());
-        logger.info("Setting up netexMapper without DI");
-    }
-
-    public static List<Converter> getDefaultConverters() {
-        List<Converter> converters = new ArrayList<>();
-        converters.add(new AccessSpacesConverter());
-        converters.add(new LevelsConverter());
-        converters.add(new QuayListConverter());
-        converters.add(new AlternativeNamesConverter());
-        converters.add(new EquipmentPlacesConverter());
-        converters.add(new ValidBetweenConverter());
-        converters.add(new BoardingPositionsConverter());
-        converters.add(new CheckConstraintsConverter());
-        converters.add(new DestinationDisplayViewsConverter());
-        converters.add(new ZonedDateTimeInstantConverter());
-
-        converters.add(new LocalDateTimeInstantConverter());
-        ExportTimeZone exportTimeZone = new ExportTimeZone();
-        converters.add(new OffsetDateTimeInstantConverter(exportTimeZone));
-        converters.add(new SimplePointVersionStructureConverter(new GeometryFactoryConfig().geometryFactory()));
-        converters.add(new KeyValuesToKeyListConverter());
-        converters.add(new AccessibilityLimitationsListConverter());
-        converters.add(new TariffZonesRefConverter());
-//        converters.add(new PathLinkEndConverter());
-        return converters;
     }
 
     public TopographicPlace mapToNetexModel(org.rutebanken.tiamat.model.TopographicPlace topographicPlace) {

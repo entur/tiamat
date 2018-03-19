@@ -20,6 +20,8 @@ import org.junit.Test;
 import org.rutebanken.netex.model.KeyListStructure;
 import org.rutebanken.netex.model.KeyValueStructure;
 import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.netex.id.NetexIdHelper;
+import org.rutebanken.tiamat.netex.id.ValidPrefixList;
 import org.rutebanken.tiamat.netex.mapping.PublicationDeliveryHelper;
 import org.rutebanken.tiamat.repository.TagRepository;
 
@@ -36,7 +38,10 @@ public class DataManagedObjectStructureMapperTest {
     private TagRepository tagRepository = mock(TagRepository.class);
     private TagKeyValuesMapper tagKeyValuesMapper = new TagKeyValuesMapper(tagRepository);
 
-    private DataManagedObjectStructureMapper dataManagedObjectStructureMapper = new DataManagedObjectStructureMapper(tagRepository, new NetexIdMapper(), tagKeyValuesMapper);
+    private ValidPrefixList validPrefixList = new ValidPrefixList("NSR", new HashMap<>());
+    private NetexIdHelper netexIdHelper = new NetexIdHelper(validPrefixList);
+
+    private DataManagedObjectStructureMapper dataManagedObjectStructureMapper = new DataManagedObjectStructureMapper(tagRepository, new NetexIdMapper(validPrefixList, netexIdHelper), tagKeyValuesMapper);
 
     private PublicationDeliveryHelper publicationDeliveryHelper = new PublicationDeliveryHelper();
 

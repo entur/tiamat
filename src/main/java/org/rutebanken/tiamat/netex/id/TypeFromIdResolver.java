@@ -17,14 +17,18 @@ package org.rutebanken.tiamat.netex.id;
 
 import org.rutebanken.tiamat.model.DataManagedObjectStructure;
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class TypeFromIdResolver {
 
+    @Autowired
+    private NetexIdHelper netexIdHelper;
+
     public <T extends EntityInVersionStructure> Class<T> resolveClassFromId(String netexId) {
 
-        String memberClass = NetexIdHelper.extractIdType(netexId);
+        String memberClass = netexIdHelper.extractIdType(netexId);
         String canonicalName = EntityInVersionStructure.class.getPackage().getName() + "." + memberClass;
         try {
             @SuppressWarnings("unchecked")

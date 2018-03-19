@@ -40,16 +40,17 @@ public class TiamatSiteFrameExporter {
 
     private final PathLinkRepository pathLinkRepository;
 
-    @Autowired
     private final ExportTimeZone exportTimeZone;
 
+    private final NetexIdHelper netexIdHelper;
 
     @Autowired
-    public TiamatSiteFrameExporter(TopographicPlaceRepository topographicPlaceRepository, TariffZoneRepository tariffZoneRepository, PathLinkRepository pathLinkRepository, ExportTimeZone exportTimeZone) {
+    public TiamatSiteFrameExporter(TopographicPlaceRepository topographicPlaceRepository, TariffZoneRepository tariffZoneRepository, PathLinkRepository pathLinkRepository, ExportTimeZone exportTimeZone, NetexIdHelper netexIdHelper) {
         this.topographicPlaceRepository = topographicPlaceRepository;
         this.tariffZoneRepository = tariffZoneRepository;
         this.pathLinkRepository = pathLinkRepository;
         this.exportTimeZone = exportTimeZone;
+        this.netexIdHelper = netexIdHelper;
     }
 
 
@@ -59,7 +60,7 @@ public class TiamatSiteFrameExporter {
         siteFrame.setDescription(new MultilingualStringEntity(description));
         // siteFrame.setCreated(Instant.now()); // Disabled because of OffsetDateTimeInstantConverter issues during test
         siteFrame.setVersion(1L);
-        siteFrame.setNetexId(NetexIdHelper.generateRandomizedNetexId(siteFrame));
+        siteFrame.setNetexId(netexIdHelper.getNetexId(siteFrame, siteFrame.hashCode()));
         return siteFrame;
     }
 

@@ -22,12 +22,19 @@ import org.rutebanken.tiamat.model.AccessibilityAssessment;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.SiteFrame;
 import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.netex.id.NetexIdHelper;
+import org.rutebanken.tiamat.netex.id.ValidPrefixList;
+
+import java.util.HashMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
 
 public class NetexIdMapperTest {
-    private NetexIdMapper netexIdMapper = new NetexIdMapper();
+
+    private ValidPrefixList validPrefixList = new ValidPrefixList("NSR", new HashMap<>());
+    private NetexIdHelper netexIdHelper = new NetexIdHelper(validPrefixList);
+    private NetexIdMapper netexIdMapper = new NetexIdMapper(validPrefixList, netexIdHelper);
 
     @Test
     public void mapSiteFrameIdToNetex() throws Exception {

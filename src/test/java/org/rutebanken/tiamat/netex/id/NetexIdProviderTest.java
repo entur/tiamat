@@ -16,7 +16,6 @@
 package org.rutebanken.tiamat.netex.id;
 
 import org.junit.Test;
-import org.rutebanken.tiamat.model.TariffZone;
 import org.rutebanken.tiamat.model.TopographicPlace;
 
 import java.util.Arrays;
@@ -31,6 +30,9 @@ import static org.mockito.Mockito.verify;
 
 public class NetexIdProviderTest {
 
+
+
+
     @Test
     public void claimValidId() {
 
@@ -43,7 +45,9 @@ public class NetexIdProviderTest {
 
         validPrefixesPerType.put("TopographicPlace", Arrays.asList("NSR"));
 
-        NetexIdProvider netexIdProvider = new NetexIdProvider(gaplessIdGeneratorService, new ValidPrefixList(validPrefixesPerType));
+        ValidPrefixList validPrefixList = new ValidPrefixList("NSR", validPrefixesPerType);
+        NetexIdHelper netexIdHelper = new NetexIdHelper(validPrefixList);
+        NetexIdProvider netexIdProvider = new NetexIdProvider(gaplessIdGeneratorService, validPrefixList, netexIdHelper);
 
         netexIdProvider.claimId(topographicPlace);
         verify(gaplessIdGeneratorService, times(1)).getNextIdForEntity(TopographicPlace.class.getSimpleName(),1L);
@@ -63,8 +67,9 @@ public class NetexIdProviderTest {
         Map<String, List<String>> validPrefixesPerType = new HashMap<>();
 
         validPrefixesPerType.put("TopographicPlace", Arrays.asList("KVE", "VVV"));
-
-        NetexIdProvider netexIdProvider = new NetexIdProvider(gaplessIdGeneratorService, new ValidPrefixList(validPrefixesPerType));
+        ValidPrefixList validPrefixList = new ValidPrefixList("NSR", validPrefixesPerType);
+        NetexIdHelper netexIdHelper = new NetexIdHelper(validPrefixList);
+        NetexIdProvider netexIdProvider = new NetexIdProvider(gaplessIdGeneratorService, validPrefixList, netexIdHelper);
 
         netexIdProvider.claimId(topographicPlace);
         verify(gaplessIdGeneratorService, times(0)).getNextIdForEntity(TopographicPlace.class.getSimpleName(),1L);

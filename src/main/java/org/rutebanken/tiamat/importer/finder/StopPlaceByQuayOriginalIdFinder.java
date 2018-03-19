@@ -45,6 +45,9 @@ public class StopPlaceByQuayOriginalIdFinder {
     @Autowired
     private StopPlaceRepository stopPlaceRepository;
 
+    @Autowired
+    private NetexIdHelper netexIdHelper;
+
     public List<StopPlace> find(StopPlace incomingStopPlace, boolean hasQuays) {
         if (hasQuays) {
             return incomingStopPlace.getQuays().stream()
@@ -65,7 +68,7 @@ public class StopPlaceByQuayOriginalIdFinder {
     private String extractNumericValueIfPossible(String quayOriginalId) {
         try {
             // Extract last part of ID. Remove zero padding. Fall back to string ID.
-            return String.valueOf(NetexIdHelper.extractIdPostfixNumeric(quayOriginalId));
+            return String.valueOf(netexIdHelper.extractIdPostfixNumeric(quayOriginalId));
         } catch (NumberFormatException e) {
             return quayOriginalId;
         }

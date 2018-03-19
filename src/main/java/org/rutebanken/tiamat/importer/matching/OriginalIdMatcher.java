@@ -19,6 +19,7 @@ import org.rutebanken.tiamat.model.DataManagedObjectStructure;
 import org.rutebanken.tiamat.netex.id.NetexIdHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
@@ -33,7 +34,14 @@ public class OriginalIdMatcher {
 
     private static final Logger logger = LoggerFactory.getLogger(OriginalIdMatcher.class);
 
-        public boolean matchesOnOriginalId(DataManagedObjectStructure dataManagedObject, DataManagedObjectStructure otherDataManagedObject) {
+    private final NetexIdHelper netexIdHelper;
+
+    @Autowired
+    public OriginalIdMatcher(NetexIdHelper netexIdHelper) {
+        this.netexIdHelper = netexIdHelper;
+    }
+
+    public boolean matchesOnOriginalId(DataManagedObjectStructure dataManagedObject, DataManagedObjectStructure otherDataManagedObject) {
 
         if (Objects.isNull(dataManagedObject) || Objects.isNull(otherDataManagedObject)) {
             return false;
@@ -45,11 +53,11 @@ public class OriginalIdMatcher {
 
         boolean match = compareAfterPrefix(dataManagedObject, otherDataManagedObject);
 
-        if(!match) {
+        if (!match) {
             match = compareNumericPostFix(dataManagedObject, otherDataManagedObject);
         }
 
-        if(match) {
+        if (match) {
             logger.debug("Object matches on original ID: {}. Existing object ID: {}", dataManagedObject, dataManagedObject.getNetexId());
             return true;
         }
@@ -76,7 +84,7 @@ public class OriginalIdMatcher {
                 .stream()
                 .map(netexId -> {
                     try {
-                        return NetexIdHelper.extractIdPostfixNumeric(netexId);
+                        return netexIdHelper.extractIdPostfixNumeric(netexId);
                     } catch (NumberFormatException nfe) {
                         logger.info("Cannot parse original ID postfix {} to Integer", netexId);
                         return null;

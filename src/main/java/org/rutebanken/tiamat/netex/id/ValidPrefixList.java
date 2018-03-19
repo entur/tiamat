@@ -27,23 +27,33 @@ import java.util.Map;
 @Component
 public class ValidPrefixList {
 
+    private static final Logger logger = LoggerFactory.getLogger(ValidPrefixList.class);
+
     public static final String ANY_PREFIX = "*";
 
-    @Value("${netex.validPrefix:NSR}")
-    public static String VALID_NETEX_PREFIX = "NSR";
+    private final String validNetexPrefix;
 
-
-    private static final Logger logger = LoggerFactory.getLogger(ValidPrefixList.class);
     private final Map<String, List<String>> validPrefixesPerType;
 
     @Autowired
-    public ValidPrefixList(@Value("#{${netex.id.valid.prefix.list:{TopographicPlace:{'KVE','WOF','OSM'},TariffZone:{'*'}}}}") Map<String, List<String>> validPrefixesPerType) {
+    public ValidPrefixList(@Value("${netex.validPrefix:NSR}") String validNetexPrefix,
+                           @Value("#{${netex.id.valid.prefix.list:{TopographicPlace:{'KVE','WOF','OSM'},TariffZone:{'*'}}}}") Map<String, List<String>> validPrefixesPerType) {
         for (String type : validPrefixesPerType.keySet()) {
             List<String> validPrefixesForType = validPrefixesPerType.get(type);
             logger.info("Loaded valid prefixes for {}: {} ", type, validPrefixesForType);
         }
 
         this.validPrefixesPerType = validPrefixesPerType;
+        this.validNetexPrefix = validNetexPrefix;
+    }
+
+    /**
+     * Gets the configured prefix in netex IDs. Ex: NSR
+     * See the property netex.validPrefix.
+     * @return the prefix
+     */
+    public String getValidNetexPrefix() {
+        return validNetexPrefix;
     }
 
     public List<String> get(Class clazz) {
@@ -57,7 +67,7 @@ public class ValidPrefixList {
 
     public boolean isValidPrefixForType(String prefix, String type) {
 
-        if (prefix.equals(VALID_NETEX_PREFIX)) {
+        if (prefix.equals(validNetexPrefix)) {
             return true;
         }
 

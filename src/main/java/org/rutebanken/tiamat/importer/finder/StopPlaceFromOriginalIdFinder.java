@@ -53,13 +53,16 @@ public class StopPlaceFromOriginalIdFinder {
      */
     private Cache<String, Set<String>> keyValueCache;
 
+    private final NetexIdHelper netexIdHelper;
+
     @Autowired
     public StopPlaceFromOriginalIdFinder(StopPlaceRepository stopPlaceRepository,
                                          @Value("${stopPlaceFromOriginalIdFinderCache.maxSize:50000}") int maximumSize,
                                          @Value("${stopPlaceFromOriginalIdFinderCache.expiresAfter:30}") int expiresAfter,
                                          @Value("${stopPlaceFromOriginalIdFinderCache.expiresAfterTimeUnit:DAYS}") TimeUnit expiresAfterTimeUnit,
-                                         PeriodicCacheLogger periodicCacheLogger) {
+                                         PeriodicCacheLogger periodicCacheLogger, NetexIdHelper netexIdHelper) {
         this.stopPlaceRepository = stopPlaceRepository;
+        this.netexIdHelper = netexIdHelper;
         keyValueCache = CacheBuilder.newBuilder()
                 .maximumSize(maximumSize)
                 .expireAfterWrite(expiresAfter, expiresAfterTimeUnit)
@@ -119,7 +122,7 @@ public class StopPlaceFromOriginalIdFinder {
      */
     private Stream<String> zeroStrippedPostfixAndUnchanged(String originalId) {
 
-        String stringPostfix = NetexIdHelper.extractIdPostfix(originalId);
+        String stringPostfix = netexIdHelper.extractIdPostfix(originalId);
 
         if(stringPostfix.equals(originalId)) {
             logger.debug("Postfix cannot be extracted, leaving value as is: {}", originalId);
@@ -127,7 +130,7 @@ public class StopPlaceFromOriginalIdFinder {
         }
 
         try {
-            Long numericPostFix = NetexIdHelper.extractIdPostfixNumeric(originalId);
+            Long numericPostFix = netexIdHelper.extractIdPostfixNumeric(originalId);
 
             // Both these should be added:
             // Rut:StopPlace:1232123213

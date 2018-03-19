@@ -21,24 +21,17 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.impl.CoordinateArraySequence;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
-import org.rutebanken.tiamat.config.GeometryFactoryConfig;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.TariffZone;
-import org.rutebanken.tiamat.netex.id.NetexIdHelper;
+import org.rutebanken.tiamat.netex.id.RandomizedTestNetexIdGenerator;
 import org.rutebanken.tiamat.repository.TariffZoneRepository;
+import org.rutebanken.tiamat.rest.netex.publicationdelivery.PublicationDeliveryTestHelper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 @Transactional
 public class TariffZoneSaverServiceTest extends TiamatIntegrationTest {
@@ -51,6 +44,9 @@ public class TariffZoneSaverServiceTest extends TiamatIntegrationTest {
 
     @Autowired
     private TariffZoneSaverService tariffZoneSaverService;
+
+    @Autowired
+    private RandomizedTestNetexIdGenerator randomizedTestNetexIdGenerator;
 
     @Test
     public void saveNewTariffZone() {
@@ -71,7 +67,7 @@ public class TariffZoneSaverServiceTest extends TiamatIntegrationTest {
     public void saveExistingTariffZone() {
 
         TariffZone existingTariffZone = new TariffZone();
-        existingTariffZone.setNetexId(NetexIdHelper.generateRandomizedNetexId(existingTariffZone));
+        existingTariffZone.setNetexId(randomizedTestNetexIdGenerator.generateRandomizedNetexId(existingTariffZone));
         Geometry geometry = geometryFactory.createPoint(new Coordinate(9.84, 59.26)).buffer(20);
         LinearRing linearRing = new LinearRing(new CoordinateArraySequence(geometry.getCoordinates()), geometryFactory);
         existingTariffZone.setPolygon(geometryFactory.createPolygon(linearRing, null));

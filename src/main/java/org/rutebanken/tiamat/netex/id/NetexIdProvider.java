@@ -21,6 +21,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+/**
+ * Provides NetexIDs for IdentifiedEntities when saved.
+ */
 @Component
 public class NetexIdProvider {
 
@@ -30,12 +33,13 @@ public class NetexIdProvider {
 
     private final ValidPrefixList validPrefixList;
 
+    private final NetexIdHelper netexIdHelper;
+
     @Autowired
-    public NetexIdProvider(GaplessIdGeneratorService gaplessIdGenerator, ValidPrefixList validPrefixList) {
+    public NetexIdProvider(GaplessIdGeneratorService gaplessIdGenerator, ValidPrefixList validPrefixList, NetexIdHelper netexIdHelper) {
         this.gaplessIdGenerator = gaplessIdGenerator;
         this.validPrefixList = validPrefixList;
-
-
+        this.netexIdHelper = netexIdHelper;
     }
 
     public String getGeneratedId(IdentifiedEntity identifiedEntity) {
@@ -43,18 +47,18 @@ public class NetexIdProvider {
 
         long longId = gaplessIdGenerator.getNextIdForEntity(entityTypeName);
 
-        return NetexIdHelper.getNetexId(entityTypeName, longId);
+        return netexIdHelper.getNetexId(entityTypeName, longId);
     }
 
     public void claimId(IdentifiedEntity identifiedEntity) {
 
-        String prefix = NetexIdHelper.extractIdPrefix(identifiedEntity.getNetexId());
+        String prefix = netexIdHelper.extractIdPrefix(identifiedEntity.getNetexId());
 
         if(validPrefixList.isValidPrefixForType(prefix, identifiedEntity.getClass())) {
             logger.debug("Claimed ID {} contains valid prefix for claiming: {}", identifiedEntity.getNetexId(), prefix);
 
-            if(NetexIdHelper.isNsrId(identifiedEntity.getNetexId())) {
-                Long claimedId = NetexIdHelper.extractIdPostfixNumeric(identifiedEntity.getNetexId());
+            if(netexIdHelper.isNsrId(identifiedEntity.getNetexId())) {
+                Long claimedId = netexIdHelper.extractIdPostfixNumeric(identifiedEntity.getNetexId());
 
                 String entityTypeName = key(identifiedEntity);
 

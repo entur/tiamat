@@ -22,6 +22,7 @@ import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.exporter.params.StopPlaceSearch;
 import org.rutebanken.tiamat.netex.id.NetexIdHelper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.test.annotation.Commit;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,6 +42,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Transactional
 @Commit
 public class StopPlaceTest extends TiamatIntegrationTest {
+
+
+    @Autowired
+    private NetexIdHelper netexIdHelper;
 
     @Test
     public void persistStopPlaceWithTariffZone() {
@@ -65,7 +70,7 @@ public class StopPlaceTest extends TiamatIntegrationTest {
     @Test
     public void fillGapsInStopPlaces() {
         long explicitIdPostfix = 20000;
-        String explicitId = NetexIdHelper.getNetexId(StopPlace.class.getSimpleName(), explicitIdPostfix);
+        String explicitId = netexIdHelper.getNetexId(StopPlace.class.getSimpleName(), explicitIdPostfix);
         StopPlace explicitIdStopPlace = new StopPlace();
         explicitIdStopPlace.setNetexId(explicitId);
         explicitIdStopPlace = stopPlaceRepository.save(explicitIdStopPlace);
@@ -75,8 +80,8 @@ public class StopPlaceTest extends TiamatIntegrationTest {
         StopPlace giveMeAnyId2 = stopPlaceRepository.save(new StopPlace());
 
         assertThat(explicitIdStopPlace.getNetexId()).isEqualTo(explicitId);
-        assertThat(NetexIdHelper.extractIdPostfixNumeric(giveMeAnyId.getNetexId())).isLessThan(explicitIdPostfix);
-        assertThat(NetexIdHelper.extractIdPostfixNumeric(giveMeAnyId2.getNetexId())).isLessThan(explicitIdPostfix);
+        assertThat(netexIdHelper.extractIdPostfixNumeric(giveMeAnyId.getNetexId())).isLessThan(explicitIdPostfix);
+        assertThat(netexIdHelper.extractIdPostfixNumeric(giveMeAnyId2.getNetexId())).isLessThan(explicitIdPostfix);
     }
 
     @Test

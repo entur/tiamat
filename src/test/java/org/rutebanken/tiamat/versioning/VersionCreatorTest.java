@@ -21,24 +21,24 @@ import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
-import org.rutebanken.tiamat.netex.id.NetexIdHelper;
+import org.rutebanken.tiamat.netex.id.RandomizedTestNetexIdGenerator;
+import org.rutebanken.tiamat.rest.netex.publicationdelivery.PublicationDeliveryTestHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Field;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @Transactional
 public class VersionCreatorTest extends TiamatIntegrationTest {
 
     @Autowired
     private VersionCreator versionCreator;
+
+    @Autowired
+    private RandomizedTestNetexIdGenerator randomizedTestNetexIdGenerator;
 
     @Test
     public void versionCommentShouldNotBeCopied() {
@@ -205,7 +205,7 @@ public class VersionCreatorTest extends TiamatIntegrationTest {
     @Test
     public void stopPlacePlaceEquipmentSholdBeCopiedWithoutNetexIdAndVersion() {
         StopPlace stopPlace = new StopPlace();
-        stopPlace.setNetexId(NetexIdHelper.generateRandomizedNetexId(stopPlace));
+        stopPlace.setNetexId(randomizedTestNetexIdGenerator.generateRandomizedNetexId(stopPlace));
         stopPlace.setVersion(1L);
         stopPlace.setPlaceEquipments(createPlaceEquipment());
 
@@ -216,7 +216,7 @@ public class VersionCreatorTest extends TiamatIntegrationTest {
     @Test
     public void quayPlaceEquipmentSholdBeCopiedWithoutNetexIdAndVersion() {
         Quay quay = new Quay();
-        quay.setNetexId(NetexIdHelper.generateRandomizedNetexId(quay));
+        quay.setNetexId(randomizedTestNetexIdGenerator.generateRandomizedNetexId(quay));
         quay.setVersion(1L);
         quay.setPlaceEquipments(createPlaceEquipment());
 
@@ -240,11 +240,11 @@ public class VersionCreatorTest extends TiamatIntegrationTest {
 
     private PlaceEquipment createPlaceEquipment() {
         PlaceEquipment placeEquipment = new PlaceEquipment();
-        placeEquipment.setNetexId(NetexIdHelper.generateRandomizedNetexId(placeEquipment));
+        placeEquipment.setNetexId(randomizedTestNetexIdGenerator.generateRandomizedNetexId(placeEquipment));
         placeEquipment.setVersion(1L);
 
         TicketingEquipment ticketingEquipment = new TicketingEquipment();
-        ticketingEquipment.setNetexId(NetexIdHelper.generateRandomizedNetexId(ticketingEquipment));
+        ticketingEquipment.setNetexId(randomizedTestNetexIdGenerator.generateRandomizedNetexId(ticketingEquipment));
         ticketingEquipment.setVersion(1L);
 
         placeEquipment.getInstalledEquipment().add(ticketingEquipment);
