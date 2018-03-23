@@ -99,7 +99,9 @@ public class PublicationDeliveryImporter {
             validate(importParams);
         }
 
-        logger.info("Got publication delivery with {} site frames", incomingPublicationDelivery.getDataObjects().getCompositeFrameOrCommonFrame().size());
+        logger.info("Got publication delivery with {} site frames and description {}",
+                incomingPublicationDelivery.getDataObjects().getCompositeFrameOrCommonFrame().size(),
+                incomingPublicationDelivery.getDescription());
 
         AtomicInteger stopPlaceCounter = new AtomicInteger(0);
         AtomicInteger parkingCounter = new AtomicInteger(0);
