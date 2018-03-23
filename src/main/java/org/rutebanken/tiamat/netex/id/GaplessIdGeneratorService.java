@@ -54,8 +54,6 @@ public class GaplessIdGeneratorService {
 
     private static BasicFormatterImpl basicFormatter = new BasicFormatterImpl();
 
-    private final ScheduledExecutorService claimedIdsScheduler = Executors.newScheduledThreadPool(1, (runnable) -> new Thread(runnable, "save-claimed-ids"));
-
     private final int fetchSize;
 
     private final EntityManagerFactory entityManagerFactory;
@@ -82,11 +80,6 @@ public class GaplessIdGeneratorService {
 
         this.fetchSize = fetchSize;
 
-    }
-
-    @PostConstruct
-    public void startSchedulingThread() {
-        claimedIdsScheduler.scheduleAtFixedRate(() -> persistClaimedIds(), 15, 15, TimeUnit.SECONDS);
     }
 
     public long getNextIdForEntity(String entityTypeName) {

@@ -16,6 +16,7 @@
 package org.rutebanken.tiamat.service;
 
 
+import com.google.common.collect.Sets;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 import org.rutebanken.tiamat.general.ResettableMemoizer;
@@ -30,10 +31,11 @@ import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
-import java.util.concurrent.TimeUnit;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.*;
 
@@ -52,23 +54,34 @@ public class TariffZonesLookupService {
         this.tariffZoneRepository = tariffZoneRepository;
     }
 
-    public void populateTariffZone(StopPlace stopPlace) {
+    public boolean populateTariffZone(StopPlace stopPlace) {
         if(stopPlace.getCentroid() != null) {
+
+            if(stopPlace.getTariffZones() == null) {
+                stopPlace.setTariffZones(new HashSet<>());
+            }
+
+            Set<String> refsBefore = mapToIdStrings(stopPlace.getTariffZones());
 
             Set<TariffZoneRef> matches = findTariffZones(stopPlace.getCentroid())
                     .stream()
-                    .filter(tariffZone -> stopPlace.getTariffZones() == null ? true : stopPlace.getTariffZones()
+                    .filter(tariffZone -> stopPlace.getTariffZones().isEmpty() ? true : stopPlace.getTariffZones()
                             .stream()
                             .noneMatch(tariffZoneRef -> tariffZone.getNetexId().equals(tariffZoneRef.getRef())))
                     .map(tariffZone -> new TariffZoneRef(tariffZone.getNetexId()))
                     .collect(toSet());
 
-            if(stopPlace.getTariffZones() == null) {
-                stopPlace.setTariffZones(new HashSet<>());
-            }
             stopPlace.getTariffZones().addAll(matches);
 
+            Set<String> refsAfter = mapToIdStrings(stopPlace.getTariffZones());
+
+            return !Sets.difference(refsBefore, refsAfter).isEmpty();
         }
+        return false;
+    }
+
+    private Set<String> mapToIdStrings(Set<TariffZoneRef> tariffZoneRefs) {
+        return tariffZoneRefs.stream().map(tzr -> tzr.getRef()).collect(toSet());
     }
 
     public List<TariffZone> findTariffZones(Point point) {
