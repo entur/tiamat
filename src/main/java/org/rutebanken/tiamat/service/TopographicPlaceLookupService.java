@@ -60,7 +60,16 @@ public class TopographicPlaceLookupService {
 
         if (topographicPlace.isPresent()) {
             logger.debug("Found topographic place {} for site {}", siteVersionStructure.getTopographicPlace(), siteVersionStructure);
-            siteVersionStructure.setTopographicPlace(topographicPlace.get());
+            TopographicPlace topographicPlaceMatch = topographicPlace.get();
+
+            if(siteVersionStructure.getTopographicPlace() != null) {
+
+                if(siteVersionStructure.getTopographicPlace().getId() == topographicPlaceMatch.getId()) {
+                    return false;
+                }
+            }
+
+            siteVersionStructure.setTopographicPlace(topographicPlaceMatch);
             return true;
         } else {
             logger.warn("Could not find topographic places from site's point: {}", siteVersionStructure);
