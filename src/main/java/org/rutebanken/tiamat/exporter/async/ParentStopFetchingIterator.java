@@ -75,6 +75,10 @@ public class ParentStopFetchingIterator implements Iterator<StopPlace> {
         return stopPlace;
     }
 
+    public boolean hasNextParent() {
+        return parent != null;
+    }
+
     public void copyNameFromParentIfMissing(String parentRefString, EmbeddableMultilingualString parentName, StopPlace childStopPlace) {
         if (childStopPlace.getName() == null || Strings.isNullOrEmpty(childStopPlace.getName().getValue())) {
             logger.debug("Copying name: {} from parent {} to child stop: {}", parentName, parentRefString, childStopPlace.getNetexId());
