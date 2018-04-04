@@ -75,7 +75,7 @@ public class TariffZonesLookupService {
 
             Set<String> refsAfter = mapToIdStrings(stopPlace.getTariffZones());
 
-            return !Sets.difference(refsBefore, refsAfter).isEmpty();
+            return !Sets.symmetricDifference(refsBefore, refsAfter).isEmpty();
         }
         return false;
     }
