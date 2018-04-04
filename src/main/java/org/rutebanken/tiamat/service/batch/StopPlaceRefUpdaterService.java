@@ -68,7 +68,7 @@ public class StopPlaceRefUpdaterService {
         AtomicInteger updatedBecauseOfTopographicPlaceChange = new AtomicInteger();
         AtomicInteger stopsSavedTotal = new AtomicInteger();
         AtomicInteger stopsCounter = new AtomicInteger();
-        PerSecondLogger perSecondsLogger = new PerSecondLogger(startTime, stopsSavedTotal, "Updating stop places references");
+        PerSecondLogger perSecondsLogger = new PerSecondLogger(startTime, stopsSavedTotal, "Progress while updating stop places references");
 
         while (stopPlaceIterator.hasNext()) {
             try {
@@ -109,6 +109,4 @@ public class StopPlaceRefUpdaterService {
 
 
     }
-
-
 }
