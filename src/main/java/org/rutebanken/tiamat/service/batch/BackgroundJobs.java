@@ -24,19 +24,19 @@ public class BackgroundJobs {
 
     private final GaplessIdGeneratorService gaplessIdGeneratorService;
 
-    private final StopPlaceUpdaterService stopPlaceUpdaterService;
+    private final StopPlaceRefUpdaterService stopPlaceRefUpdaterService;
 
     @Autowired
-    public BackgroundJobs(GaplessIdGeneratorService gaplessIdGeneratorService, StopPlaceUpdaterService stopPlaceUpdaterService) {
+    public BackgroundJobs(GaplessIdGeneratorService gaplessIdGeneratorService, StopPlaceRefUpdaterService stopPlaceRefUpdaterService) {
         this.gaplessIdGeneratorService = gaplessIdGeneratorService;
-        this.stopPlaceUpdaterService = stopPlaceUpdaterService;
+        this.stopPlaceRefUpdaterService = stopPlaceRefUpdaterService;
     }
 
     @PostConstruct
     public void scheduleBackgroundJobs() {
         logger.info("Scheduling background job for gaplessIdGeneratorService");
         backgroundJobExecutor.scheduleAtFixedRate(gaplessIdGeneratorService::persistClaimedIds, 15, 15, TimeUnit.SECONDS);
-//        logger.info("Scheduling background job for updating stop places");
-//        backgroundJobExecutor.scheduleAtFixedRate(stopPlaceUpdaterService::updateAllStopPlaces, 0, 4, TimeUnit.HOURS);
+        logger.info("Scheduling background job for updating stop places");
+        backgroundJobExecutor.scheduleAtFixedRate(stopPlaceRefUpdaterService::updateAllStopPlaces, 3, 240, TimeUnit.MINUTES);
     }
 }
