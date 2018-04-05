@@ -16,7 +16,6 @@
 package org.rutebanken.tiamat.importer;
 
 import org.rutebanken.helper.organisation.NotAuthenticatedException;
-import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
 import org.rutebanken.helper.organisation.RoleAssignmentExtractor;
 import org.rutebanken.netex.model.*;
 import org.rutebanken.tiamat.exporter.PublicationDeliveryExporter;
@@ -24,13 +23,13 @@ import org.rutebanken.tiamat.importer.handler.*;
 import org.rutebanken.tiamat.importer.log.ImportLogger;
 import org.rutebanken.tiamat.importer.log.ImportLoggerTask;
 import org.rutebanken.tiamat.netex.mapping.*;
+import org.rutebanken.tiamat.service.batch.BackgroundJobs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.management.relation.Role;
 import java.util.Timer;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -53,6 +52,7 @@ public class PublicationDeliveryImporter {
     private final ParkingsImportHandler parkingsImportHandler;
     private final TopographicPlaceImportHandler topographicPlaceImportHandler;
     private final RoleAssignmentExtractor roleAssignmentExtractor;
+    private final BackgroundJobs backgroundJobs;
 
     @Autowired
     public PublicationDeliveryImporter(PublicationDeliveryHelper publicationDeliveryHelper, NetexMapper netexMapper,
@@ -62,7 +62,8 @@ public class PublicationDeliveryImporter {
                                        TariffZoneImportHandler tariffZoneImportHandler,
                                        StopPlaceImportHandler stopPlaceImportHandler,
                                        ParkingsImportHandler parkingsImportHandler,
-                                       RoleAssignmentExtractor roleAssignmentExtractor) {
+                                       RoleAssignmentExtractor roleAssignmentExtractor,
+                                       BackgroundJobs backgroundJobs) {
         this.publicationDeliveryHelper = publicationDeliveryHelper;
         this.parkingsImportHandler = parkingsImportHandler;
         this.publicationDeliveryExporter = publicationDeliveryExporter;
@@ -71,6 +72,7 @@ public class PublicationDeliveryImporter {
         this.tariffZoneImportHandler = tariffZoneImportHandler;
         this.stopPlaceImportHandler = stopPlaceImportHandler;
         this.roleAssignmentExtractor = roleAssignmentExtractor;
+        this.backgroundJobs = backgroundJobs;
     }
 
 
@@ -132,6 +134,8 @@ public class PublicationDeliveryImporter {
             parkingsImportHandler.handleParkings(netexSiteFrame, importParams, parkingCounter, responseSiteframe);
             pathLinkImportHandler.handlePathLinks(netexSiteFrame, importParams, pathLinkCounter, responseSiteframe);
 
+
+            backgroundJobs.triggerStopPlaceUpdate();
             return publicationDeliveryExporter.createPublicationDelivery(responseSiteframe);
         } finally {
             MDC.remove(IMPORT_CORRELATION_ID);

@@ -41,4 +41,9 @@ public class BackgroundJobs {
         logger.info("Scheduling background job for updating stop places");
         backgroundJobExecutor.scheduleAtFixedRate(stopPlaceRefUpdaterService::updateAllStopPlaces, 0, 1, TimeUnit.MINUTES);
     }
+
+    public void triggerStopPlaceUpdate() {
+        logger.info("Job for updating stop place was triggered manually by thread {}. It will not be executed if a job is already running", Thread.currentThread().getName());
+        backgroundJobExecutor.submit(stopPlaceRefUpdaterService::updateAllStopPlaces);
+    }
 }
