@@ -5,6 +5,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.impl.CoordinateArraySequence;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.*;
@@ -51,7 +52,6 @@ public class StopPlaceRefUpdaterServiceTest extends TiamatIntegrationTest {
 
         return stopPlace;
     }
-
 
     @Transactional
     @Test

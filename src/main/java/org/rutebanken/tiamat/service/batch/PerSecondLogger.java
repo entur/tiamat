@@ -16,14 +16,17 @@ public class PerSecondLogger {
 
     private long lastCount;
 
-    private final AtomicInteger count;
+    private final AtomicInteger iteratedCount;
+
+    private final AtomicInteger updatecCount;
 
     private final String logMessage;
 
     private final long startTime;
 
-    public PerSecondLogger(long startTime, AtomicInteger count, String logMessage) {
-        this.count = count;
+    public PerSecondLogger(long startTime, AtomicInteger iteratedCount, AtomicInteger updatedCount, String logMessage) {
+        this.iteratedCount = iteratedCount;
+        this.updatecCount = updatedCount;
         this.logMessage = logMessage;
         this.startTime = startTime;
     }
@@ -33,16 +36,16 @@ public class PerSecondLogger {
         long now = System.currentTimeMillis();
 
         if(moreThanXSecondsSinceLastLog(now, 1000)
-                || increaseFromLastLogMoreThan(1000, count.get())) {
+                || increaseFromLastLogMoreThan(1000, iteratedCount.get())) {
 
 
             long duration = now - startTime;
-            String perSecond = String.valueOf(count.get() / (duration / 1000f));
+            String perSecond = String.valueOf(iteratedCount.get() / (duration / 1000f));
 
-            logger.info("{} count: {}, per second (since start): {}", logMessage, count.get(), perSecond);
+            logger.info("{}. iterated: {}, updated: {}, iterated per second: {}", logMessage, iteratedCount.get(), updatecCount.get(), perSecond);
 
             lastLogTime = now;
-            lastCount = count.get();
+            lastCount = iteratedCount.get();
         }
     }
 
