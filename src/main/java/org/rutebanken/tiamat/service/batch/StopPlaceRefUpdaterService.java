@@ -101,7 +101,7 @@ public class StopPlaceRefUpdaterService {
                         perSecondsLogger.log();
                         session.flush();
                         if (stopsCounter.get() % FLUSH_EACH == 0 && !stopPlaceIterator.hasNextParent()) {
-                            logger.info("Flushing and clearing session at count {}", stopsCounter.get());
+                            logger.trace("Flushing and clearing session at count {}", stopsCounter.get());
                             session.clear();
                         } else {
                             sessionEntitiesEvictor.evictKnownEntitiesFromSession(stopPlace);
