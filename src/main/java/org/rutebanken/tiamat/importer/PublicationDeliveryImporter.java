@@ -134,8 +134,9 @@ public class PublicationDeliveryImporter {
             parkingsImportHandler.handleParkings(netexSiteFrame, importParams, parkingCounter, responseSiteframe);
             pathLinkImportHandler.handlePathLinks(netexSiteFrame, importParams, pathLinkCounter, responseSiteframe);
 
-
-            backgroundJobs.triggerStopPlaceUpdate();
+            if(responseSiteframe.getTariffZones() != null && responseSiteframe.getTopographicPlaces() != null) {
+                backgroundJobs.triggerStopPlaceUpdate();
+            }
             return publicationDeliveryExporter.createPublicationDelivery(responseSiteframe);
         } finally {
             MDC.remove(IMPORT_CORRELATION_ID);
