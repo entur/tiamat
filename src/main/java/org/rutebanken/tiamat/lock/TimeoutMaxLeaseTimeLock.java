@@ -48,6 +48,7 @@ public class TimeoutMaxLeaseTimeLock {
                     return supplier.get();
                 } finally {
                     try {
+                        logger.info("Unlocking {}", lockName);
                         lock.unlock();
                     } catch (IllegalMonitorStateException ex) {
                         long timeSpent = System.currentTimeMillis() - started;
