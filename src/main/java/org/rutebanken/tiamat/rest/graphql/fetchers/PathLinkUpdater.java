@@ -20,7 +20,7 @@ import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import org.rutebanken.tiamat.model.PathLink;
 import org.rutebanken.tiamat.rest.graphql.mappers.PathLinkMapper;
-import org.rutebanken.tiamat.service.MutateLock;
+import org.rutebanken.tiamat.lock.MutateLock;
 import org.rutebanken.tiamat.service.stopplace.PathLinkUpdaterService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

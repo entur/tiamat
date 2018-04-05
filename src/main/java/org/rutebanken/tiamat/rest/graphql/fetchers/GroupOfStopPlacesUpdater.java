@@ -39,7 +39,7 @@ import org.rutebanken.tiamat.repository.GroupOfStopPlacesRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.rest.graphql.helpers.CleanupHelper;
 import org.rutebanken.tiamat.rest.graphql.mappers.GroupOfStopPlacesMapper;
-import org.rutebanken.tiamat.service.MutateLock;
+import org.rutebanken.tiamat.lock.MutateLock;
 import org.rutebanken.tiamat.versioning.GroupOfStopPlacesSaverService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

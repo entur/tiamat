@@ -22,7 +22,7 @@ import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.TariffZoneRef;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.service.ObjectMerger;
-import org.rutebanken.tiamat.service.MutateLock;
+import org.rutebanken.tiamat.lock.MutateLock;
 import org.rutebanken.tiamat.service.merge.AlternativeNamesMerger;
 import org.rutebanken.tiamat.service.merge.KeyValuesMerger;
 import org.rutebanken.tiamat.service.merge.PlaceEquipmentMerger;

@@ -21,7 +21,7 @@ import org.rutebanken.tiamat.auth.UsernameFetcher;
 import org.rutebanken.tiamat.changelog.EntityChangedListener;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
-import org.rutebanken.tiamat.service.MutateLock;
+import org.rutebanken.tiamat.lock.MutateLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,8 +30,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.function.Supplier;
 
 import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_DELETE_STOPS;
 

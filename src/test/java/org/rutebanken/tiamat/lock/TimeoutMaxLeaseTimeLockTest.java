@@ -13,22 +13,26 @@
  * limitations under the Licence.
  */
 
-package org.rutebanken.tiamat.service;
+package org.rutebanken.tiamat.lock;
 
 import com.hazelcast.core.HazelcastInstance;
+import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.rutebanken.tiamat.service.MutateLock.LOCK_MAX_LEASE_TIME_SECONDS;
-import static org.rutebanken.tiamat.service.MutateLock.WAIT_FOR_LOCK_SECONDS;
 
 
-public class MutateLockTest extends TiamatIntegrationTest {
+public class TimeoutMaxLeaseTimeLockTest extends TiamatIntegrationTest {
+
+    private static final Logger logger = LoggerFactory.getLogger(TimeoutMaxLeaseTimeLockTest.class);
+
+    private static final String TEST_LOCK_NAME = "test-lock-name";
 
     @Autowired
     private HazelcastInstance hazelcastInstance;
@@ -36,67 +40,75 @@ public class MutateLockTest extends TiamatIntegrationTest {
 
     @Test
     public void testWaitingForLock() throws InterruptedException {
-        MutateLock mutateLock = new MutateLock(hazelcastInstance);
+        TimeoutMaxLeaseTimeLock lock = new TimeoutMaxLeaseTimeLock(hazelcastInstance);
 
         long sleep = 1000;
 
         AtomicBoolean threadGotLock = new AtomicBoolean(false);
         Thread t1 = new Thread(() -> {
-            mutateLock.executeInLock(() -> {
+            lock.executeInLock(() -> {
                 threadGotLock.set(true);
                 try {
-                    System.out.println("Sleeping for " + sleep + " millis");
+                    logger.info("Sleeping for " + sleep + " millis");
                     Thread.sleep(sleep);
-                    System.out.println("Slept" + sleep + " millis");
+                    logger.info("Slept" + sleep + " millis");
                     return null;
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
 
-            });
+            }, TEST_LOCK_NAME);
         });
         long started = System.currentTimeMillis();
         t1.start();
         // Make sure the thread gets the lock first
-        while(!threadGotLock.get()) {}
-        long gotLock = mutateLock.executeInLock(() -> System.currentTimeMillis());
+        while (!threadGotLock.get()) {
+        }
+        long gotLock = lock.executeInLock(() -> System.currentTimeMillis(), TEST_LOCK_NAME);
 
         long waited = gotLock - started;
-        assertThat(waited)
+        Assertions.assertThat(waited)
                 .as("waited ms")
                 .isGreaterThanOrEqualTo(sleep)
                 .as("ms thread slept within lock");
     }
 
-    @Test(expected = MutateLockException.class)
+    @Test(expected = LockException.class)
     public void testWaitingForLocktTimeout() throws InterruptedException {
 
-        int waitTimeout = 300;
-        MutateLock mutateLock = new MutateLock(hazelcastInstance, waitTimeout, TimeUnit.MILLISECONDS);
+        int waitTimeoutSeconds = 1;
+        TimeoutMaxLeaseTimeLock timeoutMaxLeaseTimeLock = new TimeoutMaxLeaseTimeLock(hazelcastInstance);
 
         // Sleep more than the wait time to trigger exception
-        long sleep = waitTimeout + 100;
+        long sleep = (waitTimeoutSeconds * 3 * 1000);
         AtomicBoolean threadGotLock = new AtomicBoolean(false);
 
         Thread t1 = new Thread(() -> {
-            mutateLock.executeInLock(() -> {
+            timeoutMaxLeaseTimeLock.executeInLock(() -> {
                 try {
                     threadGotLock.set(true);
-                    System.out.println("Sleeping " + sleep + " millis");
+                    logger.info("Sleeping " + sleep + " millis");
                     Thread.sleep(sleep);
-                    System.out.println("Slept " + sleep + " millis");
+                    logger.info("Slept " + sleep + " millis");
                     return null;
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
 
-            });
+            }, TEST_LOCK_NAME, waitTimeoutSeconds, 10);
         });
 
         t1.start();
-        // Make sure the thread gets the lock first
-        while(!threadGotLock.get()) {}
+
+        logger.info("thread started");
+
+        logger.info("Make sure the thread gets the lock first");
+        while (!threadGotLock.get()) {
+        }
+        logger.info("Thread did get the lock");
+
+        logger.info("expecting exception");
         // Should throw exception because the wait time was too long
-        mutateLock.executeInLock(() -> System.currentTimeMillis());
+        timeoutMaxLeaseTimeLock.executeInLock(() -> System.currentTimeMillis(), TEST_LOCK_NAME, waitTimeoutSeconds, 10);
     }
 }

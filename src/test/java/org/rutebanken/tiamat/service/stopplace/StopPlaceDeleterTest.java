@@ -21,8 +21,7 @@ import org.rutebanken.tiamat.auth.UsernameFetcher;
 import org.rutebanken.tiamat.changelog.EntityChangedListener;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
-import org.rutebanken.tiamat.rest.netex.publicationdelivery.PublicationDeliveryTestHelper;
-import org.rutebanken.tiamat.service.MutateLock;
+import org.rutebanken.tiamat.lock.MutateLock;
 
 import java.util.Arrays;
 import java.util.function.Supplier;

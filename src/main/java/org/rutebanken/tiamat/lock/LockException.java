@@ -28,15 +28,15 @@
  * limitations under the Licence.
  */
 
-package org.rutebanken.tiamat.service;
+package org.rutebanken.tiamat.lock;
 
-public class MutateLockException extends RuntimeException {
+public class LockException extends RuntimeException {
 
-    public MutateLockException(String message) {
+    public LockException(String message) {
         super(message);
     }
 
-    public MutateLockException(String message, Throwable cause) {
+    public LockException(String message, Throwable cause) {
         super(message, cause);
     }
 }
