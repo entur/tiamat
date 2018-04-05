@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.Java6Assertions.assertThat;
 
+@Ignore // TODO
 public class StopPlaceRefUpdaterServiceTest extends TiamatIntegrationTest {
 
     @Autowired
