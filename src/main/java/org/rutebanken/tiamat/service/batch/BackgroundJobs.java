@@ -10,6 +10,7 @@ import javax.annotation.PostConstruct;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Jobs that run periodically in the background
@@ -19,8 +20,10 @@ public class BackgroundJobs {
 
     private static final Logger logger = LoggerFactory.getLogger(BackgroundJobs.class);
 
+    private static final AtomicLong threadNumber = new AtomicLong();
+
     private final ScheduledExecutorService backgroundJobExecutor =
-            Executors.newScheduledThreadPool(2, (runnable) -> new Thread(runnable, "background-job"));
+            Executors.newScheduledThreadPool(3, (runnable) -> new Thread(runnable, "background-job-"+threadNumber.incrementAndGet()));
 
     private final GaplessIdGeneratorService gaplessIdGeneratorService;
 
