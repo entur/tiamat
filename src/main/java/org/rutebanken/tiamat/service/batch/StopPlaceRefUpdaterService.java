@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.service.batch;
 
+import com.google.common.collect.Lists;
 import org.hibernate.Session;
 import org.hibernate.internal.SessionImpl;
 import org.rutebanken.tiamat.exporter.async.ParentStopFetchingIterator;
@@ -72,7 +73,7 @@ public class StopPlaceRefUpdaterService {
             }, BACKGROUND_UPDATE_STOPS_LOCK, WAIT_TIMEOUT_SECONDS, MAX_LEASE_TIME_SECONDS);
         } catch (LockException lockException) {
             logger.info(lockException.getMessage());
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             logger.warn("Background job stopped because of exception", e);
         }
     }
@@ -120,8 +121,16 @@ public class StopPlaceRefUpdaterService {
                     stopsSaved.incrementAndGet();
                     StopPlace stopPlaceToSave = optionalStopPlace.get();
                     stopPlaceToSave.setChanged(Instant.now());
-//                    entityManager.detach(stopPlaceToSave);
-                    stopPlaceRepository.saveAndFlush(stopPlaceToSave);
+
+                    // Issues with topographic place not being updated.
+                    // https://stackoverflow.com/a/2370276
+                    // https://stackoverflow.com/a/5709244
+
+                    if(session.contains(stopPlaceToSave)) {
+                        session.evict(stopPlaceToSave);
+                    }
+                    session.update(stopPlaceToSave);
+
                     logger.trace("Saved stop {}", stopPlaceToSave);
                     session.flush();
                     if (stopsIterated.get() % CLEAR_EACH == 0 && !stopPlaceIterator.hasNextParent()) {
