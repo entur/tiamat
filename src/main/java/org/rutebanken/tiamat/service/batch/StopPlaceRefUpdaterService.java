@@ -6,6 +6,7 @@ import org.rutebanken.tiamat.exporter.async.ParentStopFetchingIterator;
 import org.rutebanken.tiamat.exporter.eviction.SessionEntitiesEvictor;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.exporter.params.StopPlaceSearch;
+import org.rutebanken.tiamat.lock.LockException;
 import org.rutebanken.tiamat.lock.TimeoutMaxLeaseTimeLock;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -32,7 +33,7 @@ public class StopPlaceRefUpdaterService {
     private static final Logger logger = LoggerFactory.getLogger(StopPlaceRefUpdaterService.class);
     public static final int CLEAR_EACH = 100;
     public static final int MAX_LEASE_TIME_SECONDS = 7200;
-    public static final int WAIT_TIMEOUT_SECONDS = 1000;
+    public static final int WAIT_TIMEOUT_SECONDS = 10;
     public static final String BACKGROUND_UPDATE_STOPS_LOCK = "background-update-stops-lock";
 
     private final StopPlaceRepository stopPlaceRepository;
@@ -57,17 +58,23 @@ public class StopPlaceRefUpdaterService {
 
     public void updateAllStopPlaces() {
 
-        // To avoid multiple hazelcast instances doing the same job
-        timeoutMaxLeaseTimeLock.executeInLock(() -> {
+        try {
+            // To avoid multiple hazelcast instances doing the same job
+            timeoutMaxLeaseTimeLock.executeInLock(() -> {
 
-            try {
-                updateStops();
-            } catch (Exception e){
-                logger.error("Error updating stops", e);
-            }
+                try {
+                    updateStops();
+                } catch (Exception e) {
+                    logger.error("Error updating stops", e);
+                }
 
-            return null;
-        }, BACKGROUND_UPDATE_STOPS_LOCK, WAIT_TIMEOUT_SECONDS, MAX_LEASE_TIME_SECONDS);
+                return null;
+            }, BACKGROUND_UPDATE_STOPS_LOCK, WAIT_TIMEOUT_SECONDS, MAX_LEASE_TIME_SECONDS);
+        } catch (LockException lockException) {
+            logger.info(lockException.getMessage());
+        } catch (Exception e) {
+            logger.warn("Background job stopped because of exception", e);
+        }
     }
 
     public void updateStops() {
