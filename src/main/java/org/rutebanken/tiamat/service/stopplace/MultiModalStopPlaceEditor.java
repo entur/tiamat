@@ -89,7 +89,7 @@ public class MultiModalStopPlaceEditor {
             Instant terminationDate = fromDate.minusMillis(MILLIS_BETWEEN_VERSIONS);
 
             terminatePreviousVersionsOfChildren(futureChildStopPlaces, terminationDate);
-            stopPlaceRepository.save(futureChildStopPlaces);
+            stopPlaceRepository.saveAll(futureChildStopPlaces);
 
             return stopPlaceVersionedSaverService.saveNewVersion(null, parentStopPlace, fromDate);
         });
@@ -139,7 +139,7 @@ public class MultiModalStopPlaceEditor {
             Set<StopPlace> childCopies = validateAndCopyPotentionalChildren(futureChildStopPlaces, parentStopPlace, fromDate);
             Instant terminationDate = fromDate.minusMillis(MILLIS_BETWEEN_VERSIONS);
             terminatePreviousVersionsOfChildren(futureChildStopPlaces, terminationDate);
-            stopPlaceRepository.save(futureChildStopPlaces);
+            stopPlaceRepository.saveAll(futureChildStopPlaces);
 
             parentStopPlaceCopy.getChildren().addAll(childCopies);
             return stopPlaceVersionedSaverService.saveNewVersion(parentStopPlace, parentStopPlaceCopy, fromDate);

@@ -114,6 +114,6 @@ public class GroupOfStopPlacesDeleter {
         logger.warn("{} is deleting group {}", username, groupId);
 
 
-        groupOfStopPlacesRepository.delete(groupOfStopPlacesToDelete);
+        groupOfStopPlacesRepository.deleteAll(groupOfStopPlacesToDelete);
     }
 }
