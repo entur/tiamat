@@ -42,7 +42,7 @@ public class BackgroundJobs {
 
         // Initial delay for the background stop place reference updater service can be good to avoid conflicts when running tests
         logger.info("Scheduling background job for updating stop places");
-        backgroundJobExecutor.scheduleAtFixedRate(stopPlaceRefUpdaterService::updateAllStopPlaces, 1, 8, TimeUnit.MINUTES);
+        backgroundJobExecutor.scheduleAtFixedRate(stopPlaceRefUpdaterService::updateAllStopPlaces, 1, 280, TimeUnit.MINUTES);
     }
 
     public void triggerStopPlaceUpdate() {
