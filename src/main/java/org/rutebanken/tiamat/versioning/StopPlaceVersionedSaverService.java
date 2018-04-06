@@ -134,7 +134,7 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
                 tariffZonesLookupService.populateTariffZone(child);
             });
 
-            stopPlaceRepository.save(newVersion.getChildren());
+            stopPlaceRepository.saveAll(newVersion.getChildren());
             if(logger.isDebugEnabled()) {
                 logger.debug("Saved children: {}", newVersion.getChildren().stream()
                         .map(sp -> "{id:" + sp.getId() + " netexId:" + sp.getNetexId() + " version:" + sp.getVersion() + "}")
