@@ -54,7 +54,7 @@ public class GenericEntityInVersionRepository {
     }
 
     public String findByKeyValue(String key, Set<String> values, Class<? extends DataManagedObjectStructure> clazz) {
-        DataManagedObjectStructureRepository repository = (DataManagedObjectStructureRepository) repositories.getRepositoryFor(clazz);
+        DataManagedObjectStructureRepository repository = (DataManagedObjectStructureRepository) getRepository(clazz);
         String netexId = repository.findFirstByKeyValues(key, values);
         if (netexId != null) {
             return netexId;
