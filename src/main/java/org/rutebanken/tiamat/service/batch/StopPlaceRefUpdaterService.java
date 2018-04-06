@@ -120,7 +120,7 @@ public class StopPlaceRefUpdaterService {
                     stopsSaved.incrementAndGet();
                     StopPlace stopPlaceToSave = optionalStopPlace.get();
                     stopPlaceToSave.setChanged(Instant.now());
-                    entityManager.detach(stopPlaceToSave);
+//                    entityManager.detach(stopPlaceToSave);
                     stopPlaceRepository.saveAndFlush(stopPlaceToSave);
                     logger.trace("Saved stop {}", stopPlaceToSave);
                     session.flush();
