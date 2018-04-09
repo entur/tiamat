@@ -134,7 +134,7 @@ public class PublicationDeliveryImporter {
             parkingsImportHandler.handleParkings(netexSiteFrame, importParams, parkingCounter, responseSiteframe);
             pathLinkImportHandler.handlePathLinks(netexSiteFrame, importParams, pathLinkCounter, responseSiteframe);
 
-            if(responseSiteframe.getTariffZones() != null && responseSiteframe.getTopographicPlaces() != null) {
+            if(responseSiteframe.getTariffZones() != null || responseSiteframe.getTopographicPlaces() != null) {
                 backgroundJobs.triggerStopPlaceUpdate();
             }
             return publicationDeliveryExporter.createPublicationDelivery(responseSiteframe);
