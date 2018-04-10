@@ -69,6 +69,8 @@ public class TariffZoneSaverService extends VersionedSaverService<TariffZone> {
             result = tariffZoneRepository.save(newVersion);
         }
 
+        result.setChangedBy(usernameFetcher.getUserNameForAuthenticatedUser());
+
         logger.info("Saved tariff zone {}, version {}, name {}", result.getNetexId(), result.getVersion(), result.getName());
 
         tariffZonesLookupService.reset();
