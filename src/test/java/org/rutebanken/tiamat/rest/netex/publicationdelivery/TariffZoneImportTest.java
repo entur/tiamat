@@ -82,6 +82,7 @@ public class TariffZoneImportTest extends TiamatIntegrationTest {
         // First
         publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDeliveryStructure, importParams);
 
+        // Second
         PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDeliveryStructure, importParams);
 
         List<TariffZone> actualZones = publicationDeliveryTestHelper.findSiteFrame(response)
@@ -89,8 +90,7 @@ public class TariffZoneImportTest extends TiamatIntegrationTest {
 
         assertThat(actualZones).isNotEmpty();
         assertThat(actualZones.get(0).getName().getValue()).isEqualTo(tariffZone.getName().getValue());
-        // Versions for tariff zones are not incremented.
-        assertThat(actualZones.get(0).getVersion()).isEqualTo("1");
+        assertThat(actualZones.get(0).getVersion()).isEqualTo("2");
     }
 
     @Test
