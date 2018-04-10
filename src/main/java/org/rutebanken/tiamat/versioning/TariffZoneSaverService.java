@@ -60,6 +60,7 @@ public class TariffZoneSaverService extends VersionedSaverService<TariffZone> {
             BeanUtils.copyProperties(newVersion, existing, "id", "created", "version");
             existing.setValidBetween(null);
             existing.setChanged(Instant.now());
+            versionIncrementor.incrementVersion(existing);
             result = tariffZoneRepository.save(existing);
 
         } else {

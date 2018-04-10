@@ -81,7 +81,7 @@ public class TariffZoneSaverServiceTest extends TiamatIntegrationTest {
 
         TariffZone actual = tariffZoneSaverService.saveNewVersion(newTariffZone);
         assertThat(actual.getPolygon()).isNull();
-        assertThat(actual.getVersion()).isEqualTo(2L);
+        assertThat(actual.getVersion()).isEqualTo(3L);
         assertThat(actual.getName().getValue()).isEqualTo(newTariffZone.getName().getValue());
     }
 
