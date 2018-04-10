@@ -15,13 +15,10 @@
 
 package org.rutebanken.tiamat.service;
 
-import com.google.common.base.Supplier;
 import com.vividsolutions.jts.geom.*;
 import com.vividsolutions.jts.geom.impl.CoordinateArraySequence;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.rutebanken.tiamat.config.GeometryFactoryConfig;
-import org.rutebanken.tiamat.general.ResettableMemoizer;
 import org.rutebanken.tiamat.model.TariffZone;
 import org.rutebanken.tiamat.repository.TariffZoneRepository;
 import org.springframework.data.util.Pair;
@@ -40,7 +37,7 @@ public class TariffZonesLookupServiceTest {
 
     private GeometryFactory geometryFactory = new GeometryFactoryConfig().geometryFactory();
 
-    private TariffZonesLookupService tariffZonesLookupService = new TariffZonesLookupService(tariffZoneRepository);
+    private TariffZonesLookupService tariffZonesLookupService = new TariffZonesLookupService(tariffZoneRepository, false);
 
     @Test
     public void getTariffZones() {

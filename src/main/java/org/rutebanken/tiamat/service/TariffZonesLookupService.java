@@ -27,6 +27,7 @@ import org.rutebanken.tiamat.repository.TariffZoneRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,9 +50,13 @@ public class TariffZonesLookupService {
 
     private final TariffZoneRepository tariffZoneRepository;
 
+    private final boolean removeExistingReferences;
+
     @Autowired
-    public TariffZonesLookupService(TariffZoneRepository tariffZoneRepository) {
+    public TariffZonesLookupService(TariffZoneRepository tariffZoneRepository,
+                                    @Value("${tariffzoneLookupService.resetReferences:false}") boolean removeExistingReferences) {
         this.tariffZoneRepository = tariffZoneRepository;
+        this.removeExistingReferences = removeExistingReferences;
     }
 
     public boolean populateTariffZone(StopPlace stopPlace) {
@@ -62,6 +67,10 @@ public class TariffZonesLookupService {
             }
 
             Set<String> refsBefore = mapToIdStrings(stopPlace.getTariffZones());
+
+            if(removeExistingReferences) {
+                stopPlace.getTariffZones().clear();
+            }
 
             Set<TariffZoneRef> matches = findTariffZones(stopPlace.getCentroid())
                     .stream()
