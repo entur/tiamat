@@ -15,10 +15,12 @@
 
 package org.rutebanken.tiamat.versioning;
 
+import com.google.common.collect.Sets;
 import org.rutebanken.tiamat.changelog.EntityChangedListener;
 import org.rutebanken.tiamat.importer.finder.NearbyStopPlaceFinder;
 import org.rutebanken.tiamat.importer.finder.StopPlaceByQuayOriginalIdFinder;
 import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
 import org.rutebanken.tiamat.repository.EntityInVersionRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.repository.TariffZoneRepository;
@@ -30,11 +32,13 @@ import org.rutebanken.tiamat.versioning.util.AccessibilityAssessmentOptimizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.lang.reflect.Field;
 import java.time.Instant;
-import java.util.Arrays;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
@@ -71,6 +75,9 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
     @Autowired
     private ReferenceResolver referenceResolver;
 
+    @Autowired
+    private SubmodeValidator submodeValidator;
+
     @Override
     public EntityInVersionRepository<StopPlace> getRepository() {
         return stopPlaceRepository;
@@ -98,6 +105,8 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
         }
 
         authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(newVersion));
+
+        submodeValidator.validate(newVersion);
 
         Instant changed = Instant.now();
 
