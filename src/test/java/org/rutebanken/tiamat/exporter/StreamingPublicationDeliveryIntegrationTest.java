@@ -43,6 +43,9 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
 import java.util.List;
 
 import static javax.xml.bind.JAXBContext.newInstance;
@@ -343,6 +346,41 @@ public class StreamingPublicationDeliveryIntegrationTest extends TiamatIntegrati
 
 
 
+    }
+
+    /**
+     * Rperoduce ROR-277, missing current stop place, when there is a future version.
+     * VersionValidity must be default in order to reproduce, which is ALL at the time of writing.
+     */
+    @Test
+    public void keepCurrentVersionOfStopPlaceWhenFutureVersionExist() throws InterruptedException, IOException, XMLStreamException, SAXException, JAXBException {
+
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
+        StopPlace stopPlacev1 = new StopPlace(new EmbeddableMultilingualString("name"));
+        stopPlacev1 = stopPlaceVersionedSaverService.saveNewVersion(stopPlacev1);
+        StopPlace stopPlacev2 = stopPlaceVersionedSaverService.createCopy(stopPlacev1, StopPlace.class);
+
+        stopPlacev2.setValidBetween(new ValidBetween(Instant.now().plus(10, ChronoUnit.DAYS)));
+
+        stopPlaceVersionedSaverService.saveNewVersion(stopPlacev1, stopPlacev2);
+
+        stopPlaceRepository.flush();
+
+        ExportParams exportParams = ExportParams.newExportParamsBuilder()
+                .setStopPlaceSearch(
+                        StopPlaceSearch.newStopPlaceSearchBuilder()
+                                .build())
+                .setTopographicPlaceExportMode(ExportParams.ExportMode.NONE)
+                .setTariffZoneExportMode(ExportParams.ExportMode.NONE)
+                .build();
+
+        streamingPublicationDelivery.stream(exportParams, byteArrayOutputStream);
+
+        PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryUnmarshaller.unmarshal(new ByteArrayInputStream(byteArrayOutputStream.toByteArray()));
+
+        List<org.rutebanken.netex.model.StopPlace> stopPlaces = publicationDeliveryTestHelper.extractStopPlaces(publicationDeliveryStructure);
+        assertThat(stopPlaces).hasSize(2);
     }
 
     private void validate(String xml) throws JAXBException, IOException, SAXException {
