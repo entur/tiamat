@@ -28,4 +28,23 @@ public class SubmodeValidatorTest {
         new SubmodeValidator().validate(stopPlace);
     }
 
+    @Test
+    public void validateUnknown() {
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setTramSubmode(TramSubmodeEnumeration.LOCAL_TRAM);
+        stopPlace.setBusSubmode(BusSubmodeEnumeration.UNKNOWN);
+
+        new SubmodeValidator().validate(stopPlace);
+    }
+
+    @Test
+    public void validateUndefined() {
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setTramSubmode(TramSubmodeEnumeration.LOCAL_TRAM);
+        stopPlace.setBusSubmode(BusSubmodeEnumeration.UNDEFINED);
+
+        new SubmodeValidator().validate(stopPlace);
+    }
 }
