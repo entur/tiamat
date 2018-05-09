@@ -1112,6 +1112,17 @@ def class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourc
                 .body("id", equalTo(stopPlace.getNetexId()))
                 .body("transportMode", equalTo(newTransportMode))
                 .body("submode", equalTo(newSubmode))
+
+        def stopPlaces = stopPlaceRepository.findAll()
+        for(stopPlaceVersion in stopPlaces) {
+            if( stopPlaceVersion.version == 1) {
+                assertThat(stopPlaceVersion.busSubmode).as("version 1").isNotNull().is(equalTo(BusSubmodeEnumeration.LOCAL_BUS))
+                assertThat(stopPlaceVersion.tramSubmode).as("version 1").isNull()
+            } else if (stopPlaceVersion.version == 2) {
+                assertThat(stopPlaceVersion.busSubmode).as("version 2").isNull()
+                assertThat(stopPlaceVersion.tramSubmode).as("version 2").isNotNull().is(equalTo(TramSubmodeEnumeration.LOCAL_TRAM))
+            }
+        }
     }
 
     @Test
