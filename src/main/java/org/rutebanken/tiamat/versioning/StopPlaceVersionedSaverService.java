@@ -51,6 +51,9 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
 
     private static final Logger logger = LoggerFactory.getLogger(StopPlaceVersionedSaverService.class);
 
+    public static final InterchangeWeightingEnumeration DEFAULT_WEIGHTING = InterchangeWeightingEnumeration.INTERCHANGE_ALLOWED;
+
+
     @Autowired
     private StopPlaceRepository stopPlaceRepository;
 
@@ -132,6 +135,11 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
 
         newVersion.setChangedBy(usernameFetcher.getUserNameForAuthenticatedUser());
         logger.info("StopPlace [{}], version {} changed by user [{}]. {}", newVersion.getNetexId(), newVersion.getVersion(), newVersion.getChangedBy(), newVersion.getValidBetween());
+
+        if(newVersion.getWeighting() == null) {
+            logger.info("Weighting is null for stop {} {}. Setting default value {}.", newVersion.getName(), newVersion.getNetexId(), DEFAULT_WEIGHTING);
+            newVersion.setWeighting(DEFAULT_WEIGHTING);
+        }
 
         countyAndMunicipalityLookupService.populateTopographicPlaceRelation(newVersion);
         tariffZonesLookupService.populateTariffZone(newVersion);
