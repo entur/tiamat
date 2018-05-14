@@ -511,7 +511,7 @@ public class StopPlaceRegisterGraphQLSchema {
         arguments.add(GraphQLArgument.newArgument()
                 .name(POINT_IN_TIME)
                 .type(dateScalar.getGraphQLDateScalar())
-                .description("Sets the point in time to use in search. Only StopPlaces valid on the given timestamp will be returned. If none is provided, 'now' is used.")
+                .description("Sets the point in time to use in search. Only StopPlaces valid on the given timestamp will be returned. If none is provided, ALL versions will be returned.")
                 .build());
         arguments.add(GraphQLArgument.newArgument()
                 .name(KEY)
