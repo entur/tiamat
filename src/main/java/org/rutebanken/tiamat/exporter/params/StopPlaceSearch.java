@@ -25,6 +25,8 @@ import javax.ws.rs.QueryParam;
 import java.time.Instant;
 import java.util.List;
 
+import static org.rutebanken.tiamat.exporter.params.ExportParams.VersionValidity.CURRENT_FUTURE;
+
 public class StopPlaceSearch implements SearchObject {
 
     /**
@@ -54,7 +56,7 @@ public class StopPlaceSearch implements SearchObject {
     @QueryParam(value = "allVersions")
     private boolean allVersions;
 
-    @DefaultValue(value = "ALL")
+    @DefaultValue(value = "CURRENT_FUTURE")
     @QueryParam(value = "versionValidity")
     private ExportParams.VersionValidity versionValidity;
 
@@ -163,6 +165,7 @@ public class StopPlaceSearch implements SearchObject {
     public boolean isWithTags() {
         return withTags;
     }
+
 
     public Instant getPointInTime() {
         return pointInTime;
