@@ -261,6 +261,8 @@ public class GraphQLNames {
     public static final String PUBLIC_CODE = "publicCode";
     public static final String WEIGHTING = "weighting";
 
+    public static final String VERSION_ARG_DESCRIPTION = "Find stop place from " + ID + " and " +  VERSION + ". Only used together with " + ID + " argument";
+
     public static final String IMPORTED_ID_QUERY = "importedId";
     public static final String COUNTY_REF = "countyReference";
     public static final String MUNICIPALITY_REF = "municipalityReference";

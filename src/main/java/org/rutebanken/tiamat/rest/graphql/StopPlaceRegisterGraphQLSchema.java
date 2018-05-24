@@ -476,7 +476,7 @@ public class StopPlaceRegisterGraphQLSchema {
         arguments.add(GraphQLArgument.newArgument()
                 .name(VERSION)
                 .type(GraphQLInt)
-                .description("Find stop place based on ID. Only used together with " + ID + " argument")
+                .description(VERSION_ARG_DESCRIPTION    )
                 .build());
         arguments.add(GraphQLArgument.newArgument()
                 .name(STOP_PLACE_TYPE)

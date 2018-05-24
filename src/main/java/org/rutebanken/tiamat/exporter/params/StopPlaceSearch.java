@@ -16,7 +16,9 @@
 package org.rutebanken.tiamat.exporter.params;
 
 import com.google.common.base.MoreObjects;
+import io.swagger.annotations.ApiParam;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
+import org.rutebanken.tiamat.rest.graphql.GraphQLNames;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
@@ -72,6 +74,7 @@ public class StopPlaceSearch implements SearchObject {
     @QueryParam(value = "withNearbySimilarDuplicates")
     private boolean withNearbySimilarDuplicates;
 
+    @ApiParam(value = GraphQLNames.VERSION_ARG_DESCRIPTION)
     @QueryParam(value = "version")
     private Long version;
 
