@@ -73,7 +73,6 @@ public class StopPlaceSearch implements SearchObject {
     private boolean allVersions;
 
     @QueryParam(value = "versionValidity")
-    @DefaultValue(value = "CURRENT_FUTURE")
     @ApiParam(value = VERSION_VALIDITY_ARG_DESCRIPTION)
     private ExportParams.VersionValidity versionValidity;
 

@@ -248,19 +248,17 @@ public class StopPlaceQueryFromSearchBuilder {
             String pointInTimeCondition = createPointInTimeCondition("s", "p");
             parameters.put("pointInTime", Timestamp.from(stopPlaceSearch.getPointInTime()));
             wheres.add(pointInTimeCondition);
-        } else if (stopPlaceSearch.getVersionValidity() != null) {
-            operators.add("and");
-
-            if (ExportParams.VersionValidity.CURRENT.equals(stopPlaceSearch.getVersionValidity())) {
+        } else if (ExportParams.VersionValidity.CURRENT.equals(stopPlaceSearch.getVersionValidity())) {
+                operators.add("and");
                 parameters.put("pointInTime", Date.from(Instant.now()));
                 String currentQuery = "(%s.from_date <= :pointInTime AND (%s.to_date >= :pointInTime or %s.to_date IS NULL))";
                 wheres.add("(" + formatRepeatedValue(currentQuery, "s", 3) + " or " + formatRepeatedValue(currentQuery, "p", 3) + ")");
-            } else if (ExportParams.VersionValidity.CURRENT_FUTURE.equals(stopPlaceSearch.getVersionValidity())) {
+        } else if (ExportParams.VersionValidity.CURRENT_FUTURE.equals(stopPlaceSearch.getVersionValidity()) || stopPlaceSearch.getVersionValidity() == null) {
+             operators.add("and");
                 parameters.put("pointInTime", Date.from(Instant.now()));
                 String futureQuery = "p.netex_id is null and (s.to_date >= :pointInTime OR s.to_date IS NULL)";
                 String parentFutureQuery = "p.netex_id is not null and (p.to_date >= :pointInTime OR p.to_date IS NULL)";
                 wheres.add("((" + futureQuery + ") or (" + parentFutureQuery + "))");
-            }
         }
 
         if (stopPlaceSearch.isWithoutLocationOnly()) {
