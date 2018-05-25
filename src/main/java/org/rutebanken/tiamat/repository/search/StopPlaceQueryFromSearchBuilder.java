@@ -141,7 +141,7 @@ public class StopPlaceQueryFromSearchBuilder {
      */
     private final Set<String> commonWordsToIgnore;
 
-    public StopPlaceQueryFromSearchBuilder(@Value(" ${stopPlaces.search.commonWordsToIgnore:}") String commonWordsToIgnore) {
+    public StopPlaceQueryFromSearchBuilder(@Value("${stopPlaces.search.commonWordsToIgnore:}") String commonWordsToIgnore) {
         this.commonWordsToIgnore = StringUtils.isNotEmpty(commonWordsToIgnore) ? new HashSet<>(Arrays.asList(commonWordsToIgnore.split(","))) : new HashSet<>();
     }
 
