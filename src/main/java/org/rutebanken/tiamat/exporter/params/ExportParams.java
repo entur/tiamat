@@ -126,6 +126,7 @@ public class ExportParams {
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
+                .omitNullValues()
                 .add("topographicPlaceExportMode", topographicPlaceExportMode)
                 .add("municipalityReferences", municipalityReferences)
                 .add("countyReferences", countyReferences)
