@@ -62,7 +62,7 @@ public class StopPlaceSearch implements SearchObject {
     private String submode;
 
     @QueryParam(value = "idList")
-    @ApiParam(value = "Provide a list of stop place Ids")
+    @ApiParam(value = "Provide a list of stop place Ids. If using this argument, most other arguments will be disabled.")
     private List<String> netexIdList;
 
     @QueryParam(value = "allVersions")
@@ -71,6 +71,7 @@ public class StopPlaceSearch implements SearchObject {
 
     @QueryParam(value = "versionValidity")
     @DefaultValue(value = "CURRENT_FUTURE")
+    @ApiParam(value = "Only return stop places witch are currently valid, valid currently and in the future or all versions")
     private ExportParams.VersionValidity versionValidity;
 
     @QueryParam(value = "withoutLocationOnly")
