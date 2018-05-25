@@ -208,12 +208,14 @@ public class StopPlaceSearch implements SearchObject {
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
+                .omitNullValues()
                 .add("q", getQuery())
                 .add("stopPlaceType", getStopTypeEnumerations())
                 .add("submode", getSubmode())
                 .add("netexIdList", getNetexIdList())
                 .add("allVersions", isAllVersions())
                 .add("versionValidity", getVersionValidity())
+                .add("pointInTime", getPointInTime())
                 .add("withoutLocationOnly", isWithoutLocationOnly())
                 .add("withoutQuaysOnly", isWithoutQuaysOnly())
                 .add("withDuplicatedQuayImportedIds", isWithDuplicatedQuayImportedIds())
