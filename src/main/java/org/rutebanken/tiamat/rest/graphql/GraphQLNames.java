@@ -340,6 +340,9 @@ public class GraphQLNames {
 
     public static final String TOTAL_CAPACITY = "totalCapacity";
 
+    public static final String VERSION_VALIDITY_ARG = "versionValitidy";
+    public static final String VERSION_VALIDITY_ARG_DESCRIPTION = "Controls returned stop places based on time. Only return stop places witch are currently valid, currently valid and in the future or just all versions";
+
     public static final String PARKING_TYPE = "parkingType";
     public static final String PARKING_VEHICLE_TYPES = "parkingVehicleTypes";
     public static final String PARKING_VEHICLE_TYPE = "parkingVehicleType";
