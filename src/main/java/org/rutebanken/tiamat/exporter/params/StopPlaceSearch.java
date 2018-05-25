@@ -31,6 +31,9 @@ import java.util.List;
 import static org.rutebanken.tiamat.exporter.params.ExportParams.VersionValidity.CURRENT_FUTURE;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 
+/**
+ * Search params relevant for searching for stop places.
+ */
 public class StopPlaceSearch implements SearchObject {
 
     /**
