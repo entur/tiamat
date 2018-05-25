@@ -74,7 +74,7 @@ public class StopPlaceSearch implements SearchObject {
 
     @QueryParam(value = "versionValidity")
     @DefaultValue(value = "CURRENT_FUTURE")
-    @ApiParam(value = "Only return stop places witch are currently valid, currently valid and in the future or all versions")
+    @ApiParam(value = VERSION_VALIDITY_ARG_DESCRIPTION)
     private ExportParams.VersionValidity versionValidity;
 
     @QueryParam(value = "withoutLocationOnly")
