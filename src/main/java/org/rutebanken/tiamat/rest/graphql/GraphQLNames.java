@@ -293,7 +293,7 @@ public class GraphQLNames {
     public static final String SIZE_ARG_DESCRIPTION = "Number of hits per page when using pagination - default is " + DEFAULT_SIZE_VALUE;
 
     public static final String ALL_VERSIONS = "allVersions";
-    public static final String ALL_VERSIONS_ARG_DESCRIPTION = "Fetch all versions for entitites in result. This should only be used when fetch a single stop place by ID";
+    public static final String ALL_VERSIONS_ARG_DESCRIPTION = "Fetch all versions for entitites in result. Should not be combined with argument versionValidity";
 
     public static final String WITHOUT_LOCATION_ONLY = "withoutLocationOnly";
     public static final String WITHOUT_LOCATION_ONLY_ARG_DESCRIPTION = "Set to true to only return objects that do not have coordinates.";
