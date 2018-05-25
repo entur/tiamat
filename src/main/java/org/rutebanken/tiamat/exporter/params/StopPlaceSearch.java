@@ -69,8 +69,8 @@ public class StopPlaceSearch implements SearchObject {
     @ApiParam(value = ALL_VERSIONS_ARG_DESCRIPTION)
     private boolean allVersions;
 
-    @DefaultValue(value = "CURRENT_FUTURE")
     @QueryParam(value = "versionValidity")
+    @DefaultValue(value = "CURRENT_FUTURE")
     private ExportParams.VersionValidity versionValidity;
 
     @QueryParam(value = "withoutLocationOnly")
@@ -89,8 +89,8 @@ public class StopPlaceSearch implements SearchObject {
     @ApiParam(value = WITH_NEARBY_SIMILAR_DUPLICATES_ARG_DESCRIPTION)
     private boolean withNearbySimilarDuplicates;
 
-    @ApiParam(value = GraphQLNames.VERSION_ARG_DESCRIPTION)
     @QueryParam(value = "version")
+    @ApiParam(value = GraphQLNames.VERSION_ARG_DESCRIPTION)
     private Long version;
 
     @QueryParam(value = "tag")

@@ -277,6 +277,7 @@ public class GraphQLNames {
     public static final String WEIGHTING = "weighting";
 
     public static final String IMPORTED_ID_QUERY = "importedId";
+    public static final String IMPORTED_ID_ARG_DESCRIPTION = "Searches for StopPlace by importedId.";
     public static final String COUNTY_REF = "countyReference";
     public static final String COUNTY_REF_ARG_DESCRIPTION = "Only return StopPlaces located in given counties.";
 
@@ -292,7 +293,7 @@ public class GraphQLNames {
     public static final String SIZE_ARG_DESCRIPTION = "Number of hits per page when using pagination - default is " + DEFAULT_SIZE_VALUE;
 
     public static final String ALL_VERSIONS = "allVersions";
-    public static final String ALL_VERSIONS_ARG_DESCRIPTION = "Fetch all versions for entitites in result";
+    public static final String ALL_VERSIONS_ARG_DESCRIPTION = "Fetch all versions for entitites in result. This should only be used when fetch a single stop place by ID";
 
     public static final String WITHOUT_LOCATION_ONLY = "withoutLocationOnly";
     public static final String WITHOUT_LOCATION_ONLY_ARG_DESCRIPTION = "Set to true to only return objects that do not have coordinates.";
@@ -306,7 +307,7 @@ public class GraphQLNames {
     public static final String WITH_NEARBY_SIMILAR_DUPLICATES_ARG_DESCRIPTION = "withNearbySimilarDuplicates";
 
     public static final String POINT_IN_TIME = "pointInTime";
-    public static final String POINT_IN_TIME_ARG_DESCRIPTION = "Sets the point in time to use in search. Only StopPlaces valid on the given timestamp will be returned. If none is provided, ALL versions will be returned.";
+    public static final String POINT_IN_TIME_ARG_DESCRIPTION = "Sets the point in time to use in search. Only StopPlaces valid on the given timestamp will be returned. If no value is provided, the search will fall back to VersionValidity's default value";
 
     public static final String LONGITUDE_MIN = "lonMin";
     public static final String LATITUDE_MIN = "latMin";

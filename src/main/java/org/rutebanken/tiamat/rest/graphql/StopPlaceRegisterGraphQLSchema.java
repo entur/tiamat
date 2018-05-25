@@ -504,7 +504,7 @@ public class StopPlaceRegisterGraphQLSchema {
         arguments.add(GraphQLArgument.newArgument()
                 .name(IMPORTED_ID_QUERY)
                 .type(GraphQLString)
-                .description("Searches for StopPlace by importedId.")
+                .description(IMPORTED_ID_ARG_DESCRIPTION)
                 .build());
         arguments.add(GraphQLArgument.newArgument()
                 .name(POINT_IN_TIME)
@@ -597,7 +597,7 @@ public class StopPlaceRegisterGraphQLSchema {
         arguments.add(GraphQLArgument.newArgument()
                 .name(POINT_IN_TIME)
                 .type(dateScalar.getGraphQLDateScalar())
-                .description("Sets the point in time to use in search. Only StopPlaces valid on the given timestamp will be returned. If none is provided, 'now' is used.")
+                .description(POINT_IN_TIME_ARG_DESCRIPTION)
                 .build());
         return arguments;
     }
