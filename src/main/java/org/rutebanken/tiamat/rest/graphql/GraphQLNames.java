@@ -15,6 +15,8 @@
 
 package org.rutebanken.tiamat.rest.graphql;
 
+import org.rutebanken.tiamat.rest.graphql.scalars.DateScalar;
+
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.MERGED_ID_KEY;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
 import static org.rutebanken.tiamat.rest.graphql.StopPlaceRegisterGraphQLSchema.DEFAULT_PAGE_VALUE;
@@ -307,7 +309,10 @@ public class GraphQLNames {
     public static final String WITH_NEARBY_SIMILAR_DUPLICATES_ARG_DESCRIPTION = "withNearbySimilarDuplicates";
 
     public static final String POINT_IN_TIME = "pointInTime";
-    public static final String POINT_IN_TIME_ARG_DESCRIPTION = "Sets the point in time to use in search. Only StopPlaces valid on the given timestamp will be returned. If no value is provided, the search will fall back to VersionValidity's default value";
+    public static final String POINT_IN_TIME_ARG_DESCRIPTION = "Sets the point in time to use in search. Only StopPlaces " +
+            "valid on the given timestamp will be returned. " +
+            "If no value is provided, the search will fall back to VersionValidity's default value." +
+            " Date format: "+ DateScalar.DATE_TIME_PATTERN;
 
     public static final String LONGITUDE_MIN = "lonMin";
     public static final String LATITUDE_MIN = "latMin";
