@@ -214,7 +214,7 @@ public class StopPlaceSearch implements SearchObject {
                 .add("netexIdList", getNetexIdList())
                 .add("allVersions", isAllVersions())
                 .add("versionValidity", getVersionValidity())
-                .add("withouLocationOnly", isWithoutLocationOnly())
+                .add("withoutLocationOnly", isWithoutLocationOnly())
                 .add("withoutQuaysOnly", isWithoutQuaysOnly())
                 .add("withDuplicatedQuayImportedIds", isWithDuplicatedQuayImportedIds())
                 .add("withTags", tags)
