@@ -51,8 +51,8 @@ import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.*;
 @Component
 public class StopPlaceRegisterGraphQLSchema {
 
-    private final int DEFAULT_PAGE_VALUE = 0;
-    private final int DEFAULT_SIZE_VALUE = 20;
+    public final static int DEFAULT_PAGE_VALUE = 0;
+    public final static int DEFAULT_SIZE_VALUE = 20;
 
     public GraphQLSchema stopPlaceRegisterSchema;
 
@@ -608,13 +608,13 @@ public class StopPlaceRegisterGraphQLSchema {
                 .name(PAGE)
                 .type(GraphQLInt)
                 .defaultValue(DEFAULT_PAGE_VALUE)
-                .description("Pagenumber when using pagination - default is " + DEFAULT_PAGE_VALUE)
+                .description(PAGE_ARG_DESCRIPTION)
                 .build());
         arguments.add(GraphQLArgument.newArgument()
                 .name(SIZE)
                 .type(GraphQLInt)
                 .defaultValue(DEFAULT_SIZE_VALUE)
-                .description("Number of hits per page when using pagination - default is " + DEFAULT_SIZE_VALUE)
+                .description(SIZE_ARG_DESCRIPTION)
                 .build());
         return arguments;
     }

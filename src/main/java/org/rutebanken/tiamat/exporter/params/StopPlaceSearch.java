@@ -41,10 +41,12 @@ public class StopPlaceSearch implements SearchObject {
 
     @QueryParam(value = "page")
     @DefaultValue(value = "0")
+    @ApiParam(value = PAGE_ARG_DESCRIPTION)
     private int page = DEFAULT_PAGE;
 
     @QueryParam(value = "size")
     @DefaultValue(value = "20")
+    @ApiParam(value = SIZE_ARG_DESCRIPTION)
     private int size = DEFAULT_PAGE_SIZE;
 
     @QueryParam(value = "q")

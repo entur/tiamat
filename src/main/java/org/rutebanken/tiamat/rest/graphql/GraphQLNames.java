@@ -17,6 +17,8 @@ package org.rutebanken.tiamat.rest.graphql;
 
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.MERGED_ID_KEY;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
+import static org.rutebanken.tiamat.rest.graphql.StopPlaceRegisterGraphQLSchema.DEFAULT_PAGE_VALUE;
+import static org.rutebanken.tiamat.rest.graphql.StopPlaceRegisterGraphQLSchema.DEFAULT_SIZE_VALUE;
 import static org.rutebanken.tiamat.rest.graphql.scalars.DateScalar.DATE_TIME_PATTERN;
 import static org.rutebanken.tiamat.rest.graphql.scalars.DateScalar.EXAMPLE_DATE_TIME;
 
@@ -284,7 +286,10 @@ public class GraphQLNames {
     public static final String QUERY = "query";
     public static final String QUERY_ARG_DESCRIPTION = "Searches for StopPlace by name, " + ID + ", " + ORIGINAL_ID_KEY + ", " + MERGED_ID_KEY + " or a single tag prefixed with #";
     public static final String PAGE = "page";
+    public static final String PAGE_ARG_DESCRIPTION = "Pagenumber when using pagination - default is " + DEFAULT_PAGE_VALUE;
+
     public static final String SIZE = "size";
+    public static final String SIZE_ARG_DESCRIPTION = "Number of hits per page when using pagination - default is " + DEFAULT_SIZE_VALUE;
 
     public static final String ALL_VERSIONS = "allVersions";
     public static final String ALL_VERSIONS_ARG_DESCRIPTION = "Fetch all versions for entitites in result";
