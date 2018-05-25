@@ -43,8 +43,6 @@ import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLInputObjectField.newInputObjectField;
 import static graphql.schema.GraphQLInputObjectType.newInputObject;
 import static graphql.schema.GraphQLObjectType.newObject;
-import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.MERGED_ID_KEY;
-import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 import static org.rutebanken.tiamat.rest.graphql.types.AuthorizationCheckCreator.createAuthorizationCheckArguments;
 import static org.rutebanken.tiamat.rest.graphql.types.AuthorizationCheckCreator.createAuthorizationCheckOutputType;
@@ -225,7 +223,7 @@ public class StopPlaceRegisterGraphQLSchema {
         GraphQLArgument allVersionsArgument = GraphQLArgument.newArgument()
                 .name(ALL_VERSIONS)
                 .type(GraphQLBoolean)
-                .description("Fetch all versions for entitites in result")
+                .description(ALL_VERSIONS_ARG_DESCRIPTION)
                 .build();
 
         GraphQLObjectType stopPlaceRegisterQuery = newObject()
@@ -471,7 +469,7 @@ public class StopPlaceRegisterGraphQLSchema {
         arguments.add(GraphQLArgument.newArgument()
                 .name(ID)
                 .type(GraphQLString)
-                .description("IDs used to lookup StopPlace(s). When used - all other searchparameters are ignored.")
+                .description(ID_ARG_DESCRIPTION)
                 .build());
         arguments.add(GraphQLArgument.newArgument()
                 .name(VERSION)
@@ -481,27 +479,27 @@ public class StopPlaceRegisterGraphQLSchema {
         arguments.add(GraphQLArgument.newArgument()
                 .name(STOP_PLACE_TYPE)
                 .type(new GraphQLList(stopPlaceTypeEnum))
-                .description("Only return StopPlaces with given StopPlaceType(s).")
+                .description(STOP_PLACE_TYPE_ARG_DESCRIPTION)
                 .build());
         arguments.add(GraphQLArgument.newArgument()
                 .name(COUNTY_REF)
                 .type(new GraphQLList(GraphQLString))
-                .description("Only return StopPlaces located in given counties.")
+                .description(COUNTY_REF_ARG_DESCRIPTION)
                 .build());
         arguments.add(GraphQLArgument.newArgument()
                 .name(TAGS)
                 .type(new GraphQLList(GraphQLString))
-                .description("Only return StopPlace reffered to by the tag names provided. Values should not start with #")
+                .description(TAGS_ARG_DESCRIPTION)
                 .build());
         arguments.add(GraphQLArgument.newArgument()
                 .name(MUNICIPALITY_REF)
                 .type(new GraphQLList(GraphQLString))
-                .description("Only return StopPlaces located in given municipalities.")
+                .description(MUNICIPALITY_REF_ARG_DESCRIPTION)
                 .build());
         arguments.add(GraphQLArgument.newArgument()
                 .name(QUERY)
                 .type(GraphQLString)
-                .description("Searches for StopPlace by name, " + ID + ", " + ORIGINAL_ID_KEY + ", " + MERGED_ID_KEY + " or a single tag prefixed with #")
+                .description(QUERY_ARG_DESCRIPTION)
                 .build());
         arguments.add(GraphQLArgument.newArgument()
                 .name(IMPORTED_ID_QUERY)
@@ -511,53 +509,53 @@ public class StopPlaceRegisterGraphQLSchema {
         arguments.add(GraphQLArgument.newArgument()
                 .name(POINT_IN_TIME)
                 .type(dateScalar.getGraphQLDateScalar())
-                .description("Sets the point in time to use in search. Only StopPlaces valid on the given timestamp will be returned. If none is provided, ALL versions will be returned.")
+                .description(POINT_IN_TIME_ARG_DESCRIPTION)
                 .build());
         arguments.add(GraphQLArgument.newArgument()
                 .name(KEY)
                 .type(GraphQLString)
-                .description("Must be used together with parameter 'values', other search-parameters are ignored. Defines key to search for.")
+                .description(KEY_ARG_DESCRIPTION)
                 .build());
         arguments.add(GraphQLArgument.newArgument()
                 .name(WITHOUT_LOCATION_ONLY)
                 .type(GraphQLBoolean)
                 .defaultValue(Boolean.FALSE)
-                .description("Set to true to only return objects that do not have coordinates.")
+                .description(WITHOUT_LOCATION_ONLY_ARG_DESCRIPTION)
                 .build());
         arguments.add(GraphQLArgument.newArgument()
                 .name(WITHOUT_QUAYS_ONLY)
                 .type(GraphQLBoolean)
                 .defaultValue(Boolean.FALSE)
-                .description("Set to true to only return stop place that does not have quays.")
+                .description(WITHOUT_QUAYS_ONLY_ARG_DESCRIPTION)
                 .build());
         arguments.add(GraphQLArgument.newArgument()
                 .name(WITH_DUPLICATED_QUAY_IMPORTED_IDS)
                 .type(GraphQLBoolean)
                 .defaultValue(Boolean.FALSE)
-                .description("Set to true to only return stop places that have quays with duplicated imported IDs.")
+                .description(WITH_DUPLICATED_QUAY_IMPORTED_IDS_ARG_DESCRIPTION)
                 .build());
         arguments.add(GraphQLArgument.newArgument()
                 .name(WITH_NEARBY_SIMILAR_DUPLICATES)
                 .type(GraphQLBoolean)
                 .defaultValue(Boolean.FALSE)
-                .description("Set to true to only return stop places have nearby similar duplicates. The result will not have duplicates omitted.")
+                .description(WITH_NEARBY_SIMILAR_DUPLICATES_ARG_DESCRIPTION)
                 .build());
         arguments.add(GraphQLArgument.newArgument()
                 .name(VALUES)
                 .type(new GraphQLList(GraphQLString))
-                .description("Must be used together with parameter 'key', other search-parameters are ignored. Defines value to search for.")
+                .description(VALUES_ARG_DESCRIPTION)
                 .build());
         arguments.add(GraphQLArgument.newArgument()
                 .name(WITH_TAGS)
                 .type(GraphQLBoolean)
                 .defaultValue(Boolean.FALSE)
-                .description("If set to true, only stop places with valid tags are returned. If false, filter does not apply.")
+                .description(WITH_TAGS_ARG_DESCRIPTION)
                 .build());
         arguments.add(GraphQLArgument.newArgument()
                 .name(SEARCH_WITH_CODE_SPACE)
                 .type(GraphQLString)
                 .defaultValue(null)
-                .description("Search by data producer prefix code.")
+                .description(SEARCH_WITH_CODE_SPACE_ARG_DESCRIPTION)
                 .build());
         return arguments;
     }

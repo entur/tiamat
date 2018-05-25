@@ -24,6 +24,10 @@ import javax.ws.rs.QueryParam;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.COUNTY_REF_ARG_DESCRIPTION;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.MUNICIPALITY_REF_ARG_DESCRIPTION;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.SEARCH_WITH_CODE_SPACE_ARG_DESCRIPTION;
+
 /**
  * Export parameters.
  * Parameters specific for search related to a certain type like StopPlace does not necessary belong here.
@@ -40,29 +44,31 @@ public class ExportParams {
 
     public static final ExportMode DEFAULT_GROUP_OF_STOP_PLACES_EXPORT_MODE = ExportMode.RELEVANT;
 
-    @ApiParam(value = "Controls exported topographic places. If set to relevant, only topographic places relevant to exported stop places are exported.")
-    @DefaultValue(value = "RELEVANT")
     @QueryParam(value = "topographicPlaceExportMode")
+    @DefaultValue(value = "RELEVANT")
+    @ApiParam(value = "Controls exported topographic places. If set to relevant, only topographic places relevant to exported stop places are exported.")
     private ExportMode topographicPlaceExportMode = DEFAULT_TOPOGRAPHIC_PLACE_EXPORT_MODE;
 
-    @ApiParam(value = "Controls exported tariff zones. If set to relevant, only tariff zones relevant to exported stop places are exported.")
-    @DefaultValue(value = "RELEVANT")
     @QueryParam(value = "tariffZoneExportMode")
+    @DefaultValue(value = "RELEVANT")
+    @ApiParam(value = "Controls exported tariff zones. If set to relevant, only tariff zones relevant to exported stop places are exported.")
     private ExportMode tariffZoneExportMode = DEFAULT_TARIFF_ZONE_EXPORT_MODE;
 
-    @ApiParam(value = "Controls exported group of stop places. If set to relevant, only group of stop places relevant to exported stop places are exported.")
-    @DefaultValue(value = "RELEVANT")
     @QueryParam(value = "groupOfStopPlacesExportMode")
+    @DefaultValue(value = "RELEVANT")
+    @ApiParam(value = "Controls exported group of stop places. If set to relevant, only group of stop places relevant to exported stop places are exported.")
     private ExportMode groupOfStopPlacesExportMode = DEFAULT_GROUP_OF_STOP_PLACES_EXPORT_MODE;
 
     @QueryParam(value = "municipalityReference")
+    @ApiParam(value = MUNICIPALITY_REF_ARG_DESCRIPTION)
     private List<String> municipalityReferences;
 
     @QueryParam(value = "countyReference")
+    @ApiParam(value = COUNTY_REF_ARG_DESCRIPTION)
     private List<String> countyReferences;
 
-    @ApiParam(value = "Filter results by data producer code space - i.e. code from original imported ID")
     @QueryParam(value = "codeSpace")
+    @ApiParam(value = SEARCH_WITH_CODE_SPACE_ARG_DESCRIPTION)
     private String codeSpace;
 
     @BeanParam

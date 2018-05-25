@@ -16,6 +16,7 @@
 package org.rutebanken.tiamat.exporter.params;
 
 import com.google.common.base.MoreObjects;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiParam;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.rutebanken.tiamat.rest.graphql.GraphQLNames;
@@ -28,6 +29,7 @@ import java.time.Instant;
 import java.util.List;
 
 import static org.rutebanken.tiamat.exporter.params.ExportParams.VersionValidity.CURRENT_FUTURE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 
 public class StopPlaceSearch implements SearchObject {
 
@@ -37,25 +39,32 @@ public class StopPlaceSearch implements SearchObject {
     public static final int DEFAULT_PAGE = 0;
     public static final int DEFAULT_PAGE_SIZE = 20;
 
-    @DefaultValue(value = "0") @QueryParam(value = "page")
+    @QueryParam(value = "page")
+    @DefaultValue(value = "0")
     private int page = DEFAULT_PAGE;
 
-    @DefaultValue(value = "20") @QueryParam(value = "size")
+    @QueryParam(value = "size")
+    @DefaultValue(value = "20")
     private int size = DEFAULT_PAGE_SIZE;
 
     @QueryParam(value = "q")
+    @ApiParam(value = QUERY_ARG_DESCRIPTION)
     private String query;
 
     @QueryParam(value = "stopPlaceType")
+    @ApiParam(value = STOP_PLACE_TYPE_ARG_DESCRIPTION)
     private List<StopTypeEnumeration> stopTypeEnumerations;
 
     @QueryParam(value = "submode")
+    @ApiParam(value = "Only return stop places with matching submode")
     private String submode;
 
     @QueryParam(value = "idList")
+    @ApiParam(value = "Provide a list of stop place Ids")
     private List<String> netexIdList;
 
     @QueryParam(value = "allVersions")
+    @ApiParam(value = ALL_VERSIONS_ARG_DESCRIPTION)
     private boolean allVersions;
 
     @DefaultValue(value = "CURRENT_FUTURE")
@@ -63,15 +72,19 @@ public class StopPlaceSearch implements SearchObject {
     private ExportParams.VersionValidity versionValidity;
 
     @QueryParam(value = "withoutLocationOnly")
+    @ApiParam(value = WITHOUT_LOCATION_ONLY_ARG_DESCRIPTION)
     private boolean withoutLocationOnly;
 
     @QueryParam(value = "withoutQuaysOnly")
+    @ApiParam(value = WITHOUT_QUAYS_ONLY_ARG_DESCRIPTION)
     private boolean withoutQuaysOnly;
 
     @QueryParam(value = "withDuplicatedQuayImportedIds")
+    @ApiParam(value = WITH_DUPLICATED_QUAY_IMPORTED_IDS_ARG_DESCRIPTION)
     private boolean withDuplicatedQuayImportedIds;
 
     @QueryParam(value = "withNearbySimilarDuplicates")
+    @ApiParam(value = WITH_NEARBY_SIMILAR_DUPLICATES_ARG_DESCRIPTION)
     private boolean withNearbySimilarDuplicates;
 
     @ApiParam(value = GraphQLNames.VERSION_ARG_DESCRIPTION)
@@ -79,11 +92,15 @@ public class StopPlaceSearch implements SearchObject {
     private Long version;
 
     @QueryParam(value = "tag")
+    @ApiParam(value = TAGS_ARG_DESCRIPTION)
     private List<String> tags;
 
     @QueryParam(value = "withTags")
+    @ApiParam(value = WITH_TAGS_ARG_DESCRIPTION)
     private boolean withTags;
 
+    @QueryParam(value = "pointInTime")
+    @ApiParam(value = POINT_IN_TIME_ARG_DESCRIPTION)
     private Instant pointInTime;
 
     public StopPlaceSearch() {}
