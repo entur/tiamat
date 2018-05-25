@@ -141,11 +141,17 @@ public class StopPlaceQueryFromSearchBuilder {
      */
     private final Set<String> commonWordsToIgnore;
 
-    public StopPlaceQueryFromSearchBuilder(@Value("${stopPlaces.search.commonWordsToIgnore:}") String commonWordsToIgnore) {
+    private final ExportParamsAndStopPlaceSearchValidator exportParamsAndStopPlaceSearchValidator;
+
+    @Autowired
+    public StopPlaceQueryFromSearchBuilder(@Value(" ${stopPlaces.search.commonWordsToIgnore:}") String commonWordsToIgnore, ExportParamsAndStopPlaceSearchValidator exportParamsAndStopPlaceSearchValidator) {
         this.commonWordsToIgnore = StringUtils.isNotEmpty(commonWordsToIgnore) ? new HashSet<>(Arrays.asList(commonWordsToIgnore.split(","))) : new HashSet<>();
+        this.exportParamsAndStopPlaceSearchValidator = exportParamsAndStopPlaceSearchValidator;
     }
 
     public Pair<String, Map<String, Object>> buildQueryString(ExportParams exportParams) {
+
+        this.exportParamsAndStopPlaceSearchValidator.validateExportParams(exportParams);
 
         StopPlaceSearch stopPlaceSearch = exportParams.getStopPlaceSearch();
 
