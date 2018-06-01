@@ -21,6 +21,7 @@ import io.swagger.jaxrs.listing.SwaggerSerializers;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
 import org.rutebanken.tiamat.filter.LoggingFilter;
+import org.rutebanken.tiamat.jersey.JerseyJava8TimeConverterProvider;
 import org.rutebanken.tiamat.rest.dto.DtoJbvCodeMappingResource;
 import org.rutebanken.tiamat.rest.dto.DtoQuayResource;
 import org.rutebanken.tiamat.rest.dto.DtoStopPlaceResource;
@@ -90,6 +91,7 @@ public class JerseyConfig {
         publicResources.add(SwaggerSerializers.class);
 
         ResourceConfig resourceConfig = new ResourceConfig(publicResources);
+        resourceConfig.register(JerseyJava8TimeConverterProvider.class);
         ServletRegistrationBean publicServicesJersey = new ServletRegistrationBean(new ServletContainer(resourceConfig));
 
         BeanConfig config = new BeanConfig();

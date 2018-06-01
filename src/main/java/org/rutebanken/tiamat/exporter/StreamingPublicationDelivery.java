@@ -121,7 +121,7 @@ public class StreamingPublicationDelivery {
 
         EntitiesEvictor entitiesEvictor = instantiateEvictor();
 
-        logger.info("Async export initiated. Export params: {}", exportParams);
+        logger.info("Streaming export initiated. Export params: {}", exportParams);
 
         // We need to know these IDs before marshalling begins.
         // To avoid marshalling empty parking element and to be able to gather relevant topographic places

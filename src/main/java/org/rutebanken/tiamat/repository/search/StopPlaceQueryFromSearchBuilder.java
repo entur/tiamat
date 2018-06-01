@@ -28,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -138,13 +139,19 @@ public class StopPlaceQueryFromSearchBuilder {
     /**
      * Configure some common words to be skipped during stop place search by name.
      */
-    private Set<String> commonWordsToIgnore = new HashSet<>();
+    private final Set<String> commonWordsToIgnore;
 
-    public StopPlaceQueryFromSearchBuilder(@Value(" ${stopPlaces.search.commonWordsToIgnore:}") String commonWordsToIgnore) {
+    private final ExportParamsAndStopPlaceSearchValidator exportParamsAndStopPlaceSearchValidator;
+
+    @Autowired
+    public StopPlaceQueryFromSearchBuilder(@Value(" ${stopPlaces.search.commonWordsToIgnore:}") String commonWordsToIgnore, ExportParamsAndStopPlaceSearchValidator exportParamsAndStopPlaceSearchValidator) {
         this.commonWordsToIgnore = StringUtils.isNotEmpty(commonWordsToIgnore) ? new HashSet<>(Arrays.asList(commonWordsToIgnore.split(","))) : new HashSet<>();
+        this.exportParamsAndStopPlaceSearchValidator = exportParamsAndStopPlaceSearchValidator;
     }
 
     public Pair<String, Map<String, Object>> buildQueryString(ExportParams exportParams) {
+
+        this.exportParamsAndStopPlaceSearchValidator.validateExportParams(exportParams);
 
         StopPlaceSearch stopPlaceSearch = exportParams.getStopPlaceSearch();
 
@@ -223,7 +230,14 @@ public class StopPlaceQueryFromSearchBuilder {
             parameters.put("version", stopPlaceSearch.getVersion());
         } else if (!stopPlaceSearch.isAllVersions()
                 && stopPlaceSearch.getPointInTime() == null &&
-                (stopPlaceSearch.getVersionValidity() == null || ExportParams.VersionValidity.ALL.equals(stopPlaceSearch.getVersionValidity()))) {
+                (stopPlaceSearch.getVersionValidity() == null || ExportParams.VersionValidity.ALL.equals(stopPlaceSearch.getVersionValidity()))
+                && !CollectionUtils.isEmpty(stopPlaceSearch.getNetexIdList())) {
+
+            // Fetch max versions of stops. But only if the following is true:
+            // point in time is null, allversions is false, version validity is null or ALL, and last: getNetexIdList is not empty
+            // If the netex id list is provided, it makes sense to only return max version.
+            // On the other hand, if not provided, version validity ALL should give you all versions.
+
             operators.add("and");
             wheres.add("s.version = (select max(sv.version) from stop_place sv where sv.netex_id = s.netex_id)");
         }
@@ -234,19 +248,17 @@ public class StopPlaceQueryFromSearchBuilder {
             String pointInTimeCondition = createPointInTimeCondition("s", "p");
             parameters.put("pointInTime", Timestamp.from(stopPlaceSearch.getPointInTime()));
             wheres.add(pointInTimeCondition);
-        } else if (stopPlaceSearch.getVersionValidity() != null) {
-            operators.add("and");
-
-            if (ExportParams.VersionValidity.CURRENT.equals(stopPlaceSearch.getVersionValidity())) {
+        } else if (ExportParams.VersionValidity.CURRENT.equals(stopPlaceSearch.getVersionValidity())) {
+                operators.add("and");
                 parameters.put("pointInTime", Date.from(Instant.now()));
                 String currentQuery = "(%s.from_date <= :pointInTime AND (%s.to_date >= :pointInTime or %s.to_date IS NULL))";
                 wheres.add("(" + formatRepeatedValue(currentQuery, "s", 3) + " or " + formatRepeatedValue(currentQuery, "p", 3) + ")");
-            } else if (ExportParams.VersionValidity.CURRENT_FUTURE.equals(stopPlaceSearch.getVersionValidity())) {
+        } else if (ExportParams.VersionValidity.CURRENT_FUTURE.equals(stopPlaceSearch.getVersionValidity()) || stopPlaceSearch.getVersionValidity() == null) {
+             operators.add("and");
                 parameters.put("pointInTime", Date.from(Instant.now()));
                 String futureQuery = "p.netex_id is null and (s.to_date >= :pointInTime OR s.to_date IS NULL)";
                 String parentFutureQuery = "p.netex_id is not null and (p.to_date >= :pointInTime OR p.to_date IS NULL)";
                 wheres.add("((" + futureQuery + ") or (" + parentFutureQuery + "))");
-            }
         }
 
         if (stopPlaceSearch.isWithoutLocationOnly()) {

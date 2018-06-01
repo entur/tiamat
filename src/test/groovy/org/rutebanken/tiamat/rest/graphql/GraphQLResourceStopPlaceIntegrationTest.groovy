@@ -718,6 +718,7 @@ def class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourc
                 "          }" +
                 "       }) { " +
                 "  id " +
+                "  weighting " +
                 "  name { value } " +
                 "  shortName { value } " +
                 "  description { value } " +
@@ -736,6 +737,7 @@ def class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourc
                     .body("geometry.type", equalTo("Point"))
                     .body("geometry.coordinates[0][0]", comparesEqualTo(lon))
                     .body("geometry.coordinates[0][1]", comparesEqualTo(lat))
+                    .body("weighting", comparesEqualTo(InterchangeWeightingEnumeration.INTERCHANGE_ALLOWED.value()))
 
         assertThat(entityChangedJMSListener.hasReceivedEvent(null, 1l, EntityChangedEvent.CrudAction.CREATE)).isTrue()
     }
@@ -1112,6 +1114,17 @@ def class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourc
                 .body("id", equalTo(stopPlace.getNetexId()))
                 .body("transportMode", equalTo(newTransportMode))
                 .body("submode", equalTo(newSubmode))
+
+        def stopPlaces = stopPlaceRepository.findAll()
+        for(stopPlaceVersion in stopPlaces) {
+            if( stopPlaceVersion.version == 1) {
+                assertThat(stopPlaceVersion.busSubmode).as("version 1").isNotNull().is(equalTo(BusSubmodeEnumeration.LOCAL_BUS))
+                assertThat(stopPlaceVersion.tramSubmode).as("version 1").isNull()
+            } else if (stopPlaceVersion.version == 2) {
+                assertThat(stopPlaceVersion.busSubmode).as("version 2").isNull()
+                assertThat(stopPlaceVersion.tramSubmode).as("version 2").isNotNull().is(equalTo(TramSubmodeEnumeration.LOCAL_TRAM))
+            }
+        }
     }
 
     @Test

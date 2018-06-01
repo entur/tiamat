@@ -15,10 +15,12 @@
 
 package org.rutebanken.tiamat.versioning;
 
+import com.google.common.collect.Sets;
 import org.rutebanken.tiamat.changelog.EntityChangedListener;
 import org.rutebanken.tiamat.importer.finder.NearbyStopPlaceFinder;
 import org.rutebanken.tiamat.importer.finder.StopPlaceByQuayOriginalIdFinder;
 import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
 import org.rutebanken.tiamat.repository.EntityInVersionRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.repository.TariffZoneRepository;
@@ -30,11 +32,13 @@ import org.rutebanken.tiamat.versioning.util.AccessibilityAssessmentOptimizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.lang.reflect.Field;
 import java.time.Instant;
-import java.util.Arrays;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
@@ -46,6 +50,9 @@ import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDI
 public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPlace> {
 
     private static final Logger logger = LoggerFactory.getLogger(StopPlaceVersionedSaverService.class);
+
+    public static final InterchangeWeightingEnumeration DEFAULT_WEIGHTING = InterchangeWeightingEnumeration.INTERCHANGE_ALLOWED;
+
 
     @Autowired
     private StopPlaceRepository stopPlaceRepository;
@@ -70,6 +77,9 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
 
     @Autowired
     private ReferenceResolver referenceResolver;
+
+    @Autowired
+    private SubmodeValidator submodeValidator;
 
     @Override
     public EntityInVersionRepository<StopPlace> getRepository() {
@@ -99,6 +109,8 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
 
         authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(newVersion));
 
+        submodeValidator.validate(newVersion);
+
         Instant changed = Instant.now();
 
         logger.debug("Rearrange accessibility assessments for: {}", newVersion);
@@ -123,6 +135,11 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
 
         newVersion.setChangedBy(usernameFetcher.getUserNameForAuthenticatedUser());
         logger.info("StopPlace [{}], version {} changed by user [{}]. {}", newVersion.getNetexId(), newVersion.getVersion(), newVersion.getChangedBy(), newVersion.getValidBetween());
+
+        if(newVersion.getWeighting() == null) {
+            logger.info("Weighting is null for stop {} {}. Setting default value {}.", newVersion.getName(), newVersion.getNetexId(), DEFAULT_WEIGHTING);
+            newVersion.setWeighting(DEFAULT_WEIGHTING);
+        }
 
         countyAndMunicipalityLookupService.populateTopographicPlaceRelation(newVersion);
         tariffZonesLookupService.populateTariffZone(newVersion);
