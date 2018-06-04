@@ -342,7 +342,7 @@ public class GraphQLNames {
 
     public static final String VERSION_VALIDITY_ARG = "versionValidity";
     public static final String VERSION_VALIDITY_ARG_DESCRIPTION = "Controls returned stop places based on time. " +
-            "Only return stop places wich are valid currently, currently and in the future or just all versions. Default value: " + DEFAULT_VERSION_VALIDITY.name();
+            "Only return stop places wich are valid currently, currently and in the future or just all versions. Default value: CURRENT";
 
     public static final String POINT_IN_TIME = "pointInTime";
     public static final String POINT_IN_TIME_ARG_DESCRIPTION = "Sets the point in time to use in search. Only StopPlaces " +

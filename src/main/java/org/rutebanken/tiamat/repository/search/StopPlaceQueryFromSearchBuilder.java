@@ -131,6 +131,11 @@ public class StopPlaceQueryFromSearchBuilder {
             " join value_items vi on vi.value_id = spkv.key_values_id" +
             " where substring(vi.items, 4, 1) = ':' and lower(substring(vi.items, 1, 3)) = :codeSpace)";
 
+    /**
+     * Default version validity for searches where pointInTime is not given.
+     */
+    private final ExportParams.VersionValidity defaultVersionValidity;
+
 
     @Autowired
     private SearchHelper searchHelper;
@@ -146,9 +151,12 @@ public class StopPlaceQueryFromSearchBuilder {
     private final ExportParamsAndStopPlaceSearchValidator exportParamsAndStopPlaceSearchValidator;
 
     @Autowired
-    public StopPlaceQueryFromSearchBuilder(@Value(" ${stopPlaces.search.commonWordsToIgnore:}") String commonWordsToIgnore, ExportParamsAndStopPlaceSearchValidator exportParamsAndStopPlaceSearchValidator) {
+    public StopPlaceQueryFromSearchBuilder(@Value(" ${stopPlaces.search.commonWordsToIgnore:}") String commonWordsToIgnore,
+                                           ExportParamsAndStopPlaceSearchValidator exportParamsAndStopPlaceSearchValidator,
+                                           @Value(value = "${stopPlace.search.defaultVersionValidity:CURRENT}") ExportParams.VersionValidity defaultVersionValidity) {
         this.commonWordsToIgnore = StringUtils.isNotEmpty(commonWordsToIgnore) ? new HashSet<>(Arrays.asList(commonWordsToIgnore.split(","))) : new HashSet<>();
         this.exportParamsAndStopPlaceSearchValidator = exportParamsAndStopPlaceSearchValidator;
+        this.defaultVersionValidity = defaultVersionValidity;
     }
 
     public Pair<String, Map<String, Object>> buildQueryString(ExportParams exportParams) {
@@ -159,8 +167,8 @@ public class StopPlaceQueryFromSearchBuilder {
 
         final ExportParams.VersionValidity versionValidity;
         if(stopPlaceSearch.getPointInTime() == null && stopPlaceSearch.getVersionValidity() == null) {
-            logger.debug("pointInTime and versionValidity not set. Defaulting to version validity ");
-            versionValidity = DEFAULT_VERSION_VALIDITY;
+            logger.debug("pointInTime and versionValidity not set. Defaulting to version validity " + defaultVersionValidity);
+            versionValidity = defaultVersionValidity;
         } else {
             versionValidity = stopPlaceSearch.getVersionValidity();
         }
