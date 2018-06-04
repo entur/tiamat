@@ -16,6 +16,7 @@
 package org.rutebanken.tiamat.versioning;
 
 import com.google.common.collect.Sets;
+import org.rutebanken.tiamat.auth.StopPlaceAuthorizationService;
 import org.rutebanken.tiamat.changelog.EntityChangedListener;
 import org.rutebanken.tiamat.importer.finder.NearbyStopPlaceFinder;
 import org.rutebanken.tiamat.importer.finder.StopPlaceByQuayOriginalIdFinder;
@@ -81,6 +82,9 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
     @Autowired
     private SubmodeValidator submodeValidator;
 
+    @Autowired
+    private StopPlaceAuthorizationService stopPlaceAuthorizationService;
+
     @Override
     public EntityInVersionRepository<StopPlace> getRepository() {
         return stopPlaceRepository;
@@ -107,7 +111,7 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
             }
         }
 
-        authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(newVersion));
+        stopPlaceAuthorizationService.assertAuthorized(ROLE_EDIT_STOPS, newVersion);
 
         submodeValidator.validate(newVersion);
 
@@ -125,11 +129,11 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
             newVersion.setChanged(changed);
             logger.debug("About to terminate previous version for {},{}", existingVersion.getNetexId(), existingVersion.getVersion());
             StopPlace existingStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(existingVersion.getNetexId());
-            authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(existingStopPlace));
+            stopPlaceAuthorizationService.assertAuthorized(ROLE_EDIT_STOPS, existingStopPlace);
             logger.debug("Found previous version {},{}. Terminating it.", existingStopPlace.getNetexId(), existingStopPlace.getVersion());
             validityUpdater.terminateVersion(existingStopPlace, newVersionValidFrom.minusMillis(MILLIS_BETWEEN_VERSIONS));
         }
-        
+
         newVersion =  versionIncrementor.initiateOrIncrementVersions(newVersion);
 
         newVersion.setChangedBy(usernameFetcher.getUserNameForAuthenticatedUser());
