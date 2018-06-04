@@ -19,6 +19,7 @@ import org.rutebanken.tiamat.rest.graphql.scalars.DateScalar;
 
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.MERGED_ID_KEY;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
+import static org.rutebanken.tiamat.repository.search.StopPlaceQueryFromSearchBuilder.DEFAULT_VERSION_VALIDITY;
 import static org.rutebanken.tiamat.rest.graphql.StopPlaceRegisterGraphQLSchema.DEFAULT_PAGE_VALUE;
 import static org.rutebanken.tiamat.rest.graphql.StopPlaceRegisterGraphQLSchema.DEFAULT_SIZE_VALUE;
 import static org.rutebanken.tiamat.rest.graphql.scalars.DateScalar.DATE_TIME_PATTERN;
@@ -308,12 +309,6 @@ public class GraphQLNames {
     public static final String WITH_NEARBY_SIMILAR_DUPLICATES = "withNearbySimilarDuplicates";
     public static final String WITH_NEARBY_SIMILAR_DUPLICATES_ARG_DESCRIPTION = "withNearbySimilarDuplicates";
 
-    public static final String POINT_IN_TIME = "pointInTime";
-    public static final String POINT_IN_TIME_ARG_DESCRIPTION = "Sets the point in time to use in search. Only StopPlaces " +
-            "valid on the given timestamp will be returned. " +
-            "If no value is provided, the search will fall back to VersionValidity's default value." +
-            " Date format: "+ DateScalar.DATE_TIME_PATTERN;
-
     public static final String LONGITUDE_MIN = "lonMin";
     public static final String LATITUDE_MIN = "latMin";
     public static final String LONGITUDE_MAX = "lonMax";
@@ -345,8 +340,15 @@ public class GraphQLNames {
 
     public static final String TOTAL_CAPACITY = "totalCapacity";
 
-    public static final String VERSION_VALIDITY_ARG = "versionValitidy";
-    public static final String VERSION_VALIDITY_ARG_DESCRIPTION = "Controls returned stop places based on time. Only return stop places witch are currently valid, currently valid and in the future or just all versions";
+    public static final String VERSION_VALIDITY_ARG = "versionValidity";
+    public static final String VERSION_VALIDITY_ARG_DESCRIPTION = "Controls returned stop places based on time. " +
+            "Only return stop places wich are valid currently, currently and in the future or just all versions. Default value: " + DEFAULT_VERSION_VALIDITY.name();
+
+    public static final String POINT_IN_TIME = "pointInTime";
+    public static final String POINT_IN_TIME_ARG_DESCRIPTION = "Sets the point in time to use in search. Only StopPlaces " +
+            "valid on the given timestamp will be returned. " +
+            "If no value is provided, the search will fall back "+ VERSION_VALIDITY_ARG +"'s default value. Cannot be combined with " + VERSION_VALIDITY_ARG +
+            " Date format: "+ DateScalar.DATE_TIME_PATTERN;
 
     public static final String PARKING_TYPE = "parkingType";
     public static final String PARKING_VEHICLE_TYPES = "parkingVehicleTypes";
