@@ -18,25 +18,21 @@ package org.rutebanken.tiamat.auth;
 import org.junit.Test;
 import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
 import org.rutebanken.helper.organisation.RoleAssignment;
-import org.rutebanken.helper.organisation.RoleAssignmentExtractor;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.auth.check.TiamatOriganisationChecker;
 import org.rutebanken.tiamat.auth.check.TopographicPlaceChecker;
 import org.rutebanken.tiamat.config.AuthorizationServiceConfig;
-import org.rutebanken.tiamat.model.BusSubmodeEnumeration;
-import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
-import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.model.StopTypeEnumeration;
+import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.service.stopplace.MultiModalStopPlaceEditor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.access.AccessDeniedException;
 
-import javax.management.relation.Role;
-import java.util.ArrayList;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.rutebanken.helper.organisation.AuthorizationConstants.ENTITY_TYPE;
 import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
 
@@ -65,6 +61,14 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
     @Autowired
     private MultiModalStopPlaceEditor multiModalStopPlaceEditor;
 
+
+    private static final RoleAssignment ADMIN =
+            RoleAssignment.builder()
+                .withRole(ROLE_EDIT_STOPS)
+                .withOrganisation("OST")
+                .withEntityClassification(ENTITY_TYPE, "StopPlace")
+                .build();
+
     private final ReflectionAuthorizationService reflectionAuthorizationService;
 
 
@@ -81,8 +85,30 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
 
 
     @Test
-    public void authorizedForStopPlaceTypeWhenOthersBlacklisted() {
+    public void authorizedOnstreetBusWhenAccessToOnstreetBus() {
 
+        // Setup using admin role assignment
+        mockedRoleAssignmentExtractor.setNextReturnedRoleAssignment(ADMIN);
+
+        StopPlace onstreetBus = new StopPlace(new EmbeddableMultilingualString("onstreetBus"));
+        onstreetBus.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
+
+        StopPlace railStation = new StopPlace(new EmbeddableMultilingualString("railStation"));
+        railStation.setStopPlaceType(StopTypeEnumeration.RAIL_STATION);
+
+        StopPlace railReplacementBus = new StopPlace(new EmbeddableMultilingualString("railReplacementBus"));
+        railReplacementBus.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
+        railReplacementBus.setBusSubmode(BusSubmodeEnumeration.RAIL_REPLACEMENT_BUS);
+
+        List<StopPlace> childStops = Arrays.asList(onstreetBus, railStation, railReplacementBus);
+        stopPlaceRepository.save(childStops);
+
+        StopPlace existingVersion = multiModalStopPlaceEditor.createMultiModalParentStopPlace(
+                childStops.stream().map(s -> s.getNetexId()).collect(Collectors.toList()),
+                new EmbeddableMultilingualString("Multi modal stop placee"));
+
+
+        // This user can only edit
         RoleAssignment roleAssignment = RoleAssignment.builder()
                 .withRole(ROLE_EDIT_STOPS)
                 .withOrganisation("OST")
@@ -93,26 +119,136 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
 
         mockedRoleAssignmentExtractor.setNextReturnedRoleAssignment(roleAssignment);
 
+        StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(existingVersion, StopPlace.class);
+        newVersion.getChildren().removeIf(child -> !child.getNetexId().equals(onstreetBus.getNetexId()));
 
-        StopPlace onstreetBus = new StopPlace();
+        stopPlaceAuthorizationService.assertEditAuthorized(existingVersion, newVersion);
+    }
+
+    @Test
+    public void authorizedRailStationChildWhenAccessToRailStation() {
+
+        // Setup using admin role assignment
+        mockedRoleAssignmentExtractor.setNextReturnedRoleAssignment(ADMIN);
+
+        StopPlace onstreetBus = new StopPlace(new EmbeddableMultilingualString("onstreetBus"));
         onstreetBus.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
 
-        StopPlace railStation = new StopPlace();
+        StopPlace railStation = new StopPlace(new EmbeddableMultilingualString("railStation"));
         railStation.setStopPlaceType(StopTypeEnumeration.RAIL_STATION);
 
-        StopPlace railReplacementBus = new StopPlace();
+        StopPlace railReplacementBus = new StopPlace(new EmbeddableMultilingualString("railReplacementBus"));
         railReplacementBus.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
         railReplacementBus.setBusSubmode(BusSubmodeEnumeration.RAIL_REPLACEMENT_BUS);
 
         List<StopPlace> childStops = Arrays.asList(onstreetBus, railStation, railReplacementBus);
         stopPlaceRepository.save(childStops);
 
-        StopPlace multiModalStopPlacee = multiModalStopPlaceEditor.createMultiModalParentStopPlace(
+        StopPlace existingVersion = multiModalStopPlaceEditor.createMultiModalParentStopPlace(
                 childStops.stream().map(s -> s.getNetexId()).collect(Collectors.toList()),
                 new EmbeddableMultilingualString("Multi modal stop placee"));
 
 
-        stopPlaceAuthorizationService.assertAuthorized(ROLE_EDIT_STOPS, multiModalStopPlacee);
+        // This user can only edit
+        RoleAssignment roleAssignment = RoleAssignment.builder()
+                .withRole(ROLE_EDIT_STOPS)
+                .withOrganisation("OST")
+                .withEntityClassification(ENTITY_TYPE, "StopPlace")
+                .withEntityClassification("StopPlaceType", "railStation")
+                .build();
+
+        mockedRoleAssignmentExtractor.setNextReturnedRoleAssignment(roleAssignment);
+
+        StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(existingVersion, StopPlace.class);
+        newVersion.getChildren().removeIf(child -> !child.getNetexId().equals(railStation.getNetexId()));
+
+        stopPlaceAuthorizationService.assertEditAuthorized(existingVersion, newVersion);
+    }
+
+    @Test
+    public void notAuthorizedOnstreetBusChildWhenAccessToRailStationOnly() {
+
+        // Setup using admin role assignment
+        mockedRoleAssignmentExtractor.setNextReturnedRoleAssignment(ADMIN);
+
+        StopPlace onstreetBus = new StopPlace(new EmbeddableMultilingualString("onstreetBus"));
+        onstreetBus.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
+
+        StopPlace railStation = new StopPlace(new EmbeddableMultilingualString("railStation"));
+        railStation.setStopPlaceType(StopTypeEnumeration.RAIL_STATION);
+
+        StopPlace railReplacementBus = new StopPlace(new EmbeddableMultilingualString("railReplacementBus"));
+        railReplacementBus.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
+        railReplacementBus.setBusSubmode(BusSubmodeEnumeration.RAIL_REPLACEMENT_BUS);
+
+        List<StopPlace> childStops = Arrays.asList(onstreetBus, railStation, railReplacementBus);
+        stopPlaceRepository.save(childStops);
+
+        StopPlace existingVersion = multiModalStopPlaceEditor.createMultiModalParentStopPlace(
+                childStops.stream().map(s -> s.getNetexId()).collect(Collectors.toList()),
+                new EmbeddableMultilingualString("Multi modal stop placee"));
+
+
+        // This user can only edit
+        RoleAssignment roleAssignment = RoleAssignment.builder()
+                .withRole(ROLE_EDIT_STOPS)
+                .withOrganisation("OST")
+                .withEntityClassification(ENTITY_TYPE, "StopPlace")
+                .withEntityClassification("StopPlaceType", "railStation")
+                .build();
+
+        mockedRoleAssignmentExtractor.setNextReturnedRoleAssignment(roleAssignment);
+
+        StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(existingVersion, StopPlace.class);
+        newVersion.getChildren().removeIf(child -> !child.getNetexId().equals(onstreetBus.getNetexId()));
+
+        assertThatThrownBy(() ->
+                stopPlaceAuthorizationService.assertEditAuthorized(existingVersion, newVersion))
+                .isInstanceOf(AccessDeniedException.class);
+    }
+
+    @Test
+    public void notAllowedToSetTerminationDateWhenNoAccessToAllChildren() {
+
+        // Setup using admin role assignment
+        mockedRoleAssignmentExtractor.setNextReturnedRoleAssignment(ADMIN);
+
+        StopPlace onstreetBus = new StopPlace(new EmbeddableMultilingualString("onstreetBus"));
+        onstreetBus.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
+
+        StopPlace railStation = new StopPlace(new EmbeddableMultilingualString("railStation"));
+        railStation.setStopPlaceType(StopTypeEnumeration.RAIL_STATION);
+
+        StopPlace railReplacementBus = new StopPlace(new EmbeddableMultilingualString("railReplacementBus"));
+        railReplacementBus.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
+        railReplacementBus.setBusSubmode(BusSubmodeEnumeration.RAIL_REPLACEMENT_BUS);
+
+        List<StopPlace> childStops = Arrays.asList(onstreetBus, railStation, railReplacementBus);
+        stopPlaceRepository.save(childStops);
+
+        StopPlace existingVersion = multiModalStopPlaceEditor.createMultiModalParentStopPlace(
+                childStops.stream().map(s -> s.getNetexId()).collect(Collectors.toList()),
+                new EmbeddableMultilingualString("Multi modal stop placee"));
+
+
+        // This user can only edit
+        RoleAssignment roleAssignment = RoleAssignment.builder()
+                .withRole(ROLE_EDIT_STOPS)
+                .withOrganisation("OST")
+                .withEntityClassification(ENTITY_TYPE, "StopPlace")
+                .withEntityClassification("StopPlaceType", "onstreetBus")
+                .build();
+
+        mockedRoleAssignmentExtractor.setNextReturnedRoleAssignment(roleAssignment);
+
+        StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(existingVersion, StopPlace.class);
+        newVersion.getChildren().removeIf(child -> !child.getNetexId().equals(onstreetBus.getNetexId()));
+
+        newVersion.setValidBetween(new ValidBetween(null, Instant.now()));
+
+        assertThatThrownBy(() ->
+                stopPlaceAuthorizationService.assertEditAuthorized(existingVersion, newVersion))
+                .isInstanceOf(AccessDeniedException.class);
     }
 
 }
