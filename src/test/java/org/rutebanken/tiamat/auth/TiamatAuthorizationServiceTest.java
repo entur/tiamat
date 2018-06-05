@@ -206,7 +206,7 @@ public class TiamatAuthorizationServiceTest extends TiamatIntegrationTest {
                         .withEntityClassification(ENTITY_TYPE, "StopPlace")
                         .withEntityClassification("Submode", "railReplacementBus")
                         .build());
-        mockedRoleAssignmentExtractor.setNextReturnedRoleAssignmentList(roleAssignments);
+        mockedRoleAssignmentExtractor.setNextReturnedRoleAssignment(roleAssignments);
         return roleAssignments;
     }
 

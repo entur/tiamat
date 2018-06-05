@@ -156,7 +156,7 @@ class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResourceInte
 
     @Test
     void createNewPathLinkByUserWithoutAuthorizationForStopPlaceType() throws Exception {
-        mockedRoleAssignmentExtractor.setNextReturnedRoleAssignmentList(
+        mockedRoleAssignmentExtractor.setNextReturnedRoleAssignment(
                 RoleAssignmentListBuilder.builder().withStopPlaceOfType(StopTypeEnumeration.BUS_STATION).build())
         PathLinkQuery query = createNewPathLinkQuery(StopTypeEnumeration.FERRY_STOP)
         executeGraphqQLQueryOnly(query.query, HttpStatus.FORBIDDEN.value())
@@ -164,7 +164,7 @@ class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResourceInte
 
     @Test
     void createNewPathLinkByUserWithCorrectAuthorizationForStopPlaceType() throws Exception {
-        mockedRoleAssignmentExtractor.setNextReturnedRoleAssignmentList(
+        mockedRoleAssignmentExtractor.setNextReturnedRoleAssignment(
                 RoleAssignmentListBuilder.builder().withStopPlaceOfType(StopTypeEnumeration.BUS_STATION).build())
         PathLinkQuery query = createNewPathLinkQuery(StopTypeEnumeration.BUS_STATION)
 
