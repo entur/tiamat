@@ -15,9 +15,11 @@
 
 package org.rutebanken.tiamat.auth;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
 import org.rutebanken.helper.organisation.RoleAssignment;
+import org.rutebanken.helper.organisation.RoleAssignmentExtractor;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.auth.check.TiamatOriganisationChecker;
 import org.rutebanken.tiamat.auth.check.TopographicPlaceChecker;
@@ -33,62 +35,76 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.rutebanken.helper.organisation.AuthorizationConstants.ENTITY_TYPE;
 import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
 
 
 /**
+ * This test class covers special cases unique to stop places, and multimodal stop place editing.
  * Testing authorization for generic use cases is done in {@link TiamatAuthorizationServiceTest}.
- * This test class covers special cases unique to stop places.
  */
 public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
+
+    private static final RoleAssignment ADMIN =
+            RoleAssignment.builder()
+                    .withRole(ROLE_EDIT_STOPS)
+                    .withOrganisation("OST")
+                    .withEntityClassification(ENTITY_TYPE, "StopPlace")
+                    .build();
+
+    @Autowired
+    private MultiModalStopPlaceEditor multiModalStopPlaceEditor;
+
+    @Autowired
+    private ReflectionAuthorizationService reflectionAuthorizationService;
 
     @Autowired
     private StopPlaceAuthorizationService stopPlaceAuthorizationService;
 
     @Autowired
-    private MockedRoleAssignmentExtractor mockedRoleAssignmentExtractor;
-
-    @Autowired
-    private TopographicPlaceChecker topographicPlaceChecker;
+    private TiamatEntityResolver tiamatEntityResolver;
 
     @Autowired
     private TiamatOriganisationChecker tiamatOriganisationChecker;
 
     @Autowired
-    private TiamatEntityResolver tiamatEntityResolver;
+    private TopographicPlaceChecker topographicPlaceChecker;
 
-    @Autowired
-    private MultiModalStopPlaceEditor multiModalStopPlaceEditor;
+    /**
+     * Not using {@link MockedRoleAssignmentExtractor} because it resets the returned role assignment on each call.
+     * The {@link StopPlaceAuthorizationService} makes several calls.
+     */
+    private RoleAssignmentExtractor roleAssignmentExtractor;
 
-
-    private static final RoleAssignment ADMIN =
-            RoleAssignment.builder()
-                .withRole(ROLE_EDIT_STOPS)
-                .withOrganisation("OST")
-                .withEntityClassification(ENTITY_TYPE, "StopPlace")
-                .build();
-
-    private final ReflectionAuthorizationService reflectionAuthorizationService;
-
-
-
-    public StopPlaceAuthorizationServiceTest() {
+    @Before
+    public void StopPlaceAuthorizationServiceTest() {
+        roleAssignmentExtractor = mock(RoleAssignmentExtractor.class);
 
         this.reflectionAuthorizationService = new AuthorizationServiceConfig().getAuthorizationService(
-                mockedRoleAssignmentExtractor,
+                roleAssignmentExtractor,
                 true,
                 tiamatOriganisationChecker,
                 topographicPlaceChecker,
                 tiamatEntityResolver);
+
+        stopPlaceAuthorizationService = new StopPlaceAuthorizationService(reflectionAuthorizationService);
+    }
+
+    private void setRoleAssignmentReturned(RoleAssignment roleAssignment) {
+
+        List<RoleAssignment> roleAssignments = Arrays.asList(roleAssignment);
+        when(roleAssignmentExtractor.getRoleAssignmentsForUser()).thenReturn(roleAssignments);
+        when(roleAssignmentExtractor.getRoleAssignmentsForUser(any())).thenReturn(roleAssignments);
     }
 
 
     @Test
     public void authorizedOnstreetBusWhenAccessToOnstreetBus() {
 
-        // Setup using admin role assignment
-        mockedRoleAssignmentExtractor.setNextReturnedRoleAssignment(ADMIN);
+        setRoleAssignmentReturned(ADMIN);
 
         StopPlace onstreetBus = new StopPlace(new EmbeddableMultilingualString("onstreetBus"));
         onstreetBus.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
@@ -117,7 +133,7 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
                 .withEntityClassification("StopPlaceType", "!railStation")
                 .build();
 
-        mockedRoleAssignmentExtractor.setNextReturnedRoleAssignment(roleAssignment);
+        setRoleAssignmentReturned(roleAssignment);
 
         StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(existingVersion, StopPlace.class);
         newVersion.getChildren().removeIf(child -> !child.getNetexId().equals(onstreetBus.getNetexId()));
@@ -129,7 +145,7 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
     public void authorizedRailStationChildWhenAccessToRailStation() {
 
         // Setup using admin role assignment
-        mockedRoleAssignmentExtractor.setNextReturnedRoleAssignment(ADMIN);
+        setRoleAssignmentReturned(ADMIN);
 
         StopPlace onstreetBus = new StopPlace(new EmbeddableMultilingualString("onstreetBus"));
         onstreetBus.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
@@ -157,7 +173,7 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
                 .withEntityClassification("StopPlaceType", "railStation")
                 .build();
 
-        mockedRoleAssignmentExtractor.setNextReturnedRoleAssignment(roleAssignment);
+        setRoleAssignmentReturned(roleAssignment);
 
         StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(existingVersion, StopPlace.class);
         newVersion.getChildren().removeIf(child -> !child.getNetexId().equals(railStation.getNetexId()));
@@ -169,7 +185,7 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
     public void notAuthorizedOnstreetBusChildWhenAccessToRailStationOnly() {
 
         // Setup using admin role assignment
-        mockedRoleAssignmentExtractor.setNextReturnedRoleAssignment(ADMIN);
+        setRoleAssignmentReturned(ADMIN);
 
         StopPlace onstreetBus = new StopPlace(new EmbeddableMultilingualString("onstreetBus"));
         onstreetBus.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
@@ -197,7 +213,7 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
                 .withEntityClassification("StopPlaceType", "railStation")
                 .build();
 
-        mockedRoleAssignmentExtractor.setNextReturnedRoleAssignment(roleAssignment);
+        setRoleAssignmentReturned(roleAssignment);
 
         StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(existingVersion, StopPlace.class);
         newVersion.getChildren().removeIf(child -> !child.getNetexId().equals(onstreetBus.getNetexId()));
@@ -211,7 +227,7 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
     public void notAllowedToSetTerminationDateWhenNoAccessToAllChildren() {
 
         // Setup using admin role assignment
-        mockedRoleAssignmentExtractor.setNextReturnedRoleAssignment(ADMIN);
+        setRoleAssignmentReturned(ADMIN);
 
         StopPlace onstreetBus = new StopPlace(new EmbeddableMultilingualString("onstreetBus"));
         onstreetBus.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
@@ -239,7 +255,7 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
                 .withEntityClassification("StopPlaceType", "onstreetBus")
                 .build();
 
-        mockedRoleAssignmentExtractor.setNextReturnedRoleAssignment(roleAssignment);
+        setRoleAssignmentReturned(roleAssignment);
 
         StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(existingVersion, StopPlace.class);
         newVersion.getChildren().removeIf(child -> !child.getNetexId().equals(onstreetBus.getNetexId()));
