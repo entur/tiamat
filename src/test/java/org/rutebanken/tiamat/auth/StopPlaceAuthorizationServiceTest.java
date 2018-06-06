@@ -43,11 +43,15 @@ import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDI
 
 
 /**
- * This test class covers special cases unique to stop places, and multimodal stop place editing.
+ * This test class covers testing special cases unique to stop places, and multimodal stop places.
+ * <p>
  * Testing authorization for generic use cases is done in {@link TiamatAuthorizationServiceTest}.
  */
 public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
 
+    /**
+     * Admin role used for creating stops during test setup.
+     */
     private static final RoleAssignment ADMIN =
             RoleAssignment.builder()
                     .withRole(ROLE_EDIT_STOPS)
@@ -55,17 +59,26 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
                     .withEntityClassification(ENTITY_TYPE, "StopPlace")
                     .build();
 
+    /**
+     * Multimodal stop place editor is used for creating test cases.
+     */
     @Autowired
     private MultiModalStopPlaceEditor multiModalStopPlaceEditor;
 
-    @Autowired
+    /**
+     * The reflection authorization service is the generic authorization service used by {@link StopPlaceAuthorizationService}
+     */
     private ReflectionAuthorizationService reflectionAuthorizationService;
 
+    /**
+     * Class being tested
+     */
     @Autowired
     private StopPlaceAuthorizationService stopPlaceAuthorizationService;
 
     @Autowired
     private TiamatEntityResolver tiamatEntityResolver;
+
 
     @Autowired
     private TiamatOriganisationChecker tiamatOriganisationChecker;
@@ -74,11 +87,17 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
     private TopographicPlaceChecker topographicPlaceChecker;
 
     /**
+     * Mocked class for extracting role assignments.
+     * <p>
      * Not using {@link MockedRoleAssignmentExtractor} because it resets the returned role assignment on each call.
      * The {@link StopPlaceAuthorizationService} makes several calls.
      */
     private RoleAssignmentExtractor roleAssignmentExtractor;
 
+    /**
+     * Set up stopPlaceAuthorizationService with custom roleAssignmentExtractor.
+     * Borrowing the config class to get field mappings.
+     */
     @Before
     public void StopPlaceAuthorizationServiceTest() {
         roleAssignmentExtractor = mock(RoleAssignmentExtractor.class);
@@ -106,18 +125,10 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
         stopPlaceRepository.save(childStops);
 
         StopPlace existingVersion = multiModalStopPlaceEditor.createMultiModalParentStopPlace(
-                childStops.stream().map(s -> s.getNetexId()).collect(Collectors.toList()),
-                new EmbeddableMultilingualString("Multi modal stop placee"));
+                toIdList(childStops),
+                new EmbeddableMultilingualString("Multi modal stop place with onstreetBus, railStation and railReplacementBus"));
 
-
-        // This user can only edit
-        RoleAssignment roleAssignment = RoleAssignment.builder()
-                .withRole(ROLE_EDIT_STOPS)
-                .withOrganisation("OST")
-                .withEntityClassification(ENTITY_TYPE, "StopPlace")
-                .withEntityClassification("StopPlaceType", "!airport")
-                .withEntityClassification("StopPlaceType", "!railStation")
-                .build();
+        RoleAssignment roleAssignment = canEditAllTypesExcept("airport", "railStation");
 
         setRoleAssignmentReturned(roleAssignment);
 
@@ -141,17 +152,10 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
         stopPlaceRepository.save(childStops);
 
         StopPlace existingVersion = multiModalStopPlaceEditor.createMultiModalParentStopPlace(
-                childStops.stream().map(s -> s.getNetexId()).collect(Collectors.toList()),
-                new EmbeddableMultilingualString("Multi modal stop placee"));
+                toIdList(childStops),
+                new EmbeddableMultilingualString("Another multi modal stop place with onstreetBus, railStation and railReplacementBus"));
 
-
-        // This user can only edit
-        RoleAssignment roleAssignment = RoleAssignment.builder()
-                .withRole(ROLE_EDIT_STOPS)
-                .withOrganisation("OST")
-                .withEntityClassification(ENTITY_TYPE, "StopPlace")
-                .withEntityClassification("StopPlaceType", "railStation")
-                .build();
+        RoleAssignment roleAssignment = canOnlyEdit("railStation");
 
         setRoleAssignmentReturned(roleAssignment);
 
@@ -176,17 +180,10 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
         stopPlaceRepository.save(childStops);
 
         StopPlace existingVersion = multiModalStopPlaceEditor.createMultiModalParentStopPlace(
-                childStops.stream().map(s -> s.getNetexId()).collect(Collectors.toList()),
-                new EmbeddableMultilingualString("Multi modal stop placee"));
+                toIdList(childStops),
+                new EmbeddableMultilingualString("Multiple multi modal stop place with onstreetBus, railStation and railReplacementBus"));
 
-
-        // This user can only edit
-        RoleAssignment roleAssignment = RoleAssignment.builder()
-                .withRole(ROLE_EDIT_STOPS)
-                .withOrganisation("OST")
-                .withEntityClassification(ENTITY_TYPE, "StopPlace")
-                .withEntityClassification("StopPlaceType", "railStation")
-                .build();
+        RoleAssignment roleAssignment = canOnlyEdit("railStation");
 
         setRoleAssignmentReturned(roleAssignment);
 
@@ -212,17 +209,10 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
         stopPlaceRepository.save(childStops);
 
         StopPlace existingVersion = multiModalStopPlaceEditor.createMultiModalParentStopPlace(
-                childStops.stream().map(s -> s.getNetexId()).collect(Collectors.toList()),
-                new EmbeddableMultilingualString("Multi modal stop placee"));
+                toIdList(childStops),
+                new EmbeddableMultilingualString("Multi modal stop place that should be attempted terminated with validbetween"));
 
-
-        // This user can only edit
-        RoleAssignment roleAssignment = RoleAssignment.builder()
-                .withRole(ROLE_EDIT_STOPS)
-                .withOrganisation("OST")
-                .withEntityClassification(ENTITY_TYPE, "StopPlace")
-                .withEntityClassification("StopPlaceType", "onstreetBus")
-                .build();
+        RoleAssignment roleAssignment = canOnlyEdit("onstreetBus");
 
         setRoleAssignmentReturned(roleAssignment);
 
@@ -251,14 +241,39 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
         stopPlaceRepository.save(childStops);
 
         StopPlace existingVersion = multiModalStopPlaceEditor.createMultiModalParentStopPlace(
-                childStops.stream().map(s -> s.getNetexId()).collect(Collectors.toList()),
-                new EmbeddableMultilingualString("Multi modal stop placee"));
-
+                toIdList(childStops),
+                new EmbeddableMultilingualString("Multi modal stop place that should be terminated by an admin user"));
 
         StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(existingVersion, StopPlace.class);
 
         newVersion.setValidBetween(new ValidBetween(null, Instant.now()));
         stopPlaceAuthorizationService.assertEditAuthorized(existingVersion, newVersion);
+    }
+
+    private RoleAssignment canOnlyEdit(String stopPlaceType) {
+        return RoleAssignment.builder()
+                .withRole(ROLE_EDIT_STOPS)
+                .withOrganisation("OST")
+                .withEntityClassification(ENTITY_TYPE, "StopPlace")
+                .withEntityClassification("StopPlaceType", stopPlaceType)
+                .build();
+    }
+
+    private RoleAssignment canEditAllTypesExcept(String... excludedTypes) {
+        RoleAssignment.Builder roleAssignmentBuilder = RoleAssignment.builder()
+                .withRole(ROLE_EDIT_STOPS)
+                .withOrganisation("OST")
+                .withEntityClassification(ENTITY_TYPE, "StopPlace");
+
+        for (String excludedType : excludedTypes) {
+            roleAssignmentBuilder.withEntityClassification("StopPlaceType", "!" + excludedType);
+        }
+
+        return roleAssignmentBuilder.build();
+    }
+
+    private List<String> toIdList(List<StopPlace> children) {
+        return children.stream().map(s -> s.getNetexId()).collect(Collectors.toList());
     }
 
     private void setRoleAssignmentReturned(RoleAssignment roleAssignment) {
