@@ -100,6 +100,11 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
         when(roleAssignmentExtractor.getRoleAssignmentsForUser(any())).thenReturn(roleAssignments);
     }
 
+    private void removeAllChildrenExcept(StopPlace parentStopPlace, String exceptThisNetexId) {
+        parentStopPlace.getChildren().removeIf(child -> !child.getNetexId().equals(exceptThisNetexId));
+
+    }
+
 
     @Test
     public void authorizedOnstreetBusWhenAccessToOnstreetBus() {
@@ -136,7 +141,7 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
         setRoleAssignmentReturned(roleAssignment);
 
         StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(existingVersion, StopPlace.class);
-        newVersion.getChildren().removeIf(child -> !child.getNetexId().equals(onstreetBus.getNetexId()));
+        removeAllChildrenExcept(newVersion, onstreetBus.getNetexId());
 
         stopPlaceAuthorizationService.assertEditAuthorized(existingVersion, newVersion);
     }
@@ -176,7 +181,8 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
         setRoleAssignmentReturned(roleAssignment);
 
         StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(existingVersion, StopPlace.class);
-        newVersion.getChildren().removeIf(child -> !child.getNetexId().equals(railStation.getNetexId()));
+
+        removeAllChildrenExcept(newVersion, railStation.getNetexId());
 
         stopPlaceAuthorizationService.assertEditAuthorized(existingVersion, newVersion);
     }
@@ -216,7 +222,7 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
         setRoleAssignmentReturned(roleAssignment);
 
         StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(existingVersion, StopPlace.class);
-        newVersion.getChildren().removeIf(child -> !child.getNetexId().equals(onstreetBus.getNetexId()));
+        removeAllChildrenExcept(newVersion, onstreetBus.getNetexId());
 
         assertThatThrownBy(() ->
                 stopPlaceAuthorizationService.assertEditAuthorized(existingVersion, newVersion))
@@ -258,8 +264,9 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
         setRoleAssignmentReturned(roleAssignment);
 
         StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(existingVersion, StopPlace.class);
-        newVersion.getChildren().removeIf(child -> !child.getNetexId().equals(onstreetBus.getNetexId()));
+        removeAllChildrenExcept(newVersion, onstreetBus.getNetexId());
 
+        // Set termination date
         newVersion.setValidBetween(new ValidBetween(null, Instant.now()));
 
         assertThatThrownBy(() ->
@@ -292,7 +299,6 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
 
 
         StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(existingVersion, StopPlace.class);
-        newVersion.getChildren().removeIf(child -> !child.getNetexId().equals(onstreetBus.getNetexId()));
 
         newVersion.setValidBetween(new ValidBetween(null, Instant.now()));
         stopPlaceAuthorizationService.assertEditAuthorized(existingVersion, newVersion);
