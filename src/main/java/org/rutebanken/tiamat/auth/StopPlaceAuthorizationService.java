@@ -25,7 +25,6 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -46,10 +45,6 @@ public class StopPlaceAuthorizationService {
         this.authorizationService = authorizationService;
     }
 
-    public boolean isAuthorized(String requiredRole, Set<StopPlace> otherChilds) {
-        return authorizationService.isAuthorized(requiredRole, otherChilds);
-    }
-
     public void assertEditAuthorized(StopPlace existingVersion, StopPlace newVersion) {
         boolean accessToAllChildren;
 
@@ -61,19 +56,21 @@ public class StopPlaceAuthorizationService {
             authorizationService.assertAuthorized(ROLE_EDIT_STOPS, newVersion.getChildren());
 
             if (existingVersion != null) {
-                Set<String> existingChildren = existingVersion.getChildren().stream().map(s -> s.getNetexId()).collect(Collectors.toSet());
-                Set<String> newChildren = newVersion.getChildren().stream().map(s -> s.getNetexId()).collect(Collectors.toSet());
+                Set<String> existingChildrenIds = existingVersion.getChildren().stream().map(s -> s.getNetexId()).collect(Collectors.toSet());
+                Set<String> newChildrenIds = newVersion.getChildren().stream().map(s -> s.getNetexId()).collect(Collectors.toSet());
 
-                Sets.SetView<String> difference = Sets.difference(existingChildren, newChildren);
+                Sets.SetView<String> difference = Sets.difference(existingChildrenIds, newChildrenIds);
 
                 if (!difference.isEmpty()) {
                     logger.info("Childrens differ: {}", difference);
-                    accessToAllChildren = isAuthorized(ROLE_EDIT_STOPS, existingVersion.getChildren());
+                    accessToAllChildren = authorizationService.isAuthorized(ROLE_EDIT_STOPS, existingVersion.getChildren());
                     if (!accessToAllChildren) {
-                        logger.info("Detected a situation where the user does not have access to all child stops");
-                    }
-                    if (!accessToAllChildren && newVersion.getValidBetween().getToDate() != null) {
-                        throw new AccessDeniedException("The user does not have access to all child stops, and can therefore not set termination date for the parent stop place " + newVersion.getNetexId());
+                        logger.info("Detected a situation where the user does not have access to all existing child stops {}. About to check new version's termination date: {}.",
+                                existingChildrenIds,
+                                newVersion.getValidBetween());
+                        if (newVersion.getValidBetween() != null && newVersion.getValidBetween().getToDate() != null) {
+                            throw new AccessDeniedException("The user does not have access to all child stops, and can therefore not set termination date for the parent stop place " + newVersion.getNetexId());
+                        }
                     }
                 }
             }
