@@ -31,7 +31,8 @@ import java.util.stream.Collectors;
 import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
 
 /**
- * This authorization service is implemented for handling multi modal stops.
+ * This authorization service is implemented mainly for handling multi modal stops.
+ * Generic authorization logic should be implemented in and handled by {@link ReflectionAuthorizationService}.
  */
 @Service
 public class StopPlaceAuthorizationService {
@@ -45,7 +46,20 @@ public class StopPlaceAuthorizationService {
         this.authorizationService = authorizationService;
     }
 
-    public void assertEditAuthorized(StopPlace existingVersion, StopPlace newVersion) {
+    /**
+     * Assert that the user is authorized to edit the stop place.
+     *
+     * If the stop place is a parent stop place, the following will be checked:
+     * If the user does not have access to all childs stops, it can still edit a child stop it is privileged to edit, but cannot terminate the validity of the parent stop.
+     * In this situation, the newVersion of the stop must only be populated with the children that are relevant for change.
+     * If the newVersion of the stop place contain all children, and the user does not have authorization to edit those stop places, authorization is not granted.
+     *
+     * If the stop place is a normal mono modal stop place, the {@link ReflectionAuthorizationService} will be called directly.
+     *
+     * @param existingVersion
+     * @param newVersion
+     */
+    public void assertAuthorizedToEdit(StopPlace existingVersion, StopPlace newVersion) {
         boolean accessToAllChildren;
 
 

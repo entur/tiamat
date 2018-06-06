@@ -36,7 +36,6 @@ import java.time.Instant;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
-import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
 
 
 @Transactional
@@ -116,14 +115,14 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
         if (existingVersion == null) {
             logger.debug("Existing version is not present, which means new entity. {}", newVersion);
             newVersion.setCreated(changed);
-            stopPlaceAuthorizationService.assertEditAuthorized(null, newVersion);
+            stopPlaceAuthorizationService.assertAuthorizedToEdit(null, newVersion);
         } else {
             newVersion.setChanged(changed);
             logger.debug("About to terminate previous version for {},{}", existingVersion.getNetexId(), existingVersion.getVersion());
             StopPlace existingVersionRefetched = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(existingVersion.getNetexId());
             logger.debug("Found previous version {},{}. Terminating it.", existingVersionRefetched.getNetexId(), existingVersionRefetched.getVersion());
             validityUpdater.terminateVersion(existingVersionRefetched, newVersionValidFrom.minusMillis(MILLIS_BETWEEN_VERSIONS));
-            stopPlaceAuthorizationService.assertEditAuthorized(existingVersionRefetched, newVersion);
+            stopPlaceAuthorizationService.assertAuthorizedToEdit(existingVersionRefetched, newVersion);
         }
 
         newVersion =  versionIncrementor.initiateOrIncrementVersions(newVersion);

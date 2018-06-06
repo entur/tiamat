@@ -135,7 +135,7 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
         StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(existingVersion, StopPlace.class);
         removeAllChildrenExcept(newVersion, onstreetBus.getNetexId());
 
-        stopPlaceAuthorizationService.assertEditAuthorized(existingVersion, newVersion);
+        stopPlaceAuthorizationService.assertAuthorizedToEdit(existingVersion, newVersion);
     }
 
     @Test
@@ -163,7 +163,7 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
 
         removeAllChildrenExcept(newVersion, railStation.getNetexId());
 
-        stopPlaceAuthorizationService.assertEditAuthorized(existingVersion, newVersion);
+        stopPlaceAuthorizationService.assertAuthorizedToEdit(existingVersion, newVersion);
     }
 
     @Test
@@ -191,7 +191,7 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
         removeAllChildrenExcept(newVersion, onstreetBus.getNetexId());
 
         assertThatThrownBy(() ->
-                stopPlaceAuthorizationService.assertEditAuthorized(existingVersion, newVersion))
+                stopPlaceAuthorizationService.assertAuthorizedToEdit(existingVersion, newVersion))
                 .isInstanceOf(AccessDeniedException.class);
     }
 
@@ -223,7 +223,7 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
         newVersion.setValidBetween(new ValidBetween(null, Instant.now()));
 
         assertThatThrownBy(() ->
-                stopPlaceAuthorizationService.assertEditAuthorized(existingVersion, newVersion))
+                stopPlaceAuthorizationService.assertAuthorizedToEdit(existingVersion, newVersion))
                 .isInstanceOf(AccessDeniedException.class);
     }
 
@@ -247,7 +247,7 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
         StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(existingVersion, StopPlace.class);
 
         newVersion.setValidBetween(new ValidBetween(null, Instant.now()));
-        stopPlaceAuthorizationService.assertEditAuthorized(existingVersion, newVersion);
+        stopPlaceAuthorizationService.assertAuthorizedToEdit(existingVersion, newVersion);
     }
 
     private RoleAssignment canOnlyEdit(String stopPlaceType) {
