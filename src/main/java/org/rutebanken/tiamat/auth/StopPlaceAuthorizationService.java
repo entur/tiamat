@@ -62,8 +62,6 @@ public class StopPlaceAuthorizationService {
     public void assertAuthorizedToEdit(StopPlace existingVersion, StopPlace newVersion) {
         boolean accessToAllChildren;
 
-
-        // In case of standard stop place, the user should as usual be authorized to edit
         if (newVersion.isParentStopPlace()) {
             // Only child stops that the user has access to should be provided with the new version
             // If the stop place already contains children the user does not have access to, the user does not have access to terminate the stop place.
