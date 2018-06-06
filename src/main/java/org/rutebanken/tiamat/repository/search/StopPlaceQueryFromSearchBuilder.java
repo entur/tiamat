@@ -166,8 +166,11 @@ public class StopPlaceQueryFromSearchBuilder {
         StopPlaceSearch stopPlaceSearch = exportParams.getStopPlaceSearch();
 
         final ExportParams.VersionValidity versionValidity;
-        if(stopPlaceSearch.getPointInTime() == null && stopPlaceSearch.getVersionValidity() == null) {
-            logger.debug("pointInTime and versionValidity not set. Defaulting to version validity " + defaultVersionValidity);
+        if(stopPlaceSearch.getPointInTime() == null
+                && stopPlaceSearch.getVersionValidity() == null
+                && !stopPlaceSearch.isAllVersions()
+                && stopPlaceSearch.getVersion() == 0) {
+            logger.debug("Parameters pointInTime, versionValidity, allVersions or version not set. Defaulting to version validity " + defaultVersionValidity);
             versionValidity = defaultVersionValidity;
         } else {
             versionValidity = stopPlaceSearch.getVersionValidity();
