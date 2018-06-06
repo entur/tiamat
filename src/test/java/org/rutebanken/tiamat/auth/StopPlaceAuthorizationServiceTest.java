@@ -267,4 +267,35 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
                 .isInstanceOf(AccessDeniedException.class);
     }
 
+    @Test
+    public void adminAllowedToTerminate() {
+
+        // Setup using admin role assignment
+        setRoleAssignmentReturned(ADMIN);
+
+        StopPlace onstreetBus = new StopPlace(new EmbeddableMultilingualString("onstreetBus"));
+        onstreetBus.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
+
+        StopPlace railStation = new StopPlace(new EmbeddableMultilingualString("railStation"));
+        railStation.setStopPlaceType(StopTypeEnumeration.RAIL_STATION);
+
+        StopPlace railReplacementBus = new StopPlace(new EmbeddableMultilingualString("railReplacementBus"));
+        railReplacementBus.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
+        railReplacementBus.setBusSubmode(BusSubmodeEnumeration.RAIL_REPLACEMENT_BUS);
+
+        List<StopPlace> childStops = Arrays.asList(onstreetBus, railStation, railReplacementBus);
+        stopPlaceRepository.save(childStops);
+
+        StopPlace existingVersion = multiModalStopPlaceEditor.createMultiModalParentStopPlace(
+                childStops.stream().map(s -> s.getNetexId()).collect(Collectors.toList()),
+                new EmbeddableMultilingualString("Multi modal stop placee"));
+
+
+        StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(existingVersion, StopPlace.class);
+        newVersion.getChildren().removeIf(child -> !child.getNetexId().equals(onstreetBus.getNetexId()));
+
+        newVersion.setValidBetween(new ValidBetween(null, Instant.now()));
+        stopPlaceAuthorizationService.assertEditAuthorized(existingVersion, newVersion);
+    }
+
 }
