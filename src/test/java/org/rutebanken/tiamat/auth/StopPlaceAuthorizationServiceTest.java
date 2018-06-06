@@ -228,7 +228,7 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
     }
 
     @Test
-    public void notAllowedToChangeStopPlaceTypeToOtherTypeChildren() {
+    public void notAllowedToChangeChildStopPlaceTypeToOtherType() {
 
         setRoleAssignmentReturned(ADMIN);
 
@@ -248,14 +248,46 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
         setRoleAssignmentReturned(roleAssignment);
 
         StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(existingVersion, StopPlace.class);
-        removeAllChildrenExcept(newVersion, railStation.getNetexId());
+        removeAllChildrenExcept(newVersion, onstreetBus.getNetexId());
 
+        newVersion.getChildren().iterator().next().setStopPlaceType(StopTypeEnumeration.TRAM_STATION);
 
-        railStation.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
-
+        // Cannot change stop place type to a type the user is not authorized to change to
         assertThatThrownBy(() ->
                 stopPlaceAuthorizationService.assertAuthorizedToEdit(existingVersion, newVersion))
                 .isInstanceOf(AccessDeniedException.class);
+    }
+
+    /**
+     * A user that can edit all stop place types except railStation, can change the stop place type if both types are authorized for this user.
+     */
+    @Test
+    public void isAllowedToChangeStopPlaceType() {
+
+        setRoleAssignmentReturned(ADMIN);
+
+        StopPlace onstreetBus = createOnstreetBus();
+        StopPlace railStation = createRailStation();
+        StopPlace railReplacementBus = createRailReplacementBus();
+
+        List<StopPlace> childStops = Arrays.asList(onstreetBus, railStation, railReplacementBus);
+        stopPlaceRepository.save(childStops);
+
+        StopPlace existingVersion = multiModalStopPlaceEditor.createMultiModalParentStopPlace(
+                toIdList(childStops),
+                new EmbeddableMultilingualString("Multi modal stop place. User attempts to set stop place type to unauthorized value"));
+
+        RoleAssignment roleAssignment = canEditAllTypesExcept("railStation");
+
+        setRoleAssignmentReturned(roleAssignment);
+
+        StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(existingVersion, StopPlace.class);
+        removeAllChildrenExcept(newVersion, onstreetBus.getNetexId());
+
+        // Change the bus to ferry
+        onstreetBus.setStopPlaceType(StopTypeEnumeration.FERRY_STOP);
+
+        stopPlaceAuthorizationService.assertAuthorizedToEdit(existingVersion, newVersion);
     }
 
     @Test
