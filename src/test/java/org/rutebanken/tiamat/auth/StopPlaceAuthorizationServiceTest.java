@@ -228,6 +228,37 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
     }
 
     @Test
+    public void notAllowedToChangeStopPlaceTypeToOtherTypeChildren() {
+
+        setRoleAssignmentReturned(ADMIN);
+
+        StopPlace onstreetBus = createOnstreetBus();
+        StopPlace railStation = createRailStation();
+        StopPlace railReplacementBus = createRailReplacementBus();
+
+        List<StopPlace> childStops = Arrays.asList(onstreetBus, railStation, railReplacementBus);
+        stopPlaceRepository.save(childStops);
+
+        StopPlace existingVersion = multiModalStopPlaceEditor.createMultiModalParentStopPlace(
+                toIdList(childStops),
+                new EmbeddableMultilingualString("Multi modal stop place. User attempts to set stop place type to unauthorized value"));
+
+        RoleAssignment roleAssignment = canOnlyEdit("onstreetBus");
+
+        setRoleAssignmentReturned(roleAssignment);
+
+        StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(existingVersion, StopPlace.class);
+        removeAllChildrenExcept(newVersion, railStation.getNetexId());
+
+
+        railStation.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
+
+        assertThatThrownBy(() ->
+                stopPlaceAuthorizationService.assertAuthorizedToEdit(existingVersion, newVersion))
+                .isInstanceOf(AccessDeniedException.class);
+    }
+
+    @Test
     public void adminAllowedToTerminate() {
 
         // Setup using admin role assignment
