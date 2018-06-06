@@ -15,18 +15,29 @@
 
 package org.rutebanken.tiamat.auth;
 
+import com.google.common.collect.Sets;
 import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
 import org.rutebanken.tiamat.model.StopPlace;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
 
 /**
- * This authorization service is implemented for handling multi modal stops.
+ * This authorization service is implemented mainly for handling multi modal stops.
+ * Generic authorization logic should be implemented in and handled by {@link ReflectionAuthorizationService}.
  */
 @Service
 public class StopPlaceAuthorizationService {
+
+    private static final Logger logger = LoggerFactory.getLogger(StopPlaceAuthorizationService.class);
 
     private final ReflectionAuthorizationService authorizationService;
 
@@ -35,7 +46,51 @@ public class StopPlaceAuthorizationService {
         this.authorizationService = authorizationService;
     }
 
-    public void assertAuthorized(String requiredRole, StopPlace stopPlace) {
-        authorizationService.assertAuthorized(requiredRole, Arrays.asList(stopPlace));
+    /**
+     * Assert that the user is authorized to edit the stop place.
+     *
+     * If the stop place is a parent stop place, the following will be checked:
+     * If the user does not have access to all childs stops, it can still edit a child stop it is privileged to edit, but cannot terminate the validity of the parent stop.
+     * In this situation, the newVersion of the stop must only be populated with the children that are relevant for change.
+     * If the newVersion of the stop place contain all children, and the user does not have authorization to edit those stop places, authorization is not granted.
+     *
+     * If the stop place is a normal mono modal stop place, the {@link ReflectionAuthorizationService} will be called directly.
+     *
+     * @param existingVersion
+     * @param newVersion
+     */
+    public void assertAuthorizedToEdit(StopPlace existingVersion, StopPlace newVersion) {
+        boolean accessToAllChildren;
+
+
+        // In case of standard stop place, the user should as usual be authorized to edit
+        if (newVersion.isParentStopPlace()) {
+            // Only child stops that the user has access to should be provided with the new version
+            // If the stop place already contains children the user does not have access to, the user does not have access to terminate the stop place.
+            authorizationService.assertAuthorized(ROLE_EDIT_STOPS, newVersion.getChildren());
+
+            if (existingVersion != null) {
+                Set<String> existingChildrenIds = existingVersion.getChildren().stream().map(s -> s.getNetexId()).collect(Collectors.toSet());
+                Set<String> newChildrenIds = newVersion.getChildren().stream().map(s -> s.getNetexId()).collect(Collectors.toSet());
+
+                Sets.SetView<String> difference = Sets.difference(existingChildrenIds, newChildrenIds);
+
+                if (!difference.isEmpty()) {
+                    logger.info("Childrens differ: {}", difference);
+                    accessToAllChildren = authorizationService.isAuthorized(ROLE_EDIT_STOPS, existingVersion.getChildren());
+                    if (!accessToAllChildren) {
+                        logger.info("Detected a situation where the user does not have access to all existing child stops {}. About to check new version's termination date: {}.",
+                                existingChildrenIds,
+                                newVersion.getValidBetween());
+                        if (newVersion.getValidBetween() != null && newVersion.getValidBetween().getToDate() != null) {
+                            throw new AccessDeniedException("The user does not have access to all child stops, and can therefore not set termination date for the parent stop place " + newVersion.getNetexId());
+                        }
+                    }
+                }
+            }
+        } else {
+            authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(newVersion));
+        }
+
     }
 }

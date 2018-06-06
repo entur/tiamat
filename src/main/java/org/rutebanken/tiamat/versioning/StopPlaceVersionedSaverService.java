@@ -15,35 +15,27 @@
 
 package org.rutebanken.tiamat.versioning;
 
-import com.google.common.collect.Sets;
 import org.rutebanken.tiamat.auth.StopPlaceAuthorizationService;
 import org.rutebanken.tiamat.changelog.EntityChangedListener;
 import org.rutebanken.tiamat.importer.finder.NearbyStopPlaceFinder;
 import org.rutebanken.tiamat.importer.finder.StopPlaceByQuayOriginalIdFinder;
 import org.rutebanken.tiamat.model.*;
-import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
 import org.rutebanken.tiamat.repository.EntityInVersionRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
-import org.rutebanken.tiamat.repository.TariffZoneRepository;
 import org.rutebanken.tiamat.repository.reference.ReferenceResolver;
 import org.rutebanken.tiamat.service.TariffZonesLookupService;
 import org.rutebanken.tiamat.service.TopographicPlaceLookupService;
-import org.rutebanken.tiamat.service.metrics.MetricsService;
 import org.rutebanken.tiamat.versioning.util.AccessibilityAssessmentOptimizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.lang.reflect.Field;
 import java.time.Instant;
-import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
-import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
 
 
 @Transactional
@@ -111,8 +103,6 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
             }
         }
 
-        stopPlaceAuthorizationService.assertAuthorized(ROLE_EDIT_STOPS, newVersion);
-
         submodeValidator.validate(newVersion);
 
         Instant changed = Instant.now();
@@ -125,13 +115,14 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
         if (existingVersion == null) {
             logger.debug("Existing version is not present, which means new entity. {}", newVersion);
             newVersion.setCreated(changed);
+            stopPlaceAuthorizationService.assertAuthorizedToEdit(null, newVersion);
         } else {
             newVersion.setChanged(changed);
             logger.debug("About to terminate previous version for {},{}", existingVersion.getNetexId(), existingVersion.getVersion());
-            StopPlace existingStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(existingVersion.getNetexId());
-            stopPlaceAuthorizationService.assertAuthorized(ROLE_EDIT_STOPS, existingStopPlace);
-            logger.debug("Found previous version {},{}. Terminating it.", existingStopPlace.getNetexId(), existingStopPlace.getVersion());
-            validityUpdater.terminateVersion(existingStopPlace, newVersionValidFrom.minusMillis(MILLIS_BETWEEN_VERSIONS));
+            StopPlace existingVersionRefetched = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(existingVersion.getNetexId());
+            logger.debug("Found previous version {},{}. Terminating it.", existingVersionRefetched.getNetexId(), existingVersionRefetched.getVersion());
+            validityUpdater.terminateVersion(existingVersionRefetched, newVersionValidFrom.minusMillis(MILLIS_BETWEEN_VERSIONS));
+            stopPlaceAuthorizationService.assertAuthorizedToEdit(existingVersionRefetched, newVersion);
         }
 
         newVersion =  versionIncrementor.initiateOrIncrementVersions(newVersion);
