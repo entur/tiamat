@@ -93,33 +93,14 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
         stopPlaceAuthorizationService = new StopPlaceAuthorizationService(reflectionAuthorizationService);
     }
 
-    private void setRoleAssignmentReturned(RoleAssignment roleAssignment) {
-
-        List<RoleAssignment> roleAssignments = Arrays.asList(roleAssignment);
-        when(roleAssignmentExtractor.getRoleAssignmentsForUser()).thenReturn(roleAssignments);
-        when(roleAssignmentExtractor.getRoleAssignmentsForUser(any())).thenReturn(roleAssignments);
-    }
-
-    private void removeAllChildrenExcept(StopPlace parentStopPlace, String exceptThisNetexId) {
-        parentStopPlace.getChildren().removeIf(child -> !child.getNetexId().equals(exceptThisNetexId));
-
-    }
-
-
     @Test
     public void authorizedOnstreetBusWhenAccessToOnstreetBus() {
 
         setRoleAssignmentReturned(ADMIN);
 
-        StopPlace onstreetBus = new StopPlace(new EmbeddableMultilingualString("onstreetBus"));
-        onstreetBus.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
-
-        StopPlace railStation = new StopPlace(new EmbeddableMultilingualString("railStation"));
-        railStation.setStopPlaceType(StopTypeEnumeration.RAIL_STATION);
-
-        StopPlace railReplacementBus = new StopPlace(new EmbeddableMultilingualString("railReplacementBus"));
-        railReplacementBus.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
-        railReplacementBus.setBusSubmode(BusSubmodeEnumeration.RAIL_REPLACEMENT_BUS);
+        StopPlace onstreetBus = createOnstreetBus();
+        StopPlace railStation = createRailStation();
+        StopPlace railReplacementBus = createRailReplacementBus();
 
         List<StopPlace> childStops = Arrays.asList(onstreetBus, railStation, railReplacementBus);
         stopPlaceRepository.save(childStops);
@@ -152,15 +133,9 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
         // Setup using admin role assignment
         setRoleAssignmentReturned(ADMIN);
 
-        StopPlace onstreetBus = new StopPlace(new EmbeddableMultilingualString("onstreetBus"));
-        onstreetBus.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
-
-        StopPlace railStation = new StopPlace(new EmbeddableMultilingualString("railStation"));
-        railStation.setStopPlaceType(StopTypeEnumeration.RAIL_STATION);
-
-        StopPlace railReplacementBus = new StopPlace(new EmbeddableMultilingualString("railReplacementBus"));
-        railReplacementBus.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
-        railReplacementBus.setBusSubmode(BusSubmodeEnumeration.RAIL_REPLACEMENT_BUS);
+        StopPlace onstreetBus = createOnstreetBus();
+        StopPlace railStation = createRailStation();
+        StopPlace railReplacementBus = createRailReplacementBus();
 
         List<StopPlace> childStops = Arrays.asList(onstreetBus, railStation, railReplacementBus);
         stopPlaceRepository.save(childStops);
@@ -193,15 +168,9 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
         // Setup using admin role assignment
         setRoleAssignmentReturned(ADMIN);
 
-        StopPlace onstreetBus = new StopPlace(new EmbeddableMultilingualString("onstreetBus"));
-        onstreetBus.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
-
-        StopPlace railStation = new StopPlace(new EmbeddableMultilingualString("railStation"));
-        railStation.setStopPlaceType(StopTypeEnumeration.RAIL_STATION);
-
-        StopPlace railReplacementBus = new StopPlace(new EmbeddableMultilingualString("railReplacementBus"));
-        railReplacementBus.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
-        railReplacementBus.setBusSubmode(BusSubmodeEnumeration.RAIL_REPLACEMENT_BUS);
+        StopPlace onstreetBus = createOnstreetBus();
+        StopPlace railStation = createRailStation();
+        StopPlace railReplacementBus = createRailReplacementBus();
 
         List<StopPlace> childStops = Arrays.asList(onstreetBus, railStation, railReplacementBus);
         stopPlaceRepository.save(childStops);
@@ -235,15 +204,9 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
         // Setup using admin role assignment
         setRoleAssignmentReturned(ADMIN);
 
-        StopPlace onstreetBus = new StopPlace(new EmbeddableMultilingualString("onstreetBus"));
-        onstreetBus.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
-
-        StopPlace railStation = new StopPlace(new EmbeddableMultilingualString("railStation"));
-        railStation.setStopPlaceType(StopTypeEnumeration.RAIL_STATION);
-
-        StopPlace railReplacementBus = new StopPlace(new EmbeddableMultilingualString("railReplacementBus"));
-        railReplacementBus.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
-        railReplacementBus.setBusSubmode(BusSubmodeEnumeration.RAIL_REPLACEMENT_BUS);
+        StopPlace onstreetBus = createOnstreetBus();
+        StopPlace railStation = createRailStation();
+        StopPlace railReplacementBus = createRailReplacementBus();
 
         List<StopPlace> childStops = Arrays.asList(onstreetBus, railStation, railReplacementBus);
         stopPlaceRepository.save(childStops);
@@ -280,15 +243,9 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
         // Setup using admin role assignment
         setRoleAssignmentReturned(ADMIN);
 
-        StopPlace onstreetBus = new StopPlace(new EmbeddableMultilingualString("onstreetBus"));
-        onstreetBus.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
-
-        StopPlace railStation = new StopPlace(new EmbeddableMultilingualString("railStation"));
-        railStation.setStopPlaceType(StopTypeEnumeration.RAIL_STATION);
-
-        StopPlace railReplacementBus = new StopPlace(new EmbeddableMultilingualString("railReplacementBus"));
-        railReplacementBus.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
-        railReplacementBus.setBusSubmode(BusSubmodeEnumeration.RAIL_REPLACEMENT_BUS);
+        StopPlace onstreetBus = createOnstreetBus();
+        StopPlace railStation = createRailStation();
+        StopPlace railReplacementBus = createRailReplacementBus();
 
         List<StopPlace> childStops = Arrays.asList(onstreetBus, railStation, railReplacementBus);
         stopPlaceRepository.save(childStops);
@@ -304,4 +261,33 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
         stopPlaceAuthorizationService.assertEditAuthorized(existingVersion, newVersion);
     }
 
+    private void setRoleAssignmentReturned(RoleAssignment roleAssignment) {
+
+        List<RoleAssignment> roleAssignments = Arrays.asList(roleAssignment);
+        when(roleAssignmentExtractor.getRoleAssignmentsForUser()).thenReturn(roleAssignments);
+        when(roleAssignmentExtractor.getRoleAssignmentsForUser(any())).thenReturn(roleAssignments);
+    }
+
+    private void removeAllChildrenExcept(StopPlace parentStopPlace, String exceptThisNetexId) {
+        parentStopPlace.getChildren().removeIf(child -> !child.getNetexId().equals(exceptThisNetexId));
+    }
+
+    private StopPlace createOnstreetBus() {
+        StopPlace onstreetBus = new StopPlace(new EmbeddableMultilingualString("onstreetBus"));
+        onstreetBus.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
+        return onstreetBus;
+    }
+
+    private StopPlace createRailStation() {
+        StopPlace railStation = new StopPlace(new EmbeddableMultilingualString("railStation"));
+        railStation.setStopPlaceType(StopTypeEnumeration.RAIL_STATION);
+        return railStation;
+    }
+
+    private StopPlace createRailReplacementBus() {
+        StopPlace railReplacementBus = new StopPlace(new EmbeddableMultilingualString("railReplacementBus"));
+        railReplacementBus.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
+        railReplacementBus.setBusSubmode(BusSubmodeEnumeration.RAIL_REPLACEMENT_BUS);
+        return railReplacementBus;
+    }
 }
