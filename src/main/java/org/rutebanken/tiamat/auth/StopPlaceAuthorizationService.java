@@ -50,14 +50,14 @@ public class StopPlaceAuthorizationService {
      * Assert that the user is authorized to edit the stop place.
      *
      * If the stop place is a parent stop place, the following will be checked:
-     * If the user does not have access to all childs stops, it can still edit a child stop it is privileged to edit, but cannot terminate the validity of the parent stop.
-     * In this situation, the newVersion of the stop must only be populated with the children that are relevant for change.
-     * If the newVersion of the stop place contain all children, and the user does not have authorization to edit those stop places, authorization is not granted.
+     * If the user is not authorized to edit all childs stops, it can still edit a child stop the user is authorized to edit, but it cannot terminate the validity of the parent stop.
+     * In this situation, the newVersion of the stop must only be populated with the children that are relevant to edit.
+     * If the newVersion of the stop place contains all current children, and the user does not have authorization to edit those stop places, authorization is not granted.
      *
      * If the stop place is a normal mono modal stop place, the {@link ReflectionAuthorizationService} will be called directly.
      *
-     * @param existingVersion
-     * @param newVersion
+     * @param existingVersion the current version of the stop place, persisted
+     * @param newVersion the new version of the same stop place, containing the changed state. If type is parent stop place, only child stops that the user would be authorized to change and edit, should be present.
      */
     public void assertAuthorizedToEdit(StopPlace existingVersion, StopPlace newVersion) {
         boolean accessToAllChildren;
