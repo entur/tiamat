@@ -349,8 +349,7 @@ public class StreamingPublicationDeliveryIntegrationTest extends TiamatIntegrati
     }
 
     /**
-     * Rperoduce ROR-277, missing current stop place, when there is a future version.
-     * VersionValidity must be default in order to reproduce, which is ALL at the time of writing.
+     * Reproduce ROR-277, missing current stop place, when there is a future version.
      */
     @Test
     public void keepCurrentVersionOfStopPlaceWhenFutureVersionExist() throws InterruptedException, IOException, XMLStreamException, SAXException, JAXBException {
@@ -370,6 +369,7 @@ public class StreamingPublicationDeliveryIntegrationTest extends TiamatIntegrati
         ExportParams exportParams = ExportParams.newExportParamsBuilder()
                 .setStopPlaceSearch(
                         StopPlaceSearch.newStopPlaceSearchBuilder()
+                                .setVersionValidity(ExportParams.VersionValidity.CURRENT_FUTURE)
                                 .build())
                 .setTopographicPlaceExportMode(ExportParams.ExportMode.NONE)
                 .setTariffZoneExportMode(ExportParams.ExportMode.NONE)
