@@ -498,7 +498,7 @@ def class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourc
 
         String graphQlJsonQuery = """{
                   stopPlace:  ${GraphQLNames.FIND_STOPPLACE} 
-                        (stopPlaceType:${StopTypeEnumeration.TRAM_STATION.value()} countyReference:"${hordaland.getNetexId()}" municipalityReference:"${kvinnherad.getNetexId()}") {
+                        (stopPlaceType:${StopTypeEnumeration.TRAM_STATION.value()} countyReference:"${hordaland.getNetexId()}" municipalityReference:"${kvinnherad.getNetexId()}", allVersions:true) {
                             name {value}
                         }
                     }"""
