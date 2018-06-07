@@ -72,21 +72,21 @@ def class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourc
         stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(5, 60)))
         stopPlaceRepository.save(stopPlace)
 
-        String graphQlJsonQuery = "{" +
-                "\"query\":\"" +
-                "{ stopPlace:" + GraphQLNames.FIND_STOPPLACE + " (id:\\\"" + stopPlace.getNetexId() + "\\\") {" +
-                "   id " +
-                "   name { value } " +
-                "  ... on StopPlace {" +
-                "   quays { " +
-                "      id " +
-                "      name  { value } " +
-                "     }" +
-                "  }" +
-                "}" +
-                "}\",\"variables\":\"\"}"
 
-        executeGraphQL(graphQlJsonQuery)
+        String graphQlJsonQuery = """{
+                  stopPlace:  ${GraphQLNames.FIND_STOPPLACE} (${QUERY}:"${stopPlace.getNetexId()}", allVersions:true) {
+                            id
+                            name { value }
+                            ... on StopPlace {
+                                quays {
+                                    id
+                                    name { value }
+                                }
+                            }
+                        }
+                    }"""
+
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .body("data.stopPlace[0].name.value", equalTo(stopPlaceName))
                 .body("data.stopPlace[0].quays.name.value", hasItems(firstQuayName, secondQuayName))
                 .body("data.stopPlace[0].quays.id", hasItems(quay.getNetexId(), secondQuay.getNetexId()))
@@ -107,17 +107,15 @@ def class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourc
         stopPlace.getKeyValues().put(NetexIdMapper.ORIGINAL_ID_KEY, value)
         stopPlaceRepository.save(stopPlace)
 
-        String graphQlJsonQuery = "{" +
-                "\"query\":\"{stopPlace: " + GraphQLNames.FIND_STOPPLACE +
-                " (" + GraphQLNames.IMPORTED_ID_QUERY + ":\\\"" + originalId + "\\\")" +
-                " { " +
-                "  id " +
-                "  name { value } " +
-                " }" +
-                "}\",\"variables\":\"\"}"
 
+        String graphQlJsonQuery = """{
+                  stopPlace:  ${GraphQLNames.FIND_STOPPLACE} (${IMPORTED_ID_QUERY}:"${originalId}", allVersions:true) {
+                            id
+                            name { value }
+                        }
+                    }"""
 
-        executeGraphQL(graphQlJsonQuery)
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .body("data.stopPlace[0].id", equalTo(stopPlace.getNetexId()))
                 .body("data.stopPlace[0].name.value", equalTo(stopPlaceName))
     }
@@ -137,17 +135,15 @@ def class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourc
         stopPlace.getKeyValues().put(NetexIdMapper.ORIGINAL_ID_KEY, value)
         stopPlaceRepository.save(stopPlace)
 
-        String graphQlJsonQuery = "{" +
-                "\"query\":\"{stopPlace: " + GraphQLNames.FIND_STOPPLACE +
-                " (" + GraphQLNames.QUERY + ":\\\"" + originalId + "\\\")" +
-                " { " +
-                "  id " +
-                "  name { value } " +
-                " }" +
-                "}\",\"variables\":\"\"}"
 
+        String graphQlJsonQuery = """{
+                  stopPlace:  ${GraphQLNames.FIND_STOPPLACE} (query:"${originalId}", allVersions:true) {
+                            id
+                            name { value }
+                        }
+                    }"""
 
-        executeGraphQL(graphQlJsonQuery)
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .body("data.stopPlace[0].id", equalTo(stopPlace.getNetexId()))
                 .body("data.stopPlace[0].name.value", equalTo(stopPlaceName))
     }
@@ -170,18 +166,16 @@ def class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourc
         stopPlaceRepository.save(stopPlaceWithCoordinates)
         stopPlaceRepository.save(stopPlaceWithoutCoordinates)
 
-        String graphQlJsonQuery = "{" +
-                "\"query\":\"{stopPlace: " + GraphQLNames.FIND_STOPPLACE +
-                " (" + GraphQLNames.QUERY + ":\\\"" + basename + "\\\")" +
-                " { " +
-                "  id " +
-                "  name { value } " +
-                "  geometry {coordinates } " +
-                " }" +
-                "}\",\"variables\":\"\"}"
+        String graphQlJsonQuery = """{
+                  stopPlace:  ${GraphQLNames.FIND_STOPPLACE} (query:"${basename}", allVersions:true) {
+                            id
+                            name { value }
+                            geometry {coordinates }
+                        }
+                    }"""
 
         // Search for stopPlace should return both StopPlaces above
-        executeGraphQL(graphQlJsonQuery)
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .root("data.stopPlace.find { it.id == '" + stopPlaceWithCoordinates.getNetexId() + "'}")
                     .body("name.value", equalTo(nameWithLocation))
                     .body("geometry", notNullValue())
@@ -190,19 +184,16 @@ def class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourc
                     .body("name.value", equalTo(nameWithoutLocation))
                     .body("geometry", nullValue())
 
-
-        graphQlJsonQuery = "{" +
-                "\"query\":\"{stopPlace: " + GraphQLNames.FIND_STOPPLACE +
-                " (" + GraphQLNames.QUERY + ":\\\"" + basename + "\\\" withoutLocationOnly:true)" +
-                " { " +
-                "  id " +
-                "  name { value } " +
-                "  geometry {coordinates } " +
-                " }" +
-                "}\",\"variables\":\"\"}"
+        graphQlJsonQuery = """{
+                  stopPlace:  ${GraphQLNames.FIND_STOPPLACE} (query:"${basename}", allVersions:true, withoutLocationOnly:true) {
+                            id
+                            name { value }
+                            geometry {coordinates }
+                        }
+                    }"""
 
         // Filtering on withoutLocationsOnly stopPlace should only return one
-        executeGraphQL(graphQlJsonQuery)
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .body("data.stopPlace", hasSize(1))
                 .body("data.stopPlace[0].name.value", equalTo(nameWithoutLocation))
                 .body("data.stopPlace[0].geometry", nullValue())
@@ -227,17 +218,14 @@ def class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourc
 
         stopPlaceRepository.save(stopPlace)
 
-        String graphQlJsonQuery = "{" +
-                "\"query\":\"{stopPlace: " + GraphQLNames.FIND_STOPPLACE +
-                " (" + GraphQLNames.QUERY + ":\\\"" + quayOriginalId + "\\\")" +
-                " { " +
-                "  id " +
-                "  name { value } " +
-                " }" +
-                "}\",\"variables\":\"\"}"
+        String graphQlJsonQuery = """{
+                  stopPlace:  ${GraphQLNames.FIND_STOPPLACE} (query:"${quayOriginalId}", allVersions:true) {
+                            id
+                            name { value }
+                        }
+                    }"""
 
-
-        executeGraphQL(graphQlJsonQuery)
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .body("data.stopPlace[0].id", equalTo(stopPlace.getNetexId()))
                 .body("data.stopPlace[0].name.value", equalTo(stopPlaceName))
     }
@@ -249,17 +237,14 @@ def class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourc
 
         stopPlaceRepository.save(stopPlace)
 
-        String graphQlJsonQuery = "{" +
-                "\"query\":\"{stopPlace: " + GraphQLNames.FIND_STOPPLACE +
-                " (" + GraphQLNames.QUERY + ":\\\"" + stopPlace.getNetexId() + "\\\")" +
-                " { " +
-                "  id " +
-                "  name { value } " +
-                " }" +
-                "}\",\"variables\":\"\"}"
+        String graphQlJsonQuery = """{
+                  stopPlace:  ${GraphQLNames.FIND_STOPPLACE} (query:"${stopPlace.getNetexId()}", allVersions:true) {
+                            id
+                            name {value}
+                        }
+                    }"""
 
-
-        executeGraphQL(graphQlJsonQuery)
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .body("data.stopPlace[0].id", equalTo(stopPlace.getNetexId()))
                 .body("data.stopPlace[0].name.value", equalTo(stopPlaceName))
     }
@@ -303,36 +288,31 @@ def class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourc
 
         stopPlaceRepository.save(stopPlace)
 
-        String graphQlJsonQuery = "{" +
-                "\"query\":\"{stopPlace: " + GraphQLNames.FIND_STOPPLACE +
-                " (" + GraphQLNames.QUERY + ":\\\"" + quay.getNetexId() + "\\\")" +
-                " { " +
-                "  id " +
-                "  name { value } " +
-                " }" +
-                "}\",\"variables\":\"\"}"
+        String graphQlJsonQuery = """{
+                  stopPlace:  ${GraphQLNames.FIND_STOPPLACE} (query:"${quay.getNetexId()}", allVersions:true) {
+                            id
+                            name {value}
+                        }
+                    }"""
 
-
-        executeGraphQL(graphQlJsonQuery)
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .body("data.stopPlace[0].id", equalTo(stopPlace.getNetexId()))
                 .body("data.stopPlace[0].name.value", equalTo(stopPlaceName))
     }
 
     @Test
-    void searchForStopPlaceNoParams() throws Exception {
+    void searchForStopPlaceNoParamsExpectAllVersions() throws Exception {
         String stopPlaceName = "Eselstua"
         StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(stopPlaceName))
         stopPlaceRepository.save(stopPlace)
 
-        String graphQlJsonQuery = "{" +
-                "\"query\":\"{stopPlace: " + GraphQLNames.FIND_STOPPLACE +
-                " { " +
-                "  name { value } " +
-                " } " +
-                "}\",\"variables\":\"\"}"
+        String graphQlJsonQuery = """{
+                  stopPlace:  ${GraphQLNames.FIND_STOPPLACE} (allVersions:true) {
+                            name { value }
+                        }
+                    }"""
 
-
-        executeGraphQL(graphQlJsonQuery)
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .body("data.stopPlace[0].name.value", equalTo(stopPlaceName))
     }
 
@@ -342,16 +322,15 @@ def class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourc
         StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(stopPlaceName))
         stopPlaceRepository.save(stopPlace)
 
-        String graphQlJsonQuery = "{" +
-                "\"query\":\"{stopPlace: " + GraphQLNames.FIND_STOPPLACE +
-                "(id:\\\"\\\" countyReference:\\\"\\\" municipalityReference:\\\"\\\") " +
-                " { " +
-                "  name { value } " +
-                " } " +
-                "}\",\"variables\":\"\"}"
 
+        String graphQlJsonQuery = """{
+                  stopPlace:  ${GraphQLNames.FIND_STOPPLACE} (id:"" countyReference:"" municipalityReference:"" allVersions:true) {
+                            id
+                            name {value}
+                        }
+                    }"""
 
-        executeGraphQL(graphQlJsonQuery)
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .body("data.stopPlace[0].name.value", equalTo(stopPlaceName))
     }
 
@@ -384,17 +363,15 @@ def class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourc
         stopPlace.getKeyValues().put(key, new Value(value))
         stopPlaceRepository.save(stopPlace)
 
-        String graphQlJsonQuery = "{" +
-                "\"query\":\"{" +
-                "  stopPlace: " + GraphQLNames.FIND_STOPPLACE + " (key:\\\"" + key + "\\\", values:\\\"" + value + "\\\") { " +
-                "    name {value} " +
-                "    keyValues {key values} " +
-                "  } " +
-                "}\"," +
-                "\"variables\":\"\"}"
+        String graphQlJsonQuery = """{
+                  stopPlace:  ${GraphQLNames.FIND_STOPPLACE} (key:"${key}", values:"${value}" allVersions:true) {
+                            id
+                            name { value }
+                            keyValues { key values }
+                        }
+                    }"""
 
-
-        executeGraphQL(graphQlJsonQuery)
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .body("data.stopPlace", hasSize(1))
                 .root("data.stopPlace[0]")
                     .body("name.value", equalTo(stopPlaceName))
@@ -518,16 +495,15 @@ def class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourc
         StopPlace stopPlace = createStopPlaceWithMunicipalityRef("Anda", kvinnherad, StopTypeEnumeration.TRAM_STATION)
         stopPlaceRepository.save(stopPlace)
 
-        String graphQlJsonQuery = "{" +
-                "\"query\":\"{" +
-                "  stopPlace:" + GraphQLNames.FIND_STOPPLACE +
-                " (stopPlaceType:" + StopTypeEnumeration.TRAM_STATION.value() + " countyReference:\\\"" + hordaland.getNetexId() + "\\\" municipalityReference:\\\"" + kvinnherad.getNetexId() +"\\\") { " +
-                "    name {value} " +
-                "  } " +
-                "}\"," +
-                "\"variables\":\"\"}"
 
-        executeGraphQL(graphQlJsonQuery)
+        String graphQlJsonQuery = """{
+                  stopPlace:  ${GraphQLNames.FIND_STOPPLACE} 
+                        (stopPlaceType:${StopTypeEnumeration.TRAM_STATION.value()} countyReference:"${hordaland.getNetexId()}" municipalityReference:"${kvinnherad.getNetexId()}") {
+                            name {value}
+                        }
+                    }"""
+
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .body("data.stopPlace", hasSize(1))
                 .body("data.stopPlace[0].name.value", equalTo(stopPlace.getName().getValue()))
     }
@@ -561,16 +537,14 @@ def class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourc
         String stopPlaceName = "Nesbru"
         createStopPlaceWithMunicipalityRef(stopPlaceName, asker)
 
-        String graphQlJsonQuery = "{" +
-                "\"query\":\"{" +
-                "  stopPlace:" + GraphQLNames.FIND_STOPPLACE +
-                " (municipalityReference:\\\"" + asker.getNetexId() +"\\\") { " +
-                "    name {value} " +
-                "  } " +
-                "}\"," +
-                "\"variables\":\"\"}"
+        String graphQlJsonQuery = """{
+                  stopPlace:  ${GraphQLNames.FIND_STOPPLACE} (municipalityReference: ["${asker.getNetexId()}"], allVersions:true) {
+                            id
+                            name {value}
+                        }
+                    }"""
 
-        executeGraphQL(graphQlJsonQuery)
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .body("data.stopPlace", hasSize(1))
                 .body("data.stopPlace[0].name.value",  equalTo(stopPlaceName))
     }
@@ -583,23 +557,21 @@ def class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourc
         createStopPlaceWithMunicipalityRef("Nesbru", asker)
         createStopPlaceWithMunicipalityRef("Slependen", baerum)
 
+        String graphQlJsonQuery = """{
+                  stopPlace:  ${GraphQLNames.FIND_STOPPLACE} (municipalityReference: ["${baerum.getNetexId()}", "${asker.getNetexId()}"], allVersions:true) {
+                            id
+                            name { value }
+                            ... on StopPlace {
+                                quays {
+                                    id
+                                    name  { value }
+                                }
+                            }
+                       }
+                   }"""
 
-        String graphQlJsonQuery = "{" +
-                "\"query\":\"{stopPlace:" + GraphQLNames.FIND_STOPPLACE +
-                " (municipalityReference:[\\\""+baerum.getNetexId()+"\\\",\\\""+asker.getNetexId()+"\\\"]) {" +
-                "id " +
-                "name { value } " +
-                "  ... on StopPlace {" +
-                "quays " +
-                "  { " +
-                "   id " +
-                "   name  { value } " +
-                "  }  " +
-                "}" +
-                "}" +
-                "}\",\"variables\":\"\"}"
 
-        executeGraphQL(graphQlJsonQuery)
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .body("data.stopPlace.name.value", hasItems("Nesbru", "Slependen"))
     }
 
@@ -633,15 +605,15 @@ def class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourc
         createStopPlaceWithMunicipalityRef("Trollstua", asker)
         createStopPlaceWithMunicipalityRef("Haslum", baerum)
 
-        String graphQlJsonQuery = "{" +
-                "\"query\":\"{stopPlace:" + GraphQLNames.FIND_STOPPLACE +
-                " (countyReference:\\\""+akershus.getNetexId()+"\\\") {" +
-                "id " +
-                "name { value } " +
-                "}" +
-                "}\",\"variables\":\"\"}"
+        def graphQlJsonQuery = """{ stopPlace: ${GraphQLNames.FIND_STOPPLACE} 
+                            (allVersions:true, countyReference:["${akershus.getNetexId()}"]) {
+                            id
+                            name { value }
+                          }
+                       }"""
 
-        executeGraphQL(graphQlJsonQuery)
+
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .body("data.stopPlace.name.value", hasItems("Trollstua", "Haslum"))
     }
 
@@ -651,15 +623,14 @@ def class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourc
         StopPlace stopPlace = createStopPlace("Espa")
         stopPlaceRepository.save(stopPlace)
 
-        String graphQlJsonQuery = "{" +
-                "\"query\":\"{stopPlace:" + GraphQLNames.FIND_STOPPLACE+
-                " (id:\\\""+ stopPlace.getNetexId() +"\\\") {" +
-                "id " +
-                "name { value } " +
-                "}" +
-                "}\",\"variables\":\"\"}"
+        String graphQlJsonQuery = """{
+                  stopPlace:  ${GraphQLNames.FIND_STOPPLACE} (${QUERY}:"${stopPlace.getNetexId()}", allVersions:true) {
+                            id
+                            name { value }
+                        }
+                    }"""
 
-        executeGraphQL(graphQlJsonQuery)
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .body("data.stopPlace[0].name.value", equalTo(stopPlace.getName().getValue()))
     }
 
@@ -677,15 +648,15 @@ def class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourc
 
         stopPlaceRepository.save(stopPlace)
 
-        String graphQlJsonQuery = "{" +
-                "\"query\":\"{stopPlace:" + GraphQLNames.FIND_STOPPLACE+
-                " (id:\\\""+ stopPlace.getNetexId() +"\\\") {" +
-                "id " +
-                "tariffZones { id version name { value }} " +
-                "}" +
-                "}\",\"variables\":\"\"}"
+        String graphQlJsonQuery = """{
+                  stopPlace:  ${GraphQLNames.FIND_STOPPLACE} (id:"${stopPlace.getNetexId()}", allVersions:true) {
+                            id
+                            tariffZones { id version name { value }}
+                        }
+                    }"""
 
-        executeGraphQL(graphQlJsonQuery)
+
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .root("data.stopPlace[0]")
                     .body("tariffZones[0].id", equalTo(tariffZone.getNetexId()))
                     .body("tariffZones[0].name.value", equalTo(tariffZone.getName().getValue()))
