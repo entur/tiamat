@@ -616,15 +616,13 @@ def class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourc
         createStopPlaceWithMunicipalityRef("Nesbru", asker)
         createStopPlaceWithMunicipalityRef("Hennumkrysset", asker)
 
-        String graphQlJsonQuery = "{" +
-                "\"query\":\"{stopPlace:" + GraphQLNames.FIND_STOPPLACE +
-                " (countyReference:[\\\""+akershus.getNetexId()+"\\\",\\\""+buskerud.getNetexId()+"\\\"] municipalityReference:[\\\""+lier.getNetexId()+"\\\",\\\""+asker.getNetexId()+"\\\"]) {" +
-                "id " +
-                "name { value } " +
-                "}" +
-                "}\",\"variables\":\"\"}"
+        def graphQlJsonQuery = """{ stopPlace: ${GraphQLNames.FIND_STOPPLACE} (allVersions:true, countyReference:["${akershus.getNetexId()}","${buskerud.getNetexId()}"] municipalityReference:["${lier.getNetexId()}","${asker.getNetexId()}"]) {
+                            id
+                            name { value }
+                          }
+                       }"""
 
-        executeGraphQL(graphQlJsonQuery)
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .body("data.stopPlace.name.value", hasItems("Nesbru", "Hennumkrysset"))
     }
 
