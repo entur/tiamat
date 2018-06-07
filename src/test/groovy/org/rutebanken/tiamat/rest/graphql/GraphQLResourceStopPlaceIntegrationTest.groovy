@@ -362,16 +362,14 @@ def class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourc
         stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(10.533212, 59.678080)))
         stopPlaceRepository.save(stopPlace)
 
-        String graphQlJsonQuery = "{" +
-                "\"query\":\"{" +
-                "  stopPlace: " + GraphQLNames.FIND_STOPPLACE + " (query:\\\"ytNES\\\") { " +
-                "    name {value} " +
-                "  } " +
-                "}\"," +
-                "\"variables\":\"\"}"
+        String graphQlJsonQuery = """{
+                  stopPlace:  ${GraphQLNames.FIND_STOPPLACE} (query:"ytNES", allVersions:true) {
+                            name {value}
+                        }
+                    }"""
 
 
-        executeGraphQL(graphQlJsonQuery)
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .body("data.stopPlace[0].name.value", equalTo(stopPlaceName))
     }
 
