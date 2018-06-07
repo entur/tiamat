@@ -36,7 +36,7 @@ public class ExportParams {
 
     public enum ExportMode {NONE, RELEVANT, ALL}
 
-    public enum VersionValidity {ALL, CURRENT, CURRENT_FUTURE}
+    public enum VersionValidity {ALL, CURRENT, CURRENT_FUTURE, MAX_VERSION}
 
     public static final ExportMode DEFAULT_TARIFF_ZONE_EXPORT_MODE = ExportMode.RELEVANT;
 

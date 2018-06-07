@@ -869,6 +869,7 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
 
         StopPlaceSearch stopPlaceSearch = newStopPlaceSearchBuilder()
                                                   .setNetexIdList(Arrays.asList(versionOne.getNetexId()))
+                                                  .setVersionValidity(ExportParams.VersionValidity.MAX_VERSION)
                                                   .build();
 
         Page<StopPlace> result = stopPlaceRepository.findStopPlace(newExportParamsBuilder().setStopPlaceSearch(stopPlaceSearch).build());

@@ -10,7 +10,7 @@ public class StopPlaceQueryFromSearchBuilderTest {
     public void handleCommonWordsInQuery() {
 
         ExportParamsAndStopPlaceSearchValidator exportParamsAndStopPlaceSearchValidator = new ExportParamsAndStopPlaceSearchValidator();
-        StopPlaceQueryFromSearchBuilder stopPlaceQueryFromSearchBuilder = new StopPlaceQueryFromSearchBuilder("des,de,ould,wordToBeSkipped", exportParamsAndStopPlaceSearchValidator, ExportParams.VersionValidity.ALL);
+        StopPlaceQueryFromSearchBuilder stopPlaceQueryFromSearchBuilder = new StopPlaceQueryFromSearchBuilder("des,de,ould,wordToBeSkipped", exportParamsAndStopPlaceSearchValidator);
 
         String result = stopPlaceQueryFromSearchBuilder.handleCommonWordsInQuery("Gare de dax");
 

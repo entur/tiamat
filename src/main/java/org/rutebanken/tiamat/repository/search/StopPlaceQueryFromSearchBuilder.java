@@ -249,14 +249,9 @@ public class StopPlaceQueryFromSearchBuilder {
             wheres.add("s.version = :version");
             parameters.put("version", stopPlaceSearch.getVersion());
         } else if (!stopPlaceSearch.isAllVersions()
-                && stopPlaceSearch.getPointInTime() == null &&
-                (stopPlaceSearch.getVersionValidity() == null || ExportParams.VersionValidity.ALL.equals(stopPlaceSearch.getVersionValidity()))
+                && stopPlaceSearch.getPointInTime() == null
+                && (ExportParams.VersionValidity.MAX_VERSION.equals(stopPlaceSearch.getVersionValidity()))
                 && !CollectionUtils.isEmpty(stopPlaceSearch.getNetexIdList())) {
-
-            // Fetch max versions of stops. But only if the following is true:
-            // point in time is null, allversions is false, version validity is null or ALL, and last: getNetexIdList is not empty
-            // If the netex id list is provided, it makes sense to only return max version.
-            // On the other hand, if not provided, version validity ALL should give you all versions.
 
             operators.add("and");
             wheres.add("s.version = (select max(sv.version) from stop_place sv where sv.netex_id = s.netex_id)");
