@@ -35,12 +35,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.Temporal;
+import java.time.temporal.TemporalUnit;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
+import static org.assertj.core.api.AssertionsForClassTypes.contentOf;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.rutebanken.tiamat.exporter.params.ExportParams.newExportParamsBuilder;
 import static org.rutebanken.tiamat.exporter.params.StopPlaceSearch.newStopPlaceSearchBuilder;
@@ -544,6 +550,73 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
 
         assertThat(result).isNotEmpty();
         System.out.println(result.getContent().get(0));
+    }
+
+    @Test
+    public void findStopPlacesByVersion() {
+
+        //Searching for StopPlaces with arguments {page=0, size=50, allVersions=true, id=null, version=null, stopPlaceType=null, countyReference=null, tags=null, municipalityReference=null, query=NSR:StopPlace:6505, importedId=null, pointInTime=null, key=null, withoutLocationOnly=false, withoutQuaysOnly=false, withDuplicatedQuayImportedIds=false, withNearbySimilarDuplicates=false, values=null, withTags=false, code=null}
+
+        StopPlace v1 = new StopPlace(new EmbeddableMultilingualString("v1"));
+        v1.setStopPlaceType(StopTypeEnumeration.BUS_STATION);
+        v1.setVersion(1L);
+
+        Instant yesterday = Instant.now().minus(1, ChronoUnit.DAYS);
+        v1.setValidBetween(new ValidBetween(Instant.EPOCH, yesterday));
+        stopPlaceRepository.save(v1);
+
+        StopPlace v2 = new StopPlace(new EmbeddableMultilingualString("v2"));
+        v2.setValidBetween(new ValidBetween(yesterday));
+        v2.setVersion(2L);
+        v2.setNetexId(v1.getNetexId());
+        v2.setStopPlaceType(StopTypeEnumeration.BUS_STATION);
+
+        stopPlaceRepository.save(v2);
+
+        ExportParams exportParams = newExportParamsBuilder().setStopPlaceSearch(newStopPlaceSearchBuilder()
+                    .setQuery(v1.getNetexId())
+                    .setStopTypeEnumerations(Arrays.asList(StopTypeEnumeration.BUS_STATION))
+                    .setAllVersions(true)
+                    .build())
+                .build();
+
+        List<StopPlace> content = stopPlaceRepository.findStopPlace(exportParams).getContent();
+
+        assertThat(content).isNotEmpty();
+        assertThat(content).hasSize(2);
+    }
+
+    @Test
+    public void findStopPlacesDefaultsToVersionValidityCurrent() {
+
+        Instant yesterday = Instant.now().minus(1, ChronoUnit.DAYS);
+
+        StopPlace v1 = new StopPlace(new EmbeddableMultilingualString("stop"));
+        v1.setStopPlaceType(StopTypeEnumeration.BUS_STATION);
+        v1.setVersion(1L);
+        v1.setValidBetween(new ValidBetween(Instant.EPOCH, yesterday));
+        stopPlaceRepository.save(v1);
+
+        StopPlace v2 = new StopPlace(new EmbeddableMultilingualString("v2"));
+        v2.setVersion(2L);
+        v2.setNetexId(v1.getNetexId());
+        v2.setStopPlaceType(StopTypeEnumeration.BUS_STATION);
+        v2.setValidBetween(new ValidBetween(yesterday));
+        stopPlaceRepository.save(v2);
+
+        stopPlaceRepository.flush();
+
+        ExportParams exportParams = newExportParamsBuilder().setStopPlaceSearch(newStopPlaceSearchBuilder()
+                .setQuery(v2.getNetexId())
+                .setStopTypeEnumerations(Arrays.asList(StopTypeEnumeration.BUS_STATION))
+                .build())
+                .build();
+
+        List<StopPlace> content = stopPlaceRepository.findStopPlace(exportParams).getContent();
+
+        assertThat(content).isNotEmpty();
+        assertThat(content).hasSize(1);
+        assertThat(content.get(0).getVersion()).isEqualTo(2L);
     }
 
     @Test
