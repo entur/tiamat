@@ -45,7 +45,6 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
 import java.util.List;
 
 import static javax.xml.bind.JAXBContext.newInstance;
@@ -105,8 +104,10 @@ public class StreamingPublicationDeliveryIntegrationTest extends TiamatIntegrati
 
         ExportParams exportParams = ExportParams.newExportParamsBuilder()
                 .setStopPlaceSearch(
-                        StopPlaceSearch.newStopPlaceSearchBuilder()
-                        .build())
+                        StopPlaceSearch
+                                .newStopPlaceSearchBuilder()
+                                .setVersionValidity(ExportParams.VersionValidity.ALL)
+                                .build())
                 .build();
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
