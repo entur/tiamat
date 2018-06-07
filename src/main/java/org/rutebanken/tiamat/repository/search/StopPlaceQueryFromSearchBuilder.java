@@ -134,7 +134,7 @@ public class StopPlaceQueryFromSearchBuilder {
     /**
      * Default version validity for searches where pointInTime is not given.
      */
-    private final ExportParams.VersionValidity defaultVersionValidity;
+    private static final ExportParams.VersionValidity defaultVersionValidity = ExportParams.VersionValidity.CURRENT;
 
 
     @Autowired
@@ -152,11 +152,9 @@ public class StopPlaceQueryFromSearchBuilder {
 
     @Autowired
     public StopPlaceQueryFromSearchBuilder(@Value(" ${stopPlaces.search.commonWordsToIgnore:}") String commonWordsToIgnore,
-                                           ExportParamsAndStopPlaceSearchValidator exportParamsAndStopPlaceSearchValidator,
-                                           @Value(value = "${stopPlace.search.defaultVersionValidity:CURRENT}") ExportParams.VersionValidity defaultVersionValidity) {
+                                           ExportParamsAndStopPlaceSearchValidator exportParamsAndStopPlaceSearchValidator) {
         this.commonWordsToIgnore = StringUtils.isNotEmpty(commonWordsToIgnore) ? new HashSet<>(Arrays.asList(commonWordsToIgnore.split(","))) : new HashSet<>();
         this.exportParamsAndStopPlaceSearchValidator = exportParamsAndStopPlaceSearchValidator;
-        this.defaultVersionValidity = defaultVersionValidity;
     }
 
     public Pair<String, Map<String, Object>> buildQueryString(ExportParams exportParams) {
@@ -169,7 +167,7 @@ public class StopPlaceQueryFromSearchBuilder {
         if(stopPlaceSearch.getPointInTime() == null
                 && stopPlaceSearch.getVersionValidity() == null
                 && !stopPlaceSearch.isAllVersions()
-                && stopPlaceSearch.getVersion() == 0) {
+                && stopPlaceSearch.getVersion() == null) {
             logger.debug("Parameters pointInTime, versionValidity, allVersions or version not set. Defaulting to version validity " + defaultVersionValidity);
             versionValidity = defaultVersionValidity;
         } else {
