@@ -157,12 +157,15 @@ class StopPlaceUpdater implements DataFetcher {
                 StopPlace existingChildStopPlace = updatedParentStopPlace.getChildren().stream().filter(c -> c.getNetexId().equals(childNetexId)).findFirst().orElse(null);
                 verifyStopPlaceNotNull(existingChildStopPlace, childNetexId);
 
-                // Next line is not strictly required. As the child will alway belong to the parent.
+                // Next line is not strictly required. As the child will always belong to the parent.
                 verifyCorrectParentSet(existingChildStopPlace, updatedParentStopPlace);
 
                 logger.info("Populating changes for child stop {} (parent: {})", childNetexId, updatedParentStopPlace.getNetexId());
-                updated |= stopPlaceMapper.populateStopPlaceFromInput((Map) childStopMap, existingChildStopPlace);
-                updatedCount++;
+                boolean wasUpdated = stopPlaceMapper.populateStopPlaceFromInput((Map) childStopMap, existingChildStopPlace);;
+                updated |= wasUpdated;
+                if (wasUpdated) {
+                    updatedCount++;
+                }
             }
 
             logger.info("Applied changes for {} child stops. Parent stop contains {} child stops", updatedCount, updatedParentStopPlace.getChildren().size());
