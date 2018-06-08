@@ -15,8 +15,9 @@
 
 package org.rutebanken.tiamat.auth;
 
-import com.google.common.collect.Sets;
 import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
+import org.rutebanken.tiamat.diff.TiamatObjectDiffer;
+import org.rutebanken.tiamat.diff.generic.Difference;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +26,8 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -41,54 +44,95 @@ public class StopPlaceAuthorizationService {
 
     private final ReflectionAuthorizationService authorizationService;
 
+    private final TiamatObjectDiffer tiamatObjectDiffer;
+
     @Autowired
-    public StopPlaceAuthorizationService(ReflectionAuthorizationService authorizationService) {
+    public StopPlaceAuthorizationService(ReflectionAuthorizationService authorizationService, TiamatObjectDiffer tiamatObjectDiffer) {
         this.authorizationService = authorizationService;
+        this.tiamatObjectDiffer = tiamatObjectDiffer;
     }
 
     /**
      * Assert that the user is authorized to edit the stop place.
-     *
+     * <p>
      * If the stop place is a parent stop place, the following will be checked:
      * If the user is not authorized to edit all childs stops, it can still edit a child stop the user is authorized to edit, but it cannot terminate the validity of the parent stop.
      * In this situation, the newVersion of the stop must only be populated with the children that are relevant to edit.
      * If the newVersion of the stop place contains all current children, and the user does not have authorization to edit those stop places, authorization is not granted.
-     *
+     * <p>
      * If the stop place is a normal mono modal stop place, the {@link ReflectionAuthorizationService} will be called directly.
      *
      * @param existingVersion the current version of the stop place, persisted
-     * @param newVersion the new version of the same stop place, containing the changed state. If type is parent stop place, only child stops that the user would be authorized to change and edit, should be present.
+     * @param newVersion      the new version of the same stop place, containing the changed state. If type is parent stop place, only child stops that the user would be authorized to change and edit, should be present.
      */
     public void assertAuthorizedToEdit(StopPlace existingVersion, StopPlace newVersion) {
-        boolean accessToAllChildren;
 
-        if (newVersion.isParentStopPlace()) {
+        if (newVersion.isParentStopPlace() && existingVersion != null) {
             // Only child stops that the user has access to should be provided with the new version
             // If the stop place already contains children the user does not have access to, the user does not have access to terminate the stop place.
-            authorizationService.assertAuthorized(ROLE_EDIT_STOPS, newVersion.getChildren());
 
-            if (existingVersion != null) {
-                Set<String> existingChildrenIds = existingVersion.getChildren().stream().map(s -> s.getNetexId()).collect(Collectors.toSet());
-                Set<String> newChildrenIds = newVersion.getChildren().stream().map(s -> s.getNetexId()).collect(Collectors.toSet());
+            boolean accessToAllChildren = authorizationService.isAuthorized(ROLE_EDIT_STOPS, existingVersion.getChildren());
+            if (!accessToAllChildren) {
+                // This user does not have access to all children.
+                // Could the user still be allowed to edit a child?
 
-                Sets.SetView<String> difference = Sets.difference(existingChildrenIds, newChildrenIds);
+                Set<StopPlace> mustBeAuthorizedToEditTheseChildren = newVersion.getChildren().stream()
+                        .filter(newVersionOfChild -> compareChild(newVersionOfChild, existingVersion))
+                        .collect(Collectors.toSet());
 
-                if (!difference.isEmpty()) {
-                    logger.info("Childrens differ: {}", difference);
-                    accessToAllChildren = authorizationService.isAuthorized(ROLE_EDIT_STOPS, existingVersion.getChildren());
-                    if (!accessToAllChildren) {
-                        logger.info("Detected a situation where the user does not have access to all existing child stops {}. About to check new version's termination date: {}.",
-                                existingChildrenIds,
-                                newVersion.getValidBetween());
-                        if (newVersion.getValidBetween() != null && newVersion.getValidBetween().getToDate() != null) {
-                            throw new AccessDeniedException("The user does not have access to all child stops, and can therefore not set termination date for the parent stop place " + newVersion.getNetexId());
-                        }
-                    }
+                if (mustBeAuthorizedToEditTheseChildren.isEmpty()) {
+                    // Cannot accept empty list.
+                    mustBeAuthorizedToEditTheseChildren = newVersion.getChildren();
                 }
+
+                logger.debug("Must be authorized to edit these children: {}", mustBeAuthorizedToEditTheseChildren.stream().map(child -> child.getNetexId()).collect(Collectors.toList()));
+                authorizationService.assertAuthorized(ROLE_EDIT_STOPS, mustBeAuthorizedToEditTheseChildren);
+
+                Set<String> existingChildrenIds = existingVersion.getChildren().stream().map(s -> s.getNetexId()).collect(Collectors.toSet());
+
+                if (newVersion.getValidBetween() != null && newVersion.getValidBetween().getToDate() != null) {
+                    throw new AccessDeniedException("The user does not have access to all child stops, and can therefore not set termination date for the parent stop place " + newVersion.getNetexId());
+                }
+
+                logger.info("Detected a situation where the user does not have access to all existing child stops {} of parent stop {}. Access is still granted because the user has access to the following child stops: {}.",
+                        existingChildrenIds, newVersion.getNetexId(), mustBeAuthorizedToEditTheseChildren);
             }
         } else {
             authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(newVersion));
         }
 
     }
+
+    private boolean compareChild(StopPlace newVersionOfChild, StopPlace existingVersion) {
+        if (existingVersion == null) {
+            return true;
+        }
+        Optional<StopPlace> matchingExistingChild = existingVersion.getChildren().stream().filter(existingChild -> newVersionOfChild.getNetexId().equals(existingChild.getNetexId())).findFirst();
+
+        if (matchingExistingChild.isPresent()) {
+            return stopShouldBeAuthorized(newVersionOfChild, matchingExistingChild.get());
+        }
+        logger.info("Cannot find matching existing child {}. Return true.", newVersionOfChild.getNetexId());
+        return true;
+    }
+
+    private boolean stopShouldBeAuthorized(StopPlace newVersionOfChild, StopPlace matchingExistingChild) {
+        try {
+            List<Difference> differenceList = tiamatObjectDiffer.compareObjects(matchingExistingChild, newVersionOfChild);
+
+            if (differenceList.isEmpty()) {
+                logger.info("Child has NOT changed {} {}", newVersionOfChild.getNetexId(), newVersionOfChild.getStopPlaceType());
+                // Disable authorization check for this stop. It has not been changed.
+                return false;
+            } else {
+                logger.info("Child has changed {} {}", newVersionOfChild.getNetexId(), newVersionOfChild.getStopPlaceType());
+                return true;
+            }
+        } catch (IllegalAccessException e) {
+            logger.warn("Could not compare children", e);
+            return true;
+        }
+    }
+
+
 }

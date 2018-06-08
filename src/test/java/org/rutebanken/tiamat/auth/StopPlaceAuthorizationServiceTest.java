@@ -24,6 +24,7 @@ import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.auth.check.TiamatOriganisationChecker;
 import org.rutebanken.tiamat.auth.check.TopographicPlaceChecker;
 import org.rutebanken.tiamat.config.AuthorizationServiceConfig;
+import org.rutebanken.tiamat.diff.TiamatObjectDiffer;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.service.stopplace.MultiModalStopPlaceEditor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -94,6 +95,9 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
      */
     private RoleAssignmentExtractor roleAssignmentExtractor;
 
+    @Autowired
+    private TiamatObjectDiffer tiamatObjectDiffer;
+
     /**
      * Set up stopPlaceAuthorizationService with custom roleAssignmentExtractor.
      * Borrowing the config class to get field mappings.
@@ -109,7 +113,8 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
                 topographicPlaceChecker,
                 tiamatEntityResolver);
 
-        stopPlaceAuthorizationService = new StopPlaceAuthorizationService(reflectionAuthorizationService);
+
+        stopPlaceAuthorizationService = new StopPlaceAuthorizationService(reflectionAuthorizationService, tiamatObjectDiffer);
     }
 
     @Test
@@ -133,8 +138,8 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
         setRoleAssignmentReturned(roleAssignment);
 
         StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(existingVersion, StopPlace.class);
-        removeAllChildrenExcept(newVersion, onstreetBus.getNetexId());
 
+        getChildStop(onstreetBus.getNetexId(), newVersion).setName(new EmbeddableMultilingualString("new name"));
         stopPlaceAuthorizationService.assertAuthorizedToEdit(existingVersion, newVersion);
     }
 
@@ -157,13 +162,22 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
 
         RoleAssignment roleAssignment = canOnlyEdit("railStation");
 
+
         setRoleAssignmentReturned(roleAssignment);
 
         StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(existingVersion, StopPlace.class);
-
-        removeAllChildrenExcept(newVersion, railStation.getNetexId());
+        getChildStop(railStation.getNetexId(), newVersion).setDescription(new EmbeddableMultilingualString("new description"));
 
         stopPlaceAuthorizationService.assertAuthorizedToEdit(existingVersion, newVersion);
+    }
+
+    private StopPlace getChildStop(String netexId, StopPlace parentStop) {
+        for (StopPlace child : parentStop.getChildren()) {
+            if(child.getNetexId().equals(netexId)) {
+                return child;
+            }
+        }
+        return null;
     }
 
     @Test
@@ -188,7 +202,8 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
         setRoleAssignmentReturned(roleAssignment);
 
         StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(existingVersion, StopPlace.class);
-        removeAllChildrenExcept(newVersion, onstreetBus.getNetexId());
+
+        getChildStop(onstreetBus.getNetexId(), newVersion).setDescription(new EmbeddableMultilingualString("new description"));
 
         assertThatThrownBy(() ->
                 stopPlaceAuthorizationService.assertAuthorizedToEdit(existingVersion, newVersion))
@@ -217,7 +232,8 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
         setRoleAssignmentReturned(roleAssignment);
 
         StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(existingVersion, StopPlace.class);
-        removeAllChildrenExcept(newVersion, onstreetBus.getNetexId());
+
+        getChildStop(onstreetBus.getNetexId(), newVersion).setDescription(new EmbeddableMultilingualString("new description"));
 
         // Set termination date
         newVersion.setValidBetween(new ValidBetween(null, Instant.now()));
@@ -248,9 +264,8 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
         setRoleAssignmentReturned(roleAssignment);
 
         StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(existingVersion, StopPlace.class);
-        removeAllChildrenExcept(newVersion, onstreetBus.getNetexId());
 
-        newVersion.getChildren().iterator().next().setStopPlaceType(StopTypeEnumeration.TRAM_STATION);
+        getChildStop(onstreetBus.getNetexId(), newVersion).setStopPlaceType(StopTypeEnumeration.TRAM_STATION);
 
         // Cannot change stop place type to a type the user is not authorized to change to
         assertThatThrownBy(() ->
@@ -282,10 +297,9 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
         setRoleAssignmentReturned(roleAssignment);
 
         StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(existingVersion, StopPlace.class);
-        removeAllChildrenExcept(newVersion, onstreetBus.getNetexId());
 
         // Change the bus to ferry
-        onstreetBus.setStopPlaceType(StopTypeEnumeration.FERRY_STOP);
+        getChildStop(onstreetBus.getNetexId(), newVersion).setStopPlaceType(StopTypeEnumeration.FERRY_STOP);
 
         stopPlaceAuthorizationService.assertAuthorizedToEdit(existingVersion, newVersion);
     }
