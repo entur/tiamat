@@ -32,11 +32,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 
 @Service("stopPlaceUpdater")
@@ -119,8 +116,12 @@ class StopPlaceUpdater implements DataFetcher {
             if (updatedStopPlace != null) {
                 boolean hasValuesChanged = stopPlaceMapper.populateStopPlaceFromInput(input, updatedStopPlace);
 
+                Set<String> childStopsUpdated;
                 if (updatedStopPlace.isParentStopPlace()) {
-                    hasValuesChanged |= handleChildStops(input, updatedStopPlace);
+                    childStopsUpdated = handleChildStops(input, updatedStopPlace);
+                    hasValuesChanged |= !childStopsUpdated.isEmpty();
+                } else {
+                    childStopsUpdated = new HashSet<>();
                 }
 
                 if (hasValuesChanged) {
@@ -128,7 +129,7 @@ class StopPlaceUpdater implements DataFetcher {
                         throw new IllegalArgumentException("Updated stop place must have name set: " + updatedStopPlace);
                     }
 
-                    updatedStopPlace = stopPlaceVersionedSaverService.saveNewVersion(existingVersion, updatedStopPlace);
+                    updatedStopPlace = stopPlaceVersionedSaverService.saveNewVersion(existingVersion, updatedStopPlace, childStopsUpdated);
 
                     return updatedStopPlace;
                 }
@@ -137,10 +138,9 @@ class StopPlaceUpdater implements DataFetcher {
         return existingVersion;
     }
 
-    private boolean handleChildStops(Map input, StopPlace updatedParentStopPlace) {
-        boolean updated = false;
+    private Set<String> handleChildStops(Map input, StopPlace updatedParentStopPlace) {
+        Set<String> childStopsUpdated = new HashSet<>();
 
-        int updatedCount = 0;
         if (input.get(CHILDREN) != null) {
             List childObjects = (List) input.get(CHILDREN);
             logger.info("Incoming child stop objects: {}", childObjects);
@@ -162,15 +162,15 @@ class StopPlaceUpdater implements DataFetcher {
 
                 logger.info("Populating changes for child stop {} (parent: {})", childNetexId, updatedParentStopPlace.getNetexId());
                 boolean wasUpdated = stopPlaceMapper.populateStopPlaceFromInput((Map) childStopMap, existingChildStopPlace);;
-                updated |= wasUpdated;
+
                 if (wasUpdated) {
-                    updatedCount++;
+                    childStopsUpdated.add(existingChildStopPlace.getNetexId());
                 }
             }
 
-            logger.info("Applied changes for {} child stops. Parent stop contains {} child stops", updatedCount, updatedParentStopPlace.getChildren().size());
+            logger.info("Applied changes for {} child stops. Parent stop contains {} child stops", childStopsUpdated.size(), updatedParentStopPlace.getChildren().size());
         }
-        return updated;
+        return childStopsUpdated;
     }
 
     private StopPlace findAndVerify(String netexId) {

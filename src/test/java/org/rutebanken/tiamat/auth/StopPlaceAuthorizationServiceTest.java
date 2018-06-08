@@ -15,6 +15,7 @@
 
 package org.rutebanken.tiamat.auth;
 
+import com.google.common.collect.Sets;
 import org.junit.Before;
 import org.junit.Test;
 import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
@@ -139,8 +140,7 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
 
         StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(existingVersion, StopPlace.class);
 
-        getChildStop(onstreetBus.getNetexId(), newVersion).setName(new EmbeddableMultilingualString("new name"));
-        stopPlaceAuthorizationService.assertAuthorizedToEdit(existingVersion, newVersion);
+        stopPlaceAuthorizationService.assertAuthorizedToEdit(existingVersion, newVersion, Sets.newHashSet(onstreetBus.getNetexId()));
     }
 
     @Test
@@ -166,9 +166,8 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
         setRoleAssignmentReturned(roleAssignment);
 
         StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(existingVersion, StopPlace.class);
-        getChildStop(railStation.getNetexId(), newVersion).setDescription(new EmbeddableMultilingualString("new description"));
 
-        stopPlaceAuthorizationService.assertAuthorizedToEdit(existingVersion, newVersion);
+        stopPlaceAuthorizationService.assertAuthorizedToEdit(existingVersion, newVersion, Sets.newHashSet(railStation.getNetexId()));
     }
 
     private StopPlace getChildStop(String netexId, StopPlace parentStop) {
@@ -203,10 +202,8 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
 
         StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(existingVersion, StopPlace.class);
 
-        getChildStop(onstreetBus.getNetexId(), newVersion).setDescription(new EmbeddableMultilingualString("new description"));
-
         assertThatThrownBy(() ->
-                stopPlaceAuthorizationService.assertAuthorizedToEdit(existingVersion, newVersion))
+                stopPlaceAuthorizationService.assertAuthorizedToEdit(existingVersion, newVersion, Sets.newHashSet(onstreetBus.getNetexId())))
                 .isInstanceOf(AccessDeniedException.class);
     }
 
@@ -233,13 +230,11 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
 
         StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(existingVersion, StopPlace.class);
 
-        getChildStop(onstreetBus.getNetexId(), newVersion).setDescription(new EmbeddableMultilingualString("new description"));
-
         // Set termination date
         newVersion.setValidBetween(new ValidBetween(null, Instant.now()));
 
         assertThatThrownBy(() ->
-                stopPlaceAuthorizationService.assertAuthorizedToEdit(existingVersion, newVersion))
+                stopPlaceAuthorizationService.assertAuthorizedToEdit(existingVersion, newVersion, Sets.newHashSet(onstreetBus.getNetexId())))
                 .isInstanceOf(AccessDeniedException.class);
     }
 
@@ -269,7 +264,7 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
 
         // Cannot change stop place type to a type the user is not authorized to change to
         assertThatThrownBy(() ->
-                stopPlaceAuthorizationService.assertAuthorizedToEdit(existingVersion, newVersion))
+                stopPlaceAuthorizationService.assertAuthorizedToEdit(existingVersion, newVersion, Sets.newHashSet(onstreetBus.getNetexId())))
                 .isInstanceOf(AccessDeniedException.class);
     }
 
@@ -301,7 +296,7 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
         // Change the bus to ferry
         getChildStop(onstreetBus.getNetexId(), newVersion).setStopPlaceType(StopTypeEnumeration.FERRY_STOP);
 
-        stopPlaceAuthorizationService.assertAuthorizedToEdit(existingVersion, newVersion);
+        stopPlaceAuthorizationService.assertAuthorizedToEdit(existingVersion, newVersion, Sets.newHashSet(onstreetBus.getNetexId()));
     }
 
     @Test

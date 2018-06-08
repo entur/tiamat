@@ -25,10 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
@@ -52,6 +49,10 @@ public class StopPlaceAuthorizationService {
         this.tiamatObjectDiffer = tiamatObjectDiffer;
     }
 
+    public void assertAuthorizedToEdit(StopPlace existingVersion, StopPlace newVersion) {
+        assertAuthorizedToEdit(existingVersion, newVersion, new HashSet<String>());
+    }
+
     /**
      * Assert that the user is authorized to edit the stop place.
      * <p>
@@ -61,11 +62,11 @@ public class StopPlaceAuthorizationService {
      * If the newVersion of the stop place contains all current children, and the user does not have authorization to edit those stop places, authorization is not granted.
      * <p>
      * If the stop place is a normal mono modal stop place, the {@link ReflectionAuthorizationService} will be called directly.
-     *
-     * @param existingVersion the current version of the stop place, persisted
+     *  @param existingVersion the current version of the stop place, persisted
      * @param newVersion      the new version of the same stop place, containing the changed state. If type is parent stop place, only child stops that the user would be authorized to change and edit, should be present.
+     * @param childStopsUpdated
      */
-    public void assertAuthorizedToEdit(StopPlace existingVersion, StopPlace newVersion) {
+    public void assertAuthorizedToEdit(StopPlace existingVersion, StopPlace newVersion, Set<String> childStopsUpdated) {
 
         if (newVersion.isParentStopPlace() && existingVersion != null) {
             // Only child stops that the user has access to should be provided with the new version
@@ -77,7 +78,7 @@ public class StopPlaceAuthorizationService {
                 // Could the user still be allowed to edit a child?
 
                 Set<StopPlace> mustBeAuthorizedToEditTheseChildren = newVersion.getChildren().stream()
-                        .filter(newVersionOfChild -> compareChild(newVersionOfChild, existingVersion))
+                        .filter(newVersionOfChild -> childStopsUpdated.contains(newVersionOfChild.getNetexId()))
                         .collect(Collectors.toSet());
 
                 if (mustBeAuthorizedToEditTheseChildren.isEmpty()) {

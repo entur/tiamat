@@ -33,6 +33,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
@@ -84,6 +86,14 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
 
     @Override
     public StopPlace saveNewVersion(StopPlace existingVersion, StopPlace newVersion, Instant defaultValidFrom) {
+        return saveNewVersion(existingVersion, newVersion, defaultValidFrom, new HashSet<>());
+    }
+
+    public StopPlace saveNewVersion(StopPlace existingVersion, StopPlace newVersion, Set<String> childStopsUpdated) {
+        return saveNewVersion(existingVersion, newVersion, Instant.now(), childStopsUpdated);
+    }
+
+    public StopPlace saveNewVersion(StopPlace existingVersion, StopPlace newVersion, Instant defaultValidFrom, Set<String> childStopsUpdated) {
 
         super.validate(existingVersion, newVersion);
 
@@ -115,14 +125,14 @@ public class StopPlaceVersionedSaverService extends VersionedSaverService<StopPl
         if (existingVersion == null) {
             logger.debug("Existing version is not present, which means new entity. {}", newVersion);
             newVersion.setCreated(changed);
-            stopPlaceAuthorizationService.assertAuthorizedToEdit(null, newVersion);
+            stopPlaceAuthorizationService.assertAuthorizedToEdit(null, newVersion, childStopsUpdated);
         } else {
             newVersion.setChanged(changed);
             logger.debug("About to terminate previous version for {},{}", existingVersion.getNetexId(), existingVersion.getVersion());
             StopPlace existingVersionRefetched = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(existingVersion.getNetexId());
             logger.debug("Found previous version {},{}. Terminating it.", existingVersionRefetched.getNetexId(), existingVersionRefetched.getVersion());
             validityUpdater.terminateVersion(existingVersionRefetched, newVersionValidFrom.minusMillis(MILLIS_BETWEEN_VERSIONS));
-            stopPlaceAuthorizationService.assertAuthorizedToEdit(existingVersionRefetched, newVersion);
+            stopPlaceAuthorizationService.assertAuthorizedToEdit(existingVersionRefetched, newVersion, childStopsUpdated);
         }
 
         newVersion =  versionIncrementor.initiateOrIncrementVersions(newVersion);
