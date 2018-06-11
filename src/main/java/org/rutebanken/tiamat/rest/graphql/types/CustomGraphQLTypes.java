@@ -17,6 +17,7 @@ package org.rutebanken.tiamat.rest.graphql.types;
 
 import com.vividsolutions.jts.geom.Geometry;
 import graphql.schema.*;
+import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
 import org.rutebanken.tiamat.rest.graphql.fetchers.PrivateCodeFetcher;
@@ -24,6 +25,7 @@ import org.rutebanken.tiamat.rest.graphql.fetchers.PrivateCodeFetcher;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static graphql.Scalars.*;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
@@ -89,22 +91,32 @@ public class CustomGraphQLTypes {
         public static GraphQLEnumType waterSubmodeType = createCustomEnumType("WaterSubmodeType", WaterSubmodeEnumeration.class);
         public static GraphQLEnumType cablewaySubmodeType = createCustomEnumType("TelecabinSubmodeType", TelecabinSubmodeEnumeration.class);
         public static GraphQLEnumType funicularSubmodeType = createCustomEnumType("FunicularSubmodeType", FunicularSubmodeEnumeration.class);
+        public static GraphQLEnumType versionValidityEnumType = createCustomEnumType(ExportParams.VersionValidity.class.getSimpleName(), ExportParams.VersionValidity.class);
 
-        private static GraphQLEnumType createCustomEnumType(String name, Class c) {
+
+        public static GraphQLEnumType createCustomEnumType(String name, Class c) {
 
                 Object[] enumConstants = c.getEnumConstants();
 
                 GraphQLEnumType.Builder builder = GraphQLEnumType.newEnum().name(name);
                 for (Object enumObj : enumConstants) {
+                    boolean valueWasSetFromValueMethod = false;
                         Method[] methods = enumObj.getClass().getMethods();
                         for (Method method : methods) {
+
                                 if (method.getParameterCount() == 0 && "value".equals(method.getName())) {
                                         try {
                                                 builder.value((String) method.invoke(enumObj), enumObj);
+                                            valueWasSetFromValueMethod = true;
                                         } catch (Exception e) {
                                                 throw new ExceptionInInitializerError(e);
                                         }
                                 }
+
+
+                        }
+                        if(!valueWasSetFromValueMethod) {
+                            builder.value(enumObj.toString());
                         }
                 }
                 return builder.build();
