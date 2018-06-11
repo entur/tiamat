@@ -28,7 +28,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -244,20 +243,12 @@ public class StopPlaceQueryFromSearchBuilder {
 
         }
 
+        // Parameters: version, pointInTime, versionValidity, allVersions. Should not be combined. See the exportParamsAndStopPlaceSearchValidator
         if (stopPlaceSearch.getVersion() != null) {
             operators.add("and");
             wheres.add("s.version = :version");
             parameters.put("version", stopPlaceSearch.getVersion());
-        } else if (!stopPlaceSearch.isAllVersions()
-                && stopPlaceSearch.getPointInTime() == null
-                && (ExportParams.VersionValidity.MAX_VERSION.equals(stopPlaceSearch.getVersionValidity()))
-                && !CollectionUtils.isEmpty(stopPlaceSearch.getNetexIdList())) {
-
-            operators.add("and");
-            wheres.add("s.version = (select max(sv.version) from stop_place sv where sv.netex_id = s.netex_id)");
-        }
-
-        if (stopPlaceSearch.getPointInTime() != null) {
+        } else if (stopPlaceSearch.getPointInTime() != null) {
             operators.add("and");
             //(from- and toDate is NULL), or (fromDate is set and toDate IS NULL or set)
             String pointInTimeCondition = createPointInTimeCondition("s", "p");
@@ -274,6 +265,9 @@ public class StopPlaceQueryFromSearchBuilder {
             String futureQuery = "p.netex_id is null and (s.to_date >= :pointInTime OR s.to_date IS NULL)";
             String parentFutureQuery = "p.netex_id is not null and (p.to_date >= :pointInTime OR p.to_date IS NULL)";
             wheres.add("((" + futureQuery + ") or (" + parentFutureQuery + "))");
+        } else if (!stopPlaceSearch.isAllVersions() && ExportParams.VersionValidity.MAX_VERSION.equals(stopPlaceSearch.getVersionValidity())) {
+            operators.add("and");
+            wheres.add("s.version = (select max(sv.version) from stop_place sv where sv.netex_id = s.netex_id)");
         }
 
         if (stopPlaceSearch.isWithoutLocationOnly()) {
