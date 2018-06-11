@@ -18,6 +18,7 @@ package org.rutebanken.tiamat.rest.graphql.types;
 import graphql.schema.GraphQLEnumType;
 import graphql.schema.GraphQLEnumValueDefinition;
 import org.junit.Test;
+import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.model.LimitationStatusEnumeration;
 
 import java.lang.reflect.Field;
@@ -27,6 +28,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static junit.framework.TestCase.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class CustomGraphQLTypesTest {
 
@@ -61,5 +63,19 @@ public class CustomGraphQLTypesTest {
             }
         }
         assertTrue("No custom GraphQL-enums have been tested!", counter.get() > 0);
+    }
+
+    @Test
+    public void testVersionValidityEnum() {
+
+
+        GraphQLEnumType myFreshEnum = CustomGraphQLTypes.createCustomEnumType("myFreshEnum", ExportParams.VersionValidity.class);
+        assertThat(myFreshEnum.getValues()).extracting(graphQLEnumValueDefinition -> graphQLEnumValueDefinition.getName()).contains(
+                ExportParams.VersionValidity.CURRENT.toString(),
+                ExportParams.VersionValidity.CURRENT_FUTURE.toString(),
+                ExportParams.VersionValidity.MAX_VERSION.toString(),
+                ExportParams.VersionValidity.ALL.toString()
+        );
+
     }
 }

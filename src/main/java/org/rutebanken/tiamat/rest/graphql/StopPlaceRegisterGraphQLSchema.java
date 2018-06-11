@@ -474,7 +474,12 @@ public class StopPlaceRegisterGraphQLSchema {
         arguments.add(GraphQLArgument.newArgument()
                 .name(VERSION)
                 .type(GraphQLInt)
-                .description(VERSION_ARG_DESCRIPTION    )
+                .description(VERSION_ARG_DESCRIPTION)
+                .build());
+        arguments.add(GraphQLArgument.newArgument()
+                .type(versionValidityEnumType)
+                .name(VERSION_VALIDITY_ARG)
+                .description(VERSION_ARG_DESCRIPTION)
                 .build());
         arguments.add(GraphQLArgument.newArgument()
                 .name(STOP_PLACE_TYPE)

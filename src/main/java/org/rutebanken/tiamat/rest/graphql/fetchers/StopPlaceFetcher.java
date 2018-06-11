@@ -98,6 +98,11 @@ class StopPlaceFetcher implements DataFetcher {
             pointInTime = null;
         }
 
+        if(environment.getArgument(VERSION_VALIDITY_ARG) != null) {
+            ExportParams.VersionValidity versionValidity = ExportParams.VersionValidity.valueOf(ExportParams.VersionValidity.class, environment.getArgument(VERSION_VALIDITY_ARG));
+            stopPlaceSearchBuilder.setVersionValidity(versionValidity);
+        }
+
         if (netexId != null && !netexId.isEmpty()) {
 
             try {
