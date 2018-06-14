@@ -41,6 +41,7 @@ import org.rutebanken.tiamat.rest.graphql.helpers.CleanupHelper;
 import org.rutebanken.tiamat.rest.graphql.mappers.GroupOfStopPlacesMapper;
 import org.rutebanken.tiamat.lock.MutateLock;
 import org.rutebanken.tiamat.versioning.GroupOfStopPlacesSaverService;
+import org.rutebanken.tiamat.versioning.VersionCreator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,9 +63,6 @@ class GroupOfStopPlacesUpdater implements DataFetcher<GroupOfStopPlaces> {
     private GroupOfStopPlacesSaverService groupOfStopPlacesSaverService;
 
     @Autowired
-    private StopPlaceRepository stopPlaceRepository;
-
-    @Autowired
     private GroupOfStopPlacesRepository groupOfStopPlacesRepository;
 
     @Autowired
@@ -72,6 +70,9 @@ class GroupOfStopPlacesUpdater implements DataFetcher<GroupOfStopPlaces> {
 
     @Autowired
     private MutateLock mutateLock;
+
+    @Autowired
+    protected VersionCreator versionCreator;
 
     @Override
     public GroupOfStopPlaces get(DataFetchingEnvironment environment) {
@@ -101,7 +102,7 @@ class GroupOfStopPlacesUpdater implements DataFetcher<GroupOfStopPlaces> {
                     logger.info("About to update GroupOfStopPlaces {}", netexId);
 
                     existingVersion = findAndVerify(netexId);
-                    updatedGroupOfStopPlaces = groupOfStopPlacesSaverService.createCopy(existingVersion, GroupOfStopPlaces.class);
+                    updatedGroupOfStopPlaces = versionCreator.createCopy(existingVersion, GroupOfStopPlaces.class);
                     updatedGroupOfStopPlaces.getMembers().clear();
 
                 } else {
@@ -113,7 +114,7 @@ class GroupOfStopPlacesUpdater implements DataFetcher<GroupOfStopPlaces> {
 
                 if (isUpdated) {
                     logger.info("Saving {}", updatedGroupOfStopPlaces);
-                    return groupOfStopPlacesSaverService.saveNewVersion(existingVersion, updatedGroupOfStopPlaces);
+                    return groupOfStopPlacesSaverService.saveNewVersion(updatedGroupOfStopPlaces);
                 }
             }
             logger.warn("GroupOfStopPlaces was attemted mutated, but no changes were applied {}", existingVersion);

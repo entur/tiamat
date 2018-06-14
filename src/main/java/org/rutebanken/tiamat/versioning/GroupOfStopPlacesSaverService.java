@@ -18,12 +18,15 @@ package org.rutebanken.tiamat.versioning;
 import com.google.api.client.util.Preconditions;
 import com.vividsolutions.jts.geom.Point;
 import org.rutebanken.helper.organisation.AuthorizationConstants;
+import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
+import org.rutebanken.tiamat.auth.UsernameFetcher;
 import org.rutebanken.tiamat.model.GroupOfStopPlaces;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.EntityInVersionRepository;
 import org.rutebanken.tiamat.repository.GroupOfStopPlacesRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.service.groupofstopplaces.GroupOfStopPlacesCentroidComputer;
+import org.rutebanken.tiamat.service.metrics.MetricsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -42,7 +45,7 @@ import java.util.Optional;
  */
 @Transactional
 @Service
-public class GroupOfStopPlacesSaverService extends VersionedSaverService<GroupOfStopPlaces> {
+public class GroupOfStopPlacesSaverService {
 
     private static final Logger logger = LoggerFactory.getLogger(GroupOfStopPlacesSaverService.class);
 
@@ -55,13 +58,18 @@ public class GroupOfStopPlacesSaverService extends VersionedSaverService<GroupOf
     @Autowired
     private GroupOfStopPlacesCentroidComputer groupOfStopPlacesCentroidComputer;
 
+    @Autowired
+    private UsernameFetcher usernameFetcher;
 
-    @Override
-    public GroupOfStopPlaces saveNewVersion(GroupOfStopPlaces existingVersion, GroupOfStopPlaces newVersion) {
-        return saveNewVersion(newVersion);
-    }
+    @Autowired
+    private VersionIncrementor versionIncrementor;
 
-    @Override
+    @Autowired
+    private MetricsService metricsService;
+
+    @Autowired
+    private ReflectionAuthorizationService authorizationService;
+
     public GroupOfStopPlaces saveNewVersion(GroupOfStopPlaces newVersion) {
 
         validateMembers(newVersion);
@@ -108,11 +116,6 @@ public class GroupOfStopPlacesSaverService extends VersionedSaverService<GroupOf
 
             authorizationService.assertAuthorized(AuthorizationConstants.ROLE_EDIT_STOPS, Arrays.asList(resolvedMember));
         });
-    }
-
-    @Override
-    public EntityInVersionRepository<GroupOfStopPlaces> getRepository() {
-        return groupOfStopPlacesRepository;
     }
 
 
