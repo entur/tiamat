@@ -25,6 +25,7 @@ import org.rutebanken.tiamat.repository.ParkingRepository;
 import org.rutebanken.tiamat.rest.graphql.mappers.GeometryMapper;
 import org.rutebanken.tiamat.rest.graphql.mappers.ValidBetweenMapper;
 import org.rutebanken.tiamat.versioning.ParkingVersionedSaverService;
+import org.rutebanken.tiamat.versioning.VersionCreator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,6 +62,8 @@ class ParkingUpdater implements DataFetcher {
     @Autowired
     private ValidBetweenMapper validBetweenMapper;
 
+    @Autowired
+    private VersionCreator versionCreator;
 
 
     @Override
@@ -84,7 +87,7 @@ class ParkingUpdater implements DataFetcher {
             logger.info("Updating Parking {}", netexId);
             existingVersion = parkingRepository.findFirstByNetexIdOrderByVersionDesc(netexId);
             Preconditions.checkArgument(existingVersion != null, "Attempting to update Parking [id = %s], but Parking does not exist.", netexId);
-            updatedParking = parkingVersionedSaverService.createCopy(existingVersion, Parking.class);
+            updatedParking = versionCreator.createCopy(existingVersion, Parking.class);
 
         } else {
             logger.info("Creating new Parking");
