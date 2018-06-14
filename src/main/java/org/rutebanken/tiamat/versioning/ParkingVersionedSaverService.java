@@ -17,16 +17,16 @@ package org.rutebanken.tiamat.versioning;
 
 
 import com.google.api.client.util.Preconditions;
+import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
 import org.rutebanken.tiamat.auth.UsernameFetcher;
 import org.rutebanken.tiamat.model.DataManagedObjectStructure;
 import org.rutebanken.tiamat.model.Parking;
 import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.repository.EntityInVersionRepository;
 import org.rutebanken.tiamat.repository.ParkingRepository;
 import org.rutebanken.tiamat.repository.reference.ReferenceResolver;
+import org.rutebanken.tiamat.service.metrics.MetricsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,7 +38,7 @@ import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDI
 
 @Transactional
 @Service
-public class ParkingVersionedSaverService extends VersionedSaverService<Parking> {
+public class ParkingVersionedSaverService {
 
     private static final Logger logger = LoggerFactory.getLogger(ParkingVersionedSaverService.class);
 
@@ -51,12 +51,15 @@ public class ParkingVersionedSaverService extends VersionedSaverService<Parking>
     @Autowired
     private ReferenceResolver referenceResolver;
 
-    @Override
-    public EntityInVersionRepository<Parking> getRepository() {
-        return parkingRepository;
-    }
+    @Autowired
+    private VersionIncrementor versionIncrementor;
 
-    @Override
+    @Autowired
+    private MetricsService metricsService;
+
+    @Autowired
+    private ReflectionAuthorizationService reflectionAuthorizationService;
+
     public Parking saveNewVersion(Parking newVersion) {
 
         Preconditions.checkArgument(newVersion.getParentSiteRef() != null, "Parent site ref cannot be null for parking");
@@ -66,7 +69,7 @@ public class ParkingVersionedSaverService extends VersionedSaverService<Parking>
         resolveAndAuthorizeParkingSiteRef(newVersion);
 
         Parking result;
-        if(existing != null) {
+        if (existing != null) {
             logger.trace("existing: {}", existing);
             logger.trace("new: {}", newVersion);
 
@@ -101,12 +104,12 @@ public class ParkingVersionedSaverService extends VersionedSaverService<Parking>
      */
     private void resolveAndAuthorizeParkingSiteRef(Parking parking) {
         DataManagedObjectStructure parentSite = referenceResolver.resolve(parking.getParentSiteRef());
-        if(parentSite == null) {
+        if (parentSite == null) {
             throw new IllegalArgumentException("Cannot save parking without resolvable parent site ref: " + parking.toString());
         }
-        if(!(parentSite instanceof StopPlace)) {
+        if (!(parentSite instanceof StopPlace)) {
             throw new IllegalArgumentException("Parking must have a parentSiteRef pointing to stop place. Parking: " + parking.toString() + " Parent site: " + parentSite);
         }
-        authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(parentSite));
+        reflectionAuthorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(parentSite));
     }
 }
