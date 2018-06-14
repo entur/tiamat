@@ -41,7 +41,7 @@ import java.util.Optional;
 /**
  * No history for group of stop places.
  * Version is incremented and changed date is updated, but the history will not be kept.
- * Valid between must not be polulated
+ * Valid between must not be populated
  */
 @Transactional
 @Service
