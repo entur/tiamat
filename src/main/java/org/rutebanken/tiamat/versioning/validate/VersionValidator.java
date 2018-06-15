@@ -21,7 +21,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class VersionValidator<T extends EntityInVersionStructure> {
 
-    protected void validate(T existingVersion, T newVersion) {
+    public void validate(T existingVersion, T newVersion) {
 
         if(newVersion == null) {
             throw new IllegalArgumentException("Cannot save new version if it's null");

@@ -41,7 +41,7 @@ public class ValidityUpdater {
      * @param defaultFromTime
      * @return the new version's valid from date
      */
-    protected <T extends EntityInVersionStructure> Instant updateValidBetween(T existingVersion, T newVersion, Instant defaultFromTime) {
+    public <T extends EntityInVersionStructure> Instant updateValidBetween(T existingVersion, T newVersion, Instant defaultFromTime) {
 
         instantiateValidBetween(newVersion);
 
