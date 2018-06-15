@@ -16,41 +16,46 @@
 package org.rutebanken.tiamat.versioning;
 
 
+import org.rutebanken.tiamat.auth.UsernameFetcher;
 import org.rutebanken.tiamat.model.TariffZone;
 import org.rutebanken.tiamat.repository.EntityInVersionRepository;
 import org.rutebanken.tiamat.repository.TariffZoneRepository;
-import org.rutebanken.tiamat.service.ObjectMerger;
 import org.rutebanken.tiamat.service.TariffZonesLookupService;
+import org.rutebanken.tiamat.service.metrics.MetricsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 
 /**
  * No history for tariff zones. Overwrites existing version for tariff zone
  */
-@Component
-public class TariffZoneSaverService extends VersionedSaverService<TariffZone> {
+@Service
+public class TariffZoneSaverService {
 
     private static final Logger logger = LoggerFactory.getLogger(TariffZoneSaverService.class);
 
     private final TariffZoneRepository tariffZoneRepository;
     private final TariffZonesLookupService tariffZonesLookupService;
+    private final UsernameFetcher usernameFetcher;
+    private final MetricsService metricsService;
 
-    public TariffZoneSaverService(TariffZoneRepository tariffZoneRepository, TariffZonesLookupService tariffZonesLookupService) {
+    @Autowired
+    public TariffZoneSaverService(TariffZoneRepository tariffZoneRepository, TariffZonesLookupService tariffZonesLookupService, UsernameFetcher usernameFetcher, MetricsService metricsService) {
         this.tariffZoneRepository = tariffZoneRepository;
         this.tariffZonesLookupService = tariffZonesLookupService;
+        this.usernameFetcher = usernameFetcher;
+        this.metricsService = metricsService;
     }
 
-
-    @Override
     public TariffZone saveNewVersion(TariffZone existingVersion, TariffZone newVersion) {
         return saveNewVersion(newVersion);
     }
 
-    @Override
     public TariffZone saveNewVersion(TariffZone newVersion) {
 
         TariffZone existing = tariffZoneRepository.findFirstByNetexIdOrderByVersionDesc(newVersion.getNetexId());
@@ -76,9 +81,5 @@ public class TariffZoneSaverService extends VersionedSaverService<TariffZone> {
         metricsService.registerEntitySaved(newVersion.getClass());
         return result;
     }
-
-    @Override
-    public EntityInVersionRepository<TariffZone> getRepository() {
-        return tariffZoneRepository;
-    }
+    
 }
