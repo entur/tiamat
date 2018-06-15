@@ -13,7 +13,7 @@
  * limitations under the Licence.
  */
 
-package org.rutebanken.tiamat.versioning;
+package org.rutebanken.tiamat.versioning.util;
 
 
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
