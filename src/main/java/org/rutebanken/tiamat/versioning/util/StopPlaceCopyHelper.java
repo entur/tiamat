@@ -30,9 +30,6 @@ import java.util.Optional;
 public class StopPlaceCopyHelper {
 
     @Autowired
-    private StopPlaceVersionedSaverService stopPlaceVersionedSaverService;
-
-    @Autowired
     private ChildFromParentResolver childFromParentResolver;
 
     @Autowired
