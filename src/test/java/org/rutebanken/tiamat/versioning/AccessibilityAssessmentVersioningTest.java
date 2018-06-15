@@ -31,6 +31,9 @@ public class AccessibilityAssessmentVersioningTest extends TiamatIntegrationTest
     @Autowired
     private StopPlaceVersionedSaverService stopPlaceVersionedSaverService;
 
+    @Autowired
+    private VersionCreator versionCreator;
+
     @Test
     public void testAccessibilityVersioning() {
 
@@ -68,7 +71,7 @@ public class AccessibilityAssessmentVersioningTest extends TiamatIntegrationTest
         /**
          * One of the quays updates AccessibilityAssessment
          */
-        stopPlace = stopPlaceVersionedSaverService.createCopy(stopPlace_v1, StopPlace.class);
+        stopPlace = versionCreator.createCopy(stopPlace_v1, StopPlace.class);
 
         stopPlace.getQuays().forEach(quay -> {
             if (quay.getName().getValue().equals(quay1.getName().getValue())) {
@@ -101,7 +104,7 @@ public class AccessibilityAssessmentVersioningTest extends TiamatIntegrationTest
          *
          * All AccessibilityAssessments are different
          */
-        stopPlace = stopPlaceVersionedSaverService.createCopy(stopPlace_v2, StopPlace.class);
+        stopPlace = versionCreator.createCopy(stopPlace_v2, StopPlace.class);
 
         stopPlace.getQuays().forEach(quay -> {
             AccessibilityLimitation limitation = quay.getAccessibilityAssessment().getLimitations().get(0);
@@ -138,7 +141,7 @@ public class AccessibilityAssessmentVersioningTest extends TiamatIntegrationTest
         /**
          * All Quays are given the same limitations
          */
-        stopPlace = stopPlaceVersionedSaverService.createCopy(stopPlace_v3, StopPlace.class);
+        stopPlace = versionCreator.createCopy(stopPlace_v3, StopPlace.class);
 
         stopPlace.getQuays().forEach(quay -> {
             AccessibilityLimitation limitation = quay.getAccessibilityAssessment().getLimitations().get(0);

@@ -256,7 +256,7 @@ def class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourc
         StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(stopPlaceName))
 
         stopPlace = stopPlaceVersionedSaverService.saveNewVersion(stopPlace)
-        StopPlace copy = stopPlaceVersionedSaverService.createCopy(stopPlace, StopPlace.class)
+        StopPlace copy = versionCreator.createCopy(stopPlace, StopPlace.class)
         copy = stopPlaceVersionedSaverService.saveNewVersion(stopPlace, copy)
 
         assertThat(stopPlace.getVersion()).isEqualTo(1)

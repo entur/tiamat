@@ -20,6 +20,7 @@ import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.lock.MutateLock;
 import org.rutebanken.tiamat.versioning.StopPlaceVersionedSaverService;
+import org.rutebanken.tiamat.versioning.VersionCreator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +43,9 @@ public class StopPlaceReopener {
     @Autowired
     private MutateLock mutateLock;
 
+    @Autowired
+    private VersionCreator versionCreator;
+
     public StopPlace reopenStopPlace(String stopPlaceId, String versionComment) {
 
         return mutateLock.executeInLock(() -> {
@@ -53,7 +57,7 @@ public class StopPlaceReopener {
 
                 // TODO: Assert that version of stop place is not currently "open"
 
-                StopPlace nextVersionStopPlace = stopPlaceVersionedSaverService.createCopy(stopPlace, StopPlace.class);
+                StopPlace nextVersionStopPlace = versionCreator.createCopy(stopPlace, StopPlace.class);
                 nextVersionStopPlace.setVersionComment(versionComment);
 
                 return stopPlaceVersionedSaverService.saveNewVersion(stopPlace, nextVersionStopPlace);

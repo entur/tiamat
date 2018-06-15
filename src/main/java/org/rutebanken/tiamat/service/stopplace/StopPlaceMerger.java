@@ -29,6 +29,7 @@ import org.rutebanken.tiamat.service.merge.PlaceEquipmentMerger;
 import org.rutebanken.tiamat.versioning.CopiedEntity;
 import org.rutebanken.tiamat.versioning.StopPlaceVersionedSaverService;
 import org.rutebanken.tiamat.versioning.ValidityUpdater;
+import org.rutebanken.tiamat.versioning.VersionCreator;
 import org.rutebanken.tiamat.versioning.util.StopPlaceCopyHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,6 +81,10 @@ public class StopPlaceMerger {
     @Autowired
     private MutateLock mutateLock;
 
+    @Autowired
+    private VersionCreator versionCreator;
+
+
     public StopPlace mergeStopPlaces(String fromStopPlaceId, String toStopPlaceId, String fromVersionComment, String toVersionComment, boolean isDryRun) {
 
         return mutateLock.executeInLock(() -> {
@@ -92,7 +97,7 @@ public class StopPlaceMerger {
 
             authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(fromStopPlace, toStopPlace));
 
-            StopPlace fromStopPlaceToTerminate = stopPlaceVersionedSaverService.createCopy(fromStopPlace, StopPlace.class);
+            StopPlace fromStopPlaceToTerminate = versionCreator.createCopy(fromStopPlace, StopPlace.class);
 
             CopiedEntity<StopPlace> mergedStopPlaceCopy = stopPlaceCopyHelper.createCopies(toStopPlace);
 
@@ -174,7 +179,7 @@ public class StopPlaceMerger {
 
     private void transferQuays(StopPlace fromStopPlaceToTerminate, StopPlace mergedStopPlace) {
         fromStopPlaceToTerminate.getQuays().stream()
-                .forEach(quay -> mergedStopPlace.getQuays().add(stopPlaceVersionedSaverService.createCopy(quay, Quay.class)));
+                .forEach(quay -> mergedStopPlace.getQuays().add(versionCreator.createCopy(quay, Quay.class)));
     }
 
 }

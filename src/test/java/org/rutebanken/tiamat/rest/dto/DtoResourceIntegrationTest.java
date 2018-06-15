@@ -69,7 +69,7 @@ public class DtoResourceIntegrationTest extends TiamatIntegrationTest {
         stopPlace.setQuays(quays);
 
         stopPlace = saverService.saveNewVersion(stopPlace);
-        StopPlace newVersion = saverService.createCopy(stopPlace, StopPlace.class);
+        StopPlace newVersion = versionCreator.createCopy(stopPlace, StopPlace.class);
         String originalId3 = "TST:12345";
         newVersion.getQuays().forEach(quay -> quay.getOriginalIds().add(originalId3));
 
@@ -104,7 +104,7 @@ public class DtoResourceIntegrationTest extends TiamatIntegrationTest {
 
         stopPlace = saverService.saveNewVersion(stopPlace);
 
-        StopPlace newVersion = saverService.createCopy(stopPlace, StopPlace.class);
+        StopPlace newVersion = versionCreator.createCopy(stopPlace, StopPlace.class);
         String jbvCode3 = "12345";
         newVersion.getOrCreateValues(JBV_CODE).add(jbvCode3);
 

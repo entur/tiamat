@@ -59,6 +59,9 @@ public abstract class VersionedSaverService<T extends EntityInVersionStructure> 
     @Autowired
     protected ReflectionAuthorizationService authorizationService;
 
+    @Autowired
+    private VersionValidator versionValidator;
+
     public abstract EntityInVersionRepository<T> getRepository();
 
     public <T extends EntityInVersionStructure> T createCopy(T entity, Class<T> type) {
@@ -75,7 +78,7 @@ public abstract class VersionedSaverService<T extends EntityInVersionStructure> 
 
     protected T saveNewVersion(T existingVersion, T newVersion, Instant defaultValidFrom) {
 
-        validate(existingVersion, newVersion);
+        versionValidator.validate(existingVersion, newVersion);
 
         Instant newVersionValidFrom = validityUpdater.updateValidBetween(existingVersion, newVersion, defaultValidFrom);
 
@@ -123,26 +126,6 @@ public abstract class VersionedSaverService<T extends EntityInVersionStructure> 
         authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(existingVersion, newVersion));
     }
 
-    protected void validate(T existingVersion, T newVersion) {
-
-        if(newVersion == null) {
-            throw new IllegalArgumentException("Cannot save new version if it's null");
-        }
-
-        if (existingVersion == newVersion) {
-            throw new IllegalArgumentException("Existing and new version must be different objects");
-        }
-
-        if(existingVersion != null) {
-            if (existingVersion.getNetexId() == null) {
-                throw new IllegalArgumentException("Existing entity must have netexId set: " + existingVersion);
-            }
-
-            if (!existingVersion.getNetexId().equals(newVersion.getNetexId())) {
-                throw new IllegalArgumentException("Existing and new entity do not match: " + existingVersion.getNetexId() + " != " + newVersion.getNetexId());
-            }
-        }
-    }
 
 
 }

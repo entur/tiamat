@@ -21,6 +21,7 @@ import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.versioning.StopPlaceVersionedSaverService;
+import org.rutebanken.tiamat.versioning.VersionCreator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.Commit;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,6 +47,7 @@ public class AccessibilityAssessmentOptimizerTest extends TiamatIntegrationTest 
 
     @Autowired
     public StopPlaceVersionedSaverService stopPlaceVersionedSaverService;
+
 
     /*
      * Testcase:
@@ -167,7 +169,7 @@ public class AccessibilityAssessmentOptimizerTest extends TiamatIntegrationTest 
 
         stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
 
-        StopPlace actualStopPlace = stopPlaceVersionedSaverService.createCopy(stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId()), StopPlace.class);
+        StopPlace actualStopPlace = versionCreator.createCopy(stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId()), StopPlace.class);
 
         assertThat(actualStopPlace.getAccessibilityAssessment()).isNotNull();
         assertThat(actualStopPlace.getAccessibilityAssessment().getLimitations()).isNotNull();
@@ -237,7 +239,7 @@ public class AccessibilityAssessmentOptimizerTest extends TiamatIntegrationTest 
 
         stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
 
-        StopPlace actualStopPlace = stopPlaceVersionedSaverService.createCopy(stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId()), StopPlace.class);
+        StopPlace actualStopPlace = versionCreator.createCopy(stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId()), StopPlace.class);
 
         assertThat(actualStopPlace.getAccessibilityAssessment()).isNull();
 
@@ -309,7 +311,7 @@ public class AccessibilityAssessmentOptimizerTest extends TiamatIntegrationTest 
 
         stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
 
-        StopPlace actualStopPlace = stopPlaceVersionedSaverService.createCopy(stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId()), StopPlace.class);
+        StopPlace actualStopPlace = versionCreator.createCopy(stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId()), StopPlace.class);
 
         assertThat(actualStopPlace.getAccessibilityAssessment()).isNotNull();
         AccessibilityLimitation limitation = actualStopPlace.getAccessibilityAssessment().getLimitations().get(0);

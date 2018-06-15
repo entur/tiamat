@@ -26,6 +26,7 @@ import org.rutebanken.tiamat.geo.ZoneDistanceChecker;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.versioning.StopPlaceVersionedSaverService;
+import org.rutebanken.tiamat.versioning.VersionCreator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,12 +76,14 @@ public class MergingStopPlaceImporter {
 
     private final ZoneDistanceChecker zoneDistanceChecker;
 
+    private final VersionCreator versionCreator;
+
     @Autowired
     public MergingStopPlaceImporter(StopPlaceFromOriginalIdFinder stopPlaceFromOriginalIdFinder,
                                     NearbyStopsWithSameTypeFinder nearbyStopsWithSameTypeFinder, NearbyStopPlaceFinder nearbyStopPlaceFinder,
                                     StopPlaceCentroidComputer stopPlaceCentroidComputer,
                                     KeyValueListAppender keyValueListAppender, QuayMerger quayMerger, NetexMapper netexMapper,
-                                    StopPlaceVersionedSaverService stopPlaceVersionedSaverService, ZoneDistanceChecker zoneDistanceChecker) {
+                                    StopPlaceVersionedSaverService stopPlaceVersionedSaverService, ZoneDistanceChecker zoneDistanceChecker, VersionCreator versionCreator) {
         this.stopPlaceFromOriginalIdFinder = stopPlaceFromOriginalIdFinder;
         this.nearbyStopsWithSameTypeFinder = nearbyStopsWithSameTypeFinder;
         this.nearbyStopPlaceFinder = nearbyStopPlaceFinder;
@@ -90,6 +93,7 @@ public class MergingStopPlaceImporter {
         this.netexMapper = netexMapper;
         this.stopPlaceVersionedSaverService = stopPlaceVersionedSaverService;
         this.zoneDistanceChecker = zoneDistanceChecker;
+        this.versionCreator = versionCreator;
     }
 
     /**
@@ -148,7 +152,7 @@ public class MergingStopPlaceImporter {
         stopPlaceCentroidComputer.computeCentroidForStopPlace(incomingStopPlace);
         // Ignore incoming version. Always set version to 1 for new stop places.
         logger.debug("New stop place: {}. Setting version to \"1\"", incomingStopPlace.getName());
-        stopPlaceVersionedSaverService.createCopy(incomingStopPlace, StopPlace.class);
+        versionCreator.createCopy(incomingStopPlace, StopPlace.class);
 
         incomingStopPlace = stopPlaceVersionedSaverService.saveNewVersion(incomingStopPlace);
         return updateCache(incomingStopPlace);
@@ -157,7 +161,7 @@ public class MergingStopPlaceImporter {
     public StopPlace handleAlreadyExistingStopPlace(StopPlace existingStopPlace, StopPlace incomingStopPlace) {
         logger.debug("Found existing stop place {} from incoming {}", existingStopPlace, incomingStopPlace);
 
-        StopPlace copy = stopPlaceVersionedSaverService.createCopy(existingStopPlace, StopPlace.class);
+        StopPlace copy = versionCreator.createCopy(existingStopPlace, StopPlace.class);
 
         boolean quayChanged = quayMerger.appendImportIds(incomingStopPlace, copy, ADD_NEW_QUAYS, EXISTING_STOP_QUAY_MERGE_SHORT_DISTANCE_CHECK_BEFORE_ID_MATCH);
         boolean keyValuesChanged = keyValueListAppender.appendToOriginalId(NetexIdMapper.ORIGINAL_ID_KEY, incomingStopPlace, copy);

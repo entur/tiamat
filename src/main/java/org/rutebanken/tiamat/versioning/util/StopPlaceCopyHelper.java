@@ -20,6 +20,7 @@ import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.service.stopplace.ChildFromParentResolver;
 import org.rutebanken.tiamat.versioning.CopiedEntity;
 import org.rutebanken.tiamat.versioning.StopPlaceVersionedSaverService;
+import org.rutebanken.tiamat.versioning.VersionCreator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -37,6 +38,9 @@ public class StopPlaceCopyHelper {
     @Autowired
     private StopPlaceRepository stopPlaceRepository;
 
+    @Autowired
+    private VersionCreator versionCreator;
+
     /**
      * Create copy of stop place, and if exists the parent stop place as well
      */
@@ -51,12 +55,12 @@ public class StopPlaceCopyHelper {
         StopPlace parentCopy = null;
         StopPlace sourceCopy;
         if(parentStopPlace.isPresent()) {
-            parentCopy = stopPlaceVersionedSaverService.createCopy(parentStopPlace.get(), StopPlace.class);
+            parentCopy = versionCreator.createCopy(parentStopPlace.get(), StopPlace.class);
             sourceCopy = childFromParentResolver.resolveChildFromParent(parentCopy, sourceStopPlace.getNetexId(), sourceStopPlace.getVersion());
             return new CopiedEntity<>(sourceStopPlace, sourceCopy, parentStopPlace.get(), parentCopy);
 
         } else {
-            sourceCopy = stopPlaceVersionedSaverService.createCopy(sourceStopPlace, StopPlace.class);
+            sourceCopy = versionCreator.createCopy(sourceStopPlace, StopPlace.class);
             return new CopiedEntity<>(sourceStopPlace, sourceCopy, null, null);
         }
     }

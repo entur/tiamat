@@ -28,6 +28,7 @@ import org.rutebanken.tiamat.service.TopographicPlaceLookupService;
 import org.rutebanken.tiamat.versioning.GroupOfStopPlacesSaverService;
 import org.rutebanken.tiamat.versioning.ParkingVersionedSaverService;
 import org.rutebanken.tiamat.versioning.StopPlaceVersionedSaverService;
+import org.rutebanken.tiamat.versioning.VersionCreator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -101,6 +102,9 @@ public abstract class TiamatIntegrationTest {
 
     @Autowired
     private TariffZonesLookupService tariffZonesLookupService;
+
+    @Autowired
+    protected VersionCreator versionCreator;
 
     @Value("${local.server.port}")
     protected int port;

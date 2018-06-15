@@ -21,6 +21,7 @@ import org.rutebanken.tiamat.model.ValidBetween;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.lock.MutateLock;
 import org.rutebanken.tiamat.versioning.StopPlaceVersionedSaverService;
+import org.rutebanken.tiamat.versioning.VersionCreator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +45,9 @@ public class StopPlaceTerminator {
 
     @Autowired
     private MutateLock mutateLock;
+
+    @Autowired
+    private VersionCreator versionCreator;
 
     public StopPlace terminateStopPlace(String stopPlaceId, Instant suggestedTimeOfTermination, String versionComment) {
 
@@ -75,7 +79,7 @@ public class StopPlaceTerminator {
                     throw new IllegalArgumentException("The stop place " + stopPlaceId + ", version " + previousStopPlaceVersion.getVersion() + " is already terminated at " + previousStopPlaceVersion.getValidBetween().getToDate());
                 }
 
-                StopPlace nextVersionStopPlace = stopPlaceVersionedSaverService.createCopy(previousStopPlaceVersion, StopPlace.class);
+                StopPlace nextVersionStopPlace = versionCreator.createCopy(previousStopPlaceVersion, StopPlace.class);
 
                 logger.debug("End previous version {} of stop place {} at {} (now)", previousStopPlaceVersion.getVersion(), previousStopPlaceVersion.getNetexId(), now);
                 previousStopPlaceVersion.getValidBetween().setToDate(now);

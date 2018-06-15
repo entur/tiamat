@@ -28,6 +28,7 @@ import org.rutebanken.tiamat.config.AuthorizationServiceConfig;
 import org.rutebanken.tiamat.diff.TiamatObjectDiffer;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.service.stopplace.MultiModalStopPlaceEditor;
+import org.rutebanken.tiamat.versioning.VersionCreator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 
@@ -88,6 +89,9 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
     @Autowired
     private TopographicPlaceChecker topographicPlaceChecker;
 
+    @Autowired
+    private VersionCreator versionCreator;
+
     /**
      * Mocked class for extracting role assignments.
      * <p>
@@ -138,7 +142,7 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
 
         setRoleAssignmentReturned(roleAssignment);
 
-        StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(existingVersion, StopPlace.class);
+        StopPlace newVersion = versionCreator.createCopy(existingVersion, StopPlace.class);
 
         stopPlaceAuthorizationService.assertAuthorizedToEdit(existingVersion, newVersion, Sets.newHashSet(onstreetBus.getNetexId()));
     }
@@ -165,7 +169,7 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
 
         setRoleAssignmentReturned(roleAssignment);
 
-        StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(existingVersion, StopPlace.class);
+        StopPlace newVersion = versionCreator.createCopy(existingVersion, StopPlace.class);
 
         stopPlaceAuthorizationService.assertAuthorizedToEdit(existingVersion, newVersion, Sets.newHashSet(railStation.getNetexId()));
     }
@@ -200,7 +204,7 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
 
         setRoleAssignmentReturned(roleAssignment);
 
-        StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(existingVersion, StopPlace.class);
+        StopPlace newVersion = versionCreator.createCopy(existingVersion, StopPlace.class);
 
         assertThatThrownBy(() ->
                 stopPlaceAuthorizationService.assertAuthorizedToEdit(existingVersion, newVersion, Sets.newHashSet(onstreetBus.getNetexId())))
@@ -228,7 +232,7 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
 
         setRoleAssignmentReturned(roleAssignment);
 
-        StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(existingVersion, StopPlace.class);
+        StopPlace newVersion = versionCreator.createCopy(existingVersion, StopPlace.class);
 
         // Set termination date
         newVersion.setValidBetween(new ValidBetween(null, Instant.now()));
@@ -258,7 +262,7 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
 
         setRoleAssignmentReturned(roleAssignment);
 
-        StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(existingVersion, StopPlace.class);
+        StopPlace newVersion = versionCreator.createCopy(existingVersion, StopPlace.class);
 
         getChildStop(onstreetBus.getNetexId(), newVersion).setStopPlaceType(StopTypeEnumeration.TRAM_STATION);
 
@@ -291,7 +295,7 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
 
         setRoleAssignmentReturned(roleAssignment);
 
-        StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(existingVersion, StopPlace.class);
+        StopPlace newVersion = versionCreator.createCopy(existingVersion, StopPlace.class);
 
         // Change the bus to ferry
         getChildStop(onstreetBus.getNetexId(), newVersion).setStopPlaceType(StopTypeEnumeration.FERRY_STOP);
@@ -316,7 +320,7 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
                 toIdList(childStops),
                 new EmbeddableMultilingualString("Multi modal stop place that should be terminated by an admin user"));
 
-        StopPlace newVersion = stopPlaceVersionedSaverService.createCopy(existingVersion, StopPlace.class);
+        StopPlace newVersion = versionCreator.createCopy(existingVersion, StopPlace.class);
 
         newVersion.setValidBetween(new ValidBetween(null, Instant.now()));
         stopPlaceAuthorizationService.assertAuthorizedToEdit(existingVersion, newVersion);

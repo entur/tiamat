@@ -23,6 +23,7 @@ import org.rutebanken.tiamat.model.ValidBetween;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.lock.MutateLock;
 import org.rutebanken.tiamat.versioning.StopPlaceVersionedSaverService;
+import org.rutebanken.tiamat.versioning.VersionCreator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,6 +57,9 @@ public class MultiModalStopPlaceEditor {
 
     @Autowired
     private MutateLock mutateLock;
+
+    @Autowired
+    private VersionCreator versionCreator;
 
     public StopPlace createMultiModalParentStopPlace(List<String> childStopPlaceIds, EmbeddableMultilingualString name) {
         return createMultiModalParentStopPlace(childStopPlaceIds, name, null, null, null);
@@ -128,7 +132,7 @@ public class MultiModalStopPlaceEditor {
                 throw new IllegalArgumentException("Child stop place(s) " + alreadyAdded + " is already added to " + parentStopPlace);
             }
 
-            StopPlace parentStopPlaceCopy = stopPlaceVersionedSaverService.createCopy(parentStopPlace, StopPlace.class);
+            StopPlace parentStopPlaceCopy = versionCreator.createCopy(parentStopPlace, StopPlace.class);
 
             parentStopPlaceCopy.setValidBetween(validBetween);
             parentStopPlaceCopy.setVersionComment(versionComment);
@@ -163,12 +167,12 @@ public class MultiModalStopPlaceEditor {
 
             Instant now = Instant.now();
 
-            StopPlace parentStopPlaceCopy = stopPlaceVersionedSaverService.createCopy(parentStopPlace, StopPlace.class);
+            StopPlace parentStopPlaceCopy = versionCreator.createCopy(parentStopPlace, StopPlace.class);
 
             parentStopPlaceCopy.getChildren().forEach(stopToRemove -> {
                 if (childStopPlaceIds.contains(stopToRemove.getNetexId())) {
                     logger.info("Removing child stop place {} from parent stop place {}", stopToRemove.getNetexId(), parentStopPlace.getNetexId());
-                    StopPlace stopToRemoveCopy = stopPlaceVersionedSaverService.createCopy(stopToRemove, StopPlace.class);
+                    StopPlace stopToRemoveCopy = versionCreator.createCopy(stopToRemove, StopPlace.class);
                     stopToRemoveCopy.setParentSiteRef(null);
 
                     if (stopToRemoveCopy.getName() == null) {
@@ -205,7 +209,7 @@ public class MultiModalStopPlaceEditor {
 
                     logger.info("Adding child stop place {} to parent stop place {}", existingVersion, parentStopPlace);
                     // Create copy to get rid of database primary keys, preparing it to be versioned under parent stop place.
-                    StopPlace stopPlaceCopy = stopPlaceVersionedSaverService.createCopy(existingVersion, StopPlace.class);
+                    StopPlace stopPlaceCopy = versionCreator.createCopy(existingVersion, StopPlace.class);
                     return stopPlaceCopy;
                 })
                 .collect(toSet());

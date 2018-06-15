@@ -474,7 +474,7 @@ public class StopPlaceTest extends TiamatIntegrationTest {
         currentVersion.setVersion(1);
         stopPlaceRepository.save(currentVersion);
 
-        StopPlace futureVersion = stopPlaceVersionedSaverService.createCopy(currentVersion, StopPlace.class);
+        StopPlace futureVersion = versionCreator.createCopy(currentVersion, StopPlace.class);
 
         futureVersion.setValidBetween(new ValidBetween(to));
         futureVersion.setVersion(2);

@@ -26,6 +26,7 @@ import org.rutebanken.tiamat.rest.graphql.helpers.CleanupHelper;
 import org.rutebanken.tiamat.rest.graphql.mappers.StopPlaceMapper;
 import org.rutebanken.tiamat.lock.MutateLock;
 import org.rutebanken.tiamat.versioning.StopPlaceVersionedSaverService;
+import org.rutebanken.tiamat.versioning.VersionCreator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +54,9 @@ class StopPlaceUpdater implements DataFetcher {
 
     @Autowired
     private MutateLock mutateLock;
+
+    @Autowired
+    private VersionCreator versionCreator;
 
     @Override
     public Object get(DataFetchingEnvironment environment) {
@@ -103,7 +107,7 @@ class StopPlaceUpdater implements DataFetcher {
                             "Attempting to update stop place which has parent [id = %s]. Edit the parent instead. (Parent %s)", netexId, existingVersion.getParentSiteRef());
                 }
 
-                updatedStopPlace = stopPlaceVersionedSaverService.createCopy(existingVersion, StopPlace.class);
+                updatedStopPlace = versionCreator.createCopy(existingVersion, StopPlace.class);
 
             } else {
                 Preconditions.checkArgument(!mutateParent,
