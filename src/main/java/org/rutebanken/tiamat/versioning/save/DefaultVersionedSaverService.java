@@ -43,22 +43,22 @@ public class DefaultVersionedSaverService {
     public static final int MILLIS_BETWEEN_VERSIONS = 1;
 
     @Autowired
-    protected UsernameFetcher usernameFetcher;
+    private UsernameFetcher usernameFetcher;
 
     @Autowired
-    protected ValidityUpdater validityUpdater;
+    private ValidityUpdater validityUpdater;
 
     @Autowired
-    protected TiamatObjectDiffer tiamatObjectDiffer;
+    private TiamatObjectDiffer tiamatObjectDiffer;
 
     @Autowired
-    protected VersionIncrementor versionIncrementor;
+    private VersionIncrementor versionIncrementor;
 
     @Autowired
-    protected MetricsService metricsService;
+    private MetricsService metricsService;
 
     @Autowired
-    protected ReflectionAuthorizationService authorizationService;
+    private ReflectionAuthorizationService authorizationService;
 
     @Autowired
     private VersionValidator versionValidator;
@@ -71,7 +71,7 @@ public class DefaultVersionedSaverService {
         return saveNewVersion(existingVersion, newVersion, Instant.now(), entityInVersionRepository);
     }
 
-    protected <T extends EntityInVersionStructure> T saveNewVersion(T existingVersion, T newVersion, Instant defaultValidFrom, EntityInVersionRepository<T> entityInVersionRepository) {
+    public <T extends EntityInVersionStructure> T saveNewVersion(T existingVersion, T newVersion, Instant defaultValidFrom, EntityInVersionRepository<T> entityInVersionRepository) {
 
         versionValidator.validate(existingVersion, newVersion);
 
@@ -117,7 +117,7 @@ public class DefaultVersionedSaverService {
         return newVersion;
     }
 
-    protected <T extends EntityInVersionStructure> void authorizeNewVersion(T existingVersion, T newVersion) {
+    private <T extends EntityInVersionStructure> void authorizeNewVersion(T existingVersion, T newVersion) {
         authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(existingVersion, newVersion));
     }
 
