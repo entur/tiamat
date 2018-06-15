@@ -19,9 +19,9 @@ import org.rutebanken.tiamat.model.EntityInVersionStructure;
 import org.springframework.stereotype.Service;
 
 @Service
-public class VersionValidator<T extends EntityInVersionStructure> {
+public class VersionValidator {
 
-    public void validate(T existingVersion, T newVersion) {
+    public void validate(EntityInVersionStructure existingVersion, EntityInVersionStructure newVersion) {
 
         if(newVersion == null) {
             throw new IllegalArgumentException("Cannot save new version if it's null");
