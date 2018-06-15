@@ -81,5 +81,5 @@ public class TariffZoneSaverService {
         metricsService.registerEntitySaved(newVersion.getClass());
         return result;
     }
-    
+
 }
