@@ -13,12 +13,13 @@
  * limitations under the Licence.
  */
 
-package org.rutebanken.tiamat.versioning;
+package org.rutebanken.tiamat.versioning.save;
 
 import org.junit.Ignore;
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.versioning.save.StopPlaceVersionedSaverService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -35,7 +36,7 @@ import java.util.Map;
 import static junit.framework.TestCase.fail;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.rutebanken.tiamat.versioning.DefaultVersionedSaverService.MILLIS_BETWEEN_VERSIONS;
+import static org.rutebanken.tiamat.versioning.save.DefaultVersionedSaverService.MILLIS_BETWEEN_VERSIONS;
 
 @Transactional
 public class StopPlaceVersionedSaverServiceTest extends TiamatIntegrationTest {

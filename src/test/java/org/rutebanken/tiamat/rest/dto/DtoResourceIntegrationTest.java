@@ -22,7 +22,7 @@ import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
-import org.rutebanken.tiamat.versioning.StopPlaceVersionedSaverService;
+import org.rutebanken.tiamat.versioning.save.StopPlaceVersionedSaverService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.HashSet;

@@ -13,7 +13,7 @@
  * limitations under the Licence.
  */
 
-package org.rutebanken.tiamat.versioning;
+package org.rutebanken.tiamat.versioning.save;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
@@ -26,7 +26,7 @@ import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.TariffZone;
 import org.rutebanken.tiamat.netex.id.RandomizedTestNetexIdGenerator;
 import org.rutebanken.tiamat.repository.TariffZoneRepository;
-import org.rutebanken.tiamat.rest.netex.publicationdelivery.PublicationDeliveryTestHelper;
+import org.rutebanken.tiamat.versioning.save.TariffZoneSaverService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 

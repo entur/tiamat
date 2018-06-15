@@ -13,7 +13,7 @@
  * limitations under the Licence.
  */
 
-package org.rutebanken.tiamat.versioning;
+package org.rutebanken.tiamat.versioning.save;
 
 import org.rutebanken.tiamat.auth.StopPlaceAuthorizationService;
 import org.rutebanken.tiamat.auth.UsernameFetcher;
@@ -27,6 +27,10 @@ import org.rutebanken.tiamat.repository.reference.ReferenceResolver;
 import org.rutebanken.tiamat.service.TariffZonesLookupService;
 import org.rutebanken.tiamat.service.TopographicPlaceLookupService;
 import org.rutebanken.tiamat.service.metrics.MetricsService;
+import org.rutebanken.tiamat.versioning.validate.SubmodeValidator;
+import org.rutebanken.tiamat.versioning.ValidityUpdater;
+import org.rutebanken.tiamat.versioning.VersionIncrementor;
+import org.rutebanken.tiamat.versioning.validate.VersionValidator;
 import org.rutebanken.tiamat.versioning.util.AccessibilityAssessmentOptimizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +44,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
-import static org.rutebanken.tiamat.versioning.DefaultVersionedSaverService.MILLIS_BETWEEN_VERSIONS;
+import static org.rutebanken.tiamat.versioning.save.DefaultVersionedSaverService.MILLIS_BETWEEN_VERSIONS;
 
 
 @Transactional

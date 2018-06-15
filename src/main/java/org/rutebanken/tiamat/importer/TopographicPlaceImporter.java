@@ -21,7 +21,7 @@ import org.rutebanken.tiamat.model.TopographicPlaceTypeEnumeration;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.rutebanken.tiamat.service.ObjectMerger;
-import org.rutebanken.tiamat.versioning.TopographicPlaceVersionedSaverService;
+import org.rutebanken.tiamat.versioning.save.TopographicPlaceVersionedSaverService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

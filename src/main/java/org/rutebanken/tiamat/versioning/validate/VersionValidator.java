@@ -13,7 +13,7 @@
  * limitations under the Licence.
  */
 
-package org.rutebanken.tiamat.versioning;
+package org.rutebanken.tiamat.versioning.validate;
 
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
 import org.springframework.stereotype.Service;

@@ -17,7 +17,6 @@ package org.rutebanken.tiamat.service.merge;
 
 import org.rutebanken.tiamat.model.InstalledEquipment_VersionStructure;
 import org.rutebanken.tiamat.model.PlaceEquipment;
-import org.rutebanken.tiamat.versioning.StopPlaceVersionedSaverService;
 import org.rutebanken.tiamat.versioning.VersionCreator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

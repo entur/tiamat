@@ -13,11 +13,12 @@
  * limitations under the Licence.
  */
 
-package org.rutebanken.tiamat.versioning;
+package org.rutebanken.tiamat.versioning.save;
 
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.versioning.save.GroupOfStopPlacesSaverService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;

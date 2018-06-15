@@ -16,28 +16,13 @@
 package org.rutebanken.tiamat.rest.graphql
 
 import com.vividsolutions.jts.geom.Coordinate
-import com.vividsolutions.jts.geom.Point
-import org.hamcrest.Matchers
-import org.junit.Before
 import org.junit.Test
-import org.rutebanken.tiamat.changelog.EntityChangedEvent
-import org.rutebanken.tiamat.changelog.EntityChangedJMSListener
 import org.rutebanken.tiamat.model.*
-import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper
-import org.rutebanken.tiamat.service.stopplace.MultiModalStopPlaceEditor
 import org.rutebanken.tiamat.time.ExportTimeZone
-import org.rutebanken.tiamat.versioning.StopPlaceVersionedSaverService
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.transaction.annotation.Transactional
 
-import java.time.Instant
-import java.time.format.DateTimeFormatter
-
-import static org.assertj.core.api.Assertions.assertThat
 import static org.hamcrest.Matchers.*
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*
-import static org.rutebanken.tiamat.rest.graphql.operations.MultiModalityOperationsBuilder.INPUT
-import static org.rutebanken.tiamat.rest.graphql.scalars.DateScalar.DATE_TIME_PATTERN
 
 def class GraphQLResourceGroupOfStopPlacesIntegrationTest extends AbstractGraphQLResourceIntegrationTest {
 
