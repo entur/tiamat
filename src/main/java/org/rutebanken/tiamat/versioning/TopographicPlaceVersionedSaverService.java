@@ -38,11 +38,7 @@ public class TopographicPlaceVersionedSaverService {
     private DefaultVersionedSaverService defaultVersionedSaverService;
 
     public TopographicPlace saveNewVersion(TopographicPlace newVersion) {
-        return saveNewVersion(null, newVersion);
-    }
-
-    public TopographicPlace saveNewVersion(TopographicPlace existingVersion, TopographicPlace newVersion) {
-        TopographicPlace saved = defaultVersionedSaverService.saveNewVersion(existingVersion, newVersion, topographicPlaceRepository);
+        TopographicPlace saved = defaultVersionedSaverService.saveNewVersion(newVersion, topographicPlaceRepository);
         topographicPlaceLookupService.reset();
         return saved;
     }
