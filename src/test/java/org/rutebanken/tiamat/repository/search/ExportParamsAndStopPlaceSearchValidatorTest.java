@@ -25,8 +25,8 @@ public class ExportParamsAndStopPlaceSearchValidatorTest {
     @Test(expected = IllegalArgumentException.class)
     public void versionValidityAndPointInTimeCannotBeCombined() {
         ExportParams exportParams = ExportParams.newExportParamsBuilder()
+                .setVersionValidity(ExportParams.VersionValidity.CURRENT_FUTURE)
                 .setStopPlaceSearch(StopPlaceSearch.newStopPlaceSearchBuilder()
-                        .setVersionValidity(ExportParams.VersionValidity.CURRENT_FUTURE)
                         .setPointInTime(Instant.now())
                         .build())
                 .build();
@@ -37,8 +37,8 @@ public class ExportParamsAndStopPlaceSearchValidatorTest {
     @Test(expected = IllegalArgumentException.class)
     public void versionValidityAndAllversionsCannotBeCombined() {
         ExportParams exportParams = ExportParams.newExportParamsBuilder()
+                .setVersionValidity(ExportParams.VersionValidity.CURRENT_FUTURE)
                 .setStopPlaceSearch(StopPlaceSearch.newStopPlaceSearchBuilder()
-                        .setVersionValidity(ExportParams.VersionValidity.CURRENT_FUTURE)
                         .setAllVersions(true)
                         .build())
                 .build();

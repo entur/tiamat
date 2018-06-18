@@ -106,8 +106,8 @@ public class StreamingPublicationDeliveryIntegrationTest extends TiamatIntegrati
                 .setStopPlaceSearch(
                         StopPlaceSearch
                                 .newStopPlaceSearchBuilder()
-                                .setVersionValidity(ExportParams.VersionValidity.ALL)
                                 .build())
+                .setVersionValidity(ExportParams.VersionValidity.ALL)
                 .build();
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
@@ -140,8 +140,8 @@ public class StreamingPublicationDeliveryIntegrationTest extends TiamatIntegrati
         ExportParams exportParams = ExportParams.newExportParamsBuilder()
                 .setStopPlaceSearch(
                         StopPlaceSearch.newStopPlaceSearchBuilder()
-                                .setVersionValidity(ExportParams.VersionValidity.CURRENT_FUTURE)
                                 .build())
+                .setVersionValidity(ExportParams.VersionValidity.CURRENT_FUTURE)
                 .setTopographicPlaceExportMode(ExportParams.ExportMode.ALL)
                 .setTariffZoneExportMode(ExportParams.ExportMode.RELEVANT)
                 .build();
@@ -192,8 +192,8 @@ public class StreamingPublicationDeliveryIntegrationTest extends TiamatIntegrati
         ExportParams exportParams = ExportParams.newExportParamsBuilder()
                 .setStopPlaceSearch(
                         StopPlaceSearch.newStopPlaceSearchBuilder()
-                                .setVersionValidity(ExportParams.VersionValidity.CURRENT_FUTURE)
                                 .build())
+                .setVersionValidity(ExportParams.VersionValidity.CURRENT_FUTURE)
                 .setTopographicPlaceExportMode(ExportParams.ExportMode.NONE)
                 .setTariffZoneExportMode(ExportParams.ExportMode.NONE)
                 .setGroupOfStopPlacesExportMode(ExportParams.ExportMode.NONE)
@@ -267,8 +267,8 @@ public class StreamingPublicationDeliveryIntegrationTest extends TiamatIntegrati
         ExportParams exportParams = ExportParams.newExportParamsBuilder()
                 .setStopPlaceSearch(
                         StopPlaceSearch.newStopPlaceSearchBuilder()
-                                .setVersionValidity(ExportParams.VersionValidity.CURRENT_FUTURE)
                                 .build())
+                .setVersionValidity(ExportParams.VersionValidity.CURRENT_FUTURE)
                 .setTopographicPlaceExportMode(ExportParams.ExportMode.RELEVANT)
                 .setTariffZoneExportMode(ExportParams.ExportMode.RELEVANT)
                 .setGroupOfStopPlacesExportMode(ExportParams.ExportMode.RELEVANT)
@@ -370,8 +370,8 @@ public class StreamingPublicationDeliveryIntegrationTest extends TiamatIntegrati
         ExportParams exportParams = ExportParams.newExportParamsBuilder()
                 .setStopPlaceSearch(
                         StopPlaceSearch.newStopPlaceSearchBuilder()
-                                .setVersionValidity(ExportParams.VersionValidity.CURRENT_FUTURE)
                                 .build())
+                .setVersionValidity(ExportParams.VersionValidity.CURRENT_FUTURE)
                 .setTopographicPlaceExportMode(ExportParams.ExportMode.NONE)
                 .setTariffZoneExportMode(ExportParams.ExportMode.NONE)
                 .build();

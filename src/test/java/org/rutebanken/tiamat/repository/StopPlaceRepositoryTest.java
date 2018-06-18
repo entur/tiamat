@@ -99,9 +99,11 @@ public class StopPlaceRepositoryTest extends TiamatIntegrationTest {
 		currentlyValid.setValidBetween(new ValidBetween(Instant.now().minus(1, DAYS), Instant.now().plus(1, DAYS)));
 		stopPlaceRepository.save(currentlyValid);
 
-		StopPlaceSearch stopPlaceSearch = StopPlaceSearch.newStopPlaceSearchBuilder().setVersionValidity(ExportParams.VersionValidity.ALL).build();
+		ExportParams exportParams = ExportParams.newExportParamsBuilder()
+				.setVersionValidity(ExportParams.VersionValidity.ALL)
+				.build();
 
-		Page<StopPlace> results = stopPlaceRepository.findStopPlace(ExportParams.newExportParamsBuilder().setStopPlaceSearch(stopPlaceSearch).build());
+		Page<StopPlace> results = stopPlaceRepository.findStopPlace(exportParams);
 		assertThat(results).hasSize(1);
 		assertThat(results).contains(currentlyValid);
 	}
@@ -113,9 +115,12 @@ public class StopPlaceRepositoryTest extends TiamatIntegrationTest {
 		currentlyValid.setValidBetween(new ValidBetween(Instant.now().minus(1, DAYS)));
 		stopPlaceRepository.save(currentlyValid);
 
-		StopPlaceSearch stopPlaceSearch = StopPlaceSearch.newStopPlaceSearchBuilder().setVersionValidity(ExportParams.VersionValidity.ALL).build();
+		ExportParams exportParams = ExportParams.newExportParamsBuilder()
+				.setVersionValidity(ExportParams.VersionValidity.ALL)
+				.build();
 
-		Page<StopPlace> results = stopPlaceRepository.findStopPlace(ExportParams.newExportParamsBuilder().setStopPlaceSearch(stopPlaceSearch).build());
+		Page<StopPlace> results = stopPlaceRepository.findStopPlace(exportParams);
+
 		assertThat(results).hasSize(1);
 		assertThat(results).contains(currentlyValid);
 	}
@@ -128,9 +133,12 @@ public class StopPlaceRepositoryTest extends TiamatIntegrationTest {
 		expiredVersion.setValidBetween(new ValidBetween(Instant.now().minus(2, DAYS), Instant.now().minus(1, DAYS)));
 		stopPlaceRepository.save(expiredVersion);
 
-		StopPlaceSearch stopPlaceSearch = StopPlaceSearch.newStopPlaceSearchBuilder().setVersionValidity(ExportParams.VersionValidity.CURRENT).build();
+		ExportParams exportParams = ExportParams.newExportParamsBuilder()
+				.setVersionValidity(ExportParams.VersionValidity.ALL)
+				.build();
 
-		Page<StopPlace> results = stopPlaceRepository.findStopPlace(ExportParams.newExportParamsBuilder().setStopPlaceSearch(stopPlaceSearch).build());
+		Page<StopPlace> results = stopPlaceRepository.findStopPlace(exportParams);
+
 		assertThat(results).isEmpty();
 	}
 
@@ -141,9 +149,12 @@ public class StopPlaceRepositoryTest extends TiamatIntegrationTest {
 		futureVersion.setValidBetween(new ValidBetween(Instant.now().plus(1, DAYS), Instant.now().plus(2, DAYS)));
 		stopPlaceRepository.save(futureVersion);
 
-		StopPlaceSearch stopPlaceSearch = StopPlaceSearch.newStopPlaceSearchBuilder().setVersionValidity(ExportParams.VersionValidity.CURRENT).build();
+		ExportParams exportParams = ExportParams.newExportParamsBuilder()
+				.setVersionValidity(ExportParams.VersionValidity.ALL)
+				.build();
 
-		Page<StopPlace> results = stopPlaceRepository.findStopPlace(ExportParams.newExportParamsBuilder().setStopPlaceSearch(stopPlaceSearch).build());
+		Page<StopPlace> results = stopPlaceRepository.findStopPlace(exportParams);
+
 		assertThat(results).isEmpty();
 	}
 
@@ -154,9 +165,12 @@ public class StopPlaceRepositoryTest extends TiamatIntegrationTest {
 		historicVersion.setValidBetween(new ValidBetween(Instant.now().minus(3, DAYS), Instant.now().minus(2, DAYS)));
 		stopPlaceRepository.save(historicVersion);
 
-		StopPlaceSearch stopPlaceSearch = StopPlaceSearch.newStopPlaceSearchBuilder().setVersionValidity(ExportParams.VersionValidity.CURRENT_FUTURE).build();
+		ExportParams exportParams = ExportParams.newExportParamsBuilder()
+				.setVersionValidity(ExportParams.VersionValidity.ALL)
+				.build();
 
-		Page<StopPlace> results = stopPlaceRepository.findStopPlace(ExportParams.newExportParamsBuilder().setStopPlaceSearch(stopPlaceSearch).build());
+		Page<StopPlace> results = stopPlaceRepository.findStopPlace(exportParams);
+
 		assertThat(results).isEmpty();
 	}
 
@@ -172,9 +186,12 @@ public class StopPlaceRepositoryTest extends TiamatIntegrationTest {
 		historicChild.setParentSiteRef(new SiteRefStructure(historicParent.getNetexId(), String.valueOf(historicParent.getVersion())));
 		stopPlaceRepository.save(historicChild);
 
-		StopPlaceSearch stopPlaceSearch = StopPlaceSearch.newStopPlaceSearchBuilder().setVersionValidity(ExportParams.VersionValidity.CURRENT_FUTURE).build();
+		ExportParams exportParams = ExportParams.newExportParamsBuilder()
+				.setVersionValidity(ExportParams.VersionValidity.ALL)
+				.build();
 
-		Page<StopPlace> results = stopPlaceRepository.findStopPlace(ExportParams.newExportParamsBuilder().setStopPlaceSearch(stopPlaceSearch).build());
+		Page<StopPlace> results = stopPlaceRepository.findStopPlace(exportParams);
+
 		assertThat(results).isEmpty();
 	}
 
@@ -185,9 +202,12 @@ public class StopPlaceRepositoryTest extends TiamatIntegrationTest {
 		futureVersion.setValidBetween(new ValidBetween(Instant.now().plus(1, DAYS), Instant.now().plus(2, DAYS)));
 		stopPlaceRepository.save(futureVersion);
 
-		StopPlaceSearch stopPlaceSearch = StopPlaceSearch.newStopPlaceSearchBuilder().setVersionValidity(ExportParams.VersionValidity.CURRENT_FUTURE).build();
+		ExportParams exportParams = ExportParams.newExportParamsBuilder()
+				.setVersionValidity(ExportParams.VersionValidity.ALL)
+				.build();
 
-		Page<StopPlace> results = stopPlaceRepository.findStopPlace(ExportParams.newExportParamsBuilder().setStopPlaceSearch(stopPlaceSearch).build());
+		Page<StopPlace> results = stopPlaceRepository.findStopPlace(exportParams);
+
 		assertThat(results)
 				.hasSize(1)
 				.contains(futureVersion);
@@ -202,9 +222,12 @@ public class StopPlaceRepositoryTest extends TiamatIntegrationTest {
 		futureVersion.setValidBetween(new ValidBetween(Instant.now().plus(1, DAYS)));
 		stopPlaceRepository.save(futureVersion);
 
-		StopPlaceSearch stopPlaceSearch = StopPlaceSearch.newStopPlaceSearchBuilder().setVersionValidity(ExportParams.VersionValidity.CURRENT_FUTURE).build();
+		ExportParams exportParams = ExportParams.newExportParamsBuilder()
+				.setVersionValidity(ExportParams.VersionValidity.ALL)
+				.build();
 
-		Page<StopPlace> results = stopPlaceRepository.findStopPlace(ExportParams.newExportParamsBuilder().setStopPlaceSearch(stopPlaceSearch).build());
+		Page<StopPlace> results = stopPlaceRepository.findStopPlace(exportParams);
+
 		assertThat(results)
 				.hasSize(1)
 				.contains(futureVersion);
