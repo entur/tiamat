@@ -164,13 +164,13 @@ public class StopPlaceQueryFromSearchBuilder {
 
         final ExportParams.VersionValidity versionValidity;
         if(stopPlaceSearch.getPointInTime() == null
-                && stopPlaceSearch.getVersionValidity() == null
+                && exportParams.getVersionValidity() == null
                 && !stopPlaceSearch.isAllVersions()
                 && stopPlaceSearch.getVersion() == null) {
             logger.debug("Parameters pointInTime, versionValidity, allVersions or version not set. Defaulting to version validity " + defaultVersionValidity);
             versionValidity = defaultVersionValidity;
         } else {
-            versionValidity = stopPlaceSearch.getVersionValidity();
+            versionValidity = exportParams.getVersionValidity();
         }
 
 
@@ -265,7 +265,7 @@ public class StopPlaceQueryFromSearchBuilder {
             String futureQuery = "p.netex_id is null and (s.to_date >= :pointInTime OR s.to_date IS NULL)";
             String parentFutureQuery = "p.netex_id is not null and (p.to_date >= :pointInTime OR p.to_date IS NULL)";
             wheres.add("((" + futureQuery + ") or (" + parentFutureQuery + "))");
-        } else if (!stopPlaceSearch.isAllVersions() && ExportParams.VersionValidity.MAX_VERSION.equals(stopPlaceSearch.getVersionValidity())) {
+        } else if (!stopPlaceSearch.isAllVersions() && ExportParams.VersionValidity.MAX_VERSION.equals(exportParams.getVersionValidity())) {
             operators.add("and");
             wheres.add("s.version = (select max(sv.version) from stop_place sv where sv.netex_id = s.netex_id)");
         }

@@ -21,7 +21,7 @@ public class ExportParamsAndStopPlaceSearchValidator {
         addIfTrue(ALL_VERSIONS, stopPlaceSearch.isAllVersions(), paramsExplicitySet);
         addIfNonNull(VERSION, stopPlaceSearch.getVersion(), paramsExplicitySet);
         addIfNonNull(POINT_IN_TIME, stopPlaceSearch.getPointInTime(), paramsExplicitySet);
-        addIfNonNull("versionValidity", stopPlaceSearch.getVersionValidity(), paramsExplicitySet);
+        addIfNonNull("versionValidity", exportParams.getVersionValidity(), paramsExplicitySet);
 
         if (paramsExplicitySet.size() > 1) {
             String message = "Parameters cannot be combined: " + paramsExplicitySet + ". Remove one of them";

@@ -72,10 +72,6 @@ public class StopPlaceSearch implements SearchObject {
     @ApiParam(value = ALL_VERSIONS_ARG_DESCRIPTION)
     private boolean allVersions;
 
-    @QueryParam(value = "versionValidity")
-    @ApiParam(value = VERSION_VALIDITY_ARG_DESCRIPTION)
-    private ExportParams.VersionValidity versionValidity;
-
     @QueryParam(value = "withoutLocationOnly")
     @ApiParam(value = WITHOUT_LOCATION_ONLY_ARG_DESCRIPTION)
     private boolean withoutLocationOnly;
@@ -120,7 +116,6 @@ public class StopPlaceSearch implements SearchObject {
                             boolean withNearbySimilarDuplicates,
                             Instant pointInTime,
                             Long version,
-                            ExportParams.VersionValidity versionValidity,
                             List<String> tags,
                             boolean withTags,
                             String submode,
@@ -135,7 +130,6 @@ public class StopPlaceSearch implements SearchObject {
         this.withNearbySimilarDuplicates = withNearbySimilarDuplicates;
         this.pointInTime = pointInTime;
         this.version = version;
-        this.versionValidity = versionValidity;
         this.tags = tags;
         this.withTags = withTags;
         this.submode = submode;
@@ -196,9 +190,6 @@ public class StopPlaceSearch implements SearchObject {
         return pointInTime;
     }
 
-    public ExportParams.VersionValidity getVersionValidity() {
-        return versionValidity;
-    }
 
     public List<String> getTags() {
         return tags;
@@ -213,7 +204,6 @@ public class StopPlaceSearch implements SearchObject {
                 .add("submode", getSubmode())
                 .add("netexIdList", getNetexIdList())
                 .add("allVersions", isAllVersions())
-                .add("versionValidity", getVersionValidity())
                 .add("pointInTime", getPointInTime())
                 .add("withoutLocationOnly", isWithoutLocationOnly())
                 .add("withoutQuaysOnly", isWithoutQuaysOnly())
@@ -243,7 +233,6 @@ public class StopPlaceSearch implements SearchObject {
         private boolean withTags;
         private Long version;
         private Instant pointInTime;
-        private ExportParams.VersionValidity versionValidity;
         private List<String> tags;
         private int page = DEFAULT_PAGE;
         private int size = DEFAULT_PAGE_SIZE;
@@ -314,11 +303,6 @@ public class StopPlaceSearch implements SearchObject {
             return this;
         }
 
-        public Builder setVersionValidity(ExportParams.VersionValidity versionValidity) {
-            this.versionValidity = versionValidity;
-            return this;
-        }
-
         public Builder setTags(List<String> tags) {
             this.tags = tags;
             return this;
@@ -340,7 +324,6 @@ public class StopPlaceSearch implements SearchObject {
                     withNearbySimilarDuplicates,
                     pointInTime,
                     version,
-                    versionValidity,
                     tags,
                     withTags,
                     submode,

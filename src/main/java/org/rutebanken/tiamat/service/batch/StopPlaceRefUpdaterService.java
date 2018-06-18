@@ -88,10 +88,7 @@ public class StopPlaceRefUpdaterService {
         SessionEntitiesEvictor sessionEntitiesEvictor = new SessionEntitiesEvictor((SessionImpl) session);
 
         ExportParams exportParams = ExportParams.newExportParamsBuilder()
-                .setStopPlaceSearch(
-                        StopPlaceSearch.newStopPlaceSearchBuilder()
-                                .setVersionValidity(ExportParams.VersionValidity.CURRENT)
-                                .build())
+                .setVersionValidity(ExportParams.VersionValidity.CURRENT)
                 .build();
         logger.info("Created export params search for scrolling stop places {}", exportParams);
 

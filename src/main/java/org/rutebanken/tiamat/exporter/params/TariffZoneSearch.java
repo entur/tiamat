@@ -54,7 +54,6 @@ public class TariffZoneSearch implements SearchObject {
     @QueryParam(value = "tariffZoneQuery")
     private String query;
 
-
     private TariffZoneSearch(Builder builder) {
         this.query = builder.query;
     }

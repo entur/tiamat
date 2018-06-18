@@ -24,9 +24,7 @@ import javax.ws.rs.QueryParam;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.COUNTY_REF_ARG_DESCRIPTION;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.MUNICIPALITY_REF_ARG_DESCRIPTION;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.SEARCH_WITH_CODE_SPACE_ARG_DESCRIPTION;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 
 /**
  * Export parameters.
@@ -43,6 +41,10 @@ public class ExportParams {
     public static final ExportMode DEFAULT_TOPOGRAPHIC_PLACE_EXPORT_MODE = ExportMode.RELEVANT;
 
     public static final ExportMode DEFAULT_GROUP_OF_STOP_PLACES_EXPORT_MODE = ExportMode.RELEVANT;
+
+    @QueryParam(value = "versionValidity")
+    @ApiParam(value = VERSION_VALIDITY_ARG_DESCRIPTION)
+    private ExportParams.VersionValidity versionValidity;
 
     @QueryParam(value = "topographicPlaceExportMode")
     @DefaultValue(value = "RELEVANT")
@@ -74,7 +76,14 @@ public class ExportParams {
     @BeanParam
     private StopPlaceSearch stopPlaceSearch;
 
-    private ExportParams(ExportMode topographicPlaceExportMode, ExportMode tariffZoneExportMode, ExportMode groupOfStopPlacesExportMode, List<String> municipalityReferences, List<String> countyReferences, StopPlaceSearch stopPlaceSearch, String codeSpace) {
+    private ExportParams(ExportMode topographicPlaceExportMode,
+                         ExportMode tariffZoneExportMode,
+                         ExportMode groupOfStopPlacesExportMode,
+                         List<String> municipalityReferences,
+                         List<String> countyReferences,
+                         StopPlaceSearch stopPlaceSearch,
+                         String codeSpace,
+                         ExportParams.VersionValidity versionValidity) {
         this.topographicPlaceExportMode = topographicPlaceExportMode;
         this.tariffZoneExportMode = tariffZoneExportMode;
         this.groupOfStopPlacesExportMode = groupOfStopPlacesExportMode;
@@ -82,6 +91,7 @@ public class ExportParams {
         this.countyReferences = countyReferences;
         this.stopPlaceSearch = stopPlaceSearch;
         this.codeSpace = codeSpace;
+        this.versionValidity = versionValidity;
     }
 
     public ExportParams(StopPlaceSearch stopPlaceSearch) {
@@ -119,6 +129,10 @@ public class ExportParams {
         return codeSpace;
     }
 
+    public ExportParams.VersionValidity getVersionValidity() {
+        return versionValidity;
+    }
+
     public static ExportParams.Builder newExportParamsBuilder() {
         return new Builder();
     }
@@ -133,6 +147,7 @@ public class ExportParams {
                 .add("stopPlaceSearch", stopPlaceSearch)
                 .add("tariffZoneExportMode", tariffZoneExportMode)
                 .add("codeSpace", codeSpace)
+                .add("versionValidity", getVersionValidity())
                 .toString();
     }
 
@@ -144,6 +159,7 @@ public class ExportParams {
         private List<String> countyReferences;
         private StopPlaceSearch stopPlaceSearch;
         private String codeSpace;
+        private ExportParams.VersionValidity versionValidity;
 
         private Builder() {
         }
@@ -193,8 +209,21 @@ public class ExportParams {
             return this;
         }
 
+        public Builder setVersionValidity(ExportParams.VersionValidity versionValidity) {
+            this.versionValidity = versionValidity;
+            return this;
+        }
+
         public ExportParams build() {
-            return new ExportParams(topographicPlaceExportMode, tariffZoneExportMode, groupOfStopPlacesExportMode, municipalityReferences, countyReferences, stopPlaceSearch, codeSpace);
+            return new ExportParams(
+                    topographicPlaceExportMode,
+                    tariffZoneExportMode,
+                    groupOfStopPlacesExportMode,
+                    municipalityReferences,
+                    countyReferences,
+                    stopPlaceSearch,
+                    codeSpace,
+                    versionValidity);
         }
     }
 }
