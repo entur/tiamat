@@ -68,6 +68,7 @@ public class TopographicPlaceLookupService {
 
                 if(siteVersionStructure.getTopographicPlace().getId() == topographicPlaceMatch.getId()
                         && siteVersionStructure.getTopographicPlace().getVersion() == topographicPlaceMatch.getVersion()) {
+                    logger.trace("Version and id is the same for {}-{} not doing update", topographicPlaceMatch.getNetexId(), topographicPlaceMatch.getVersion());
                     return false;
                 }
                 logger.debug("Changed topographic place from {}-{} to {}-{} for {}-{}",
