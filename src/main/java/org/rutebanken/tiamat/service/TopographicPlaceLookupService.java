@@ -70,15 +70,22 @@ public class TopographicPlaceLookupService {
                         && siteVersionStructure.getTopographicPlace().getVersion() == topographicPlaceMatch.getVersion()) {
                     return false;
                 }
+                logger.debug("Changed topographic place from {}-{} to {}-{} for {}-{}",
+                        siteVersionStructure.getTopographicPlace().getNetexId(),
+                        siteVersionStructure.getTopographicPlace().getVersion(),
+                        topographicPlaceMatch.getNetexId(),
+                        topographicPlaceMatch.getVersion(),
+                        siteVersionStructure.getNetexId(),
+                        siteVersionStructure.getVersion());
+            } else {
+                logger.debug("Set topographic place to {}-{} for {}-{}",
+                        topographicPlaceMatch.getNetexId(),
+                        topographicPlaceMatch.getVersion(),
+                        siteVersionStructure.getNetexId(),
+                        siteVersionStructure.getVersion());
             }
 
-            logger.debug("Changed topographic place from {}-{} to {}-{} for {}-{}",
-                    siteVersionStructure.getTopographicPlace().getNetexId(),
-                    siteVersionStructure.getTopographicPlace().getVersion(),
-                    topographicPlaceMatch.getNetexId(),
-                    topographicPlaceMatch.getVersion(),
-                    siteVersionStructure.getNetexId(),
-                    siteVersionStructure.getVersion());
+
 
             siteVersionStructure.setTopographicPlace(topographicPlaceMatch);
 
