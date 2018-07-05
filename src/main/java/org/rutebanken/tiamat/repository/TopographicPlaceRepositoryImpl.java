@@ -19,11 +19,16 @@ package org.rutebanken.tiamat.repository;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import org.apache.commons.lang.NotImplementedException;
 import org.hibernate.*;
+import org.rutebanken.tiamat.exporter.params.ExportParams;
+import org.rutebanken.tiamat.exporter.params.TopographicPlaceSearch;
 import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.repository.iterator.ScrollableResultIterator;
+import org.rutebanken.tiamat.repository.search.TopographicPlaceQueryFromSearchBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +36,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -43,6 +49,22 @@ public class TopographicPlaceRepositoryImpl implements TopographicPlaceRepositor
 	@Autowired
 	private EntityManager entityManager;
 
+
+	@Autowired
+	private TopographicPlaceQueryFromSearchBuilder topographicPlaceQueryFromSearchBuilder;
+
+	@Override
+	public List<TopographicPlace> findTopographicPlace(TopographicPlaceSearch topographicPlaceSearch) {
+
+		Pair<String, Map<String, Object>> queryWithParams = topographicPlaceQueryFromSearchBuilder.buildQueryString(topographicPlaceSearch);
+
+		final Query nativeQuery = entityManager.createNativeQuery(queryWithParams.getFirst(), TopographicPlace.class);
+
+		queryWithParams.getSecond().forEach(nativeQuery::setParameter);
+
+		List<TopographicPlace> topographicPlaces = nativeQuery.getResultList();
+		return topographicPlaces;
+	}
 
 	@Override
 	public String findFirstByKeyValues(String key, Set<String> originalIds) {

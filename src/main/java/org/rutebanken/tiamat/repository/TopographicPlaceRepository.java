@@ -16,6 +16,8 @@
 package org.rutebanken.tiamat.repository;
 
 import com.vividsolutions.jts.geom.Point;
+import org.rutebanken.tiamat.exporter.params.ExportParams;
+import org.rutebanken.tiamat.exporter.params.TopographicPlaceSearch;
 import org.rutebanken.tiamat.model.IanaCountryTldEnumeration;
 import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.model.TopographicPlaceTypeEnumeration;
@@ -47,4 +49,7 @@ public interface TopographicPlaceRepository extends EntityInVersionRepository<To
 
 
     void deleteAllByTopographicPlaceTypeAndNetexIdStartingWith(TopographicPlaceTypeEnumeration topographicPlaceTypeEnumeration, String idPrefix);
+
+    @Override
+    List<TopographicPlace> findTopographicPlace(TopographicPlaceSearch topographicPlaceSearch);
 }

@@ -18,13 +18,14 @@ package org.rutebanken.tiamat.repository;
 import com.vividsolutions.jts.geom.*;
 import com.vividsolutions.jts.geom.impl.CoordinateArraySequence;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
-import org.rutebanken.tiamat.geo.DoubleValuesToCoordinateSequence;
+import org.rutebanken.tiamat.exporter.params.ExportParams;
+import org.rutebanken.tiamat.exporter.params.TopographicPlaceSearch;
 import org.rutebanken.tiamat.model.*;
 import org.junit.Test;
 import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.ArrayList;
+import java.time.Instant;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
@@ -66,5 +67,61 @@ public class TopographicPlaceRepositoryTest extends TiamatIntegrationTest {
         List<TopographicPlace> matches = topographicPlaceRepository.findByPoint(geometryFactory.createPoint(new Coordinate(9.84, 59.2643)));
 
         assertThat(matches).hasSize(1);
+    }
+
+
+    @Test
+    public void findCurrentlyValidTopographicPlace() {
+
+        Instant testStarted  = Instant.now();
+
+        TopographicPlace validNow = new TopographicPlace();
+        validNow.setValidBetween(new ValidBetween(testStarted.minusSeconds(200)));
+        validNow.setName(new EmbeddableMultilingualString("Topographic place valid now", "no"));
+
+        topographicPlaceRepository.save(validNow);
+
+        TopographicPlace validInThePast = new TopographicPlace();
+        validInThePast.setValidBetween(new ValidBetween(testStarted.minusSeconds(2000), testStarted.minusSeconds(200)));
+        topographicPlaceRepository.save(validInThePast);
+
+        TopographicPlace validInTheFuture = new TopographicPlace();
+        validInTheFuture.setValidBetween(new ValidBetween(testStarted.plusSeconds(2000)));
+        topographicPlaceRepository.save(validInTheFuture);
+
+        List<TopographicPlace> matches = topographicPlaceRepository.findTopographicPlace(
+                TopographicPlaceSearch
+                        .newTopographicPlaceSearchBuilder()
+                        .versionValidity(ExportParams.VersionValidity.CURRENT)
+                        .build());
+
+        assertThat(matches).hasSize(1);
+    }
+
+    @Test
+    public void findCurrentAndFutureValidTopographicPlace() {
+
+        Instant testStarted  = Instant.now();
+
+        TopographicPlace validNow = new TopographicPlace();
+        validNow.setValidBetween(new ValidBetween(testStarted.minusSeconds(200)));
+        validNow.setName(new EmbeddableMultilingualString("Topographic place valid now", "no"));
+        topographicPlaceRepository.save(validNow);
+
+        TopographicPlace validInThePast = new TopographicPlace();
+        validInThePast.setValidBetween(new ValidBetween(testStarted.minusSeconds(2000), testStarted.minusSeconds(200)));
+        topographicPlaceRepository.save(validInThePast);
+
+        TopographicPlace validInTheFuture = new TopographicPlace();
+        validInTheFuture.setValidBetween(new ValidBetween(testStarted.plusSeconds(2000)));
+        topographicPlaceRepository.save(validInTheFuture);
+
+        List<TopographicPlace> matches = topographicPlaceRepository.findTopographicPlace(
+                TopographicPlaceSearch
+                        .newTopographicPlaceSearchBuilder()
+                        .versionValidity(ExportParams.VersionValidity.CURRENT_FUTURE)
+                        .build());
+
+        assertThat(matches).hasSize(2);
     }
 }
