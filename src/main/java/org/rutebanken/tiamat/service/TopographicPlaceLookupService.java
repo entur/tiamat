@@ -61,22 +61,24 @@ public class TopographicPlaceLookupService {
         Optional<TopographicPlace> topographicPlace = findTopographicPlace(siteVersionStructure.getCentroid());
 
         if (topographicPlace.isPresent()) {
-            logger.debug("Found topographic place {} for site {}", siteVersionStructure.getTopographicPlace(), siteVersionStructure);
+            logger.trace("Found topographic place {} for site {}", siteVersionStructure.getTopographicPlace(), siteVersionStructure);
             TopographicPlace topographicPlaceMatch = topographicPlace.get();
 
             if(siteVersionStructure.getTopographicPlace() != null) {
 
-                if(siteVersionStructure.getTopographicPlace().getId() == topographicPlaceMatch.getId()) {
+                if(siteVersionStructure.getTopographicPlace().getId() == topographicPlaceMatch.getId()
+                        && siteVersionStructure.getTopographicPlace().getVersion() == topographicPlaceMatch.getVersion()) {
                     return false;
                 }
-                logger.trace("Changed topographic place from {}-{} to {}-{} for {}-{}",
-                        siteVersionStructure.getTopographicPlace().getNetexId(),
-                        siteVersionStructure.getTopographicPlace().getVersion(),
-                        topographicPlaceMatch.getNetexId(),
-                        topographicPlaceMatch.getVersion(),
-                        siteVersionStructure.getNetexId(),
-                        siteVersionStructure.getVersion());
             }
+
+            logger.debug("Changed topographic place from {}-{} to {}-{} for {}-{}",
+                    siteVersionStructure.getTopographicPlace().getNetexId(),
+                    siteVersionStructure.getTopographicPlace().getVersion(),
+                    topographicPlaceMatch.getNetexId(),
+                    topographicPlaceMatch.getVersion(),
+                    siteVersionStructure.getNetexId(),
+                    siteVersionStructure.getVersion());
 
             siteVersionStructure.setTopographicPlace(topographicPlaceMatch);
 
