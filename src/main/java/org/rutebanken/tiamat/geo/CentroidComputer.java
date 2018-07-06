@@ -15,14 +15,18 @@
 
 package org.rutebanken.tiamat.geo;
 
-import com.vividsolutions.jts.algorithm.CentroidPoint;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.Point;
+import org.locationtech.jts.algorithm.Centroid;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryCollection;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Point;
 import org.rutebanken.tiamat.model.Zone_VersionStructure;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class CentroidComputer {
@@ -35,26 +39,23 @@ public class CentroidComputer {
 
     /**
      * Computes point from a list of zone's centrois
-      * @param zones netex zones
+     *
+     * @param zones netex zones
      * @return point or empty if none of the zones contained centroid point
      */
     public Optional<Point> compute(Set<? extends Zone_VersionStructure> zones) {
-        CentroidPoint centroidPoint = new CentroidPoint();
 
-        boolean anyAdded = false;
-        if(zones != null) {
-            for (Zone_VersionStructure zone : zones) {
-                if (zone.getCentroid() != null) {
-                    centroidPoint.add(zone.getCentroid());
-                    anyAdded = true;
-                }
-            }
-        }
-        if(anyAdded) {
+        Geometry[] geometries = zones.stream()
+                .filter(zone -> zone.getCentroid() != null)
+                .map(zone -> zone.getCentroid())
+                .toArray(size -> new Geometry[size]);
+
+        if (geometries.length > 0) {
+            GeometryCollection geometryCollection = new GeometryCollection(geometries, geometryFactory);
+            Centroid centroidPoint = new Centroid(geometryCollection);
             Point point = geometryFactory.createPoint(centroidPoint.getCentroid());
             return Optional.of(point);
-        }
-        else return Optional.empty();
+        } else return Optional.empty();
 
     }
 }
