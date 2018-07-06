@@ -84,7 +84,7 @@
         <docker.maven.plugin.version>0.21.0</docker.maven.plugin.version>
         <spring-boot-plugin.version>1.5.6.RELEASE</spring-boot-plugin.version>
         <spring-boot.version>1.5.6.RELEASE</spring-boot.version>
-        <spring.security.version>4.2.3.RELEASE</spring.security.version>
+        <spring.security.version>4.2.4.RELEASE</spring.security.version>
         <keycloak.version>3.1.0.Final</keycloak.version>
         <postgresql.version>42.1.4</postgresql.version>
         <geodb.version>0.8</geodb.version>
@@ -571,13 +571,11 @@
                         <configuration>
                             <tasks>
                                 <mkdir dir="${basedir}/src/test/groovy"/>
-                                <taskdef name="groovyc"
-                                         classname="org.codehaus.groovy.ant.Groovyc">
+                                <taskdef name="groovyc" classname="org.codehaus.groovy.ant.Groovyc">
                                     <classpath refid="maven.test.classpath"/>
                                 </taskdef>
                                 <mkdir dir="${project.build.testOutputDirectory}"/>
-                                <groovyc destdir="${project.build.testOutputDirectory}"
-                                         srcdir="${basedir}/src/test/groovy/" listfiles="true">
+                                <groovyc destdir="${project.build.testOutputDirectory}" srcdir="${basedir}/src/test/groovy/" listfiles="true">
                                     <classpath refid="maven.test.classpath"/>
                                 </groovyc>
                             </tasks>
