@@ -89,7 +89,7 @@
         <postgresql.version>42.1.4</postgresql.version>
         <geodb.version>0.8</geodb.version>
         <geotools.version>17.2</geotools.version>
-        <com.vividsolutions.version>1.13</com.vividsolutions.version>
+        <locationtech.jts.version>1.15.0</locationtech.jts.version>
         <activemq-client.version>5.15.0</activemq-client.version>
         <maven-javadoc-plugin.version>2.10.4</maven-javadoc-plugin.version>
         <flyway-core.version>4.2.0</flyway-core.version>
@@ -203,11 +203,10 @@
             <version>${flyway-core.version}</version>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/com.vividsolutions/jts -->
         <dependency>
-            <groupId>com.vividsolutions</groupId>
-            <artifactId>jts</artifactId>
-            <version>${com.vividsolutions.version}</version>
+            <groupId>org.locationtech.jts</groupId>
+            <artifactId>jts-core</artifactId>
+            <version>${locationtech.jts.version}</version>
         </dependency>
 
         <dependency>
