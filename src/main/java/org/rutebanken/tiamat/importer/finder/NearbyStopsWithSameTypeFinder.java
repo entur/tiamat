@@ -15,7 +15,7 @@
 
 package org.rutebanken.tiamat.importer.finder;
 
-import com.vividsolutions.jts.geom.Envelope;
+import org.locationtech.jts.geom.Envelope;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
 import org.rutebanken.tiamat.geo.EnvelopeCreator;

@@ -15,7 +15,7 @@
 
 package org.rutebanken.tiamat.rest.graphql.types;
 
-import com.vividsolutions.jts.geom.Geometry;
+import org.locationtech.jts.geom.Geometry;
 import graphql.schema.*;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.model.*;

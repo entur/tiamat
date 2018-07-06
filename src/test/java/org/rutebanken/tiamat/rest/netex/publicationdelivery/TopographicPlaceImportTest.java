@@ -15,7 +15,7 @@
 
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
-import com.vividsolutions.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Coordinate;
 import net.opengis.gml._3.*;
 import net.opengis.gml._3.ObjectFactory;
 import org.junit.Test;

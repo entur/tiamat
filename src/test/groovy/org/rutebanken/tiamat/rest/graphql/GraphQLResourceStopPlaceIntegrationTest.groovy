@@ -15,8 +15,8 @@
 
 package org.rutebanken.tiamat.rest.graphql
 
-import com.vividsolutions.jts.geom.Coordinate
-import com.vividsolutions.jts.geom.Point
+import org.locationtech.jts.geom.Coordinate
+import org.locationtech.jts.geom.Point
 import org.hamcrest.Matchers
 import org.junit.Before
 import org.junit.Test

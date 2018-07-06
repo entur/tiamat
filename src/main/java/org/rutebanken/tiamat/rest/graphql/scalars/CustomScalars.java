@@ -15,7 +15,7 @@
 
 package org.rutebanken.tiamat.rest.graphql.scalars;
 
-import com.vividsolutions.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Coordinate;
 import graphql.language.ArrayValue;
 import graphql.language.FloatValue;
 import graphql.schema.Coercing;

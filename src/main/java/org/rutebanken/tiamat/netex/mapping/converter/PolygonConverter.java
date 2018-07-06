@@ -15,7 +15,7 @@
 
 package org.rutebanken.tiamat.netex.mapping.converter;
 
-import com.vividsolutions.jts.geom.*;
+import org.locationtech.jts.geom.*;
 import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;

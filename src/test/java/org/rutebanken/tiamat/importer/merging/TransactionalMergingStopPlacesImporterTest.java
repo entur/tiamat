@@ -16,7 +16,7 @@
 package org.rutebanken.tiamat.importer.merging;
 
 
-import com.vividsolutions.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Coordinate;
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.importer.merging.TransactionalMergingStopPlacesImporter;

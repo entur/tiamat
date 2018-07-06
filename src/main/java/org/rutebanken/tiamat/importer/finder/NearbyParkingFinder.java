@@ -17,9 +17,9 @@ package org.rutebanken.tiamat.importer.finder;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Point;
+import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.Point;
 import org.rutebanken.tiamat.model.Parking;
 import org.rutebanken.tiamat.repository.ParkingRepository;
 import org.slf4j.Logger;

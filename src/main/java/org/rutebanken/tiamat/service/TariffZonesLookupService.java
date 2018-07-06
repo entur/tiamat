@@ -17,8 +17,8 @@ package org.rutebanken.tiamat.service;
 
 
 import com.google.common.collect.Sets;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.Polygon;
 import org.rutebanken.tiamat.general.ResettableMemoizer;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.TariffZone;

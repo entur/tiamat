@@ -15,7 +15,7 @@
 
 package org.rutebanken.tiamat.rest.graphql.operations;
 
-import com.vividsolutions.jts.geom.Point;
+import org.locationtech.jts.geom.Point;
 import graphql.schema.*;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.ValidBetween;

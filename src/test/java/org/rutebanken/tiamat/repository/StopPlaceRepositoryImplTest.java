@@ -16,8 +16,8 @@
 package org.rutebanken.tiamat.repository;
 
 import com.google.common.collect.Sets;
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Envelope;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Envelope;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
