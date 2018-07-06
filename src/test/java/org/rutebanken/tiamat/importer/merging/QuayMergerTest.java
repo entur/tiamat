@@ -42,7 +42,7 @@ public class QuayMergerTest {
     private GeometryFactory geometryFactory = new GeometryFactoryConfig().geometryFactory();
 
     private NetexIdHelper netexIdHelper = new NetexIdHelper(new ValidPrefixList("NSR", new HashMap<>()));
-    private QuayMerger quayMerger = new QuayMerger(new OriginalIdMatcher(netexIdHelper));
+    private QuayMerger quayMerger = new QuayMerger(new OriginalIdMatcher(netexIdHelper), zoneDistanceChecker);
 
     @Test
     public void disableMatchingQuaysWithinLowDistanceBeforeIdMatch() {

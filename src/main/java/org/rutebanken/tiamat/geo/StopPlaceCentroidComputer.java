@@ -16,11 +16,8 @@
 package org.rutebanken.tiamat.geo;
 
 import com.google.common.base.MoreObjects;
-import org.locationtech.jts.geom.GeometryFactory;
+import org.geotools.referencing.GeodeticCalculator;
 import org.locationtech.jts.geom.Point;
-import org.geotools.geometry.jts.JTS;
-import org.geotools.referencing.crs.DefaultGeographicCRS;
-import org.opengis.referencing.operation.TransformException;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,10 +39,13 @@ public class StopPlaceCentroidComputer {
 
     private final CentroidComputer centroidComputer;
 
+    private final ZoneDistanceChecker zoneDistanceChecker;
+
 
     @Autowired
-    public StopPlaceCentroidComputer(CentroidComputer centroidComputer) {
+    public StopPlaceCentroidComputer(CentroidComputer centroidComputer, ZoneDistanceChecker zoneDistanceChecker) {
         this.centroidComputer = centroidComputer;
+        this.zoneDistanceChecker = zoneDistanceChecker;
     }
 
     public boolean computeCentroidForStopPlace(StopPlace stopPlace) {
@@ -64,10 +64,12 @@ public class StopPlaceCentroidComputer {
                 stopPlace.getQuays().forEach(quay -> {
                     try {
                         if(quay.getCentroid() != null) {
-                            double distanceInMeters = JTS.orthodromicDistance(
-                                    quay.getCentroid().getCoordinate(),
-                                    stopPlace.getCentroid().getCoordinate(),
-                                    DefaultGeographicCRS.WGS84);
+
+                            GeodeticCalculator calc = new GeodeticCalculator();
+                            calc.setStartingGeographicPoint(quay.getCentroid().getX(), quay.getCentroid().getY());
+                            calc.setDestinationGeographicPoint(quay.getCentroid().getX(), quay.getCentroid().getY());
+
+                            double distanceInMeters = zoneDistanceChecker.getDistanceInMeters(quay, stopPlace);
 
                             if (distanceInMeters > DISTANCE_WARNING_METERS) {
                                 String stopPlaceString = MoreObjects.toStringHelper(stopPlace)
@@ -80,7 +82,7 @@ public class StopPlaceCentroidComputer {
                                         distanceInMeters, stopPlaceString, quay.getOriginalIds());
                             }
                         }
-                    } catch (TransformException e) {
+                    } catch (Exception e) {
                         logger.warn("Could not determine orthodromic distance between quay and stop place {}", stopPlace);
                     }
                 });

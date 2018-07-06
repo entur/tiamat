@@ -19,6 +19,7 @@ import org.apache.commons.lang3.SerializationUtils;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.opengis.referencing.operation.TransformException;
+import org.rutebanken.tiamat.geo.OrthodromicDistanceComputer;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.slf4j.Logger;
@@ -35,6 +36,8 @@ public class StopPlaceSplitter {
     private static final int QUAY_DISTANCE = 1000;
 
     private static final Logger logger = LoggerFactory.getLogger(StopPlaceSplitter.class);
+
+    private static final OrthodromicDistanceComputer orthodromicDistanceComputer = new OrthodromicDistanceComputer();
 
     public List<StopPlace> split(List<StopPlace> stops) {
         logger.debug("Looking for quays eligible for splitting in {} stop places based on quay distance", stops.size());
@@ -155,12 +158,9 @@ public class StopPlaceSplitter {
         logger.debug("Checking distance between {} and {}", quay1.getOriginalIds(), quay2.getOriginalIds());
 
         try {
-            double distanceInMeters = JTS.orthodromicDistance(
-                    quay1.getCentroid().getCoordinate(),
-                    quay2.getCentroid().getCoordinate(),
-                    DefaultGeographicCRS.WGS84);
+            double distanceInMeters = orthodromicDistanceComputer.compute(quay1.getCentroid(), quay2.getCentroid());
             return distanceInMeters < QUAY_DISTANCE;
-        } catch (TransformException e) {
+        } catch (Exception e) {
             logger.warn("Error checking distance between {} and {}", quay1, quay2, e);
         }
         return true;

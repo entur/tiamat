@@ -20,6 +20,7 @@ import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.jboss.logging.Logger;
 import org.opengis.referencing.operation.TransformException;
 import org.rutebanken.tiamat.model.Zone_VersionStructure;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -29,6 +30,9 @@ public class ZoneDistanceChecker {
 
     private static final Logger logger = Logger.getLogger(ZoneDistanceChecker.class);
 
+    @Autowired
+    private OrthodromicDistanceComputer orthodromicDistanceComputer;
+
     public double getDistanceInMeters(Zone_VersionStructure zone1, Zone_VersionStructure zone2) throws TransformException {
 
         if(zone1 == null || zone1.getCentroid() == null || zone2 == null || zone2.getCentroid() == null) {
@@ -36,10 +40,7 @@ public class ZoneDistanceChecker {
             return 0;
         }
 
-        return JTS.orthodromicDistance(
-                zone1.getCentroid().getCoordinate(),
-                zone2.getCentroid().getCoordinate(),
-                DefaultGeographicCRS.WGS84);
+        return orthodromicDistanceComputer.compute(zone1.getCentroid(), zone2.getCentroid());
     }
 
     public boolean exceedsLimit(Zone_VersionStructure zone1, Zone_VersionStructure zone2) {

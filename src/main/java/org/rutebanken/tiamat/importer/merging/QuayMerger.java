@@ -19,6 +19,7 @@ import com.google.api.client.repackaged.com.google.common.base.Strings;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.opengis.referencing.operation.TransformException;
+import org.rutebanken.tiamat.geo.ZoneDistanceChecker;
 import org.rutebanken.tiamat.importer.matching.OriginalIdMatcher;
 import org.rutebanken.tiamat.model.MultilingualString;
 import org.rutebanken.tiamat.model.Quay;
@@ -55,9 +56,12 @@ public class QuayMerger {
 
     private final OriginalIdMatcher originalIdMatcher;
 
+    private final ZoneDistanceChecker zoneDistanceChecker;
+
     @Autowired
-    public QuayMerger(OriginalIdMatcher originalIdMatcher) {
+    public QuayMerger(OriginalIdMatcher originalIdMatcher, ZoneDistanceChecker zoneDistanceChecker) {
         this.originalIdMatcher = originalIdMatcher;
+        this.zoneDistanceChecker = zoneDistanceChecker;
     }
 
     public boolean appendImportIds(StopPlace newStopPlace, StopPlace existingStopPlace, boolean addNewQuays) {
@@ -252,10 +256,7 @@ public class QuayMerger {
         }
 
         try {
-            double distanceInMeters = JTS.orthodromicDistance(
-                    quay1.getCentroid().getCoordinate(),
-                    quay2.getCentroid().getCoordinate(),
-                    DefaultGeographicCRS.WGS84);
+            double distanceInMeters = zoneDistanceChecker.getDistanceInMeters(quay1, quay2);
 
             logger.debug("Distance in meters between quays is {} meters. {} - {}", distanceInMeters, quay1, quay2);
 
