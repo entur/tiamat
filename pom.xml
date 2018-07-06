@@ -131,13 +131,6 @@
     -->
     <repositories>
         <repository>
-            <id>central</id>
-            <name>Maven Repository Switchboard</name>
-            <layout>default</layout>
-            <url>http://repo1.maven.org/maven2</url>
-        </repository>
-
-        <repository>
             <id>geo-solutions.it</id>
             <url>http://maven.geo-solutions.it</url>
         </repository>
