@@ -85,7 +85,7 @@
         <spring-boot-plugin.version>1.5.6.RELEASE</spring-boot-plugin.version>
         <spring-boot.version>1.5.6.RELEASE</spring-boot.version>
         <spring.security.version>4.2.4.RELEASE</spring.security.version>
-        <keycloak.version>3.3.0.Final</keycloak.version>
+        <keycloak.version>4.0.0.Final</keycloak.version>
         <postgresql.version>42.1.4</postgresql.version>
         <geodb.version>0.8</geodb.version>
         <geotools.version>17.2</geotools.version>
@@ -94,7 +94,7 @@
         <maven-javadoc-plugin.version>2.10.4</maven-javadoc-plugin.version>
         <flyway-core.version>4.2.0</flyway-core.version>
 
-        <logstash-logback.version>4.11</logstash-logback.version>
+        <logstash-logback.version>5.1</logstash-logback.version>
         <kubernetes-client.version>2.6.1</kubernetes-client.version>
         <janino.version>3.0.7</janino.version>
         <httpcomponents-fluent.version>4.5.3</httpcomponents-fluent.version>
