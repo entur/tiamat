@@ -85,7 +85,7 @@
         <spring-boot-plugin.version>1.5.6.RELEASE</spring-boot-plugin.version>
         <spring-boot.version>1.5.6.RELEASE</spring-boot.version>
         <spring.security.version>4.2.4.RELEASE</spring.security.version>
-        <keycloak.version>3.3.0.Final</keycloak.version>
+        <keycloak.version>4.0.0.Final</keycloak.version>
         <postgresql.version>42.1.4</postgresql.version>
         <geodb.version>0.8</geodb.version>
         <geotools.version>17.2</geotools.version>
@@ -428,7 +428,7 @@
                 https://github.com/jboss/xerces/pull/14
                 https://issues.apache.org/jira/browse/XERCESJ-1276
             -->
-            <version>2.11.0.SP6-RB</version>
+            <version>2.12.0</version>
         </dependency>
 
         <dependency>
