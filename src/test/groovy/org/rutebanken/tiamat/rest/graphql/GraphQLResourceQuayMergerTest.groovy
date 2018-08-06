@@ -82,7 +82,6 @@ class GraphQLResourceQuayMergerTest extends AbstractGraphQLResourceIntegrationTe
                                 }
                             }
                         }
-                   }
                  }"""
 
 
