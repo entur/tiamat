@@ -201,35 +201,33 @@ class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResourceInte
 
         String query = """mutation {
                            pathLink: ${MUTATE_PATH_LINK} (PathLink: [{
-                                    from: {placeRef: {ref: "${firstQuay.getNetexId()}", version:"${
-            firstQuay.getVersion()
-        }"}},
-                                        to: {placeRef: {ref: "${secondQuay.getNetexId()}"}}
-                                        geometry: {
-                                            type: LineString, coordinates: [[10.3, 59.9], [10.3, 59.9], [10.3, 59.9], [10.3, 59.9], [10.3, 59.9]]
-                                        }
-                                    }]) {
+                                from: {placeRef: {ref: "${firstQuay.getNetexId()}", version:"${firstQuay.getVersion()}"}},
+                                    to: {placeRef: {ref: "${secondQuay.getNetexId()}"}}
+                                    geometry: {
+                                        type: LineString, coordinates: [[10.3, 59.9], [10.3, 59.9], [10.3, 59.9], [10.3, 59.9], [10.3, 59.9]]
+                                    }
+                                }]) {
+                                id
+                                geometry {
+                                    type
+                                    coordinates
+                                }
+                                from {
                                     id
-                                    geometry {
-                                        type
-                                        coordinates
-                                    }
-                                    from {
-                                        id
-                                        placeRef {
-                                            ref
-                                            version
-                                        }
-                                    }
-                                    to {
-                                        id
-                                        placeRef {
-                                            ref
-                                            version
-                                        }
+                                    placeRef {
+                                        ref
+                                        version
                                     }
                                 }
-                            }}"""
+                                to {
+                                    id
+                                    placeRef {
+                                        ref
+                                        version
+                                    }
+                                }
+                            }
+                           }"""
         return new PathLinkQuery(firstQuay, secondQuay, query)
     }
 
