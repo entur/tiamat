@@ -19,6 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.google.common.collect.Sets;
 import graphql.*;
+import graphql.execution.ExecutionPath;
 import io.swagger.annotations.Api;
 import org.rutebanken.helper.organisation.NotAuthenticatedException;
 import org.rutebanken.tiamat.rest.exception.ErrorResponseEntity;
@@ -166,7 +167,8 @@ public class GraphQLResource {
         } catch (GraphQLException e) {
             logger.warn("Catched graphqlException. Setting rollback only", e);
             res = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
-            content.put("errors", Arrays.asList(new ExceptionWhileDataFetching(e)));
+
+            content.put("errors", Arrays.asList(e));
             transactionStatus.setRollbackOnly();
         }
         removeErrorStacktraces(content);
