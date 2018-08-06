@@ -93,8 +93,7 @@
         <activemq-client.version>5.15.0</activemq-client.version>
         <maven-javadoc-plugin.version>2.10.4</maven-javadoc-plugin.version>
         <flyway-core.version>4.2.0</flyway-core.version>
-
-        <logstash-logback.version>4.11</logstash-logback.version>
+        <logstash-logback.version>5.1</logstash-logback.version>
         <kubernetes-client.version>2.6.2</kubernetes-client.version>
         <janino.version>3.0.7</janino.version>
         <httpcomponents-fluent.version>4.5.3</httpcomponents-fluent.version>
@@ -114,7 +113,7 @@
 
         <groovy-all.version>2.4.12</groovy-all.version>
         <jaxb-version>2.2.11</jaxb-version>
-        <swagger-jersey2.version>1.5.16</swagger-jersey2.version>
+        <swagger-jersey2.version>1.5.19</swagger-jersey2.version>
 
         <!-- NB: Concious choice of using snapshot version. This is to keep in
             sync, and fail fast if incompatibilities -->
