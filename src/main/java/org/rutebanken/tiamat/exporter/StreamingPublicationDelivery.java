@@ -36,6 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.xml.sax.SAXException;
 
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -80,7 +81,7 @@ public class StreamingPublicationDelivery {
      */
     private final boolean validateAgainstSchema;
 
-    @Autowired
+    @PersistenceContext
     private EntityManager entityManager;
 
     @Autowired

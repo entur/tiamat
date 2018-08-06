@@ -82,10 +82,10 @@
         <!-- versions for use in mvn plugins as we cannot inherit them from a BOM -->
         <fabric8.version>2.3.4</fabric8.version>
         <docker.maven.plugin.version>0.21.0</docker.maven.plugin.version>
-        <spring-boot-plugin.version>1.5.14.RELEASE</spring-boot-plugin.version>
-        <spring-boot.version>1.5.14.RELEASE</spring-boot.version>
-        <spring.security.version>4.2.4.RELEASE</spring.security.version>
-        <keycloak.version>3.3.0.Final</keycloak.version>
+        <spring-boot-plugin.version>2.0.3.RELEASE</spring-boot-plugin.version>
+        <spring-boot.version>2.0.3.RELEASE</spring-boot.version>
+        <spring.security.version>5.0.7.RELEASE</spring.security.version>
+        <keycloak.version>4.1.0.Final</keycloak.version>
         <postgresql.version>42.1.4</postgresql.version>
         <geodb.version>0.8</geodb.version>
         <geotools.version>17.2</geotools.version>
@@ -107,9 +107,9 @@
         <guava.version>23.0</guava.version>
         <graphql-java.version>9.2</graphql-java.version>
 
-        <hazelcast-hibernate5.version>1.2.2</hazelcast-hibernate5.version>
-        <hibernate.version>5.0.12.Final</hibernate.version>
-        <hibernate-spatial.version>5.0.12.Final</hibernate-spatial.version>
+        <hazelcast-hibernate52.version>1.2.3</hazelcast-hibernate52.version>
+        <hibernate.version>5.2.17.Final</hibernate.version>
+        <hibernate-spatial.version>5.2.17.Final</hibernate-spatial.version>
 
         <groovy-all.version>2.4.12</groovy-all.version>
         <jaxb-version>2.2.11</jaxb-version>
@@ -250,12 +250,8 @@
 
         <dependency>
             <groupId>com.hazelcast</groupId>
-            <!-- use hazelcast-hibernate52 when spring boot data >= 2.*.* and hibernate >= 5.2.*
-                https://github.com/spring-projects/spring-boot/commit/d50878bac18bf7aa9eb426589a1f6519b342d731
-                https://github.com/hazelcast/hazelcast-hibernate5
-            -->
-            <artifactId>hazelcast-hibernate5</artifactId>
-            <version>${hazelcast-hibernate5.version}</version>
+            <artifactId>hazelcast-hibernate52</artifactId>
+            <version>${hazelcast-hibernate52.version}</version>
         </dependency>
         <!-- Due to maven artifact cache, this dependency needs to be explicit -->
         <dependency>
@@ -507,7 +503,7 @@
 
         <dependency>
             <groupId>org.keycloak</groupId>
-            <artifactId>keycloak-spring-boot-adapter</artifactId>
+            <artifactId>keycloak-spring-boot-2-adapter</artifactId>
             <version>${keycloak.version}</version>
         </dependency>
 

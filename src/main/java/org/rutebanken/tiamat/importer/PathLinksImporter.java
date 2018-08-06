@@ -124,7 +124,7 @@ public class PathLinksImporter {
         } else if(!incomingPathLink.getOriginalIds().isEmpty()) {
             Long existingPathLinkId = pathLinkRepository.findByKeyValue(NetexIdMapper.ORIGINAL_ID_KEY, incomingPathLink.getOriginalIds());
             if(existingPathLinkId != null) {
-                existingPathLink = Optional.of(pathLinkRepository.findOne(existingPathLinkId));
+                existingPathLink = pathLinkRepository.findById(existingPathLinkId);
                 logger.info("Found existing existing path link from original id. {}", existingPathLink);
             }
         }

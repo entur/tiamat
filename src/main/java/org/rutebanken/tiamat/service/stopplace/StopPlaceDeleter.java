@@ -70,7 +70,7 @@ public class StopPlaceDeleter {
             }
 
             authorizationService.assertAuthorized(ROLE_DELETE_STOPS, stopPlaces);
-            stopPlaceRepository.delete(stopPlaces);
+            stopPlaceRepository.deleteAll(stopPlaces);
             notifyDeleted(stopPlaces);
 
             logger.warn("All versions ({}) of stop place {} deleted by user {}", stopPlaces.size(), stopPlaceId, usernameForAuthenticatedUser);

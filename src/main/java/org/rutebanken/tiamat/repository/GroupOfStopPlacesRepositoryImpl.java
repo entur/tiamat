@@ -32,6 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import java.util.*;
 
@@ -39,7 +40,7 @@ public class GroupOfStopPlacesRepositoryImpl implements GroupOfStopPlacesReposit
 
     private static final Logger logger = LoggerFactory.getLogger(GroupOfStopPlaces.class);
 
-    @Autowired
+    @PersistenceContext
     private EntityManager entityManager;
 
     @Autowired

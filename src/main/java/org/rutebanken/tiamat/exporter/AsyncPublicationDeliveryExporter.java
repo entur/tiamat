@@ -37,6 +37,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -119,9 +120,9 @@ public class AsyncPublicationDeliveryExporter {
 
     public ExportJob getExportJob(long exportJobId) {
 
-        ExportJob exportJob = exportJobRepository.findOne(exportJobId);
-        if(exportJob != null) {
-            return setJobUrl(exportJob);
+        Optional<ExportJob> exportJob = exportJobRepository.findById(exportJobId);
+        if(exportJob.isPresent()) {
+            return setJobUrl(exportJob.get());
         }
         return null;
     }

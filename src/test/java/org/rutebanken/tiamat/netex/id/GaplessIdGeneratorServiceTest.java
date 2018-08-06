@@ -17,8 +17,11 @@ package org.rutebanken.tiamat.netex.id;
 
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IQueue;
+import org.hibernate.Hibernate;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.jpa.HibernateEntityManagerFactory;
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
@@ -27,7 +30,10 @@ import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import java.math.BigInteger;
 import java.util.Collections;
 import java.util.HashSet;
@@ -40,8 +46,8 @@ import static org.rutebanken.tiamat.netex.id.GaplessIdGeneratorService.LOW_LEVEL
 
 public class GaplessIdGeneratorServiceTest extends TiamatIntegrationTest {
 
-    @Autowired
-    private HibernateEntityManagerFactory hibernateEntityManagerFactory;
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @Autowired
     private NetexIdHelper netexIdHelper;
@@ -86,10 +92,10 @@ public class GaplessIdGeneratorServiceTest extends TiamatIntegrationTest {
     }
 
     private long selectSingleInsertedId(String tableName, long expectedId) {
-        Session session = hibernateEntityManagerFactory.getSessionFactory().openSession();
-        SQLQuery query = session.createSQLQuery("SELECT id_value FROM id_generator WHERE table_name = '" + tableName + "' AND id_value = '" + expectedId + "'");
 
-        List list = query.list();
+        Query query = entityManager.createNativeQuery("SELECT id_value FROM id_generator WHERE table_name = '" + tableName + "' AND id_value = '" + expectedId + "'");
+
+        List list = query.getResultList();
         assertThat(list).hasSize(1);
         BigInteger actual = (BigInteger) list.get(0);
         return actual.longValue();
