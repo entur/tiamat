@@ -95,7 +95,7 @@
         <flyway-core.version>4.2.0</flyway-core.version>
 
         <logstash-logback.version>4.11</logstash-logback.version>
-        <kubernetes-client.version>2.6.1</kubernetes-client.version>
+        <kubernetes-client.version>2.6.2</kubernetes-client.version>
         <janino.version>3.0.7</janino.version>
         <httpcomponents-fluent.version>4.5.3</httpcomponents-fluent.version>
         <assertj-core.version>3.8.0</assertj-core.version>
