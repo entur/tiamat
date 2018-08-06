@@ -90,7 +90,7 @@
         <geodb.version>0.8</geodb.version>
         <geotools.version>17.2</geotools.version>
         <com.vividsolutions.version>1.13</com.vividsolutions.version>
-        <activemq-client.version>5.15.0</activemq-client.version>
+        <activemq-client.version>5.15.3</activemq-client.version>
         <maven-javadoc-plugin.version>2.10.4</maven-javadoc-plugin.version>
         <flyway-core.version>4.2.0</flyway-core.version>
         <logstash-logback.version>5.1</logstash-logback.version>
