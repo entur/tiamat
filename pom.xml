@@ -92,7 +92,7 @@
         <com.vividsolutions.version>1.13</com.vividsolutions.version>
         <activemq-client.version>5.15.3</activemq-client.version>
         <maven-javadoc-plugin.version>2.10.4</maven-javadoc-plugin.version>
-        <flyway-core.version>4.2.0</flyway-core.version>
+        <flyway-core.version>5.1.4</flyway-core.version>
         <logstash-logback.version>5.1</logstash-logback.version>
         <kubernetes-client.version>4.0.3</kubernetes-client.version>
         <janino.version>3.0.7</janino.version>
