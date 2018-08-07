@@ -100,7 +100,7 @@
         <com.h2database.version>1.4.196</com.h2database.version>
         <hikariCP.version>3.2.0</hikariCP.version>
         <commons.lang3.version>3.6</commons.lang3.version>
-        <orika-core.version>1.5.1</orika-core.version>
+        <orika-core.version>1.5.2</orika-core.version>
         <guava.version>26.0-jre</guava.version>
         <graphql-java.version>9.2</graphql-java.version>
 
