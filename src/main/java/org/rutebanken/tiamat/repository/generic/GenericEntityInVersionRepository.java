@@ -23,6 +23,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.data.repository.support.Repositories;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -36,7 +37,8 @@ public class GenericEntityInVersionRepository {
     }
 
     public EntityInVersionRepository getRepository(Class<? extends EntityInVersionStructure> clazz) {
-        return (EntityInVersionRepository) repositories.getRepositoryFor(clazz);
+        Optional<Object> repositoryFor = repositories.getRepositoryFor(clazz);
+        return (EntityInVersionRepository) repositoryFor.orElse(null);
     }
 
     public <T extends EntityInVersionStructure> T findFirstByNetexIdOrderByVersionDesc(String netexId, Class<T> clazz) {
@@ -52,7 +54,7 @@ public class GenericEntityInVersionRepository {
     }
 
     public String findByKeyValue(String key, Set<String> values, Class<? extends DataManagedObjectStructure> clazz) {
-        DataManagedObjectStructureRepository repository = (DataManagedObjectStructureRepository) repositories.getRepositoryFor(clazz);
+        DataManagedObjectStructureRepository repository = (DataManagedObjectStructureRepository) getRepository(clazz);
         String netexId = repository.findFirstByKeyValues(key, values);
         if (netexId != null) {
             return netexId;

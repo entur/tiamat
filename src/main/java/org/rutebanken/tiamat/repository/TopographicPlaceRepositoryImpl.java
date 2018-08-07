@@ -32,10 +32,8 @@ import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
+import javax.persistence.*;
 import javax.persistence.Query;
-import javax.persistence.TypedQuery;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -46,7 +44,7 @@ public class TopographicPlaceRepositoryImpl implements TopographicPlaceRepositor
 
 	private static final Logger logger = LoggerFactory.getLogger(TopographicPlaceRepositoryImpl.class);
 
-	@Autowired
+	@PersistenceContext
 	private EntityManager entityManager;
 
 

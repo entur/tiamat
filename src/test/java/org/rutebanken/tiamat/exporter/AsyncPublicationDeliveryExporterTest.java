@@ -33,6 +33,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.transform.TransformerException;
 import java.io.IOException;
+import java.util.Optional;
 
 import static junit.framework.TestCase.fail;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -64,8 +65,8 @@ public class AsyncPublicationDeliveryExporterTest extends TiamatIntegrationTest 
         long start = System.currentTimeMillis();
         long timeout = 10000;
         while (true) {
-            ExportJob actualExportJob = exportJobRepository.findOne(exportJob.getId());
-            if (actualExportJob.getStatus().equals(exportJob.getStatus())) {
+            Optional<ExportJob> actualExportJob = exportJobRepository.findById(exportJob.getId());
+            if (actualExportJob.get().getStatus().equals(exportJob.getStatus())) {
                 if (System.currentTimeMillis() - start > timeout) {
                     fail("Waited more than " + timeout + " millis for job status to change");
                 }
@@ -73,9 +74,9 @@ public class AsyncPublicationDeliveryExporterTest extends TiamatIntegrationTest 
                 continue;
             }
 
-            if (actualExportJob.getStatus().equals(JobStatus.FAILED)) {
+            if (actualExportJob.get().getStatus().equals(JobStatus.FAILED)) {
                 fail("Job status is failed");
-            } else if (actualExportJob.getStatus().equals(JobStatus.FINISHED)) {
+            } else if (actualExportJob.get().getStatus().equals(JobStatus.FINISHED)) {
                 System.out.println("Job finished");
 
             }

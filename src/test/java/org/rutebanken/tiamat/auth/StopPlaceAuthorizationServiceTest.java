@@ -132,7 +132,7 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
         StopPlace railReplacementBus = createRailReplacementBus();
 
         List<StopPlace> childStops = Arrays.asList(onstreetBus, railStation, railReplacementBus);
-        stopPlaceRepository.save(childStops);
+        stopPlaceRepository.saveAll(childStops);
 
         StopPlace existingVersion = multiModalStopPlaceEditor.createMultiModalParentStopPlace(
                 toIdList(childStops),
@@ -158,7 +158,7 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
         StopPlace railReplacementBus = createRailReplacementBus();
 
         List<StopPlace> childStops = Arrays.asList(onstreetBus, railStation, railReplacementBus);
-        stopPlaceRepository.save(childStops);
+        stopPlaceRepository.saveAll(childStops);
 
         StopPlace existingVersion = multiModalStopPlaceEditor.createMultiModalParentStopPlace(
                 toIdList(childStops),
@@ -194,7 +194,7 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
         StopPlace railReplacementBus = createRailReplacementBus();
 
         List<StopPlace> childStops = Arrays.asList(onstreetBus, railStation, railReplacementBus);
-        stopPlaceRepository.save(childStops);
+        stopPlaceRepository.saveAll(childStops);
 
         StopPlace existingVersion = multiModalStopPlaceEditor.createMultiModalParentStopPlace(
                 toIdList(childStops),
@@ -222,7 +222,7 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
         StopPlace railReplacementBus = createRailReplacementBus();
 
         List<StopPlace> childStops = Arrays.asList(onstreetBus, railStation, railReplacementBus);
-        stopPlaceRepository.save(childStops);
+        stopPlaceRepository.saveAll(childStops);
 
         StopPlace existingVersion = multiModalStopPlaceEditor.createMultiModalParentStopPlace(
                 toIdList(childStops),
@@ -252,7 +252,7 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
         StopPlace railReplacementBus = createRailReplacementBus();
 
         List<StopPlace> childStops = Arrays.asList(onstreetBus, railStation, railReplacementBus);
-        stopPlaceRepository.save(childStops);
+        stopPlaceRepository.saveAll(childStops);
 
         StopPlace existingVersion = multiModalStopPlaceEditor.createMultiModalParentStopPlace(
                 toIdList(childStops),
@@ -285,7 +285,7 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
         StopPlace railReplacementBus = createRailReplacementBus();
 
         List<StopPlace> childStops = Arrays.asList(onstreetBus, railStation, railReplacementBus);
-        stopPlaceRepository.save(childStops);
+        stopPlaceRepository.saveAll(childStops);
 
         StopPlace existingVersion = multiModalStopPlaceEditor.createMultiModalParentStopPlace(
                 toIdList(childStops),
@@ -314,7 +314,7 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
         StopPlace railReplacementBus = createRailReplacementBus();
 
         List<StopPlace> childStops = Arrays.asList(onstreetBus, railStation, railReplacementBus);
-        stopPlaceRepository.save(childStops);
+        stopPlaceRepository.saveAll(childStops);
 
         StopPlace existingVersion = multiModalStopPlaceEditor.createMultiModalParentStopPlace(
                 toIdList(childStops),

@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
+import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -38,7 +39,8 @@ import static org.rutebanken.tiamat.repository.StopPlaceRepositoryImpl.SQL_STOP_
 @Transactional
 public class QuayRepositoryImpl implements QuayRepositoryCustom {
     public static final String JBV_CODE = "jbvCode";
-    @Autowired
+
+    @PersistenceContext
     private EntityManager entityManager;
 
     /**

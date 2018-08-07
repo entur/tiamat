@@ -70,7 +70,7 @@ public class StopPlaceDeleterTest {
 
         assertThat(deleted).isTrue();
 
-        verify(stopPlaceRepository, times(1)).delete(anyList());
+        verify(stopPlaceRepository, times(1)).deleteAll(anyList());
     }
 
 }

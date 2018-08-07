@@ -73,7 +73,7 @@ public class StopPlaceFromOriginalIdFinderTest {
         List<StopPlace> actual = stopPlaceFromOriginalIdFinder.find(stopPlace);
 
         verify(stopPlaceRepository, never()).findFirstByKeyValues(anyString(), anySet());
-        verify(stopPlaceRepository, never()).findOne(anyLong());
+        verify(stopPlaceRepository, never()).findById(anyLong());
         assertThat(actual).isEmpty();
     }
 }

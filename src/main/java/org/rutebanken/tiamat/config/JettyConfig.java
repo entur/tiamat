@@ -20,7 +20,7 @@ import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.embedded.jetty.JettyEmbeddedServletContainerFactory;
+import org.springframework.boot.web.embedded.jetty.JettyServletWebServerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -30,13 +30,13 @@ public class JettyConfig {
     private static final Logger logger = LoggerFactory.getLogger(JettyConfig.class);
 
     @Bean
-    public JettyEmbeddedServletContainerFactory jettyEmbeddedServletContainerFactory(
+    public JettyServletWebServerFactory jettyEmbeddedServletContainerFactory(
             @Value("${jettyMinThreads:10}") int jettyMinThreads,
             @Value("${jettyMaxThreads:40}") int jettyMaxThreads) {
 
         logger.info("Configuring jetty with minThreads: {} and maxThreads: {}", jettyMinThreads, jettyMaxThreads);
 
-        final JettyEmbeddedServletContainerFactory factory = new JettyEmbeddedServletContainerFactory() {
+        final JettyServletWebServerFactory factory = new JettyServletWebServerFactory() {
             @Override
             public QueuedThreadPool getThreadPool() {
                 return new QueuedThreadPool(jettyMaxThreads, jettyMinThreads);

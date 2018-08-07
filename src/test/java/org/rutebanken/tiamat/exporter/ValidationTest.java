@@ -52,7 +52,7 @@ public class ValidationTest {
         System.out.println("loading file "+file);
         Source xmlFile = new StreamSource(new File(file));
 
-        NeTExValidator neTExValidator = new NeTExValidator(NeTExValidator.NetexVersion.V1_0_7);
+        NeTExValidator neTExValidator = new NeTExValidator(NeTExValidator.NetexVersion.v1_0_9);
 
         try {
             neTExValidator.validate(xmlFile);

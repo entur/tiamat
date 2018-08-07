@@ -72,7 +72,7 @@ public class MultiModalStopPlaceEditorTest extends TiamatIntegrationTest {
         children.add(createStopPlace("StopPlace - 3"));
         children.add(createStopPlace("StopPlace - 4"));
 
-        List<StopPlace> savedChildren = stopPlaceRepository.save(children);
+        List<StopPlace> savedChildren = stopPlaceRepository.saveAll(children);
 
         List<String> childIds = new ArrayList<>();
         savedChildren.forEach(sp -> {
@@ -105,7 +105,7 @@ public class MultiModalStopPlaceEditorTest extends TiamatIntegrationTest {
         children.add(createStopPlace(differentChildStopPlaceName, nb));
         children.add(createStopPlace(equalStopPlaceName, en));
 
-        List<StopPlace> savedChildren = stopPlaceRepository.save(children);
+        List<StopPlace> savedChildren = stopPlaceRepository.saveAll(children);
 
         List<String> childIds = new ArrayList<>();
         savedChildren.forEach(sp -> {

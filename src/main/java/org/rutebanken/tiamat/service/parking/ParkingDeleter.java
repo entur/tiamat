@@ -102,7 +102,7 @@ public class ParkingDeleter {
             }
         }
 
-        parkingRepository.delete(parkings);
+        parkingRepository.deleteAll(parkings);
         notifyDeleted(parkings);
 
         logger.warn("All versions ({}) of parking {} deleted by user {}", parkings.size(), parkingId, usernameForAuthenticatedUser);

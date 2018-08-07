@@ -33,10 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Repository;
 
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.Query;
-import javax.persistence.TypedQuery;
+import javax.persistence.*;
 import javax.transaction.Transactional;
 import java.math.BigInteger;
 import java.util.*;
@@ -50,7 +47,7 @@ public class ParkingRepositoryImpl implements ParkingRepositoryCustom {
      */
     protected static final String SQL_MAX_VERSION_OF_PARKING = "p.version = (select max(pv.version) from parking pv where pv.netex_id = p.netex_id) ";
 
-    @Autowired
+    @PersistenceContext
     private EntityManager entityManager;
 
     @Autowired
