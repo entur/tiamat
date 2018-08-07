@@ -87,7 +87,7 @@
         <spring.security.version>5.0.7.RELEASE</spring.security.version>
         <keycloak.version>4.1.0.Final</keycloak.version>
         <postgresql.version>42.2.4</postgresql.version>
-        <geodb.version>0.8</geodb.version>
+        <geodb.version>0.9</geodb.version>
         <geotools.version>17.2</geotools.version>
         <com.vividsolutions.version>1.13</com.vividsolutions.version>
         <activemq-client.version>5.15.3</activemq-client.version>
