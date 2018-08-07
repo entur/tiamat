@@ -101,7 +101,7 @@
         <hikariCP.version>3.2.0</hikariCP.version>
         <commons.lang3.version>3.6</commons.lang3.version>
         <orika-core.version>1.5.1</orika-core.version>
-        <guava.version>23.0</guava.version>
+        <guava.version>26.0-jre</guava.version>
         <graphql-java.version>9.2</graphql-java.version>
 
         <hazelcast-hibernate52.version>1.2.3</hazelcast-hibernate52.version>
