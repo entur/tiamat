@@ -107,7 +107,7 @@
         <hibernate.version>5.2.17.Final</hibernate.version>
         <hibernate-spatial.version>5.2.17.Final</hibernate-spatial.version>
 
-        <groovy-all.version>2.4.12</groovy-all.version>
+        <groovy-all.version>2.5.1</groovy-all.version>
         <jaxb-version>2.2.11</jaxb-version>
         <swagger-jersey2.version>1.5.20</swagger-jersey2.version>
 
