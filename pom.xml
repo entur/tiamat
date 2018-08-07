@@ -95,7 +95,7 @@
         <janino.version>3.0.7</janino.version>
         <httpcomponents-fluent.version>4.5.3</httpcomponents-fluent.version>
         <assertj-core.version>3.8.0</assertj-core.version>
-        <rest-assured.version>3.0.3</rest-assured.version>
+        <rest-assured.version>3.1.0</rest-assured.version>
         <javax.el.version>3.0.0</javax.el.version>
         <com.h2database.version>1.4.196</com.h2database.version>
         <hikariCP.version>3.2.0</hikariCP.version>
