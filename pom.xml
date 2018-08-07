@@ -93,7 +93,7 @@
         <logstash-logback.version>5.2</logstash-logback.version>
         <kubernetes-client.version>4.0.3</kubernetes-client.version>
         <janino.version>3.0.7</janino.version>
-        <assertj-core.version>3.8.0</assertj-core.version>
+        <assertj-core.version>3.10.0</assertj-core.version>
         <rest-assured.version>3.1.0</rest-assured.version>
         <javax.el.version>3.0.0</javax.el.version>
         <com.h2database.version>1.4.196</com.h2database.version>
@@ -471,7 +471,7 @@
             <version>${groovy-all.version}</version>
             <scope>test</scope>
         </dependency>
-        
+
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
