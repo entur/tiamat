@@ -53,7 +53,7 @@ public class BlobStoreService {
         String blobIdName = createBlobIdName(blobPath, fileName);
         try {
             logger.info("Uploading {} to path {} in bucket {}", fileName, blobPath, bucketName);
-            BlobStoreHelper.uploadBlob(storage, bucketName, blobIdName, ByteStreams.toByteArray(inputStream), false);
+            BlobStoreHelper.uploadBlobWithRetry(storage, bucketName, blobIdName, inputStream, false);
         } catch (Exception e) {
             throw new RuntimeException("Error uploading file " + fileName + ", blobIdName " + blobIdName + " to bucket " + bucketName, e);
         }
