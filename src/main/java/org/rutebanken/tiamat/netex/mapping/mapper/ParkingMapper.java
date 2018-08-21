@@ -39,17 +39,23 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
     }
 
     @Override
-    public void mapBtoA(org.rutebanken.tiamat.model.Parking parking, Parking parking2, MappingContext context) {
-        super.mapBtoA(parking, parking2, context);
-        if (parking.getParkingAreas() != null &&
-                !parking.getParkingAreas().isEmpty()) {
+    public void mapBtoA(org.rutebanken.tiamat.model.Parking tiamatParking, Parking netexParking, MappingContext context) {
+        super.mapBtoA(tiamatParking, netexParking, context);
+        if (tiamatParking.getParkingAreas() != null &&
+                !tiamatParking.getParkingAreas().isEmpty()) {
 
-            List<ParkingArea> parkingAreas = mapperFacade.mapAsList(parking.getParkingAreas(), ParkingArea.class, context);
+            List<ParkingArea> parkingAreas = mapperFacade.mapAsList(tiamatParking.getParkingAreas(), ParkingArea.class, context);
             if (!parkingAreas.isEmpty()) {
                 ParkingAreas_RelStructure parkingAreas_relStructure = new ParkingAreas_RelStructure();
                 parkingAreas_relStructure.getParkingAreaRefOrParkingArea().addAll(parkingAreas);
 
-                parking2.setParkingAreas(parkingAreas_relStructure);
+                netexParking.setParkingAreas(parkingAreas_relStructure);
+            }
+        }
+
+        if (tiamatParking.getAdjacentSites() != null) {
+            if(tiamatParking.getAdjacentSites().isEmpty()) {
+                netexParking.setAdjacentSites(null);
             }
         }
     }
