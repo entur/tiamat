@@ -88,12 +88,6 @@ public class StopPlaceMapper extends CustomMapper<StopPlace, org.rutebanken.tiam
             netexStopPlace.setPlaceEquipments(null);
         }
 
-        if (stopPlace.getAdjacentSites() != null) {
-            if(stopPlace.getAdjacentSites().isEmpty()) {
-                netexStopPlace.setAdjacentSites(null);
-            }
-        }
-
         if (stopPlace.getAlternativeNames() != null &&
                 !stopPlace.getAlternativeNames().isEmpty()) {
             List<org.rutebanken.tiamat.model.AlternativeName> alternativeNames = stopPlace.getAlternativeNames();

@@ -52,11 +52,5 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
                 netexParking.setParkingAreas(parkingAreas_relStructure);
             }
         }
-
-        if (tiamatParking.getAdjacentSites() != null) {
-            if(tiamatParking.getAdjacentSites().isEmpty()) {
-                netexParking.setAdjacentSites(null);
-            }
-        }
     }
 }
