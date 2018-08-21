@@ -1,0 +1,2 @@
+CREATE TABLE parking_adjacent_sites (parking_id bigint NOT NULL, ref VARCHAR(255), version VARCHAR(255));
+CREATE TABLE stop_place_adjacent_sites (stop_place_id bigint NOT NULL, ref VARCHAR(255), version VARCHAR(255));
