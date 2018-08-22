@@ -703,6 +703,10 @@ public class StopPlaceRegisterGraphQLSchema {
                         .name(TARIFF_ZONES)
                         .description("List of tariff zone references without version")
                         .type(new GraphQLList(versionLessRefInputObjectType)))
+                .field(newInputObjectField()
+                        .name(ADJACENT_SITES)
+                        .description(ADJACENT_SITES_DESCRIPTION)
+                        .type(new GraphQLList(versionLessRefInputObjectType)))
                 .build();
     }
 
