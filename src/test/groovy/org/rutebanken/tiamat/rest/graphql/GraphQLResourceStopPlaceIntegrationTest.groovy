@@ -930,35 +930,37 @@ def class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourc
 
         InterchangeWeightingEnumeration weighting = InterchangeWeightingEnumeration.INTERCHANGE_ALLOWED
 
-        String graphQlJsonQuery = "{" +
-                "\"query\":\"mutation { " +
-                "  stopPlace: " + GraphQLNames.MUTATE_STOPPLACE + " (StopPlace: {" +
-                "          id:\\\"" + stopPlace.getNetexId() + "\\\"" +
-                "          name: { value:\\\"" + updatedName + "\\\" } " +
-                "          shortName:{ value:\\\"" + updatedShortName + "\\\" } " +
-                "          description:{ value:\\\"" + updatedDescription + "\\\" }" +
-                "          stopPlaceType:" + StopTypeEnumeration.TRAM_STATION.value() +
-                "          versionComment: \\\""+ versionComment + "\\\"" +
-                "          geometry: {" +
-                "            type: Point" +
-                "            coordinates: [[" + updatedLon + "," + updatedLat + "]] " +
-                "          }" +
-                "          weighting:" + weighting.value() +
-                "       }) { " +
-                "  id " +
-                "  name { value } " +
-                "  shortName { value } " +
-                "  description { value } " +
-                "  stopPlaceType " +
-                "  versionComment " +
-                "  topographicPlace { id topographicPlaceType parentTopographicPlace { id topographicPlaceType }} " +
-                "  weighting " +
-                "  geometry { type coordinates } " +
-                "  validBetween { fromDate toDate } " +
-                "  } " +
-                "}\",\"variables\":\"\"}"
+        String graphQlJsonQuery = """
+            mutation {
+                stopPlace: ${GraphQLNames.MUTATE_STOPPLACE}(StopPlace: {
+                    id: "${stopPlace.getNetexId()}"
+                    name: { value: "${updatedName}" }
+                    shortName:{ value: "${updatedShortName}" }
+                    description:{ value:"${updatedDescription}" }
+                    stopPlaceType: ${StopTypeEnumeration.TRAM_STATION.value()}
+                            versionComment: "${versionComment}"
+                        geometry: {
+                            type: Point
+                            coordinates: [[${updatedLon},${updatedLat}]]
+                        }
+                        weighting: ${weighting.value()}
+                    }) {
+                        id
+                        name { value }
+                        shortName { value }
+                        description { value }
+                        stopPlaceType
+                        versionComment
+                        topographicPlace { id topographicPlaceType parentTopographicPlace { id topographicPlaceType }}
+                        weighting
+                        geometry { type coordinates }
+                        validBetween { fromDate toDate }
+                    }
+                }
+            }
+        """
 
-        executeGraphQL(graphQlJsonQuery)
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .root("data.stopPlace[0]")
                     .body("name.value", equalTo(updatedName))
                     .body("shortName.value", equalTo(updatedShortName))
