@@ -919,7 +919,7 @@ def class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourc
 
         StopPlace adjacentStopPlace = createStopPlace("Adjacent Site")
         adjacentStopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(10, 59)))
-        stopPlaceVersionedSaverService.saveNewVersion(adjacentStopPlace);
+        stopPlaceVersionedSaverService.saveNewVersion(adjacentStopPlace)
 
         String updatedName = "Testing name"
         String updatedShortName = "Testing shortname"
@@ -934,43 +934,41 @@ def class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourc
 
         InterchangeWeightingEnumeration weighting = InterchangeWeightingEnumeration.INTERCHANGE_ALLOWED
 
-        String graphQlJsonQuery = """
-            mutation {
-                stopPlace: ${GraphQLNames.MUTATE_STOPPLACE}(StopPlace: {
-                    id: "${stopPlace.getNetexId()}"
-                    name: { value: "${updatedName}" }
-                    shortName:{ value: "${updatedShortName}" }
-                    description:{ value:"${updatedDescription}" }
-                    adjacentSites: [ {ref: "${adjacentStopPlace.getNetexId()}" ]
-                    stopPlaceType: ${StopTypeEnumeration.TRAM_STATION.value()}
-                            versionComment: "${versionComment}"
+        String graphQlJsonQuery = """mutation {
+            stopPlace: ${GraphQLNames.MUTATE_STOPPLACE}(StopPlace: {
+                        id: "${stopPlace.getNetexId()}"
+                        name: { value: "${updatedName}" }
+                        shortName: { value: "${updatedShortName}" }
+                        description: { value:"${updatedDescription}" }
+                        adjacentSites: [ {ref: "${adjacentStopPlace.getNetexId()}"} ]
+                        stopPlaceType: ${StopTypeEnumeration.TRAM_STATION.value()}
+                        versionComment: "${versionComment}"
                         geometry: {
-                            type: Point
-                            coordinates: [[${updatedLon},${updatedLat}]]
+                          type: Point
+                          coordinates: [[${updatedLon},${updatedLat}]]
                         }
                         weighting: ${weighting.value()}
-                    }) {
-                        id
-                        name { value }
-                        shortName { value }
-                        description { value }
-                        adjacentSites { ref }
-                        stopPlaceType
-                        versionComment
-                        topographicPlace { id topographicPlaceType parentTopographicPlace { id topographicPlaceType }}
-                        weighting
-                        geometry { type coordinates }
-                        validBetween { fromDate toDate }
-                    }
+                }) {
+                    id
+                    name { value }
+                    shortName { value }
+                    description { value }
+                    adjacentSites { ref }
+                    stopPlaceType
+                    versionComment
+                    topographicPlace { id topographicPlaceType parentTopographicPlace { id topographicPlaceType }}
+                    weighting
+                    geometry { type coordinates }
+                    validBetween { fromDate toDate }
                 }
-            }
-        """
+            }"""
 
         executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .root("data.stopPlace[0]")
                     .body("name.value", equalTo(updatedName))
                     .body("shortName.value", equalTo(updatedShortName))
                     .body("description.value", equalTo(updatedDescription))
+                    .body("adjacentSites[0].ref", equalTo(adjacentStopPlace.getNetexId()))
                     .body("stopPlaceType", equalTo(StopTypeEnumeration.TRAM_STATION.value()))
                     .body("versionComment", equalTo(versionComment))
                     .body("geometry.type", equalTo("Point"))
