@@ -46,7 +46,7 @@ public class ZoneDistanceChecker {
         return exceedsLimit(zone1, zone2, DEFAULT_MAX_DISTANCE);
     }
 
-    public boolean exceedsLimit(Zone_VersionStructure zone1, Zone_VersionStructure zone2, int limit) {
+    public boolean exceedsLimit(Zone_VersionStructure zone1, Zone_VersionStructure zone2, int limitInMeters) {
         double distanceInMeters = 0;
         try {
             distanceInMeters = getDistanceInMeters(zone1, zone2);
@@ -54,6 +54,6 @@ public class ZoneDistanceChecker {
             logger.warn("Caught expcetion calculating distance. Return false.", e);
             return false;
         }
-        return distanceInMeters > limit;
+        return distanceInMeters > limitInMeters;
     }
 }
