@@ -917,6 +917,10 @@ def class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourc
 
         stopPlaceVersionedSaverService.saveNewVersion(stopPlace)
 
+        StopPlace adjacentStopPlace = createStopPlace("Adjacent Site")
+        adjacentStopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(10, 59)))
+        stopPlaceVersionedSaverService.saveNewVersion(adjacentStopPlace);
+
         String updatedName = "Testing name"
         String updatedShortName = "Testing shortname"
         String updatedDescription = "Testing description"
@@ -937,6 +941,7 @@ def class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourc
                     name: { value: "${updatedName}" }
                     shortName:{ value: "${updatedShortName}" }
                     description:{ value:"${updatedDescription}" }
+                    adjacentSites: [ {ref: "${adjacentStopPlace.getNetexId()}" ]
                     stopPlaceType: ${StopTypeEnumeration.TRAM_STATION.value()}
                             versionComment: "${versionComment}"
                         geometry: {
@@ -949,6 +954,7 @@ def class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourc
                         name { value }
                         shortName { value }
                         description { value }
+                        adjacentSites { ref }
                         stopPlaceType
                         versionComment
                         topographicPlace { id topographicPlaceType parentTopographicPlace { id topographicPlaceType }}
