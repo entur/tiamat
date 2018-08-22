@@ -19,6 +19,7 @@ import org.rutebanken.tiamat.auth.StopPlaceAuthorizationService;
 import org.rutebanken.tiamat.auth.UsernameFetcher;
 import org.rutebanken.tiamat.changelog.EntityChangedListener;
 import org.rutebanken.tiamat.diff.TiamatObjectDiffer;
+import org.rutebanken.tiamat.geo.ZoneDistanceChecker;
 import org.rutebanken.tiamat.importer.finder.NearbyStopPlaceFinder;
 import org.rutebanken.tiamat.importer.finder.StopPlaceByQuayOriginalIdFinder;
 import org.rutebanken.tiamat.model.*;
@@ -27,11 +28,11 @@ import org.rutebanken.tiamat.repository.reference.ReferenceResolver;
 import org.rutebanken.tiamat.service.TariffZonesLookupService;
 import org.rutebanken.tiamat.service.TopographicPlaceLookupService;
 import org.rutebanken.tiamat.service.metrics.MetricsService;
-import org.rutebanken.tiamat.versioning.validate.SubmodeValidator;
 import org.rutebanken.tiamat.versioning.ValidityUpdater;
 import org.rutebanken.tiamat.versioning.VersionIncrementor;
-import org.rutebanken.tiamat.versioning.validate.VersionValidator;
 import org.rutebanken.tiamat.versioning.util.AccessibilityAssessmentOptimizer;
+import org.rutebanken.tiamat.versioning.validate.SubmodeValidator;
+import org.rutebanken.tiamat.versioning.validate.VersionValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,8 +54,12 @@ public class StopPlaceVersionedSaverService {
 
     private static final Logger logger = LoggerFactory.getLogger(StopPlaceVersionedSaverService.class);
 
+    public static final int ADJACENT_STOP_PLACE_MAX_DISTANCE_IN_METERS = 30;
+
     public static final InterchangeWeightingEnumeration DEFAULT_WEIGHTING = InterchangeWeightingEnumeration.INTERCHANGE_ALLOWED;
 
+    @Autowired
+    private ZoneDistanceChecker zoneDistanceChecker;
 
     @Autowired
     private StopPlaceRepository stopPlaceRepository;
@@ -140,6 +145,8 @@ public class StopPlaceVersionedSaverService {
             }
         }
 
+        validateAdjacentSites(newVersion);
+
         submodeValidator.validate(newVersion);
 
         Instant changed = Instant.now();
@@ -206,6 +213,30 @@ public class StopPlaceVersionedSaverService {
         entityChangedListener.onChange(newVersion);
 
         return newVersion;
+    }
+
+    private void validateAdjacentSites(StopPlace newVersion) {
+        if(newVersion.getAdjacentSites() != null) {
+            logger.info("Validating adjacent sites for {} {}", newVersion.getNetexId(), newVersion.getName());
+            for(SiteRefStructure siteRefStructure : newVersion.getAdjacentSites()) {
+
+                if(newVersion.getNetexId() != null && (newVersion.getNetexId().equals(siteRefStructure.getRef()))) {
+                    throw new IllegalArgumentException("Cannot set own ID as adjacent site ref: " + siteRefStructure.getRef());
+                }
+
+                StopPlace adjacentStop = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(siteRefStructure.getRef());
+                if(adjacentStop == null) {
+                    throw new IllegalArgumentException("StopPlace " + newVersion.getId() + ", " + newVersion.getName() + " cannot have " + siteRefStructure.getRef() + " as adjacent stop as it does not exist");
+                }
+
+                if(zoneDistanceChecker.exceedsLimit(newVersion, adjacentStop, ADJACENT_STOP_PLACE_MAX_DISTANCE_IN_METERS)) {
+                    throw new IllegalArgumentException(
+                            "StopPlace " + newVersion.getId() + ", " + newVersion.getName() +
+                                    " cannot be located more than " + ADJACENT_STOP_PLACE_MAX_DISTANCE_IN_METERS +
+                                    " meters from the adjacent stop: " + siteRefStructure.getRef());
+                }
+            }
+        }
     }
 
     private void updateQuaysCache(StopPlace stopPlace) {

@@ -15,6 +15,8 @@
 
 package org.rutebanken.tiamat.versioning.save;
 
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Point;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
@@ -173,6 +175,33 @@ public class StopPlaceVersionedSaverServiceTest extends TiamatIntegrationTest {
         assertThat(newVersion.getValidBetween()).isNotNull();
         assertThat(newVersion.getValidBetween().getFromDate()).isEqualTo(now);
         assertThat(newVersion.getValidBetween().getToDate()).isEqualTo(terminated);
+    }
+
+    @Test(expected = Exception.class)
+    public void saveStopWithAdjacentSiteTooFarAwayFromEachOther() throws Exception {
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("Adjacent"));
+        stopPlace.setVersion(1L);
+        stopPlace.setCentroid(point(60.000, 10.78));
+        stopPlace = stopPlaceRepository.save(stopPlace);
+
+        StopPlace adjacentStopPlace = new StopPlace(new EmbeddableMultilingualString("adjacentStopPlace"));
+        adjacentStopPlace.setVersion(1L);
+        adjacentStopPlace.setCentroid(point(70.000, 10.78));
+        adjacentStopPlace = stopPlaceRepository.save(adjacentStopPlace);
+
+        stopPlace.getAdjacentSites().add(new SiteRefStructure(adjacentStopPlace.getNetexId()));
+        stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+    }
+
+    @Test(expected = Exception.class)
+    public void saveStopWithAdjacentSiteWithSameId() throws Exception {
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("Adjacent"));
+        stopPlace.setVersion(1L);
+        stopPlace.setCentroid(point(60.000, 10.78));
+        stopPlace = stopPlaceRepository.save(stopPlace);
+
+        stopPlace.getAdjacentSites().add(new SiteRefStructure(stopPlace.getNetexId()));
+        stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
     }
 
     @Test
@@ -502,5 +531,11 @@ public class StopPlaceVersionedSaverServiceTest extends TiamatIntegrationTest {
         stopPlace.setParentSiteRef(new SiteRefStructure("ref", "1"));
 
         assertThatThrownBy(() -> stopPlaceVersionedSaverService.saveNewVersion(stopPlace)).isInstanceOf(IllegalArgumentException.class);
+    }
+
+    private Point point(double longitude, double latitude) {
+        return
+                geometryFactory.createPoint(
+                        new Coordinate(longitude, latitude));
     }
 }
