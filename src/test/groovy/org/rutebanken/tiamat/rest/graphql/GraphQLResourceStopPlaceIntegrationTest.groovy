@@ -918,7 +918,7 @@ def class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourc
         stopPlaceVersionedSaverService.saveNewVersion(stopPlace)
 
         StopPlace adjacentStopPlace = createStopPlace("Adjacent Site")
-        adjacentStopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(10, 59)))
+        adjacentStopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(10.11111, 59.11111)))
         stopPlaceVersionedSaverService.saveNewVersion(adjacentStopPlace)
 
         String updatedName = "Testing name"
@@ -930,7 +930,7 @@ def class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourc
         Float updatedLon = new Float(10.11111)
         Float updatedLat = new Float(59.11111)
 
-        String versionComment = "Stop place moved 100 meters"
+        String versionComment = "Stop place moved"
 
         InterchangeWeightingEnumeration weighting = InterchangeWeightingEnumeration.INTERCHANGE_ALLOWED
 
