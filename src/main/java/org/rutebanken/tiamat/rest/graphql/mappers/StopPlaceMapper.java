@@ -83,6 +83,7 @@ public class StopPlaceMapper {
                 SiteRefStructure siteRefStructure = new SiteRefStructure((String) adjacentMap.get(ENTITY_REF_REF));
                 logger.trace("Adding siteRefStructure {} for stop place {}", siteRefStructure, stopPlace);
                 stopPlace.getAdjacentSites().add(siteRefStructure);
+                isUpdated = true;
             }
         }
 
