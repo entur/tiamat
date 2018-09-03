@@ -77,14 +77,15 @@ public class StopPlaceMapper {
         }
 
         if (input.get(ADJACENT_SITES) != null) {
+            stopPlace.getAdjacentSites().clear();
             List adjacentSiteObjects = (List) input.get(ADJACENT_SITES);
             for(Object adjacentSiteObject : adjacentSiteObjects) {
                 Map adjacentMap = (Map) adjacentSiteObject;
                 SiteRefStructure siteRefStructure = new SiteRefStructure((String) adjacentMap.get(ENTITY_REF_REF));
                 logger.trace("Adding siteRefStructure {} for stop place {}", siteRefStructure, stopPlace);
                 stopPlace.getAdjacentSites().add(siteRefStructure);
-                isUpdated = true;
             }
+            isUpdated = true;
         }
 
         isUpdated |= stopPlaceTariffZoneRefsMapper.populate(input, stopPlace);
