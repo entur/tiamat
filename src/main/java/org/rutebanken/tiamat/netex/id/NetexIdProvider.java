@@ -63,7 +63,10 @@ public class NetexIdProvider {
                 String entityTypeName = key(identifiedEntity);
 
                 gaplessIdGenerator.getNextIdForEntity(entityTypeName, claimedId);
+            } else {
+                logger.trace("Accepting ID with prefix {}", prefix);
             }
+
             // Because IDs might end with non-numbers we cannot support claiming for any ID other than NSR.
         } else {
             logger.warn("Detected non NSR ID: {} with prefix {}", identifiedEntity.getNetexId(), prefix);
