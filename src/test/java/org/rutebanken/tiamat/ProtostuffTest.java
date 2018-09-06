@@ -15,6 +15,7 @@
 
 package org.rutebanken.tiamat;
 
+import com.google.api.client.util.IOUtils;
 import com.google.common.collect.Sets;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -24,6 +25,8 @@ import io.protostuff.ProtostuffIOUtil;
 import io.protostuff.ProtostuffOutput;
 import io.protostuff.Schema;
 import io.protostuff.runtime.RuntimeSchema;
+import org.h2.store.fs.FileUtils;
+import org.hsqldb.lib.StringInputStream;
 import org.junit.Test;
 import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
@@ -43,10 +46,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.List;
 
 import static javax.xml.bind.JAXBContext.newInstance;
@@ -141,6 +141,53 @@ public final class ProtostuffTest {
         compareXmlStrings(netexPublicationDeliveryWasProtostuffed, netexPublicationDelivery);
     }
 
+    @Test
+    public void netexPublicationDeliveryFromExternalFile() throws IllegalAccessException, IOException, JAXBException, SAXException {
+
+        // To avoid empty collections being serialized to null, the switch
+        // -Dprotostuff.runtime.collection_schema_on_repeated_fields=true
+        // must be set
+
+        System.setProperty("protostuff.runtime.collection_schema_on_repeated_fields", "true");
+
+
+        // With large files. Must set -Dmx=30g
+        File file = new File("/home/cristoffer/rutebanken/tiamat/Current-export-20180906-013339-15656216.xml");
+
+        PublicationDeliveryStructure netexPublicationDelivery = publicationDeliveryUnmarshaller.unmarshal(new FileInputStream(file));
+
+
+        long schemaStarted = System.currentTimeMillis();
+        Schema<PublicationDeliveryStructure> schema = RuntimeSchema.getSchema(PublicationDeliveryStructure.class);
+        System.out.println("Schema created in "+ (System.currentTimeMillis()-schemaStarted) + " ms");
+
+        long bufferStarted = System.currentTimeMillis();
+
+        LinkedBuffer buffer = LinkedBuffer.allocate(512);
+
+        final byte[] protostuff;
+        try {
+            protostuff = ProtostuffIOUtil.toByteArray(netexPublicationDelivery, schema, buffer);
+        } finally {
+            buffer.clear();
+        }
+        System.out.println("Written to protostuff in  "+ (System.currentTimeMillis()-bufferStarted) + " ms");
+
+        System.out.println("The byte array length is " + protostuff.length);
+
+        long serializeBack = System.currentTimeMillis();
+        PublicationDeliveryStructure netexPublicationDeliveryWasProtostuffed = schema.newMessage();
+        ProtostuffIOUtil.mergeFrom(protostuff, netexPublicationDeliveryWasProtostuffed, schema);
+
+        System.out.println("Deserialized from protobuf in  "+ (System.currentTimeMillis()-serializeBack) + " ms");
+
+        assertThat(netexPublicationDeliveryWasProtostuffed.getParticipantRef()).isEqualTo(netexPublicationDelivery.getParticipantRef());
+
+//        diff(netexPublicationDeliveryWasProtostuffed, netexPublicationDelivery);
+
+        compareXmlStrings(netexPublicationDeliveryWasProtostuffed, netexPublicationDelivery);
+    }
+
     /**
      * Does not work well with jaxb elements
      * @param pb1
@@ -160,7 +207,10 @@ public final class ProtostuffTest {
 
     private void compareXmlStrings(PublicationDeliveryStructure actual, PublicationDeliveryStructure expected) throws JAXBException, IOException, SAXException {
         String actualXml = xmlify(actual);
+        IOUtils.copy(new StringInputStream(actualXml), new FileOutputStream("actual.xml"));
         String expectedXml = xmlify(expected);
+        IOUtils.copy(new StringInputStream(expectedXml), new FileOutputStream("expected.xml"));
+        System.out.println("Files written to actual.xml and expected.xml");
         assertThat(actualXml).as("Actual xml").isEqualTo(expectedXml);
     }
 
@@ -188,7 +238,7 @@ public final class ProtostuffTest {
         marshaller.setProperty(Marshaller.JAXB_SCHEMA_LOCATION, "");
 
 
-        marshaller.setSchema(new NeTExValidator().getSchema());
+//        marshaller.setSchema(new NeTExValidator().getSchema());
 
 
         return marshaller;
