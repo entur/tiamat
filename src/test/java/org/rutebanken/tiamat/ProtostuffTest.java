@@ -174,6 +174,9 @@ public final class ProtostuffTest {
         System.out.println("Written to protostuff in  "+ (System.currentTimeMillis()-bufferStarted) + " ms");
 
         System.out.println("The byte array length is " + protostuff.length);
+        long beforeWrite = System.currentTimeMillis();
+        IOUtils.copy(new ByteArrayInputStream(protostuff), new FileOutputStream("protostuff.file"));
+        System.out.println("Wrote protostuff file to disk in " + (System.currentTimeMillis()-beforeWrite) + " ms");
 
         long serializeBack = System.currentTimeMillis();
         PublicationDeliveryStructure netexPublicationDeliveryWasProtostuffed = schema.newMessage();
@@ -207,7 +210,11 @@ public final class ProtostuffTest {
 
     private void compareXmlStrings(PublicationDeliveryStructure actual, PublicationDeliveryStructure expected) throws JAXBException, IOException, SAXException {
         String actualXml = xmlify(actual);
+        long started = System.currentTimeMillis();
         IOUtils.copy(new StringInputStream(actualXml), new FileOutputStream("actual.xml"));
+
+        System.out.println("Wrote NeTEx file from string xml to file in " + (System.currentTimeMillis() - started) + " ms");
+
         String expectedXml = xmlify(expected);
         IOUtils.copy(new StringInputStream(expectedXml), new FileOutputStream("expected.xml"));
         System.out.println("Files written to actual.xml and expected.xml");
@@ -218,7 +225,12 @@ public final class ProtostuffTest {
         JAXBElement<PublicationDeliveryStructure> jaxPublicationDelivery = objectFactory.createPublicationDelivery(publicationDeliveryStructure);
 
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        createMarshaller().marshal(jaxPublicationDelivery, byteArrayOutputStream);
+        Marshaller marshaller = createMarshaller();
+
+        long started = System.currentTimeMillis();
+        marshaller.marshal(jaxPublicationDelivery, byteArrayOutputStream);
+        System.out.println("Marshalled netex object structure to xml string in " + (System.currentTimeMillis()-started) + " ms");
+
         return byteArrayOutputStream.toString();
     }
 
