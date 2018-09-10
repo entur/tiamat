@@ -92,6 +92,44 @@ def class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourc
                 .body("data.stopPlace[0].quays.id", hasItems(quay.getNetexId(), secondQuay.getNetexId()))
     }
 
+    @Test
+    void mutateStopPlaceWithPlaceEquipmentOnQuay() {
+
+        def quay = new Quay()
+        def firstQuayName = "quay to add place equipment on"
+        quay.setName(new EmbeddableMultilingualString(firstQuayName))
+
+        def stopPlaceName = "StopPlace"
+        def stopPlace = new StopPlace(new EmbeddableMultilingualString(stopPlaceName))
+
+        stopPlace.setQuays(new HashSet<>())
+        stopPlace.getQuays().add(quay)
+
+        stopPlaceRepository.save(stopPlace)
+
+        def graphqlQuery = """
+            mutation {
+              stopPlace: mutateStopPlace(StopPlace: {id: "${stopPlace.netexId}", quays: [{id: "${quay.netexId}", placeEquipments: {shelterEquipment: [{seats: 3}]}}]}) {
+                id
+                quays {
+                  id
+                  placeEquipments {
+                    shelterEquipment {
+                      seats
+                    }
+                  }
+                }
+              }
+            }
+            """
+
+        executeGraphqQLQueryOnly(graphqlQuery)
+                .root("data.stopPlace[0].quays[0]")
+                    .body("placeEquipments", notNullValue())
+                .root("data.stopPlace[0].quays[0].placeEquipments.shelterEquipment[0]")
+                .body("seats", equalTo(3))
+    }
+
     /**
      * Use explicit parameter for original ID search
      */
