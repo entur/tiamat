@@ -20,4 +20,4 @@ jobs:
             - ~/.m2
           key: v1-dependencies-{{ checksum "pom.xml" }}
 
-      - run: mvn -o test
+      - run: mvn -o test -s .circleci/settings.xml
