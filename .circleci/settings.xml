@@ -26,8 +26,8 @@
   <servers>
     <server>
       <id>Nexus</id>
-      <username>${env.NEXUS_USER</username>
-      <password>${ENV.NEXUS_PASS</password>
+      <username>${env.NEXUS_USER}</username>
+      <password>${ENV.NEXUS_PASS}</password>
     </server>
   </servers>
   <mirrors>
