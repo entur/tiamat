@@ -9,7 +9,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          key:
+          keys:
           - tiamat-{{ checksum "pom.xml" }}
       - run: mvn dependency:go-offline -s .circleci/settings.xml
       - save_cache:
