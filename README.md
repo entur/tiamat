@@ -68,6 +68,9 @@ CREATE EXTENSION postgis;
 CREATE EXTENSION postgis_topology;
 ```
 
+# ID Generation
+During the implementation of Tiamat was desirable to produce NeTEx IDs for stop places more or less gapless.
+The reason for this implementation was legacy systems with restrictions of maximum number of digits.
 
 ## Run Keycloak
 
@@ -79,19 +82,7 @@ Bot Tiamat and Abzu are set up to be used with Keycloak. Currently, Keycloak is 
 * run:```bin/standalone.sh -Dkeycloak.migration.action=import -Dkeycloak.migration.provider=dir -Dkeycloak.migration.dir=/path/to/git/devsetup/vagrant/provisioning/roles/keycloak/files/ -Dkeycloak.migration.strategy=OVERWRITE_EXISTING```
 
 ## Docker image
-
-```
-mvn -Pf8-build
-```
-
-## Run the docker image in, eh, docker
-
-choose **one** of:
-
-* `mvn docker:start`
-* `docker run -it rutebanken/tiamat:0.0.1-SNAPSHOT`
-
-For more docker plugin goals, see: http://ro14nd.de/docker-maven-plugin/goals.html
+Tiamat has the fabric8 docker plugin configured in the pom.file. It is optional to use.
 
 
 ## Validation for incoming and outgoing NeTEx publication delivery
@@ -221,7 +212,8 @@ TRUNCATE topographic_place CASCADE;
 
 ## Import data into Tiamat
 
-If you are running this from `spring:run`, then you need to make sure that you have enough memory available for the java process:
+If you are running this from `spring:run`, then you need to make sure that you have enough memory available for the java process (in case of large data sets).
+Example:
 ```
 export MAVEN_OPTS='-Xms256m -Xmx1712m -Xss256m -XX:NewSize=64m -XX:MaxNewSize=128m -Dfile.encoding=UTF-8'
 ```
