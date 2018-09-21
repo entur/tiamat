@@ -23,7 +23,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
@@ -31,14 +30,21 @@ import javax.persistence.Query;
 import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 
 import static java.util.stream.Collectors.toList;
 
+
+/**
+ * During the implementation of Tiamat was desirable to produce NeTEx IDs for stop places more or less gapless.
+ * The reason for this implementation was legacy systems with restrictions of maximum number of digits.
+ *
+ * This service is using Hazelcast to avoid generating the same IDs on multiple nodes.
+ * There is a hazelcast lock for persisting these IDs from one node to a table in postgres.
+ * The reason for not writing the IDs immideately is performance when importing many stops. For instance the initial population of stop places.
+ */
 @Service
 public class GaplessIdGeneratorService {
 
@@ -149,9 +155,9 @@ public class GaplessIdGeneratorService {
     /**
      * Generate new IDs for entity.
      *
-     * @param entityTypeName table to writeClaimedIdsAndGenerateNew IDs for
-     * @param availableIds   The (empty) queue of available IDs to fill
-     * @param claimedId
+     * @param entityTypeName Table to writeClaimedIdsAndGenerateNew IDs for
+     * @param availableIds The (empty) queue of available IDs to fill
+     * @param entityManager The entity manager to use
      */
     private void generateNewIds(String entityTypeName, BlockingQueue<Long> availableIds, EntityManager entityManager) throws InterruptedException {
         List<Long> retrievedIds = new ArrayList<>();
@@ -168,6 +174,7 @@ public class GaplessIdGeneratorService {
 
     /**
      * Fetch new IDs when all previously fetched IDs taken.
+     * Updates the last ID state.
      *
      * @return list of available IDs for table.
      */
@@ -188,6 +195,12 @@ public class GaplessIdGeneratorService {
         return retrievedIds;
     }
 
+    /**
+     * This inserts a list of IDs ignoring duplicates
+     * @param tableName Entity name
+     * @param list List of IDs
+     * @param entityManager Entity manager to use
+     */
     private void insertIdsIgnoreDuplicates(String tableName, Set<Long> list, EntityManager entityManager) {
         if (list.isEmpty()) {
             throw new IllegalArgumentException("No IDs to insert");
@@ -227,6 +240,13 @@ public class GaplessIdGeneratorService {
         entityManager.flush();
     }
 
+    /**
+     * Use SQL command genererate_series to be able to find new IDs, without selecting the ones already used.
+     * @param tableName The name of the entity.
+     * @param lastId The last ID to avoid selecting the same window each time
+     * @param entityManager The entity manager to use
+     * @return A list of fresh IDs to use
+     */
     private List<Long> selectNextAvailableIds(String tableName, long lastId, EntityManager entityManager) {
         logger.debug("Will fetch new IDs from id_generator table for {}, lastId: {}", tableName, lastId);
 
@@ -249,6 +269,11 @@ public class GaplessIdGeneratorService {
                 .collect(toList());
     }
 
+    /**
+     * Persist claimed IDs to the helper table.
+     * Executed in a hazelcast lock, to avoid having multiple instances persisting at the same time.
+     * This method is intended to run in a background thread once in a while.
+     */
     public void persistClaimedIds() {
 
         logger.trace("Start to persist claimed IDs if any");
@@ -290,6 +315,11 @@ public class GaplessIdGeneratorService {
         }
     }
 
+    /**
+     * Helper method to execute runnable in transaction, and handle exceptions.
+     * @param runnable The runnable to run inside the transaction
+     * @param entityManager The entity manager to retrieve the transaction from
+     */
     private void executeInTransaction(Runnable runnable, EntityManager entityManager) {
         EntityTransaction transaction = entityManager.getTransaction();
 
@@ -307,11 +337,21 @@ public class GaplessIdGeneratorService {
         }
     }
 
+    /**
+     * Helper method to rollback transaction if possible
+     * @param transaction The transaction to rollback
+     * @param e The exception to throw
+     */
     private void rollbackAndThrow(EntityTransaction transaction, Exception e) {
         if (transaction != null && transaction.isActive()) transaction.rollback();
         throw new RuntimeException(e);
     }
 
+    /**
+     * Helper method to generate the entiry lock string
+     * @param entityTypeName the entity name to use, for concurrency needs
+     * @return The entity lock string with prefix
+     */
     public static String entityLockString(String entityTypeName) {
         return REENTRANT_LOCK_PREFIX + entityTypeName;
     }
