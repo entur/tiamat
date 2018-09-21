@@ -69,14 +69,6 @@ CREATE EXTENSION postgis_topology;
 ```
 
 
-#### Postgres docker container in vagrant
-There is a PostgreSQL docker container in vagrant. It can be provisioned by using the tag **rb**:
-
-```
-ONLY_TAGS=rb PLAY=build vagrant provision
-ONLY_TAGS=rb PLAY=run vagrant provision
-```
-
 ## Run Keycloak
 
 Bot Tiamat and Abzu are set up to be used with Keycloak. Currently, Keycloak is not running in vagrant so we have to run it standalone. *Currently disabled, see NRP-16*
