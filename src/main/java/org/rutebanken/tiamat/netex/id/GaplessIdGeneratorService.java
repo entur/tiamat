@@ -41,9 +41,11 @@ import static java.util.stream.Collectors.toList;
  * During the implementation of Tiamat was desirable to produce NeTEx IDs for stop places more or less gapless.
  * The reason for this implementation was legacy systems with restrictions of maximum number of digits.
  *
+ * This service should only be called for certain ID prefixes. This service only operates with long values.
+ *
  * This service is using Hazelcast to avoid generating the same IDs on multiple nodes.
  * There is a hazelcast lock for persisting these IDs from one node to a table in postgres.
- * The reason for not writing the IDs immideately is performance when importing many stops. For instance the initial population of stop places.
+ * The reason for not writing the IDs immediately is performance when importing many stops. For instance the initial population of stop places.
  */
 @Service
 public class GaplessIdGeneratorService {
@@ -88,10 +90,25 @@ public class GaplessIdGeneratorService {
 
     }
 
+    /**
+     * Get a new ID for a certain entity.
+     *
+     * @param entityTypeName Name of the entity, for instance StopPlace
+     * @return the generated long value
+     */
     public long getNextIdForEntity(String entityTypeName) {
         return getNextIdForEntity(entityTypeName, 0);
     }
 
+    /**
+     * Claim an ID for a certain entity.
+     * If the ID is generated as available, it will be removed.
+     * If the claimedId is zero, a fresh generated ID should be removed.
+     *
+     * @param entityTypeName Name of the entity, for instance StopPlace
+     * @param claimedId The claimed ID to remove from list of available IDs
+     * @return the claimed ID
+     */
     public long getNextIdForEntity(String entityTypeName, long claimedId) {
         final Lock lock = hazelcastInstance.getLock(entityLockString(entityTypeName));
         lock.lock();
@@ -129,6 +146,9 @@ public class GaplessIdGeneratorService {
         }
     }
 
+    /**
+     * Write claimed IDs and generate new ones.
+     */
     private void writeClaimedIdsAndGenerateNew(String entityTypeName, boolean timeToGenerateAvailableIds) {
         EntityManager entityManager = entityManagerFactory.createEntityManager();
         executeInTransaction(() -> {
