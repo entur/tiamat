@@ -5,7 +5,7 @@ jobs:
       - image: circleci/openjdk:8-jdk
     working_directory: ~/tiamat
     environment:
-      MAVEN_OPTS: -Xmx4G
+      MAVEN_OPTS: -Xmx5G
     steps:
       - checkout
       - run: mvn test -s .circleci/settings.xml
