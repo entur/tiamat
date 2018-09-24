@@ -2,7 +2,8 @@ version: 2
 jobs:
   build:
     docker:
-      - image: circleci/openjdk:8-jdk
+      - image: 3.5.4-jdk-8
+        cmd: ["/bin/bash"]
     working_directory: ~/tiamat
     environment:
       MAVEN_OPTS: -Xmx5G
