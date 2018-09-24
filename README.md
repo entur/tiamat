@@ -303,3 +303,4 @@ The schema of this database must be exactly equivalent to the first migration fi
 Create a new file according to the flyway documentation in the folder `resources/db/migrations`.
 Commit the migration together with code changes that requires this schema change.
 
+
