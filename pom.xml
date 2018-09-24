@@ -645,14 +645,13 @@
                 <fabric8.recreate>true</fabric8.recreate>
             </properties>
             <build>
-                <!-- Missing fabric8:apply, as this crashed (probably due to missing fabric8) -->
-                <defaultGoal>clean install docker:build docker:push fabric8:json</defaultGoal>
+                <defaultGoal>clean install docker:build docker:push</defaultGoal>
             </build>
         </profile>
         <profile>
             <id>f8-build</id>
             <build>
-                <defaultGoal>clean install docker:build fabric8:json</defaultGoal>
+                <defaultGoal>clean install docker:build</defaultGoal>
             </build>
         </profile>
         <profile>
@@ -671,7 +670,7 @@
                 <fabric8.recreate>true</fabric8.recreate>
             </properties>
             <build>
-                <defaultGoal>clean install docker:build fabric8:json fabric8:apply</defaultGoal>
+                <defaultGoal>clean install docker:build fabric8:apply</defaultGoal>
             </build>
         </profile>
     </profiles>
