@@ -11,7 +11,7 @@ jobs:
       - checkout
       - restore_cache:
           key: tiamat-{{ checksum "pom.xml" }}
-      - run: mvn dependency:go-offline -s .circleci/settings.xml
+      - run: mvn org.apache.maven.plugins:maven-dependency-plugin:3.1.0:go-offline -s .circleci/settings.xml
       - save_cache:
           paths:
             - ~/.m2
