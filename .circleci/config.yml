@@ -6,7 +6,7 @@ jobs:
         cmd: ["/bin/bash"]
     working_directory: ~/tiamat
     environment:
-      MAVEN_OPTS: -Xmx5G
+      MAVEN_OPTS: -Xmx3G
     steps:
       - checkout
       - run: mvn dependency:go-offline -s .circleci/settings.xml
