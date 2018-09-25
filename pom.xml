@@ -46,7 +46,7 @@
     <distributionManagement>
         <snapshotRepository>
             <id>Nexus</id>
-            <url>https://nexus.rutebanken.org/content/repositories/snapshots</url>
+            <url>https://nexus-rutedata.dev.entur.org/content/repositories/snapshots</url>
         </snapshotRepository>
     </distributionManagement>
 
