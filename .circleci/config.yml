@@ -1,4 +1,23 @@
 version: 2
+aliases:
+  - &GCP-auth
+    name: Authenticate with GCP SA credentials
+    command: |
+      echo $GCLOUD_SERVICE_KEY > ${HOME}/account-auth.json
+      gcloud auth activate-service-account --key-file ${HOME}/account-auth.json
+  - &install-docker-client
+    name: Install Docker client
+    command: |
+      set -x
+      VER="17.03.0-ce"
+      curl -L -o /tmp/docker-$VER.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$VER.tgz
+      tar -xz -C /tmp -f /tmp/docker-$VER.tgz
+      mv /tmp/docker/* /usr/bin
+  - &docker-login
+    name: Docker login
+    command: |
+      cat ${HOME}/account-auth.json | docker login -u _json_key --password-stdin https://eu.gcr.io
+
 jobs:
   build:
     docker:
@@ -19,9 +38,9 @@ jobs:
       # Cannot use -o because of snapshot dependencies.
       - run: mvn install -s .circleci/settings.xml
       - persist_to_workspace:
-          root: $CIRCLE_PROJECT_REPONAME
+          root: ~/tiamat
           paths:
-            - .
+            - *
   deploy-docker:
     docker:
       - image: maven:3.5.4-jdk-8
@@ -31,7 +50,11 @@ jobs:
       MAVEN_OPTS: -Xmx3G
     steps:
       - attach_workspace:
-          at: $CIRCLE_PROJECT_REPONAME
+          at: ~/tiamat
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - run: *install-docker-client
+      - run: *docker-login
       - run:
           name: Docker build and push
           command: mvn docker:build docker:push
