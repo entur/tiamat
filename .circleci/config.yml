@@ -9,5 +9,11 @@ jobs:
       MAVEN_OPTS: -Xmx3G
     steps:
       - checkout
+      - restore_cache:
+          key: tiamat-{{ checksum "pom.xml" }}
       - run: mvn dependency:go-offline -s .circleci/settings.xml
+      - save_cache:
+          paths:
+            - ~/.m2
+          key: tiamat-{{ checksum "pom.xml" }}
       - run: mvn test -s .circleci/settings.xml
