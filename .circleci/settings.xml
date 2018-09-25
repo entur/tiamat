@@ -11,7 +11,7 @@
               <repository>
                   <id>Nexus</id>
                   <name>Rutebanken Nexus</name>
-                  <url>https://nexus.rutebanken.org/content/groups/public</url>
+                  <url>https://nexus-rutedata.dev.entur.org/content/groups/public</url>
                   <releases>
                       <enabled>true</enabled>
                   </releases>
@@ -34,7 +34,7 @@
     <mirror>
       <id>Nexus</id>
       <name>Nexus Mirror</name>
-        <url>https://nexus.rutebanken.org/content/groups/public</url>
+        <url>https://nexus-rutedata.dev.entur.org/content/groups/public</url>
       <mirrorOf>*</mirrorOf>
     </mirror>
   </mirrors>
