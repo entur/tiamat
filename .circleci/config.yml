@@ -16,4 +16,5 @@ jobs:
           paths:
             - ~/.m2
           key: tiamat-{{ checksum "pom.xml" }}
+      # Cannot use -o becuase of snapshot dependencies.
       - run: mvn test -s .circleci/settings.xml
