@@ -17,7 +17,7 @@ jobs:
             - ~/.m2
           key: tiamat-{{ checksum "pom.xml" }}
       # Cannot use -o because of snapshot dependencies.
-      - run: mvn test -s .circleci/settings.xml
+      - run: mvn install -s .circleci/settings.xml
       - persist_to_workspace:
           root: $CIRCLE_PROJECT_REPONAME
           paths:
