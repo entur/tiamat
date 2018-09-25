@@ -40,7 +40,8 @@ jobs:
       - persist_to_workspace:
           root: ~/tiamat
           paths:
-            - *
+            - target
+            - pom.xml
   deploy-docker:
     docker:
       - image: maven:3.5.4-jdk-8
