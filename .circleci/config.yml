@@ -9,4 +9,5 @@ jobs:
       MAVEN_OPTS: -Xmx5G
     steps:
       - checkout
+      - run: mvn dependency:go-offline -s .circleci/settings.xml
       - run: mvn test -s .circleci/settings.xml
