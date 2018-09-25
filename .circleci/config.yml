@@ -16,5 +16,36 @@ jobs:
           paths:
             - ~/.m2
           key: tiamat-{{ checksum "pom.xml" }}
-      # Cannot use -o becuase of snapshot dependencies.
+      # Cannot use -o because of snapshot dependencies.
       - run: mvn test -s .circleci/settings.xml
+      - persist_to_workspace:
+          root: $CIRCLE_PROJECT_REPONAME
+          paths:
+            - .
+  deploy-docker:
+    docker:
+      - image: maven:3.5.4-jdk-8
+        cmd: ["/bin/bash"]
+    working_directory: ~/tiamat
+    environment:
+      MAVEN_OPTS: -Xmx3G
+    steps:
+      - attach_workspace:
+          at: $CIRCLE_PROJECT_REPONAME
+      - run:
+          name: Docker build and push
+          command: mvn docker:build docker:push
+workflows:
+  version: 2
+  build_and_deploy:
+    jobs:
+      - build:
+          context: org-carbon
+      - deploy-docker:
+          requires:
+            - build
+          context: org-carbon
+          filters:
+            branches:
+              only:
+                - master
