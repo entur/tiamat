@@ -618,7 +618,6 @@
                 <version>3.2.1</version>
                 <executions>
                     <execution>
-                        <phase>compile</phase>
                         <goals>
                             <goal>check</goal>
                         </goals>
