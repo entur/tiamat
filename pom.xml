@@ -88,8 +88,8 @@
         <keycloak.version>4.1.0.Final</keycloak.version>
         <postgresql.version>42.1.4</postgresql.version>
         <geodb.version>0.8</geodb.version>
-        <geotools.version>19.2</geotools.version>
-        <locationtech.jts.version>1.15.0</locationtech.jts.version>
+        <geotools.version>20.0</geotools.version>
+        <locationtech.jts.version>1.16.0</locationtech.jts.version>
         <activemq-client.version>5.15.3</activemq-client.version>
         <maven-javadoc-plugin.version>2.10.4</maven-javadoc-plugin.version>
         <flyway-core.version>4.2.0</flyway-core.version>
