@@ -123,6 +123,7 @@
         <rutebanken-organisation.version>0.0.3-SNAPSHOT</rutebanken-organisation.version>
         <fabric8.version>2.3.6</fabric8.version>
         <metrics.version>3.2.3</metrics.version>
+        <esapi.version>2.1.0.1</esapi.version>
     </properties>
 
     <!-- This repository list can be deleted, as it is now supplied by rutebanken nexus.
@@ -538,6 +539,12 @@
             <groupId>org.apache.activemq</groupId>
             <artifactId>activemq-kahadb-store</artifactId>
             <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.owasp.esapi</groupId>
+            <artifactId>esapi</artifactId>
+            <version>${esapi.version}</version>
         </dependency>
     </dependencies>
 
