@@ -22,15 +22,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.math.BigInteger;
+import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.SIGN_CONTENT_TYPE;
-import static org.rutebanken.tiamat.rest.graphql.mappers.EmbeddableMultilingualStringMapper.getEmbeddableString;
-import static org.rutebanken.tiamat.rest.graphql.mappers.PrivateCodeMapper.getPrivateCodeStructure;
 
 @Component
 public class SiteElementMapper {
@@ -47,6 +45,9 @@ public class SiteElementMapper {
     private AccessibilityLimitationMapper accessibilityLimitationMapper;
 
     @Autowired
+    private PlaceEquipmentMapper placeEquipmentMapper;
+
+    @Autowired
     private GeometryMapper geometryMapper;
 
     public boolean populate(Map input, SiteElement siteElement) {
@@ -57,7 +58,7 @@ public class SiteElementMapper {
             List alternativeNames = (List) input.get(ALTERNATIVE_NAMES);
             List<AlternativeName> mappedAlternativeNames = alternativeNameMapper.mapAlternativeNames(alternativeNames);
 
-            if(alternativeNameUpdater.updateAlternativeNames(siteElement, mappedAlternativeNames)) {
+            if (alternativeNameUpdater.updateAlternativeNames(siteElement, mappedAlternativeNames)) {
                 isUpdated = true;
             } else {
                 logger.info("AlternativeName not changed");
@@ -112,92 +113,16 @@ public class SiteElementMapper {
             }
         }
 
-        if (input.get(PLACE_EQUIPMENTS) != null && siteElement instanceof Site_VersionStructure) {
-            PlaceEquipment equipments = new PlaceEquipment();
+        Optional<PlaceEquipment> placeEquipment = placeEquipmentMapper.map(input);
 
-            Map<String, Object> equipmentInput = (Map) input.get(PLACE_EQUIPMENTS);
-
-            if (equipmentInput.get(SANITARY_EQUIPMENT) != null) {
-
-                List equipment = (List) equipmentInput.get(SANITARY_EQUIPMENT);
-                for (Object item : equipment) {
-                    Map<String, Object> sanitaryEquipment = (Map<String, Object>) item;
-
-                    SanitaryEquipment toalett = new SanitaryEquipment();
-                    toalett.setNumberOfToilets((BigInteger) sanitaryEquipment.get(NUMBER_OF_TOILETS));
-                    toalett.setGender((GenderLimitationEnumeration) sanitaryEquipment.get(GENDER));
-                    equipments.getInstalledEquipment().add(toalett);
-                }
+        if (placeEquipment.isPresent()) {
+            if (siteElement instanceof Site_VersionStructure) {
+                ((Site_VersionStructure) siteElement).setPlaceEquipments(placeEquipment.get());
+            } else if (siteElement instanceof SiteComponent_VersionStructure) {
+                ((SiteComponent_VersionStructure) siteElement).setPlaceEquipments(placeEquipment.get());
+            } else {
+                logger.warn("Cannot set place equipment for site element. Cannot detect type: {}", siteElement.getClass().getSimpleName());
             }
-
-            if (equipmentInput.get(SHELTER_EQUIPMENT) != null) {
-
-                List equipment = (List) equipmentInput.get(SHELTER_EQUIPMENT);
-                for (Object item : equipment) {
-                    Map<String, Object> shelterEquipment = (Map<String, Object>) item;
-                    ShelterEquipment leskur = new ShelterEquipment();
-                    leskur.setEnclosed((Boolean) shelterEquipment.get(ENCLOSED));
-                    leskur.setSeats((BigInteger) shelterEquipment.get(SEATS));
-                    leskur.setStepFree((Boolean) shelterEquipment.get(STEP_FREE));
-                    equipments.getInstalledEquipment().add(leskur);
-                }
-            }
-
-            if (equipmentInput.get(CYCLE_STORAGE_EQUIPMENT) != null) {
-
-                List equipment = (List) equipmentInput.get(CYCLE_STORAGE_EQUIPMENT);
-                for (Object item : equipment) {
-                    Map<String, Object> cycleStorageEquipment = (Map<String, Object>) item;
-                    CycleStorageEquipment sykkelskur = new CycleStorageEquipment();
-                    sykkelskur.setNumberOfSpaces((BigInteger) cycleStorageEquipment.get(NUMBER_OF_SPACES));
-                    sykkelskur.setCycleStorageType((CycleStorageEnumeration) cycleStorageEquipment.get(CYCLE_STORAGE_TYPE));
-                    equipments.getInstalledEquipment().add(sykkelskur);
-                }
-            }
-
-            if (equipmentInput.get(WAITING_ROOM_EQUIPMENT) != null) {
-
-                List equipment = (List) equipmentInput.get(WAITING_ROOM_EQUIPMENT);
-                for (Object item : equipment) {
-                    Map<String, Object> waitingRoomEquipment = (Map<String, Object>) item;
-                    WaitingRoomEquipment venterom = new WaitingRoomEquipment();
-                    venterom.setSeats((BigInteger) waitingRoomEquipment.get(SEATS));
-                    venterom.setHeated((Boolean) waitingRoomEquipment.get(HEATED));
-                    venterom.setStepFree((Boolean) waitingRoomEquipment.get(STEP_FREE));
-                    equipments.getInstalledEquipment().add(venterom);
-                }
-            }
-
-            if (equipmentInput.get(TICKETING_EQUIPMENT) != null) {
-
-                List equipment = (List) equipmentInput.get(TICKETING_EQUIPMENT);
-                for (Object item : equipment) {
-                    Map<String, Object> ticketingEquipment = (Map<String, Object>) item;
-                    TicketingEquipment billettAutomat = new TicketingEquipment();
-                    billettAutomat.setTicketOffice((Boolean) ticketingEquipment.get(TICKET_OFFICE));
-                    billettAutomat.setTicketMachines((Boolean) ticketingEquipment.get(TICKET_MACHINES));
-                    billettAutomat.setNumberOfMachines((BigInteger) ticketingEquipment.get(NUMBER_OF_MACHINES));
-                    equipments.getInstalledEquipment().add(billettAutomat);
-                }
-            }
-
-            if (equipmentInput.get(GENERAL_SIGN) != null) {
-
-                List equipment = (List) equipmentInput.get(GENERAL_SIGN);
-                for (Object item : equipment) {
-
-                    Map<String, Object> generalSignEquipment = (Map<String, Object>) item;
-
-                    GeneralSign skilt = new GeneralSign();
-                    skilt.setPrivateCode(getPrivateCodeStructure((Map) generalSignEquipment.get(PRIVATE_CODE)));
-                    skilt.setContent(getEmbeddableString((Map) generalSignEquipment.get(CONTENT)));
-                    skilt.setSignContentType((SignContentEnumeration) generalSignEquipment.get(SIGN_CONTENT_TYPE));
-                    equipments.getInstalledEquipment().add(skilt);
-                }
-            }
-
-
-            ((Site_VersionStructure) siteElement).setPlaceEquipments(equipments);
 
             isUpdated = true;
         }

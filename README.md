@@ -68,14 +68,20 @@ CREATE EXTENSION postgis;
 CREATE EXTENSION postgis_topology;
 ```
 
+## ID Generation
+### Background
+During the implementation of Tiamat was desirable to produce NeTEx IDs for stop places more or less gapless.
+The reason for this implementation was legacy systems with restrictions of maximum number of digits.
 
-#### Postgres docker container in vagrant
-There is a PostgreSQL docker container in vagrant. It can be provisioned by using the tag **rb**:
+### Configre ID generation
+It is possibe to control wether IDs should be generated outside Tiamat or not. See the class ValidPrefixList.
+Setting the property `netex.validPrefix` tells Tiamat to generate IDs for new entities.
+Please note that it is not possible to do an initial import (see ImportType) multiple times with the same IDs.
 
-```
-ONLY_TAGS=rb PLAY=build vagrant provision
-ONLY_TAGS=rb PLAY=run vagrant provision
-```
+### How its all connected
+It's all initiated by an entity listener annotated with `PrePersist` on the class `IdentifiedEntity` called `IdentifiedEntityListener`.
+`NetexIdAssigner` determines if the entity already has an ID or not. `NetexIdProvider` either return a new ID or handles explicity claimed IDs if the configured prefix matches. See `ValidPrefixList` for the configuration of valid prefixes, and prefixes for IDs generated elsewhere. The `GaplessIdGeneratorService` uses Hazelcast to sync state between instances and avoid conflicts. 
+
 
 ## Run Keycloak
 
@@ -87,19 +93,7 @@ Bot Tiamat and Abzu are set up to be used with Keycloak. Currently, Keycloak is 
 * run:```bin/standalone.sh -Dkeycloak.migration.action=import -Dkeycloak.migration.provider=dir -Dkeycloak.migration.dir=/path/to/git/devsetup/vagrant/provisioning/roles/keycloak/files/ -Dkeycloak.migration.strategy=OVERWRITE_EXISTING```
 
 ## Docker image
-
-```
-mvn -Pf8-build
-```
-
-## Run the docker image in, eh, docker
-
-choose **one** of:
-
-* `mvn docker:start`
-* `docker run -it rutebanken/tiamat:0.0.1-SNAPSHOT`
-
-For more docker plugin goals, see: http://ro14nd.de/docker-maven-plugin/goals.html
+Tiamat has the fabric8 docker plugin configured in the pom.file. It is optional to use.
 
 
 ## Validation for incoming and outgoing NeTEx publication delivery
@@ -229,7 +223,8 @@ TRUNCATE topographic_place CASCADE;
 
 ## Import data into Tiamat
 
-If you are running this from `spring:run`, then you need to make sure that you have enough memory available for the java process:
+If you are running this from `spring:run`, then you need to make sure that you have enough memory available for the java process (in case of large data sets).
+Example:
 ```
 export MAVEN_OPTS='-Xms256m -Xmx1712m -Xss256m -XX:NewSize=64m -XX:MaxNewSize=128m -Dfile.encoding=UTF-8'
 ```
@@ -307,3 +302,5 @@ The schema of this database must be exactly equivalent to the first migration fi
 ## Schema changes
 Create a new file according to the flyway documentation in the folder `resources/db/migrations`.
 Commit the migration together with code changes that requires this schema change.
+
+

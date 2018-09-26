@@ -20,8 +20,7 @@ import javax.persistence.MappedSuperclass;
 
 @Embeddable
 @MappedSuperclass
-public class SiteRefStructure
-        extends SiteElementRefStructure {
+public class SiteRefStructure extends SiteElementRefStructure {
 
     public SiteRefStructure() {
         super();

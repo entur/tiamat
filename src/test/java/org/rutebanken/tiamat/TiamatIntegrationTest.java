@@ -104,6 +104,9 @@ public abstract class TiamatIntegrationTest {
     private TariffZonesLookupService tariffZonesLookupService;
 
     @Autowired
+    private TagRepository tagRepository;
+
+    @Autowired
     protected VersionCreator versionCreator;
 
     @Value("${local.server.port}")
@@ -146,6 +149,9 @@ public abstract class TiamatIntegrationTest {
         tariffZonesLookupService.reset();
 
         clearIdGeneration();
+
+        tagRepository.deleteAll();
+        tagRepository.flush();
     }
 
     /**

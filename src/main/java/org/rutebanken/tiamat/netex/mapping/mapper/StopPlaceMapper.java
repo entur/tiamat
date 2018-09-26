@@ -44,6 +44,7 @@ public class StopPlaceMapper extends CustomMapper<StopPlace, org.rutebanken.tiam
             netexStopPlace.setPlaceEquipments(null);
             stopPlace.setPlaceEquipments(null);
         }
+
         if (netexStopPlace.getAlternativeNames() != null &&
                 netexStopPlace.getAlternativeNames().getAlternativeName() != null &&
                 !netexStopPlace.getAlternativeNames().getAlternativeName().isEmpty()) {

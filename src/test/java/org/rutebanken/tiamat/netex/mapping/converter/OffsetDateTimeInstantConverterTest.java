@@ -23,6 +23,7 @@ import org.rutebanken.tiamat.time.ExportTimeZone;
 
 import java.time.Instant;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.time.temporal.TemporalUnit;
 import java.util.HashMap;
 
@@ -40,7 +41,7 @@ public class OffsetDateTimeInstantConverterTest {
     @Test
     public void convertFrom() throws Exception {
 
-        OffsetDateTime offsetDateTime = OffsetDateTime.now();
+        OffsetDateTime offsetDateTime = OffsetDateTime.now(exportTimeZone.getDefaultTimeZoneId());
         System.out.println("offset date time: " + offsetDateTime);
         Instant instant = offsetDateTimeInstantConverter.convertTo(offsetDateTime, instantType, mappingContext);
         System.out.println("converted to instant: " + instant);

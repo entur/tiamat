@@ -17,6 +17,7 @@ package org.rutebanken.tiamat.rest.graphql.mappers;
 
 import com.google.api.client.util.Preconditions;
 import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.rest.graphql.GraphQLNames;
 import org.rutebanken.tiamat.rest.graphql.scalars.TransportModeScalar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,8 +28,6 @@ import java.util.List;
 import java.util.Map;
 
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.QUAYS;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.SUBMODE;
 
 @Component
 public class StopPlaceMapper {
@@ -64,14 +63,28 @@ public class StopPlaceMapper {
             stopPlace.setValidBetween(validBetweenMapper.map((Map) input.get(VALID_BETWEEN)));
             isUpdated = true;
         }
+
         if (input.get(WEIGHTING) != null) {
             stopPlace.setWeighting((InterchangeWeightingEnumeration) input.get(WEIGHTING));
             isUpdated = true;
         }
+
         if (input.get(PARENT_SITE_REF) != null) {
             SiteRefStructure parentSiteRef = new SiteRefStructure();
             parentSiteRef.setRef((String) input.get(PARENT_SITE_REF));
             stopPlace.setParentSiteRef(parentSiteRef);
+            isUpdated = true;
+        }
+
+        if (input.get(ADJACENT_SITES) != null) {
+            stopPlace.getAdjacentSites().clear();
+            List adjacentSiteObjects = (List) input.get(ADJACENT_SITES);
+            for(Object adjacentSiteObject : adjacentSiteObjects) {
+                Map adjacentMap = (Map) adjacentSiteObject;
+                SiteRefStructure siteRefStructure = new SiteRefStructure((String) adjacentMap.get(ENTITY_REF_REF));
+                logger.trace("Adding siteRefStructure {} for stop place {}", siteRefStructure, stopPlace);
+                stopPlace.getAdjacentSites().add(siteRefStructure);
+            }
             isUpdated = true;
         }
 

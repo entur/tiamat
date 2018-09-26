@@ -46,7 +46,7 @@
     <distributionManagement>
         <snapshotRepository>
             <id>Nexus</id>
-            <url>https://nexus.rutebanken.org/content/repositories/snapshots</url>
+            <url>https://nexus-rutedata.dev.entur.org/content/repositories/snapshots</url>
         </snapshotRepository>
     </distributionManagement>
 
@@ -78,49 +78,47 @@
         <fabric8.label.group>rutebanken</fabric8.label.group>
         <fabric8.iconRef>spring-boot</fabric8.iconRef>
 
-
-        <!-- versions for use in mvn plugins as we cannot inherit them from a BOM -->
-        <fabric8.version>2.3.4</fabric8.version>
         <docker.maven.plugin.version>0.21.0</docker.maven.plugin.version>
         <spring-boot-plugin.version>2.0.3.RELEASE</spring-boot-plugin.version>
         <spring-boot.version>2.0.3.RELEASE</spring-boot.version>
         <spring.security.version>5.0.7.RELEASE</spring.security.version>
         <keycloak.version>4.1.0.Final</keycloak.version>
-        <postgresql.version>42.1.4</postgresql.version>
-        <geodb.version>0.8</geodb.version>
+
+        <postgresql.version>42.2.4</postgresql.version>
+        <geodb.version>0.9</geodb.version>
         <geotools.version>20.0</geotools.version>
         <locationtech.jts.version>1.16.0</locationtech.jts.version>
-        <activemq-client.version>5.15.3</activemq-client.version>
+        <activemq-client.version>5.15.4</activemq-client.version>
+
         <maven-javadoc-plugin.version>2.10.4</maven-javadoc-plugin.version>
-        <flyway-core.version>4.2.0</flyway-core.version>
-        <logstash-logback.version>5.1</logstash-logback.version>
-        <kubernetes-client.version>2.6.2</kubernetes-client.version>
-        <janino.version>3.0.7</janino.version>
-        <httpcomponents-fluent.version>4.5.3</httpcomponents-fluent.version>
-        <assertj-core.version>3.8.0</assertj-core.version>
-        <rest-assured.version>3.0.3</rest-assured.version>
+        <flyway-core.version>5.1.4</flyway-core.version>
+        <logstash-logback.version>5.2</logstash-logback.version>
+        <kubernetes-client.version>4.0.3</kubernetes-client.version>
+        <janino.version>3.0.8</janino.version>
+        <assertj-core.version>3.10.0</assertj-core.version>
+        <rest-assured.version>3.1.0</rest-assured.version>
         <javax.el.version>3.0.0</javax.el.version>
         <com.h2database.version>1.4.196</com.h2database.version>
-        <hikariCP.version>2.6.3</hikariCP.version>
-        <commons.lang3.version>3.6</commons.lang3.version>
-        <orika-core.version>1.5.1</orika-core.version>
-        <guava.version>23.0</guava.version>
+        <hikariCP.version>3.2.0</hikariCP.version>
+        <commons.lang3.version>3.7</commons.lang3.version>
+        <orika-core.version>1.5.2</orika-core.version>
+        <guava.version>26.0-jre</guava.version>
         <graphql-java.version>9.2</graphql-java.version>
 
         <hazelcast-hibernate52.version>1.2.3</hazelcast-hibernate52.version>
         <hibernate.version>5.2.17.Final</hibernate.version>
         <hibernate-spatial.version>5.2.17.Final</hibernate-spatial.version>
 
-        <groovy-all.version>2.4.12</groovy-all.version>
-        <jaxb-version>2.2.11</jaxb-version>
-        <swagger-jersey2.version>1.5.19</swagger-jersey2.version>
+        <groovy-all.version>2.4.15</groovy-all.version>
+        <jaxb-version>2.3.0.1</jaxb-version>
+        <swagger-jersey2.version>1.5.20</swagger-jersey2.version>
 
         <!-- NB: Concious choice of using snapshot version. This is to keep in
             sync, and fail fast if incompatibilities -->
         <netex-java-model.version>1.0.9-SNAPSHOT</netex-java-model.version>
-        <hazelcast-helper.version>0.0.3-SNAPSHOT</hazelcast-helper.version>
-        <rutebanken-gcp-storage.version>0.0.3-SNAPSHOT</rutebanken-gcp-storage.version>
-        <rutebanken-organisation.version>0.0.3-SNAPSHOT</rutebanken-organisation.version>
+        <hazelcast-helper.version>0.0.4-SNAPSHOT</hazelcast-helper.version>
+        <rutebanken-gcp-storage.version>0.0.4-SNAPSHOT</rutebanken-gcp-storage.version>
+        <rutebanken-organisation.version>0.0.4-SNAPSHOT</rutebanken-organisation.version>
         <fabric8.version>2.3.6</fabric8.version>
         <metrics.version>3.2.3</metrics.version>
         <esapi.version>2.1.0.1</esapi.version>
@@ -477,12 +475,6 @@
         </dependency>
 
         <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>fluent-hc</artifactId>
-            <version>${httpcomponents-fluent.version}</version>
-        </dependency>
-
-        <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
             <version>${assertj-core.version}</version>
@@ -605,31 +597,10 @@
 
             <plugin>
                 <groupId>io.fabric8</groupId>
-                <artifactId>fabric8-maven-plugin</artifactId>
-                <version>${fabric8.version}</version>
-                <executions>
-                    <execution>
-                        <id>json</id>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>json</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>attach</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>attach</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>io.fabric8</groupId>
                 <artifactId>docker-maven-plugin</artifactId>
                 <version>${docker.maven.plugin.version}</version>
                 <configuration>
+                    <autoPull>always</autoPull>
                     <images>
                         <image>
                             <name>${docker.image}</name>
@@ -655,7 +626,6 @@
                 <version>3.2.1</version>
                 <executions>
                     <execution>
-                        <phase>compile</phase>
                         <goals>
                             <goal>check</goal>
                         </goals>
@@ -683,14 +653,13 @@
                 <fabric8.recreate>true</fabric8.recreate>
             </properties>
             <build>
-                <!-- Missing fabric8:apply, as this crashed (probably due to missing fabric8) -->
-                <defaultGoal>clean install docker:build docker:push fabric8:json</defaultGoal>
+                <defaultGoal>clean install docker:build docker:push</defaultGoal>
             </build>
         </profile>
         <profile>
             <id>f8-build</id>
             <build>
-                <defaultGoal>clean install docker:build fabric8:json</defaultGoal>
+                <defaultGoal>clean install docker:build</defaultGoal>
             </build>
         </profile>
         <profile>
@@ -700,7 +669,7 @@
                 <fabric8.recreate>true</fabric8.recreate>
             </properties>
             <build>
-                <defaultGoal>clean install docker:build docker:push fabric8:json fabric8:apply</defaultGoal>
+                <defaultGoal>clean install docker:build docker:push fabric8:apply</defaultGoal>
             </build>
         </profile>
         <profile>
@@ -709,7 +678,7 @@
                 <fabric8.recreate>true</fabric8.recreate>
             </properties>
             <build>
-                <defaultGoal>clean install docker:build fabric8:json fabric8:apply</defaultGoal>
+                <defaultGoal>clean install docker:build fabric8:apply</defaultGoal>
             </build>
         </profile>
     </profiles>

@@ -34,10 +34,11 @@ import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.QUAYS;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.interchangeWeightingEnum;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.stopPlaceTypeEnum;
+import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.versionLessRefInputObjectType;
+import static org.rutebanken.tiamat.rest.graphql.types.VersionLessEntityRef.versionLessEntityRef;
 
 @Component
 public class StopPlaceObjectTypeCreator {
-
 
     @Autowired
     private TransportModeScalar transportModeScalar;
@@ -65,6 +66,10 @@ public class StopPlaceObjectTypeCreator {
                             }
                             return null;
                         }))
+                .field(newFieldDefinition()
+                        .name(ADJACENT_SITES)
+                        .type(new GraphQLList(versionLessEntityRef))
+                        .description(ADJACENT_SITES_DESCRIPTION))
                 .field(newFieldDefinition()
                         .name(QUAYS)
                         .type(new GraphQLList(quayObjectType)))

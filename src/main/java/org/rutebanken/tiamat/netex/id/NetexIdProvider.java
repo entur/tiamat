@@ -22,7 +22,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * Provides NetexIDs for IdentifiedEntities when saved.
+ * Provides generated NetexIDs for IdentifiedEntities when saved.
+ * It uses the {@link GaplessIdGeneratorService} to retrieve the incremented number in the ID.
+ * If the ID is explicity set, the valid prefix list is checked.
+ * If the prefix matches it will try to use the claimed ID.
  */
 @Component
 public class NetexIdProvider {
@@ -63,7 +66,10 @@ public class NetexIdProvider {
                 String entityTypeName = key(identifiedEntity);
 
                 gaplessIdGenerator.getNextIdForEntity(entityTypeName, claimedId);
+            } else {
+                logger.trace("Accepting ID with prefix {}", prefix);
             }
+
             // Because IDs might end with non-numbers we cannot support claiming for any ID other than NSR.
         } else {
             logger.warn("Detected non NSR ID: {} with prefix {}", identifiedEntity.getNetexId(), prefix);

@@ -92,6 +92,44 @@ def class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourc
                 .body("data.stopPlace[0].quays.id", hasItems(quay.getNetexId(), secondQuay.getNetexId()))
     }
 
+    @Test
+    void mutateStopPlaceWithPlaceEquipmentOnQuay() {
+
+        def quay = new Quay()
+        def firstQuayName = "quay to add place equipment on"
+        quay.setName(new EmbeddableMultilingualString(firstQuayName))
+
+        def stopPlaceName = "StopPlace"
+        def stopPlace = new StopPlace(new EmbeddableMultilingualString(stopPlaceName))
+
+        stopPlace.setQuays(new HashSet<>())
+        stopPlace.getQuays().add(quay)
+
+        stopPlaceRepository.save(stopPlace)
+
+        def graphqlQuery = """
+            mutation {
+              stopPlace: mutateStopPlace(StopPlace: {id: "${stopPlace.netexId}", quays: [{id: "${quay.netexId}", placeEquipments: {shelterEquipment: [{seats: 3}]}}]}) {
+                id
+                quays {
+                  id
+                  placeEquipments {
+                    shelterEquipment {
+                      seats
+                    }
+                  }
+                }
+              }
+            }
+            """
+
+        executeGraphqQLQueryOnly(graphqlQuery)
+                .root("data.stopPlace[0].quays[0]")
+                    .body("placeEquipments", notNullValue())
+                .root("data.stopPlace[0].quays[0].placeEquipments.shelterEquipment[0]")
+                .body("seats", equalTo(3))
+    }
+
     /**
      * Use explicit parameter for original ID search
      */
@@ -917,6 +955,10 @@ def class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourc
 
         stopPlaceVersionedSaverService.saveNewVersion(stopPlace)
 
+        StopPlace adjacentStopPlace = createStopPlace("Adjacent Site")
+        adjacentStopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(10.11111, 59.11111)))
+        stopPlaceVersionedSaverService.saveNewVersion(adjacentStopPlace)
+
         String updatedName = "Testing name"
         String updatedShortName = "Testing shortname"
         String updatedDescription = "Testing description"
@@ -926,43 +968,45 @@ def class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourc
         Float updatedLon = new Float(10.11111)
         Float updatedLat = new Float(59.11111)
 
-        String versionComment = "Stop place moved 100 meters"
+        String versionComment = "Stop place moved"
 
         InterchangeWeightingEnumeration weighting = InterchangeWeightingEnumeration.INTERCHANGE_ALLOWED
 
-        String graphQlJsonQuery = "{" +
-                "\"query\":\"mutation { " +
-                "  stopPlace: " + GraphQLNames.MUTATE_STOPPLACE + " (StopPlace: {" +
-                "          id:\\\"" + stopPlace.getNetexId() + "\\\"" +
-                "          name: { value:\\\"" + updatedName + "\\\" } " +
-                "          shortName:{ value:\\\"" + updatedShortName + "\\\" } " +
-                "          description:{ value:\\\"" + updatedDescription + "\\\" }" +
-                "          stopPlaceType:" + StopTypeEnumeration.TRAM_STATION.value() +
-                "          versionComment: \\\""+ versionComment + "\\\"" +
-                "          geometry: {" +
-                "            type: Point" +
-                "            coordinates: [[" + updatedLon + "," + updatedLat + "]] " +
-                "          }" +
-                "          weighting:" + weighting.value() +
-                "       }) { " +
-                "  id " +
-                "  name { value } " +
-                "  shortName { value } " +
-                "  description { value } " +
-                "  stopPlaceType " +
-                "  versionComment " +
-                "  topographicPlace { id topographicPlaceType parentTopographicPlace { id topographicPlaceType }} " +
-                "  weighting " +
-                "  geometry { type coordinates } " +
-                "  validBetween { fromDate toDate } " +
-                "  } " +
-                "}\",\"variables\":\"\"}"
+        String graphQlJsonQuery = """mutation {
+            stopPlace: ${GraphQLNames.MUTATE_STOPPLACE}(StopPlace: {
+                        id: "${stopPlace.getNetexId()}"
+                        name: { value: "${updatedName}" }
+                        shortName: { value: "${updatedShortName}" }
+                        description: { value:"${updatedDescription}" }
+                        adjacentSites: [ {ref: "${adjacentStopPlace.getNetexId()}"} ]
+                        stopPlaceType: ${StopTypeEnumeration.TRAM_STATION.value()}
+                        versionComment: "${versionComment}"
+                        geometry: {
+                          type: Point
+                          coordinates: [[${updatedLon},${updatedLat}]]
+                        }
+                        weighting: ${weighting.value()}
+                }) {
+                    id
+                    name { value }
+                    shortName { value }
+                    description { value }
+                    adjacentSites { ref }
+                    stopPlaceType
+                    versionComment
+                    topographicPlace { id topographicPlaceType parentTopographicPlace { id topographicPlaceType }}
+                    weighting
+                    geometry { type coordinates }
+                    validBetween { fromDate toDate }
+                }
+            }"""
 
-        executeGraphQL(graphQlJsonQuery)
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .root("data.stopPlace[0]")
                     .body("name.value", equalTo(updatedName))
                     .body("shortName.value", equalTo(updatedShortName))
                     .body("description.value", equalTo(updatedDescription))
+                    .body("adjacentSites[0].ref", equalTo(adjacentStopPlace.getNetexId()))
                     .body("stopPlaceType", equalTo(StopTypeEnumeration.TRAM_STATION.value()))
                     .body("versionComment", equalTo(versionComment))
                     .body("geometry.type", equalTo("Point"))

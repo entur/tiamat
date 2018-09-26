@@ -1,0 +1,75 @@
+version: 2
+aliases:
+  - &GCP-auth
+    name: Authenticate with GCP SA credentials
+    command: |
+      echo $GCLOUD_SERVICE_KEY > ${HOME}/account-auth.json
+      gcloud auth activate-service-account --key-file ${HOME}/account-auth.json
+  - &install-docker-client
+    name: Install Docker client
+    command: |
+      set -x
+      VER="17.03.0-ce"
+      curl -L -o /tmp/docker-$VER.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$VER.tgz
+      tar -xz -C /tmp -f /tmp/docker-$VER.tgz
+      mv /tmp/docker/* /usr/bin
+  - &docker-login
+    name: Docker login
+    command: |
+      cat ${HOME}/account-auth.json | docker login -u _json_key --password-stdin https://eu.gcr.io
+
+jobs:
+  build:
+    docker:
+      - image: maven:3.5.4-jdk-8
+        cmd: ["/bin/bash"]
+    working_directory: ~/tiamat
+    environment:
+      MAVEN_OPTS: -Xmx3G
+    steps:
+      - checkout
+      - restore_cache:
+          key: tiamat-{{ checksum "pom.xml" }}
+      - run: mvn org.apache.maven.plugins:maven-dependency-plugin:3.1.0:go-offline -s .circleci/settings.xml
+      - save_cache:
+          paths:
+            - ~/.m2
+          key: tiamat-{{ checksum "pom.xml" }}
+      # Cannot use -o because of snapshot dependencies.
+      - run: mvn install -s .circleci/settings.xml
+      - persist_to_workspace:
+          root: ~/tiamat
+          paths:
+            - target
+            - pom.xml
+  deploy-docker:
+    docker:
+      - image: maven:3.5.4-jdk-8
+        cmd: ["/bin/bash"]
+    working_directory: ~/tiamat
+    environment:
+      MAVEN_OPTS: -Xmx3G
+    steps:
+      - attach_workspace:
+          at: ~/tiamat
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - run: *install-docker-client
+      - run: *docker-login
+      - run:
+          name: Docker build and push
+          command: mvn docker:build docker:push -s .circleci/settings.xml
+workflows:
+  version: 2
+  build_and_deploy:
+    jobs:
+      - build:
+          context: org-carbon
+      - deploy-docker:
+          requires:
+            - build
+          context: org-carbon
+          filters:
+            branches:
+              only:
+                - master

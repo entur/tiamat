@@ -74,4 +74,31 @@ public class NetexIdProviderTest {
         netexIdProvider.claimId(topographicPlace);
         verify(gaplessIdGeneratorService, times(0)).getNextIdForEntity(TopographicPlace.class.getSimpleName(),1L);
     }
+
+    /**
+     * Test claiming ID with alphanumeric ID and ENT prefix
+     */
+    @Test
+    public void claimEnt() {
+
+        final String prefix = "ENT";
+
+        TopographicPlace topographicPlace = new TopographicPlace();
+        topographicPlace.setNetexId(prefix + ":"+TopographicPlace.class.getSimpleName()+":SVA");
+
+        GaplessIdGeneratorService gaplessIdGeneratorService = mock(GaplessIdGeneratorService.class);
+
+        Map<String, List<String>> validPrefixesPerType = new HashMap<>();
+
+        validPrefixesPerType.put("TopographicPlace", Arrays.asList(prefix));
+        ValidPrefixList validPrefixList = new ValidPrefixList("NSR", validPrefixesPerType);
+
+        NetexIdHelper netexIdHelper = new NetexIdHelper(validPrefixList);
+
+        NetexIdProvider netexIdProvider = new NetexIdProvider(gaplessIdGeneratorService, validPrefixList, netexIdHelper);
+
+        netexIdProvider.claimId(topographicPlace);
+
+        verify(gaplessIdGeneratorService, times(0)).getNextIdForEntity(TopographicPlace.class.getSimpleName(),1L);
+    }
 }

@@ -54,6 +54,10 @@ public class TopographicPlaceQueryFromSearchBuilder {
         parameters.put("pointInTime", Date.from(Instant.now()));
 
         searchHelper.addWheres(queryString, wheres, operators);
+
+        List<String> orderByStatements = Arrays.asList("id desc", "changed desc", "from_date desc");
+
+        searchHelper.addOrderByStatements(queryString, orderByStatements);
         final String generatedSql = searchHelper.format(queryString.toString());
 
         return Pair.of(generatedSql, parameters);

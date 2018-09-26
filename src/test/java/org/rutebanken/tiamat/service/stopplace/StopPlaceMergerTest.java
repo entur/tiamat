@@ -74,7 +74,7 @@ public class StopPlaceMergerTest extends TiamatIntegrationTest {
         String oldVersionComment = "Old version deleted";
         fromStopPlace.setVersionComment(oldVersionComment);
 
-        fromStopPlace.setTransportMode(VehicleModeEnumeration.BUS);
+        fromStopPlace.setTransportMode(VehicleModeEnumeration.WATER);
 
         stopPlaceVersionedSaverService.saveNewVersion(fromStopPlace);
 
@@ -84,6 +84,7 @@ public class StopPlaceMergerTest extends TiamatIntegrationTest {
         toStopPlace.getOriginalIds().add("TEST:StopPlace:4321");
         toStopPlace.getOriginalIds().add("TEST:StopPlace:8765");
         toStopPlace.setStopPlaceType(StopTypeEnumeration.BUS_STATION);
+        toStopPlace.setTransportMode(VehicleModeEnumeration.BUS);
         // Old version of toStopPlace
         Instant toStopPlaceOriginalFromDate = Instant.EPOCH;
         toStopPlace.setValidBetween(new ValidBetween(toStopPlaceOriginalFromDate));
