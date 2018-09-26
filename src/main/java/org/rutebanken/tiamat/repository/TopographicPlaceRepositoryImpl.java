@@ -17,7 +17,7 @@ package org.rutebanken.tiamat.repository;
 
 
 import com.google.api.client.repackaged.com.google.common.base.Strings;
-import org.apache.commons.lang.NotImplementedException;
+import org.apache.commons.lang3.NotImplementedException;
 import org.hibernate.*;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.exporter.params.TopographicPlaceSearch;

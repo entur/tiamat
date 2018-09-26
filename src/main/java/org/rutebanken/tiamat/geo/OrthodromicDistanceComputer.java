@@ -17,11 +17,10 @@ package org.rutebanken.tiamat.geo;
 
 import org.geotools.referencing.GeodeticCalculator;
 import org.locationtech.jts.geom.Geometry;
+import org.springframework.stereotype.Service;
 
-
+@Service
 public class OrthodromicDistanceComputer {
-
-
 
     public double compute(Geometry g1, Geometry g2) {
 

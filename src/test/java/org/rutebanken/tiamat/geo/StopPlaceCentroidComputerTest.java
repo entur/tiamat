@@ -25,6 +25,7 @@ import org.rutebanken.tiamat.model.StopPlace;
 public class StopPlaceCentroidComputerTest {
 
     private GeometryFactory geometryFactory = new GeometryFactoryConfig().geometryFactory();
+    private ZoneDistanceChecker zoneDistanceChecker = new ZoneDistanceChecker();
     private StopPlaceCentroidComputer stopPlaceCentroidComputer = new StopPlaceCentroidComputer(new CentroidComputer(geometryFactory), zoneDistanceChecker);
 
     @Test

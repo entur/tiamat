@@ -16,7 +16,7 @@
 package org.rutebanken.tiamat.netex.id;
 
 import com.google.common.base.Strings;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.rutebanken.tiamat.model.PathLinkEnd;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.SiteFrame;

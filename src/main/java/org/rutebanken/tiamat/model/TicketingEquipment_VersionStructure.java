@@ -15,7 +15,7 @@
 
 package org.rutebanken.tiamat.model;
 
-import org.apache.commons.lang.BooleanUtils;
+import org.apache.commons.lang3.BooleanUtils;
 
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Transient;

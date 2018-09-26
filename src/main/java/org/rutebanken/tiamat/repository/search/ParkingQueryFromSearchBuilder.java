@@ -15,7 +15,8 @@
 
 package org.rutebanken.tiamat.repository.search;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
+import org.owasp.esapi.codecs.MySQLCodec;
 import org.rutebanken.tiamat.exporter.params.ParkingSearch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 
+import org.owasp.esapi.ESAPI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -45,12 +47,14 @@ public class ParkingQueryFromSearchBuilder {
 
         if(parkingSearch != null) {
 
+            // Should have used prepared statements of course, if the number of parent site refs were less.
+
             if (parkingSearch.getParentSiteRefs() != null && !parkingSearch.getParentSiteRefs().isEmpty()) {
                 StringBuilder stringBuilder = new StringBuilder("(");
                 int counter = 0;
                 for(String parentSiteRef : parkingSearch.getParentSiteRefs()) {
                     stringBuilder.append("'")
-                            .append(StringEscapeUtils.escapeSql(parentSiteRef))
+                            .append(escapeSql(parentSiteRef))
                             .append("'");
                     if(++counter < parkingSearch.getParentSiteRefs().size()) {
                         stringBuilder.append(",");
@@ -71,5 +75,10 @@ public class ParkingQueryFromSearchBuilder {
         final String generatedSql = searchHelper.format(queryString.toString());
         searchHelper.logIfLoggable(generatedSql, parameters, parkingSearch, logger);
         return Pair.of(generatedSql, parameters);
+    }
+
+    private String escapeSql(String string) {
+        return ESAPI.encoder().encodeForSQL(new MySQLCodec(MySQLCodec.Mode.STANDARD), string);
+
     }
 }

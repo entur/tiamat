@@ -16,7 +16,7 @@
 package org.rutebanken.tiamat.repository.reference;
 
 import com.google.common.collect.Sets;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.rutebanken.tiamat.model.DataManagedObjectStructure;
 import org.rutebanken.tiamat.model.VersionOfObjectRefStructure;
 import org.rutebanken.tiamat.netex.id.NetexIdHelper;

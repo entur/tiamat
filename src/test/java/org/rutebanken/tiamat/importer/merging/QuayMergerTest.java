@@ -22,6 +22,7 @@ import org.locationtech.jts.geom.Point;
 import org.geotools.referencing.GeodeticCalculator;
 import org.junit.Test;
 import org.rutebanken.tiamat.config.GeometryFactoryConfig;
+import org.rutebanken.tiamat.geo.ZoneDistanceChecker;
 import org.rutebanken.tiamat.importer.matching.OriginalIdMatcher;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.Quay;
@@ -42,6 +43,7 @@ public class QuayMergerTest {
     private GeometryFactory geometryFactory = new GeometryFactoryConfig().geometryFactory();
 
     private NetexIdHelper netexIdHelper = new NetexIdHelper(new ValidPrefixList("NSR", new HashMap<>()));
+    private ZoneDistanceChecker zoneDistanceChecker = new ZoneDistanceChecker();
     private QuayMerger quayMerger = new QuayMerger(new OriginalIdMatcher(netexIdHelper), zoneDistanceChecker);
 
     @Test
