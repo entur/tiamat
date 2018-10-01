@@ -19,13 +19,6 @@ aliases:
       cat ${HOME}/account-auth.json | docker login -u _json_key --password-stdin https://eu.gcr.io
 
 jobs:
-  authenticate:
-    docker:
-      - image: google/cloud-sdk:198.0.0
-        cmd: ["/bin/bash"]
-    working_directory: ~/tiamat
-    steps:
-      - run: *GCP-auth
   build:
     docker:
       - image: maven:3.5.4-jdk-8
@@ -61,6 +54,7 @@ jobs:
           at: ~/tiamat
       - setup_remote_docker:
           docker_layer_caching: true
+      - run: *GCP-auth
       - run: *install-docker-client
       - run: *docker-login
       - run:
@@ -70,8 +64,6 @@ workflows:
   version: 2
   build_test_deploy:
     jobs:
-      - authenticate:
-          context: org-carbon
       - build:
           context: org-carbon
       - deploy-docker:
