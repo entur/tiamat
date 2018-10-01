@@ -4,20 +4,29 @@ aliases:
     name: Authenticate with GCP SA credentials
     command: |
       echo $GCLOUD_SERVICE_KEY > ${HOME}/account-auth.json
-      gcloud auth activate-service-account --key-file ${HOME}/account-auth.json
+      ./google-cloud-sdk/bin/gcloud auth activate-service-account --key-file ${HOME}/account-auth.json
   - &install-docker-client
     name: Install Docker client
     command: |
       set -x
-      VER="17.03.0-ce"
+      VER="18.03.1-ce"
       curl -L -o /tmp/docker-$VER.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$VER.tgz
       tar -xz -C /tmp -f /tmp/docker-$VER.tgz
       mv /tmp/docker/* /usr/bin
+  - &install-gcloud
+    name: Install gcloud
+    command: |
+      set -x
+      VER="218.0.0-linux-x86_64"
+      wget https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${VER}.tar.gz
+      tar -xvzf google-cloud-sdk-218.0.0-linux-x86_64.tar.gz
+      ./google-cloud-sdk/install.sh -q
+      ./google-cloud-sdk/bin/gcloud components update
   - &docker-login
     name: Docker login
     command: |
+      docker --version
       cat ${HOME}/account-auth.json | docker login -u _json_key --password-stdin https://eu.gcr.io
-
 jobs:
   build:
     docker:
@@ -42,18 +51,20 @@ jobs:
           paths:
             - target
             - pom.xml
+            - .circleci
   deploy-docker:
     docker:
-      - image: google/cloud-sdk:198.0.0
+      - image: maven:3.5.4-jdk-8
     environment:
       DEBIAN_FRONTEND: "noninteractive"
     working_directory: ~/tiamat
     steps:
       - attach_workspace:
           at: ~/tiamat
-      - run: *GCP-auth
       - setup_remote_docker:
           docker_layer_caching: true
+      - run: *install-gcloud
+      - run: *GCP-auth
       - run: *install-docker-client
       - run: *docker-login
       - run:
@@ -63,11 +74,7 @@ workflows:
   version: 2
   build_test_deploy:
     jobs:
-      - build:
-          context: org-carbon
       - deploy-docker:
-          requires:
-            - build
           context: org-carbon
           filters:
             branches:
