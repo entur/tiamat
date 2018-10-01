@@ -27,6 +27,7 @@ jobs:
     environment:
       MAVEN_OPTS: -Xmx3G
     steps:
+      - run: *GCP-auth
       - checkout
       - restore_cache:
           key: tiamat-{{ checksum "pom.xml" }}
