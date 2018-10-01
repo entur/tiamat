@@ -45,16 +45,13 @@ jobs:
   deploy-docker:
     docker:
       - image: google/cloud-sdk:198.0.0
-        cmd: ["/bin/bash"]
     working_directory: ~/tiamat
-    environment:
-      MAVEN_OPTS: -Xmx3G
     steps:
       - attach_workspace:
           at: ~/tiamat
+      - run: *GCP-auth
       - setup_remote_docker:
           docker_layer_caching: true
-      - run: *GCP-auth
       - run: *install-docker-client
       - run: *docker-login
       - run:
