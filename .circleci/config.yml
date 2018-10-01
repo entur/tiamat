@@ -45,6 +45,8 @@ jobs:
   deploy-docker:
     docker:
       - image: google/cloud-sdk:198.0.0
+    environment:
+      DEBIAN_FRONTEND: "noninteractive"
     working_directory: ~/tiamat
     steps:
       - attach_workspace:
