@@ -4,6 +4,7 @@ aliases:
     name: Authenticate with GCP SA credentials
     command: |
       echo $GCLOUD_SERVICE_KEY > ${HOME}/account-auth.json
+      echo $GCLOUD_SERVICE_KEY
       gcloud auth activate-service-account --key-file ${HOME}/account-auth.json
   - &install-docker-client
     name: Install Docker client
