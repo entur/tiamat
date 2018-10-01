@@ -71,5 +71,4 @@ workflows:
           context: org-carbon
           filters:
             branches:
-              only:
-                - master
+              only: master
