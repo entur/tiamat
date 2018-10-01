@@ -4,7 +4,6 @@ aliases:
     name: Authenticate with GCP SA credentials
     command: |
       echo $GCLOUD_SERVICE_KEY > ${HOME}/account-auth.json
-      echo $GCLOUD_SERVICE_KEY
       gcloud auth activate-service-account --key-file ${HOME}/account-auth.json
   - &install-docker-client
     name: Install Docker client
@@ -20,6 +19,13 @@ aliases:
       cat ${HOME}/account-auth.json | docker login -u _json_key --password-stdin https://eu.gcr.io
 
 jobs:
+  authenticate:
+    docker:
+      - image: google/cloud-sdk:198.0.0
+        cmd: ["/bin/bash"]
+    working_directory: ~/tiamat
+    steps:
+      - run: *GCP-auth
   build:
     docker:
       - image: maven:3.5.4-jdk-8
@@ -28,7 +34,6 @@ jobs:
     environment:
       MAVEN_OPTS: -Xmx3G
     steps:
-      - run: *GCP-auth
       - checkout
       - restore_cache:
           key: tiamat-{{ checksum "pom.xml" }}
@@ -46,7 +51,7 @@ jobs:
             - pom.xml
   deploy-docker:
     docker:
-      - image: maven:3.5.4-jdk-8
+      - image: google/cloud-sdk:198.0.0
         cmd: ["/bin/bash"]
     working_directory: ~/tiamat
     environment:
@@ -65,6 +70,8 @@ workflows:
   version: 2
   build_test_deploy:
     jobs:
+      - authenticate:
+          context: org-carbon
       - build:
           context: org-carbon
       - deploy-docker:
