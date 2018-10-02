@@ -26,6 +26,12 @@ aliases:
     name: Docker login
     command: |
       cat ${HOME}/account-auth.json | docker login -u _json_key --password-stdin https://eu.gcr.io
+  - &post-hook
+    name: Notify about build and docker image pushed
+    command: |
+      echo "{\"name\": \"tiamat\", \"build\": {\"status\": \"SUCCESS\", \"phase\": \"FINALIZED\", \"scm\": {\"commit\": \"${CIRCLE_SHA1}\"}}}" > message.json
+      echo sending: $(cat message.json)
+      curl -X POST --data @message.json -H "apiKey: ${BUILD_STATUS_API_KEY}" -H "Content-Type: application/json" "https://api-test.entur.org/build_status/1.0/"
 jobs:
   build:
     docker:
@@ -66,14 +72,10 @@ jobs:
       - run: *GCP-auth
       - run: *install-docker-client
       - run: *docker-login
-      - run: ls -la
-      - run: pwd
-      - run: echo $HOME
-      - run: ls -la ~/
-      - run: ls -la ~/tiamat
       - run:
           name: Docker build and push
           command: mvn docker:build docker:push -s .circleci/settings.xml
+      - run: *post-hook
 workflows:
   version: 2
   build_test_deploy:
