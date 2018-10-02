@@ -72,8 +72,6 @@ jobs:
           docker_layer_caching: true
       - run: *install-gcloud
       - run: *GCP-auth
-      - setup_remote_docker:
-          docker_layer_caching: true
       - run: *install-docker-client
       - run: *docker-login
       - run:
