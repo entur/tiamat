@@ -31,7 +31,7 @@ aliases:
     command: |
       echo "{\"name\": \"tiamat\", \"build\": {\"status\": \"SUCCESS\", \"phase\": \"FINALIZED\", \"scm\": {\"commit\": \"${CIRCLE_SHA1}\"}}}" > message.json
       echo sending: $(cat message.json)
-      curl -X POST --data @message.json -H "apiKey: ${BUILD_STATUS_API_KEY}" -H "Content-Type: application/json" "https://api-test.entur.org/build_status/1.0/"
+      curl -X POST --data @message.json -H "apiKey: ${BUILD_STATUS_API_KEY}" -H "Content-Type: application/json" -H "ET-Client-Name: CircleCI" -H "ET-Client-ID: CircleCI-${CIRCLE_PROJECT_REPONAME}"  "https://api-test.entur.org/build_status/1.0/"
 jobs:
   build:
     docker:
