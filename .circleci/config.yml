@@ -66,6 +66,8 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/tiamat
+      - restore_cache:
+          key: tiamat-{{ checksum "pom.xml" }}
       - setup_remote_docker:
           docker_layer_caching: true
       - run: *install-gcloud
