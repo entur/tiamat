@@ -2,6 +2,8 @@
 
 Module also known as the backend for "Stoppestedsregisteret"
 
+[![CircleCI](https://circleci.com/gh/entur/tiamat.svg?style=svg)](https://circleci.com/gh/entur/tiamat)
+
 ## Build
 `mvn clean install`
 
@@ -80,7 +82,7 @@ Please note that it is not possible to do an initial import (see ImportType) mul
 
 ### How its all connected
 It's all initiated by an entity listener annotated with `PrePersist` on the class `IdentifiedEntity` called `IdentifiedEntityListener`.
-`NetexIdAssigner` determines if the entity already has an ID or not. `NetexIdProvider` either return a new ID or handles explicity claimed IDs if the configured prefix matches. See `ValidPrefixList` for the configuration of valid prefixes, and prefixes for IDs generated elsewhere. The `GaplessIdGeneratorService` uses Hazelcast to sync state between instances and avoid conflicts. 
+`NetexIdAssigner` determines if the entity already has an ID or not. `NetexIdProvider` either return a new ID or handles explicity claimed IDs if the configured prefix matches. See `ValidPrefixList` for the configuration of valid prefixes, and prefixes for IDs generated elsewhere. The `GaplessIdGeneratorService` uses Hazelcast to sync state between instances and avoid conflicts.
 
 
 ## Run Keycloak
@@ -130,7 +132,7 @@ It is also possible with multiple types.
 https://api-test.entur.org/stop_places/1.0/netex?municipalityReference=KVE:TopographicPlace:1003
 ```
 
-### Query by county ID 
+### Query by county ID
 ```
 https://api-test.entur.org/stop_places/1.0/netex?countyReference=KVE:TopographicPlace:11
 ```
@@ -242,10 +244,10 @@ curl  -XPOST -H"Content-Type: application/xml" -d@chouette-netex.xml http://loca
 
 ### Importing with importType=INITIAL
 
-When importing with _importType=INITIAL_, a parallel stream will be created, spawning the original process. During import, user authorizations is checked, thus accessing SecurityContextHolder. 
+When importing with _importType=INITIAL_, a parallel stream will be created, spawning the original process. During import, user authorizations is checked, thus accessing SecurityContextHolder.
 By default, SecurityContextHolder use DEFAULT\_LOCAL\_STRATEGY. When using INITIAL importType, you should tell Spring to use MODE\_INHERITABLETHREADLOCAL for SecurityContextHolder, allowing Spring to duplicate Security Context in spawned threads.
-This can be done setting env variable : 
-    
+This can be done setting env variable :
+
     -Dspring.security.strategy=MODE_INHERITABLETHREADLOCAL
 
 If not, the application may complain about user not being authenticated if Spring tries to check authorization in a spawned process
@@ -280,7 +282,7 @@ Execute the migration. Point to the migration files in tiamat.
 ./flyway -url=jdbc:postgresql://localhost:5433/tiamat -locations=filesystem:/path/to/tiamat/src/main/resources/db/migration migrate
 Flyway 4.2.0 by Boxfuse
 
-Database password: 
+Database password:
 Database: jdbc:postgresql://localhost:5433/tiamat (PostgreSQL 9.6)
 Successfully validated 1 migration (execution time 00:00.016s)
 Creating Metadata table: "public"."schema_version"
