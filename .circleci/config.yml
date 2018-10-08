@@ -37,7 +37,6 @@ jobs:
     docker:
       - image: maven:3.5.4-jdk-8
         cmd: ["/bin/bash"]
-    working_directory: ~/${CIRCLE_PROJECT_REPONAME}
     environment:
       MAVEN_OPTS: -Xmx3G
     steps:
@@ -72,7 +71,6 @@ jobs:
       - image: maven:3.5.4-jdk-8
     environment:
       DEBIAN_FRONTEND: "noninteractive"
-    working_directory: ~/${CIRCLE_PROJECT_REPONAME}
     steps:
       - attach_workspace:
           at: ~/${CIRCLE_PROJECT_REPONAME}
