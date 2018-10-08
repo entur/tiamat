@@ -43,12 +43,12 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          key: key-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-{{ checksum "pom.xml" }}
+          key: dep-cache-{{ checksum "pom.xml" }}
       - run: mvn org.apache.maven.plugins:maven-dependency-plugin:3.1.0:go-offline -s .circleci/settings.xml
       - save_cache:
           paths:
             - ~/.m2
-          key: key-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-{{ checksum "pom.xml" }}
+          key: dep-cache-{{ checksum "pom.xml" }}
       # Cannot use -o because of snapshot dependencies.
       - run: mvn install -s .circleci/settings.xml
       - run:
@@ -77,7 +77,7 @@ jobs:
       - attach_workspace:
           at: ~/${CIRCLE_PROJECT_REPONAME}
       - restore_cache:
-          key: key-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-{{ checksum "pom.xml" }}
+          key: dep-cache-{{ checksum "pom.xml" }}
       - setup_remote_docker:
           docker_layer_caching: true
       - run: *install-gcloud
