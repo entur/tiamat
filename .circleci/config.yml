@@ -43,12 +43,12 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          key: ${CIRCLE_PROJECT_REPONAME}-{{ checksum "pom.xml" }}
+          key: {{ .Environment.CIRCLE_PROJECT_REPONAME }}-{{ checksum "pom.xml" }}
       - run: mvn org.apache.maven.plugins:maven-dependency-plugin:3.1.0:go-offline -s .circleci/settings.xml
       - save_cache:
           paths:
             - ~/.m2
-          key: ${CIRCLE_PROJECT_REPONAME}-{{ checksum "pom.xml" }}
+          key: {{ .Environment.CIRCLE_PROJECT_REPONAME }}-{{ checksum "pom.xml" }}
       # Cannot use -o because of snapshot dependencies.
       - run: mvn install -s .circleci/settings.xml
       - run:
