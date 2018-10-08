@@ -61,7 +61,7 @@ jobs:
       - store_artifacts:
           path: ~/junit
       - persist_to_workspace:
-          root: ~/${CIRCLE_PROJECT_REPONAME}
+          root: ~/workspace
           paths:
             - target
             - pom.xml
@@ -73,7 +73,7 @@ jobs:
       DEBIAN_FRONTEND: "noninteractive"
     steps:
       - attach_workspace:
-          at: ~/${CIRCLE_PROJECT_REPONAME}
+          at: ~/workspace
       - restore_cache:
           key: dep-cache-{{ checksum "pom.xml" }}
       - setup_remote_docker:
