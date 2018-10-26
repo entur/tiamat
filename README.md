@@ -1,4 +1,4 @@
-# Tiamat [![CircleCI](https://circleci.com/gh/entur/tiamat/tree/master.svg?style=svg)](https://circleci.com/gh/entur/tiamat/tree/master)
+# Tiamat
 
 Module also known as the backend for "Stoppestedsregisteret"
 
