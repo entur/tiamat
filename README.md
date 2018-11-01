@@ -105,7 +105,7 @@ docker run -p 5435:5432 -e POSTGRES_USER=tiamat -e POSTGRES_PASSWORD=<insertpass
 During the implementation of Tiamat was desirable to produce NeTEx IDs for stop places more or less gap less.
 The reason for this implementation was legacy systems with restrictions of maximum number of digits.
 
-### Configre ID generation
+### Configure ID generation
 It is possible to control wether IDs should be generated outside Tiamat or not. See the class ValidPrefixList.
 Setting the property `netex.validPrefix` tells Tiamat to generate IDs for new entities.
 Please note that it is not possible to do an initial import (see ImportType) multiple times with the same IDs.
