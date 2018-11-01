@@ -115,14 +115,8 @@ It's all initiated by an entity listener annotated with `PrePersist` on the clas
 `NetexIdAssigner` determines if the entity already has an ID or not. `NetexIdProvider` either return a new ID or handles explicity claimed IDs if the configured prefix matches. See `ValidPrefixList` for the configuration of valid prefixes, and prefixes for IDs generated elsewhere. The `GaplessIdGeneratorService` uses Hazelcast to sync state between instances and avoid conflicts.
 
 
-## Run Keycloak
-
-Bot Tiamat and Abzu are set up to be used with Keycloak.
-
-* Download Keycloak version 1.7.0.CR1 (or newer)
-* Change the port in standalone/configuration/standalone.xml** to 18080 : ```{jboss.http.port:18080}```
-* ```git pull``` devsetup.
-* run:```bin/standalone.sh -Dkeycloak.migration.action=import -Dkeycloak.migration.provider=dir -Dkeycloak.migration.dir=/path/to/git/devsetup/vagrant/provisioning/roles/keycloak/files/ -Dkeycloak.migration.strategy=OVERWRITE_EXISTING```
+## Keycloak
+Both Tiamat and Abzu are set up to be used with Keycloak.
 
 ## Docker image
 Tiamat has the fabric8 docker plugin configured in the pom.file. It is optional to use.
