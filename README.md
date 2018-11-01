@@ -274,7 +274,7 @@ This can be done setting env variable :
 
 If not, the application may complain about user not being authenticated if Spring tries to check authorization in a spawned process
 
-# GraphQL
+## GraphQL
 GraphQL endpoint is available on
 ```
 https://api-test.entur.org/stop_places/1.0/graphql
@@ -284,14 +284,14 @@ Tip: GraphiQL UI available on https://www-test.entur.org/admin/shamash-nsr/ usin
 https://github.com/graphql/graphiql
 (Use e.g. `Modify Headers` for Chrome to add bearer-token for mutations)
 
-# Flyway
+## Flyway
 To create the database for tiamat, download and use the flyway command line tool:
 https://flywaydb.org/documentation/commandline/
 
-## Migrations
+### Migrations
 Migrations are executed when tiamat is started.
 
-## Schema changes
+### Schema changes
 Create a new file according to the flyway documentation in the folder `resources/db/migrations`.
 Commit the migration together with code changes that requires this schema change. Follow the naming convention.
 
