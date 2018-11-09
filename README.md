@@ -1,14 +1,58 @@
-# Tiamat [![CircleCI](https://circleci.com/gh/entur/tiamat/tree/master.svg?style=svg)](https://circleci.com/gh/entur/tiamat/tree/master)
+# Tiamat
 
-Module also known as the backend for "Stoppestedsregisteret"
+Tiamat is the Stop Place Register.
+It is used nationally in Norway, and other places.
+Tiamat is created with technologies like Spring Boot, Hibernate, Postgis, Jersey and Jackson.
 
 [![CircleCI](https://circleci.com/gh/entur/tiamat.svg?style=svg)](https://circleci.com/gh/entur/tiamat)
+
+## Core functionality
+### NeTEx imports
+* Supports different pre steps and merging options for stop places, handling bad data quality.
+* Assigns unique IDs to stop places (if desired).
+* Validates incoming data against the XML schema.
+
+### NeTEx exports
+Supports exporting stop places and other entities to the http://netex-cen.eu/ format.
+There are many options for exports:
+* Asynchronous exports to google cloud storage. Asynchronous exports handles large amount of data, even if exporting thousands of stop places.
+* Synchronous exports directly returned
+* Several export parameters and filtering (ex: query or administrative polygons filtering)
+* Exports can be validated against the NeTEx schema, ensuring quality.
+
+### GraphQL API
+Tiamat provides a rich GraphQL API for stop places, topographic places, path links, tariff zones and so on, support the same parameters as the NeTEx export API.
+It also supports mutations. So you can update or create entities.
+There are also graphql processes (named functions) which allows functionality like merging quays or stop places.
+
+### A ReactJS Frontend
+A frontend for Tiamat is available. It's name is Abzu.
+See https://github.com/entur/abzu
+
+### Supports running multiple instances
+Tiamat uses Hazelcast memory grid to communicate with other instances in kubernetes.
+This means that you can run multiple instances.
+
+### Mapping of IDs
+After import stop places and assigning new IDs to stop places, tiamat keeps olds IDs in a mapping table.
+The mapping table between old and new IDs is available through the GraphQL API and a REST endpoint.
+
+### Automatic topographic place and tariff zone lookup
+Tiamat supports looking up and populating references to tariff zones and topographic places from polygon matches when saving a stop place.
+
+### Versioning
+Stop places and other entities are versioned. This means that you have full version history of stop places and what person that made those changes.
+Tiamat also includes a diff tool. This is used to compare and show the difference between two versions of a stop place (or other entity).
+
 
 ## Build
 `mvn clean install`
 
 You need the directory `/deployments/data` with rights for the user who
 performs the build.
+
+Tiamat currently depends on snapshot dependencies. These are open source as well.
+You might have to build those first (or fallback to latest release in the pom.xml file)
 
 ## Run with in-memory GeoDB (H2)
 ```
@@ -56,27 +100,13 @@ See also http://stackoverflow.com/a/26514779
 docker run -p 5435:5432 -e POSTGRES_USER=tiamat -e POSTGRES_PASSWORD=<insertpasswordhere>" -e POSTGRES_INITDB_ARGS="-d" mdillon/postgis:9.6
 ```
 
-#### Database creation in google cloud / kubernetes
-
-Before starting tiamat, you need to run the following commands:
-
-```
-kubectl exec -it tiamatdb-HASH psql -- --username=postgres tiamat
-CREATE DATABASE template_postgis;
-UPDATE pg_database SET datistemplate = TRUE WHERE datname = 'template_postgis';
-CREATE DATABASE tiamat WITH encoding 'UTF8' template=template0;
-\c tiamat
-CREATE EXTENSION postgis;
-CREATE EXTENSION postgis_topology;
-```
-
 ## ID Generation
 ### Background
-During the implementation of Tiamat was desirable to produce NeTEx IDs for stop places more or less gapless.
+During the implementation of Tiamat was desirable to produce NeTEx IDs for stop places more or less gap less.
 The reason for this implementation was legacy systems with restrictions of maximum number of digits.
 
-### Configre ID generation
-It is possibe to control wether IDs should be generated outside Tiamat or not. See the class ValidPrefixList.
+### Configure ID generation
+It is possible to control wether IDs should be generated outside Tiamat or not. See the class ValidPrefixList.
 Setting the property `netex.validPrefix` tells Tiamat to generate IDs for new entities.
 Please note that it is not possible to do an initial import (see ImportType) multiple times with the same IDs.
 
@@ -85,18 +115,11 @@ It's all initiated by an entity listener annotated with `PrePersist` on the clas
 `NetexIdAssigner` determines if the entity already has an ID or not. `NetexIdProvider` either return a new ID or handles explicity claimed IDs if the configured prefix matches. See `ValidPrefixList` for the configuration of valid prefixes, and prefixes for IDs generated elsewhere. The `GaplessIdGeneratorService` uses Hazelcast to sync state between instances and avoid conflicts.
 
 
-## Run Keycloak
-
-Bot Tiamat and Abzu are set up to be used with Keycloak. Currently, Keycloak is not running in vagrant so we have to run it standalone. *Currently disabled, see NRP-16*
-
-* Download Keycloak version 1.7.0.CR1 (or newer)
-* Change the port in standalone/configuration/standalone.xml** to 18080 : ```{jboss.http.port:18080}```
-* ```git pull``` devsetup.
-* run:```bin/standalone.sh -Dkeycloak.migration.action=import -Dkeycloak.migration.provider=dir -Dkeycloak.migration.dir=/path/to/git/devsetup/vagrant/provisioning/roles/keycloak/files/ -Dkeycloak.migration.strategy=OVERWRITE_EXISTING```
+## Keycloak
+Both Tiamat and Abzu are set up to be used with Keycloak.
 
 ## Docker image
 Tiamat has the fabric8 docker plugin configured in the pom.file. It is optional to use.
-
 
 ## Validation for incoming and outgoing NeTEx publication delivery
 
@@ -159,8 +182,7 @@ If set to false, the highest version by number will be returned for matching sto
 
 ### Stop places without location
 Match only stop places without location
-Use the paramter: ```withoutLocationOnly=true```
-
+Use the parameter: ```withoutLocationOnly=true```
 
 ### Topographic export mode
 The parameter ```topographicPlaceExportMode``` can be set to *NONE*, *RELEVANT* or *ALL*
@@ -173,7 +195,6 @@ Relevant tariff zones with be found from the exported list of stop places. Becau
 ### Group of stop places export mode
 The parameter ```groupOfStopPlacesExportMode``` can be set to *NONE*, *RELEVANT* or *ALL*
 Relevant group of stop places can be found from the exported list of stop places.
-
 
 ### Version validity
 The ```versionValidity``` parameter controls what stop places to return.
@@ -226,20 +247,21 @@ TRUNCATE topographic_place CASCADE;
 ## Import data into Tiamat
 
 If you are running this from `spring:run`, then you need to make sure that you have enough memory available for the java process (in case of large data sets).
+Another issue is thread stack size, which might need to be increased when coping with really large NeTEx imports.
 Example:
 ```
 export MAVEN_OPTS='-Xms256m -Xmx1712m -Xss256m -XX:NewSize=64m -XX:MaxNewSize=128m -Dfile.encoding=UTF-8'
 ```
 
 ### Import NeTEx file without *NSR* IDs
-This NeTEx file should not contain NSR ID.
+This NeTEx file should not contain NSR ID. (The NSR prefix is configurable in the class ValidPrefixList)
 * Tiamat will match existing stops based on name and coordinates.
 * Tiamat will merge Quays inside stops that are close, have the same original ID and does not have too different compass bearing.
 
 Tiamat will return the modified NeTEx structure with it's own NSR IDs. Original IDs will be present in key value list on each object.
 
 ```
-curl  -XPOST -H"Content-Type: application/xml" -d@chouette-netex.xml http://localhost:1997/services/stop_places/netex
+curl  -XPOST -H"Content-Type: application/xml" -d@my-nice-netex-file.xml http://localhost:1997/services/stop_places/netex
 ```
 
 ### Importing with importType=INITIAL
@@ -252,57 +274,34 @@ This can be done setting env variable :
 
 If not, the application may complain about user not being authenticated if Spring tries to check authorization in a spawned process
 
-## See also
-https://rutebanken.atlassian.net/wiki/display/REIS/Holdeplassregister
-
-
-# GraphQL
+## GraphQL
 GraphQL endpoint is available on
 ```
 https://api-test.entur.org/stop_places/1.0/graphql
 ```
 
-Tip: GraphiQL UI available on https://www-test.entur.org/admin/shamash-nsr/
+Tip: GraphiQL UI available on https://www-test.entur.org/admin/shamash-nsr/ using *GraphiQL*:
+https://github.com/graphql/graphiql
 (Use e.g. `Modify Headers` for Chrome to add bearer-token for mutations)
 
-
-# Flyway
+## Flyway
 To create the database for tiamat, download and use the flyway command line tool:
 https://flywaydb.org/documentation/commandline/
 
-## Migration
-Execute the migration. Point to the migration files in tiamat.
+### Migrations
+Migrations are executed when tiamat is started.
 
-```
-./flyway -url=jdbc:postgresql://localhost:5433/tiamat -locations=filesystem:/path/to/tiamat/src/main/resources/db/migration migrate
-```
-
-### Example migration
-```
-./flyway -url=jdbc:postgresql://localhost:5433/tiamat -locations=filesystem:/path/to/tiamat/src/main/resources/db/migration migrate
-Flyway 4.2.0 by Boxfuse
-
-Database password:
-Database: jdbc:postgresql://localhost:5433/tiamat (PostgreSQL 9.6)
-Successfully validated 1 migration (execution time 00:00.016s)
-Creating Metadata table: "public"."schema_version"
-Current version of schema "public": << Empty Schema >>
-Migrating schema "public" to version 1 - Base version
-Successfully applied 1 migration to schema "public" (execution time 00:04.220s).
-```
-
-
-## Baseline existing database
-To baseline an existing database that does not contain the table `schema_version`.
-The schema of this database must be exactly equivalent to the first migration file. If not, you might be better off by starting from scratch and import an sql dump.
-
-```
-./flyway -url=jdbc:postgresql://localhost:6432/tiamat -locations=filesystem:/path/to/tiamat/src/main/resources/db/migration baseline
-```
-
-
-## Schema changes
+### Schema changes
 Create a new file according to the flyway documentation in the folder `resources/db/migrations`.
-Commit the migration together with code changes that requires this schema change.
+Commit the migration together with code changes that requires this schema change. Follow the naming convention.
+
+
+## Tiamat scripts
+Various queries and scripts related to tiamat, has been collected here:
+https://github.com/entur/tiamat-scripts
+
+
+## CircleCI
+Tiamat is built using CircleCI. See the .circleci folder.
 
 

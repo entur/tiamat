@@ -266,6 +266,10 @@ public class StopPlaceQueryFromSearchBuilder {
             String parentFutureQuery = "p.netex_id is not null and (p.to_date >= :pointInTime OR p.to_date IS NULL)";
             wheres.add("((" + futureQuery + ") or (" + parentFutureQuery + "))");
         } else if (!stopPlaceSearch.isAllVersions() && ExportParams.VersionValidity.MAX_VERSION.equals(stopPlaceSearch.getVersionValidity())) {
+
+            // This part of query can cause issues finding matches in older versions of stop place
+            // See the task https://enturas.atlassian.net/browse/ROR-572
+
             operators.add("and");
             wheres.add("s.version = (select max(sv.version) from stop_place sv where sv.netex_id = s.netex_id)");
         }
