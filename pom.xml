@@ -45,8 +45,9 @@
 
     <distributionManagement>
         <snapshotRepository>
-            <id>Nexus</id>
-            <url>https://nexus-rutedata.dev.entur.org/content/repositories/snapshots</url>
+            <id>snapshots</id>
+            <name>entur2-snapshots</name>
+            <url>https://entur2.jfrog.io/entur2/libs-snapshot-local</url>
         </snapshotRepository>
     </distributionManagement>
 
