@@ -37,7 +37,7 @@ import java.util.Map;
 import java.util.Set;
 
 @Component
-@Api
+@Api(tags = {"Stop place resource"}, produces = "text/plain")
 @Produces("application/json")
 @Path("/")
 @Transactional

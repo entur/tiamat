@@ -31,11 +31,10 @@ import java.io.BufferedWriter;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.time.Instant;
-import java.time.Period;
 import java.util.List;
 
 @Component
-@Api
+@Api(tags = {"Quay resource"}, produces = "text/plain")
 @Produces("application/json")
 @Path("/")
 public class DtoQuayResource {

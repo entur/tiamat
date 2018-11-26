@@ -40,7 +40,7 @@ import java.io.IOException;
 import java.net.URI;
 
 @Component
-@Api
+@Api(tags = {"Sync export resource"}, produces = "application/xml")
 @Produces("application/xml")
 @Path("netex")
 public class ExportResource {

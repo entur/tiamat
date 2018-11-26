@@ -16,6 +16,8 @@
 package org.rutebanken.tiamat.model.job;
 
 import com.google.common.base.MoreObjects;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 
 import javax.persistence.Entity;
@@ -29,15 +31,19 @@ import static org.rutebanken.tiamat.rest.netex.publicationdelivery.AsyncExportRe
 
 @Entity
 @XmlRootElement
+@ApiModel(description = "Export job model")
 public class ExportJob {
 
     @Id
     @GeneratedValue
+    @ApiModelProperty("Unique id for the entity")
     private Long id;
 
     @Deprecated
+    @ApiModelProperty("JobUrl property  is deprecated")
     private String jobUrl;
 
+    @ApiModelProperty("File name of exported file")
     private String fileName;
 
     private String subFolder;
@@ -48,6 +54,7 @@ public class ExportJob {
 
     private Instant finished;
 
+    @ApiModelProperty("Job status")
     private JobStatus status;
 
     @Transient

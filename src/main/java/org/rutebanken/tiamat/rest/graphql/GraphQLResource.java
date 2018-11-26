@@ -44,7 +44,7 @@ import java.util.*;
 import static java.util.stream.Collectors.toList;
 
 @Component
-@Api
+@Api(tags = {"GraphQL Resource"}, produces = "application/json")
 @Path("graphql")
 public class GraphQLResource {
 

@@ -16,7 +16,6 @@
 package org.rutebanken.tiamat.exporter.params;
 
 import com.google.common.base.MoreObjects;
-import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiParam;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.rutebanken.tiamat.rest.graphql.GraphQLNames;
@@ -28,7 +27,6 @@ import javax.ws.rs.QueryParam;
 import java.time.Instant;
 import java.util.List;
 
-import static org.rutebanken.tiamat.exporter.params.ExportParams.VersionValidity.CURRENT_FUTURE;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 
 /**
