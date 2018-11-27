@@ -66,8 +66,8 @@
 
 
         <docker.maven.plugin.version>0.21.0</docker.maven.plugin.version>
-        <spring-boot-plugin.version>2.0.3.RELEASE</spring-boot-plugin.version>
-        <spring-boot.version>2.0.3.RELEASE</spring-boot.version>
+        <spring-boot-plugin.version>2.1.0.RELEASE</spring-boot-plugin.version>
+        <spring-boot.version>2.1.0.RELEASE</spring-boot.version>
         <spring.security.version>5.0.7.RELEASE</spring.security.version>
         <keycloak.version>4.1.0.Final</keycloak.version>
         <postgresql.version>42.2.4</postgresql.version>
@@ -94,7 +94,7 @@
         <hibernate.version>5.2.17.Final</hibernate.version>
         <hibernate-spatial.version>5.2.17.Final</hibernate-spatial.version>
 
-        <groovy-all.version>2.4.15</groovy-all.version>
+        <groovy-all.version>2.5.4</groovy-all.version>
         <jaxb-version>2.3.0.1</jaxb-version>
         <swagger-jersey2.version>1.5.20</swagger-jersey2.version>
 
@@ -447,6 +447,7 @@
             <groupId>org.codehaus.groovy</groupId>
             <artifactId>groovy-all</artifactId>
             <version>${groovy-all.version}</version>
+            <type>pom</type>
             <scope>test</scope>
         </dependency>
 
@@ -536,6 +537,9 @@
                 <configuration>
                     <useSystemClassLoader>false</useSystemClassLoader>
                     <argLine>-Xmx3G</argLine>
+                    <argLine>
+                        --illegal-access=deny
+                    </argLine>
                     <systemPropertyVariables combine.children="override">
                         <spring.output.ansi.enabled>ALWAYS</spring.output.ansi.enabled>
                         <env>dev</env>
@@ -608,7 +612,17 @@
             </plugin>
         </plugins>
     </build>
-
-
+    <profiles>
+        <profile>
+            <id>java-11</id>
+            <activation>
+                <jdk>11</jdk>
+            </activation>
+            <properties>
+                <maven.compiler.source>11</maven.compiler.source>
+                <maven.compiler.target>11</maven.compiler.target>
+            </properties>
+        </profile>
+    </profiles>
 </project>
 
