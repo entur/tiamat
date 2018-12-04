@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<TargetEndpoint name="stop-places-v1">
+    <Description/>
+    <FaultRules/>
+    <DefaultFaultRule name="target-fault">
+        <Step>
+            <Name>flowCallout.generalSecurityHeaders</Name>
+        </Step>
+    </DefaultFaultRule>
+    <Flows/>
+    <PostFlow name="PostFlow">
+        <Request/>
+        <Response>
+            <Step>
+                <FaultRules/>
+                <Name>flowCallout.generalSecurityHeaders</Name>
+            </Step>
+        </Response>
+    </PostFlow>
+    <PreFlow name="PreFlow">
+        <Request>
+            <Step>
+                <Name>flowCallout.replaceTargetUrl</Name>
+            </Step>
+        </Request>
+        <Response>
+            <Step>
+                <FaultRules/>
+                <Name>assignMessage.addCors</Name>
+            </Step>
+        </Response>
+    </PreFlow>
+    <HTTPTargetConnection>
+        <Properties/>
+        <URL>https://stop-places-v1-NAMESPACE.INGRESS_ENVIRONMENT/services/stop_places</URL>
+    </HTTPTargetConnection>
+</TargetEndpoint>
