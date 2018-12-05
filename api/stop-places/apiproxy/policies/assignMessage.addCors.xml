@@ -6,7 +6,7 @@
     <Set>
         <Headers>
             <Header name="Access-Control-Allow-Origin">*</Header>
-            <Header name="Access-Control-Allow-Headers">origin, x-requested-with, accept</Header>
+            <Header name="Access-Control-Allow-Headers">origin, x-requested-with, accept, ET-Client-Name, ET-Client-Id, Content-Type, X-Correlation-Id, entur-pos</Header>
             <Header name="Access-Control-Max-Age">3628800</Header>
             <Header name="Access-Control-Allow-Methods">GET, PUT, POST, DELETE</Header>
         </Headers>
