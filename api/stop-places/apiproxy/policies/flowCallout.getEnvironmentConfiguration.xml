@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<FlowCallout async="false" continueOnError="false" enabled="true" name="flowCallout.getEnvironmentConfiguration">
+    <DisplayName>flowCallout.getEnvironmentConfiguration</DisplayName>
+    <FaultRules/>
+    <Properties/>
+    <SharedFlowBundle>fetchEnvironmentConfiguration</SharedFlowBundle>
+</FlowCallout>
