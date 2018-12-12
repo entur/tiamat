@@ -16,12 +16,15 @@
 package org.rutebanken.tiamat.rest.graphql
 
 import org.junit.Test
+import com.vividsolutions.jts.geom.Coordinate
+import com.vividsolutions.jts.geom.GeometryFactory
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString
 import org.rutebanken.tiamat.model.TariffZone
 import org.rutebanken.tiamat.repository.TariffZoneRepository
 import org.springframework.beans.factory.annotation.Autowired
 
 import static org.hamcrest.Matchers.equalTo
+import static org.hamcrest.Matchers.notNullValue
 
 class GraphQLResourceTariffZoneIntegrationTest extends AbstractGraphQLResourceIntegrationTest {
 
@@ -34,7 +37,9 @@ class GraphQLResourceTariffZoneIntegrationTest extends AbstractGraphQLResourceIn
         def tariffZone = new TariffZone()
         tariffZone.netexId = "BRA:TariffZone:112"
         tariffZone.name = new EmbeddableMultilingualString("Somewhere")
-        tariffZone.version = 1L
+        tariffZone.version = 1L;
+        Coordinate[] coordinates = Arrays.asList(new Coordinate(0, 0), new Coordinate(1, 0), new Coordinate(1, 1), new Coordinate(0, 0)).toArray(new Coordinate[4]);
+        tariffZone.setPolygon(new GeometryFactory().createPolygon(coordinates))
         tariffZoneRepository.save(tariffZone)
 
         String graphQlJsonQuery = """
@@ -43,6 +48,14 @@ class GraphQLResourceTariffZoneIntegrationTest extends AbstractGraphQLResourceIn
                                 id
                                 name {value}
                                 version
+                                    geometry {
+                                        type
+                                        coordinates
+                                    }
+                                    polygon {
+                                        type
+                                        coordinates
+                                    }
                           }
                         }"""
 
@@ -51,6 +64,7 @@ class GraphQLResourceTariffZoneIntegrationTest extends AbstractGraphQLResourceIn
                 .body("name.value", equalTo(tariffZone.name.value))
                 .body("id", equalTo(tariffZone.netexId))
                 .body("version", equalTo(Long.toString(tariffZone.version)))
+                .body("polygon",notNullValue())
     }
 
 }
