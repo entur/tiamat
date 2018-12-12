@@ -61,6 +61,19 @@ public class DateScalarTest extends TiamatIntegrationTest {
         assertThat(LocalDateTime.ofInstant(actual, ZoneOffset.UTC).getHour()).as("Hour should be correct").isEqualTo(17);
     }
 
+    @Test
+    public void parseDateTimeWithoutMilliseconds() {
+        Instant actual = (Instant) dateScalar.getGraphQLDateScalar().getCoercing().parseValue( "2017-04-23T18:25:43Z");
+        System.out.println(actual);
+        assertThat(LocalDateTime.ofInstant(actual, ZoneOffset.UTC).getHour()).as("Hour should be correct").isEqualTo(18);
+    }
+
+    @Test
+    public void parseDateTimeWithMicroseconds() {
+        Instant actual = (Instant) dateScalar.getGraphQLDateScalar().getCoercing().parseValue( "2017-04-23T18:25:43.123456+0100");
+        System.out.println(actual);
+        assertThat(LocalDateTime.ofInstant(actual, ZoneOffset.UTC).getHour()).as("Hour should be correct").isEqualTo(17);
+    }
     /**
      * new Date().toISOString();
      */

@@ -25,6 +25,7 @@ import org.rutebanken.tiamat.versioning.VersionCreator;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
@@ -35,6 +36,8 @@ public class QuayRepositoryImplTest extends TiamatIntegrationTest {
 
     @Autowired
     private VersionCreator versionCreator;
+
+    private Instant now = Instant.now().truncatedTo(ChronoUnit.SECONDS);
 
     @Test
     public void findByKeyValue() throws Exception {
@@ -60,7 +63,6 @@ public class QuayRepositoryImplTest extends TiamatIntegrationTest {
 
         String importedIdPosix = "187";
         String importedId = "XXX:Quay:" + importedIdPosix;
-        Instant now = Instant.now();
 
         StopPlace childStop = new StopPlace();
         childStop.setVersion(1L);
@@ -81,7 +83,7 @@ public class QuayRepositoryImplTest extends TiamatIntegrationTest {
         childStop.setParentSiteRef(new SiteRefStructure(parentStop.getNetexId(), String.valueOf(parentStop.getVersion())));
         stopPlaceRepository.save(childStop);
 
-        List<IdMappingDto> idMapping = quayRepository.findKeyValueMappingsForQuay(now,now, 0, 10);
+        List<IdMappingDto> idMapping = quayRepository.findKeyValueMappingsForQuay(now, now, 0, 10);
         assertThat(idMapping).extracting(idMappingDto -> idMappingDto.netexId).contains(quay.getNetexId());
     }
 
@@ -90,7 +92,6 @@ public class QuayRepositoryImplTest extends TiamatIntegrationTest {
 
         String importedIdPosix = "104";
         String importedId = "YYY:Quay:" + importedIdPosix;
-        Instant now = Instant.now();
 
         StopPlace childStop = new StopPlace();
         childStop.setVersion(1L);
@@ -111,7 +112,7 @@ public class QuayRepositoryImplTest extends TiamatIntegrationTest {
         childStop.setParentSiteRef(new SiteRefStructure(notCurrentlyValidParentStop.getNetexId(), String.valueOf(notCurrentlyValidParentStop.getVersion())));
         stopPlaceRepository.save(childStop);
 
-        List<IdMappingDto> idMapping = quayRepository.findKeyValueMappingsForQuay(now,now, 0, 10);
+        List<IdMappingDto> idMapping = quayRepository.findKeyValueMappingsForQuay(now, now, 0, 10);
         assertThat(idMapping).extracting(idMappingDto -> idMappingDto.netexId)
                 .as("Quay " + quay.getNetexId() + " should not be returned in mapping as it belongs to a stop place with parent stop place wich is currently not valid")
                 .doesNotContain(quay.getNetexId());
@@ -130,7 +131,6 @@ public class QuayRepositoryImplTest extends TiamatIntegrationTest {
     public void testFindKeyValueMappingsForQuayReturnsOnlyQuaysValidInInterval(String orgIdKey) {
         String orgIdSuffix = "2";
         String orgId = "XXX:Quay:" + orgIdSuffix;
-        Instant now = Instant.now();
 
         StopPlace historicMatchingStopV1 = saveStop("NSR:StopPlace:1", 1l, now.minusSeconds(200), now.minusSeconds(10));
         Quay historicMatchingQuay = saveQuay(historicMatchingStopV1, "NSR:Quay:1", 1l, orgIdKey, orgId);
@@ -138,7 +138,7 @@ public class QuayRepositoryImplTest extends TiamatIntegrationTest {
         StopPlace currentMatchingStop = saveStop("NSR:StopPlace:2", 1l, now.minusSeconds(10), null);
         Quay currentMatchingQuay = saveQuay(currentMatchingStop, "NSR:Quay:2", 1l, orgIdKey, orgId);
 
-        List<IdMappingDto> currentMapping = quayRepository.findKeyValueMappingsForQuay(now,now, 0, 2000);
+        List<IdMappingDto> currentMapping = quayRepository.findKeyValueMappingsForQuay(now, now, 0, 2000);
         Assert.assertEquals(1, currentMapping.size());
         Assert.assertEquals(orgId, currentMapping.get(0).originalId);
         Assert.assertEquals(currentMatchingQuay.getNetexId(), currentMapping.get(0).netexId);

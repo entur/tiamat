@@ -16,7 +16,7 @@
 package org.rutebanken.tiamat.versioning.save;
 
 import com.google.api.client.util.Preconditions;
-import com.vividsolutions.jts.geom.Point;
+import org.locationtech.jts.geom.Point;
 import org.rutebanken.helper.organisation.AuthorizationConstants;
 import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
 import org.rutebanken.tiamat.auth.UsernameFetcher;

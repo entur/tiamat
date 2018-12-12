@@ -29,6 +29,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -40,6 +41,7 @@ public class DtoQuayResourceTest {
 
     private QuayRepository quayRepository = mock(QuayRepository.class);
     private DtoQuayResource dtoQuayResource;
+    private Instant now = Instant.now().truncatedTo(ChronoUnit.SECONDS);
 
     @Before
     public void setUp() {
@@ -50,7 +52,7 @@ public class DtoQuayResourceTest {
     public void keyValueQuayMappingWithSize() throws IOException, InterruptedException {
         int keyValueMappingCount = 3;
         int size = 1;
-        Instant now = Instant.now();
+
         when(quayRepository.findKeyValueMappingsForQuay(any(Instant.class), any(Instant.class), anyInt(), anyInt()))
                 .thenReturn(Arrays.asList(new IdMappingDto("original id", BigInteger.ONE.toString(), now, now, StopTypeEnumeration.FERRY_STOP)))
                 .thenReturn(Arrays.asList(new IdMappingDto("original id", BigInteger.TEN.toString(), now, now, StopTypeEnumeration.TRAM_STATION)))

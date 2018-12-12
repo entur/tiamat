@@ -15,12 +15,15 @@
 
 package org.rutebanken.tiamat.geo;
 
-import com.vividsolutions.jts.algorithm.CentroidPoint;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.Point;
+
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.MultiPoint;
+import org.locationtech.jts.geom.Point;
 import org.rutebanken.tiamat.model.Zone_VersionStructure;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -35,26 +38,25 @@ public class CentroidComputer {
 
     /**
      * Computes point from a list of zone's centrois
-      * @param zones netex zones
+     *
+     * @param zones netex zones
      * @return point or empty if none of the zones contained centroid point
      */
     public Optional<Point> compute(Set<? extends Zone_VersionStructure> zones) {
-        CentroidPoint centroidPoint = new CentroidPoint();
 
-        boolean anyAdded = false;
-        if(zones != null) {
+
+        List<Point> centroids = new ArrayList<>();
+        if (zones != null) {
             for (Zone_VersionStructure zone : zones) {
                 if (zone.getCentroid() != null) {
-                    centroidPoint.add(zone.getCentroid());
-                    anyAdded = true;
+                    centroids.add(zone.getCentroid());
                 }
             }
         }
-        if(anyAdded) {
-            Point point = geometryFactory.createPoint(centroidPoint.getCentroid());
-            return Optional.of(point);
-        }
-        else return Optional.empty();
+        if (!centroids.isEmpty()) {
+            MultiPoint multiPoint = geometryFactory.createMultiPoint(centroids.toArray(new Point[centroids.size()]));
+            return Optional.of(multiPoint.getCentroid());
+        } else return Optional.empty();
 
     }
 }

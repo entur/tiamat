@@ -16,7 +16,7 @@
 package org.rutebanken.tiamat.rest.graphql.fetchers;
 
 import com.google.common.base.Preconditions;
-import com.vividsolutions.jts.geom.Point;
+import org.locationtech.jts.geom.Point;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import org.rutebanken.helper.organisation.ReflectionAuthorizationService;

@@ -35,7 +35,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -53,6 +55,8 @@ public class ImportResourceTest extends TiamatIntegrationTest {
 
     @Autowired
     private PublicationDeliveryHelper publicationDeliveryHelper;
+
+    private LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
 
     /**
      * When sending a stop place with the same ID twice, the same stop place must be returned.
@@ -1017,8 +1021,8 @@ public class ImportResourceTest extends TiamatIntegrationTest {
 
     @Test
     public void importStopPlaceWithMultipleValidBetweenPeriodsIgnoresAllButFirst() throws Exception {
-        LocalDateTime firstValidFrom = LocalDateTime.now().plusSeconds(1);
-        LocalDateTime secondValidFrom = LocalDateTime.now().plusSeconds(2);
+        LocalDateTime firstValidFrom = now.plusSeconds(1);
+        LocalDateTime secondValidFrom = now.plusSeconds(2);
         StopPlace stopPlace1 = new StopPlace()
                 .withId("XYZ:Stopplace:1")
                 .withVersion("1")

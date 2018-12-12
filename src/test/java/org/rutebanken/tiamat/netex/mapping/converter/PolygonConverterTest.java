@@ -15,8 +15,8 @@
 
 package org.rutebanken.tiamat.netex.mapping.converter;
 
-import com.vividsolutions.jts.geom.*;
-import com.vividsolutions.jts.geom.impl.CoordinateArraySequence;
+import org.locationtech.jts.geom.*;
+import org.locationtech.jts.geom.impl.CoordinateArraySequence;
 import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.metadata.TypeBuilder;
 import net.opengis.gml._3.*;

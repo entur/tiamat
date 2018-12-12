@@ -29,6 +29,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -40,7 +41,7 @@ public class DtoStopPlaceResourceTest {
 
     private StopPlaceRepository stopPlaceRepository = mock(StopPlaceRepository.class);
     private DtoStopPlaceResource dtoStopPlaceResource;
-
+    private Instant now = Instant.now().truncatedTo(ChronoUnit.SECONDS);
     @Before
     public void setUp() {
         dtoStopPlaceResource = new DtoStopPlaceResource(stopPlaceRepository, mock(DtoMappingSemaphore.class), new IdMappingDtoCsvMapper(new ExportTimeZone()));
@@ -51,7 +52,6 @@ public class DtoStopPlaceResourceTest {
         int keyValueMappingCount = 3;
         int size = 1;
 
-        Instant now = Instant.now();
         when(stopPlaceRepository.findKeyValueMappingsForStop(any(Instant.class), any(Instant.class), anyInt(), anyInt()))
                 .thenReturn(Arrays.asList(new IdMappingDto("original id", BigInteger.ONE.toString(),now,now, StopTypeEnumeration.FERRY_STOP)))
                 .thenReturn(Arrays.asList(new IdMappingDto("original id", BigInteger.TEN.toString(),now,now, StopTypeEnumeration.TRAM_STATION)))

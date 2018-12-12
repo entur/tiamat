@@ -15,8 +15,8 @@
 
 package org.rutebanken.tiamat.rest.graphql
 
-import com.vividsolutions.jts.geom.Coordinate
-import com.vividsolutions.jts.geom.Point
+import org.locationtech.jts.geom.Coordinate
+import org.locationtech.jts.geom.Point
 import org.hamcrest.Matchers
 import org.junit.Before
 import org.junit.Test
@@ -31,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional
 
 import java.time.Instant
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 
 import static org.assertj.core.api.Assertions.assertThat
 import static org.hamcrest.Matchers.*
@@ -45,6 +46,8 @@ def class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourc
 
     @Autowired
     private ExportTimeZone exportTimeZone
+
+    private Instant now = Instant.now().truncatedTo(ChronoUnit.SECONDS);
 
     @Before
     void cleanReceivedJMS(){
@@ -444,8 +447,6 @@ def class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourc
         String name = "Gamleveien"
         StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(name))
 
-        Instant now = Instant.now()
-
         Instant fromDate = now.minusSeconds(10000)
         Instant toDate = now.minusSeconds(1000)
 
@@ -502,11 +503,11 @@ def class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourc
 
         String name = "fuscator"
         StopPlace stopPlaceWithoutQuays = new StopPlace(new EmbeddableMultilingualString(name))
-        stopPlaceWithoutQuays.setValidBetween(new ValidBetween(Instant.now().minusMillis(10000)))
+        stopPlaceWithoutQuays.setValidBetween(new ValidBetween(now.minusMillis(10000)))
         stopPlaceRepository.save(stopPlaceWithoutQuays)
 
         StopPlace stopPlaceWithQuays = new StopPlace(new EmbeddableMultilingualString(name))
-        stopPlaceWithQuays.setValidBetween(new ValidBetween(Instant.now().minusMillis(10000)))
+        stopPlaceWithQuays.setValidBetween(new ValidBetween(now.minusMillis(10000)))
         stopPlaceWithQuays.getQuays().add(new Quay())
         stopPlaceRepository.save(stopPlaceWithQuays)
 
@@ -827,7 +828,7 @@ def class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourc
         tram.setStopPlaceType(StopTypeEnumeration.TRAM_STATION)
         stopPlaceVersionedSaverService.saveNewVersion(tram)
 
-        def fromDate = Instant.now().plusSeconds(100000)
+        def fromDate = now.plusSeconds(100000)
 
         def parentStopPlaceName = "Super stop place name"
         def versionComment = "VersionComment"
@@ -1030,8 +1031,6 @@ def class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourc
 
         String versionComment = "Stop place not valid anymore"
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DATE_TIME_PATTERN)
-
-        Instant now = Instant.now()
 
         // Mutate stop place. The new version should have valid from now.
         String fromDate = dateTimeFormatter.format(now.atZone(exportTimeZone.getDefaultTimeZoneId()))

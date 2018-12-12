@@ -24,6 +24,7 @@ import org.rutebanken.tiamat.model.tag.Tag;
 import org.rutebanken.tiamat.repository.TagRepository;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -37,17 +38,17 @@ public class TagKeyValuesMapperTest {
 
     private TagRepository tagRepository = mock(TagRepository.class);
     private TagKeyValuesMapper tagKeyValuesMapper = new TagKeyValuesMapper(tagRepository);
-
+    private Instant now = Instant.now().truncatedTo(ChronoUnit.SECONDS);
     @Test
     public void mapTagsToProperties() throws Exception {
 
         Tag tag = new Tag();
-        tag.setCreated(Instant.now());
+        tag.setCreated(now);
         tag.setName("name");
         tag.setCreatedBy("also me");
         tag.setIdreference("NSR:StopPlace:1");
         tag.setRemovedBy("me");
-        tag.setRemoved(Instant.now());
+        tag.setRemoved(now);
         tag.setComment("comment");
 
         Set<Tag> tags = Sets.newHashSet(tag);
@@ -83,7 +84,7 @@ public class TagKeyValuesMapperTest {
 
         KeyListStructure keyListStructure = new KeyListStructure();
         keyListStructure.getKeyValue().add(new KeyValueStructure().withKey("TAG-0-name").withValue("name"));
-        keyListStructure.getKeyValue().add(new KeyValueStructure().withKey("TAG-0-created").withValue(String.valueOf(Instant.now().toEpochMilli())));
+        keyListStructure.getKeyValue().add(new KeyValueStructure().withKey("TAG-0-created").withValue(String.valueOf(now.toEpochMilli())));
         keyListStructure.getKeyValue().add(new KeyValueStructure().withKey("TAG-0-idReference").withValue("NSR:StopPlace:1"));
         keyListStructure.getKeyValue().add(new KeyValueStructure().withKey("TAG-1-name").withValue("name 2"));
         keyListStructure.getKeyValue().add(new KeyValueStructure().withKey("TAG-1-idReference").withValue("NSR:StopPlace:2"));
@@ -98,12 +99,12 @@ public class TagKeyValuesMapperTest {
     public void mapForthAndBack() throws Exception {
         String netexReference = "NSR:StopPlace:2";
         Tag tag = new Tag();
-        tag.setCreated(Instant.now());
+        tag.setCreated(now);
         tag.setName("name");
         tag.setCreatedBy("also me");
         tag.setIdreference(netexReference);
         tag.setRemovedBy("me");
-        tag.setRemoved(Instant.now());
+        tag.setRemoved(now);
         tag.setComment("comment");
 
         Set<Tag> tags = Sets.newHashSet(tag);

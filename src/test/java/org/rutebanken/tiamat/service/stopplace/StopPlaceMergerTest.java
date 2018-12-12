@@ -15,15 +15,34 @@
 
 package org.rutebanken.tiamat.service.stopplace;
 
-import com.vividsolutions.jts.geom.Coordinate;
+import org.junit.Assert;
 import org.junit.Test;
+import org.locationtech.jts.geom.Coordinate;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
-import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.model.AlternativeName;
+import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
+import org.rutebanken.tiamat.model.GeneralSign;
+import org.rutebanken.tiamat.model.InstalledEquipment_VersionStructure;
+import org.rutebanken.tiamat.model.PlaceEquipment;
+import org.rutebanken.tiamat.model.PrivateCodeStructure;
+import org.rutebanken.tiamat.model.Quay;
+import org.rutebanken.tiamat.model.SignContentEnumeration;
+import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.StopTypeEnumeration;
+import org.rutebanken.tiamat.model.TariffZone;
+import org.rutebanken.tiamat.model.TariffZoneRef;
+import org.rutebanken.tiamat.model.ValidBetween;
+import org.rutebanken.tiamat.model.Value;
+import org.rutebanken.tiamat.model.VehicleModeEnumeration;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.transaction.Transactional;
 import java.time.Instant;
-import java.util.*;
+import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -38,11 +57,13 @@ public class StopPlaceMergerTest extends TiamatIntegrationTest {
     @Autowired
     private MultiModalStopPlaceEditor multiModalStopPlaceEditor;
 
+    private Instant now = Instant.now().truncatedTo(ChronoUnit.SECONDS);
+
     @Test
     @Transactional
     public void testMergeStopPlaces() {
 
-        Instant atTestStart = Instant.now();
+        Instant atTestStart = now;
 
         StopPlace fromStopPlace = new StopPlace();
         fromStopPlace.setName(new EmbeddableMultilingualString("Name"));
@@ -221,13 +242,13 @@ public class StopPlaceMergerTest extends TiamatIntegrationTest {
 
         StopPlace fromStopPlace = new StopPlace();
         fromStopPlace.setName(new EmbeddableMultilingualString("Name"));
-        ValidBetween fromValidBetween = new ValidBetween(Instant.now().minusSeconds(3600));
+        ValidBetween fromValidBetween = new ValidBetween(now.minusSeconds(3600));
         fromStopPlace.setValidBetween(fromValidBetween);
 
         StopPlace toStopPlace = new StopPlace();
         toStopPlace.setName(new EmbeddableMultilingualString("Name 2"));
 
-        ValidBetween toValidBetween = new ValidBetween(Instant.now().minusSeconds(1800));
+        ValidBetween toValidBetween = new ValidBetween(now.minusSeconds(1800));
         toStopPlace.setValidBetween(toValidBetween);
 
 
@@ -328,7 +349,7 @@ public class StopPlaceMergerTest extends TiamatIntegrationTest {
         assertThat(actualChild.getParentSiteRef()).as("merged stop place parent site ref").isNotNull();
         assertThat(actualChild.getParentSiteRef().getRef()).isEqualTo(toChild.getParentSiteRef().getRef());
         assertThat(actualChild.getParentSiteRef().getVersion()).as("parent version").isEqualTo("2");
-        assertThat(actualChild.getVersion()).isEqualTo(toChild.getVersion()+1);
+        assertThat(actualChild.getVersion()).isEqualTo(toChild.getVersion() + 1);
     }
 
     private StopPlace createChildWithParent(String name) {
@@ -337,4 +358,5 @@ public class StopPlaceMergerTest extends TiamatIntegrationTest {
         return multiModalStopPlaceEditor.createMultiModalParentStopPlace(Arrays.asList(child.getNetexId()), new EmbeddableMultilingualString(name)).getChildren().iterator().next();
 
     }
+
 }

@@ -122,7 +122,7 @@ public class StopPlaceVersionedSaverService {
     }
 
     public StopPlace saveNewVersion(StopPlace newVersion) {
-        return saveNewVersion(null , newVersion);
+        return saveNewVersion(null, newVersion);
     }
 
     public StopPlace saveNewVersion(StopPlace existingVersion, StopPlace newVersion, Instant defaultValidFrom, Set<String> childStopsUpdated) {
@@ -131,15 +131,15 @@ public class StopPlaceVersionedSaverService {
 
         if (newVersion.getParentSiteRef() != null && !newVersion.isParentStopPlace()) {
             throw new IllegalArgumentException("StopPlace " +
-                    newVersion.getNetexId() +
-                    " seems to be a child stop. Save the parent stop place instead: "
-                    + newVersion.getParentSiteRef());
+                                                       newVersion.getNetexId() +
+                                                       " seems to be a child stop. Save the parent stop place instead: "
+                                                       + newVersion.getParentSiteRef());
         }
 
-        if(newVersion.getTariffZones() != null) {
-            for(TariffZoneRef tariffZoneRef : newVersion.getTariffZones()) {
+        if (newVersion.getTariffZones() != null) {
+            for (TariffZoneRef tariffZoneRef : newVersion.getTariffZones()) {
                 TariffZone tariffZone = referenceResolver.resolve(tariffZoneRef);
-                if(tariffZone == null) {
+                if (tariffZone == null) {
                     throw new IllegalArgumentException("StopPlace refers to non existing tariff zone: " + tariffZoneRef);
                 }
             }
@@ -169,12 +169,12 @@ public class StopPlaceVersionedSaverService {
             stopPlaceAuthorizationService.assertAuthorizedToEdit(existingVersionRefetched, newVersion, childStopsUpdated);
         }
 
-        newVersion =  versionIncrementor.initiateOrIncrementVersions(newVersion);
+        newVersion = versionIncrementor.initiateOrIncrementVersions(newVersion);
 
         newVersion.setChangedBy(usernameFetcher.getUserNameForAuthenticatedUser());
         logger.info("StopPlace [{}], version {} changed by user [{}]. {}", newVersion.getNetexId(), newVersion.getVersion(), newVersion.getChangedBy(), newVersion.getValidBetween());
 
-        if(newVersion.getWeighting() == null) {
+        if (newVersion.getWeighting() == null) {
             logger.info("Weighting is null for stop {} {}. Setting default value {}.", newVersion.getName(), newVersion.getNetexId(), DEFAULT_WEIGHTING);
             newVersion.setWeighting(DEFAULT_WEIGHTING);
         }
@@ -183,26 +183,26 @@ public class StopPlaceVersionedSaverService {
         tariffZonesLookupService.populateTariffZone(newVersion);
         clearUnwantedChildFields(newVersion);
 
-        if(newVersion.getChildren() != null) {
+        if (newVersion.getChildren() != null) {
             newVersion.getChildren().forEach(child -> {
                 child.setChanged(changed);
                 tariffZonesLookupService.populateTariffZone(child);
             });
 
             stopPlaceRepository.saveAll(newVersion.getChildren());
-            if(logger.isDebugEnabled()) {
+            if (logger.isDebugEnabled()) {
                 logger.debug("Saved children: {}", newVersion.getChildren().stream()
-                        .map(sp -> "{id:" + sp.getId() + " netexId:" + sp.getNetexId() + " version:" + sp.getVersion() + "}")
-                        .collect(Collectors.toList()));
+                                                           .map(sp -> "{id:" + sp.getId() + " netexId:" + sp.getNetexId() + " version:" + sp.getVersion() + "}")
+                                                           .collect(Collectors.toList()));
             }
         }
         newVersion = stopPlaceRepository.save(newVersion);
         logger.debug("Saved stop place with id: {} and childs {}", newVersion.getId(), newVersion.getChildren().stream().map(ch -> ch.getId()).collect(toList()));
 
-        updateParentSiteRefsForChilds(newVersion);
+        updateParentSiteRefsForChildren(newVersion);
 
-        if(existingVersion != null) {
-           tiamatObjectDiffer.logDifference(existingVersion, newVersion);
+        if (existingVersion != null) {
+            tiamatObjectDiffer.logDifference(existingVersion, newVersion);
         }
         metricsService.registerEntitySaved(newVersion.getClass());
 
@@ -216,20 +216,20 @@ public class StopPlaceVersionedSaverService {
     }
 
     private void validateAdjacentSites(StopPlace newVersion) {
-        if(newVersion.getAdjacentSites() != null) {
+        if (newVersion.getAdjacentSites() != null) {
             logger.info("Validating adjacent sites for {} {}", newVersion.getNetexId(), newVersion.getName());
-            for(SiteRefStructure siteRefStructure : newVersion.getAdjacentSites()) {
+            for (SiteRefStructure siteRefStructure : newVersion.getAdjacentSites()) {
 
-                if(newVersion.getNetexId() != null && (newVersion.getNetexId().equals(siteRefStructure.getRef()))) {
+                if (newVersion.getNetexId() != null && (newVersion.getNetexId().equals(siteRefStructure.getRef()))) {
                     throw new IllegalArgumentException("Cannot set own ID as adjacent site ref: " + siteRefStructure.getRef());
                 }
 
                 StopPlace adjacentStop = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(siteRefStructure.getRef());
-                if(adjacentStop == null) {
+                if (adjacentStop == null) {
                     throw new IllegalArgumentException("StopPlace " + newVersion.getId() + ", " + newVersion.getName() + " cannot have " + siteRefStructure.getRef() + " as adjacent stop as it does not exist");
                 }
 
-                if(zoneDistanceChecker.exceedsLimit(newVersion, adjacentStop, ADJACENT_STOP_PLACE_MAX_DISTANCE_IN_METERS)) {
+                if (zoneDistanceChecker.exceedsLimit(newVersion, adjacentStop, ADJACENT_STOP_PLACE_MAX_DISTANCE_IN_METERS)) {
                     throw new IllegalArgumentException(
                             "StopPlace " + newVersion.getId() + ", " + newVersion.getName() +
                                     " cannot be located more than " + ADJACENT_STOP_PLACE_MAX_DISTANCE_IN_METERS +
@@ -240,28 +240,28 @@ public class StopPlaceVersionedSaverService {
     }
 
     private void updateQuaysCache(StopPlace stopPlace) {
-        if(stopPlace.getQuays() != null) {
+        if (stopPlace.getQuays() != null) {
             stopPlaceByQuayOriginalIdFinder.updateCache(stopPlace.getNetexId(),
                     stopPlace.getQuays()
                             .stream()
                             .flatMap(q -> q.getOriginalIds().stream())
                             .collect(toList()));
         }
-        if(stopPlace.isParentStopPlace()) {
-            if(stopPlace.getChildren() != null) {
+        if (stopPlace.isParentStopPlace()) {
+            if (stopPlace.getChildren() != null) {
                 stopPlace.getChildren().forEach(this::updateQuaysCache);
             }
         }
     }
 
     private void clearUnwantedChildFields(StopPlace stopPlaceToSave) {
-        if(stopPlaceToSave.getChildren() == null) return;
+        if (stopPlaceToSave.getChildren() == null) return;
         stopPlaceToSave.getChildren().forEach(child -> {
 
-            if(child.getName() != null
-                    && stopPlaceToSave.getName() != null
-                    && child.getName().getValue().equalsIgnoreCase(stopPlaceToSave.getName().getValue())
-                    && (child.getName().getLang() == null || child.getName().getLang().equalsIgnoreCase(stopPlaceToSave.getName().getLang()))) {
+            if (child.getName() != null
+                        && stopPlaceToSave.getName() != null
+                        && child.getName().getValue().equalsIgnoreCase(stopPlaceToSave.getName().getValue())
+                        && (child.getName().getLang() == null || child.getName().getLang().equalsIgnoreCase(stopPlaceToSave.getName().getLang()))) {
                 logger.info("Name of child {}: {} is equal to parent's name {}. Clearing it", child.getNetexId(), stopPlaceToSave.getName(), stopPlaceToSave.getNetexId());
                 child.setName(null);
             }
@@ -272,17 +272,15 @@ public class StopPlaceVersionedSaverService {
 
     /**
      * Needs to be done after parent stop place has been assigned an ID
+     *
      * @param parentStopPlace saved parent stop place
      */
-    private void updateParentSiteRefsForChilds(StopPlace parentStopPlace) {
+    private void updateParentSiteRefsForChildren(StopPlace parentStopPlace) {
         long count = 0;
-        if(parentStopPlace.getChildren() != null) {
-            count = parentStopPlace.getChildren().stream()
-                .map(child -> {
-                    child.setParentSiteRef(new SiteRefStructure(parentStopPlace.getNetexId(), String.valueOf(parentStopPlace.getVersion())));
-                    return child;
-
-            }).count();
+        if (parentStopPlace.getChildren() != null) {
+            parentStopPlace.getChildren().stream()
+                    .forEach(child -> child.setParentSiteRef(new SiteRefStructure(parentStopPlace.getNetexId(), String.valueOf(parentStopPlace.getVersion()))));
+            count = parentStopPlace.getChildren().size();
         }
         logger.info("Updated {} childs with parent site refs", count);
     }

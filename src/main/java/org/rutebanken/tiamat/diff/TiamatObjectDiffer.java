@@ -16,7 +16,7 @@
 package org.rutebanken.tiamat.diff;
 
 import com.google.common.collect.Sets;
-import com.vividsolutions.jts.geom.Geometry;
+import org.locationtech.jts.geom.Geometry;
 import org.rutebanken.tiamat.diff.generic.Difference;
 import org.rutebanken.tiamat.diff.generic.GenericDiffConfig;
 import org.rutebanken.tiamat.diff.generic.GenericObjectDiffer;

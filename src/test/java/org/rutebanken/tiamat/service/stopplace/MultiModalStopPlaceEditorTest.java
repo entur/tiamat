@@ -44,6 +44,8 @@ public class MultiModalStopPlaceEditorTest extends TiamatIntegrationTest {
     @Autowired
     private MultiModalStopPlaceEditor multiModalStopPlaceEditor;
 
+    private Instant now = Instant.now().truncatedTo(ChronoUnit.SECONDS);
+
     @Test
     public void testCreateMultiModalParentStopPlaceDoNotAllowEmptyListOfStopPlace() {
         List<String> childIds = new ArrayList<>();
@@ -137,7 +139,7 @@ public class MultiModalStopPlaceEditorTest extends TiamatIntegrationTest {
 
         StopPlace child = stopPlaceRepository.save(createStopPlace("StopPlace - 1"));
 
-        Instant futureTime = Instant.now().plusSeconds(600);
+        Instant futureTime = now.plusSeconds(600);
 
 
         String parentStopPlaceName = "Super Duper StopPlace";
@@ -156,7 +158,7 @@ public class MultiModalStopPlaceEditorTest extends TiamatIntegrationTest {
 
         StopPlace child = stopPlaceRepository.save(createStopPlace("StopPlace - 1"));
 
-        Instant futureTime = Instant.now().plusSeconds(600);
+        Instant futureTime = now.plusSeconds(600);
 
 
         String parentStopPlaceName = "Super Duper StopPlace +1";
@@ -219,7 +221,7 @@ public class MultiModalStopPlaceEditorTest extends TiamatIntegrationTest {
 
         StopPlace newChild = createStopPlace("new child");
         newChild.setVersion(1L);
-        newChild.setValidBetween(new ValidBetween(Instant.now().minusSeconds(1000)));
+        newChild.setValidBetween(new ValidBetween(now.minusSeconds(1000)));
         newChild = stopPlaceRepository.save(newChild);
 
         parent = multiModalStopPlaceEditor.addToMultiModalParentStopPlace(parent.getNetexId(), Arrays.asList(newChild.getNetexId()));
@@ -237,12 +239,12 @@ public class MultiModalStopPlaceEditorTest extends TiamatIntegrationTest {
 
         StopPlace childToKeep = createStopPlace("existingChild");
         childToKeep.setVersion(1L);
-        childToKeep.setCreated(Instant.now().minus(1, ChronoUnit.DAYS));
+        childToKeep.setCreated(now.minus(1, ChronoUnit.DAYS));
         childToKeep = stopPlaceRepository.save(childToKeep);
 
         StopPlace childToRemove = createStopPlace("existingChild 2");
         childToRemove.setVersion(1L);
-        childToRemove.setCreated(Instant.now());
+        childToRemove.setCreated(now);
         childToRemove = stopPlaceRepository.save(childToRemove);
 
         String parentStopPlaceName = "Parent StopPlace about to lose a child";
@@ -264,7 +266,7 @@ public class MultiModalStopPlaceEditorTest extends TiamatIntegrationTest {
         String lang = "en";
         StopPlace childToRemove = createStopPlace(parentStopPlaceName, lang);
         childToRemove.setVersion(1L);
-        childToRemove.setCreated(Instant.now());
+        childToRemove.setCreated(now);
         childToRemove = stopPlaceRepository.save(childToRemove);
 
 
@@ -285,7 +287,7 @@ public class MultiModalStopPlaceEditorTest extends TiamatIntegrationTest {
     public void testNotAllowsChildStopWithFutureVersion() {
 
         StopPlace child = createStopPlace("child candidate");
-        child.setValidBetween(new ValidBetween(Instant.now().plus(10, ChronoUnit.DAYS)));
+        child.setValidBetween(new ValidBetween(now.plus(10, ChronoUnit.DAYS)));
         child = stopPlaceRepository.save(child);
 
         String parentStopPlaceName = "Super StopPlace";
@@ -334,7 +336,7 @@ public class MultiModalStopPlaceEditorTest extends TiamatIntegrationTest {
 
     private StopPlace createStopPlace(String name, String lang) {
         StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(name, lang));
-        stopPlace.setValidBetween(new ValidBetween(Instant.now().minusSeconds(120)));
+        stopPlace.setValidBetween(new ValidBetween(now.minusSeconds(120)));
         stopPlace.setVersion(1L);
         return stopPlace;
     }

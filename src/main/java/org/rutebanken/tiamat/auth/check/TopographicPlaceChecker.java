@@ -15,7 +15,7 @@
 
 package org.rutebanken.tiamat.auth.check;
 
-import com.vividsolutions.jts.geom.Polygon;
+import org.locationtech.jts.geom.Polygon;
 import org.rutebanken.helper.organisation.AdministrativeZoneChecker;
 import org.rutebanken.helper.organisation.RoleAssignment;
 import org.rutebanken.tiamat.model.TopographicPlace;

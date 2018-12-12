@@ -15,17 +15,11 @@
 
 package org.rutebanken.tiamat.rest.graphql
 
-import com.vividsolutions.jts.geom.Coordinate
+import org.locationtech.jts.geom.Coordinate
 import org.junit.Test
 import org.rutebanken.tiamat.model.*
 
-import javax.transaction.Transactional
-import java.util.HashSet
-import java.util.Set
-
-import static org.hamcrest.Matchers.comparesEqualTo
-import static org.hamcrest.Matchers.containsInAnyOrder
-import static org.hamcrest.Matchers.hasSize
+import static org.hamcrest.Matchers.*
 
 class GraphQLResourceStopPlaceMergerTest extends AbstractGraphQLResourceIntegrationTest {
 

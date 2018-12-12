@@ -15,7 +15,7 @@
 
 package org.rutebanken.tiamat.netex.mapping;
 
-import com.vividsolutions.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Coordinate;
 import ma.glasnost.orika.MappingContext;
 import org.junit.Ignore;
 import org.junit.Test;

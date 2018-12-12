@@ -15,11 +15,21 @@
 
 package org.rutebanken.tiamat.netex.mapping.converter;
 
-import com.vividsolutions.jts.geom.*;
+
+import org.locationtech.jts.geom.CoordinateSequence;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.LinearRing;
+import org.locationtech.jts.geom.Polygon;
 import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;
-import net.opengis.gml._3.*;
+import net.opengis.gml._3.AbstractRingPropertyType;
+import net.opengis.gml._3.DirectPositionListType;
+import net.opengis.gml._3.LinearRingType;
+import net.opengis.gml._3.ObjectFactory;
+import net.opengis.gml._3.PolygonType;
+import org.locationtech.jts.geom.Coordinate;
 import org.rutebanken.tiamat.geo.DoubleValuesToCoordinateSequence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +39,6 @@ import org.springframework.stereotype.Component;
 import javax.xml.bind.JAXBElement;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;

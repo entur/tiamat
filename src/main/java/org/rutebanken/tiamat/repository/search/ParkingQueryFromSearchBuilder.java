@@ -15,7 +15,7 @@
 
 package org.rutebanken.tiamat.repository.search;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import net.logstash.logback.encoder.org.apache.commons.lang.StringEscapeUtils;
 import org.rutebanken.tiamat.exporter.params.ParkingSearch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -31,13 +31,14 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalUnit;
 
 import static java.time.temporal.ChronoUnit.DAYS;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class StopPlaceRepositoryTest extends TiamatIntegrationTest {
-
+	private Instant now = Instant.now().truncatedTo(ChronoUnit.SECONDS);
 	@Test
 	public void findStopPlacesSortedCorrectly() {
 		StopPlace stopPlaceOlder = new StopPlace();
@@ -96,7 +97,7 @@ public class StopPlaceRepositoryTest extends TiamatIntegrationTest {
 	public void findCurrentlyValidStopPlace() {
 		StopPlace currentlyValid = new StopPlace();
 		currentlyValid.setVersion(1L);
-		currentlyValid.setValidBetween(new ValidBetween(Instant.now().minus(1, DAYS), Instant.now().plus(1, DAYS)));
+		currentlyValid.setValidBetween(new ValidBetween(now.minus(1, DAYS), now.plus(1, DAYS)));
 		stopPlaceRepository.save(currentlyValid);
 
 		StopPlaceSearch stopPlaceSearch = StopPlaceSearch.newStopPlaceSearchBuilder().setVersionValidity(ExportParams.VersionValidity.ALL).build();
@@ -110,7 +111,7 @@ public class StopPlaceRepositoryTest extends TiamatIntegrationTest {
 	public void findCurrentlyValidStopPlaceWithoutEndDate() {
 		StopPlace currentlyValid = new StopPlace();
 		currentlyValid.setVersion(1L);
-		currentlyValid.setValidBetween(new ValidBetween(Instant.now().minus(1, DAYS)));
+		currentlyValid.setValidBetween(new ValidBetween(now.minus(1, DAYS)));
 		stopPlaceRepository.save(currentlyValid);
 
 		StopPlaceSearch stopPlaceSearch = StopPlaceSearch.newStopPlaceSearchBuilder().setVersionValidity(ExportParams.VersionValidity.ALL).build();
@@ -125,7 +126,7 @@ public class StopPlaceRepositoryTest extends TiamatIntegrationTest {
 	public void doNotFindExpiredStopPlaceVersion() {
 		StopPlace expiredVersion = new StopPlace();
 		expiredVersion.setVersion(1L);
-		expiredVersion.setValidBetween(new ValidBetween(Instant.now().minus(2, DAYS), Instant.now().minus(1, DAYS)));
+		expiredVersion.setValidBetween(new ValidBetween(now.minus(2, DAYS), now.minus(1, DAYS)));
 		stopPlaceRepository.save(expiredVersion);
 
 		StopPlaceSearch stopPlaceSearch = StopPlaceSearch.newStopPlaceSearchBuilder().setVersionValidity(ExportParams.VersionValidity.CURRENT).build();
@@ -138,7 +139,7 @@ public class StopPlaceRepositoryTest extends TiamatIntegrationTest {
 	public void doNotFindFutureStopPlaceVersion() {
 		StopPlace futureVersion = new StopPlace();
 		futureVersion.setVersion(1L);
-		futureVersion.setValidBetween(new ValidBetween(Instant.now().plus(1, DAYS), Instant.now().plus(2, DAYS)));
+		futureVersion.setValidBetween(new ValidBetween(now.plus(1, DAYS), now.plus(2, DAYS)));
 		stopPlaceRepository.save(futureVersion);
 
 		StopPlaceSearch stopPlaceSearch = StopPlaceSearch.newStopPlaceSearchBuilder().setVersionValidity(ExportParams.VersionValidity.CURRENT).build();
@@ -151,7 +152,7 @@ public class StopPlaceRepositoryTest extends TiamatIntegrationTest {
 	public void doNotFindHistoricStopPlaceWithoutParentForCurrentAndFutureVersion() {
 		StopPlace historicVersion = new StopPlace();
 		historicVersion.setVersion(1L);
-		historicVersion.setValidBetween(new ValidBetween(Instant.now().minus(3, DAYS), Instant.now().minus(2, DAYS)));
+		historicVersion.setValidBetween(new ValidBetween(now.minus(3, DAYS), now.minus(2, DAYS)));
 		stopPlaceRepository.save(historicVersion);
 
 		StopPlaceSearch stopPlaceSearch = StopPlaceSearch.newStopPlaceSearchBuilder().setVersionValidity(ExportParams.VersionValidity.CURRENT_FUTURE).build();
@@ -164,7 +165,7 @@ public class StopPlaceRepositoryTest extends TiamatIntegrationTest {
 	public void doNotFindHistoricStopPlaceWithParentForCurrentAndFutureVersion() {
 		StopPlace historicParent = new StopPlace();
 		historicParent.setVersion(1L);
-		historicParent.setValidBetween(new ValidBetween(Instant.now().minus(3, DAYS), Instant.now().minus(2, DAYS)));
+		historicParent.setValidBetween(new ValidBetween(now.minus(3, DAYS), now.minus(2, DAYS)));
 		stopPlaceRepository.save(historicParent);
 
 		StopPlace historicChild=new StopPlace();
@@ -182,7 +183,7 @@ public class StopPlaceRepositoryTest extends TiamatIntegrationTest {
 	public void findFutureStopPlaceVersion() {
 		StopPlace futureVersion = new StopPlace();
 		futureVersion.setVersion(1L);
-		futureVersion.setValidBetween(new ValidBetween(Instant.now().plus(1, DAYS), Instant.now().plus(2, DAYS)));
+		futureVersion.setValidBetween(new ValidBetween(now.plus(1, DAYS), now.plus(2, DAYS)));
 		stopPlaceRepository.save(futureVersion);
 
 		StopPlaceSearch stopPlaceSearch = StopPlaceSearch.newStopPlaceSearchBuilder().setVersionValidity(ExportParams.VersionValidity.CURRENT_FUTURE).build();
@@ -199,7 +200,7 @@ public class StopPlaceRepositoryTest extends TiamatIntegrationTest {
 	public void findFutureStopPlaceVersionWithoutEndDate() {
 		StopPlace futureVersion = new StopPlace();
 		futureVersion.setVersion(1L);
-		futureVersion.setValidBetween(new ValidBetween(Instant.now().plus(1, DAYS)));
+		futureVersion.setValidBetween(new ValidBetween(now.plus(1, DAYS)));
 		stopPlaceRepository.save(futureVersion);
 
 		StopPlaceSearch stopPlaceSearch = StopPlaceSearch.newStopPlaceSearchBuilder().setVersionValidity(ExportParams.VersionValidity.CURRENT_FUTURE).build();
