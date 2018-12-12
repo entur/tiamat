@@ -60,7 +60,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!-- Docker & Fabric8 Configs -->
-        <docker.from>eu.gcr.io/carbon-1287/java-base-image</docker.from>
+        <docker.from>eu.gcr.io/carbon-1287/openjdk11-base-image</docker.from>
         <docker.image>eu.gcr.io/${fabric8.dockerUser}${project.artifactId}:${project.version}</docker.image>
         <docker.cleanup>none</docker.cleanup>
         <fabric8.dockerUser>carbon-1287/</fabric8.dockerUser>
