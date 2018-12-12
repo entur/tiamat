@@ -20,7 +20,7 @@ aliases:
 jobs:
   build:
     docker:
-      - image: eu.gcr.io/carbon-1287/circleci-toolboximage-java11
+      - image: eu.gcr.io/carbon-1287/circleci-toolbox-image-java11
         auth:
           username: _json_key
           password: $GCLOUD_SERVICE_KEY
@@ -55,7 +55,7 @@ jobs:
             - .circleci
   deploy-docker:
     docker:
-      - image: eu.gcr.io/carbon-1287/circleci-toolboximage-java11
+      - image: eu.gcr.io/carbon-1287/circleci-toolbox-image-java11
         auth:
           username: _json_key
           password: $GCLOUD_SERVICE_KEY
