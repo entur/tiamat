@@ -97,7 +97,6 @@
 
         <groovy-all.version>2.5.4</groovy-all.version>
         <jaxb-version>2.3.0.1</jaxb-version>
-        <jaxb-version>2.3.0.1</jaxb-version>
         <swagger-jersey2.version>1.5.20</swagger-jersey2.version>
 
         <!-- NB: Concious choice of using snapshot version. This is to keep in
