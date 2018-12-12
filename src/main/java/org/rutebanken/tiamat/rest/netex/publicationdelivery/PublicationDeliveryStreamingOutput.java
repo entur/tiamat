@@ -43,7 +43,7 @@ public class PublicationDeliveryStreamingOutput {
 
     private final ObjectFactory objectFactory = new ObjectFactory();
 
-    private final NeTExValidator neTExValidator = new NeTExValidator();
+    private final NeTExValidator neTExValidator = NeTExValidator.getNeTExValidator();
 
     static {
         try {

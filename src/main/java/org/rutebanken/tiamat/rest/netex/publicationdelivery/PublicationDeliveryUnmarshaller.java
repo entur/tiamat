@@ -53,7 +53,7 @@ public class PublicationDeliveryUnmarshaller {
     private boolean validateAgainstSchema;
 
     public PublicationDeliveryUnmarshaller() throws IOException, SAXException {
-        this.neTExValidator = new NeTExValidator();
+        this.neTExValidator = NeTExValidator.getNeTExValidator();
     }
 
     public PublicationDeliveryStructure unmarshal(InputStream inputStream) throws JAXBException, IOException, SAXException {

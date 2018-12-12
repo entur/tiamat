@@ -15,27 +15,15 @@
 
 package org.rutebanken.tiamat.exporter;
 
-import com.google.common.collect.Sets;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.rutebanken.netex.validation.NeTExValidator;
-import org.springframework.util.CollectionUtils;
 import org.xml.sax.SAXException;
 
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamConstants;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static org.assertj.core.api.Java6Assertions.fail;
 
 /**
  * Test for manual execution. For XSD validation of existing files.
@@ -52,7 +40,7 @@ public class ValidationTest {
         System.out.println("loading file "+file);
         Source xmlFile = new StreamSource(new File(file));
 
-        NeTExValidator neTExValidator = new NeTExValidator(NeTExValidator.NetexVersion.v1_0_9);
+        NeTExValidator neTExValidator =  NeTExValidator.getNeTExValidator(NeTExValidator.NetexVersion.v1_0_9);
 
         try {
             neTExValidator.validate(xmlFile);

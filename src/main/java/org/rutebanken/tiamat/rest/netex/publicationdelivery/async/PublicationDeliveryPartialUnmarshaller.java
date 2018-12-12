@@ -15,7 +15,9 @@
 
 package org.rutebanken.tiamat.rest.netex.publicationdelivery.async;
 
-import org.rutebanken.netex.model.*;
+import org.rutebanken.netex.model.PublicationDeliveryStructure;
+import org.rutebanken.netex.model.StopPlace;
+import org.rutebanken.netex.model.TopographicPlace;
 import org.rutebanken.netex.validation.NeTExValidator;
 import org.rutebanken.tiamat.netex.mapping.PublicationDeliveryHelper;
 import org.slf4j.Logger;
@@ -33,7 +35,12 @@ import javax.xml.stream.EventFilter;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 
@@ -76,7 +83,7 @@ public class PublicationDeliveryPartialUnmarshaller {
     @Autowired
     public PublicationDeliveryPartialUnmarshaller(PublicationDeliveryHelper publicationDeliveryHelper) throws IOException, SAXException {
         this.publicationDeliveryHelper = publicationDeliveryHelper;
-        this.neTExValidator = new NeTExValidator();
+        this.neTExValidator = NeTExValidator.getNeTExValidator();
     }
 
     public UnmarshalResult unmarshal(InputStream inputStream) throws JAXBException, IOException, SAXException, XMLStreamException, InterruptedException, ParserConfigurationException {
