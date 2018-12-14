@@ -144,10 +144,13 @@ public class CustomGraphQLTypes {
             .type(geoJsonObjectType)
             .dataFetcher(env -> {
                 if (env.getSource() instanceof Zone_VersionStructure) {
-                    Zone_VersionStructure source = (Zone_VersionStructure) env.getSource();
-                    return source.getCentroid();
+                    Zone_VersionStructure source = env.getSource();
+                    if (source.getCentroid()!=null) {
+                        return source.getCentroid();
+                    }
+                    return source.getPolygon();
                 } else if (env.getSource() instanceof Link) {
-                    Link link = (Link) env.getSource();
+                    Link link = env.getSource();
                     return link.getLineString();
                 }
                 return null;
