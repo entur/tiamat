@@ -284,6 +284,11 @@ public class StopPlaceQueryFromSearchBuilder {
             wheres.add("not exists (select sq.quays_id from stop_place_quays sq where sq.stop_place_id = s.id)");
         }
 
+        if (stopPlaceSearch.isHasParking()) {
+            operators.add("and");
+            wheres.add("exists (select * from parking p where p.parent_site_ref=s.netex_id)");
+        }
+
         if (stopPlaceSearch.isWithTags()) {
             operators.add("and");
             wheres.add(SQL_WITH_TAGS);
