@@ -546,6 +546,12 @@ public class StopPlaceRegisterGraphQLSchema {
                 .description(WITH_NEARBY_SIMILAR_DUPLICATES_ARG_DESCRIPTION)
                 .build());
         arguments.add(GraphQLArgument.newArgument()
+                .name(HAS_PARKING)
+                .type(GraphQLBoolean)
+                .defaultValue(Boolean.FALSE)
+                .description(HAS_PARKING)
+                .build());
+        arguments.add(GraphQLArgument.newArgument()
                 .name(VALUES)
                 .type(new GraphQLList(GraphQLString))
                 .description(VALUES_ARG_DESCRIPTION)
