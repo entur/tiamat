@@ -15,6 +15,7 @@
 
 package org.rutebanken.tiamat.diff.generic;
 
+import com.google.common.collect.Sets;
 import javassist.util.proxy.MethodHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,7 +56,7 @@ public class GenericObjectDiffer {
         Class clazz = oldObject.getClass();
 
         Field[] fields = getAllFields(clazz, genericDiffConfig.ignoreFields);
-
+        Set<Field> newObjectFields = Sets.newHashSet(getAllFields(newObject.getClass(), genericDiffConfig.ignoreFields));
         if (property == null) {
             property = oldObject.getClass().getSimpleName();
         }
@@ -63,7 +64,10 @@ public class GenericObjectDiffer {
         for (Field field : fields) {
 
             try {
-
+                if (!newObjectFields.contains(field)) {
+                    logger.debug("Ignoring field {} as it not present in newObject of type {}", field, newObject.getClass());
+                    continue;
+                }
                 if (field.getType().isAssignableFrom(MethodHandler.class)) {
                     logger.debug("Ignoring field {} as its assignable from {}", field, MethodHandler.class);
                     continue;
@@ -105,7 +109,7 @@ public class GenericObjectDiffer {
 
                 if (isPrimitive(oldValue)) {
                     differences.add(new Difference(childProperty, oldValue, newValue));
-                } else if(Instant.class.isAssignableFrom(field.getType())) {
+                } else if (Instant.class.isAssignableFrom(field.getType())) {
                     differences.add(new Difference(property + '.' + field.getName(), oldValue, newValue));
                 } else if (genericDiffConfig.onlyDoEqualsCheck.stream().anyMatch(type -> type.isAssignableFrom(oldValue.getClass()))) {
                     if (!oldValue.equals(newValue)) {
@@ -116,9 +120,9 @@ public class GenericObjectDiffer {
                 }
             } catch (IllegalAccessException | IllegalArgumentException e) {
                 throw new RuntimeException("Could not compare property " + property
-                        + ", field '" + field + ". ex:\""
-                        + e.getMessage() + "\". old object "
-                        + oldObject + " new object " + newObject, e);
+                                                   + ", field '" + field + ". ex:\""
+                                                   + e.getMessage() + "\". old object "
+                                                   + oldObject + " new object " + newObject, e);
             }
         }
 
@@ -234,16 +238,16 @@ public class GenericObjectDiffer {
             fields.addAll(Arrays.asList(getAllFields(clazz.getSuperclass(), ignoreFields)));
         }
         return fields.stream()
-                .filter(field -> !ignoreFields.contains(field.getName()))
-                .collect(Collectors.toList()).toArray(new Field[]{});
+                       .filter(field -> !ignoreFields.contains(field.getName()))
+                       .collect(Collectors.toList()).toArray(new Field[]{});
     }
 
     private Field identifierField(Set<String> identifiers, Field[] fields) {
         return Stream.of(fields)
-                .filter(field -> identifiers.contains(field.getName()))
-                .peek(identifierField -> identifierField.setAccessible(true))
-                .findFirst()
-                .orElse(null);
+                       .filter(field -> identifiers.contains(field.getName()))
+                       .peek(identifierField -> identifierField.setAccessible(true))
+                       .findFirst()
+                       .orElse(null);
     }
 
 }
