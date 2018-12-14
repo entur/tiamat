@@ -68,8 +68,8 @@
         <maven.compiler.plugin.version>3.8.0</maven.compiler.plugin.version>
         <plexus.compiler.javac.version>2.8.5</plexus.compiler.javac.version>
         <docker.maven.plugin.version>0.21.0</docker.maven.plugin.version>
-        <spring-boot-plugin.version>2.1.0.RELEASE</spring-boot-plugin.version>
-        <spring-boot.version>2.1.0.RELEASE</spring-boot.version>
+        <spring-boot-plugin.version>2.1.1.RELEASE</spring-boot-plugin.version>
+        <spring-boot.version>2.1.1.RELEASE</spring-boot.version>
         <spring.security.version>5.0.7.RELEASE</spring.security.version>
         <keycloak.version>4.7.0.Final</keycloak.version>
         <postgresql.version>42.2.4</postgresql.version>
@@ -88,12 +88,12 @@
         <hikariCP.version>3.2.0</hikariCP.version>
         <commons.lang3.version>3.7</commons.lang3.version>
         <orika-core.version>1.5.2</orika-core.version>
-        <guava.version>26.0-jre</guava.version>
+        <guava.version>27.0-jre</guava.version>
         <graphql-java.version>9.2</graphql-java.version>
 
         <hazelcast-hibernate53.version>1.3.0</hazelcast-hibernate53.version>
-        <hibernate.version>5.4.0.CR2</hibernate.version>
-        <hibernate-spatial.version>5.4.0.CR2</hibernate-spatial.version>
+        <hibernate.version>5.4.0.Final</hibernate.version>
+        <hibernate-spatial.version>5.4.0.Final</hibernate-spatial.version>
 
         <groovy-all.version>2.5.4</groovy-all.version>
         <jaxb-version>2.3.0.1</jaxb-version>
