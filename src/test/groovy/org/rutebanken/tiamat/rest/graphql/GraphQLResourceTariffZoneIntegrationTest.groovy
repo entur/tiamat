@@ -16,8 +16,8 @@
 package org.rutebanken.tiamat.rest.graphql
 
 import org.junit.Test
-import com.vividsolutions.jts.geom.Coordinate
-import com.vividsolutions.jts.geom.GeometryFactory
+import org.locationtech.jts.geom.Coordinate
+import org.locationtech.jts.geom.GeometryFactory
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString
 import org.rutebanken.tiamat.model.TariffZone
 import org.rutebanken.tiamat.repository.TariffZoneRepository
