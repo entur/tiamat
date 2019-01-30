@@ -574,7 +574,8 @@
                                     <classpath refid="maven.test.classpath"/>
                                 </taskdef>
                                 <mkdir dir="${project.build.testOutputDirectory}"/>
-                                <groovyc destdir="${project.build.testOutputDirectory}" srcdir="${basedir}/src/test/groovy/" listfiles="true">
+                                <groovyc destdir="${project.build.testOutputDirectory}"
+                                         srcdir="${basedir}/src/test/groovy/" listfiles="true">
                                     <classpath refid="maven.test.classpath"/>
                                 </groovyc>
                             </tasks>
