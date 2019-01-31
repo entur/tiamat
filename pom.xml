@@ -78,7 +78,7 @@
         <activemq-client.version>5.15.6</activemq-client.version>
         <maven-javadoc-plugin.version>2.10.4</maven-javadoc-plugin.version>
         <flyway-core.version>5.2.4</flyway-core.version>
-        <logstash-logback.version>5.3</logstash-logback.version>
+        <logstash-logback.version>5.2</logstash-logback.version>
         <kubernetes-client.version>4.0.3</kubernetes-client.version>
         <janino.version>3.0.8</janino.version>
         <assertj-core.version>3.10.0</assertj-core.version>
