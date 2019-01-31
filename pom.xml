@@ -71,7 +71,7 @@
         <spring-boot-plugin.version>2.1.1.RELEASE</spring-boot-plugin.version>
         <spring-boot.version>2.1.1.RELEASE</spring-boot.version>
         <spring.security.version>5.0.7.RELEASE</spring.security.version>
-        <keycloak.version>4.7.0.Final</keycloak.version>
+        <keycloak.version>4.8.3.Final</keycloak.version>
         <postgresql.version>42.2.4</postgresql.version>
         <geodb.version>0.9</geodb.version>
         <geotools.version>20.1</geotools.version>
@@ -97,7 +97,7 @@
 
         <groovy-all.version>2.5.4</groovy-all.version>
         <jaxb-version>2.3.0.1</jaxb-version>
-        <swagger-jersey2.version>1.5.20</swagger-jersey2.version>
+        <swagger-jersey2.version>1.5.21</swagger-jersey2.version>
 
         <!-- NB: Concious choice of using snapshot version. This is to keep in
             sync, and fail fast if incompatibilities -->
