@@ -84,7 +84,7 @@
         <assertj-core.version>3.10.0</assertj-core.version>
         <rest-assured.version>3.1.0</rest-assured.version>
         <javax.el.version>3.0.0</javax.el.version>
-        <com.h2database.version>1.4.197</com.h2database.version>
+        <com.h2database.version>1.4.198</com.h2database.version>
         <hikariCP.version>3.2.0</hikariCP.version>
         <commons.lang3.version>3.7</commons.lang3.version>
         <orika-core.version>1.5.2</orika-core.version>
@@ -584,8 +584,7 @@
                                     <classpath refid="maven.test.classpath"/>
                                 </taskdef>
                                 <mkdir dir="${project.build.testOutputDirectory}"/>
-                                <groovyc destdir="${project.build.testOutputDirectory}"
-                                         srcdir="${basedir}/src/test/groovy/" listfiles="true">
+                                <groovyc destdir="${project.build.testOutputDirectory}" srcdir="${basedir}/src/test/groovy/" listfiles="true">
                                     <classpath refid="maven.test.classpath"/>
                                 </groovyc>
                             </tasks>
