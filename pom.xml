@@ -411,7 +411,7 @@
                 https://github.com/jboss/xerces/pull/14
                 https://issues.apache.org/jira/browse/XERCESJ-1276
             -->
-            <version>2.12.0.SP03-RB</version>
+            <version>2.12.0</version>
         </dependency>
 
 
@@ -584,8 +584,7 @@
                                     <classpath refid="maven.test.classpath"/>
                                 </taskdef>
                                 <mkdir dir="${project.build.testOutputDirectory}"/>
-                                <groovyc destdir="${project.build.testOutputDirectory}"
-                                         srcdir="${basedir}/src/test/groovy/" listfiles="true">
+                                <groovyc destdir="${project.build.testOutputDirectory}" srcdir="${basedir}/src/test/groovy/" listfiles="true">
                                     <classpath refid="maven.test.classpath"/>
                                 </groovyc>
                             </tasks>
