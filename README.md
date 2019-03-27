@@ -117,6 +117,13 @@ It's all initiated by an entity listener annotated with `PrePersist` on the clas
 
 ## Keycloak
 Both Tiamat and Abzu are set up to be used with Keycloak.
+### Keycloak configuraiton
+- Create realm e.g. Entur
+- Create client for frontend e.g. abzu
+- Under client setting  configure Mapper e.g. entur-roles
+- Create Roles e.g. deleteStop, editStop, viewStop
+- Add User and assign roles
+- Add User attribute roles `{"r":"editStops","o":"NSB","e":{"StopPlaceType":["*"]}}##{"r":"editStops","o":"RB","e":{"EntityType":["*"]}}##{"r":"deleteStops","o":"RB","e":{"EntityType":["StopPlace"]}}##{"r":"deleteStops","o":"RB"}##{"r":"editRouteData","o":"RUT"}`
 
 ## Docker image
 Tiamat has the fabric8 docker plugin configured in the pom.file. It is optional to use.
