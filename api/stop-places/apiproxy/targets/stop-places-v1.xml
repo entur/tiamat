@@ -31,7 +31,10 @@
         </Response>
     </PreFlow>
     <HTTPTargetConnection>
-        <Properties/>
+        <Properties>
+            <Property name="response.streaming.enabled">true</Property>
+            <Property name="request.streaming.enabled">true</Property>
+        </Properties>
         <URL>https://stop-places-v1-NAMESPACE.INGRESS_ENVIRONMENT/services/stop_places</URL>
     </HTTPTargetConnection>
 </TargetEndpoint>

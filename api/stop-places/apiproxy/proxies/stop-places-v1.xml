@@ -26,7 +26,10 @@
     </PreFlow>
     <HTTPProxyConnection>
         <BasePath>/stop-places/v1</BasePath>
-        <Properties/>
+        <Properties>
+            <Property name="response.streaming.enabled">true</Property>
+            <Property name="request.streaming.enabled">true</Property>
+        </Properties>
         <VirtualHost>entur</VirtualHost>
     </HTTPProxyConnection>
     <RouteRule name="stop-places-v1">
