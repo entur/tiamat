@@ -81,7 +81,6 @@ public class TariffZonesFetcher implements DataFetcher<Page<TariffZone>> {
                 .build();
 
         List<TariffZone> tariffZones = tariffZoneRepository.findTariffZones(tariffZoneSearch);
-
-        return new PageImpl<>(tariffZones, new PageRequest(environment.getArgument(PAGE), environment.getArgument(SIZE)), tariffZones.size());
+        return new PageImpl<>(tariffZones, PageRequest.of(environment.getArgument(PAGE), environment.getArgument(SIZE)), tariffZones.size());
     }
 }

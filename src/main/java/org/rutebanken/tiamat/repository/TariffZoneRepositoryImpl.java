@@ -23,6 +23,7 @@ import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.hibernate.internal.SessionImpl;
+import org.hibernate.query.NativeQuery;
 import org.rutebanken.tiamat.exporter.params.TariffZoneSearch;
 import org.rutebanken.tiamat.model.TariffZone;
 import org.rutebanken.tiamat.repository.iterator.ScrollableResultIterator;
@@ -59,13 +60,13 @@ public class TariffZoneRepositoryImpl implements TariffZoneRepositoryCustom {
     public List<TariffZone> findTariffZones(TariffZoneSearch search) {
         Pair<String, Map<String, Object>> pair = tariffZoneQueryFromSearchBuilder.buildQueryFromSearch(search);
         Session session = entityManager.unwrap(SessionImpl.class);
-        SQLQuery query = session.createSQLQuery(pair.getFirst());
-        query.addEntity(TariffZone.class);
+        NativeQuery nativeQuery = session.createNativeQuery(pair.getFirst());
+        nativeQuery.addEntity(TariffZone.class);
 
-        searchHelper.addParams(query, pair.getSecond());
+        searchHelper.addParams(nativeQuery, pair.getSecond());
 
         @SuppressWarnings("unchecked")
-        List<TariffZone> tariffZones = query.list();
+        List<TariffZone> tariffZones = nativeQuery.list();
         return tariffZones;
     }
 

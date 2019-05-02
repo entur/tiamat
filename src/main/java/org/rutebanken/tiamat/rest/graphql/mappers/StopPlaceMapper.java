@@ -17,7 +17,6 @@ package org.rutebanken.tiamat.rest.graphql.mappers;
 
 import com.google.api.client.util.Preconditions;
 import org.rutebanken.tiamat.model.*;
-import org.rutebanken.tiamat.rest.graphql.GraphQLNames;
 import org.rutebanken.tiamat.rest.graphql.scalars.TransportModeScalar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

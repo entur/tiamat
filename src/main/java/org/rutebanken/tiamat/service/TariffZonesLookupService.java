@@ -20,6 +20,7 @@ import com.google.common.collect.Sets;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
 import org.rutebanken.tiamat.general.ResettableMemoizer;
+import org.rutebanken.tiamat.model.EntityInVersionStructure;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.TariffZone;
 import org.rutebanken.tiamat.model.TariffZoneRef;
@@ -32,6 +33,7 @@ import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -110,7 +112,7 @@ public class TariffZonesLookupService {
                     .filter(tariffZone -> tariffZone.getPolygon() != null)
                     .collect(
                             groupingBy(TariffZone::getNetexId,
-                                    maxBy((TariffZone tz1, TariffZone tz2) -> Long.compare(tz1.getVersion(), tz2.getVersion()))))
+                                    maxBy(Comparator.comparingLong(EntityInVersionStructure::getVersion))))
                     .values()
                     .stream()
                     .filter(Optional::isPresent)
