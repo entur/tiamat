@@ -87,7 +87,6 @@ public class VersionIncrementor {
      * Increment versions for stop place with children.
      * The object must have their netexId set, or else they will get an initial version
      * @param stopPlace with quays and accessibility assessment
-     * @param validFrom
      * @return modified StopPlace
      */
     public StopPlace initiateOrIncrementVersions(StopPlace stopPlace) {

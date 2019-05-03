@@ -15,8 +15,6 @@
 
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
-import com.google.common.io.ByteStreams;
-import javassist.bytecode.ByteArray;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.netex.validation.NeTExValidator;
 import org.slf4j.Logger;
