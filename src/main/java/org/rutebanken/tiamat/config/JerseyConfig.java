@@ -56,6 +56,8 @@ public class JerseyConfig {
      */
     public static final String ET_CLIENT_NAME_HEADER = "ET-Client-Name";
 
+    public static final String X_CORRELATION_ID_HEADER = "X-Correlation-Id";
+
     public static final String SERVICES_PATH = "/services";
 
     public static final String SERVICES_ADMIN_PATH = SERVICES_PATH + "/admin";
