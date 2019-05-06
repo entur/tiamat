@@ -30,7 +30,6 @@ import java.util.Enumeration;
 
 import static org.rutebanken.tiamat.config.JerseyConfig.ET_CLIENT_ID_HEADER;
 import static org.rutebanken.tiamat.config.JerseyConfig.ET_CLIENT_NAME_HEADER;
-import static org.rutebanken.tiamat.config.JerseyConfig.X_CORRELATION_ID_HEADER;
 
 @Component
 public class LoggingFilter implements Filter {
@@ -59,17 +58,16 @@ public class LoggingFilter implements Filter {
 
                 String clientName = httpServletRequest.getHeader(ET_CLIENT_NAME_HEADER);
                 String clientId = httpServletRequest.getHeader(ET_CLIENT_ID_HEADER);
-                final String correlationId = httpServletRequest.getHeader(X_CORRELATION_ID_HEADER);
 
                 String userName = usernameFetcher.getUserNameForAuthenticatedUser();
 
                 if (logger.isTraceEnabled()) {
                     // If trace enabled, log all headers.
                     String allHeaders = headersAsString(httpServletRequest);
-                    logger.trace("{} User: '{}', Headers: '{}'", requestUri, userName, allHeaders);
+                    logger.trace("{} User: '{}', Headers: '{}'", requestUri, userName, allHeaders.toString());
                 } else {
 
-                    logger.info("{}: User: '{}', Client: '{}', Client_ID: '{}', Correlation_Id: '{}' ", requestUri, userName, clientName, clientId, correlationId);
+                    logger.info("{}: User: '{}', Client: '{}', ID: '{}'", requestUri, userName, clientName, clientId);
                 }
 
                 metricsService.registerRequestFromClient(clientName, clientId);
