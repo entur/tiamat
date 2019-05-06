@@ -15,6 +15,9 @@
 
 package org.rutebanken.tiamat.filter;
 
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
@@ -27,9 +30,11 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.UUID;
 
 import static org.rutebanken.tiamat.config.JerseyConfig.ET_CLIENT_ID_HEADER;
 import static org.rutebanken.tiamat.config.JerseyConfig.ET_CLIENT_NAME_HEADER;
+import static org.rutebanken.tiamat.config.JerseyConfig.X_CORRELATION_ID_HEADER;
 
 /**
  * https://github.com/Smartling/spring-security-keycloak/issues/1
@@ -37,8 +42,10 @@ import static org.rutebanken.tiamat.config.JerseyConfig.ET_CLIENT_NAME_HEADER;
 @Component
 public class CorsResponseFilter implements Filter {
 
+    final Logger logger = LoggerFactory.getLogger(CorsResponseFilter.class);
+
     @Override
-    public void init(FilterConfig filterConfig) throws ServletException {}
+    public void init(FilterConfig filterConfig){}
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
@@ -52,6 +59,15 @@ public class CorsResponseFilter implements Filter {
         // If the call is an options call, do not return a body
         HttpServletRequest req = (HttpServletRequest)servletRequest;
         HttpServletResponse resp = (HttpServletResponse )servletResponse;
+
+        String correlation_id_header = req.getHeader(X_CORRELATION_ID_HEADER);
+
+        if (StringUtils.isEmpty(correlation_id_header)) {
+            correlation_id_header = UUID.randomUUID().toString();
+            logger.info("No correlation_id found in header generating new correlation-id: " + correlation_id_header);
+        }
+
+        httpServletResponse.setHeader(X_CORRELATION_ID_HEADER, correlation_id_header);
         if ("OPTIONS".equals(req.getMethod())) {
             resp.setStatus(HttpStatus.OK.value());
         } else {
