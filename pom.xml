@@ -530,6 +530,11 @@
             <artifactId>activemq-kahadb-store</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.entur.logging</groupId>
+            <artifactId>common-logging-spring-boot-starter</artifactId>
+            <version>1.0.14</version>
+        </dependency>
     </dependencies>
 
 
