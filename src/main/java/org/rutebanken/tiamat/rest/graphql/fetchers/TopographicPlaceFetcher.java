@@ -41,7 +41,7 @@ class TopographicPlaceFetcher implements DataFetcher {
     @Override
     public Object get(DataFetchingEnvironment environment) {
         String netexId = environment.getArgument(ID);
-        boolean allVersions = environment.getArgument(ALL_VERSIONS);
+        boolean allVersions = Boolean.TRUE.equals(environment.getArgument(ALL_VERSIONS));
 
         if (netexId != null) {
 
