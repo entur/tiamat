@@ -552,6 +552,12 @@ public class StopPlaceRegisterGraphQLSchema {
                 .description(HAS_PARKING)
                 .build());
         arguments.add(GraphQLArgument.newArgument()
+                .name(RESOLVE_PARENTS)
+                .type(GraphQLBoolean)
+                .defaultValue(Boolean.TRUE)
+                .description(RESOLVE_PARENTS)
+                .build());
+        arguments.add(GraphQLArgument.newArgument()
                 .name(VALUES)
                 .type(new GraphQLList(GraphQLString))
                 .description(VALUES_ARG_DESCRIPTION)
