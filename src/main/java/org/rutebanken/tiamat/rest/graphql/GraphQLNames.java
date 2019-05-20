@@ -312,7 +312,8 @@ public class GraphQLNames {
     public static final String WITH_NEARBY_SIMILAR_DUPLICATES_ARG_DESCRIPTION = "withNearbySimilarDuplicates";
 
     public static final String HAS_PARKING = "hasParking";
-    public static final String RESOLVE_PARENTS = "resolveParents";
+    public static final String ONLY_MONOMODAL_STOPPLACES = "onlyMonomodalStopPlaces";
+    public static final String ONLY_MONOMODAL_STOPPLACES_DESCRIPTION = "Set to true to only return mono modal stop places.";
 
     public static final String LONGITUDE_MIN = "lonMin";
     public static final String LATITUDE_MIN = "latMin";

@@ -552,10 +552,10 @@ public class StopPlaceRegisterGraphQLSchema {
                 .description(HAS_PARKING)
                 .build());
         arguments.add(GraphQLArgument.newArgument()
-                .name(RESOLVE_PARENTS)
+                .name(ONLY_MONOMODAL_STOPPLACES)
                 .type(GraphQLBoolean)
-                .defaultValue(Boolean.TRUE)
-                .description(RESOLVE_PARENTS)
+                .defaultValue(Boolean.FALSE)
+                .description(ONLY_MONOMODAL_STOPPLACES_DESCRIPTION)
                 .build());
         arguments.add(GraphQLArgument.newArgument()
                 .name(VALUES)

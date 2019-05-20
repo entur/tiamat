@@ -215,13 +215,13 @@ class StopPlaceFetcher implements DataFetcher {
         }
 
         final List<StopPlace> stopPlaces = stopPlacesPage.getContent();
-        final boolean resolveParents = environment.getArgument(RESOLVE_PARENTS);
+        final boolean onlyMonomodalStopplaces = environment.getArgument(ONLY_MONOMODAL_STOPPLACES);
         //By default stop should resolve parent stops
-        if (resolveParents) {
+        if (onlyMonomodalStopplaces) {
+            return getStopPlaces(environment, stopPlaces, stopPlaces.size());
+        } else {
             List<StopPlace> parentsResolved = parentStopPlacesFetcher.resolveParents(stopPlaces, KEEP_CHILDREN);
             return getStopPlaces(environment,parentsResolved,parentsResolved.size());
-        } else {
-            return getStopPlaces(environment, stopPlaces, stopPlaces.size());
         }
     }
 
