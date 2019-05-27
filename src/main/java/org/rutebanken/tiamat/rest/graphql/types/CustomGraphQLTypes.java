@@ -667,16 +667,25 @@ public class CustomGraphQLTypes {
                     .name(PARKING_VEHICLE_TYPE)
                     .type(parkingVehicleEnum))
             .field(newFieldDefinition()
+                    .name(PARKING_USER_TYPE)
+                    .type(parkingUserEnum))
+            .field(newFieldDefinition()
                     .name(PARKING_STAY_TYPE)
                     .type(parkingStayEnum))
             .field(newFieldDefinition()
                     .name(NUMBER_OF_SPACES)
+                    .type(GraphQLBigInteger))
+            .field(newFieldDefinition()
+                    .name(NUMBER_OF_SPACES_WITH_RECHARGE_POINT)
                     .type(GraphQLBigInteger))
             .build();
 
 
     public static GraphQLInputObjectType parkingCapacityInputObjectType = GraphQLInputObjectType.newInputObject()
             .name(INPUT_TYPE_PARKING_CAPACITY)
+            .field(newInputObjectField()
+                    .name(PARKING_USER_TYPE)
+                    .type(parkingUserEnum))
             .field(newInputObjectField()
                     .name(PARKING_VEHICLE_TYPE)
                     .type(parkingVehicleEnum))
@@ -685,6 +694,9 @@ public class CustomGraphQLTypes {
                     .type(parkingStayEnum))
             .field(newInputObjectField()
                     .name(NUMBER_OF_SPACES)
+                    .type(GraphQLBigInteger))
+            .field(newInputObjectField()
+                    .name(NUMBER_OF_SPACES_WITH_RECHARGE_POINT)
                     .type(GraphQLBigInteger))
             .build();
 

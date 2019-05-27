@@ -50,7 +50,7 @@ class ParkingFetcher implements DataFetcher {
     @Override
     public Object get(DataFetchingEnvironment environment) {
 
-        PageRequest pageable = new PageRequest(environment.getArgument(PAGE), environment.getArgument(SIZE));
+        PageRequest pageable = PageRequest.of(environment.getArgument(PAGE), environment.getArgument(SIZE));
 
         Page<Parking> allParkings;
 

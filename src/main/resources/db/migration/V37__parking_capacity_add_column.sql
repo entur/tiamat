@@ -1,0 +1,1 @@
+ALTER TABLE public.parking_capacity ADD COLUMN number_of_spaces_with_recharge_point numeric(19, 2);

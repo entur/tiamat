@@ -256,6 +256,7 @@ public class GraphQLNames {
     public static final String CYCLE_STORAGE_TYPE = "cycleStorageType";
     //GeneralSign
 
+    public static final String NUMBER_OF_SPACES_WITH_RECHARGE_POINT = "numberOfSpacesWithRechargePoint";
 
     public static final String OUTPUT_TYPE_PRIVATE_CODE = "PrivateCode";
     public static final String PRIVATE_CODE = "privateCode";
@@ -360,6 +361,7 @@ public class GraphQLNames {
     public static final String PARKING_VEHICLE_TYPES = "parkingVehicleTypes";
     public static final String PARKING_VEHICLE_TYPE = "parkingVehicleType";
     public static final String PARKING_USER_TYPES = "parkingUserTypes";
+    public static final String PARKING_USER_TYPE = "parkingUserType";
     public static final String MAXIMUM_STAY = "maximumStay";
     public static final String PARKING_STAY_TYPE = "parkingStayType";
     public static final String SPACES = "spaces";

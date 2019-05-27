@@ -32,6 +32,7 @@ public class ParkingCapacity
     @Enumerated(EnumType.STRING)
     protected ParkingStayEnumeration parkingStayType;
     protected BigInteger numberOfSpaces;
+    protected BigInteger numberOfSpacesWithRechargePoint;
 
     public SiteElementRefStructure getParentRef() {
         return parentRef;
@@ -72,5 +73,14 @@ public class ParkingCapacity
     public void setNumberOfSpaces(BigInteger value) {
         this.numberOfSpaces = value;
     }
+
+    public BigInteger getNumberOfSpacesWithRechargePoint() {
+        return numberOfSpacesWithRechargePoint;
+    }
+
+    public void setNumberOfSpacesWithRechargePoint(BigInteger numberOfSpacesWithRechargePoint) {
+        this.numberOfSpacesWithRechargePoint = numberOfSpacesWithRechargePoint;
+    }
+
 
 }
