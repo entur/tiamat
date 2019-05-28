@@ -60,6 +60,7 @@ public class CustomGraphQLTypes {
     public static GraphQLEnumType parkingUserEnum = createCustomEnumType(PARKING_USER_ENUM, ParkingUserEnumeration.class);
     public static GraphQLEnumType parkingStayEnum = createCustomEnumType(PARKING_STAY_TYPE_ENUM, ParkingStayEnumeration.class);
     public static GraphQLEnumType parkingReservationEnum = createCustomEnumType(PARKING_RESERVATION_ENUM, ParkingReservationEnumeration.class);
+    public static GraphQLEnumType parkingPaymentProcessEnum = createCustomEnumType(PARKING_PAYMENT_PROCESS_ENUM, ParkingPaymentProcessEnumeration.class);
     public static GraphQLEnumType parkingTypeEnum = createCustomEnumType(PARKING_TYPE_ENUM, ParkingTypeEnumeration.class);
     public static GraphQLEnumType topographicPlaceTypeEnum = createCustomEnumType(TOPOGRAPHIC_PLACE_TYPE_ENUM, TopographicPlaceTypeEnumeration.class);
     public static GraphQLEnumType stopPlaceTypeEnum = createCustomEnumType(STOP_PLACE_TYPE_ENUM, StopTypeEnumeration.class);
@@ -827,6 +828,9 @@ public class CustomGraphQLTypes {
                         .name(FREE_PARKING_OUT_OF_HOURS)
                         .type(GraphQLBoolean))
                 .field(newFieldDefinition()
+                        .name(PARKING_PAYMENT_PROCESS)
+                        .type(new GraphQLList(parkingPaymentProcessEnum)))
+                .field(newFieldDefinition()
                         .name(PARKING_PROPERTIES)
                         .type(new GraphQLList(parkingPropertiesObjectType)))
                 .field(newFieldDefinition()
@@ -884,6 +888,9 @@ public class CustomGraphQLTypes {
                 .field(newInputObjectField()
                         .name(FREE_PARKING_OUT_OF_HOURS)
                         .type(GraphQLBoolean))
+                .field(newInputObjectField()
+                        .name(PARKING_PAYMENT_PROCESS)
+                        .type(new GraphQLList(parkingPaymentProcessEnum)))
                 .field(newInputObjectField()
                         .name(PARKING_PROPERTIES)
                         .type(new GraphQLList(parkingPropertiesInputObjectType)))

@@ -125,7 +125,8 @@ public class GraphQLResource {
         Response.ResponseBuilder res = Response.status(Response.Status.OK);
         HashMap<String, Object> content = new HashMap<>();
         try {
-            ExecutionResult executionResult = graphQL.execute(query, null, null, variables);
+            final ExecutionInput executionInput = ExecutionInput.newExecutionInput().query(query).variables(variables).build();
+            ExecutionResult executionResult = graphQL.execute(executionInput);
 
             if (!executionResult.getErrors().isEmpty()) {
                 List<GraphQLError> errors = executionResult.getErrors();
@@ -134,8 +135,6 @@ public class GraphQLResource {
                 for (GraphQLError error : errors) {
                     switch (error.getErrorType()) {
                         case InvalidSyntax:
-                            status = Response.Status.BAD_REQUEST;
-                            break;
                         case ValidationError:
                             status = Response.Status.BAD_REQUEST;
                             break;

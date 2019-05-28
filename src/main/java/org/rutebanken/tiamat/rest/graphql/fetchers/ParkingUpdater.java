@@ -199,6 +199,16 @@ class ParkingUpdater implements DataFetcher {
             updatedParking.setFreeParkingOutOfHours(freeParkingOutOfHours);
         }
 
+        if (input.get(PARKING_PAYMENT_PROCESS) != null) {
+
+            List<ParkingPaymentProcessEnumeration> parkingPaymentProcessTypes = (List<ParkingPaymentProcessEnumeration>) input.get(PARKING_PAYMENT_PROCESS);
+            isUpdated = isUpdated || !(updatedParking.getParkingPaymentProcess().containsAll(parkingPaymentProcessTypes) &&
+                    parkingPaymentProcessTypes.containsAll(updatedParking.getParkingPaymentProcess()));
+
+            updatedParking.getParkingPaymentProcess().clear();
+            updatedParking.getParkingPaymentProcess().addAll(parkingPaymentProcessTypes);
+        }
+
         if (input.get(PARKING_RESERVATION) != null) {
             ParkingReservationEnumeration parkingReservation = (ParkingReservationEnumeration) input.get(PARKING_RESERVATION);
             isUpdated = isUpdated || (!parkingReservation.equals(updatedParking.getParkingReservation()));

@@ -16,6 +16,8 @@
 package org.rutebanken.tiamat.model;
 
 import com.google.common.base.MoreObjects;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 
 import javax.persistence.*;
 import java.math.BigInteger;
@@ -30,8 +32,6 @@ public class Parking
     protected String publicCode;
     @Transient
     protected MultilingualStringEntity label;
-    @Transient
-    protected List<ParkingPaymentProcessEnumeration> parkingPaymentProcess;
     @Transient
     protected List<PaymentMethodEnumeration> paymentMethods;
     @Transient
@@ -54,6 +54,11 @@ public class Parking
 
     @Enumerated(EnumType.STRING)
     protected ParkingTypeEnumeration parkingType;
+
+    @ElementCollection(targetClass = ParkingPaymentProcessEnumeration.class)
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @Enumerated(EnumType.STRING)
+    protected List<ParkingPaymentProcessEnumeration> parkingPaymentProcess;
 
     @ElementCollection(targetClass = ParkingVehicleEnumeration.class, fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
