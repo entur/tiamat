@@ -15,6 +15,7 @@
 
 package org.rutebanken.tiamat.repository;
 
+import org.hibernate.query.NativeQuery;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -126,7 +127,7 @@ public class ParkingRepositoryImpl implements ParkingRepositoryCustom {
 
     private int countResult(Pair<String, Map<String, Object>> sqlWithParams) {
         Session session = entityManager.unwrap(Session.class);
-        SQLQuery query = session.createSQLQuery("SELECT COUNT(*) from (" + sqlWithParams.getFirst() + ") as numberOfParkings");
+        NativeQuery query = session.createNativeQuery("SELECT COUNT(*) from (" + sqlWithParams.getFirst() + ") as numberOfParkings");
         searchHelper.addParams(query, sqlWithParams.getSecond());
         return ((BigInteger) query.uniqueResult()).intValue();
     }
@@ -135,7 +136,7 @@ public class ParkingRepositoryImpl implements ParkingRepositoryCustom {
         final int fetchSize = 100;
 
         Session session = entityManager.unwrap(Session.class);
-        SQLQuery query = session.createSQLQuery(sqlWithParams.getFirst());
+        NativeQuery query = session.createNativeQuery(sqlWithParams.getFirst());
         searchHelper.addParams(query, sqlWithParams.getSecond());
 
         query.addEntity(Parking.class);

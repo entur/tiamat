@@ -60,7 +60,8 @@ public class Parking
     @Enumerated(EnumType.STRING)
     protected List<ParkingPaymentProcessEnumeration> parkingPaymentProcess;
 
-    @ElementCollection(targetClass = ParkingVehicleEnumeration.class, fetch = FetchType.EAGER)
+    @ElementCollection(targetClass = ParkingVehicleEnumeration.class)
+    @LazyCollection(LazyCollectionOption.FALSE)
     @Enumerated(EnumType.STRING)
     protected List<ParkingVehicleEnumeration> parkingVehicleTypes;
     protected ParkingLayoutEnumeration parkingLayout;
