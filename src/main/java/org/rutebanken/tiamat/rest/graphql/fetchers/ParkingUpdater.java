@@ -134,14 +134,14 @@ class ParkingUpdater implements DataFetcher {
 
             updatedParking.setParentSiteRef(parentSiteRef);
         }
-
+        /*
         if (input.get(TOTAL_CAPACITY) != null) {
             BigInteger totalCapacity = (BigInteger) input.get(TOTAL_CAPACITY);
             isUpdated = isUpdated || (!totalCapacity.equals(updatedParking.getTotalCapacity()));
 
             updatedParking.setTotalCapacity(totalCapacity);
         }
-
+        */
         if (input.get(PRINCIPAL_CAPACITY) != null) {
             BigInteger principalCapacity = (BigInteger) input.get(PRINCIPAL_CAPACITY);
             isUpdated = isUpdated || (!principalCapacity.equals(updatedParking.getPrincipalCapacity()));
@@ -223,8 +223,20 @@ class ParkingUpdater implements DataFetcher {
 
         if (input.get(PARKING_PROPERTIES) != null) {
             List<ParkingProperties> parkingPropertiesList = resolveParkingPropertiesList((List) input.get(PARKING_PROPERTIES));
+            int total_capacity = parkingPropertiesList.stream()
+                    .map(ParkingProperties::getSpaces)
+                    .filter(Objects::nonNull)
+                    .flatMap(Collection::stream)
+                    .filter(space -> space.getNumberOfSpaces() != null)
+                    .mapToInt(space -> space.getNumberOfSpaces().intValue())
+                    .sum();
             isUpdated = true;
             updatedParking.setParkingProperties(parkingPropertiesList);
+            if (total_capacity > 0) {
+                updatedParking.setTotalCapacity(BigInteger.valueOf(total_capacity));
+            } else {
+                updatedParking.setTotalCapacity(null);
+            }
         }
 
         if (input.get(PARKING_AREAS) != null) {
