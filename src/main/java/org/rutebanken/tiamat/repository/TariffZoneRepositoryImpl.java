@@ -99,7 +99,7 @@ public class TariffZoneRepositoryImpl implements TariffZoneRepositoryCustom {
 
     public Iterator<TariffZone> scrollTariffZones(String sql) {
         Session session = entityManager.unwrap(Session.class);
-        SQLQuery sqlQuery = session.createSQLQuery(sql);
+        NativeQuery sqlQuery = session.createNativeQuery(sql);
 
         sqlQuery.addEntity(TariffZone.class);
         sqlQuery.setReadOnly(true);

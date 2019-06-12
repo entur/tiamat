@@ -198,7 +198,7 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         child.setParentSiteRef(new SiteRefStructure(parent.getNetexId(), String.valueOf(parent.getVersion())));
         stopPlaceRepository.save(child);
 
-        Pageable pageable = new PageRequest(0, 10);
+        Pageable pageable = PageRequest.of(0, 10);
 
         Page<StopPlace> result = stopPlaceRepository.findStopPlacesWithin(southEastLongitude, southEastLatitude, northWestLongitude, northWestLatitude, null, pageable);
         assertThat(result.getContent()).extracting(EntityStructure::getNetexId).contains(child.getNetexId());
@@ -224,7 +224,7 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         stopPlaceRepository.save(version1);
         stopPlaceRepository.save(version2);
 
-        Pageable pageable = new PageRequest(0, 10);
+        Pageable pageable = PageRequest.of(0, 10);
 
         Page<StopPlace> result = stopPlaceRepository.findStopPlacesWithin(southEastLongitude, southEastLatitude, northWestLongitude, northWestLatitude, null, pageable);
         assertThat(result).hasSize(1);
@@ -260,7 +260,7 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         double northWestLongitude = 11;
 
         StopPlace stopPlace = createStopPlace(59.5, 10.5);
-        Pageable pageable = new PageRequest(0, 10);
+        Pageable pageable = PageRequest.of(0, 10);
 
         stopPlaceRepository.save(stopPlace);
 
@@ -287,7 +287,7 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         StopPlace otherStopPlace = createStopPlace(59.5, 10.5);
         stopPlaceRepository.save(otherStopPlace);
 
-        Pageable pageable = new PageRequest(0, 10);
+        Pageable pageable = PageRequest.of(0, 10);
 
         Page<StopPlace> result = stopPlaceRepository.findStopPlacesWithin(southEastLongitude, southEastLatitude, northWestLongitude, northWestLatitude, ignoredStopPlace.getNetexId(), pageable);
 
@@ -320,7 +320,7 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         expiredStopPlace = stopPlaceRepository.save(expiredStopPlace);
         openEndedStopPlace = stopPlaceRepository.save(openEndedStopPlace);
 
-        Pageable pageable = new PageRequest(0, 10);
+        Pageable pageable = PageRequest.of(0, 10);
 
         Page<StopPlace> result = stopPlaceRepository.findStopPlacesWithin(xMin, yMin, xMax, yMax, null, pageable);
         assertThat(result).hasSize(1);
