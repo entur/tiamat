@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ProxyEndpoint name="stop-places-v1-dk">
+    <Description></Description>
+    <FaultRules/>
+    <Flows/>
+    <PostFlow name="PostFlow">
+        <Request/>
+        <Response/>
+    </PostFlow>
+    <PreFlow name="PreFlow">
+        <Request>
+            <Step>
+                <FaultRules/>
+                <Name>flowCallout.globalIpBlacklistTeamRutedata</Name>
+            </Step>
+            <Step>
+                <FaultRules/>
+                <Name>spikeArrest</Name>
+            </Step>
+            <Step>
+                <FaultRules/>
+                <Name>flowCallout.getEnvironmentConfiguration</Name>
+            </Step>
+        </Request>
+        <Response/>
+    </PreFlow>
+    <HTTPProxyConnection>
+        <BasePath>/stop-places/v1/dk</BasePath>
+        <Properties>
+            <Property name="response.streaming.enabled">true</Property>
+            <Property name="request.streaming.enabled">true</Property>
+        </Properties>
+        <VirtualHost>entur</VirtualHost>
+    </HTTPProxyConnection>
+    <RouteRule name="stop-places-v1-dk">
+        <TargetEndpoint>stop-places-v1-dk</TargetEndpoint>
+    </RouteRule>
+</ProxyEndpoint>
