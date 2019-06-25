@@ -9,7 +9,6 @@
         <Policy>flowCallout.globalIpBlacklistTeamRutedata</Policy>
         <Policy>flowCallout.replaceTargetUrl</Policy>
         <Policy>spikeArrest</Policy>
-        <Policy>flowCallout.generalSecurityHeaders</Policy>
     </Policies>
     <ProxyEndpoints>
         <ProxyEndpoint>stop-places-v1-dk</ProxyEndpoint>

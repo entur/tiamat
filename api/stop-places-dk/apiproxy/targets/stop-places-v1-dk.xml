@@ -3,19 +3,11 @@
     <Description/>
     <FaultRules/>
     <DefaultFaultRule name="target-fault">
-        <Step>
-            <Name>flowCallout.generalSecurityHeaders</Name>
-        </Step>
     </DefaultFaultRule>
     <Flows/>
     <PostFlow name="PostFlow">
         <Request/>
-        <Response>
-            <Step>
-                <FaultRules/>
-                <Name>flowCallout.generalSecurityHeaders</Name>
-            </Step>
-        </Response>
+        <Response/>
     </PostFlow>
     <PreFlow name="PreFlow">
         <Request>
