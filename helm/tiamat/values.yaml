@@ -1,7 +1,7 @@
 minReplicas: 1
 maxReplicas: 2
 image: eu.gcr.io/carbon-1287/tiamat
-imageTag: latest
+imageTag: 0.0.2-SNAPSHOT
 imagePullPolicy: Always
 slack: talk-ror
 team: ror
