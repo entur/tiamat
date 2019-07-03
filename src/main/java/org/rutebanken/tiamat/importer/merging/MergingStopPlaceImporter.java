@@ -196,7 +196,7 @@ public class MergingStopPlaceImporter {
     }
 
     private StopPlace findNearbyOrExistingStopPlace(StopPlace newStopPlace) {
-        final List<StopPlace> existingStopPlaces = stopPlaceFromOriginalIdFinder.find(newStopPlace);
+        /**final List<StopPlace> existingStopPlaces = stopPlaceFromOriginalIdFinder.find(newStopPlace);
         if (existingStopPlaces != null && !existingStopPlaces.isEmpty()) {
 
             Optional<StopPlace> nearbyExistingStopPlace = existingStopPlaces.stream()
@@ -215,7 +215,7 @@ public class MergingStopPlaceImporter {
                 return nearbyExistingStopPlace.get();
             }
         }
-
+**/
         if (newStopPlace.getName() != null) {
             final StopPlace nearbyStopPlace = nearbyStopPlaceFinder.find(newStopPlace, true);
             if (nearbyStopPlace != null) {

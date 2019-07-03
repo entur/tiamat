@@ -32,7 +32,7 @@ import static java.util.stream.Collectors.toList;
  * When importing site frames with the matching stops concurrently, not thread safe.
  */
 @Component
-@Transactional
+//@Transactional
 public class TransactionalMergingStopPlacesImporter {
 
     private static final Logger logger = LoggerFactory.getLogger(TransactionalMergingStopPlacesImporter.class);
