@@ -1,0 +1,67 @@
+apiVersion: v1
+data:
+  application.properties: |+
+            nearbyStopsWithSameTypeFinder.limits={railStation:''200'',airport:''3000''}
+            blobstore.gcs.bucket.name=tiamat-dk
+            blobstore.gcs.blob.path=export
+            spring.jpa.properties.hibernate.dialect=org.hibernate.spatial.dialect.postgis.PostgisDialect
+            logging.level.org.rutebanken.tiamat.importer.finder=INFO
+            authorization.enabled=true
+            server.port=8777
+            keycloak.realm=rutebanken
+            spring.jpa.hibernate.ddl-auto=none
+            spring.database.driverClassName=org.postgresql.Driver
+            spring.datasource.hikari.maximumPoolSize=30
+            keycloak.auth-server-url=https://kc-dev.devstage.entur.io/auth
+            spring.jpa.open-in-view=false
+            changelog.publish.enabled=true
+            spring.datasource.url=jdbc:postgresql://localhost:5432/tiamat
+            spring.jpa.properties.javax.persistence.query.timeout=15000
+            tariffzoneLookupService.resetReferences=true
+            spring.datasource.hikari.idleTimeout=90000
+            spring.jpa.hibernate.use-new-id-generator-mappings=true
+            spring.jpa.database=POSTGRESQL
+            logging.level.org.hibernate.SQL=WARN
+            logging.level.org.rutebanken.tiamat=INFO
+            spring.jpa.properties.hibernate.cache.use_second_level_cache=true
+            spring.jpa.properties.hibernate.cache.region.factory_class=org.rutebanken.tiamat.hazelcast.TiamatHazelcastCacheRegionFactory
+            logging.level.org.hibernate.tool.hbm2ddl=INFO
+            blobstore.gcs.credential.path=/etc/tiamat/tiamat-blobstore-credentials.json
+            logging.level.org.rutebanken.tiamat.rest.netex.publicationdelivery.PublicationDeliveryUnmarshaller=INFO
+            spring.datasource.username=tiamat
+            keycloak.principal-attribute=preferred_username
+            rutebanken.hazelcast.management.url=http://tiamat-hzmgmt/mancenter/
+            spring.jpa.properties.hibernate.cache.use_minimal_puts=true
+            spring.jpa.show-sql=false
+            logging.level.org.rutebanken.tiamat.dtoassembling.disassembler.StopPlaceSearchDisassembler=WARN
+            publicationDeliveryStreamingOutput.validateAgainstSchema=true
+            logging.level.org.hibernate.type=WARN
+            blobstore.gcs.project.id=carbon-1287
+            logging.level.org.rutebanken.tiamat.versioning=INFO
+            spring.activemq.broker-url=tcp://activemq:61616?jms.redeliveryPolicy.maximumRedeliveries=0
+            spring.flyway.enabled=false
+            spring.flyway.table=schema_version
+            graphite.server=graphite.metrics
+            logging.level.org.springframework.orm.hibernate4.support=WARN
+            logging.level.org.rutebanken.tiamat.rest.netex.publicationdelivery=INFO
+            netex.import.enabled.types=MERGE,INITIAL,ID_MATCH,MATCH
+            spring.jpa.properties.hibernate.cache.use_query_cache=true
+            logging.level.org.rutebanken.tiamat.repository=INFO
+            spring.datasource.hikari.maxLifetime=123000
+            keycloak.resource=Tiamat
+            logging.level.org.rutebanken.tiamat.rest.netex.publicationdelivery.PublicationDeliveryStreamingOutput=INFO
+            spring.datasource.platform=postgres
+            logging.level.org.hibernate.id.enhanced=INFO
+            rutebanken.kubernetes.enabled=true
+            # Temporary setting until bug in KeycloakWebSecurityConfigurerAdapter is fixed
+            (The bean ''httpSessionManager'', defined in class path resource XXXSecurityConfiguration.class],
+            could not be registered. A bean with that name has already been defined in URL)
+            spring.main.allow-bean-definition-overriding=true
+            entur.logging.mdc.enabled= true
+            spring.profiles.active = dev
+            publicationDeliveryUnmarshaller.validateAgainstSchema=false
+
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}

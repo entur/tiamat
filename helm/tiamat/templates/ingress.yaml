@@ -1,36 +1,30 @@
-{{- if .Values.ingress.enabled -}}
-{{- $fullName := include "tiamat.fullname" . -}}
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: {{ $fullName }}
   labels:
-{{ include "tiamat.labels" . | indent 4 }}
-  {{- with .Values.ingress.annotations }}
+    {{- include "common.labels" . | indent 4 }}
   annotations:
-    {{- toYaml . | nindent 4 }}
-  {{- end }}
+    {{- if eq .Release.Namespace "dev" }}
+    external-dns.alpha.kubernetes.io/target: {{ .Values.externalDns.ingressLoadBalancerIP.dev }}
+    {{- else if eq .Release.Namespace "staging" }}
+    external-dns.alpha.kubernetes.io/target: {{ .Values.externalDns.ingressLoadBalancerIP.staging }}
+    {{- else if eq .Release.Namespace "production" }}
+    external-dns.alpha.kubernetes.io/target: {{ .Values.externalDns.ingressLoadBalancerIP.production }}
+    {{- end }}
+    kubernetes.io/ingress.class: traefik
+  name: {{ .Release.Name }}-{{ .Values.api }}
+  namespace: {{ .Release.Namespace }}
 spec:
-{{- if .Values.ingress.tls }}
-  tls:
-  {{- range .Values.ingress.tls }}
-    - hosts:
-      {{- range .hosts }}
-        - {{ . | quote }}
-      {{- end }}
-      secretName: {{ .secretName }}
-  {{- end }}
-{{- end }}
   rules:
-  {{- range .Values.ingress.hosts }}
-    - host: {{ .host | quote }}
-      http:
-        paths:
-        {{- range .paths }}
-          - path: {{ . }}
-            backend:
-              serviceName: {{ $fullName }}
-              servicePort: http
-        {{- end }}
-  {{- end }}
-{{- end }}
+    {{- if eq .Release.Namespace "dev" }}
+    - host: {{ .Values.app }}-{{ .Values.api }}-{{ .Release.Namespace }}.dev.entur.io
+    {{- else if eq .Release.Namespace "staging" }}
+    - host: {{ .Values.app }}-{{ .Values.api }}-{{ .Release.Namespace }}.staging.entur.io
+    {{- else if eq .Release.Namespace "staging" }}
+    - host: {{ .Values.app }}-{{ .Values.api }}-{{ .Release.Namespace }}.entur.io
+    {{- end }}
+    http:
+      paths:
+        - backend:
+            serviceName: {{ .Release.Name }}
+            servicePort: {{ .Values.service.externalPort }}configmap.yaml
