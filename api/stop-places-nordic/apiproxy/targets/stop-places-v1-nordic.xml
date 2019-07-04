@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<TargetEndpoint name="stop-places-v1-dk">
+<TargetEndpoint name="stop-places-v1-nordic">
     <Description/>
     <FaultRules/>
     <DefaultFaultRule name="target-fault">
@@ -27,6 +27,6 @@
             <Property name="response.streaming.enabled">true</Property>
             <Property name="request.streaming.enabled">true</Property>
         </Properties>
-        <URL>https://stop-places-v1-dk-NAMESPACE.INGRESS_ENVIRONMENT/services/stop_places</URL>
+        <URL>https://stop-places-v1-nordic-NAMESPACE.INGRESS_ENVIRONMENT/services/stop_places</URL>
     </HTTPTargetConnection>
 </TargetEndpoint>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<APIProxy name="stop-places-dk">
-    <Description>stop-places-dk</Description>
-    <DisplayName>stop-places-dk</DisplayName>
+<APIProxy name="stop-places-nordic">
+    <Description>stop-places-nordic</Description>
+    <DisplayName>stop-places-nordic</DisplayName>
    <Policies>
         <Policy>assignMessage.addCors</Policy>
         <Policy>flowCallout.getEnvironmentConfiguration</Policy>
@@ -11,12 +11,12 @@
         <Policy>spikeArrest</Policy>
     </Policies>
     <ProxyEndpoints>
-        <ProxyEndpoint>stop-places-v1-dk</ProxyEndpoint>
+        <ProxyEndpoint>stop-places-v1-nordic</ProxyEndpoint>
     </ProxyEndpoints>
     <Resources/>
     <Spec></Spec>
     <TargetServers/>
     <TargetEndpoints>
-        <TargetEndpoint>stop-places-v1-dk</TargetEndpoint>
+        <TargetEndpoint>stop-places-v1-nordic</TargetEndpoint>
     </TargetEndpoints>
 </APIProxy>
