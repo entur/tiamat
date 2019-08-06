@@ -157,6 +157,15 @@ class StopPlaceFetcher implements DataFetcher {
                     );
                 }
 
+                List<String> countryRef = environment.getArgument(COUNTRY_REF);
+                if (countryRef != null && !countryRef.isEmpty()) {
+                    exportParamsBuilder.setCountryReferences(
+                            countryRef.stream()
+                                    .filter(countryRefValue -> countryRefValue != null && !countryRefValue.isEmpty())
+                                    .collect(Collectors.toList())
+                    );
+                }
+
                 List<String> countyRef = environment.getArgument(COUNTY_REF);
                 if (countyRef != null && !countyRef.isEmpty()) {
                     exportParamsBuilder.setCountyReferences(

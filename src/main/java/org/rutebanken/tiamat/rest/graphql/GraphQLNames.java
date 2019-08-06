@@ -286,7 +286,9 @@ public class GraphQLNames {
     public static final String IMPORTED_ID_QUERY = "importedId";
     public static final String IMPORTED_ID_ARG_DESCRIPTION = "Searches for StopPlace by importedId.";
     public static final String COUNTY_REF = "countyReference";
+    public static final String COUNTRY_REF = "countryReference";
     public static final String COUNTY_REF_ARG_DESCRIPTION = "Only return StopPlaces located in given counties.";
+    public static final String COUNTRY_REF_ARG_DESCRIPTION = "Only return StopPlaces located in given countries.";
 
     public static final String MUNICIPALITY_REF = "municipalityReference";
     public static final String MUNICIPALITY_REF_ARG_DESCRIPTION = "Only return StopPlaces located in given municipalities.";
