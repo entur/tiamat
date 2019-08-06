@@ -492,6 +492,11 @@ public class StopPlaceRegisterGraphQLSchema {
                 .description(COUNTY_REF_ARG_DESCRIPTION)
                 .build());
         arguments.add(GraphQLArgument.newArgument()
+                .name(COUNTRY_REF)
+                .type(new GraphQLList(GraphQLString))
+                .description(COUNTRY_REF_ARG_DESCRIPTION)
+                .build());
+        arguments.add(GraphQLArgument.newArgument()
                 .name(TAGS)
                 .type(new GraphQLList(GraphQLString))
                 .description(TAGS_ARG_DESCRIPTION)
