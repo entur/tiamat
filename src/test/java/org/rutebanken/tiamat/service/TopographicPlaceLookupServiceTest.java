@@ -26,7 +26,6 @@ import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.model.TopographicPlaceTypeEnumeration;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.annotation.DirtiesContext;
 
 import java.time.Instant;
 import java.util.Optional;
@@ -48,7 +47,6 @@ public class TopographicPlaceLookupServiceTest extends TiamatIntegrationTest {
      * Test is implemented after merging of two counties (Sør- and Nordtrøndelag), were municipalities got new IDs.
      */
     @Test
-    @DirtiesContext
     public void findTopographicPlace() {
 
         Point point = geometryFactory.createPoint(new Coordinate(9.84, 59.26));
