@@ -146,18 +146,30 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
         Geometry geometryFilter = geometryFactory.toGeometry(envelope);
 
-        String queryString = "SELECT s.* FROM stop_place s " +
+
+        String queryString;
+        if (pointInTime != null) {
+        queryString = "SELECT s.* FROM stop_place s " +
                                      SQL_LEFT_JOIN_PARENT_STOP +
                                      "WHERE " +
                                         SQL_CHILD_OR_PARENT_WITHIN +
                                         "AND "
-                                        + SQL_NOT_PARENT_STOP_PLACE;
-
-        if (pointInTime != null) {
-            queryString += "AND " + SQL_STOP_PLACE_OR_PARENT_IS_VALID_AT_POINT_IN_TIME;
+                                        + SQL_NOT_PARENT_STOP_PLACE +
+                                        "AND "
+                                        + SQL_STOP_PLACE_OR_PARENT_IS_VALID_AT_POINT_IN_TIME;
         } else {
             // If no point in time is set, use max version to only get one version per stop place
-            queryString += "AND " + SQL_MAX_VERSION_OF_STOP_PLACE;
+            String subQueryString = "SELECT s.netex_id,max(s.version) FROM stop_place s " +
+                    SQL_LEFT_JOIN_PARENT_STOP +
+                    "WHERE " +
+                    SQL_CHILD_OR_PARENT_WITHIN +
+                    "AND "
+                    + SQL_NOT_PARENT_STOP_PLACE +
+                    "group by s.netex_id" ;
+
+            queryString = "SELECT s.* FROM stop_place s " +
+                    "WHERE (netex_id,version) in (" + subQueryString + ")" ;
+
         }
 
         if(ignoreStopPlaceId != null) {
