@@ -89,7 +89,7 @@
         <commons.lang3.version>3.7</commons.lang3.version>
         <orika-core.version>1.5.2</orika-core.version>
         <guava.version>27.0-jre</guava.version>
-        <graphql-java.version>9.2</graphql-java.version>
+        <graphql-java.version>11.0</graphql-java.version>
 
         <hazelcast-hibernate53.version>1.3.0</hazelcast-hibernate53.version>
         <hibernate.version>5.4.0.Final</hibernate.version>

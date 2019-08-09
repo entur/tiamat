@@ -66,7 +66,7 @@ public class QuayTest extends TiamatIntegrationTest {
     @Test
     public void persistQuayWithCompassBearing() {
         Quay quay = new Quay();
-        quay.setCompassBearing(new Float(0.01));
+        quay.setCompassBearing((float) 0.01);
         quayRepository.save(quay);
 
         Quay actual = quayRepository.findFirstByNetexIdOrderByVersionDesc(quay.getNetexId());
