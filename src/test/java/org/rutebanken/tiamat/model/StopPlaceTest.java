@@ -51,9 +51,6 @@ public class StopPlaceTest extends TiamatIntegrationTest {
     public void persistStopPlaceWithTariffZone() {
 
         StopPlace stopPlace = new StopPlace();
-
-        stopPlace.setPrivateCode(new PrivateCodeStructure("SP1","type"));
-
         TariffZone tariffZone = new TariffZone();
         tariffZone = tariffZoneRepository.save(tariffZone);
         stopPlace.getTariffZones().add(new TariffZoneRef(tariffZone));
