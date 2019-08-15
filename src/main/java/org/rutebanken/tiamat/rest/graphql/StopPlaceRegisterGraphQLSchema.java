@@ -180,10 +180,16 @@ public class StopPlaceRegisterGraphQLSchema {
                         .name(PUBLIC_CODE)
                         .type(GraphQLString).build());
         commonFieldsList.add(privateCodeFieldDefinition);
+        commonFieldsList.add(
+                newFieldDefinition()
+                        .name(MODIFICATION_ENUMERATION)
+                        .type(modificationEnumerationType)
+                        .build()
+        );
 
-        List<GraphQLFieldDefinition> zoneCommondFieldList = zoneCommonFieldListCreator.create();
+        List<GraphQLFieldDefinition> zoneCommandFieldList = zoneCommonFieldListCreator.create();
 
-        commonFieldsList.addAll(zoneCommondFieldList);
+        commonFieldsList.addAll(zoneCommandFieldList);
 
         GraphQLObjectType quayObjectType = createQuayObjectType(commonFieldsList);
 
@@ -191,7 +197,7 @@ public class StopPlaceRegisterGraphQLSchema {
 
         GraphQLObjectType topographicPlaceObjectType = topographicPlaceObjectTypeCreator.create();
 
-        GraphQLObjectType tariffZoneObjectType = tariffZoneObjectTypeCreator.create(zoneCommondFieldList);
+        GraphQLObjectType tariffZoneObjectType = tariffZoneObjectTypeCreator.create(zoneCommandFieldList);
 
         MutableTypeResolver stopPlaceTypeResolver = new MutableTypeResolver();
 
