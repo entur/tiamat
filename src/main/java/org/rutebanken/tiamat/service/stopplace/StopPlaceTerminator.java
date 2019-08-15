@@ -16,6 +16,7 @@
 package org.rutebanken.tiamat.service.stopplace;
 
 import org.rutebanken.tiamat.auth.UsernameFetcher;
+import org.rutebanken.tiamat.model.ModificationEnumeration;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.ValidBetween;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -49,7 +50,7 @@ public class StopPlaceTerminator {
     @Autowired
     private VersionCreator versionCreator;
 
-    public StopPlace terminateStopPlace(String stopPlaceId, Instant suggestedTimeOfTermination, String versionComment) {
+    public StopPlace terminateStopPlace(String stopPlaceId, Instant suggestedTimeOfTermination, String versionComment, ModificationEnumeration modificationEnumeration) {
 
         return mutateLock.executeInLock(() -> {
 
@@ -86,6 +87,13 @@ public class StopPlaceTerminator {
 
                 nextVersionStopPlace.setValidBetween(new ValidBetween(now, timeOfTermination));
                 logger.debug("Set valid betwen to {} for new version of stop place {}", nextVersionStopPlace.getValidBetween(), nextVersionStopPlace.getNetexId());
+
+
+                if (ModificationEnumeration.DELETE.equals(modificationEnumeration)) {
+                    logger.debug("Set terminate type to DELETE, to permanently terminate stop place: " + stopPlaceId);
+                    nextVersionStopPlace.setModificationEnumeration(ModificationEnumeration.DELETE);
+                }
+
                 nextVersionStopPlace.setVersionComment(versionComment);
 
                 return stopPlaceVersionedSaverService.saveNewVersion(previousStopPlaceVersion, nextVersionStopPlace, now);
