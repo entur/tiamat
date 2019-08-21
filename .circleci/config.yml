@@ -10,6 +10,14 @@ aliases:
     command: |
       echo 'export GCLOUD_SERVICE_KEY="$GCLOUD_SERVICE_KEY"' >> $BASH_ENV
       /tools/docker_login.sh
+  - &docker-build-and-push
+    name: Docker build and push
+    command: |
+      IMAGE="eu.gcr.io/carbon-1287/${CIRCLE_PROJECT_REPONAME}"
+      echo "Image: ${IMAGE}"
+      docker build -t $IMAGE .
+      docker tag $IMAGE "${IMAGE}":"0.0.2-SNAPSHOT"
+      docker push $IMAGE
   - &post-hook
     name: Notify about build and docker image pushed
     command: |
@@ -29,12 +37,12 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          key: dep-cache1-{{ checksum "pom.xml" }}
+          key: dep-cache-{{ checksum "pom.xml" }}
       - run: mvn org.apache.maven.plugins:maven-dependency-plugin:3.1.0:go-offline -s /tools/m2/settings.xml
       - save_cache:
           paths:
             - ~/.m2
-          key: dep-cache1-{{ checksum "pom.xml" }}
+          key: dep-cache-{{ checksum "pom.xml" }}
       # Cannot use -o because of snapshot dependencies.
       - run: mvn install -s /tools/m2/settings.xml
       - run:
@@ -51,7 +59,7 @@ jobs:
           root: ~/project
           paths:
             - target
-            - pom.xml
+            - Dockerfile
             - .circleci
   deploy-docker:
     docker:
@@ -64,15 +72,11 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/project
-      - restore_cache:
-          key: dep-cache-{{ checksum "pom.xml" }}
       - setup_remote_docker:
           docker_layer_caching: true
       - run: *GCP-auth
       - run: *docker-login
-      - run:
-          name: Docker build and push
-          command: mvn docker:build docker:push -s /tools/m2/settings.xml
+      - run: *docker-build-and-push
       - run: *post-hook
 workflows:
   version: 2
