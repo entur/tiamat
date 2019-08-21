@@ -59,15 +59,8 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <!-- Docker & Fabric8 Configs -->
-        <docker.from>eu.gcr.io/carbon-1287/openjdk11-base-image</docker.from>
-        <docker.image>eu.gcr.io/${fabric8.dockerUser}${project.artifactId}:${project.version}</docker.image>
-        <docker.cleanup>none</docker.cleanup>
-        <fabric8.dockerUser>carbon-1287/</fabric8.dockerUser>
-
         <maven.compiler.plugin.version>3.8.0</maven.compiler.plugin.version>
         <plexus.compiler.javac.version>2.8.5</plexus.compiler.javac.version>
-        <docker.maven.plugin.version>0.21.0</docker.maven.plugin.version>
         <spring-boot-plugin.version>2.1.1.RELEASE</spring-boot-plugin.version>
         <spring-boot.version>2.1.1.RELEASE</spring-boot.version>
         <spring.security.version>5.0.7.RELEASE</spring.security.version>
@@ -617,30 +610,6 @@
                 </executions>
             </plugin>
 
-            <plugin>
-                <groupId>io.fabric8</groupId>
-                <artifactId>docker-maven-plugin</artifactId>
-                <version>${docker.maven.plugin.version}</version>
-                <configuration>
-                    <autoPull>always</autoPull>
-                    <images>
-                        <image>
-                            <name>${docker.image}</name>
-                            <build>
-                                <from>${docker.from}</from>
-                                <cleanup>${docker.cleanup}</cleanup>
-                                <assembly>
-                                    <basedir>/deployments</basedir>
-                                    <descriptorRef>artifact</descriptorRef>
-                                </assembly>
-                                <env>
-                                    <JAVA_APP_JAR>${project.build.finalName}.jar</JAVA_APP_JAR>
-                                </env>
-                            </build>
-                        </image>
-                    </images>
-                </configuration>
-            </plugin>
         </plugins>
     </build>
 
