@@ -17,6 +17,7 @@ package org.rutebanken.tiamat.rest.graphql.operations;
 
 import graphql.schema.*;
 import org.rutebanken.tiamat.rest.graphql.scalars.DateScalar;
+import org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes;
 import org.rutebanken.tiamat.service.stopplace.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -120,9 +121,10 @@ public class StopPlaceOperationsBuilder {
                 .argument(newArgument().name(STOP_PLACE_ID).type(new GraphQLNonNull(GraphQLString)))
                 .argument(newArgument().name(VALID_BETWEEN_TO_DATE).type(new GraphQLNonNull(dateScalar.getGraphQLDateScalar())))
                 .argument(newArgument().name(VERSION_COMMENT).type(GraphQLString))
-                .dataFetcher(environment -> stopPlaceTerminator.terminateStopPlace(environment.getArgument(STOP_PLACE_ID), environment.getArgument(VALID_BETWEEN_TO_DATE), environment.getArgument(VERSION_COMMENT)))
-                .build());
+                .argument(newArgument().name(MODIFICATION_ENUMERATION).type(CustomGraphQLTypes.modificationEnumerationType))
 
+                .dataFetcher(environment -> stopPlaceTerminator.terminateStopPlace(environment.getArgument(STOP_PLACE_ID), environment.getArgument(VALID_BETWEEN_TO_DATE), environment.getArgument(VERSION_COMMENT) , environment.getArgument(MODIFICATION_ENUMERATION)))
+                .build());
 
         //Reopen StopPlace
         operations.add(newFieldDefinition()

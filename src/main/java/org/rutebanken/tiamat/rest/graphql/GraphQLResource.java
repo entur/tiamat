@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.google.common.collect.Sets;
 import graphql.*;
 import graphql.execution.ExecutionPath;
+import graphql.schema.GraphQLSchema;
 import io.swagger.annotations.Api;
 import org.rutebanken.helper.organisation.NotAuthenticatedException;
 import org.rutebanken.tiamat.rest.exception.ErrorResponseEntity;
@@ -70,7 +71,7 @@ public class GraphQLResource {
 
     @PostConstruct
     public void init() {
-        graphQL = new GraphQL(stopPlaceRegisterGraphQLSchema.stopPlaceRegisterSchema);
+        graphQL = GraphQL.newGraphQL(stopPlaceRegisterGraphQLSchema.stopPlaceRegisterSchema).build();
     }
 
     private GraphQL graphQL;

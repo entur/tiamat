@@ -18,6 +18,7 @@ package org.rutebanken.tiamat.service.stopplace;
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
+import org.rutebanken.tiamat.model.ModificationEnumeration;
 import org.rutebanken.tiamat.model.SiteRefStructure;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.ValidBetween;
@@ -36,7 +37,7 @@ public class StopPlaceTerminatorTest extends TiamatIntegrationTest {
 
     @Transactional
     @Test
-    public void testTerminateStopPlace() {
+    public void testDeactivateStopPlace() {
 
         StopPlace savedStopPlace = stopPlaceVersionedSaverService.saveNewVersion(new StopPlace(new EmbeddableMultilingualString("Name")));
         String stopPlaceNetexId = savedStopPlace.getNetexId();
@@ -44,14 +45,29 @@ public class StopPlaceTerminatorTest extends TiamatIntegrationTest {
         Instant timeOfTermination = savedStopPlace.getValidBetween().getFromDate().plusSeconds(30);
 
         System.out.println("Terminate at " + timeOfTermination);
-        StopPlace terminatedStopPlace = stopPlaceTerminator.terminateStopPlace(stopPlaceNetexId, timeOfTermination, "Terminating Stop");
+        StopPlace terminatedStopPlace = stopPlaceTerminator.terminateStopPlace(stopPlaceNetexId, timeOfTermination, "Terminating Stop",null);
 
         assertThat(terminatedStopPlace.getValidBetween().getToDate()).isNotNull();
     }
 
     @Transactional
     @Test
-    public void testTerminateStopPlaceAdjustToNowTime() {
+    public void testTerminateStopPlace() {
+
+        StopPlace savedStopPlace = stopPlaceVersionedSaverService.saveNewVersion(new StopPlace(new EmbeddableMultilingualString("Name")));
+        String stopPlaceNetexId = savedStopPlace.getNetexId();
+
+        Instant timeOfTermination = savedStopPlace.getValidBetween().getFromDate().plusSeconds(30);
+
+        StopPlace terminatedStopPlace = stopPlaceTerminator.terminateStopPlace(stopPlaceNetexId, timeOfTermination, "Terminating Stop", ModificationEnumeration.DELETE);
+
+        assertThat(terminatedStopPlace.getValidBetween().getToDate()).isNotNull();
+        assertThat(terminatedStopPlace.getModificationEnumeration().equals(ModificationEnumeration.DELETE));
+
+    }
+    @Transactional
+    @Test
+    public void testDeactivateStopPlaceAdjustToNowTime() {
 
         StopPlace savedStopPlace = stopPlaceVersionedSaverService.saveNewVersion(new StopPlace(new EmbeddableMultilingualString("Name")));
         String stopPlaceNetexId = savedStopPlace.getNetexId();
@@ -60,8 +76,7 @@ public class StopPlaceTerminatorTest extends TiamatIntegrationTest {
         Instant now = Instant.now();
         Instant timeOfTermination = now.minusSeconds(20);
 
-        System.out.println("Terminate at " + timeOfTermination);
-        StopPlace terminatedStopPlace = stopPlaceTerminator.terminateStopPlace(stopPlaceNetexId, timeOfTermination, "Terminating Stop");
+        StopPlace terminatedStopPlace = stopPlaceTerminator.terminateStopPlace(stopPlaceNetexId, timeOfTermination, "Deactivate Stop",null);
 
         assertThat(terminatedStopPlace.getValidBetween().getToDate()).isNotNull();
         assertThat(terminatedStopPlace.getValidBetween().getToDate())
@@ -71,22 +86,22 @@ public class StopPlaceTerminatorTest extends TiamatIntegrationTest {
 
     @Transactional
     @Test
-    public void testCannotTerminateChild() {
+    public void testCannotDeactivateChild() {
 
         StopPlace savedStopPlace = stopPlaceVersionedSaverService.saveNewVersion(new StopPlace(new EmbeddableMultilingualString("Name")));
         savedStopPlace.setParentSiteRef(new SiteRefStructure("x", "2"));
         stopPlaceRepository.save(savedStopPlace);
         String stopPlaceNetexId = savedStopPlace.getNetexId();
 
-        assertThatThrownBy(() -> stopPlaceTerminator.terminateStopPlace(stopPlaceNetexId, Instant.now(), "Terminating Stop")).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> stopPlaceTerminator.terminateStopPlace(stopPlaceNetexId, Instant.now(), "Deactivating Stop",null)).isInstanceOf(IllegalArgumentException.class);
     }
 
     /**
-     * When attempting to terminate stop place that is already terminated, expect exception.
+     * When attempting to deactivate stop place that is already deactivate, expect exception.
      */
     @Transactional
     @Test(expected = IllegalArgumentException.class)
-    public void testTerminateStopPlaceWithFromDate() {
+    public void testDeactivateStopPlaceWithFromDate() {
 
         Instant now = Instant.now();
 
@@ -96,7 +111,6 @@ public class StopPlaceTerminatorTest extends TiamatIntegrationTest {
         String stopPlaceNetexId = savedStopPlace.getNetexId();
 
         Instant terminateDate = now.plusSeconds(20);
-        System.out.println(terminateDate);
-        stopPlaceTerminator.terminateStopPlace(stopPlaceNetexId, terminateDate, "Terminating Stop");
+        stopPlaceTerminator.terminateStopPlace(stopPlaceNetexId, terminateDate, "Deactivating Stop",null);
     }
 }

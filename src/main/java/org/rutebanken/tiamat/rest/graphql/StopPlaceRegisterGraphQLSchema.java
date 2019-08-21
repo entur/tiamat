@@ -176,9 +176,20 @@ public class StopPlaceRegisterGraphQLSchema {
                 .build()
         );
 
-        List<GraphQLFieldDefinition> zoneCommondFieldList = zoneCommonFieldListCreator.create();
+        commonFieldsList.add(newFieldDefinition()
+                        .name(PUBLIC_CODE)
+                        .type(GraphQLString).build());
+        commonFieldsList.add(privateCodeFieldDefinition);
+        commonFieldsList.add(
+                newFieldDefinition()
+                        .name(MODIFICATION_ENUMERATION)
+                        .type(modificationEnumerationType)
+                        .build()
+        );
 
-        commonFieldsList.addAll(zoneCommondFieldList);
+        List<GraphQLFieldDefinition> zoneCommandFieldList = zoneCommonFieldListCreator.create();
+
+        commonFieldsList.addAll(zoneCommandFieldList);
 
         GraphQLObjectType quayObjectType = createQuayObjectType(commonFieldsList);
 
@@ -186,7 +197,7 @@ public class StopPlaceRegisterGraphQLSchema {
 
         GraphQLObjectType topographicPlaceObjectType = topographicPlaceObjectTypeCreator.create();
 
-        GraphQLObjectType tariffZoneObjectType = tariffZoneObjectTypeCreator.create(zoneCommondFieldList);
+        GraphQLObjectType tariffZoneObjectType = tariffZoneObjectTypeCreator.create(zoneCommandFieldList);
 
         MutableTypeResolver stopPlaceTypeResolver = new MutableTypeResolver();
 
@@ -649,10 +660,6 @@ public class StopPlaceRegisterGraphQLSchema {
                             .name(COMPASS_BEARING)
                             .type(GraphQLBigDecimal))
                     .field(newFieldDefinition()
-                            .name(PUBLIC_CODE)
-                            .type(GraphQLString))
-                    .field(privateCodeFieldDefinition)
-                    .field(newFieldDefinition()
                             .name(ALTERNATIVE_NAMES)
                             .type(new GraphQLList(alternativeNameObjectType)))
                     .build();
@@ -749,6 +756,8 @@ public class StopPlaceRegisterGraphQLSchema {
         commonInputFieldsList.add(newInputObjectField().name(ID).type(GraphQLString).description("Ignore when creating new").build());
         commonInputFieldsList.add(newInputObjectField().name(NAME).type(embeddableMultiLingualStringInputObjectType).build());
         commonInputFieldsList.add(newInputObjectField().name(SHORT_NAME).type(embeddableMultiLingualStringInputObjectType).build());
+        commonInputFieldsList.add(newInputObjectField().name(PUBLIC_CODE).type(GraphQLString).build());
+        commonInputFieldsList.add(newInputObjectField().name(PRIVATE_CODE).type(privateCodeInputType).build());
         commonInputFieldsList.add(newInputObjectField().name(DESCRIPTION).type(embeddableMultiLingualStringInputObjectType).build());
         commonInputFieldsList.add(newInputObjectField().name(GEOMETRY).type(geoJsonInputType).build());
         commonInputFieldsList.add(newInputObjectField().name(ALTERNATIVE_NAMES).type(new GraphQLList(alternativeNameInputObjectType)).build());
@@ -761,7 +770,6 @@ public class StopPlaceRegisterGraphQLSchema {
                         .type(accessibilityAssessmentInputObjectType)
                         .build()
         );
-
         return commonInputFieldsList;
     }
 
@@ -773,12 +781,6 @@ public class StopPlaceRegisterGraphQLSchema {
                 .field(newInputObjectField()
                         .name(COMPASS_BEARING)
                         .type(GraphQLBigDecimal))
-                .field(newInputObjectField()
-                        .name(PUBLIC_CODE)
-                        .type(GraphQLString))
-                .field(newInputObjectField()
-                    .name(PRIVATE_CODE)
-                    .type(privateCodeInputType))
                 .build();
     }
 

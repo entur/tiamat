@@ -274,6 +274,7 @@ public class GraphQLNames {
     public static final String VALUES_ARG_DESCRIPTION = "Must be used together with parameter 'key', other search-parameters are ignored. Defines value to search for.";
     public static final String VERSION = "version";
     public static final String VERSION_COMMENT = "versionComment";
+    public static final String MODIFICATION_ENUMERATION = "modificationEnumeration";
     public static final String VERSION_ARG_DESCRIPTION = "Find stop place from " + ID + " and " +  VERSION + ". Only used together with " + ID + " argument";
 
     public static final String CHANGED_BY = "changedBy";

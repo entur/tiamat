@@ -157,6 +157,10 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
                                         + SQL_NOT_PARENT_STOP_PLACE +
                                         "AND "
                                         + SQL_STOP_PLACE_OR_PARENT_IS_VALID_AT_POINT_IN_TIME;
+            if(ignoreStopPlaceId != null) {
+                queryString += "AND " + SQL_IGNORE_STOP_PLACE_ID;
+
+            }
         } else {
             // If no point in time is set, use max version to only get one version per stop place
             String subQueryString = "SELECT s.netex_id,max(s.version) FROM stop_place s " +
@@ -164,16 +168,17 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
                     "WHERE " +
                     SQL_CHILD_OR_PARENT_WITHIN +
                     "AND "
-                    + SQL_NOT_PARENT_STOP_PLACE +
-                    "group by s.netex_id" ;
+                    + SQL_NOT_PARENT_STOP_PLACE;
+
+
+            if (ignoreStopPlaceId != null) {
+                subQueryString += "AND " + SQL_IGNORE_STOP_PLACE_ID + "group by s.netex_id";
+            } else {
+                subQueryString += "group by s.netex_id" ;
+            }
 
             queryString = "SELECT s.* FROM stop_place s " +
                     "WHERE (netex_id,version) in (" + subQueryString + ")" ;
-
-        }
-
-        if(ignoreStopPlaceId != null) {
-            queryString += "AND " + SQL_IGNORE_STOP_PLACE_ID;
 
         }
 
