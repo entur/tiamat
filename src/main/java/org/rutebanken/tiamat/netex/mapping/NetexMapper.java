@@ -18,20 +18,12 @@ package org.rutebanken.tiamat.netex.mapping;
 import ma.glasnost.orika.*;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
 import org.rutebanken.netex.model.*;
-import org.rutebanken.tiamat.config.GeometryFactoryConfig;
-import org.rutebanken.tiamat.netex.id.NetexIdHelper;
-import org.rutebanken.tiamat.netex.id.ValidPrefixList;
-import org.rutebanken.tiamat.netex.mapping.converter.*;
 import org.rutebanken.tiamat.netex.mapping.mapper.*;
-import org.rutebanken.tiamat.repository.TagRepository;
-import org.rutebanken.tiamat.time.ExportTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 @Component
@@ -100,7 +92,6 @@ public class NetexMapper {
 
         mapperFactory.classMap(Parking.class, org.rutebanken.tiamat.model.Parking.class)
                 .exclude("paymentMethods")
-                .exclude("parkingPaymentProcess")
                 .exclude("cardsAccepted")
                 .exclude("currenciesAccepted")
                 .exclude("accessModes")

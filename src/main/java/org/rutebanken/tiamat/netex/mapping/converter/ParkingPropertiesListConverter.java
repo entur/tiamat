@@ -18,7 +18,10 @@ package org.rutebanken.tiamat.netex.mapping.converter;
 import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;
+import org.rutebanken.netex.model.ParkingCapacities_RelStructure;
+import org.rutebanken.netex.model.ParkingCapacity;
 import org.rutebanken.netex.model.ParkingProperties_RelStructure;
+import org.rutebanken.netex.model.ParkingUserEnumeration;
 import org.rutebanken.tiamat.model.ParkingProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,36 +36,50 @@ public class ParkingPropertiesListConverter extends BidirectionalConverter<List<
     private static final Logger logger = LoggerFactory.getLogger(ParkingPropertiesListConverter.class);
 
     @Override
-    public ParkingProperties_RelStructure convertTo(List<ParkingProperties> parkingProperties, Type<ParkingProperties_RelStructure> destinationType, MappingContext mappingContext) {
-        if(parkingProperties == null || parkingProperties.isEmpty()) {
+    public ParkingProperties_RelStructure convertTo(List<ParkingProperties> parkingPropertiesList, Type<ParkingProperties_RelStructure> destinationType, MappingContext mappingContext) {
+        if(parkingPropertiesList == null || parkingPropertiesList.isEmpty()) {
             return null;
         }
+        ParkingProperties_RelStructure parkingProperties_relStructure = new ParkingProperties_RelStructure();
+        ParkingCapacities_RelStructure parkingCapacities_relStructure = new ParkingCapacities_RelStructure();
 
+        logger.debug("Mapping {} parkingPropertiesList to netex", parkingPropertiesList.size());
 
-        ParkingProperties_RelStructure parkingAreas_relStructure = new ParkingProperties_RelStructure();
+        parkingPropertiesList.forEach(parkingProperties -> {
+            List<ParkingCapacity> parkingCapacityList = new ArrayList<>();
+            parkingProperties.getSpaces().forEach(
+                    space -> {
+                        ParkingCapacity parkingCapacity = new ParkingCapacity();
+                        ParkingUserEnumeration netexParkingUserType = mapperFacade.map(space.getParkingUserType(), ParkingUserEnumeration.class);
+                        parkingCapacity.withParkingUserType(netexParkingUserType);
+                        parkingCapacity.withNumberOfSpaces(space.getNumberOfSpaces());
+                        parkingCapacity.withNumberOfSpacesWithRechargePoint(space.getNumberOfSpacesWithRechargePoint());
+                        parkingCapacity.setId(space.getNetexId());
+                        parkingCapacity.setVersion(String.valueOf(space.getVersion()));
+                        parkingCapacityList.add(parkingCapacity);
 
-        logger.debug("Mapping {} parkingProperties to netex", parkingProperties != null ? parkingProperties.size() : 0);
-
-        parkingProperties.forEach(parkingArea -> {
-            org.rutebanken.netex.model.ParkingProperties netexParkingArea = mapperFacade.map(parkingArea, org.rutebanken.netex.model.ParkingProperties.class);
-            parkingAreas_relStructure.getParkingProperties().add(netexParkingArea);
+                    }
+            );
+           final List<ParkingUserEnumeration> parkingUserEnumerations = mapperFacade.mapAsList(parkingProperties.getParkingUserTypes(), ParkingUserEnumeration.class);
+            parkingCapacities_relStructure.getParkingCapacityRefOrParkingCapacity().addAll(parkingCapacityList);
+            final org.rutebanken.netex.model.ParkingProperties netexParkingProperties = new org.rutebanken.netex.model.ParkingProperties();
+            netexParkingProperties.getParkingUserTypes().addAll(parkingUserEnumerations);
+            netexParkingProperties.withSpaces(parkingCapacities_relStructure);
+            parkingProperties_relStructure.getParkingProperties().add(netexParkingProperties);
         });
-        return parkingAreas_relStructure;
+        return parkingProperties_relStructure;
     }
 
     @Override
-    public List<ParkingProperties> convertFrom(ParkingProperties_RelStructure parkingAreas_relStructure, Type<List<ParkingProperties>> destinationType, MappingContext mappingContext) {
-        logger.debug("Mapping {} quays to internal model", parkingAreas_relStructure != null ? parkingAreas_relStructure.getParkingProperties().size() : 0);
-        List<ParkingProperties> parkingProperties = new ArrayList<>();
-        if(parkingAreas_relStructure.getParkingProperties() != null) {
-            parkingAreas_relStructure.getParkingProperties().stream()
-                    .map(netexParkingProperty -> {
-                        ParkingProperties tiamatProperty = mapperFacade.map(netexParkingProperty, ParkingProperties.class);
-                        return tiamatProperty;
-                    })
-                    .forEach(parkingArea -> parkingProperties.add(parkingArea));
+    public List<ParkingProperties> convertFrom(ParkingProperties_RelStructure parkingProperties_relStructure, Type<List<ParkingProperties>> destinationType, MappingContext mappingContext) {
+        logger.debug("Mapping {} quays to internal model", parkingProperties_relStructure != null ? parkingProperties_relStructure.getParkingProperties().size() : 0);
+        List<ParkingProperties> parkingPropertiesList = new ArrayList<>();
+        if (parkingProperties_relStructure != null && parkingProperties_relStructure.getParkingProperties() != null) {
+            parkingProperties_relStructure.getParkingProperties().stream()
+                    .map(netexParkingProperty -> mapperFacade.map(netexParkingProperty, ParkingProperties.class))
+                    .forEach(parkingPropertiesList::add);
         }
 
-        return parkingProperties;
+        return parkingPropertiesList;
     }
 }
