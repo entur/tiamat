@@ -68,10 +68,10 @@
         <postgresql.version>42.2.4</postgresql.version>
         <geodb.version>0.9</geodb.version>
         <geotools.version>20.1</geotools.version>
-        <activemq-client.version>5.15.6</activemq-client.version>
+        <activemq-client.version>5.15.9</activemq-client.version>
         <maven-javadoc-plugin.version>2.10.4</maven-javadoc-plugin.version>
         <flyway-core.version>5.2.4</flyway-core.version>
-        <logstash-logback.version>5.2</logstash-logback.version>
+        <logstash-logback.version>6.2</logstash-logback.version>
         <kubernetes-client.version>4.1.1</kubernetes-client.version>
         <janino.version>3.0.8</janino.version>
         <assertj-core.version>3.10.0</assertj-core.version>
@@ -582,8 +582,7 @@
                                     <classpath refid="maven.test.classpath"/>
                                 </taskdef>
                                 <mkdir dir="${project.build.testOutputDirectory}"/>
-                                <groovyc destdir="${project.build.testOutputDirectory}"
-                                         srcdir="${basedir}/src/test/groovy/" listfiles="true">
+                                <groovyc destdir="${project.build.testOutputDirectory}" srcdir="${basedir}/src/test/groovy/" listfiles="true">
                                     <classpath refid="maven.test.classpath"/>
                                 </groovyc>
                             </tasks>
