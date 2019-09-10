@@ -68,7 +68,7 @@
         <postgresql.version>42.2.4</postgresql.version>
         <geodb.version>0.9</geodb.version>
         <geotools.version>20.1</geotools.version>
-        <activemq-client.version>5.15.6</activemq-client.version>
+        <activemq-client.version>5.15.9</activemq-client.version>
         <maven-javadoc-plugin.version>2.10.4</maven-javadoc-plugin.version>
         <flyway-core.version>5.2.4</flyway-core.version>
         <logstash-logback.version>5.2</logstash-logback.version>
