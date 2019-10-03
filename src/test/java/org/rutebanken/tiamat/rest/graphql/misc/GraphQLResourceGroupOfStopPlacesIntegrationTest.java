@@ -30,7 +30,7 @@ public class GraphQLResourceGroupOfStopPlacesIntegrationTest extends AbstractGra
     private ExportTimeZone exportTimeZone;
 
     @Test
-    void Create_new_group_of_stop_places() {
+    public void Create_new_group_of_stop_places() {
         var stopPlace1 = new StopPlace();
         stopPlace1.setCentroid(geometryFactory.createPoint(new Coordinate(12, 53)));
         stopPlace1.setStopPlaceType(StopTypeEnumeration.BUS_STATION);
