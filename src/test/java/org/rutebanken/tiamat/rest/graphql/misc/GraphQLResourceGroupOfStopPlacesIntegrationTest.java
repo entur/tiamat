@@ -13,38 +13,39 @@
  * limitations under the Licence.
  */
 
-package org.rutebanken.tiamat.rest.graphql.misc
+package org.rutebanken.tiamat.rest.graphql.misc;
 
-import org.locationtech.jts.geom.Coordinate
-import org.junit.Test
-import org.rutebanken.tiamat.model.*
-import org.rutebanken.tiamat.time.ExportTimeZone
-import org.springframework.beans.factory.annotation.Autowired
+import org.locationtech.jts.geom.Coordinate;
+import org.junit.Test;
+import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.time.ExportTimeZone;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.hamcrest.Matchers.*
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*
+import static org.hamcrest.Matchers.*;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 
-def class GraphQLResourceGroupOfStopPlacesIntegrationTest extends AbstractGraphQLResourceIntegrationTest {
+public class GraphQLResourceGroupOfStopPlacesIntegrationTest extends AbstractGraphQLResourceIntegrationTest {
 
     @Autowired
-    private ExportTimeZone exportTimeZone
+    private ExportTimeZone exportTimeZone;
 
     @Test
-    void "Create new group of stop places"() {
-        def stopPlace1 = new StopPlace()
-        stopPlace1.setCentroid(geometryFactory.createPoint(new Coordinate(12, 53)))
-        stopPlace1.setStopPlaceType(StopTypeEnumeration.BUS_STATION)
-        stopPlaceVersionedSaverService.saveNewVersion(stopPlace1)
+    void Create_new_group_of_stop_places() {
+        var stopPlace1 = new StopPlace();
+        stopPlace1.setCentroid(geometryFactory.createPoint(new Coordinate(12, 53)));
+        stopPlace1.setStopPlaceType(StopTypeEnumeration.BUS_STATION);
+        stopPlaceVersionedSaverService.saveNewVersion(stopPlace1);
 
-        def stopPlace2 = new StopPlace()
-        stopPlace2.setCentroid(geometryFactory.createPoint(new Coordinate(13, 61)))
-        stopPlace2.setStopPlaceType(StopTypeEnumeration.TRAM_STATION)
-        stopPlaceVersionedSaverService.saveNewVersion(stopPlace2)
+        var stopPlace2 = new StopPlace();
+        stopPlace2.setCentroid(geometryFactory.createPoint(new Coordinate(13, 61)));
+        stopPlace2.setStopPlaceType(StopTypeEnumeration.TRAM_STATION);
+        stopPlaceVersionedSaverService.saveNewVersion(stopPlace2);
         
-        def groupName = "Group name"
-        def versionComment = "VersionComment"
+        String groupName = "Group name";
+        String versionComment = "VersionComment";
 
-        def graphQlJsonQuery = """mutation {
+        String graphQlJsonQuery = """
+        mutation {
                                     group: ${MUTATE_GROUP_OF_STOP_PLACES}(GroupOfStopPlaces: {
                                         name: {value: "${groupName}"},
                                         versionComment: "${versionComment}",
@@ -70,7 +71,7 @@ def class GraphQLResourceGroupOfStopPlacesIntegrationTest extends AbstractGraphQ
                                     }
                                   }
                                 }
-                                """
+                                """;
 
         executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .body("data.group.name.value", equalTo(groupName))
@@ -82,6 +83,6 @@ def class GraphQLResourceGroupOfStopPlacesIntegrationTest extends AbstractGraphQ
                 .root("data.group.members.find { it.id == '" + stopPlace1.getNetexId() + "'}")
                     .body("name", nullValue())
                     .body("stopPlaceType", equalTo(StopTypeEnumeration.BUS_STATION.value()))
-                    .body("version", equalTo(String.valueOf(stopPlace1.getVersion())))
+                    .body("version", equalTo(String.valueOf(stopPlace1.getVersion())));
     }
 }
