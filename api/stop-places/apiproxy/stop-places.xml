@@ -15,7 +15,9 @@
   <ProxyEndpoints>
     <ProxyEndpoint>stop-places-v1</ProxyEndpoint>
   </ProxyEndpoints>
-  <Resources/>
+  <Resources>
+    <Resource>jsc://javaScript.rateLimitValues.js</Resource>
+  </Resources>
   <Spec></Spec>
   <TargetServers/>
   <TargetEndpoints>
