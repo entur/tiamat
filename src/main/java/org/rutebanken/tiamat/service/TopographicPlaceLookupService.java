@@ -34,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -66,7 +67,7 @@ public class TopographicPlaceLookupService {
 
             if(siteVersionStructure.getTopographicPlace() != null) {
 
-                if(siteVersionStructure.getTopographicPlace().getId() == topographicPlaceMatch.getId()
+                if(siteVersionStructure.getTopographicPlace().getId().equals(topographicPlaceMatch.getId())
                         && siteVersionStructure.getTopographicPlace().getVersion() == topographicPlaceMatch.getVersion()) {
                     logger.trace("Version and id is the same for {}-{} not doing update", topographicPlaceMatch.getNetexId(), topographicPlaceMatch.getVersion());
                     return false;
@@ -109,7 +110,7 @@ public class TopographicPlaceLookupService {
                     }
                     return topographicPlace;
                 })
-                .filter(topographicPlace -> topographicPlace != null)
+                .filter(Objects::nonNull)
                 .findAny();
     }
 

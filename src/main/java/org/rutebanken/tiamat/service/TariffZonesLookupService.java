@@ -36,6 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -76,7 +77,7 @@ public class TariffZonesLookupService {
 
             Set<TariffZoneRef> matches = findTariffZones(stopPlace.getCentroid())
                     .stream()
-                    .filter(tariffZone -> stopPlace.getTariffZones().isEmpty() ? true : stopPlace.getTariffZones()
+                    .filter(tariffZone -> stopPlace.getTariffZones().isEmpty() || stopPlace.getTariffZones()
                             .stream()
                             .noneMatch(tariffZoneRef -> tariffZone.getNetexId().equals(tariffZoneRef.getRef())))
                     .map(tariffZone -> new TariffZoneRef(tariffZone.getNetexId()))
@@ -100,7 +101,7 @@ public class TariffZonesLookupService {
                        .stream()
                        .filter(pair -> point.coveredBy(pair.getSecond()))
                        .map(pair -> tariffZoneRepository.findFirstByNetexIdOrderByVersionDesc(pair.getFirst()))
-                       .filter(tariffZone -> tariffZone != null)
+                       .filter(Objects::nonNull)
                        .collect(toList());
     }
 
@@ -116,7 +117,7 @@ public class TariffZonesLookupService {
                     .values()
                     .stream()
                     .filter(Optional::isPresent)
-                    .map(optional -> optional.get())
+                    .map(Optional::get)
                     .peek(tariffZone -> logger.debug("Memoizing tariff zone {} {}", tariffZone.getNetexId(), tariffZone.getVersion()))
                     .map(tariffZone -> Pair.of(tariffZone.getNetexId(), tariffZone.getPolygon()))
                     .collect(toList());
