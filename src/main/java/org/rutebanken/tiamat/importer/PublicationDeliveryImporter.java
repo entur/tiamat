@@ -18,6 +18,7 @@ package org.rutebanken.tiamat.importer;
 import org.rutebanken.helper.organisation.NotAuthenticatedException;
 import org.rutebanken.helper.organisation.RoleAssignmentExtractor;
 import org.rutebanken.netex.model.*;
+import org.rutebanken.tiamat.auth.MockedRoleAssignmentExtractor;
 import org.rutebanken.tiamat.exporter.PublicationDeliveryExporter;
 import org.rutebanken.tiamat.importer.handler.*;
 import org.rutebanken.tiamat.importer.log.ImportLogger;
@@ -62,7 +63,7 @@ public class PublicationDeliveryImporter {
                                        TariffZoneImportHandler tariffZoneImportHandler,
                                        StopPlaceImportHandler stopPlaceImportHandler,
                                        ParkingsImportHandler parkingsImportHandler,
-                                       RoleAssignmentExtractor roleAssignmentExtractor,
+                                       MockedRoleAssignmentExtractor roleAssignmentExtractor,
                                        BackgroundJobs backgroundJobs) {
         this.publicationDeliveryHelper = publicationDeliveryHelper;
         this.parkingsImportHandler = parkingsImportHandler;

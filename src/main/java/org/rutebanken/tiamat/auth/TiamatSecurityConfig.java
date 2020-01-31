@@ -22,6 +22,7 @@ import org.rutebanken.tiamat.filter.CorsResponseFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -39,6 +40,7 @@ import org.springframework.security.web.authentication.session.SessionAuthentica
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 @ComponentScan(basePackageClasses = KeycloakSecurityComponents.class)
+@ConditionalOnProperty(name = "keycloak.enabled", havingValue = "true")
 public class TiamatSecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 
 	private static final Logger logger = LoggerFactory.getLogger(TiamatSecurityConfig.class);

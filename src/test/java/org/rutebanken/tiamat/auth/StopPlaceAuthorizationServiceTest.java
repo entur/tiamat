@@ -98,7 +98,7 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
      * Not using {@link MockedRoleAssignmentExtractor} because it resets the returned role assignment on each call.
      * The {@link StopPlaceAuthorizationService} makes several calls.
      */
-    private RoleAssignmentExtractor roleAssignmentExtractor;
+    private MockedRoleAssignmentExtractor roleAssignmentExtractor;
 
     @Autowired
     private TiamatObjectDiffer tiamatObjectDiffer;
@@ -109,7 +109,7 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
      */
     @Before
     public void StopPlaceAuthorizationServiceTest() {
-        roleAssignmentExtractor = mock(RoleAssignmentExtractor.class);
+        roleAssignmentExtractor = mock(MockedRoleAssignmentExtractor.class);
 
         this.reflectionAuthorizationService = new AuthorizationServiceConfig().getAuthorizationService(
                 roleAssignmentExtractor,
