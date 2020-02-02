@@ -45,8 +45,6 @@ public class TiamatHazelcastCacheRegionFactory extends com.hazelcast.hibernate.H
                 namespace = "default";
             }
 
-            String hazelcastManagementUrl = getProperty("rutebanken.hazelcast.management.url", false);
-
             logger.info("Creating kubernetes service");
             KubernetesService kubernetesService = new KubernetesService(kubernetesUrl, namespace, kuberentesEnabled);
             if(kuberentesEnabled) {
@@ -55,7 +53,7 @@ public class TiamatHazelcastCacheRegionFactory extends com.hazelcast.hibernate.H
             }
 
             logger.info("Creating extended hazelcast service");
-            ExtendedHazelcastService extendedHazelcastService = new ExtendedHazelcastService(kubernetesService, hazelcastManagementUrl);
+            ExtendedHazelcastService extendedHazelcastService = new ExtendedHazelcastService(kubernetesService);
             logger.info("Initiating extended hazelcast service");
             extendedHazelcastService.init();
             logger.info(extendedHazelcastService.information());

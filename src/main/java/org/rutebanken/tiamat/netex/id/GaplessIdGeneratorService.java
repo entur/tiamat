@@ -15,8 +15,8 @@
 
 package org.rutebanken.tiamat.netex.id;
 
+import com.hazelcast.collection.ISet;
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.ISet;
 import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -114,7 +114,7 @@ public class GaplessIdGeneratorService {
      * @return the claimed ID
      */
     public long getNextIdForEntity(String entityTypeName, long claimedId) {
-        final Lock lock = hazelcastInstance.getLock(entityLockString(entityTypeName));
+        final Lock lock = hazelcastInstance.getCPSubsystem().getLock(entityLockString(entityTypeName));
         lock.lock();
         try {
             BlockingQueue<Long> availableIds = generatedIdState.getQueueForEntity(entityTypeName);
@@ -303,7 +303,7 @@ public class GaplessIdGeneratorService {
         logger.trace("Start to persist claimed IDs if any");
         AtomicInteger persisted = new AtomicInteger();
         generatedIdState.getRegisteredEntityNames().forEach(entityTypeName -> {
-            final Lock lock = hazelcastInstance.getLock(entityLockString(entityTypeName));
+            final Lock lock = hazelcastInstance.getCPSubsystem().getLock(entityLockString(entityTypeName));
             boolean gotLock;
             final int secondsToWait = 4;
             try {

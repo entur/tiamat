@@ -1,13 +1,13 @@
 package org.rutebanken.tiamat.lock;
 
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.ILock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
 import java.util.function.Supplier;
 
 /**
@@ -37,11 +37,11 @@ public class TimeoutMaxLeaseTimeLock {
 
     public <T> T executeInLock(Supplier<T> supplier, String lockName, int waitTimeoutSeconds, int maxLeaseTimeSeconds) {
 
-        final ILock lock = hazelcastInstance.getLock(lockName);
+        final Lock lock = hazelcastInstance.getCPSubsystem().getLock(lockName);
 
         try {
             logger.info("Waiting for lock {}", lockName);
-            if (lock.tryLock(waitTimeoutSeconds, TimeUnit.SECONDS, maxLeaseTimeSeconds, TimeUnit.SECONDS)) {
+            if (lock.tryLock(waitTimeoutSeconds, TimeUnit.SECONDS)) {
                 long started = System.currentTimeMillis();
                 try {
                     logger.info("Got lock {}", lockName);
