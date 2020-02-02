@@ -13,61 +13,65 @@
  * limitations under the Licence.
  */
 
-package org.rutebanken.tiamat.rest.graphql
+package org.rutebanken.tiamat.rest.graphql;
 
-import com.google.common.collect.Sets
-import org.locationtech.jts.geom.Coordinate
-import org.locationtech.jts.geom.CoordinateSequence
-import org.locationtech.jts.geom.LineString
-import org.locationtech.jts.geom.impl.CoordinateArraySequence
-import io.restassured.response.ValidatableResponse
-import org.junit.Test
-import org.rutebanken.tiamat.auth.MockedRoleAssignmentExtractor
-import org.rutebanken.tiamat.auth.RoleAssignmentListBuilder
-import org.rutebanken.tiamat.model.*
-import org.rutebanken.tiamat.repository.QuayRepository
-import org.rutebanken.tiamat.repository.StopPlaceRepository
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.HttpStatus
+import com.google.common.collect.Sets;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.CoordinateSequence;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.impl.CoordinateArraySequence;
+import io.restassured.response.ValidatableResponse;
+import org.junit.Test;
+import org.rutebanken.tiamat.auth.MockedRoleAssignmentExtractor;
+import org.rutebanken.tiamat.auth.RoleAssignmentListBuilder;
+import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.repository.QuayRepository;
+import org.rutebanken.tiamat.repository.StopPlaceRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 
-import static org.hamcrest.Matchers.*
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*
-import static org.rutebanken.tiamat.versioning.VersionIncrementor.INITIAL_VERSION
+import java.util.HashSet;
+import java.util.Set;
 
-class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResourceIntegrationTest {
+import static org.hamcrest.Matchers.*;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
+import static org.rutebanken.tiamat.versioning.VersionIncrementor.INITIAL_VERSION;
 
-    @Autowired
-    private QuayRepository quayRepository
-
-    @Autowired
-    private StopPlaceRepository stopPlaceRepository
+public class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResourceIntegrationTest {
 
     @Autowired
-    private MockedRoleAssignmentExtractor mockedRoleAssignmentExtractor
+    private QuayRepository quayRepository;
+
+    @Autowired
+    private StopPlaceRepository stopPlaceRepository;
+
+    @Autowired
+    private MockedRoleAssignmentExtractor mockedRoleAssignmentExtractor;
 
     @Test
-    void retrievePathLinkReferencingTwoQuays() throws Exception {
-        Quay firstQuay = new Quay()
-        firstQuay.setCentroid(geometryFactory.createPoint(new Coordinate(5, 60)))
-        quayRepository.save(firstQuay)
+    public void retrievePathLinkReferencingTwoQuays() {
+        Quay firstQuay = new Quay();
+        firstQuay.setCentroid(geometryFactory.createPoint(new Coordinate(5, 60)));
+        quayRepository.save(firstQuay);
 
-        Quay secondQuay = new Quay()
-        secondQuay.setCentroid(geometryFactory.createPoint(new Coordinate(5.1, 60.1)))
-        quayRepository.save(secondQuay)
+        Quay secondQuay = new Quay();
+        secondQuay.setCentroid(geometryFactory.createPoint(new Coordinate(5.1, 60.1)));
+        quayRepository.save(secondQuay);
 
-        PathLink pathLink = new PathLink(new PathLinkEnd(new AddressablePlaceRefStructure((firstQuay))), new PathLinkEnd(new AddressablePlaceRefStructure(secondQuay)))
-        Coordinate[] coordinates = new Coordinate[2]
-        coordinates[0] = new Coordinate(11, 60)
-        coordinates[1] = new Coordinate(11.1, 60.1)
+        PathLink pathLink = new PathLink(new PathLinkEnd(new AddressablePlaceRefStructure((firstQuay))), new PathLinkEnd(new AddressablePlaceRefStructure(secondQuay)));
+        Coordinate[] coordinates = new Coordinate[2];
+        coordinates[0] = new Coordinate(11, 60);
+        coordinates[1] = new Coordinate(11.1, 60.1);
 
-        CoordinateSequence points = new CoordinateArraySequence(coordinates)
+        CoordinateSequence points = new CoordinateArraySequence(coordinates);
 
-        LineString lineString = new LineString(points, geometryFactory)
-        pathLink.setLineString(lineString)
+        LineString lineString = new LineString(points, geometryFactory);
+        pathLink.setLineString(lineString);
 
-        pathLinkRepository.save(pathLink)
+        pathLinkRepository.save(pathLink);
 
-        String graphQlJsonQuery = """{ ${GraphQLNames.FIND_PATH_LINK} (id:"${pathLink.getNetexId()}") {
+        String graphQlJsonQuery = """
+                    { ${GraphQLNames.FIND_PATH_LINK} (id:"${pathLink.getNetexId()}") {
                     id 
                     from {
                         id
@@ -84,7 +88,7 @@ class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResourceInte
                         }
                     }
                 }
-              }"""
+              }""";
 
         executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .root("data.pathLink[0]")
@@ -96,29 +100,30 @@ class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResourceInte
                 .root("data.pathLink[0].to")
                     .body("id", comparesEqualTo(pathLink.getTo().getNetexId()))
                     .body("placeRef.ref", equalTo(secondQuay.getNetexId()))
-                    .body("placeRef.version", equalTo(String.valueOf(secondQuay.getVersion())))
+                    .body("placeRef.version", equalTo(String.valueOf(secondQuay.getVersion())));
     }
 
     @Test
-    void findPathLinkFromStopPlaceId() throws Exception {
+    public void findPathLinkFromStopPlaceId() {
 
-        Quay firstQuay = new Quay()
-        firstQuay.setVersion(1L)
+        Quay firstQuay = new Quay();
+        firstQuay.setVersion(1L);
 
-        Quay secondQuay = new Quay()
-        secondQuay.setVersion(2L)
-        secondQuay.setPublicCode("X")
+        Quay secondQuay = new Quay();
+        secondQuay.setVersion(2L);
+        secondQuay.setPublicCode("X");
 
-        StopPlace stopPlace = new StopPlace()
-        stopPlace.getQuays().add(firstQuay)
-        stopPlace.getQuays().add(secondQuay)
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.getQuays().add(firstQuay);
+        stopPlace.getQuays().add(secondQuay);
 
-        stopPlaceRepository.save(stopPlace)
+        stopPlaceRepository.save(stopPlace);
 
-        PathLink pathLink = new PathLink(new PathLinkEnd(new AddressablePlaceRefStructure(firstQuay)), new PathLinkEnd(new AddressablePlaceRefStructure(secondQuay)))
-        pathLinkRepository.save(pathLink)
+        PathLink pathLink = new PathLink(new PathLinkEnd(new AddressablePlaceRefStructure(firstQuay)), new PathLinkEnd(new AddressablePlaceRefStructure(secondQuay)));
+        pathLinkRepository.save(pathLink);
 
-        String graphQlJsonQuery = """{ ${GraphQLNames.FIND_PATH_LINK} (stopPlaceId: "${stopPlace.getNetexId()}") {
+        String graphQlJsonQuery = """
+                    { ${GraphQLNames.FIND_PATH_LINK} (stopPlaceId: "${stopPlace.getNetexId()}") {
                     id
                     from {
                         id
@@ -136,7 +141,7 @@ class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResourceInte
                     }
                    }
                   }
-                """
+                """;
 
 
         executeGraphqQLQueryOnly(graphQlJsonQuery)
@@ -149,26 +154,26 @@ class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResourceInte
                 .root("data.pathLink[0].to")
                     .body("id", comparesEqualTo(pathLink.getTo().getNetexId()))
                     .body("placeRef.ref", equalTo(secondQuay.getNetexId()))
-                    .body("placeRef.version", equalTo(String.valueOf(secondQuay.getVersion())))
+                    .body("placeRef.version", equalTo(String.valueOf(secondQuay.getVersion())));
 
     }
 
 
     @Test
-    void createNewPathLinkByUserWithoutAuthorizationForStopPlaceType() throws Exception {
+    public void createNewPathLinkByUserWithoutAuthorizationForStopPlaceType() {
         mockedRoleAssignmentExtractor.setNextReturnedRoleAssignment(
-                RoleAssignmentListBuilder.builder().withStopPlaceOfType(StopTypeEnumeration.BUS_STATION).build())
-        PathLinkQuery query = createNewPathLinkQuery(StopTypeEnumeration.FERRY_STOP)
-        executeGraphqQLQueryOnly(query.query, HttpStatus.FORBIDDEN.value())
+                RoleAssignmentListBuilder.builder().withStopPlaceOfType(StopTypeEnumeration.BUS_STATION).build());
+        PathLinkQuery query = createNewPathLinkQuery(StopTypeEnumeration.FERRY_STOP);
+        executeGraphqQLQueryOnly(query.query, HttpStatus.FORBIDDEN.value());
     }
 
     @Test
-    void createNewPathLinkByUserWithCorrectAuthorizationForStopPlaceType() throws Exception {
+    public void createNewPathLinkByUserWithCorrectAuthorizationForStopPlaceType() {
         mockedRoleAssignmentExtractor.setNextReturnedRoleAssignment(
-                RoleAssignmentListBuilder.builder().withStopPlaceOfType(StopTypeEnumeration.BUS_STATION).build())
-        PathLinkQuery query = createNewPathLinkQuery(StopTypeEnumeration.BUS_STATION)
+                RoleAssignmentListBuilder.builder().withStopPlaceOfType(StopTypeEnumeration.BUS_STATION).build());
+        PathLinkQuery query = createNewPathLinkQuery(StopTypeEnumeration.BUS_STATION);
 
-        ValidatableResponse rsp = executeGraphqQLQueryOnly(query.query)
+        ValidatableResponse rsp = executeGraphqQLQueryOnly(query.query);
 
         rsp
                 .root("data.pathLink[0]")
@@ -181,25 +186,26 @@ class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResourceInte
                 .root("data.pathLink[0].to")
                     .body("id", notNullValue())
                     .body("placeRef.ref", equalTo(query.to.getNetexId()))
-                    .body("placeRef.version", isEmptyOrNullString())
+                    .body("placeRef.version", is(emptyOrNullString()));
     }
 
 
     private PathLinkQuery createNewPathLinkQuery(StopTypeEnumeration stopType) {
-        Quay firstQuay = new Quay()
-        firstQuay.setCentroid(geometryFactory.createPoint(new Coordinate(5, 60)))
-        firstQuay.setVersion(INITIAL_VERSION)
+        Quay firstQuay = new Quay();
+        firstQuay.setCentroid(geometryFactory.createPoint(new Coordinate(5, 60)));
+        firstQuay.setVersion(INITIAL_VERSION);
 
-        Quay secondQuay = new Quay()
-        secondQuay.setVersion(INITIAL_VERSION + 1)
-        secondQuay.setCentroid(geometryFactory.createPoint(new Coordinate(5.1, 60.1)))
+        Quay secondQuay = new Quay();
+        secondQuay.setVersion(INITIAL_VERSION + 1);
+        secondQuay.setCentroid(geometryFactory.createPoint(new Coordinate(5.1, 60.1)));
 
-        StopPlace stop = new StopPlace()
-        stop.setStopPlaceType(stopType)
-        stop.setQuays(Sets.newHashSet(firstQuay, secondQuay))
-        stopPlaceRepository.save(stop)
+        StopPlace stop = new StopPlace();
+        stop.setStopPlaceType(stopType);
+        stop.setQuays(Sets.newHashSet(firstQuay, secondQuay));
+        stopPlaceRepository.save(stop);
 
-        String query = """mutation {
+        String query = """
+                           mutation {
                            pathLink: ${MUTATE_PATH_LINK} (PathLink: [{
                                 from: {placeRef: {ref: "${firstQuay.getNetexId()}", version:"${firstQuay.getVersion()}"}},
                                     to: {placeRef: {ref: "${secondQuay.getNetexId()}"}}
@@ -227,25 +233,29 @@ class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResourceInte
                                     }
                                 }
                             }
-                           }"""
-        return new PathLinkQuery(firstQuay, secondQuay, query)
+                           }""";
+        return new PathLinkQuery(firstQuay, secondQuay, query);
     }
 
     @Test
-    void updatePathLinkWithTransferDurationWithoutClearingLineString() throws Exception {
-        def firstQuay = new Quay()
-        firstQuay.setCentroid(geometryFactory.createPoint(new Coordinate(5, 60)))
-        firstQuay.setVersion(INITIAL_VERSION)
+    public void updatePathLinkWithTransferDurationWithoutClearingLineString() {
+        var firstQuay = new Quay();
+        firstQuay.setCentroid(geometryFactory.createPoint(new Coordinate(5, 60)));
+        firstQuay.setVersion(INITIAL_VERSION);
 
-        def secondQuay = new Quay()
-        secondQuay.setVersion(INITIAL_VERSION + 1)
-        secondQuay.setCentroid(geometryFactory.createPoint(new Coordinate(5.1, 60.1)))
+        var secondQuay = new Quay();
+        secondQuay.setVersion(INITIAL_VERSION + 1);
+        secondQuay.setCentroid(geometryFactory.createPoint(new Coordinate(5.1, 60.1)));
 
-        def stop = new StopPlace()
-        stop.setQuays([firstQuay, secondQuay] as Set)
-        stopPlaceRepository.save(stop)
+        var stop = new StopPlace();
+        Set<Quay> quaySet = new HashSet<>();
+        quaySet.add(firstQuay);
+        quaySet.add(secondQuay);
+        stop.setQuays(quaySet);
+        stopPlaceRepository.save(stop);
 
-        String graphQlJsonQuery = """mutation {
+        String graphQlJsonQuery = """
+                mutation {
                 pathLink: ${MUTATE_PATH_LINK} (PathLink: [{
                     from: {placeRef: {ref: "${firstQuay.getNetexId()}", version:"${firstQuay.getVersion()}"}},
                     to: {placeRef: {ref: "${secondQuay.getNetexId()}"}},
@@ -260,17 +270,18 @@ class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResourceInte
                         coordinates
                        }
                     }
-                }"""
+                }""";
 
         String pathLinkId = executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .root("data.pathLink[0]")
                     .body("id", notNullValue())
                     .body("geometry", notNullValue())
-                .extract().path("data.pathLink[0].id")
+                .extract().path("data.pathLink[0].id");
 
-        println("Got path link ID: " + pathLinkId + ". Will send another mutation were only the transfer duration will be changed")
+        System.out.println("Got path link ID: " + pathLinkId + ". Will send another mutation were only the transfer duration will be changed");
 
-        String secondGraphQlJsonQuery = """mutation {
+        String secondGraphQlJsonQuery = """
+                    mutation {
                     pathLink: ${MUTATE_PATH_LINK} (PathLink: {
                         id: "${pathLinkId}",
                         ${TRANSFER_DURATION}: {
@@ -288,7 +299,7 @@ class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResourceInte
                             ${FREQUENT_TRAVELLER_DURATION}
                         }
                     }
-                }"""
+                }""";
 
         executeGraphqQLQueryOnly(secondGraphQlJsonQuery)
                 .body("errors", nullValue())
@@ -298,20 +309,20 @@ class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResourceInte
                     .body("transferDuration", notNullValue())
                     .body("transferDuration." + DEFAULT_DURATION, notNullValue())
                     .body("transferDuration." + FREQUENT_TRAVELLER_DURATION, notNullValue())
-                .extract().path("id")
+                .extract().path("id");
 
     }
 
     // For reuse of test setup
     private class PathLinkQuery {
-        Quay from
-        Quay to
-        String query
+        Quay from;
+        Quay to;
+        String query;
 
         PathLinkQuery(Quay from, Quay to, String query) {
-            this.from = from
-            this.to = to
-            this.query = query
+            this.from = from;
+            this.to = to;
+            this.query = query;
         }
     }
 }
