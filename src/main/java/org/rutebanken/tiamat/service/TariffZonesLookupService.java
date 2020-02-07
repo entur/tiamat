@@ -17,6 +17,7 @@ package org.rutebanken.tiamat.service;
 
 
 import com.google.common.collect.Sets;
+import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
 import org.rutebanken.tiamat.general.ResettableMemoizer;
@@ -49,7 +50,7 @@ public class TariffZonesLookupService {
 
     private static final Logger logger = LoggerFactory.getLogger(TariffZonesLookupService.class);
 
-    private final ResettableMemoizer<List<Pair<String, Polygon>>> tariffZones = new ResettableMemoizer<>(getTariffZones());
+    private final ResettableMemoizer<List<Pair<String, Geometry>>> tariffZones = new ResettableMemoizer<>(getTariffZones());
 
     private final TariffZoneRepository tariffZoneRepository;
 
@@ -105,7 +106,7 @@ public class TariffZonesLookupService {
                        .collect(toList());
     }
 
-    public Supplier<List<Pair<String, Polygon>>> getTariffZones() {
+    public Supplier<List<Pair<String, Geometry>>> getTariffZones() {
         return () -> {
             logger.info("Fetching and memoizing tariff zones from repository");
             return tariffZoneRepository.findAll()

@@ -15,10 +15,55 @@
 
 package org.rutebanken.tiamat.rest.graphql.types;
 
+import graphql.schema.DataFetchingEnvironment;
+import graphql.schema.GraphQLEnumType;
+import graphql.schema.GraphQLFieldDefinition;
+import graphql.schema.GraphQLInputObjectType;
+import graphql.schema.GraphQLInputType;
+import graphql.schema.GraphQLList;
+import graphql.schema.GraphQLNonNull;
+import graphql.schema.GraphQLObjectType;
 import org.locationtech.jts.geom.Geometry;
-import graphql.schema.*;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
-import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.model.AccessibilityAssessment;
+import org.rutebanken.tiamat.model.AccessibilityLimitation;
+import org.rutebanken.tiamat.model.AirSubmodeEnumeration;
+import org.rutebanken.tiamat.model.BusSubmodeEnumeration;
+import org.rutebanken.tiamat.model.CycleStorageEnumeration;
+import org.rutebanken.tiamat.model.CycleStorageEquipment;
+import org.rutebanken.tiamat.model.FunicularSubmodeEnumeration;
+import org.rutebanken.tiamat.model.GenderLimitationEnumeration;
+import org.rutebanken.tiamat.model.GeneralSign;
+import org.rutebanken.tiamat.model.InstalledEquipment_VersionStructure;
+import org.rutebanken.tiamat.model.InterchangeWeightingEnumeration;
+import org.rutebanken.tiamat.model.LimitationStatusEnumeration;
+import org.rutebanken.tiamat.model.Link;
+import org.rutebanken.tiamat.model.MetroSubmodeEnumeration;
+import org.rutebanken.tiamat.model.ModificationEnumeration;
+import org.rutebanken.tiamat.model.NameTypeEnumeration;
+import org.rutebanken.tiamat.model.Parking;
+import org.rutebanken.tiamat.model.ParkingLayoutEnumeration;
+import org.rutebanken.tiamat.model.ParkingPaymentProcessEnumeration;
+import org.rutebanken.tiamat.model.ParkingReservationEnumeration;
+import org.rutebanken.tiamat.model.ParkingStayEnumeration;
+import org.rutebanken.tiamat.model.ParkingTypeEnumeration;
+import org.rutebanken.tiamat.model.ParkingUserEnumeration;
+import org.rutebanken.tiamat.model.ParkingVehicleEnumeration;
+import org.rutebanken.tiamat.model.PlaceEquipment;
+import org.rutebanken.tiamat.model.RailSubmodeEnumeration;
+import org.rutebanken.tiamat.model.SanitaryEquipment;
+import org.rutebanken.tiamat.model.ShelterEquipment;
+import org.rutebanken.tiamat.model.SignContentEnumeration;
+import org.rutebanken.tiamat.model.SiteRefStructure;
+import org.rutebanken.tiamat.model.StopTypeEnumeration;
+import org.rutebanken.tiamat.model.TelecabinSubmodeEnumeration;
+import org.rutebanken.tiamat.model.TicketingEquipment;
+import org.rutebanken.tiamat.model.TopographicPlaceTypeEnumeration;
+import org.rutebanken.tiamat.model.TramSubmodeEnumeration;
+import org.rutebanken.tiamat.model.VehicleModeEnumeration;
+import org.rutebanken.tiamat.model.WaitingRoomEquipment;
+import org.rutebanken.tiamat.model.WaterSubmodeEnumeration;
+import org.rutebanken.tiamat.model.Zone_VersionStructure;
 import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
 import org.rutebanken.tiamat.rest.graphql.fetchers.PrivateCodeFetcher;
 
@@ -26,12 +71,16 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import static graphql.Scalars.*;
+import static graphql.Scalars.GraphQLBigInteger;
+import static graphql.Scalars.GraphQLBoolean;
+import static graphql.Scalars.GraphQLInt;
+import static graphql.Scalars.GraphQLString;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLInputObjectField.newInputObjectField;
 import static graphql.schema.GraphQLObjectType.newObject;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 import static org.rutebanken.tiamat.rest.graphql.scalars.CustomScalars.GraphQLGeoJSONCoordinates;
+import static org.rutebanken.tiamat.rest.graphql.scalars.CustomScalars.GraphQLGeoJSONCoordinatesStandard;
 import static org.rutebanken.tiamat.rest.graphql.scalars.TransportModeScalar.getValidSubmodes;
 
 public class CustomGraphQLTypes {
@@ -127,6 +176,30 @@ public class CustomGraphQLTypes {
                     .type(GraphQLGeoJSONCoordinates))
             .build();
 
+    public static GraphQLObjectType standardGeoJsonObjectType = newObject()
+            .name(OUTPUT_TYPE_GEO_JSON_STANDARD)
+            .description("Geometry-object as specified in the GeoJSON-standard (http://geojson.org/geojson-spec.html).")
+            .field(newFieldDefinition()
+                    .name(TYPE)
+                    .type(geometryTypeEnum)
+                    .dataFetcher(env -> {
+                        Geometry geometry= env.getSource();
+                        return geometry.getGeometryType();
+                    }))
+
+            .field(newFieldDefinition()
+                    .name(COORDINATES)
+                    .type(GraphQLGeoJSONCoordinatesStandard)
+                    .dataFetcher(env -> {
+                        Geometry geometry= env.getSource();
+                        if (!geometry.isEmpty()) {
+                            return geometry;
+                        } else {
+                            return null;
+                        }
+                    }))
+            .build();
+
     public static GraphQLInputObjectType geoJsonInputType = GraphQLInputObjectType.newInputObject()
             .name(INPUT_TYPE_GEO_JSON)
             .description("Geometry-object as specified in the GeoJSON-standard (http://geojson.org/geojson-spec.html).")
@@ -143,6 +216,7 @@ public class CustomGraphQLTypes {
 
     public static GraphQLFieldDefinition geometryFieldDefinition = newFieldDefinition()
             .name(GEOMETRY)
+            .deprecate("Non standard implementation,instead use geojson field")
             .type(geoJsonObjectType)
             .dataFetcher(env -> {
                 if (env.getSource() instanceof Zone_VersionStructure) {

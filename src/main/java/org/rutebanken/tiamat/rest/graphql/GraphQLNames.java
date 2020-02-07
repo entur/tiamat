@@ -171,6 +171,7 @@ public class GraphQLNames {
     public static final String CREATE_TAG = "createTag";
 
     public static final String OUTPUT_TYPE_GEO_JSON = "GeoJSON";
+    public static final String OUTPUT_TYPE_GEO_JSON_STANDARD = "GeoJSONStandard";
     public static final String INPUT_TYPE_GEO_JSON = OUTPUT_TYPE_GEO_JSON + INPUT_TYPE_POSTFIX;
 
     public static final String OUTPUT_TYPE_PARKING = "Parking";

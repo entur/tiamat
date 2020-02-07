@@ -19,6 +19,7 @@ import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLTypeReference;
 import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
+import org.rutebanken.tiamat.rest.graphql.fetchers.GeojsonFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.PolygonFetcher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -26,8 +27,16 @@ import org.springframework.stereotype.Component;
 import static graphql.Scalars.GraphQLString;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLObjectType.newObject;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
-import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.*;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ID;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.NAME;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.OUTPUT_TYPE_TOPOGRAPHIC_PLACE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PARENT_TOPOGRAPHIC_PLACE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.POLYGON;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.TOPOGRAPHIC_PLACE_TYPE;
+import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.embeddableMultilingualStringObjectType;
+import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.geoJsonObjectType;
+import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.standardGeoJsonObjectType;
+import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.topographicPlaceTypeEnum;
 
 @Component
 public class TopographicPlaceObjectTypeCreator {
@@ -38,6 +47,9 @@ public class TopographicPlaceObjectTypeCreator {
 
     @Autowired
     private PolygonFetcher polygonFetcher;
+
+    @Autowired
+    private GeojsonFetcher geojsonFetcher;
 
     public GraphQLObjectType create() {
         return newObject()
@@ -74,8 +86,14 @@ public class TopographicPlaceObjectTypeCreator {
                 )
                 .field(newFieldDefinition()
                         .name(POLYGON)
+                        .deprecate("Non standard geojson implementation,instead use geojson field")
                         .type(geoJsonObjectType)
                         .dataFetcher(polygonFetcher))
+                .field(newFieldDefinition()
+                        .name("geojson")
+                        .type(standardGeoJsonObjectType)
+                        .dataFetcher(geojsonFetcher)
+                )
                 .build();
     }
 

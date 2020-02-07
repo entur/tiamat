@@ -15,7 +15,7 @@
 
 package org.rutebanken.tiamat.auth.check;
 
-import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.geom.Geometry;
 import org.rutebanken.helper.organisation.AdministrativeZoneChecker;
 import org.rutebanken.helper.organisation.RoleAssignment;
 import org.rutebanken.tiamat.model.TopographicPlace;
@@ -24,7 +24,6 @@ import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -48,7 +47,7 @@ public class TopographicPlaceChecker implements AdministrativeZoneChecker {
                 logger.warn("RoleAssignment contains unknown adminZone reference: {}. Will not allow authorization", roleAssignment.getAdministrativeZone());
                 return false;
             }
-            Polygon polygon = topographicPlace.getPolygon();
+            Geometry polygon = topographicPlace.getPolygon();
 
             if (entity instanceof Zone_VersionStructure) {
                 Zone_VersionStructure zone = (Zone_VersionStructure) entity;

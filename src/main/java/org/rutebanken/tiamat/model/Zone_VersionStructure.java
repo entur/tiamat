@@ -16,8 +16,8 @@
 package org.rutebanken.tiamat.model;
 
 import com.google.common.base.MoreObjects;
+import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Point;
-import org.locationtech.jts.geom.Polygon;
 
 import javax.persistence.*;
 
@@ -48,14 +48,14 @@ public class Zone_VersionStructure
         super(name);
     }
 
-    public Polygon getPolygon() {
+    public Geometry getPolygon() {
         if (polygon != null) {
             return polygon.getPolygon();
         }
         return null;
     }
 
-    public void setPolygon(Polygon polygon) {
+    public void setPolygon(Geometry polygon) {
         if (this.polygon == null) {
             this.polygon = new PersistablePolygon();
         }

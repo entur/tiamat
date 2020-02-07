@@ -72,6 +72,7 @@ public class ZoneCommonFieldListCreator {
 
         zoneFieldList.add(newFieldDefinition()
                 .name(POLYGON)
+                .deprecate("Non standard implementation,instead use geojson field")
                 .type(geoJsonObjectType)
                 .dataFetcher(polygonFetcher)
                 .build());

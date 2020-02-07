@@ -16,6 +16,8 @@
 package org.rutebanken.tiamat.model;
 
 
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.MultiPolygon;
 import org.locationtech.jts.geom.Polygon;
 
 import javax.persistence.Entity;
@@ -30,13 +32,13 @@ public class PersistablePolygon implements Serializable {
     @GeneratedValue(generator = "sequence_per_table_generator")
     protected Long id;
 
-    private Polygon polygon;
+    private Geometry polygon;
 
-    public Polygon getPolygon() {
+    public Geometry getPolygon() {
         return polygon;
     }
 
-    public void setPolygon(Polygon polygon) {
+    public void setPolygon(Geometry polygon) {
         this.polygon = polygon;
     }
 }
