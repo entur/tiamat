@@ -1,5 +1,7 @@
 env: production
 
+replicas: 2
+
 sql:
   instance: neon-1287:europe-west1:tiamat-db-1=tcp:5432
 

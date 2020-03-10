@@ -1,5 +1,6 @@
 env: staging
 
+replicas: 2
 
 sql:
   instance: radon-1287:europe-west1:tiamat-db-1=tcp:5432

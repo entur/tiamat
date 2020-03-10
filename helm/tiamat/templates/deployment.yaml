@@ -59,7 +59,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   key: password
-                  name: tiamat-db-password
+                  name: ror-tiamat-db-password
           resources:
             limits:
               cpu: {{ .Values.resources.cpuLimit }}

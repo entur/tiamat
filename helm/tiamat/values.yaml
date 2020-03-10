@@ -1,6 +1,6 @@
 env: dev
 
-replicas: 2
+replicas: 1
 
 
 rollingUpdate:
@@ -18,7 +18,7 @@ secretMount:
    name: tiamat-key
    mountPath: /etc/tiamat/credentials.json
    subPath: credentials.json
-   secretName: ror-tiamat-sa
+   secretName: ror-tiamat-sa-key
    readOnly: true
 
 
