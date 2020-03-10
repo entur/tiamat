@@ -1,0 +1,26 @@
+{{- if .Values.ingress.enabled }}
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  labels:
+    {{- include "common.labels" . | indent 4 }}
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    {{- if eq .Values.env "production"}}
+    external-dns.alpha.kubernetes.io/target: {{ .Values.ingress.productionIp }}
+    {{ else if eq .Values.env "staging"}}
+    external-dns.alpha.kubernetes.io/target: {{ .Values.ingress.stagingIp }}
+    {{ else if eq .Values.env "dev"}}
+    external-dns.alpha.kubernetes.io/target: {{ .Values.ingress.devIp }}
+    {{- end}}
+  name: stop-places-v1
+  namespace: {{ .Release.Namespace }}
+spec:
+  rules:
+  - host: stop-places-v1-{{ .Release.Namespace }}.{{ .Release.Namespace }}.entur.io
+    http:
+      paths:
+        - backend:
+            serviceName: {{ template "app.name" . }}
+            servicePort: {{ .Values.service.http.externalPort }}
+{{- end }}

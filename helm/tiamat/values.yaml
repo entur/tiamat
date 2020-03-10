@@ -1,0 +1,43 @@
+env: dev
+
+replicas: 2
+
+
+rollingUpdate:
+  maxSurge: 1
+  maxUnavailable: 1
+
+resources:
+  cpuLimit: 1200m
+  memLimit: 10000Mi
+  cpuRequest: 1200m
+  memRequest: 7500Mi
+  xmx: 7g
+
+secretMount:
+   name: tiamat-key
+   mountPath: /etc/tiamat/credentials.json
+   subPath: credentials.json
+   secretName: ror-tiamat-sa
+   readOnly: true
+
+
+configMapMount:
+   name: tiamat-config
+
+image:
+  identifier: ${artifact.metadata.image}
+  imagePullPolicy: Always
+
+service:
+  http:
+    externalPort: 80
+    internalPort: 8777
+  jolokia:
+    internalPort: 8778
+
+ingress:
+    enabled: true
+    devIp: 35.195.223.29
+    stagingIp: 35.195.146.93
+    productionIp: 35.187.15.14
