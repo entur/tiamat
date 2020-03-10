@@ -24,7 +24,7 @@ data:
     # GCS properties
     blobstore.gcs.bucket.name={{.Values.configMap.gcsBucketName}}
     blobstore.gcs.blob.path=export
-    blobstore.gcs.credential.path=/etc/tiamat/tiamat-blobstore-credentials.json
+    blobstore.gcs.credential.path=/etc/tiamat/credentials.json
     blobstore.gcs.project.id={{.Values.configMap.projectId}}
 
     # Database properties
