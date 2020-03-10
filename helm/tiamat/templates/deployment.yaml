@@ -35,7 +35,7 @@ spec:
               cpu: 50m
               memory: 40Mi
           volumeMounts:
-            - mountPath: {{ .Values.secretMount.mountPath }}
+            - mountPath: /etc/tiamat
               name: {{ .Values.secretMount.name }}
           lifecycle:
             preStop:
