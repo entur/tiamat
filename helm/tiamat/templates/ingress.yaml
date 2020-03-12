@@ -17,7 +17,11 @@ metadata:
   namespace: {{ .Release.Namespace }}
 spec:
   rules:
+  {{- if eq .Values.env "production"}}
+  - host: stop-places-v1-{{ .Release.Namespace }}.entur.io
+  {{ else }}
   - host: stop-places-v1-{{ .Release.Namespace }}.{{ .Release.Namespace }}.entur.io
+  {{- end}}
     http:
       paths:
         - backend:
