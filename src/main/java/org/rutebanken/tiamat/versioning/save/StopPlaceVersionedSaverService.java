@@ -27,7 +27,7 @@ import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.repository.reference.ReferenceResolver;
 import org.rutebanken.tiamat.service.TariffZonesLookupService;
 import org.rutebanken.tiamat.service.TopographicPlaceLookupService;
-import org.rutebanken.tiamat.service.metrics.MetricsService;
+import org.rutebanken.tiamat.service.metrics.PrometheusMetricsService;
 import org.rutebanken.tiamat.versioning.ValidityUpdater;
 import org.rutebanken.tiamat.versioning.VersionIncrementor;
 import org.rutebanken.tiamat.versioning.util.AccessibilityAssessmentOptimizer;
@@ -107,7 +107,7 @@ public class StopPlaceVersionedSaverService {
     private TiamatObjectDiffer tiamatObjectDiffer;
 
     @Autowired
-    private MetricsService metricsService;
+    private PrometheusMetricsService prometheusMetricsService;
 
     public StopPlace saveNewVersion(StopPlace existingVersion, StopPlace newVersion, Instant defaultValidFrom) {
         return saveNewVersion(existingVersion, newVersion, defaultValidFrom, new HashSet<>());
@@ -204,7 +204,7 @@ public class StopPlaceVersionedSaverService {
         if (existingVersion != null) {
             tiamatObjectDiffer.logDifference(existingVersion, newVersion);
         }
-        metricsService.registerEntitySaved(newVersion.getClass());
+        prometheusMetricsService.registerEntitySaved(newVersion.getClass(),1L);
 
         updateQuaysCache(newVersion);
 

@@ -20,7 +20,7 @@ import org.rutebanken.tiamat.auth.UsernameFetcher;
 import org.rutebanken.tiamat.model.TariffZone;
 import org.rutebanken.tiamat.repository.TariffZoneRepository;
 import org.rutebanken.tiamat.service.TariffZonesLookupService;
-import org.rutebanken.tiamat.service.metrics.MetricsService;
+import org.rutebanken.tiamat.service.metrics.PrometheusMetricsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -40,14 +40,14 @@ public class TariffZoneSaverService {
     private final TariffZoneRepository tariffZoneRepository;
     private final TariffZonesLookupService tariffZonesLookupService;
     private final UsernameFetcher usernameFetcher;
-    private final MetricsService metricsService;
+    private final PrometheusMetricsService prometheusMetricsService;
 
     @Autowired
-    public TariffZoneSaverService(TariffZoneRepository tariffZoneRepository, TariffZonesLookupService tariffZonesLookupService, UsernameFetcher usernameFetcher, MetricsService metricsService) {
+    public TariffZoneSaverService(TariffZoneRepository tariffZoneRepository, TariffZonesLookupService tariffZonesLookupService, UsernameFetcher usernameFetcher, PrometheusMetricsService prometheusMetricsService) {
         this.tariffZoneRepository = tariffZoneRepository;
         this.tariffZonesLookupService = tariffZonesLookupService;
         this.usernameFetcher = usernameFetcher;
-        this.metricsService = metricsService;
+        this.prometheusMetricsService = prometheusMetricsService;
     }
 
     public TariffZone saveNewVersion(TariffZone existingVersion, TariffZone newVersion) {
@@ -76,7 +76,7 @@ public class TariffZoneSaverService {
         logger.info("Saved tariff zone {}, version {}, name {}", result.getNetexId(), result.getVersion(), result.getName());
 
         tariffZonesLookupService.reset();
-        metricsService.registerEntitySaved(newVersion.getClass());
+        prometheusMetricsService.registerEntitySaved(newVersion.getClass(),1L);
         return result;
     }
 

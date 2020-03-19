@@ -15,7 +15,6 @@
 
 package org.rutebanken.tiamat.config;
 
-import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

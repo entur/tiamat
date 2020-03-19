@@ -32,6 +32,7 @@ import org.rutebanken.tiamat.rest.health.HealthResource;
 import org.rutebanken.tiamat.rest.netex.publicationdelivery.AsyncExportResource;
 import org.rutebanken.tiamat.rest.netex.publicationdelivery.ExportResource;
 import org.rutebanken.tiamat.rest.netex.publicationdelivery.ImportResource;
+import org.rutebanken.tiamat.rest.promethouse.PrometheusResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
@@ -72,6 +73,9 @@ public class JerseyConfig {
 
     private static final String HEALTH_SWAGGER_SCANNER_ID = "health-scanner";
     private static final String HEALTH_SWAGGER_CONFIG_ID = "health-swagger-doc";
+
+    private static final String PROMETHEUS_SWAGGER_SCANNER_ID = "prometheus-scanner";
+    private static final String PROMETHEUS_SWAGGER_CONFIG_ID = "prometheus-swagger-doc";
 
     @Bean
     public ServletRegistrationBean publicJersey() {
@@ -147,6 +151,42 @@ public class JerseyConfig {
         healthServicesJersey.setLoadOnStartup(0);
         return healthServicesJersey;
     }
+
+    @Bean
+    public ServletRegistrationBean prometheusJersey() {
+
+        Set<Class<?>> resources = new HashSet<>();
+
+        resources.add(PrometheusResource.class);
+
+        resources.add(ApiListingResource.class);
+        resources.add(SwaggerSerializers.class);
+
+        resources.add(GeneralExceptionMapper.class);
+        resources.add(ErrorResponseEntityMessageBodyWriter.class);
+
+        ResourceConfig resourceConfig = new ResourceConfig(resources);
+        ServletRegistrationBean prometheusServicesJersey = new ServletRegistrationBean(new ServletContainer(resourceConfig));
+
+        BeanConfig config = new BeanConfig();
+        config.setConfigId(PROMETHEUS_SWAGGER_CONFIG_ID);
+        config.setTitle("Tiamat Prometheus API");
+        config.setVersion("v1");
+        config.setSchemes(new String[]{"http", "https"});
+        config.setBasePath(SERVICES_HEALTH_PATH);
+        config.setResourcePackage("org.rutebanken.tiamat");
+        config.setPrettyPrint(true);
+        config.setScan(true);
+
+        prometheusServicesJersey.addUrlMappings(SERVICES_HEALTH_PATH + "/scrape/*");
+        prometheusServicesJersey.setName("PrometheusJersey");
+
+        prometheusServicesJersey.getInitParameters().put("swagger.scanner.id", PROMETHEUS_SWAGGER_SCANNER_ID);
+        prometheusServicesJersey.getInitParameters().put("swagger.config.id", PROMETHEUS_SWAGGER_CONFIG_ID);
+        prometheusServicesJersey.setLoadOnStartup(0);
+        return prometheusServicesJersey;
+    }
+
 
     @Bean
     public ServletRegistrationBean adminJersey() {

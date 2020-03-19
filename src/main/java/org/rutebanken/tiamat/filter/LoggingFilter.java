@@ -17,7 +17,7 @@ package org.rutebanken.tiamat.filter;
 
 
 import org.rutebanken.tiamat.auth.UsernameFetcher;
-import org.rutebanken.tiamat.service.metrics.MetricsService;
+import org.rutebanken.tiamat.service.metrics.PrometheusMetricsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +40,7 @@ public class LoggingFilter implements Filter {
     private UsernameFetcher usernameFetcher;
 
     @Autowired
-    private MetricsService metricsService;
+    private PrometheusMetricsService prometheusMetricsService;
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
@@ -70,8 +70,8 @@ public class LoggingFilter implements Filter {
                     logger.info("{}: User: '{}', Client: '{}', ID: '{}'", requestUri, userName, clientName, clientId);
                 }
 
-                metricsService.registerRequestFromClient(clientName, clientId);
-                metricsService.registerRequestFromUser(userName);
+                prometheusMetricsService.registerRequestFromClient(clientName,clientId,1L);
+                prometheusMetricsService.registerRequestFromUser(userName,1L);
             }
         }
 
