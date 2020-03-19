@@ -160,7 +160,7 @@ public class StopPlaceSearch implements SearchObject {
     }
 
     public Pageable getPageable() {
-        return new PageRequest(page, size);
+        return PageRequest.of(page, size);
     }
 
     public List<String> getNetexIdList() {

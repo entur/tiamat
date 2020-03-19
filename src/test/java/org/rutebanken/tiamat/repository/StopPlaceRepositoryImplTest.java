@@ -174,7 +174,7 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         StopPlace stopPlace = createStopPlace(59.875679, 10.500430);
         stopPlaceRepository.save(stopPlace);
 
-        Pageable pageable = new PageRequest(0, 10);
+        Pageable pageable =  PageRequest.of(0, 10);
 
         Page<StopPlace> result = stopPlaceRepository.findStopPlacesWithin(southEastLongitude, southEastLatitude, northWestLongitude, northWestLatitude, null, pageable);
         assertThat(result.getContent()).extracting(EntityStructure::getNetexId).contains(stopPlace.getNetexId());
@@ -242,7 +242,7 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
 
         // Outside boundingBox
         StopPlace stopPlace = createStopPlace(60.00, 11);
-        Pageable pageable = new PageRequest(0, 10);
+        Pageable pageable =  PageRequest.of(0, 10);
 
         stopPlaceRepository.save(stopPlace);
 
@@ -1003,10 +1003,10 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         StopPlace notChangedInPeriod = saveStop("NSR:StopPlace:903", 1L, startOfPeriod.minusSeconds(10), null);
 
 
-        Page<StopPlace> changedStopsP0 = stopPlaceRepository.findStopPlacesWithEffectiveChangeInPeriod(new ChangedStopPlaceSearch(startOfPeriod, endOfPeriod, new PageRequest(0, 2)));
+        Page<StopPlace> changedStopsP0 = stopPlaceRepository.findStopPlacesWithEffectiveChangeInPeriod(new ChangedStopPlaceSearch(startOfPeriod, endOfPeriod,  PageRequest.of(0, 2)));
 
         Assert.assertTrue(changedStopsP0.hasNext());
-        Page<StopPlace> changedStopsP1 = stopPlaceRepository.findStopPlacesWithEffectiveChangeInPeriod(new ChangedStopPlaceSearch(startOfPeriod, endOfPeriod, new PageRequest(1, 2)));
+        Page<StopPlace> changedStopsP1 = stopPlaceRepository.findStopPlacesWithEffectiveChangeInPeriod(new ChangedStopPlaceSearch(startOfPeriod, endOfPeriod,  PageRequest.of(1, 2)));
         Assert.assertFalse(changedStopsP1.hasNext());
 
         List<StopPlace> accumulatedStops = new ArrayList<>(changedStopsP0.getContent());
@@ -1043,7 +1043,7 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         childStop.setParentSiteRef(new SiteRefStructure(parentStop.getNetexId(), String.valueOf(parentStop.getVersion())));
         stopPlaceRepository.save(childStop);
 
-        ChangedStopPlaceSearch changedStopPlaceSearch = new ChangedStopPlaceSearch(now.minusSeconds(20), now.plusSeconds(20), new PageRequest(0, 10));
+        ChangedStopPlaceSearch changedStopPlaceSearch = new ChangedStopPlaceSearch(now.minusSeconds(20), now.plusSeconds(20),  PageRequest.of(0, 10));
         Page<StopPlace> result = stopPlaceRepository.findStopPlacesWithEffectiveChangeInPeriod(changedStopPlaceSearch);
         assertThat(result.getContent()).extracting(StopPlace::getNetexId).contains(parentStop.getNetexId());
         assertThat(result.getContent()).extracting(StopPlace::getNetexId).doesNotContain(childStop.getNetexId());

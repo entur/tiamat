@@ -44,7 +44,7 @@ public class HealthResource {
             @ApiResponse(code = 200, message = "application is running")
     })
     public Response readinessProbe() {
-        stopPlaceRepository.findAllByOrderByChangedDesc(new PageRequest(1, 1));
+        stopPlaceRepository.findAllByOrderByChangedDesc( PageRequest.of(1, 1));
         return Response.status(Response.Status.OK).build();
     }
 
