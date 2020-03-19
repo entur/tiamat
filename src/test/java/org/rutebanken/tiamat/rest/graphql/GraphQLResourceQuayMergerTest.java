@@ -64,26 +64,7 @@ public class GraphQLResourceQuayMergerTest extends AbstractGraphQLResourceIntegr
         assertThat(stopPlace.getQuays()).hasSize(3);
 
         //Calling GraphQL-api to merge Quays
-        String graphQlJsonQuery = """
-                mutation {
-                  stopPlace: mergeQuays (
-                          stopPlaceId: "${stopPlace.getNetexId()}",
-                          fromQuayId: "${fromQuay.getNetexId()}",
-                          toQuayId: "${toQuay.getNetexId()}",
-                       ) {
-                            id
-                            importedId
-                            name { value }
-                            ...on StopPlace {
-                                quays {
-                                    id
-                                    geometry { type coordinates }
-                                    compassBearing
-                                    importedId
-                                }
-                            }
-                        }
-                 }""";
+        String graphQlJsonQuery = "";
 
 
         Set<String> originalIds = new HashSet<>();

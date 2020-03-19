@@ -88,7 +88,6 @@
         <hibernate.version>5.4.0.Final</hibernate.version>
         <hibernate-spatial.version>5.4.0.Final</hibernate-spatial.version>
 
-        <groovy-all.version>2.5.4</groovy-all.version>
         <jaxb-version>2.3.0.1</jaxb-version>
         <swagger-jersey2.version>1.5.21</swagger-jersey2.version>
         <jackson-version>2.9.10</jackson-version>
@@ -544,7 +543,6 @@
                     <compilerArgs>
                         <!--arg>-Werror</arg-->
                         <arg>-Xlint:all</arg>
-                        <arg>--enable-preview</arg>
                     </compilerArgs>
                 </configuration>
                 <dependencies>
@@ -563,7 +561,6 @@
                 <configuration>
                     <useSystemClassLoader>false</useSystemClassLoader>
                     <argLine>-Xmx3G</argLine>
-                    <argLine>--enable-preview</argLine>
                     <systemPropertyVariables combine.children="override">
                         <spring.output.ansi.enabled>ALWAYS</spring.output.ansi.enabled>
                         <env>dev</env>

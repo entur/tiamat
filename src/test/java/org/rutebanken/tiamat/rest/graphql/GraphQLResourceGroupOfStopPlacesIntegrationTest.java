@@ -38,34 +38,27 @@ public class GraphQLResourceGroupOfStopPlacesIntegrationTest extends AbstractGra
         var groupName = "Group name";
         var versionComment = "VersionComment";
 
-        String graphQlJsonQuery = """
-                                    mutation {
-                                    group: ${MUTATE_GROUP_OF_STOP_PLACES}(GroupOfStopPlaces: {
-                                        name: {value: "${groupName}"},
-                                        versionComment: "${versionComment}",
-                                        members: [
-                                            {ref: "${stopPlace1.getNetexId()}"},
-                                            {ref: "${stopPlace2.getNetexId()}"}],
-                                        }) {
-                                    id
-                                    version
-                                    versionComment
-                                    name {
-                                      value
-                                    }
-                                    members {
-                                      id
-                                      name {
-                                        value
-                                      }
-                                      version
-                                      ... on StopPlace {
-                                        stopPlaceType
-                                      }
-                                    }
-                                  }
-                                }
-                                """;
+        String graphQlJsonQuery = "mutation {" +
+                "group: ${MUTATE_GROUP_OF_STOP_PLACES}(GroupOfStopPlaces: {" +
+                                        "name: {value: "+ groupName+"},"+
+                                        "versionComment:" +versionComment+","+
+                                        "members: ["+
+                                            "{ref: "+stopPlace1.getNetexId()+"},"+
+                                            "{ref: "+stopPlace2.getNetexId()+"}],"+
+                                        "}) {"+
+                                    "id"+
+                                    "version"+
+                                    "versionComment"+
+                                    "name {"+
+                                    "  value"+
+                                    "}"+
+                                    "members {"+
+                                    " id"+
+                                    " name {"+
+                                     "   value"+
+                                     " }"+
+                                      "version"+
+                                      "... on StopPlace { stopPlaceType }}}}";
 
         executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .body("data.group.name.value", equalTo(groupName))

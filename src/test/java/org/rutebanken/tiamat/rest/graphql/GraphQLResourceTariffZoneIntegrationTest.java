@@ -44,22 +44,7 @@ public class GraphQLResourceTariffZoneIntegrationTest extends AbstractGraphQLRes
         tariffZone.setPolygon(new GeometryFactory().createPolygon(coordinates));
         tariffZoneRepository.save(tariffZone);
 
-        String graphQlJsonQuery = """
-                        {
-                            tariffZones(query:"112") {
-                                id
-                                name {value}
-                                version
-                                    geometry {
-                                        type
-                                        coordinates
-                                    }
-                                    polygon {
-                                        type
-                                        coordinates
-                                    }
-                          }
-                        }""";
+        String graphQlJsonQuery = "";
 
         executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .root("data.tariffZones[0]")

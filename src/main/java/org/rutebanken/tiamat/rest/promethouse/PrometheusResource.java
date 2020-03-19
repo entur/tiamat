@@ -43,7 +43,7 @@ public class PrometheusResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "scrape")
     })
-    public Response scrap() {
+    public Response scrape() {
         final String scrape = prometheusMetricsService.scrape();
         return Response.ok(scrape).build();
     }

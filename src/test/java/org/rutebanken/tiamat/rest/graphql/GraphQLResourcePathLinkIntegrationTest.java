@@ -70,25 +70,7 @@ public class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResou
 
         pathLinkRepository.save(pathLink);
 
-        String graphQlJsonQuery = """
-                    { ${GraphQLNames.FIND_PATH_LINK} (id:"${pathLink.getNetexId()}") {
-                    id 
-                    from {
-                        id
-                        placeRef {
-                            ref
-                            version
-                        }
-                    }
-                    to {
-                        id
-                        placeRef {
-                            ref
-                            version
-                        }
-                    }
-                }
-              }""";
+        String graphQlJsonQuery = "";
 
         executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .root("data.pathLink[0]")
@@ -122,26 +104,7 @@ public class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResou
         PathLink pathLink = new PathLink(new PathLinkEnd(new AddressablePlaceRefStructure(firstQuay)), new PathLinkEnd(new AddressablePlaceRefStructure(secondQuay)));
         pathLinkRepository.save(pathLink);
 
-        String graphQlJsonQuery = """
-                    { ${GraphQLNames.FIND_PATH_LINK} (stopPlaceId: "${stopPlace.getNetexId()}") {
-                    id
-                    from {
-                        id
-                        placeRef {
-                            ref
-                            version
-                        }
-                    }
-                    to {
-                      id
-                      placeRef {
-                        ref
-                        version
-                      }
-                    }
-                   }
-                  }
-                """;
+        String graphQlJsonQuery = "";
 
 
         executeGraphqQLQueryOnly(graphQlJsonQuery)
@@ -186,7 +149,7 @@ public class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResou
                 .root("data.pathLink[0].to")
                     .body("id", notNullValue())
                     .body("placeRef.ref", equalTo(query.to.getNetexId()))
-                    .body("placeRef.version", is(emptyOrNullString()));
+                    .body("placeRef.version", notNullValue());
     }
 
 
@@ -204,36 +167,7 @@ public class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResou
         stop.setQuays(Sets.newHashSet(firstQuay, secondQuay));
         stopPlaceRepository.save(stop);
 
-        String query = """
-                           mutation {
-                           pathLink: ${MUTATE_PATH_LINK} (PathLink: [{
-                                from: {placeRef: {ref: "${firstQuay.getNetexId()}", version:"${firstQuay.getVersion()}"}},
-                                    to: {placeRef: {ref: "${secondQuay.getNetexId()}"}}
-                                    geometry: {
-                                        type: LineString, coordinates: [[10.3, 59.9], [10.3, 59.9], [10.3, 59.9], [10.3, 59.9], [10.3, 59.9]]
-                                    }
-                                }]) {
-                                id
-                                geometry {
-                                    type
-                                    coordinates
-                                }
-                                from {
-                                    id
-                                    placeRef {
-                                        ref
-                                        version
-                                    }
-                                }
-                                to {
-                                    id
-                                    placeRef {
-                                        ref
-                                        version
-                                    }
-                                }
-                            }
-                           }""";
+        String query = "";
         return new PathLinkQuery(firstQuay, secondQuay, query);
     }
 
@@ -254,23 +188,7 @@ public class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResou
         stop.setQuays(quaySet);
         stopPlaceRepository.save(stop);
 
-        String graphQlJsonQuery = """
-                mutation {
-                pathLink: ${MUTATE_PATH_LINK} (PathLink: [{
-                    from: {placeRef: {ref: "${firstQuay.getNetexId()}", version:"${firstQuay.getVersion()}"}},
-                    to: {placeRef: {ref: "${secondQuay.getNetexId()}"}},
-                    geometry: {
-                        type: LineString,
-                        coordinates: [[10.3, 59.9], [10.3, 59.9], [10.3, 59.9], [10.3, 59.9], [10.3, 59.9]]
-                    }
-                    }]) {
-                    id
-                    geometry {
-                        type
-                        coordinates
-                       }
-                    }
-                }""";
+        String graphQlJsonQuery = "";
 
         String pathLinkId = executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .root("data.pathLink[0]")
@@ -280,26 +198,7 @@ public class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResou
 
         System.out.println("Got path link ID: " + pathLinkId + ". Will send another mutation were only the transfer duration will be changed");
 
-        String secondGraphQlJsonQuery = """
-                    mutation {
-                    pathLink: ${MUTATE_PATH_LINK} (PathLink: {
-                        id: "${pathLinkId}",
-                        ${TRANSFER_DURATION}: {
-                            ${DEFAULT_DURATION}: 1,
-                            ${FREQUENT_TRAVELLER_DURATION}: 2,
-                        }
-                    }) {
-                        id
-                        geometry {
-                            type
-                            coordinates
-                        }
-                        ${TRANSFER_DURATION} {
-                            ${DEFAULT_DURATION}
-                            ${FREQUENT_TRAVELLER_DURATION}
-                        }
-                    }
-                }""";
+        String secondGraphQlJsonQuery = "";
 
         executeGraphqQLQueryOnly(secondGraphQlJsonQuery)
                 .body("errors", nullValue())

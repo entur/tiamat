@@ -74,19 +74,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(5, 60)));
         stopPlaceRepository.save(stopPlace);
 
-        String graphQlJsonQuery = """
-                  {
-                  stopPlace:  ${GraphQLNames.FIND_STOPPLACE} (${QUERY}:"${stopPlace.getNetexId()}", allVersions:true) {
-                            id
-                            name { value }
-                            ... on StopPlace {
-                                quays {
-                                    id
-                                    name { value }
-                                }
-                            }
-                        }
-                    }""";
+        String graphQlJsonQuery = "";
 
         executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .body("data.stopPlace[0].name.value", equalTo(stopPlaceName))
@@ -109,21 +97,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
 
         stopPlaceRepository.save(stopPlace);
 
-        var graphqlQuery = """
-            mutation {
-              stopPlace: mutateStopPlace(StopPlace: {id: "${stopPlace.netexId}", quays: [{id: "${quay.netexId}", placeEquipments: {shelterEquipment: [{seats: 3}]}}]}) {
-                id
-                quays {
-                  id
-                  placeEquipments {
-                    shelterEquipment {
-                      seats
-                    }
-                  }
-                }
-              }
-            }
-            """;
+        var graphqlQuery = "";
 
         executeGraphqQLQueryOnly(graphqlQuery)
                 .root("data.stopPlace[0].quays[0]")
@@ -148,13 +122,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         stopPlaceRepository.save(stopPlace);
 
 
-        String graphQlJsonQuery = """
-                  {
-                  stopPlace:  ${GraphQLNames.FIND_STOPPLACE} (${IMPORTED_ID_QUERY}:"${originalId}", allVersions:true) {
-                            id
-                            name { value }
-                        }
-                    }""";
+        String graphQlJsonQuery = "";
 
         executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .body("data.stopPlace[0].id", equalTo(stopPlace.getNetexId()))
@@ -177,13 +145,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         stopPlaceRepository.save(stopPlace);
 
 
-        String graphQlJsonQuery = """
-                  {
-                  stopPlace:  ${GraphQLNames.FIND_STOPPLACE} (query:"${originalId}", allVersions:true) {
-                            id
-                            name { value }
-                        }
-                    }""";
+        String graphQlJsonQuery = "";
 
         executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .body("data.stopPlace[0].id", equalTo(stopPlace.getNetexId()))
@@ -208,14 +170,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         stopPlaceRepository.save(stopPlaceWithCoordinates);
         stopPlaceRepository.save(stopPlaceWithoutCoordinates);
 
-        String graphQlJsonQuery = """
-                  {
-                  stopPlace:  ${GraphQLNames.FIND_STOPPLACE} (query:"${basename}", allVersions:true) {
-                            id
-                            name { value }
-                            geometry {coordinates }
-                        }
-                    }""";
+        String graphQlJsonQuery = "";
 
         // Search for stopPlace should return both StopPlaces above
         executeGraphqQLQueryOnly(graphQlJsonQuery)
@@ -227,14 +182,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                     .body("name.value", equalTo(nameWithoutLocation))
                     .body("geometry", nullValue());
 
-        graphQlJsonQuery = """
-                  {
-                  stopPlace:  ${GraphQLNames.FIND_STOPPLACE} (query:"${basename}", allVersions:true, withoutLocationOnly:true) {
-                            id
-                            name { value }
-                            geometry {coordinates }
-                        }
-                    }""";
+        graphQlJsonQuery = "";
 
         // Filtering on withoutLocationsOnly stopPlace should only return one
         executeGraphqQLQueryOnly(graphQlJsonQuery)
@@ -262,13 +210,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
 
         stopPlaceRepository.save(stopPlace);
 
-        String graphQlJsonQuery = """
-                  {
-                  stopPlace:  ${GraphQLNames.FIND_STOPPLACE} (query:"${quayOriginalId}", allVersions:true) {
-                            id
-                            name { value }
-                        }
-                    }""";
+        String graphQlJsonQuery = "";
 
         executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .body("data.stopPlace[0].id", equalTo(stopPlace.getNetexId()))
@@ -282,14 +224,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
 
         stopPlaceRepository.save(stopPlace);
 
-        String graphQlJsonQuery = """
-                  {
-                  stopPlace:  ${GraphQLNames.FIND_STOPPLACE} (query:"${stopPlace.getNetexId()}", allVersions:true) {
-                            id
-                            name {value}
-                        }
-                    }""";
-
+        String graphQlJsonQuery = "";
         executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .body("data.stopPlace[0].id", equalTo(stopPlace.getNetexId()))
                 .body("data.stopPlace[0].name.value", equalTo(stopPlaceName));
@@ -334,13 +269,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
 
         stopPlaceRepository.save(stopPlace);
 
-        String graphQlJsonQuery = """
-                  {
-                  stopPlace:  ${GraphQLNames.FIND_STOPPLACE} (query:"${quay.getNetexId()}", allVersions:true) {
-                            id
-                            name {value}
-                        }
-                    }""";
+        String graphQlJsonQuery = "";
 
         executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .body("data.stopPlace[0].id", equalTo(stopPlace.getNetexId()))
@@ -353,13 +282,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(stopPlaceName));
         stopPlaceRepository.save(stopPlace);
 
-        String graphQlJsonQuery = """
-                  {
-                  stopPlace:  ${GraphQLNames.FIND_STOPPLACE} (allVersions:true) {
-                            name { value }
-                        }
-                    }""";
-
+        String graphQlJsonQuery = "";
         executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .body("data.stopPlace[0].name.value", equalTo(stopPlaceName));
     }
@@ -371,13 +294,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         stopPlaceRepository.save(stopPlace);
 
 
-        String graphQlJsonQuery = """
-                  {
-                  stopPlace:  ${GraphQLNames.FIND_STOPPLACE} (id:"" countyReference:"" municipalityReference:"" allVersions:true) {
-                            id
-                            name {value}
-                        }
-                    }""";
+        String graphQlJsonQuery = "";
 
         executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .body("data.stopPlace[0].name.value", equalTo(stopPlaceName));
@@ -390,12 +307,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(10.533212, 59.678080)));
         stopPlaceRepository.save(stopPlace);
 
-        String graphQlJsonQuery = """
-                  {
-                  stopPlace:  ${GraphQLNames.FIND_STOPPLACE} (query:"ytNES", allVersions:true) {
-                            name {value}
-                        }
-                    }""";
+        String graphQlJsonQuery = "";
 
 
         executeGraphqQLQueryOnly(graphQlJsonQuery)
@@ -413,14 +325,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         stopPlace.getKeyValues().put(key, new Value(value));
         stopPlaceRepository.save(stopPlace);
 
-        String graphQlJsonQuery = """
-                  {
-                  stopPlace:  ${GraphQLNames.FIND_STOPPLACE} (key:"${key}", values:"${value}" allVersions:true) {
-                            id
-                            name { value }
-                            keyValues { key values }
-                        }
-                    }""";
+        String graphQlJsonQuery = "";
 
         executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .body("data.stopPlace", hasSize(1))
@@ -468,45 +373,26 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         assertThat(fromDate.isBefore(now));
         assertThat(toDate.isBefore(now));
 
-        String graphQlJsonQuery = """
-                  {
-                  stopPlace:  ${GraphQLNames.FIND_STOPPLACE} (query:"${name}", pointInTime:"${stopPlace.getValidBetween().getFromDate().plusSeconds(10)}") {
-                            name {value}
-                        }
-                    }""";
+        String graphQlJsonQuery = "";
         // Verify that pointInTime within validity-period returns expected StopPlace
         executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .body("data.stopPlace", Matchers.hasSize(1));
 
         // Verify that pointInTime *after* validity-period returns null
-        graphQlJsonQuery = """
-                {
-                stopPlace: ${GraphQLNames.FIND_STOPPLACE} (query: "${name}", pointInTime:"${stopPlace.getValidBetween().getToDate().plusSeconds(10).toString()}") {
-                    name {value}
-                    }
-                }""";
+        graphQlJsonQuery = "";
 
         executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .body("data.stopPlace", Matchers.hasSize(0));
 
         // Verify that pointInTime *before* validity-period returns null
-        graphQlJsonQuery = """
-                {
-                stopPlace: ${GraphQLNames.FIND_STOPPLACE} (query:"${name}", pointInTime:"${stopPlace.getValidBetween().getFromDate().minusSeconds(100).toString()}") { "
-                    name {value}
-                  }
-                }""";
+        graphQlJsonQuery = "";
 
         executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .body("data.stopPlace", Matchers.hasSize(0));
 
         // PointInTime must be set. If not, max version is returned.
-        graphQlJsonQuery = """
-                  {
-                  stopPlace: ${GraphQLNames.FIND_STOPPLACE} (query:"${name}", pointInTime:"${now.toString()}") {
-                    name {value}
-                  }
-                }""";
+        graphQlJsonQuery = "";
+
 
         executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .body("data.stopPlace", Matchers.hasSize(0));
@@ -525,13 +411,8 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         stopPlaceWithQuays.getQuays().add(new Quay());
         stopPlaceRepository.save(stopPlaceWithQuays);
 
-        String graphQlJsonQuery = """
-                  {
-                  stopPlace:  ${GraphQLNames.FIND_STOPPLACE} (query:"${name}", ${WITHOUT_QUAYS_ONLY}:true) {
-                            id
-                            name {value}
-                        }
-                    }""";
+        String graphQlJsonQuery = "";
+
         executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .body("data.stopPlace", Matchers.hasSize(1))
                 .body("data.stopPlace[0].id", equalTo(stopPlaceWithoutQuays.getNetexId()));
@@ -550,13 +431,8 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         stopPlaceRepository.save(stopPlace);
 
 
-        String graphQlJsonQuery = """
-                  {
-                  stopPlace:  ${GraphQLNames.FIND_STOPPLACE} 
-                        (stopPlaceType:${StopTypeEnumeration.TRAM_STATION.value()} countyReference:"${hordaland.getNetexId()}" municipalityReference:"${kvinnherad.getNetexId()}", allVersions:true) {
-                            name {value}
-                        }
-                    }""";
+        String graphQlJsonQuery = "";
+
 
         executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .body("data.stopPlace", hasSize(1))
@@ -592,13 +468,8 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         String stopPlaceName = "Nesbru";
         createStopPlaceWithMunicipalityRef(stopPlaceName, asker);
 
-        String graphQlJsonQuery = """
-                  {
-                  stopPlace:  ${GraphQLNames.FIND_STOPPLACE} (municipalityReference: ["${asker.getNetexId()}"], allVersions:true) {
-                            id
-                            name {value}
-                        }
-                    }""";
+        String graphQlJsonQuery = "";
+
 
         executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .body("data.stopPlace", hasSize(1))
@@ -613,19 +484,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         createStopPlaceWithMunicipalityRef("Nesbru", asker);
         createStopPlaceWithMunicipalityRef("Slependen", baerum);
 
-        String graphQlJsonQuery = """
-                  {
-                  stopPlace:  ${GraphQLNames.FIND_STOPPLACE} (municipalityReference: ["${baerum.getNetexId()}", "${asker.getNetexId()}"], allVersions:true) {
-                            id
-                            name { value }
-                            ... on StopPlace {
-                                quays {
-                                    id
-                                    name  { value }
-                                }
-                            }
-                       }
-                   }""";
+        String graphQlJsonQuery = "";
 
 
         executeGraphqQLQueryOnly(graphQlJsonQuery)
@@ -643,12 +502,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         createStopPlaceWithMunicipalityRef("Nesbru", asker);
         createStopPlaceWithMunicipalityRef("Hennumkrysset", asker);
 
-        var graphQlJsonQuery = """
-                            { stopPlace: ${GraphQLNames.FIND_STOPPLACE} (allVersions:true, countyReference:["${akershus.getNetexId()}","${buskerud.getNetexId()}"] municipalityReference:["${lier.getNetexId()}","${asker.getNetexId()}"]) {
-                            id
-                            name { value }
-                          }
-                       }""";
+        var graphQlJsonQuery = "";
 
         executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .body("data.stopPlace.name.value", hasItems("Nesbru", "Hennumkrysset"));
@@ -663,13 +517,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         createStopPlaceWithMunicipalityRef("Trollstua", asker);
         createStopPlaceWithMunicipalityRef("Haslum", baerum);
 
-        var graphQlJsonQuery = """
-                            { stopPlace: ${GraphQLNames.FIND_STOPPLACE}
-                            (allVersions:true, countyReference:["${akershus.getNetexId()}"]) {
-                            id
-                            name { value }
-                          }
-                       }""";
+        var graphQlJsonQuery = "";
 
 
         executeGraphqQLQueryOnly(graphQlJsonQuery)
@@ -682,13 +530,8 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         StopPlace stopPlace = createStopPlace("Espa");
         stopPlaceRepository.save(stopPlace);
 
-        String graphQlJsonQuery = """
-                  {
-                  stopPlace:  ${GraphQLNames.FIND_STOPPLACE} (${QUERY}:"${stopPlace.getNetexId()}", allVersions:true) {
-                            id
-                            name { value }
-                        }
-                    }""";
+        String graphQlJsonQuery = "";
+
 
         executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .body("data.stopPlace[0].name.value", equalTo(stopPlace.getName().getValue()));
@@ -708,13 +551,8 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
 
         stopPlaceRepository.save(stopPlace);
 
-        String graphQlJsonQuery = """
-                  {
-                  stopPlace:  ${GraphQLNames.FIND_STOPPLACE} (id:"${stopPlace.getNetexId()}", allVersions:true) {
-                            id
-                            tariffZones { id version name { value }}
-                        }
-                    }""";
+        String graphQlJsonQuery = "";
+
 
 
         executeGraphqQLQueryOnly(graphQlJsonQuery)
@@ -778,19 +616,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         tariffZone.setNetexId("CRI:TariffZone:1");
         tariffZoneRepository.save(tariffZone);
 
-        String graphqlQuery = """
-            mutation {
-              stopPlace:mutateStopPlace(StopPlace: {name: {value: "Name", lang:"nor"}, tariffZones: [{ref: "${tariffZone.netexId}"}]}) {
-                id
-                tariffZones {
-                  id
-                  name {
-                    value
-                  }
-                }
-              }
-            }
-            """;
+        String graphqlQuery = "";
 
         executeGraphqQLQueryOnly(graphqlQuery)
         .root("data.stopPlace[0]")
@@ -855,23 +681,8 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         var parentStopPlaceName = "Super stop place name";
         var versionComment = "VersionComment";
 
-        var graphQlJsonQuery = """
-                 mutation {
-                 stopPlace: ${GraphQLNames.CREATE_MULTI_MODAL_STOPPLACE} (${INPUT}: {
-                          stopPlaceIds:["${bus.getNetexId()}" ,"${tram.getNetexId()}"]
-                          name: { value: "${parentStopPlaceName}" }
-                          validBetween: { fromDate:"${fromDate}" }
-                          versionComment:"${versionComment}"
-                       }) {
-                          id
-                          name { value }
-                          children {
-                           id name { value } stopPlaceType version
-                          }
-                          validBetween { fromDate toDate }
-                          versionComment
-                       }
-                  } """;
+        var graphQlJsonQuery = "";
+
 
         executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .body("data.stopPlace.name.value", equalTo(parentStopPlaceName))
@@ -921,24 +732,8 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         var fromDate = parent.getValidBetween().getFromDate().plusSeconds(1000);
         var toDate = fromDate.plusSeconds(70000);
 
-        var graphQlJsonQuery = """
-                 mutation {
-                 stopPlace: ${ADD_TO_MULTIMODAL_STOPPLACE} (${INPUT}: {
-                          ${PARENT_SITE_REF}: "${parent.getNetexId()}"
-                          ${STOP_PLACE_IDS}:["${newChild.getNetexId()}"]
-                          validBetween: { fromDate:"${fromDate}", toDate:"${toDate}" }
-                          versionComment:"${versionComment}"
-                       }) {
-                          id
-                          name { value }
-                          children {
-                           id name { value } stopPlaceType version
-                          }
-                          validBetween { fromDate toDate }
-                          version
-                          versionComment
-                       }
-                  } """;
+        var graphQlJsonQuery = "";
+
 
         executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .body("data.stopPlace.name.value", equalTo(parentStopPlaceName))
@@ -996,35 +791,8 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
 
         InterchangeWeightingEnumeration weighting = InterchangeWeightingEnumeration.INTERCHANGE_ALLOWED;
 
-        String graphQlJsonQuery = """
-            mutation {
-            stopPlace: ${GraphQLNames.MUTATE_STOPPLACE}(StopPlace: {
-                        id: "${stopPlace.getNetexId()}"
-                        name: { value: "${updatedName}" }
-                        shortName: { value: "${updatedShortName}" }
-                        description: { value:"${updatedDescription}" }
-                        adjacentSites: [ {ref: "${adjacentStopPlace.getNetexId()}"} ]
-                        stopPlaceType: ${StopTypeEnumeration.TRAM_STATION.value()}
-                        versionComment: "${versionComment}"
-                        geometry: {
-                          type: Point
-                          coordinates: [[${updatedLon},${updatedLat}]]
-                        }
-                        weighting: ${weighting.value()}
-                }) {
-                    id
-                    name { value }
-                    shortName { value }
-                    description { value }
-                    adjacentSites { ref }
-                    stopPlaceType
-                    versionComment
-                    topographicPlace { id topographicPlaceType parentTopographicPlace { id topographicPlaceType }}
-                    weighting
-                    geometry { type coordinates }
-                    validBetween { fromDate toDate }
-                }
-            }""";
+        String graphQlJsonQuery = "";
+
 
         executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .root("data.stopPlace[0]")
@@ -1323,19 +1091,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
 
         String versionComment = "moving quays";
 
-        String graphQlJsonQuery = """
-                    mutation {
-                    stopPlace: ${MOVE_QUAYS_TO_STOP} (${QUAY_IDS}: "${quay.getNetexId()}", ${TO_VERSION_COMMENT}: "${versionComment}") {
-                        id
-                        ...on StopPlace {
-                            quays {
-                                id
-                            }
-                        }
-                        versionComment
-                    }
-                }
-              """;
+        String graphQlJsonQuery = "";
 
         executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .body("data.stopPlace.id", not(comparesEqualTo(stopPlace.getNetexId())))
@@ -1540,21 +1296,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         stopPlace.setPlaceEquipments(placeEquipment);
         stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
 
-        var query = """
-                  {
-                  stopPlace(
-                      query:"${stopPlace.netexId}"
-                    ) {
-                  placeEquipments {
-                    ticketingEquipment {
-                        ticketMachines
-                        numberOfMachines
-                        ticketOffice
-                      }
-                    }
-                  }
-                }
-        """;
+        var query = "";
 
         executeGraphqQLQueryOnly(query)
                 .body("data.stopPlace[0].placeEquipments.ticketingEquipment[0].ticketMachines", is(true))
