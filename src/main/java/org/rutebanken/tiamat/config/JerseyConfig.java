@@ -64,7 +64,6 @@ public class JerseyConfig {
     public static final String SERVICES_STOP_PLACE_PATH = SERVICES_PATH + "/stop_places";
 
     public static final String SERVICES_HEALTH_PATH = "/health";
-    public static final String SERVICES_PROMETHEUS_PATH = "/prometheus";
 
     private static final String PUBLIC_SWAGGER_SCANNER_ID = "public-scanner";
     private static final String PUBLIC_SWAGGER_CONFIG_ID = "public-swagger-doc";
@@ -174,12 +173,12 @@ public class JerseyConfig {
         config.setTitle("Tiamat Prometheus API");
         config.setVersion("v1");
         config.setSchemes(new String[]{"http", "https"});
-        config.setBasePath(SERVICES_PROMETHEUS_PATH);
+        config.setBasePath(SERVICES_HEALTH_PATH);
         config.setResourcePackage("org.rutebanken.tiamat");
         config.setPrettyPrint(true);
         config.setScan(true);
 
-        prometheusServicesJersey.addUrlMappings(SERVICES_PROMETHEUS_PATH + "/*");
+        prometheusServicesJersey.addUrlMappings(SERVICES_HEALTH_PATH + "/scrape/*");
         prometheusServicesJersey.setName("PrometheusJersey");
 
         prometheusServicesJersey.getInitParameters().put("swagger.scanner.id", PROMETHEUS_SWAGGER_SCANNER_ID);
