@@ -12,6 +12,7 @@ resources:
   memLimit: 10000Mi
   cpuRequest: 1200m
   memRequest: 7500Mi
+  xss: 1024m
   xmx: 7g
 
 secretMount:
