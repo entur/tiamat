@@ -18,6 +18,10 @@ spec:
     type: RollingUpdate
   template:
     metadata:
+      annotations:
+        prometheus.io/path: /health/scrape
+        prometheus.io/port: {{ .Values.service.http.internalPort }}
+        prometheus.io/scrape: 'true'
       labels:
         {{- include "common.labels" . | indent 8 }}
     spec:
