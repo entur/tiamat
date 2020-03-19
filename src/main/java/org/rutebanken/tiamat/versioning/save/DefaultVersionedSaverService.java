@@ -21,7 +21,7 @@ import org.rutebanken.tiamat.diff.TiamatObjectDiffer;
 import org.rutebanken.tiamat.model.DataManagedObjectStructure;
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
 import org.rutebanken.tiamat.repository.EntityInVersionRepository;
-import org.rutebanken.tiamat.service.metrics.MetricsService;
+import org.rutebanken.tiamat.service.metrics.PrometheusMetricsService;
 import org.rutebanken.tiamat.versioning.ValidityUpdater;
 import org.rutebanken.tiamat.versioning.VersionIncrementor;
 import org.rutebanken.tiamat.versioning.validate.VersionValidator;
@@ -55,7 +55,7 @@ public class DefaultVersionedSaverService {
     private VersionIncrementor versionIncrementor;
 
     @Autowired
-    private MetricsService metricsService;
+    private PrometheusMetricsService prometheusMetricsService;
 
     @Autowired
     private ReflectionAuthorizationService authorizationService;
@@ -113,7 +113,7 @@ public class DefaultVersionedSaverService {
         if(existingVersion != null) {
             tiamatObjectDiffer.logDifference(existingVersion, newVersion);
         }
-        metricsService.registerEntitySaved(newVersion.getClass());
+        prometheusMetricsService.registerEntitySaved(newVersion.getClass(),1L);
         return newVersion;
     }
 

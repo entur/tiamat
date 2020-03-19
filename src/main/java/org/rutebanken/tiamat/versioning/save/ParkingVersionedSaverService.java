@@ -24,7 +24,7 @@ import org.rutebanken.tiamat.model.Parking;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.ParkingRepository;
 import org.rutebanken.tiamat.repository.reference.ReferenceResolver;
-import org.rutebanken.tiamat.service.metrics.MetricsService;
+import org.rutebanken.tiamat.service.metrics.PrometheusMetricsService;
 import org.rutebanken.tiamat.versioning.VersionIncrementor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +56,7 @@ public class ParkingVersionedSaverService {
     private VersionIncrementor versionIncrementor;
 
     @Autowired
-    private MetricsService metricsService;
+    private PrometheusMetricsService prometheusMetricsService;
 
     @Autowired
     private ReflectionAuthorizationService reflectionAuthorizationService;
@@ -92,7 +92,7 @@ public class ParkingVersionedSaverService {
 
         logger.info("Saved parking {}, version {}, name {}", result.getNetexId(), result.getVersion(), result.getName());
 
-        metricsService.registerEntitySaved(newVersion.getClass());
+        prometheusMetricsService.registerEntitySaved(newVersion.getClass(),1L);
         return result;
     }
 

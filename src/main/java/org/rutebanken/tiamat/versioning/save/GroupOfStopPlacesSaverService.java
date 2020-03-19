@@ -25,7 +25,7 @@ import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.GroupOfStopPlacesRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.service.groupofstopplaces.GroupOfStopPlacesCentroidComputer;
-import org.rutebanken.tiamat.service.metrics.MetricsService;
+import org.rutebanken.tiamat.service.metrics.PrometheusMetricsService;
 import org.rutebanken.tiamat.versioning.VersionIncrementor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,7 +65,7 @@ public class GroupOfStopPlacesSaverService {
     private VersionIncrementor versionIncrementor;
 
     @Autowired
-    private MetricsService metricsService;
+    private PrometheusMetricsService prometheusMetricsService;
 
     @Autowired
     private ReflectionAuthorizationService authorizationService;
@@ -100,7 +100,7 @@ public class GroupOfStopPlacesSaverService {
         versionIncrementor.incrementVersion(result);
         result = groupOfStopPlacesRepository.save(result);
 
-        metricsService.registerEntitySaved(newVersion.getClass());
+        prometheusMetricsService.registerEntitySaved(newVersion.getClass(),1L);
         logger.info("Saved {}", result);
 
         return result;
