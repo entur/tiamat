@@ -54,7 +54,7 @@ public class LoggingFilter implements Filter {
             HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
             String requestUri = httpServletRequest.getRequestURI();
 
-            if(!(requestUri.startsWith("/health") || requestUri.startsWith("/prometheus")))  {
+            if(!requestUri.startsWith("/health")) {
 
                 String clientName = httpServletRequest.getHeader(ET_CLIENT_NAME_HEADER);
                 String clientId = httpServletRequest.getHeader(ET_CLIENT_ID_HEADER);
