@@ -16,7 +16,7 @@
 package org.rutebanken.tiamat.repository;
 
 
-import com.google.api.client.repackaged.com.google.common.base.Strings;
+import com.google.common.base.Strings;
 import org.apache.commons.lang3.NotImplementedException;
 import org.hibernate.*;
 import org.hibernate.query.NativeQuery;

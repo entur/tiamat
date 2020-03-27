@@ -15,12 +15,12 @@
 
 package org.rutebanken.tiamat.changelog;
 
+import org.rutebanken.tiamat.config.GooglePubSubConfig;
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
 import org.rutebanken.tiamat.model.EntityStructure;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,27 +29,28 @@ import java.util.UUID;
 @Component
 @Transactional
 public class EntityChangedEventJMSPublisher implements EntityChangedListener {
-
     @Autowired
-    private JmsTemplate jmsTemplate;
+    private GooglePubSubConfig.PubsubOutboundGateway pubsubOutboundGateway;
 
-    @Value("${changelog.queue.name:IrkallaChangelogQueue}")
-    private String queueName;
+    @Value("${changelog.gcp.publish.enabled:true}")
+    private boolean pubSubPublish;
 
-    @Value("${changelog.publish.enabled:true}")
-    private boolean publish;
+
 
     @Override
     public void onChange(EntityInVersionStructure entity) {
-        if (publish && isLoggedEntity(entity)) {
-            jmsTemplate.convertAndSend(queueName, toEntityChangedEvent(entity, false).toString());
+
+        if (pubSubPublish && isLoggedEntity(entity)) {
+            pubsubOutboundGateway.sendToPubsub(toEntityChangedEvent(entity, false).toString());
         }
+
     }
 
     @Override
     public void onDelete(EntityInVersionStructure entity) {
-        if (publish && isLoggedEntity(entity)) {
-            jmsTemplate.convertAndSend(queueName, toEntityChangedEvent(entity, true).toString());
+
+        if (pubSubPublish && isLoggedEntity(entity)) {
+            pubsubOutboundGateway.sendToPubsub(toEntityChangedEvent(entity, true).toString());
         }
     }
 
