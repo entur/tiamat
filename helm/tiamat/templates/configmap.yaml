@@ -68,3 +68,7 @@ data:
     #Profile
     spring.profiles.active=gcs-blobstore
 
+    # pubsub
+    spring.cloud.gcp.project-id={{ .Values.configMap.projectId }}
+    spring.cloud.gcp.credentials.location=file:/etc/tiamat/credentials.json
+
