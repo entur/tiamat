@@ -60,6 +60,11 @@ variable "service_account_cloudsql_role" {
   default     = "roles/cloudsql.client"
 }
 
+variable "service_account_pubsub_role" {
+  description = "Role of the Service Account - more about roles https://cloud.google.com/pubsub/docs/access-control"
+  default     = "roles/pubsub.editor"
+}
+
 variable "prevent_destroy" {
   description = "Prevent destruction of bucket"
   type        = bool
