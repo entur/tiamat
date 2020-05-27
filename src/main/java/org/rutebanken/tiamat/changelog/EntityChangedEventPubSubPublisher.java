@@ -19,8 +19,11 @@ import org.rutebanken.tiamat.config.GooglePubSubConfig;
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
 import org.rutebanken.tiamat.model.EntityStructure;
 import org.rutebanken.tiamat.model.StopPlace;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,7 +31,12 @@ import java.util.UUID;
 
 @Component
 @Transactional
-public class EntityChangedEventJMSPublisher implements EntityChangedListener {
+@Profile("google-pubsub")
+public class EntityChangedEventPubSubPublisher implements EntityChangedListener {
+
+    private static final Logger logger = LoggerFactory.getLogger(EntityChangedEventActiveMQPublisher.class);
+
+
     @Autowired
     private GooglePubSubConfig.PubsubOutboundGateway pubsubOutboundGateway;
 
@@ -39,7 +47,6 @@ public class EntityChangedEventJMSPublisher implements EntityChangedListener {
 
     @Override
     public void onChange(EntityInVersionStructure entity) {
-
         if (pubSubPublish && isLoggedEntity(entity)) {
             pubsubOutboundGateway.sendToPubsub(toEntityChangedEvent(entity, false).toString());
         }
