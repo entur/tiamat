@@ -56,6 +56,13 @@ resource "google_project_iam_member" "project" {
   member = "serviceAccount:${google_service_account.tiamat_service_account.email}"
 }
 
+# add service account as member to the pubsub
+resource "google_project_iam_member" "pubsub_member" {
+  project = var.gcp_project
+  role    = var.service_account_pubsub_role
+  member = "serviceAccount:${google_service_account.storage_bucket_service_account.email}"
+}
+
 # create key for service account
 resource "google_service_account_key" "tiamat_service_account_key" {
   service_account_id = google_service_account.tiamat_service_account.name
