@@ -66,7 +66,7 @@ data:
     logging.level.org.hibernate.id.enhanced=INFO
 
     #Profile
-    spring.profiles.active=gcs-blobstore
+    spring.profiles.active=gcs-blobstore,google-pubsub
 
     # pubsub
     spring.cloud.gcp.project-id={{ .Values.configMap.projectId }}
