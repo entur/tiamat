@@ -60,7 +60,7 @@ resource "google_project_iam_member" "project" {
 resource "google_project_iam_member" "pubsub_member" {
   project = var.gcp_project
   role    = var.service_account_pubsub_role
-  member = "serviceAccount:${google_service_account.storage_bucket_service_account.email}"
+  member = "serviceAccount:${google_service_account.tiamat_service_account.email}"
 }
 
 # create key for service account
