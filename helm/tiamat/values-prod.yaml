@@ -6,6 +6,7 @@ sql:
   instance: neon-1287:europe-west1:tiamat-db-1=tcp:5432
 
 configMap:
-  projectId: neon-1287
+  blobstoreProjectId: neon-1287
+  pubsubProjectId: neon-1287
   gcsBucketName: ror-tiamat-production
   keycloakUrl: https://auth.entur.org/auth

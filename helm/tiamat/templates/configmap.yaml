@@ -22,7 +22,7 @@ data:
     blobstore.gcs.bucket.name={{.Values.configMap.gcsBucketName}}
     blobstore.gcs.blob.path=export
     blobstore.gcs.credential.path=/etc/tiamat/credentials.json
-    blobstore.gcs.project.id={{.Values.configMap.projectId}}
+    blobstore.gcs.project.id={{.Values.configMap.blobstoreProjectId}}
 
     # Database properties
     spring.jpa.properties.javax.persistence.query.timeout=15000
@@ -69,6 +69,6 @@ data:
     spring.profiles.active=gcs-blobstore,google-pubsub
 
     # pubsub
-    spring.cloud.gcp.project-id={{ .Values.configMap.projectId }}
+    spring.cloud.gcp.project-id={{ .Values.configMap.pubsubProjectId }}
     spring.cloud.gcp.credentials.location=file:/etc/tiamat/credentials.json
 

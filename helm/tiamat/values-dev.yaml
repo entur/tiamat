@@ -4,6 +4,7 @@ sql:
   instance: carbon-1287:europe-west1:tiamat-db-1=tcp:5432
 
 configMap:
-  projectId: carbon-1287
+  blobstoreProjectId: carbon-1287
+  pubsubProjectId: carbon-1287
   gcsBucketName: ror-tiamat-dev
   keycloakUrl: https://kc-dev.devstage.entur.io/auth
