@@ -5,6 +5,6 @@ sql:
 
 configMap:
   blobstoreProjectId: carbon-1287
-  pubsubProjectId: carbon-1287
+  pubsubProjectId: entur-ror-dev
   gcsBucketName: ror-tiamat-dev
   keycloakUrl: https://kc-dev.devstage.entur.io/auth

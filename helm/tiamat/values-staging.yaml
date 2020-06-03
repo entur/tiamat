@@ -7,7 +7,7 @@ sql:
 
 configMap:
   blobstoreProjectId: radon-1287
-  pubsubProjectId: radon-1287
+  pubsubProjectId: entur-ror-test
   gcsBucketName: ror-tiamat-test
   keycloakUrl: https://kc-stage.devstage.entur.io/auth
 

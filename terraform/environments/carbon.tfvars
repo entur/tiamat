@@ -1,6 +1,6 @@
 gcp_project = "carbon-1287"
 cloudsql_project = "carbon-1287"
-pubsub_project = "carbon-1287"
+pubsub_project = "entur-ror-dev"
 storage_project = "carbon-1287"
 kube_namespace = "dev"
 bucket_instance_suffix = "dev"

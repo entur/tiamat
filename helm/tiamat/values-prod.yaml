@@ -7,6 +7,6 @@ sql:
 
 configMap:
   blobstoreProjectId: neon-1287
-  pubsubProjectId: neon-1287
+  pubsubProjectId: entur-ror-prod
   gcsBucketName: ror-tiamat-production
   keycloakUrl: https://auth.entur.org/auth
