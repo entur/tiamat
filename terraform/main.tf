@@ -25,7 +25,7 @@ resource "google_storage_bucket" "storage_bucket" {
   }
   logging {
     log_bucket        = var.log_bucket
-    log_object_prefix = "${var.labels.app}-${var.bucket_instance_suffix}"
+    log_object_prefix = "${var.bucket_instance_prefix}${var.labels.app}-${var.bucket_instance_suffix}"
   }
 }
 # Create folder in a bucket
