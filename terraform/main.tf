@@ -12,7 +12,7 @@ provider "kubernetes" {
 
 # Create bucket
 resource "google_storage_bucket" "storage_bucket" {
-  name               = "${var.labels.app}-${var.bucket_instance_suffix}"
+  name               = "${var.bucket_instance_prefix}${var.labels.app}-${var.bucket_instance_suffix}"
   force_destroy      = var.force_destroy
   location           = var.location
   project            = var.storage_project

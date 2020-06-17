@@ -34,6 +34,11 @@ variable "labels" {
 
 variable "bucket_instance_suffix" {
   description = "A suffix for the bucket instance, may be changed if environment is destroyed and then needed again (name collision workaround) - also bucket names must be globally unique"
+  default     = ""
+}
+
+variable "bucket_instance_prefix" {
+  description = "A prefix for the bucket instance, may be changed if environment is destroyed and then needed again (name collision workaround) - also bucket names must be globally unique"
 }
 
 variable "force_destroy" {
