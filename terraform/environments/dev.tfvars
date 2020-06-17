@@ -1,4 +1,4 @@
-gcp_project = "entur-dev-1287"
+gcp_project = "entur-ror-dev"
 cloudsql_project = "entur-ror-dev"
 pubsub_project = "entur-ror-dev"
 storage_project = "entur-ror-dev"

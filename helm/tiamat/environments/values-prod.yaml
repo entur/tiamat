@@ -1,0 +1,12 @@
+env: production
+
+replicas: 2
+
+sql:
+  instance: entur-ror-prod:europe-west1:tiamat-db-1=tcp:5432
+
+configMap:
+  blobstoreProjectId: entur-ror-prod
+  pubsubProjectId: entur-ror-prod
+  gcsBucketName: tiamat-production
+  keycloakUrl: https://auth.entur.org/auth
