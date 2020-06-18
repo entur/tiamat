@@ -8,3 +8,5 @@ configMap:
   pubsubProjectId: entur-ror-dev
   gcsBucketName: tiamat-dev
   keycloakUrl: https://kc-dev.devstage.entur.io/auth
+rbac:
+  enabled: true

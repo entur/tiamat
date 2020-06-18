@@ -11,3 +11,5 @@ configMap:
   gcsBucketName: tiamat-test
   keycloakUrl: https://kc-stage.devstage.entur.io/auth
 
+rbac:
+  enabled: true

@@ -10,3 +10,6 @@ configMap:
   pubsubProjectId: entur-ror-prod
   gcsBucketName: tiamat-production
   keycloakUrl: https://auth.entur.org/auth
+
+rbac:
+  enabled: true

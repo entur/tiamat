@@ -1,0 +1,36 @@
+{{- if .Values.rbac.enabled }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: tiamat-service-account
+  labels:
+    {{- include "common.labels" . | indent 4 }}
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: tiamat-service-account
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "common.labels" . | indent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: tiamat-service-account
+subjects:
+  - kind: ServiceAccount
+    name: tiamat-service-account
+    namespace: {{ .Release.Namespace }}
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  name: tiamat-service-account
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "common.labels" . | indent 4 }}
+rules:
+  - apiGroups: [""] # "" indicates the core API group
+    resources: ["services", "pods", "configmaps", "endpoints"]
+    verbs: ["get", "watch", "list"]
+{{- end }}
