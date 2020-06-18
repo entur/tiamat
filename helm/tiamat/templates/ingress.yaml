@@ -6,22 +6,12 @@ metadata:
     {{- include "common.labels" . | indent 4 }}
   annotations:
     kubernetes.io/ingress.class: traefik
-    {{- if eq .Values.env "production"}}
-    external-dns.alpha.kubernetes.io/target: {{ .Values.ingress.productionIp }}
-    {{ else if eq .Values.env "staging"}}
-    external-dns.alpha.kubernetes.io/target: {{ .Values.ingress.stagingIp }}
-    {{ else if eq .Values.env "dev"}}
-    external-dns.alpha.kubernetes.io/target: {{ .Values.ingress.devIp }}
-    {{- end}}
+    external-dns.alpha.kubernetes.io/target: {{ .Values.ingress.loadBalancerIP }}
   name: stop-places-v1
   namespace: {{ .Release.Namespace }}
 spec:
   rules:
-  {{- if eq .Values.env "production"}}
-  - host: stop-places-v1-{{ .Release.Namespace }}.entur.io
-  {{ else }}
-  - host: stop-places-v1-{{ .Release.Namespace }}.{{ .Release.Namespace }}.entur.io
-  {{- end}}
+  - host: stop-places-v1{{ .Values.ingress.domainName }}
     http:
       paths:
         - backend:

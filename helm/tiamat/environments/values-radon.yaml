@@ -11,3 +11,8 @@ configMap:
   gcsBucketName: ror-tiamat-test
   keycloakUrl: https://kc-stage.devstage.entur.io/auth
 
+
+ingress:
+  enabled: true
+  loadBalancerIP: 35.195.146.93
+  domainName: -staging.staging.entur.io

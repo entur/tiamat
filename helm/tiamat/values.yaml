@@ -36,9 +36,3 @@ service:
     internalPort: 8777
   jolokia:
     internalPort: 8778
-
-ingress:
-    enabled: true
-    devIp: 35.195.223.29
-    stagingIp: 35.195.146.93
-    productionIp: 35.187.15.14

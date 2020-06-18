@@ -10,3 +10,8 @@ configMap:
   pubsubProjectId: entur-ror-prod
   gcsBucketName: ror-tiamat-production
   keycloakUrl: https://auth.entur.org/auth
+
+ingress:
+  enabled: true
+  loadBalancerIP: 35.187.15.14
+  domainName: -production.entur.io

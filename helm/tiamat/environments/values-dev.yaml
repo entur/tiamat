@@ -10,3 +10,8 @@ configMap:
   keycloakUrl: https://kc-dev.devstage.entur.io/auth
 rbac:
   enabled: true
+
+ingress:
+  enabled: true
+  loadBalancerIP: 35.205.170.68
+  domainName: .dev.entur.io

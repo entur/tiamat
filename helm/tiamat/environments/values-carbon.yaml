@@ -8,3 +8,8 @@ configMap:
   pubsubProjectId: entur-ror-dev
   gcsBucketName: ror-tiamat-dev
   keycloakUrl: https://kc-dev.devstage.entur.io/auth
+
+ingress:
+  enabled: true
+  loadBalancerIP: 35.195.223.29
+  domainName: -dev.dev.entur.io

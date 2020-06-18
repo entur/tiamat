@@ -13,3 +13,8 @@ configMap:
 
 rbac:
   enabled: true
+
+ingress:
+  enabled: true
+  loadBalancerIP: 130.211.80.129
+  domainName: .staging.entur.io
