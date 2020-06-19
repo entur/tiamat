@@ -34,9 +34,6 @@ import java.util.UUID;
 @Profile("google-pubsub")
 public class EntityChangedEventPubSubPublisher implements EntityChangedListener {
 
-    private static final Logger logger = LoggerFactory.getLogger(EntityChangedEventActiveMQPublisher.class);
-
-
     @Autowired
     private GooglePubSubConfig.PubsubOutboundGateway pubsubOutboundGateway;
 

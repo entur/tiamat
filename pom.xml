@@ -543,12 +543,14 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-jms</artifactId>
+            <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.apache.activemq</groupId>
             <artifactId>activemq-client</artifactId>
             <version>${activemq-client.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.activemq</groupId>
