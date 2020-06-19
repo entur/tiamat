@@ -36,3 +36,5 @@ service:
     internalPort: 8777
   jolokia:
     internalPort: 8778
+rbac:
+  enabled: false
