@@ -134,7 +134,7 @@ public class ExportJobWorker implements Runnable {
             try {
                 zipOutputStream.close();
             } catch (IOException e) {
-                throw new IOException("Could not close zipoutput stream for file: "+localZipFile, e);
+                logger.error(String.format("Could not close zipoutput stream for file: %s", localZipFile), e);
             }
         }
     }
