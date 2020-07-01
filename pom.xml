@@ -587,14 +587,10 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.0.0-M1</version>
+                <version>3.0.0-M5</version>
                 <configuration>
-                    <useSystemClassLoader>false</useSystemClassLoader>
-                    <argLine>-Xmx3G</argLine>
-                    <systemPropertyVariables combine.children="override">
-                        <spring.output.ansi.enabled>ALWAYS</spring.output.ansi.enabled>
-                        <env>dev</env>
-                    </systemPropertyVariables>
+                    <argLine>@{argLine} -Xms500m -Xmx500m -Xss256k</argLine>
+                    <runOrder>alphabetical</runOrder>
                 </configuration>
             </plugin>
             <plugin>
