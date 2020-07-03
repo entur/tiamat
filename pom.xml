@@ -91,7 +91,7 @@
         <groovy-all.version>2.5.4</groovy-all.version>
         <jaxb-version>2.3.0.1</jaxb-version>
         <swagger-jersey2.version>1.5.21</swagger-jersey2.version>
-        <jackson-version>2.11.1</jackson-version>
+        <jackson-version>2.9.10.5</jackson-version>
         <jacoco-maven-plugin.version>0.8.5</jacoco-maven-plugin.version>
         <sonar-maven-plugin.version>3.7.0.1746</sonar-maven-plugin.version>
 
