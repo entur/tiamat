@@ -1,5 +1,5 @@
 gcp_project = "entur-test-1287"
-cloudsql_project = "entur-ror-test"
+cloudsql_project = "radon-1287"
 pubsub_project = "entur-ror-test"
 storage_project = "entur-ror-test"
 kube_namespace = "staging"
