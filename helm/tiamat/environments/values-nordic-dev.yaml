@@ -1,16 +1,20 @@
+deployment:
+  name: tiamat-nordic
+
 sql:
-  instance: entur-ror-dev:europe-west1:tiamat-db-1=tcp:5432
+  instance: entur-ror-dev:europe-west1:tiamat-nordic-db-1=tcp:5432
 
 configMap:
   blobstoreProjectId: entur-ror-dev
   pubsubProjectId: entur-ror-dev
-  pubsbuTopicName: ror.tiamat.changelog
-  gcsBucketName: tiamat-dev
+  pubsbuTopicName: ror.tiamat-nordic.changelog
+  gcsBucketName: tiamat-nordic
   keycloakUrl: https://kc-dev.devstage.entur.io/auth
 rbac:
   enabled: true
 
 ingress:
   enabled: true
+  name: stop-places-v1-nordic
   loadBalancerIP: 35.205.170.68
   domainName: .dev.entur.io

@@ -3,7 +3,7 @@ kind: Service
 metadata:
   labels:
     {{- include "common.labels" . | indent 4 }}
-  name: {{ template "app.name" . }}
+  name: {{ .Values.deployment.name }}
   namespace: {{ .Release.Namespace }}
 spec:
   ports:
@@ -12,6 +12,6 @@ spec:
       protocol: TCP
       targetPort: {{ .Values.service.http.internalPort }}
   selector:
-    app: {{ template "app.name" . }}
+    app: {{ .Values.deployment.name }}
   sessionAffinity: None
   type: ClusterIP

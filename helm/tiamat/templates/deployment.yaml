@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ template "app.name" . }}
+  name: {{ .Values.deployment.name }}
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "common.labels" . | indent 4 }}
@@ -10,7 +10,7 @@ spec:
   replicas: {{ .Values.replicas }}
   selector:
     matchLabels:
-      app: {{ template "app.name" . }}
+      app: {{ .Values.deployment.name }}
   strategy:
     rollingUpdate:
       maxSurge: {{ .Values.rollingUpdate.maxSurge }}
@@ -50,7 +50,7 @@ spec:
                 - sleep 28
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
-        - name: {{ .Chart.Name }}
+        - name: {{ .Values.deployment.name }}
           image: {{ .Values.image.identifier }}
           imagePullPolicy: {{ .Values.image.imagePullPolicy }}
           env:
@@ -113,8 +113,8 @@ spec:
       restartPolicy: Always
       schedulerName: default-scheduler
       securityContext: {}
-      serviceAccount: tiamat-service-account
-      serviceAccountName: tiamat-service-account
+      serviceAccount: {{ .Values.deployment.name }}-service-account
+      serviceAccountName: {{ .Values.deployment.name }}-service-account
       terminationGracePeriodSeconds: 31
       volumes:
         - name: {{ .Values.secretMount.name }}
