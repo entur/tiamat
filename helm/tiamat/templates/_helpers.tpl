@@ -27,9 +27,9 @@ If release name contains chart name it will be used as a full name.
 
 {{/* Generate basic labels */}}
 {{- define "common.labels" }}
-app: {{ template "app.name" . }}
+app: {{ .Values.deployment.name }}
 chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-release: {{ .Release.Name }}
+release: {{ .Values.deployment.name }}
 team: ror
 slack: talk-ror
 type: nsr
