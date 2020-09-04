@@ -8,7 +8,7 @@ configMap:
   blobstoreProjectId: entur-ror-dev
   pubsubProjectId: entur-ror-dev
   pubsbuTopicName: ror.tiamat-nordic.changelog
-  gcsBucketName: tiamat-nordic
+  gcsBucketName: tiamat-nordic-dev
   keycloakUrl: https://kc-dev.devstage.entur.io/auth
 rbac:
   enabled: true
