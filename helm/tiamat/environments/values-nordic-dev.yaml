@@ -18,3 +18,14 @@ ingress:
   name: stop-places-v1-nordic
   loadBalancerIP: 35.205.170.68
   domainName: .dev.entur.io
+
+secretMount:
+  name: tiamat-key
+  mountPath: /etc/tiamat/credentials.json
+  subPath: credentials.json
+  secretName: ror-tiamat-nordic-sa-key
+  readOnly: true
+
+
+configMapMount:
+  name: tiamat-nordic-config
