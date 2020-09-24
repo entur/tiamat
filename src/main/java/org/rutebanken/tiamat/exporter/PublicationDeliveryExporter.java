@@ -18,6 +18,7 @@ package org.rutebanken.tiamat.exporter;
 import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
+import org.rutebanken.tiamat.model.ServiceFrame;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.id.ValidPrefixList;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
@@ -57,6 +58,7 @@ public class PublicationDeliveryExporter {
     private final StopPlaceRepository stopPlaceRepository;
     private final NetexMapper netexMapper;
     private final TiamatSiteFrameExporter tiamatSiteFrameExporter;
+    private final TiamatServiceFrameExporter tiamatServiceFrameExporter;
     private final TopographicPlacesExporter topographicPlacesExporter;
     private final TariffZonesFromStopsExporter tariffZonesFromStopsExporter;
     private final ParentStopPlacesFetcher parentStopPlacesFetcher;
@@ -69,6 +71,7 @@ public class PublicationDeliveryExporter {
     public PublicationDeliveryExporter(StopPlaceRepository stopPlaceRepository,
                                        NetexMapper netexMapper,
                                        TiamatSiteFrameExporter tiamatSiteFrameExporter,
+                                       TiamatServiceFrameExporter tiamatServiceFrameExporter,
                                        TopographicPlacesExporter topographicPlacesExporter,
                                        TariffZonesFromStopsExporter tariffZonesFromStopsExporter,
                                        ParentStopPlacesFetcher parentStopPlacesFetcher,
@@ -77,6 +80,7 @@ public class PublicationDeliveryExporter {
         this.stopPlaceRepository = stopPlaceRepository;
         this.netexMapper = netexMapper;
         this.tiamatSiteFrameExporter = tiamatSiteFrameExporter;
+        this.tiamatServiceFrameExporter = tiamatServiceFrameExporter;
         this.topographicPlacesExporter = topographicPlacesExporter;
         this.tariffZonesFromStopsExporter = tariffZonesFromStopsExporter;
         this.parentStopPlacesFetcher = parentStopPlacesFetcher;
@@ -120,6 +124,18 @@ public class PublicationDeliveryExporter {
         return publicationDeliveryStructure;
     }
 
+    @SuppressWarnings("unchecked")
+    public PublicationDeliveryStructure createPublicationDelivery(org.rutebanken.netex.model.ServiceFrame serviceFrame) {
+        PublicationDeliveryStructure publicationDeliveryStructure = createPublicationDelivery();
+        publicationDeliveryStructure.withDataObjects
+                (
+                new PublicationDeliveryStructure.DataObjects()
+                        .withCompositeFrameOrCommonFrame(new ObjectFactory().createServiceFrame(serviceFrame))
+                );
+
+        logger.info("Returning publication delivery {} with site frame", publicationDeliveryStructure);
+        return publicationDeliveryStructure;
+    }
     /**
      *
      * @param stopPlaces
@@ -143,6 +159,8 @@ public class PublicationDeliveryExporter {
 
         org.rutebanken.tiamat.model.SiteFrame siteFrame = tiamatSiteFrameExporter.createTiamatSiteFrame("Site frame with stops");
 
+        final ServiceFrame serviceFrame = tiamatServiceFrameExporter.createTiamatServiceFrame("Service frame with scheduled stop points");
+
         tiamatSiteFrameExporter.addStopsToTiamatSiteFrame(siteFrame, stopPlaces);
         topographicPlacesExporter.addTopographicPlacesToTiamatSiteFrame(exportParams.getTopographicPlaceExportMode(), siteFrame);
 
@@ -150,6 +168,8 @@ public class PublicationDeliveryExporter {
 
         if (!relevantTariffZones && ExportParams.ExportMode.ALL.equals(exportParams.getTariffZoneExportMode())) {
             tiamatSiteFrameExporter.addAllTariffZones(siteFrame);
+
+            tiamatServiceFrameExporter.addScheduledStopPointToTiamatServiceFrame(serviceFrame,stopPlaces);
         }
 
         Set<Long> stopPlaceIds = StreamSupport.stream(stopPlaces.spliterator(), false).map(stopPlace -> stopPlace.getId()).collect(toSet());
@@ -157,6 +177,11 @@ public class PublicationDeliveryExporter {
 
         logger.info("Mapping site frame to netex model");
         org.rutebanken.netex.model.SiteFrame convertedSiteFrame = netexMapper.mapToNetexModel(siteFrame);
+
+        logger.info("Mapping service frame to netex model");
+
+        final org.rutebanken.netex.model.ServiceFrame convertedServiceFrame = netexMapper.mapToNetexModel(serviceFrame);
+
 
         if (convertedSiteFrame.getStopPlaces() != null) {
             if (relevantTariffZones) {
@@ -172,7 +197,7 @@ public class PublicationDeliveryExporter {
             removeVersionFromTopographicPlaceReferences(convertedSiteFrame);
         }
 
-        return createPublicationDelivery(convertedSiteFrame);
+        return createPublicationDelivery(convertedServiceFrame);
     }
 
     private void removeVersionFromTopographicPlaceReferences(org.rutebanken.netex.model.SiteFrame convertedSiteFrame) {

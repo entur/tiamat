@@ -22,6 +22,7 @@ import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.Parking;
 import org.rutebanken.netex.model.ParkingsInFrame_RelStructure;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
+import org.rutebanken.netex.model.ScheduledStopPointsInFrame_RelStructure;
 import org.rutebanken.netex.model.SiteFrame;
 import org.rutebanken.netex.model.StopPlace;
 import org.rutebanken.netex.model.StopPlacesInFrame_RelStructure;
@@ -38,6 +39,7 @@ import org.rutebanken.tiamat.exporter.eviction.EntitiesEvictor;
 import org.rutebanken.tiamat.exporter.eviction.SessionEntitiesEvictor;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.model.GroupOfStopPlaces;
+import org.rutebanken.tiamat.model.ServiceFrame;
 import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.repository.GroupOfStopPlacesRepository;
@@ -87,6 +89,7 @@ public class StreamingPublicationDelivery {
     private final ParkingRepository parkingRepository;
     private final PublicationDeliveryExporter publicationDeliveryExporter;
     private final TiamatSiteFrameExporter tiamatSiteFrameExporter;
+    private final TiamatServiceFrameExporter tiamatServiceFrameExporter;
     private final NetexMapper netexMapper;
     private final TariffZoneRepository tariffZoneRepository;
     private final TopographicPlaceRepository topographicPlaceRepository;
@@ -107,6 +110,7 @@ public class StreamingPublicationDelivery {
                                         ParkingRepository parkingRepository,
                                         PublicationDeliveryExporter publicationDeliveryExporter,
                                         TiamatSiteFrameExporter tiamatSiteFrameExporter,
+                                        TiamatServiceFrameExporter tiamatServiceFrameExporter,
                                         NetexMapper netexMapper,
                                         TariffZoneRepository tariffZoneRepository,
                                         TopographicPlaceRepository topographicPlaceRepository,
@@ -116,6 +120,7 @@ public class StreamingPublicationDelivery {
         this.parkingRepository = parkingRepository;
         this.publicationDeliveryExporter = publicationDeliveryExporter;
         this.tiamatSiteFrameExporter = tiamatSiteFrameExporter;
+        this.tiamatServiceFrameExporter = tiamatServiceFrameExporter;
         this.netexMapper = netexMapper;
         this.tariffZoneRepository = tariffZoneRepository;
         this.topographicPlaceRepository = topographicPlaceRepository;
@@ -130,6 +135,7 @@ public class StreamingPublicationDelivery {
     public void stream(ExportParams exportParams, OutputStream outputStream, boolean ignorePaging) throws JAXBException, XMLStreamException, IOException, InterruptedException, SAXException {
 
         org.rutebanken.tiamat.model.SiteFrame siteFrame = tiamatSiteFrameExporter.createTiamatSiteFrame("Site frame " + exportParams);
+        final ServiceFrame serviceFrame = tiamatServiceFrameExporter.createTiamatServiceFrame("Service frame " + exportParams);
 
         AtomicInteger mappedStopPlaceCount = new AtomicInteger();
         AtomicInteger mappedParkingCount = new AtomicInteger();
@@ -152,8 +158,15 @@ public class StreamingPublicationDelivery {
         //TODO: stream path links, handle export mode
         tiamatSiteFrameExporter.addRelevantPathLinks(stopPlacePrimaryIds, siteFrame);
 
+
+
         logger.info("Mapping site frame to netex model");
         org.rutebanken.netex.model.SiteFrame netexSiteFrame = netexMapper.mapToNetexModel(siteFrame);
+
+        logger.info("Mapping site frame to netex model");
+        final org.rutebanken.netex.model.ServiceFrame netexServiceFrame = netexMapper.mapToNetexModel(serviceFrame);
+
+        tiamatServiceFrameExporter.addScheduledStopPointToTiamatServiceFrame(serviceFrame,stopPlaceRepository.findAll());
 
         logger.info("Preparing scrollable iterators");
         prepareTopographicPlaces(exportParams, stopPlacePrimaryIds, mappedTopographicPlacesCount, netexSiteFrame, entitiesEvictor);
@@ -162,7 +175,9 @@ public class StreamingPublicationDelivery {
         prepareParkings(exportParams, stopPlacePrimaryIds, mappedParkingCount, netexSiteFrame, entitiesEvictor);
         prepareGroupOfStopPlaces(exportParams, stopPlacePrimaryIds, mappedGroupOfStopPlacesCount, netexSiteFrame, entitiesEvictor);
 
-        PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryExporter.createPublicationDelivery(netexSiteFrame);
+        //prepareScheduledStopPoints(exportParams,stopPlacePrimaryIds,mappedStopPlaceCount,netexServiceFrame,entitiesEvictor);
+
+        PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryExporter.createPublicationDelivery(netexServiceFrame);
 
         Marshaller marshaller = createMarshaller();
 
@@ -245,6 +260,16 @@ public class StreamingPublicationDelivery {
             netexSiteFrame.setStopPlaces(stopPlacesInFrame_relStructure);
         } else {
             logger.info("No stop places to export");
+        }
+    }
+
+    private void prepareScheduledStopPoints(ExportParams exportParams, Set<Long> stopPlacePrimaryIds, AtomicInteger mappedStopPlaceCount, org.rutebanken.netex.model.ServiceFrame netexSiteFrame, EntitiesEvictor evicter)
+    {
+        if (!stopPlacePrimaryIds.isEmpty()) {
+            logger.info("There are stop places to export");
+
+            final Iterator<org.rutebanken.tiamat.model.StopPlace> stopPlaceIterator = stopPlaceRepository.scrollStopPlaces(stopPlacePrimaryIds);
+            final ScheduledStopPointsInFrame_RelStructure scheduledStopPointsInFrame_relStructure = new ScheduledStopPointsInFrame_RelStructure();
         }
     }
 
