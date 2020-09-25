@@ -39,6 +39,8 @@ import org.rutebanken.tiamat.exporter.eviction.EntitiesEvictor;
 import org.rutebanken.tiamat.exporter.eviction.SessionEntitiesEvictor;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.model.GroupOfStopPlaces;
+import org.rutebanken.tiamat.model.Quay;
+import org.rutebanken.tiamat.model.ScheduledStopPoint;
 import org.rutebanken.tiamat.model.ServiceFrame;
 import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
@@ -64,6 +66,7 @@ import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -163,10 +166,10 @@ public class StreamingPublicationDelivery {
         logger.info("Mapping site frame to netex model");
         org.rutebanken.netex.model.SiteFrame netexSiteFrame = netexMapper.mapToNetexModel(siteFrame);
 
-        logger.info("Mapping site frame to netex model");
+        logger.info("Mapping service frame to netex model");
         final org.rutebanken.netex.model.ServiceFrame netexServiceFrame = netexMapper.mapToNetexModel(serviceFrame);
 
-        tiamatServiceFrameExporter.addScheduledStopPointToTiamatServiceFrame(serviceFrame,stopPlaceRepository.findAll());
+        tiamatServiceFrameExporter.addScheduledStopPointToTiamatServiceFrame(serviceFrame,stopPlaceRepository.findByNetexId("NSR:StopPlace:3378"));
 
         logger.info("Preparing scrollable iterators");
         prepareTopographicPlaces(exportParams, stopPlacePrimaryIds, mappedTopographicPlacesCount, netexSiteFrame, entitiesEvictor);
@@ -175,9 +178,9 @@ public class StreamingPublicationDelivery {
         prepareParkings(exportParams, stopPlacePrimaryIds, mappedParkingCount, netexSiteFrame, entitiesEvictor);
         prepareGroupOfStopPlaces(exportParams, stopPlacePrimaryIds, mappedGroupOfStopPlacesCount, netexSiteFrame, entitiesEvictor);
 
-        //prepareScheduledStopPoints(exportParams,stopPlacePrimaryIds,mappedStopPlaceCount,netexServiceFrame,entitiesEvictor);
+        prepareScheduledStopPoints(exportParams,stopPlacePrimaryIds,mappedStopPlaceCount,netexServiceFrame,entitiesEvictor);
 
-        PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryExporter.createPublicationDelivery(netexServiceFrame);
+        PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryExporter.createPublicationDelivery(netexSiteFrame,netexServiceFrame);
 
         Marshaller marshaller = createMarshaller();
 
@@ -263,14 +266,33 @@ public class StreamingPublicationDelivery {
         }
     }
 
-    private void prepareScheduledStopPoints(ExportParams exportParams, Set<Long> stopPlacePrimaryIds, AtomicInteger mappedStopPlaceCount, org.rutebanken.netex.model.ServiceFrame netexSiteFrame, EntitiesEvictor evicter)
+    private void prepareScheduledStopPoints(ExportParams exportParams, Set<Long> stopPlacePrimaryIds, AtomicInteger mappedStopPlaceCount, org.rutebanken.netex.model.ServiceFrame netexServiceFrame, EntitiesEvictor evicter)
     {
         if (!stopPlacePrimaryIds.isEmpty()) {
             logger.info("There are stop places to export");
 
             final Iterator<org.rutebanken.tiamat.model.StopPlace> stopPlaceIterator = stopPlaceRepository.scrollStopPlaces(stopPlacePrimaryIds);
             final ScheduledStopPointsInFrame_RelStructure scheduledStopPointsInFrame_relStructure = new ScheduledStopPointsInFrame_RelStructure();
+            List<org.rutebanken.netex.model.ScheduledStopPoint> netexScheduledStopPoints = new ArrayList<>();
+            if (stopPlaceIterator.hasNext()) {
+                final org.rutebanken.tiamat.model.StopPlace stopPlace = stopPlaceIterator.next();
+                final org.rutebanken.netex.model.ScheduledStopPoint scheduledStopPoint = covertStopPlaceToScheduledStopPoint(stopPlace);
+                netexScheduledStopPoints.add(scheduledStopPoint);
+            }
+            setField(ScheduledStopPointsInFrame_RelStructure.class,"scheduledStopPoint",scheduledStopPointsInFrame_relStructure,netexScheduledStopPoints);
+            netexServiceFrame.setScheduledStopPoints(scheduledStopPointsInFrame_relStructure);
         }
+    }
+
+    private org.rutebanken.netex.model.ScheduledStopPoint covertStopPlaceToScheduledStopPoint(org.rutebanken.tiamat.model.StopPlace stopPlace) {
+        // Add stop place
+        var stopPlaceNetexId = stopPlace.getNetexId().split(":")[2];
+        var scheduledStopPointNetexId="NSR:ScheduledStopPoint:S"+stopPlaceNetexId;
+        final org.rutebanken.netex.model.ScheduledStopPoint netexScheduledStopPoint = new org.rutebanken.netex.model.ScheduledStopPoint();
+        netexScheduledStopPoint.setId(scheduledStopPointNetexId);
+        netexScheduledStopPoint.setVersion("1");
+        return netexScheduledStopPoint;
+
     }
 
     private void prepareTopographicPlaces(ExportParams exportParams, Set<Long> stopPlacePrimaryIds, AtomicInteger mappedTopographicPlacesCount, SiteFrame netexSiteFrame, EntitiesEvictor evicter) {
