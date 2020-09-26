@@ -135,9 +135,6 @@ public class PublicationDeliveryExporter {
         final JAXBElement<org.rutebanken.netex.model.ServiceFrame> serviceFrame1 = new ObjectFactory().createServiceFrame(serviceFrame);
 
 
-        //frameList = new ArrayList<>();
-        //frameList.add(siteFrame1);
-        //frameList.add(serviceFrame1);
 
         publicationDeliveryStructure.withDataObjects
                 (
@@ -146,7 +143,7 @@ public class PublicationDeliveryExporter {
                         .withCompositeFrameOrCommonFrame(siteFrame1)
                 );
 
-        logger.info("Returning publication delivery {} with service frame", publicationDeliveryStructure);
+        logger.info("Returning publication delivery {} with site frame and  service frame", publicationDeliveryStructure);
         return publicationDeliveryStructure;
     }
     /**
