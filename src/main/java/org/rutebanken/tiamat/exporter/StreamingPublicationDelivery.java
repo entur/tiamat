@@ -111,7 +111,7 @@ public class StreamingPublicationDelivery {
     private final GroupOfStopPlacesRepository groupOfStopPlacesRepository;
     private final NeTExValidator neTExValidator = NeTExValidator.getNeTExValidator();
 
-    private int passengerStopAssignmentOrder = 1;
+    private int passengerStopAssignmentOrder;
 
     /**
      * Validate against netex schema using the {@link NeTExValidator}
@@ -143,6 +143,7 @@ public class StreamingPublicationDelivery {
         this.topographicPlaceRepository = topographicPlaceRepository;
         this.groupOfStopPlacesRepository = groupOfStopPlacesRepository;
         this.validateAgainstSchema = validateAgainstSchema;
+        this.passengerStopAssignmentOrder = 1;
     }
 
     private static JAXBContext createContext(Class clazz) {
@@ -221,6 +222,8 @@ public class StreamingPublicationDelivery {
                 mappedTopographicPlacesCount,
                 mappedGroupOfStopPlacesCount,
                 mappedTariffZonesCount);
+        // Rest passenger order
+        passengerStopAssignmentOrder = 1;
     }
 
     private void prepareTariffZones(ExportParams exportParams, Set<Long> stopPlacePrimaryIds, AtomicInteger mappedTariffZonesCount, SiteFrame netexSiteFrame, EntitiesEvictor evicter) {
