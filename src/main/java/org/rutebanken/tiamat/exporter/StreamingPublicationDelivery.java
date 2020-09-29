@@ -24,6 +24,7 @@ import org.rutebanken.netex.model.Parking;
 import org.rutebanken.netex.model.ParkingsInFrame_RelStructure;
 import org.rutebanken.netex.model.PassengerStopAssignment;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
+import org.rutebanken.netex.model.QuayRefStructure;
 import org.rutebanken.netex.model.ScheduledStopPoint;
 import org.rutebanken.netex.model.ScheduledStopPointRefStructure;
 import org.rutebanken.netex.model.ScheduledStopPointsInFrame_RelStructure;
@@ -142,6 +143,18 @@ public class StreamingPublicationDelivery {
         this.validateAgainstSchema = validateAgainstSchema;
     }
 
+    private static JAXBContext createContext(Class clazz) {
+        try {
+            JAXBContext jaxbContext = newInstance(clazz);
+            logger.info("Created context {}", jaxbContext.getClass());
+            return jaxbContext;
+        } catch (JAXBException e) {
+            String message = "Could not create instance of jaxb context for class " + clazz;
+            logger.warn(message, e);
+            throw new RuntimeException("Could not create instance of jaxb context for class " + clazz, e);
+        }
+    }
+
     public void stream(ExportParams exportParams, OutputStream outputStream) throws JAXBException, XMLStreamException, IOException, InterruptedException, SAXException {
         stream(exportParams, outputStream, false);
     }
@@ -189,9 +202,9 @@ public class StreamingPublicationDelivery {
         prepareParkings(exportParams, stopPlacePrimaryIds, mappedParkingCount, netexSiteFrame, entitiesEvictor);
         prepareGroupOfStopPlaces(exportParams, stopPlacePrimaryIds, mappedGroupOfStopPlacesCount, netexSiteFrame, entitiesEvictor);
 
-        prepareScheduledStopPoints(exportParams,stopPlacePrimaryIds,mappedStopPlaceCount,netexServiceFrame,entitiesEvictor);
+        prepareScheduledStopPoints(exportParams, stopPlacePrimaryIds, mappedStopPlaceCount, netexServiceFrame, entitiesEvictor);
 
-        PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryExporter.createPublicationDelivery(netexSiteFrame,netexServiceFrame);
+        PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryExporter.createPublicationDelivery(netexSiteFrame, netexServiceFrame);
 
         Marshaller marshaller = createMarshaller();
 
@@ -277,8 +290,7 @@ public class StreamingPublicationDelivery {
         }
     }
 
-    private void prepareScheduledStopPoints(ExportParams exportParams, Set<Long> stopPlacePrimaryIds, AtomicInteger mappedStopPlaceCount, org.rutebanken.netex.model.ServiceFrame netexServiceFrame, EntitiesEvictor evicter)
-    {
+    private void prepareScheduledStopPoints(ExportParams exportParams, Set<Long> stopPlacePrimaryIds, AtomicInteger mappedStopPlaceCount, org.rutebanken.netex.model.ServiceFrame netexServiceFrame, EntitiesEvictor evicter) {
         if (!stopPlacePrimaryIds.isEmpty()) {
             logger.info("There are stop places to export");
 
@@ -290,23 +302,22 @@ public class StreamingPublicationDelivery {
             List<JAXBElement<? extends StopAssignment_VersionStructure>> stopAssignment = new ArrayList<>();
 
 
-
             while (stopPlaceIterator.hasNext()) {
                 final org.rutebanken.tiamat.model.StopPlace stopPlace = stopPlaceIterator.next();
-                covertStopPlaceToScheduledStopPoint(netexScheduledStopPoints,stopAssignment,stopPlace);
+                covertStopPlaceToScheduledStopPoint(netexScheduledStopPoints, stopAssignment, stopPlace);
 
             }
 
 
             if (!netexScheduledStopPoints.isEmpty()) {
                 final ScheduledStopPointsInFrame_RelStructure scheduledStopPointsInFrame_relStructure = new ScheduledStopPointsInFrame_RelStructure();
-                setField(ScheduledStopPointsInFrame_RelStructure.class,"scheduledStopPoint",scheduledStopPointsInFrame_relStructure,netexScheduledStopPoints);
+                setField(ScheduledStopPointsInFrame_RelStructure.class, "scheduledStopPoint", scheduledStopPointsInFrame_relStructure, netexScheduledStopPoints);
                 netexServiceFrame.setScheduledStopPoints(scheduledStopPointsInFrame_relStructure);
 
 
-              StopAssignmentsInFrame_RelStructure stopAssignmentsInFrame_RelStructure = new StopAssignmentsInFrame_RelStructure();
-              setField(StopAssignmentsInFrame_RelStructure.class,"stopAssignment",stopAssignmentsInFrame_RelStructure,stopAssignment);
-              netexServiceFrame.setStopAssignments(stopAssignmentsInFrame_RelStructure);
+                StopAssignmentsInFrame_RelStructure stopAssignmentsInFrame_RelStructure = new StopAssignmentsInFrame_RelStructure();
+                setField(StopAssignmentsInFrame_RelStructure.class, "stopAssignment", stopAssignmentsInFrame_RelStructure, stopAssignment);
+                netexServiceFrame.setStopAssignments(stopAssignmentsInFrame_RelStructure);
             }
 
         }
@@ -319,34 +330,35 @@ public class StreamingPublicationDelivery {
         final String stopPlaceName = stopPlace.getName().getValue();
         final long version = stopPlace.getVersion();
         var stopPlaceNetexId = netexId.split(":")[2];
-        var scheduledStopPointNetexId="NSR:ScheduledStopPoint:S"+stopPlaceNetexId;
+        var scheduledStopPointNetexId = "NSR:ScheduledStopPoint:S" + stopPlaceNetexId;
 
         scheduledStopPoints.add(createNetexScheduledStopPoint(scheduledStopPointNetexId, stopPlaceName));
-        netexPassengerStopAssignment.add(createPassengerStopAssignment(netexId,version,scheduledStopPointNetexId));
+        netexPassengerStopAssignment.add(createPassengerStopAssignment(netexId, version, scheduledStopPointNetexId, false));
         // Add quays
         final Set<Quay> quays = stopPlace.getQuays();
         for (Quay quay : quays) {
             final String netexId1 = quay.getNetexId().split(":")[2];
-            var scheduledStopPointNetexId2="NSR:ScheduledStopPoint:Q"+netexId1;
-            scheduledStopPoints.add(createNetexScheduledStopPoint(scheduledStopPointNetexId2,stopPlaceName));
-
+            var scheduledStopPointNetexId2 = "NSR:ScheduledStopPoint:Q" + netexId1;
+            scheduledStopPoints.add(createNetexScheduledStopPoint(scheduledStopPointNetexId2, stopPlaceName));
+            netexPassengerStopAssignment.add(createPassengerStopAssignment(quay.getNetexId(), quay.getVersion(), scheduledStopPointNetexId2, true));
         }
 
     }
 
-    private JAXBElement<? extends StopAssignment_VersionStructure> createPassengerStopAssignment(String netexId, long version, String scheduledStopPointNetexId) {
+    private JAXBElement<? extends StopAssignment_VersionStructure> createPassengerStopAssignment(String netexId, long version, String scheduledStopPointNetexId, boolean isQuay) {
 
-        final String passengerStopAssignmentId = netexId.split(":")[2];
-
-
+        final String passengerStopAssignmentId = scheduledStopPointNetexId.split(":")[2];
 
         final PassengerStopAssignment passengerStopAssignment = new PassengerStopAssignment();
-        passengerStopAssignment.withId("NSR:PassengerStopAssignment:P"+passengerStopAssignmentId);
+        passengerStopAssignment.withId("NSR:PassengerStopAssignment:P" + passengerStopAssignmentId);
         passengerStopAssignment.withVersion("1");
         passengerStopAssignment.withOrder(BigInteger.ONE);
 
-
-        passengerStopAssignment.withStopPlaceRef(new StopPlaceRefStructure().withRef(netexId).withVersion(String.valueOf(version)));
+        if (isQuay) {
+            passengerStopAssignment.withQuayRef(new QuayRefStructure().withRef(netexId).withVersion(String.valueOf(version)));
+        } else {
+            passengerStopAssignment.withStopPlaceRef(new StopPlaceRefStructure().withRef(netexId).withVersion(String.valueOf(version)));
+        }
         final JAXBElement<ScheduledStopPointRefStructure> scheduledStopPointRef = new ObjectFactory().createScheduledStopPointRef(new ScheduledStopPointRefStructure().withRef(scheduledStopPointNetexId).withVersionRef(String.valueOf(version)));
         passengerStopAssignment.withScheduledStopPointRef(scheduledStopPointRef);
 
@@ -361,7 +373,6 @@ public class StreamingPublicationDelivery {
         netexScheduledStopPoint.withName(new MultilingualString().withValue(stopPlaceName));
         return netexScheduledStopPoint;
     }
-
 
     private void prepareTopographicPlaces(ExportParams exportParams, Set<Long> stopPlacePrimaryIds, AtomicInteger mappedTopographicPlacesCount, SiteFrame netexSiteFrame, EntitiesEvictor evicter) {
 
@@ -453,24 +464,12 @@ public class StreamingPublicationDelivery {
         }
     }
 
-    private static JAXBContext createContext(Class clazz) {
-        try {
-            JAXBContext jaxbContext = newInstance(clazz);
-            logger.info("Created context {}", jaxbContext.getClass());
-            return jaxbContext;
-        } catch (JAXBException e) {
-            String message = "Could not create instance of jaxb context for class " + clazz;
-            logger.warn(message, e);
-            throw new RuntimeException("Could not create instance of jaxb context for class " + clazz, e);
-        }
-    }
-
     private Marshaller createMarshaller() throws JAXBException, IOException, SAXException {
         Marshaller marshaller = publicationDeliveryContext.createMarshaller();
         marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
         marshaller.setProperty(Marshaller.JAXB_SCHEMA_LOCATION, "");
 
-        if(validateAgainstSchema) {
+        if (validateAgainstSchema) {
             marshaller.setSchema(neTExValidator.getSchema());
         }
 
