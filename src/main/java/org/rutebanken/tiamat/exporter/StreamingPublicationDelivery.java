@@ -300,7 +300,6 @@ public class StreamingPublicationDelivery {
 
             List<ScheduledStopPoint> netexScheduledStopPoints = new ArrayList<>();
 
-            List<PassengerStopAssignment> netexPassengerStopAssignments = new ArrayList<>();
             List<JAXBElement<? extends StopAssignment_VersionStructure>> stopAssignment = new ArrayList<>();
 
 
@@ -347,7 +346,7 @@ public class StreamingPublicationDelivery {
 
 
 
-        scheduledStopPoints.add(createNetexScheduledStopPoint(scheduledStopPointNetexId, stopPlaceName,validFrom,validTo));
+        scheduledStopPoints.add(createNetexScheduledStopPoint(scheduledStopPointNetexId, stopPlaceName,version,validFrom,validTo));
         netexPassengerStopAssignment.add(createPassengerStopAssignment(netexId, version, scheduledStopPointNetexId,passengerStopAssignmentOrder,validFrom,validTo, false));
         passengerStopAssignmentOrder ++ ;
         // Add quays
@@ -355,7 +354,7 @@ public class StreamingPublicationDelivery {
         for (Quay quay : quays) {
             final String netexId1 = quay.getNetexId().split(":")[2];
             var scheduledStopPointNetexId2 = "NSR:ScheduledStopPoint:Q" + netexId1;
-            scheduledStopPoints.add(createNetexScheduledStopPoint(scheduledStopPointNetexId2, stopPlaceName, validFrom,validTo));
+            scheduledStopPoints.add(createNetexScheduledStopPoint(scheduledStopPointNetexId2, stopPlaceName, version, validFrom,validTo));
             netexPassengerStopAssignment.add(createPassengerStopAssignment(quay.getNetexId(), quay.getVersion(), scheduledStopPointNetexId2,passengerStopAssignmentOrder, validFrom, validTo, true));
 
             passengerStopAssignmentOrder ++ ;
@@ -369,7 +368,7 @@ public class StreamingPublicationDelivery {
 
         final PassengerStopAssignment passengerStopAssignment = new PassengerStopAssignment();
         passengerStopAssignment.withId("NSR:PassengerStopAssignment:P" + passengerStopAssignmentId);
-        passengerStopAssignment.withVersion("1");
+        passengerStopAssignment.withVersion(String.valueOf(version));
         passengerStopAssignment.withOrder(BigInteger.valueOf(passengerStopAssignmentOrder));
 
         ValidBetween validBetween = new ValidBetween();
@@ -392,10 +391,10 @@ public class StreamingPublicationDelivery {
 
     }
 
-    private ScheduledStopPoint createNetexScheduledStopPoint(String scheduledStopPointNetexId, String stopPlaceName, LocalDateTime validFrom, LocalDateTime validTo) {
+    private ScheduledStopPoint createNetexScheduledStopPoint(String scheduledStopPointNetexId, String stopPlaceName, long version, LocalDateTime validFrom, LocalDateTime validTo) {
         final org.rutebanken.netex.model.ScheduledStopPoint netexScheduledStopPoint = new org.rutebanken.netex.model.ScheduledStopPoint();
         netexScheduledStopPoint.setId(scheduledStopPointNetexId);
-        netexScheduledStopPoint.setVersion("1");
+        netexScheduledStopPoint.setVersion(String.valueOf(version));
         netexScheduledStopPoint.withName(new MultilingualString().withValue(stopPlaceName));
         List<ValidBetween> validBetween= new ArrayList<>();
         if (validFrom != null) {
