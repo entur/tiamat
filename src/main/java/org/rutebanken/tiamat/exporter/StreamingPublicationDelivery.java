@@ -37,6 +37,7 @@ import org.rutebanken.netex.model.StopPlacesInFrame_RelStructure;
 import org.rutebanken.netex.model.TariffZone;
 import org.rutebanken.netex.model.TariffZonesInFrame_RelStructure;
 import org.rutebanken.netex.model.TopographicPlacesInFrame_RelStructure;
+import org.rutebanken.netex.model.ValidBetween;
 import org.rutebanken.netex.validation.NeTExValidator;
 import org.rutebanken.tiamat.exporter.async.NetexMappingIterator;
 import org.rutebanken.tiamat.exporter.async.NetexMappingIteratorList;
@@ -46,7 +47,6 @@ import org.rutebanken.tiamat.exporter.async.ParentTreeTopographicPlaceFetchingIt
 import org.rutebanken.tiamat.exporter.eviction.EntitiesEvictor;
 import org.rutebanken.tiamat.exporter.eviction.SessionEntitiesEvictor;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
-import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.GroupOfStopPlaces;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.ServiceFrame;
@@ -76,14 +76,14 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.math.BigInteger;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 import static javax.xml.bind.JAXBContext.newInstance;
 
@@ -334,25 +334,36 @@ public class StreamingPublicationDelivery {
         var stopPlaceNetexId = netexId.split(":")[2];
         var scheduledStopPointNetexId = "NSR:ScheduledStopPoint:S" + stopPlaceNetexId;
 
+        LocalDateTime validFrom =null;
+        LocalDateTime validTo =null;
+
+        if (stopPlace.getValidBetween().getFromDate() != null) {
+            validFrom = LocalDateTime.ofInstant(stopPlace.getValidBetween().getFromDate(), ZoneId.systemDefault());
+        }
+        if (stopPlace.getValidBetween().getToDate() != null) {
+            validTo = LocalDateTime.ofInstant(stopPlace.getValidBetween().getToDate(),ZoneId.systemDefault());
+        }
 
 
-        scheduledStopPoints.add(createNetexScheduledStopPoint(scheduledStopPointNetexId, stopPlaceName));
-        netexPassengerStopAssignment.add(createPassengerStopAssignment(netexId, version, scheduledStopPointNetexId,passengerStopAssignmentOrder, false));
+
+
+        scheduledStopPoints.add(createNetexScheduledStopPoint(scheduledStopPointNetexId, stopPlaceName,validFrom,validTo));
+        netexPassengerStopAssignment.add(createPassengerStopAssignment(netexId, version, scheduledStopPointNetexId,passengerStopAssignmentOrder,validFrom,validTo, false));
         passengerStopAssignmentOrder ++ ;
         // Add quays
         final Set<Quay> quays = stopPlace.getQuays();
         for (Quay quay : quays) {
             final String netexId1 = quay.getNetexId().split(":")[2];
             var scheduledStopPointNetexId2 = "NSR:ScheduledStopPoint:Q" + netexId1;
-            scheduledStopPoints.add(createNetexScheduledStopPoint(scheduledStopPointNetexId2, stopPlaceName));
-            netexPassengerStopAssignment.add(createPassengerStopAssignment(quay.getNetexId(), quay.getVersion(), scheduledStopPointNetexId2,passengerStopAssignmentOrder, true));
+            scheduledStopPoints.add(createNetexScheduledStopPoint(scheduledStopPointNetexId2, stopPlaceName, validFrom,validTo));
+            netexPassengerStopAssignment.add(createPassengerStopAssignment(quay.getNetexId(), quay.getVersion(), scheduledStopPointNetexId2,passengerStopAssignmentOrder, validFrom, validTo, true));
 
             passengerStopAssignmentOrder ++ ;
         }
 
     }
 
-    private JAXBElement<? extends StopAssignment_VersionStructure> createPassengerStopAssignment(String netexId, long version, String scheduledStopPointNetexId, int passengerStopAssignmentOrder, boolean isQuay) {
+    private JAXBElement<? extends StopAssignment_VersionStructure> createPassengerStopAssignment(String netexId, long version, String scheduledStopPointNetexId, int passengerStopAssignmentOrder, LocalDateTime validFrom, LocalDateTime validTo, boolean isQuay) {
 
         final String passengerStopAssignmentId = scheduledStopPointNetexId.split(":")[2];
 
@@ -360,6 +371,15 @@ public class StreamingPublicationDelivery {
         passengerStopAssignment.withId("NSR:PassengerStopAssignment:P" + passengerStopAssignmentId);
         passengerStopAssignment.withVersion("1");
         passengerStopAssignment.withOrder(BigInteger.valueOf(passengerStopAssignmentOrder));
+
+        ValidBetween validBetween = new ValidBetween();
+        if (validFrom != null) {
+            validBetween.withFromDate(validFrom);
+        }
+        if (validTo != null) {
+            validBetween.withToDate(validTo);
+        }
+        passengerStopAssignment.withValidBetween(validBetween);
         if (isQuay) {
             passengerStopAssignment.withQuayRef(new QuayRefStructure().withRef(netexId).withVersion(String.valueOf(version)));
         } else {
@@ -372,11 +392,26 @@ public class StreamingPublicationDelivery {
 
     }
 
-    private ScheduledStopPoint createNetexScheduledStopPoint(String scheduledStopPointNetexId, String stopPlaceName) {
+    private ScheduledStopPoint createNetexScheduledStopPoint(String scheduledStopPointNetexId, String stopPlaceName, LocalDateTime validFrom, LocalDateTime validTo) {
         final org.rutebanken.netex.model.ScheduledStopPoint netexScheduledStopPoint = new org.rutebanken.netex.model.ScheduledStopPoint();
         netexScheduledStopPoint.setId(scheduledStopPointNetexId);
         netexScheduledStopPoint.setVersion("1");
         netexScheduledStopPoint.withName(new MultilingualString().withValue(stopPlaceName));
+        List<ValidBetween> validBetween= new ArrayList<>();
+        if (validFrom != null) {
+            var validBetweenFrom = new ValidBetween().withFromDate(validFrom);
+            validBetween.add(validBetweenFrom);
+
+        }
+        if (validTo != null) {
+            var validBetweenTo = new ValidBetween().withFromDate(validTo);
+            validBetween.add(validBetweenTo);
+        }
+
+        if (!validBetween.isEmpty()) {
+            netexScheduledStopPoint.withValidBetween(validBetween);
+        }
+
         return netexScheduledStopPoint;
     }
 
