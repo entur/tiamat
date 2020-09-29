@@ -22,11 +22,14 @@ import org.rutebanken.netex.model.MultilingualString;
 import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.Parking;
 import org.rutebanken.netex.model.ParkingsInFrame_RelStructure;
+import org.rutebanken.netex.model.PassengerStopAssignment;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.netex.model.ScheduledStopPoint;
 import org.rutebanken.netex.model.ScheduledStopPointsInFrame_RelStructure;
 import org.rutebanken.netex.model.SiteFrame;
+import org.rutebanken.netex.model.StopAssignmentsInFrame_RelStructure;
 import org.rutebanken.netex.model.StopPlace;
+import org.rutebanken.netex.model.StopPlaceRefStructure;
 import org.rutebanken.netex.model.StopPlacesInFrame_RelStructure;
 import org.rutebanken.netex.model.TariffZone;
 import org.rutebanken.netex.model.TariffZonesInFrame_RelStructure;
@@ -68,11 +71,13 @@ import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -173,7 +178,6 @@ public class StreamingPublicationDelivery {
         logger.info("Mapping service frame to netex model");
         final org.rutebanken.netex.model.ServiceFrame netexServiceFrame = netexMapper.mapToNetexModel(serviceFrame);
 
-        //tiamatServiceFrameExporter.addScheduledStopPointToTiamatServiceFrame(serviceFrame,stopPlaceRepository.findByNetexId("NSR:StopPlace:3378"));
 
         logger.info("Preparing scrollable iterators");
         prepareTopographicPlaces(exportParams, stopPlacePrimaryIds, mappedTopographicPlacesCount, netexSiteFrame, entitiesEvictor);
@@ -279,10 +283,14 @@ public class StreamingPublicationDelivery {
 
             List<ScheduledStopPoint> netexScheduledStopPoints = new ArrayList<>();
 
+            List<PassengerStopAssignment> netexPassengerStopAssignments = new ArrayList<>();
+
+
+
             while (stopPlaceIterator.hasNext()) {
                 final org.rutebanken.tiamat.model.StopPlace stopPlace = stopPlaceIterator.next();
-                final List<ScheduledStopPoint> scheduledStopPoint = covertStopPlaceToScheduledStopPoint(stopPlace);
-                netexScheduledStopPoints.addAll(scheduledStopPoint);
+                covertStopPlaceToScheduledStopPoint(netexScheduledStopPoints,netexPassengerStopAssignments,stopPlace);
+
             }
 
 
@@ -292,22 +300,25 @@ public class StreamingPublicationDelivery {
                 netexServiceFrame.setScheduledStopPoints(scheduledStopPointsInFrame_relStructure);
 
 
-
+              // StopAssignmentsInFrame_RelStructure stopAssignmentsInFrame_RelStructure = new StopAssignmentsInFrame_RelStructure();
+              // setField(StopAssignmentsInFrame_RelStructure.class,"stopAssignment",stopAssignmentsInFrame_RelStructure,netexPassengerStopAssignments);
+              // netexServiceFrame.setStopAssignments(stopAssignmentsInFrame_RelStructure);
             }
 
         }
     }
 
-    private List<org.rutebanken.netex.model.ScheduledStopPoint> covertStopPlaceToScheduledStopPoint(org.rutebanken.tiamat.model.StopPlace stopPlace) {
+    private void covertStopPlaceToScheduledStopPoint(List<ScheduledStopPoint> scheduledStopPoints,List<PassengerStopAssignment> netexPassengerStopAssignment,org.rutebanken.tiamat.model.StopPlace stopPlace) {
 
-        List<org.rutebanken.netex.model.ScheduledStopPoint> scheduledStopPoints = new ArrayList<>();
         // Add stop place
         final String netexId = stopPlace.getNetexId();
         final String stopPlaceName = stopPlace.getName().getValue();
+        final long version = stopPlace.getVersion();
         var stopPlaceNetexId = netexId.split(":")[2];
         var scheduledStopPointNetexId="NSR:ScheduledStopPoint:S"+stopPlaceNetexId;
 
         scheduledStopPoints.add(createNetexScheduledStopPoint(scheduledStopPointNetexId, stopPlaceName));
+        netexPassengerStopAssignment.add(createPassengerStopAssignment(netexId,version,scheduledStopPointNetexId));
         // Add quays
         final Set<Quay> quays = stopPlace.getQuays();
         for (Quay quay : quays) {
@@ -317,8 +328,20 @@ public class StreamingPublicationDelivery {
 
         }
 
-        return scheduledStopPoints;
+    }
 
+    private PassengerStopAssignment createPassengerStopAssignment(String netexId, long version, String scheduledStopPointNetexId) {
+
+
+
+        final PassengerStopAssignment passengerStopAssignment = new PassengerStopAssignment();
+        passengerStopAssignment.withId("NSR:PassengerStopAssignment:P"+UUID.randomUUID());
+        passengerStopAssignment.withVersion("1");
+        passengerStopAssignment.withOrder(BigInteger.ONE);
+
+
+        passengerStopAssignment.withStopPlaceRef(new StopPlaceRefStructure().withValue(netexId).withVersion(String.valueOf(version)));
+       return passengerStopAssignment;
     }
 
     private ScheduledStopPoint createNetexScheduledStopPoint(String scheduledStopPointNetexId, String stopPlaceName) {
