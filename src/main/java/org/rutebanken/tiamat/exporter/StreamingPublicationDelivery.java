@@ -111,6 +111,8 @@ public class StreamingPublicationDelivery {
     private final GroupOfStopPlacesRepository groupOfStopPlacesRepository;
     private final NeTExValidator neTExValidator = NeTExValidator.getNeTExValidator();
 
+    private int passengerStopAssignmentOrder = 1;
+
     /**
      * Validate against netex schema using the {@link NeTExValidator}
      * Enabling this for large xml files can lead to high memory consumption and/or massive performance impact.
@@ -332,28 +334,32 @@ public class StreamingPublicationDelivery {
         var stopPlaceNetexId = netexId.split(":")[2];
         var scheduledStopPointNetexId = "NSR:ScheduledStopPoint:S" + stopPlaceNetexId;
 
+
+
         scheduledStopPoints.add(createNetexScheduledStopPoint(scheduledStopPointNetexId, stopPlaceName));
-        netexPassengerStopAssignment.add(createPassengerStopAssignment(netexId, version, scheduledStopPointNetexId, false));
+        netexPassengerStopAssignment.add(createPassengerStopAssignment(netexId, version, scheduledStopPointNetexId,passengerStopAssignmentOrder, false));
+        passengerStopAssignmentOrder ++ ;
         // Add quays
         final Set<Quay> quays = stopPlace.getQuays();
         for (Quay quay : quays) {
             final String netexId1 = quay.getNetexId().split(":")[2];
             var scheduledStopPointNetexId2 = "NSR:ScheduledStopPoint:Q" + netexId1;
             scheduledStopPoints.add(createNetexScheduledStopPoint(scheduledStopPointNetexId2, stopPlaceName));
-            netexPassengerStopAssignment.add(createPassengerStopAssignment(quay.getNetexId(), quay.getVersion(), scheduledStopPointNetexId2, true));
+            netexPassengerStopAssignment.add(createPassengerStopAssignment(quay.getNetexId(), quay.getVersion(), scheduledStopPointNetexId2,passengerStopAssignmentOrder, true));
+
+            passengerStopAssignmentOrder ++ ;
         }
 
     }
 
-    private JAXBElement<? extends StopAssignment_VersionStructure> createPassengerStopAssignment(String netexId, long version, String scheduledStopPointNetexId, boolean isQuay) {
+    private JAXBElement<? extends StopAssignment_VersionStructure> createPassengerStopAssignment(String netexId, long version, String scheduledStopPointNetexId, int passengerStopAssignmentOrder, boolean isQuay) {
 
         final String passengerStopAssignmentId = scheduledStopPointNetexId.split(":")[2];
 
         final PassengerStopAssignment passengerStopAssignment = new PassengerStopAssignment();
         passengerStopAssignment.withId("NSR:PassengerStopAssignment:P" + passengerStopAssignmentId);
         passengerStopAssignment.withVersion("1");
-        passengerStopAssignment.withOrder(BigInteger.ONE);
-
+        passengerStopAssignment.withOrder(BigInteger.valueOf(passengerStopAssignmentOrder));
         if (isQuay) {
             passengerStopAssignment.withQuayRef(new QuayRefStructure().withRef(netexId).withVersion(String.valueOf(version)));
         } else {
