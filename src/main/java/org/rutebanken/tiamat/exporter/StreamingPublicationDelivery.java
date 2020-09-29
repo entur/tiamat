@@ -374,13 +374,7 @@ public class StreamingPublicationDelivery {
         passengerStopAssignment.withVersion(String.valueOf(version));
         passengerStopAssignment.withOrder(BigInteger.valueOf(passengerStopAssignmentOrder));
 
-        ValidBetween validBetween = new ValidBetween();
-        if (validFrom != null) {
-            validBetween.withFromDate(validFrom);
-        }
-        if (validTo != null) {
-            validBetween.withToDate(validTo);
-        }
+        ValidBetween validBetween = new ValidBetween().withFromDate(validFrom).withToDate(validTo);
         passengerStopAssignment.withValidBetween(validBetween);
         if (isQuay) {
             passengerStopAssignment.withQuayRef(new QuayRefStructure().withRef(netexId).withVersion(String.valueOf(version)));
@@ -399,20 +393,9 @@ public class StreamingPublicationDelivery {
         netexScheduledStopPoint.setId(scheduledStopPointNetexId);
         netexScheduledStopPoint.setVersion(String.valueOf(version));
         netexScheduledStopPoint.withName(new MultilingualString().withValue(stopPlaceName));
-        List<ValidBetween> validBetween= new ArrayList<>();
-        if (validFrom != null) {
-            var validBetweenFrom = new ValidBetween().withFromDate(validFrom);
-            validBetween.add(validBetweenFrom);
+        ValidBetween validBetween = new ValidBetween().withFromDate(validFrom).withToDate(validTo);
 
-        }
-        if (validTo != null) {
-            var validBetweenTo = new ValidBetween().withFromDate(validTo);
-            validBetween.add(validBetweenTo);
-        }
-
-        if (!validBetween.isEmpty()) {
-            netexScheduledStopPoint.withValidBetween(validBetween);
-        }
+        netexScheduledStopPoint.withValidBetween(validBetween);
 
         return netexScheduledStopPoint;
     }
