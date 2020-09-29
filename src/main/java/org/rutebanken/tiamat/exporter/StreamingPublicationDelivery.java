@@ -187,8 +187,6 @@ public class StreamingPublicationDelivery {
         //TODO: stream path links, handle export mode
         tiamatSiteFrameExporter.addRelevantPathLinks(stopPlacePrimaryIds, siteFrame);
 
-        final Set<String> netexIds = stopPlaceRepository.getNetexIds(exportParams);
-
 
         logger.info("Mapping site frame to netex model");
         org.rutebanken.netex.model.SiteFrame netexSiteFrame = netexMapper.mapToNetexModel(siteFrame);
@@ -204,9 +202,14 @@ public class StreamingPublicationDelivery {
         prepareParkings(exportParams, stopPlacePrimaryIds, mappedParkingCount, netexSiteFrame, entitiesEvictor);
         prepareGroupOfStopPlaces(exportParams, stopPlacePrimaryIds, mappedGroupOfStopPlacesCount, netexSiteFrame, entitiesEvictor);
 
-        prepareScheduledStopPoints(exportParams, stopPlacePrimaryIds, mappedStopPlaceCount, netexServiceFrame, entitiesEvictor);
+        prepareScheduledStopPoints(exportParams, stopPlacePrimaryIds, netexServiceFrame);
 
-        PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryExporter.createPublicationDelivery(netexSiteFrame, netexServiceFrame);
+        PublicationDeliveryStructure publicationDeliveryStructure;
+        if (exportParams.getServiceFrameExportMode() == ExportParams.ExportMode.ALL) {
+            publicationDeliveryStructure = publicationDeliveryExporter.createPublicationDelivery(netexSiteFrame, netexServiceFrame);
+        } else {
+            publicationDeliveryStructure = publicationDeliveryExporter.createPublicationDelivery(netexSiteFrame);
+        }
 
         Marshaller marshaller = createMarshaller();
 
@@ -292,8 +295,8 @@ public class StreamingPublicationDelivery {
         }
     }
 
-    private void prepareScheduledStopPoints(ExportParams exportParams, Set<Long> stopPlacePrimaryIds, AtomicInteger mappedStopPlaceCount, org.rutebanken.netex.model.ServiceFrame netexServiceFrame, EntitiesEvictor evicter) {
-        if (!stopPlacePrimaryIds.isEmpty()) {
+    private void prepareScheduledStopPoints(ExportParams exportParams, Set<Long> stopPlacePrimaryIds, org.rutebanken.netex.model.ServiceFrame netexServiceFrame) {
+        if (exportParams.getServiceFrameExportMode()== ExportParams.ExportMode.ALL && !stopPlacePrimaryIds.isEmpty()) {
             logger.info("There are stop places to export");
 
             final Iterator<org.rutebanken.tiamat.model.StopPlace> stopPlaceIterator = stopPlaceRepository.scrollStopPlaces(stopPlacePrimaryIds);
