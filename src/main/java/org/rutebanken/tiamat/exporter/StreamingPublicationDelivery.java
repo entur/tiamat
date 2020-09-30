@@ -366,7 +366,7 @@ public class StreamingPublicationDelivery {
             var quayNetexId = netexIdHelper.extractIdPostfix(quay.getNetexId());
             var quayUdPrefix = netexIdHelper.extractIdPrefix(quay.getNetexId());
             var quayScheduledStopPointNetexId = quayUdPrefix + ":ScheduledStopPoint:Q" + quayNetexId;
-            scheduledStopPoints.add(createNetexScheduledStopPoint(quayScheduledStopPointNetexId, stopPlaceName, version, validFrom, validTo));
+            scheduledStopPoints.add(createNetexScheduledStopPoint(quayScheduledStopPointNetexId, stopPlaceName, quay.getVersion(), validFrom, validTo));
             netexPassengerStopAssignment.add(createPassengerStopAssignment(quay.getNetexId(), quay.getVersion(), quayScheduledStopPointNetexId, netexPassengerStopAssignment.size() + 1, validFrom, validTo, true));
 
         }
