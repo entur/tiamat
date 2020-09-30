@@ -115,7 +115,7 @@ public class StreamingPublicationDelivery {
      * Enabling this for large xml files can lead to high memory consumption and/or massive performance impact.
      */
     private final boolean validateAgainstSchema;
-    private int passengerStopAssignmentOrder;
+
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -140,7 +140,6 @@ public class StreamingPublicationDelivery {
         this.topographicPlaceRepository = topographicPlaceRepository;
         this.groupOfStopPlacesRepository = groupOfStopPlacesRepository;
         this.validateAgainstSchema = validateAgainstSchema;
-        this.passengerStopAssignmentOrder = 1;
     }
 
     private static JAXBContext createContext(Class clazz) {
@@ -219,8 +218,7 @@ public class StreamingPublicationDelivery {
                 mappedTopographicPlacesCount,
                 mappedGroupOfStopPlacesCount,
                 mappedTariffZonesCount);
-        // Rest passenger order
-        passengerStopAssignmentOrder = 1;
+
     }
 
     private void prepareTariffZones(ExportParams exportParams, Set<Long> stopPlacePrimaryIds, AtomicInteger mappedTariffZonesCount, SiteFrame netexSiteFrame, EntitiesEvictor evicter) {
@@ -352,17 +350,17 @@ public class StreamingPublicationDelivery {
 
 
         scheduledStopPoints.add(createNetexScheduledStopPoint(scheduledStopPointNetexId, stopPlaceName, version, validFrom, validTo));
-        netexPassengerStopAssignment.add(createPassengerStopAssignment(netexId, version, scheduledStopPointNetexId, passengerStopAssignmentOrder, validFrom, validTo, false));
-        passengerStopAssignmentOrder++;
+
+        netexPassengerStopAssignment.add(createPassengerStopAssignment(netexId, version, scheduledStopPointNetexId, netexPassengerStopAssignment.size() + 1, validFrom, validTo, false));
+
         // Add quays
         final Set<Quay> quays = stopPlace.getQuays();
         for (Quay quay : quays) {
             final String netexId1 = quay.getNetexId().split(":")[2];
             var scheduledStopPointNetexId2 = "NSR:ScheduledStopPoint:Q" + netexId1;
             scheduledStopPoints.add(createNetexScheduledStopPoint(scheduledStopPointNetexId2, stopPlaceName, version, validFrom, validTo));
-            netexPassengerStopAssignment.add(createPassengerStopAssignment(quay.getNetexId(), quay.getVersion(), scheduledStopPointNetexId2, passengerStopAssignmentOrder, validFrom, validTo, true));
+            netexPassengerStopAssignment.add(createPassengerStopAssignment(quay.getNetexId(), quay.getVersion(), scheduledStopPointNetexId2, netexPassengerStopAssignment.size() + 1, validFrom, validTo, true));
 
-            passengerStopAssignmentOrder++;
         }
 
     }
