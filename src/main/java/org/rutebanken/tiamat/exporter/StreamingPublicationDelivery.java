@@ -51,6 +51,7 @@ import org.rutebanken.tiamat.model.GroupOfStopPlaces;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.ServiceFrame;
 import org.rutebanken.tiamat.model.TopographicPlace;
+import org.rutebanken.tiamat.netex.id.NetexIdHelper;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.repository.GroupOfStopPlacesRepository;
 import org.rutebanken.tiamat.repository.ParkingRepository;
@@ -110,6 +111,7 @@ public class StreamingPublicationDelivery {
     private final TopographicPlaceRepository topographicPlaceRepository;
     private final GroupOfStopPlacesRepository groupOfStopPlacesRepository;
     private final NeTExValidator neTExValidator = NeTExValidator.getNeTExValidator();
+    private final NetexIdHelper netexIdHelper;
     /**
      * Validate against netex schema using the {@link NeTExValidator}
      * Enabling this for large xml files can lead to high memory consumption and/or massive performance impact.
@@ -129,6 +131,7 @@ public class StreamingPublicationDelivery {
                                         TariffZoneRepository tariffZoneRepository,
                                         TopographicPlaceRepository topographicPlaceRepository,
                                         GroupOfStopPlacesRepository groupOfStopPlacesRepository,
+                                        NetexIdHelper netexIdHelper,
                                         @Value("${asyncNetexExport.validateAgainstSchema:false}") boolean validateAgainstSchema) throws IOException, SAXException {
         this.stopPlaceRepository = stopPlaceRepository;
         this.parkingRepository = parkingRepository;
@@ -139,6 +142,7 @@ public class StreamingPublicationDelivery {
         this.tariffZoneRepository = tariffZoneRepository;
         this.topographicPlaceRepository = topographicPlaceRepository;
         this.groupOfStopPlacesRepository = groupOfStopPlacesRepository;
+        this.netexIdHelper = netexIdHelper;
         this.validateAgainstSchema = validateAgainstSchema;
     }
 
@@ -329,14 +333,16 @@ public class StreamingPublicationDelivery {
     private void covertStopPlaceToScheduledStopPoint(List<ScheduledStopPoint> scheduledStopPoints, List<JAXBElement<? extends StopAssignment_VersionStructure>> netexPassengerStopAssignment, org.rutebanken.tiamat.model.StopPlace stopPlace) {
 
         // Add stop place
+
         final String netexId = stopPlace.getNetexId();
         String stopPlaceName = null;
         if (stopPlace.getName() != null) {
             stopPlaceName = stopPlace.getName().getValue();
         }
         final long version = stopPlace.getVersion();
-        var stopPlaceNetexId = netexId.split(":")[2];
-        var scheduledStopPointNetexId = "NSR:ScheduledStopPoint:S" + stopPlaceNetexId;
+        var stopPlaceNetexId = netexIdHelper.extractIdPostfix(netexId);
+        var idPrefix = netexIdHelper.extractIdPrefix(netexId);
+        var scheduledStopPointNetexId = idPrefix + ":ScheduledStopPoint:S" + stopPlaceNetexId;
 
         LocalDateTime validFrom = null;
         LocalDateTime validTo = null;
@@ -357,10 +363,11 @@ public class StreamingPublicationDelivery {
         // Add quays
         final Set<Quay> quays = stopPlace.getQuays();
         for (Quay quay : quays) {
-            final String netexId1 = quay.getNetexId().split(":")[2];
-            var scheduledStopPointNetexId2 = "NSR:ScheduledStopPoint:Q" + netexId1;
-            scheduledStopPoints.add(createNetexScheduledStopPoint(scheduledStopPointNetexId2, stopPlaceName, version, validFrom, validTo));
-            netexPassengerStopAssignment.add(createPassengerStopAssignment(quay.getNetexId(), quay.getVersion(), scheduledStopPointNetexId2, netexPassengerStopAssignment.size() + 1, validFrom, validTo, true));
+            var quayNetexId = netexIdHelper.extractIdPostfix(quay.getNetexId());
+            var quayUdPrefix = netexIdHelper.extractIdPrefix(quay.getNetexId());
+            var quayScheduledStopPointNetexId = quayUdPrefix + ":ScheduledStopPoint:Q" + quayNetexId;
+            scheduledStopPoints.add(createNetexScheduledStopPoint(quayScheduledStopPointNetexId, stopPlaceName, version, validFrom, validTo));
+            netexPassengerStopAssignment.add(createPassengerStopAssignment(quay.getNetexId(), quay.getVersion(), quayScheduledStopPointNetexId, netexPassengerStopAssignment.size() + 1, validFrom, validTo, true));
 
         }
 
