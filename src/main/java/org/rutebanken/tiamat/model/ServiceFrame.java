@@ -19,15 +19,5 @@ package org.rutebanken.tiamat.model;
 public class ServiceFrame
         extends Common_VersionFrameStructure {
 
-    protected ScheduledStopPointsInFrame_RelStructure scheduledStopPoints;
-
-    public ScheduledStopPointsInFrame_RelStructure getScheduledStopPoints() {
-        return scheduledStopPoints;
-    }
-
-    public void setScheduledStopPoints(ScheduledStopPointsInFrame_RelStructure value) {
-        this.scheduledStopPoints = value;
-    }
-
 
 }
