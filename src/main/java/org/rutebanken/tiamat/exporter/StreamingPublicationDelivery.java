@@ -18,16 +18,26 @@ package org.rutebanken.tiamat.exporter;
 import org.hibernate.Session;
 import org.hibernate.internal.SessionImpl;
 import org.rutebanken.netex.model.GroupsOfStopPlacesInFrame_RelStructure;
+import org.rutebanken.netex.model.MultilingualString;
 import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.Parking;
 import org.rutebanken.netex.model.ParkingsInFrame_RelStructure;
+import org.rutebanken.netex.model.PassengerStopAssignment;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
+import org.rutebanken.netex.model.QuayRefStructure;
+import org.rutebanken.netex.model.ScheduledStopPoint;
+import org.rutebanken.netex.model.ScheduledStopPointRefStructure;
+import org.rutebanken.netex.model.ScheduledStopPointsInFrame_RelStructure;
 import org.rutebanken.netex.model.SiteFrame;
+import org.rutebanken.netex.model.StopAssignment_VersionStructure;
+import org.rutebanken.netex.model.StopAssignmentsInFrame_RelStructure;
 import org.rutebanken.netex.model.StopPlace;
+import org.rutebanken.netex.model.StopPlaceRefStructure;
 import org.rutebanken.netex.model.StopPlacesInFrame_RelStructure;
 import org.rutebanken.netex.model.TariffZone;
 import org.rutebanken.netex.model.TariffZonesInFrame_RelStructure;
 import org.rutebanken.netex.model.TopographicPlacesInFrame_RelStructure;
+import org.rutebanken.netex.model.ValidBetween;
 import org.rutebanken.netex.validation.NeTExValidator;
 import org.rutebanken.tiamat.exporter.async.NetexMappingIterator;
 import org.rutebanken.tiamat.exporter.async.NetexMappingIteratorList;
@@ -38,7 +48,10 @@ import org.rutebanken.tiamat.exporter.eviction.EntitiesEvictor;
 import org.rutebanken.tiamat.exporter.eviction.SessionEntitiesEvictor;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.model.GroupOfStopPlaces;
+import org.rutebanken.tiamat.model.Quay;
+import org.rutebanken.tiamat.model.ServiceFrame;
 import org.rutebanken.tiamat.model.TopographicPlace;
+import org.rutebanken.tiamat.netex.id.NetexIdHelper;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.repository.GroupOfStopPlacesRepository;
 import org.rutebanken.tiamat.repository.ParkingRepository;
@@ -56,12 +69,17 @@ import org.xml.sax.SAXException;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
+import java.math.BigInteger;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -87,12 +105,13 @@ public class StreamingPublicationDelivery {
     private final ParkingRepository parkingRepository;
     private final PublicationDeliveryExporter publicationDeliveryExporter;
     private final TiamatSiteFrameExporter tiamatSiteFrameExporter;
+    private final TiamatServiceFrameExporter tiamatServiceFrameExporter;
     private final NetexMapper netexMapper;
     private final TariffZoneRepository tariffZoneRepository;
     private final TopographicPlaceRepository topographicPlaceRepository;
     private final GroupOfStopPlacesRepository groupOfStopPlacesRepository;
     private final NeTExValidator neTExValidator = NeTExValidator.getNeTExValidator();
-
+    private final NetexIdHelper netexIdHelper;
     /**
      * Validate against netex schema using the {@link NeTExValidator}
      * Enabling this for large xml files can lead to high memory consumption and/or massive performance impact.
@@ -107,20 +126,36 @@ public class StreamingPublicationDelivery {
                                         ParkingRepository parkingRepository,
                                         PublicationDeliveryExporter publicationDeliveryExporter,
                                         TiamatSiteFrameExporter tiamatSiteFrameExporter,
+                                        TiamatServiceFrameExporter tiamatServiceFrameExporter,
                                         NetexMapper netexMapper,
                                         TariffZoneRepository tariffZoneRepository,
                                         TopographicPlaceRepository topographicPlaceRepository,
                                         GroupOfStopPlacesRepository groupOfStopPlacesRepository,
+                                        NetexIdHelper netexIdHelper,
                                         @Value("${asyncNetexExport.validateAgainstSchema:false}") boolean validateAgainstSchema) throws IOException, SAXException {
         this.stopPlaceRepository = stopPlaceRepository;
         this.parkingRepository = parkingRepository;
         this.publicationDeliveryExporter = publicationDeliveryExporter;
         this.tiamatSiteFrameExporter = tiamatSiteFrameExporter;
+        this.tiamatServiceFrameExporter = tiamatServiceFrameExporter;
         this.netexMapper = netexMapper;
         this.tariffZoneRepository = tariffZoneRepository;
         this.topographicPlaceRepository = topographicPlaceRepository;
         this.groupOfStopPlacesRepository = groupOfStopPlacesRepository;
+        this.netexIdHelper = netexIdHelper;
         this.validateAgainstSchema = validateAgainstSchema;
+    }
+
+    private static JAXBContext createContext(Class clazz) {
+        try {
+            JAXBContext jaxbContext = newInstance(clazz);
+            logger.info("Created context {}", jaxbContext.getClass());
+            return jaxbContext;
+        } catch (JAXBException e) {
+            String message = "Could not create instance of jaxb context for class " + clazz;
+            logger.warn(message, e);
+            throw new RuntimeException("Could not create instance of jaxb context for class " + clazz, e);
+        }
     }
 
     public void stream(ExportParams exportParams, OutputStream outputStream) throws JAXBException, XMLStreamException, IOException, InterruptedException, SAXException {
@@ -130,6 +165,7 @@ public class StreamingPublicationDelivery {
     public void stream(ExportParams exportParams, OutputStream outputStream, boolean ignorePaging) throws JAXBException, XMLStreamException, IOException, InterruptedException, SAXException {
 
         org.rutebanken.tiamat.model.SiteFrame siteFrame = tiamatSiteFrameExporter.createTiamatSiteFrame("Site frame " + exportParams);
+        final ServiceFrame serviceFrame = tiamatServiceFrameExporter.createTiamatServiceFrame("Service frame " + exportParams);
 
         AtomicInteger mappedStopPlaceCount = new AtomicInteger();
         AtomicInteger mappedParkingCount = new AtomicInteger();
@@ -152,8 +188,13 @@ public class StreamingPublicationDelivery {
         //TODO: stream path links, handle export mode
         tiamatSiteFrameExporter.addRelevantPathLinks(stopPlacePrimaryIds, siteFrame);
 
+
         logger.info("Mapping site frame to netex model");
         org.rutebanken.netex.model.SiteFrame netexSiteFrame = netexMapper.mapToNetexModel(siteFrame);
+
+        logger.info("Mapping service frame to netex model");
+        final org.rutebanken.netex.model.ServiceFrame netexServiceFrame = netexMapper.mapToNetexModel(serviceFrame);
+
 
         logger.info("Preparing scrollable iterators");
         prepareTopographicPlaces(exportParams, stopPlacePrimaryIds, mappedTopographicPlacesCount, netexSiteFrame, entitiesEvictor);
@@ -162,7 +203,15 @@ public class StreamingPublicationDelivery {
         prepareParkings(exportParams, stopPlacePrimaryIds, mappedParkingCount, netexSiteFrame, entitiesEvictor);
         prepareGroupOfStopPlaces(exportParams, stopPlacePrimaryIds, mappedGroupOfStopPlacesCount, netexSiteFrame, entitiesEvictor);
 
-        PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryExporter.createPublicationDelivery(netexSiteFrame);
+
+        PublicationDeliveryStructure publicationDeliveryStructure;
+
+        if (exportParams.getServiceFrameExportMode() == ExportParams.ExportMode.ALL) {
+            prepareScheduledStopPoints(stopPlacePrimaryIds, netexServiceFrame);
+            publicationDeliveryStructure = publicationDeliveryExporter.createPublicationDelivery(netexSiteFrame, netexServiceFrame);
+        } else {
+            publicationDeliveryStructure = publicationDeliveryExporter.createPublicationDelivery(netexSiteFrame);
+        }
 
         Marshaller marshaller = createMarshaller();
 
@@ -174,6 +223,7 @@ public class StreamingPublicationDelivery {
                 mappedTopographicPlacesCount,
                 mappedGroupOfStopPlacesCount,
                 mappedTariffZonesCount);
+
     }
 
     private void prepareTariffZones(ExportParams exportParams, Set<Long> stopPlacePrimaryIds, AtomicInteger mappedTariffZonesCount, SiteFrame netexSiteFrame, EntitiesEvictor evicter) {
@@ -246,6 +296,119 @@ public class StreamingPublicationDelivery {
         } else {
             logger.info("No stop places to export");
         }
+    }
+
+    private void prepareScheduledStopPoints(Set<Long> stopPlacePrimaryIds, org.rutebanken.netex.model.ServiceFrame netexServiceFrame) {
+        if (!stopPlacePrimaryIds.isEmpty()) {
+            logger.info("There are stop places to export");
+
+            final Iterator<org.rutebanken.tiamat.model.StopPlace> stopPlaceIterator = stopPlaceRepository.scrollStopPlaces(stopPlacePrimaryIds);
+
+            // Use Listening iterator to collect stop place IDs.
+            ParentStopFetchingIterator parentStopFetchingIterator = new ParentStopFetchingIterator(stopPlaceIterator, stopPlaceRepository);
+
+            List<ScheduledStopPoint> netexScheduledStopPoints = new ArrayList<>();
+
+            List<JAXBElement<? extends StopAssignment_VersionStructure>> stopAssignment = new ArrayList<>();
+
+
+            while (parentStopFetchingIterator.hasNext()) {
+                final org.rutebanken.tiamat.model.StopPlace stopPlace = parentStopFetchingIterator.next();
+                covertStopPlaceToScheduledStopPoint(netexScheduledStopPoints, stopAssignment, stopPlace);
+
+            }
+
+
+            if (!netexScheduledStopPoints.isEmpty()) {
+                final ScheduledStopPointsInFrame_RelStructure scheduledStopPointsInFrame_relStructure = new ScheduledStopPointsInFrame_RelStructure();
+                setField(ScheduledStopPointsInFrame_RelStructure.class, "scheduledStopPoint", scheduledStopPointsInFrame_relStructure, netexScheduledStopPoints);
+                netexServiceFrame.setScheduledStopPoints(scheduledStopPointsInFrame_relStructure);
+
+
+                StopAssignmentsInFrame_RelStructure stopAssignmentsInFrame_RelStructure = new StopAssignmentsInFrame_RelStructure();
+                setField(StopAssignmentsInFrame_RelStructure.class, "stopAssignment", stopAssignmentsInFrame_RelStructure, stopAssignment);
+                netexServiceFrame.setStopAssignments(stopAssignmentsInFrame_RelStructure);
+            }
+
+        }
+    }
+
+    private void covertStopPlaceToScheduledStopPoint(List<ScheduledStopPoint> scheduledStopPoints, List<JAXBElement<? extends StopAssignment_VersionStructure>> netexPassengerStopAssignment, org.rutebanken.tiamat.model.StopPlace stopPlace) {
+
+        // Add stop place
+
+        final String netexId = stopPlace.getNetexId();
+        String stopPlaceName = null;
+        if (stopPlace.getName() != null) {
+            stopPlaceName = stopPlace.getName().getValue();
+        }
+        final long version = stopPlace.getVersion();
+        var stopPlaceNetexId = netexIdHelper.extractIdPostfix(netexId);
+        var idPrefix = netexIdHelper.extractIdPrefix(netexId);
+        var scheduledStopPointNetexId = idPrefix + ":ScheduledStopPoint:S" + stopPlaceNetexId;
+
+        LocalDateTime validFrom = null;
+        LocalDateTime validTo = null;
+        if (stopPlace.getValidBetween() != null) {
+            if (stopPlace.getValidBetween().getFromDate() != null) {
+                validFrom = LocalDateTime.ofInstant(stopPlace.getValidBetween().getFromDate(), ZoneId.systemDefault());
+            }
+            if (stopPlace.getValidBetween().getToDate() != null) {
+                validTo = LocalDateTime.ofInstant(stopPlace.getValidBetween().getToDate(), ZoneId.systemDefault());
+            }
+        }
+
+
+        scheduledStopPoints.add(createNetexScheduledStopPoint(scheduledStopPointNetexId, stopPlaceName, version, validFrom, validTo));
+
+        netexPassengerStopAssignment.add(createPassengerStopAssignment(netexId, version, scheduledStopPointNetexId, netexPassengerStopAssignment.size() + 1, validFrom, validTo, false));
+
+        // Add quays
+        final Set<Quay> quays = stopPlace.getQuays();
+        for (Quay quay : quays) {
+            var quayNetexId = netexIdHelper.extractIdPostfix(quay.getNetexId());
+            var quayUdPrefix = netexIdHelper.extractIdPrefix(quay.getNetexId());
+            var quayScheduledStopPointNetexId = quayUdPrefix + ":ScheduledStopPoint:Q" + quayNetexId;
+            scheduledStopPoints.add(createNetexScheduledStopPoint(quayScheduledStopPointNetexId, stopPlaceName, quay.getVersion(), validFrom, validTo));
+            netexPassengerStopAssignment.add(createPassengerStopAssignment(quay.getNetexId(), quay.getVersion(), quayScheduledStopPointNetexId, netexPassengerStopAssignment.size() + 1, validFrom, validTo, true));
+
+        }
+
+    }
+
+    private JAXBElement<? extends StopAssignment_VersionStructure> createPassengerStopAssignment(String netexId, long version, String scheduledStopPointNetexId, int passengerStopAssignmentOrder, LocalDateTime validFrom, LocalDateTime validTo, boolean isQuay) {
+
+        var passengerStopAssignmentId = netexIdHelper.extractIdPostfix(scheduledStopPointNetexId);
+        var idPrefix= netexIdHelper.extractIdPrefix(scheduledStopPointNetexId);
+        final PassengerStopAssignment passengerStopAssignment = new PassengerStopAssignment();
+        passengerStopAssignment.withId(idPrefix + ":PassengerStopAssignment:P" + passengerStopAssignmentId);
+        passengerStopAssignment.withVersion(String.valueOf(version));
+        passengerStopAssignment.withOrder(BigInteger.valueOf(passengerStopAssignmentOrder));
+
+        ValidBetween validBetween = new ValidBetween().withFromDate(validFrom).withToDate(validTo);
+        passengerStopAssignment.withValidBetween(validBetween);
+        if (isQuay) {
+            passengerStopAssignment.withQuayRef(new QuayRefStructure().withRef(netexId).withVersion(String.valueOf(version)));
+        } else {
+            passengerStopAssignment.withStopPlaceRef(new StopPlaceRefStructure().withRef(netexId).withVersion(String.valueOf(version)));
+        }
+        final JAXBElement<ScheduledStopPointRefStructure> scheduledStopPointRef = new ObjectFactory().createScheduledStopPointRef(new ScheduledStopPointRefStructure().withRef(scheduledStopPointNetexId).withVersionRef(String.valueOf(version)));
+        passengerStopAssignment.withScheduledStopPointRef(scheduledStopPointRef);
+
+        return new ObjectFactory().createPassengerStopAssignment(passengerStopAssignment);
+
+    }
+
+    private ScheduledStopPoint createNetexScheduledStopPoint(String scheduledStopPointNetexId, String stopPlaceName, long version, LocalDateTime validFrom, LocalDateTime validTo) {
+        final org.rutebanken.netex.model.ScheduledStopPoint netexScheduledStopPoint = new org.rutebanken.netex.model.ScheduledStopPoint();
+        netexScheduledStopPoint.setId(scheduledStopPointNetexId);
+        netexScheduledStopPoint.setVersion(String.valueOf(version));
+        netexScheduledStopPoint.withName(new MultilingualString().withValue(stopPlaceName));
+        ValidBetween validBetween = new ValidBetween().withFromDate(validFrom).withToDate(validTo);
+
+        netexScheduledStopPoint.withValidBetween(validBetween);
+
+        return netexScheduledStopPoint;
     }
 
     private void prepareTopographicPlaces(ExportParams exportParams, Set<Long> stopPlacePrimaryIds, AtomicInteger mappedTopographicPlacesCount, SiteFrame netexSiteFrame, EntitiesEvictor evicter) {
@@ -338,24 +501,12 @@ public class StreamingPublicationDelivery {
         }
     }
 
-    private static JAXBContext createContext(Class clazz) {
-        try {
-            JAXBContext jaxbContext = newInstance(clazz);
-            logger.info("Created context {}", jaxbContext.getClass());
-            return jaxbContext;
-        } catch (JAXBException e) {
-            String message = "Could not create instance of jaxb context for class " + clazz;
-            logger.warn(message, e);
-            throw new RuntimeException("Could not create instance of jaxb context for class " + clazz, e);
-        }
-    }
-
     private Marshaller createMarshaller() throws JAXBException, IOException, SAXException {
         Marshaller marshaller = publicationDeliveryContext.createMarshaller();
         marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
         marshaller.setProperty(Marshaller.JAXB_SCHEMA_LOCATION, "");
 
-        if(validateAgainstSchema) {
+        if (validateAgainstSchema) {
             marshaller.setSchema(neTExValidator.getSchema());
         }
 

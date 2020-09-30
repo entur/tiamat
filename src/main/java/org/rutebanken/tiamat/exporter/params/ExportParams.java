@@ -48,6 +48,8 @@ public class ExportParams {
 
     public static final ExportMode DEFAULT_GROUP_OF_STOP_PLACES_EXPORT_MODE = ExportMode.RELEVANT;
 
+    public static final ExportMode DEFAULT_SERVICE_FRAME_EXPORT_MODE = ExportMode.NONE;
+
     @QueryParam(value = "topographicPlaceExportMode")
     @DefaultValue(value = "RELEVANT")
     @ApiParam(value = "Controls exported topographic places. If set to relevant, only topographic places relevant to exported stop places are exported.")
@@ -65,6 +67,12 @@ public class ExportParams {
     @ApiParam(value = "Controls exported group of stop places. If set to relevant, only group of stop places relevant to exported stop places are exported.")
     @ApiModelProperty("Group of stop places export mode")
     private ExportMode groupOfStopPlacesExportMode = DEFAULT_GROUP_OF_STOP_PLACES_EXPORT_MODE;
+
+    @QueryParam(value = "serviceFrameExportMode")
+    @DefaultValue(value = "NONE")
+    @ApiParam(value = "Controls exported service frame, if set to all, netex export will be exported with service frame with Scheduled Stop Points and Passenger Stop Assignments")
+    @ApiModelProperty("Service Frame export mode")
+    private ExportMode serviceFrameExportMode = DEFAULT_SERVICE_FRAME_EXPORT_MODE;
 
     @QueryParam(value = "municipalityReference")
     @ApiParam(value = MUNICIPALITY_REF_ARG_DESCRIPTION)
@@ -90,10 +98,11 @@ public class ExportParams {
     @ApiModelProperty(hidden = true)
     private StopPlaceSearch stopPlaceSearch;
 
-    private ExportParams(ExportMode topographicPlaceExportMode, ExportMode tariffZoneExportMode, ExportMode groupOfStopPlacesExportMode, List<String> municipalityReferences, List<String> countyReferences, List<String> countryReferences, StopPlaceSearch stopPlaceSearch, String codeSpace) {
+    private ExportParams(ExportMode topographicPlaceExportMode, ExportMode tariffZoneExportMode, ExportMode groupOfStopPlacesExportMode, ExportMode serviceFrameExportMode, List<String> municipalityReferences, List<String> countyReferences, List<String> countryReferences, StopPlaceSearch stopPlaceSearch, String codeSpace) {
         this.topographicPlaceExportMode = topographicPlaceExportMode;
         this.tariffZoneExportMode = tariffZoneExportMode;
         this.groupOfStopPlacesExportMode = groupOfStopPlacesExportMode;
+        this.serviceFrameExportMode = serviceFrameExportMode;
         this.municipalityReferences = municipalityReferences;
         this.countyReferences = countyReferences;
         this.countryReferences = countryReferences;
@@ -118,6 +127,10 @@ public class ExportParams {
 
     public ExportMode getGroupOfStopPlacesExportMode() {
         return groupOfStopPlacesExportMode;
+    }
+
+    public ExportMode getServiceFrameExportMode() {
+        return serviceFrameExportMode;
     }
 
     public List<String> getMunicipalityReferences() {
@@ -152,6 +165,7 @@ public class ExportParams {
                 .add("countryReferences", countryReferences)
                 .add("stopPlaceSearch", stopPlaceSearch)
                 .add("tariffZoneExportMode", tariffZoneExportMode)
+                .add("serviceFrameExportMode",serviceFrameExportMode)
                 .add("codeSpace", codeSpace)
                 .toString();
     }
@@ -160,6 +174,7 @@ public class ExportParams {
         private ExportMode tariffZoneExportMode = DEFAULT_TARIFF_ZONE_EXPORT_MODE;
         private ExportMode topographicPlaceExportMode = DEFAULT_TOPOGRAPHIC_PLACE_EXPORT_MODE;
         private ExportMode groupOfStopPlacesExportMode = DEFAULT_GROUP_OF_STOP_PLACES_EXPORT_MODE;
+        private ExportMode serviceFrameExportMode = DEFAULT_SERVICE_FRAME_EXPORT_MODE;
         private List<String> municipalityReferences;
         private List<String> countyReferences;
         private List<String> countryReferences;
@@ -171,6 +186,11 @@ public class ExportParams {
 
         public Builder setTopographicPlaceExportMode(ExportMode topographicPlaceExportMode) {
             this.topographicPlaceExportMode = topographicPlaceExportMode;
+            return this;
+        }
+
+        public Builder setServiceFrameExportMode(ExportMode serviceFrameExportMode) {
+            this.serviceFrameExportMode = serviceFrameExportMode;
             return this;
         }
 
@@ -225,7 +245,7 @@ public class ExportParams {
         }
 
         public ExportParams build() {
-            return new ExportParams(topographicPlaceExportMode, tariffZoneExportMode, groupOfStopPlacesExportMode, municipalityReferences, countyReferences, countryReferences, stopPlaceSearch, codeSpace);
+            return new ExportParams(topographicPlaceExportMode, tariffZoneExportMode, groupOfStopPlacesExportMode,serviceFrameExportMode, municipalityReferences, countyReferences, countryReferences, stopPlaceSearch, codeSpace);
         }
     }
 }
