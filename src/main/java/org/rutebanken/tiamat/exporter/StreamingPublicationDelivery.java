@@ -199,10 +199,11 @@ public class StreamingPublicationDelivery {
         prepareParkings(exportParams, stopPlacePrimaryIds, mappedParkingCount, netexSiteFrame, entitiesEvictor);
         prepareGroupOfStopPlaces(exportParams, stopPlacePrimaryIds, mappedGroupOfStopPlacesCount, netexSiteFrame, entitiesEvictor);
 
-        prepareScheduledStopPoints(exportParams, stopPlacePrimaryIds, netexServiceFrame);
 
         PublicationDeliveryStructure publicationDeliveryStructure;
+
         if (exportParams.getServiceFrameExportMode() == ExportParams.ExportMode.ALL) {
+            prepareScheduledStopPoints(stopPlacePrimaryIds, netexServiceFrame);
             publicationDeliveryStructure = publicationDeliveryExporter.createPublicationDelivery(netexSiteFrame, netexServiceFrame);
         } else {
             publicationDeliveryStructure = publicationDeliveryExporter.createPublicationDelivery(netexSiteFrame);
@@ -293,8 +294,8 @@ public class StreamingPublicationDelivery {
         }
     }
 
-    private void prepareScheduledStopPoints(ExportParams exportParams, Set<Long> stopPlacePrimaryIds, org.rutebanken.netex.model.ServiceFrame netexServiceFrame) {
-        if (exportParams.getServiceFrameExportMode() == ExportParams.ExportMode.ALL && !stopPlacePrimaryIds.isEmpty()) {
+    private void prepareScheduledStopPoints(Set<Long> stopPlacePrimaryIds, org.rutebanken.netex.model.ServiceFrame netexServiceFrame) {
+        if (!stopPlacePrimaryIds.isEmpty()) {
             logger.info("There are stop places to export");
 
             final Iterator<org.rutebanken.tiamat.model.StopPlace> stopPlaceIterator = stopPlaceRepository.scrollStopPlaces(stopPlacePrimaryIds);
