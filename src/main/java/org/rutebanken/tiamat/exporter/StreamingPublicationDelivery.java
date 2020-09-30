@@ -110,15 +110,12 @@ public class StreamingPublicationDelivery {
     private final TopographicPlaceRepository topographicPlaceRepository;
     private final GroupOfStopPlacesRepository groupOfStopPlacesRepository;
     private final NeTExValidator neTExValidator = NeTExValidator.getNeTExValidator();
-
-    private int passengerStopAssignmentOrder;
-
     /**
      * Validate against netex schema using the {@link NeTExValidator}
      * Enabling this for large xml files can lead to high memory consumption and/or massive performance impact.
      */
     private final boolean validateAgainstSchema;
-
+    private int passengerStopAssignmentOrder;
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -299,7 +296,7 @@ public class StreamingPublicationDelivery {
     }
 
     private void prepareScheduledStopPoints(ExportParams exportParams, Set<Long> stopPlacePrimaryIds, org.rutebanken.netex.model.ServiceFrame netexServiceFrame) {
-        if (exportParams.getServiceFrameExportMode()== ExportParams.ExportMode.ALL && !stopPlacePrimaryIds.isEmpty()) {
+        if (exportParams.getServiceFrameExportMode() == ExportParams.ExportMode.ALL && !stopPlacePrimaryIds.isEmpty()) {
             logger.info("There are stop places to export");
 
             final Iterator<org.rutebanken.tiamat.model.StopPlace> stopPlaceIterator = stopPlaceRepository.scrollStopPlaces(stopPlacePrimaryIds);
@@ -334,36 +331,38 @@ public class StreamingPublicationDelivery {
 
         // Add stop place
         final String netexId = stopPlace.getNetexId();
-        final String stopPlaceName = stopPlace.getName().getValue();
+        String stopPlaceName = null;
+        if (stopPlace.getName() != null) {
+            stopPlaceName = stopPlace.getName().getValue();
+        }
         final long version = stopPlace.getVersion();
         var stopPlaceNetexId = netexId.split(":")[2];
         var scheduledStopPointNetexId = "NSR:ScheduledStopPoint:S" + stopPlaceNetexId;
 
-        LocalDateTime validFrom =null;
-        LocalDateTime validTo =null;
-
-        if (stopPlace.getValidBetween().getFromDate() != null) {
-            validFrom = LocalDateTime.ofInstant(stopPlace.getValidBetween().getFromDate(), ZoneId.systemDefault());
+        LocalDateTime validFrom = null;
+        LocalDateTime validTo = null;
+        if (stopPlace.getValidBetween() != null) {
+            if (stopPlace.getValidBetween().getFromDate() != null) {
+                validFrom = LocalDateTime.ofInstant(stopPlace.getValidBetween().getFromDate(), ZoneId.systemDefault());
+            }
+            if (stopPlace.getValidBetween().getToDate() != null) {
+                validTo = LocalDateTime.ofInstant(stopPlace.getValidBetween().getToDate(), ZoneId.systemDefault());
+            }
         }
-        if (stopPlace.getValidBetween().getToDate() != null) {
-            validTo = LocalDateTime.ofInstant(stopPlace.getValidBetween().getToDate(),ZoneId.systemDefault());
-        }
 
 
-
-
-        scheduledStopPoints.add(createNetexScheduledStopPoint(scheduledStopPointNetexId, stopPlaceName,version,validFrom,validTo));
-        netexPassengerStopAssignment.add(createPassengerStopAssignment(netexId, version, scheduledStopPointNetexId,passengerStopAssignmentOrder,validFrom,validTo, false));
-        passengerStopAssignmentOrder ++ ;
+        scheduledStopPoints.add(createNetexScheduledStopPoint(scheduledStopPointNetexId, stopPlaceName, version, validFrom, validTo));
+        netexPassengerStopAssignment.add(createPassengerStopAssignment(netexId, version, scheduledStopPointNetexId, passengerStopAssignmentOrder, validFrom, validTo, false));
+        passengerStopAssignmentOrder++;
         // Add quays
         final Set<Quay> quays = stopPlace.getQuays();
         for (Quay quay : quays) {
             final String netexId1 = quay.getNetexId().split(":")[2];
             var scheduledStopPointNetexId2 = "NSR:ScheduledStopPoint:Q" + netexId1;
-            scheduledStopPoints.add(createNetexScheduledStopPoint(scheduledStopPointNetexId2, stopPlaceName, version, validFrom,validTo));
-            netexPassengerStopAssignment.add(createPassengerStopAssignment(quay.getNetexId(), quay.getVersion(), scheduledStopPointNetexId2,passengerStopAssignmentOrder, validFrom, validTo, true));
+            scheduledStopPoints.add(createNetexScheduledStopPoint(scheduledStopPointNetexId2, stopPlaceName, version, validFrom, validTo));
+            netexPassengerStopAssignment.add(createPassengerStopAssignment(quay.getNetexId(), quay.getVersion(), scheduledStopPointNetexId2, passengerStopAssignmentOrder, validFrom, validTo, true));
 
-            passengerStopAssignmentOrder ++ ;
+            passengerStopAssignmentOrder++;
         }
 
     }
