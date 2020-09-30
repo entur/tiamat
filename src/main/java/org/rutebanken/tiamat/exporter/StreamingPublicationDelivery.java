@@ -375,10 +375,10 @@ public class StreamingPublicationDelivery {
 
     private JAXBElement<? extends StopAssignment_VersionStructure> createPassengerStopAssignment(String netexId, long version, String scheduledStopPointNetexId, int passengerStopAssignmentOrder, LocalDateTime validFrom, LocalDateTime validTo, boolean isQuay) {
 
-        final String passengerStopAssignmentId = scheduledStopPointNetexId.split(":")[2];
-
+        var passengerStopAssignmentId = netexIdHelper.extractIdPostfix(scheduledStopPointNetexId);
+        var idPrefix= netexIdHelper.extractIdPrefix(scheduledStopPointNetexId);
         final PassengerStopAssignment passengerStopAssignment = new PassengerStopAssignment();
-        passengerStopAssignment.withId("NSR:PassengerStopAssignment:P" + passengerStopAssignmentId);
+        passengerStopAssignment.withId(idPrefix + ":PassengerStopAssignment:P" + passengerStopAssignmentId);
         passengerStopAssignment.withVersion(String.valueOf(version));
         passengerStopAssignment.withOrder(BigInteger.valueOf(passengerStopAssignmentOrder));
 
