@@ -304,13 +304,16 @@ public class StreamingPublicationDelivery {
 
             final Iterator<org.rutebanken.tiamat.model.StopPlace> stopPlaceIterator = stopPlaceRepository.scrollStopPlaces(stopPlacePrimaryIds);
 
+            // Use Listening iterator to collect stop place IDs.
+            ParentStopFetchingIterator parentStopFetchingIterator = new ParentStopFetchingIterator(stopPlaceIterator, stopPlaceRepository);
+
             List<ScheduledStopPoint> netexScheduledStopPoints = new ArrayList<>();
 
             List<JAXBElement<? extends StopAssignment_VersionStructure>> stopAssignment = new ArrayList<>();
 
 
-            while (stopPlaceIterator.hasNext()) {
-                final org.rutebanken.tiamat.model.StopPlace stopPlace = stopPlaceIterator.next();
+            while (parentStopFetchingIterator.hasNext()) {
+                final org.rutebanken.tiamat.model.StopPlace stopPlace = parentStopFetchingIterator.next();
                 covertStopPlaceToScheduledStopPoint(netexScheduledStopPoints, stopAssignment, stopPlace);
 
             }
