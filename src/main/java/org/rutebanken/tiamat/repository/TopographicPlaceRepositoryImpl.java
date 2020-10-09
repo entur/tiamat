@@ -66,7 +66,7 @@ public class TopographicPlaceRepositoryImpl implements TopographicPlaceRepositor
 	}
 
 	@Override
-	public List<TopographicPlace> findByNameAndTypeMaxVersion(String name, TopographicPlaceTypeEnumeration topographicPlaceType) {
+	public List<TopographicPlace> findByNetexIdOrNameAndTypeMaxVersion(String name, TopographicPlaceTypeEnumeration topographicPlaceType) {
 
 		Map<String, Object> parameters = new HashMap<>();
 		StringBuilder sql = new StringBuilder("SELECT tp.* FROM topographic_place tp WHERE " +
@@ -79,9 +79,9 @@ public class TopographicPlaceRepositoryImpl implements TopographicPlaceRepositor
             sql.append("AND tp.topographic_place_type = :topographicPlaceType ");
             parameters.put("topographicPlaceType", topographicPlaceType.name());
         }
-
+		//or t.netex_id like concat('%', :query, '%'))
         if(!Strings.isNullOrEmpty(name)) {
-            sql.append("AND similarity(tp.name_value, :name) > 0.2 ");
+            sql.append("AND (similarity(tp.name_value, :name) > 0.2 OR  similarity(tp.netex_id, :name) = 1)");
             parameters.put("name", name);
             sql.append("ORDER BY SIMILARITY(tp.name_value, :name) DESC");
         }
