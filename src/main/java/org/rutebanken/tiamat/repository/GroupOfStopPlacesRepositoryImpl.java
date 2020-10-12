@@ -21,6 +21,7 @@ import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.hibernate.internal.SessionImpl;
+import org.hibernate.query.NativeQuery;
 import org.rutebanken.tiamat.exporter.params.GroupOfStopPlacesSearch;
 import org.rutebanken.tiamat.model.GroupOfStopPlaces;
 import org.rutebanken.tiamat.repository.iterator.ScrollableResultIterator;
@@ -54,7 +55,7 @@ public class GroupOfStopPlacesRepositoryImpl implements GroupOfStopPlacesReposit
 
         Pair<String, Map<String, Object>> pair = groupOfStopPlacesQueryFromSearchBuilder.buildQueryFromSearch(search);
         Session session = entityManager.unwrap(SessionImpl.class);
-        SQLQuery query = session.createSQLQuery(pair.getFirst());
+        NativeQuery query = session.createNativeQuery(pair.getFirst());
         query.addEntity(GroupOfStopPlaces.class);
 
         searchHelper.addParams(query, pair.getSecond());

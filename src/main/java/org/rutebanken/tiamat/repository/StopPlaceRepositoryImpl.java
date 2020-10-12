@@ -17,6 +17,7 @@ package org.rutebanken.tiamat.repository;
 
 
 import com.google.common.collect.Sets;
+import org.hibernate.query.NativeQuery;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -554,7 +555,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         Session session = entityManager.unwrap(Session.class);
 
         Pair<String, Map<String, Object>> queryWithParams = stopPlaceQueryFromSearchBuilder.buildQueryString(exportParams);
-        SQLQuery sqlQuery = session.createSQLQuery(queryWithParams.getFirst());
+        NativeQuery sqlQuery = session.createNativeQuery(queryWithParams.getFirst());
         searchHelper.addParams(sqlQuery, queryWithParams.getSecond());
 
         return scrollStopPlaces(sqlQuery, session);
@@ -597,7 +598,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     public Set<String> getNetexIds(ExportParams exportParams) {
         Pair<String, Map<String, Object>> pair = stopPlaceQueryFromSearchBuilder.buildQueryString(exportParams);
         Session session = entityManager.unwrap(Session.class);
-        SQLQuery query = session.createSQLQuery("SELECT sub.netex_id from (" + pair.getFirst() + ") sub");
+        NativeQuery query = session.createNativeQuery("SELECT sub.netex_id from (" + pair.getFirst() + ") sub");
 
         searchHelper.addParams(query, pair.getSecond());
 
@@ -610,7 +611,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     public Set<Long> getDatabaseIds(ExportParams exportParams, boolean ignorePaging) {
         Pair<String, Map<String, Object>> pair = stopPlaceQueryFromSearchBuilder.buildQueryString(exportParams);
         Session session = entityManager.unwrap(Session.class);
-        SQLQuery query = session.createSQLQuery("SELECT sub.id from (" + pair.getFirst() + ") sub");
+        NativeQuery query = session.createNativeQuery("SELECT sub.id from (" + pair.getFirst() + ") sub");
 
         if(!ignorePaging) {
             long firstResult = exportParams.getStopPlaceSearch().getPageable().getOffset();
