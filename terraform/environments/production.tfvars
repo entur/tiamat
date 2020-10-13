@@ -1,6 +1,6 @@
 gcp_project = "entur-1287"
 cloudsql_project = "entur-ror-prod"
-pubsub_project = "entur-ror-prod"
+pubsub_project = "neon-1287"
 storage_project = "entur-ror-prod"
 kube_namespace = "production"
 bucket_instance_suffix = "production"
