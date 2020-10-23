@@ -39,7 +39,7 @@ public class ChangedStopPlaceSearchDisassembler {
 
         int perPage = dto.perPage > 0 ? dto.perPage : PER_PAGE_DEFAULT;
 
-        Pageable pageable = new PageRequest(dto.page, perPage);
+        Pageable pageable = PageRequest.of(dto.page,perPage);
         return new ChangedStopPlaceSearch(from, to, pageable);
     }
 
