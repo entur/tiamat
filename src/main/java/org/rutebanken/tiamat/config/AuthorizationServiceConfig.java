@@ -20,13 +20,10 @@ import org.rutebanken.helper.organisation.RoleAssignmentExtractor;
 import org.rutebanken.tiamat.auth.check.TiamatOriganisationChecker;
 import org.rutebanken.tiamat.auth.TiamatEntityResolver;
 import org.rutebanken.tiamat.auth.check.TopographicPlaceChecker;
-import org.rutebanken.tiamat.model.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
