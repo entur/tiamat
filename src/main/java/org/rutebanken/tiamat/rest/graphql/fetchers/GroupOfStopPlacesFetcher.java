@@ -83,6 +83,6 @@ public class GroupOfStopPlacesFetcher implements DataFetcher<Page<GroupOfStopPla
 
         List<GroupOfStopPlaces> groupOfStopPlaces = groupOfStopPlacesRepository.findGroupOfStopPlaces(groupOfStopPlacesSearch);
 
-        return new PageImpl<>(groupOfStopPlaces, new PageRequest(environment.getArgument(PAGE), environment.getArgument(SIZE)), groupOfStopPlaces.size());
+        return new PageImpl<>(groupOfStopPlaces, PageRequest.of(environment.getArgument(PAGE), environment.getArgument(SIZE)), groupOfStopPlaces.size());
     }
 }
