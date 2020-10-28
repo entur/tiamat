@@ -60,7 +60,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring-cloud-gcp.version>1.2.5.RELEASE</spring-cloud-gcp.version>
         <maven.compiler.plugin.version>3.8.1</maven.compiler.plugin.version>
-        <nplexus.compiler.javac.versio>2.8.8</nplexus.compiler.javac.versio>
+        <plexus.compiler.javac.version>2.8.8</plexus.compiler.javac.version>
         <spring-boot-plugin.version>2.3.4.RELEASE</spring-boot-plugin.version>
         <spring-boot.version>2.3.4.RELEASE</spring-boot.version>
         <spring.security.version>5.0.7.RELEASE</spring.security.version>
