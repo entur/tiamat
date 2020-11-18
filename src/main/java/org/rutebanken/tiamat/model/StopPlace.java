@@ -43,7 +43,7 @@ public class StopPlace
     @Enumerated(EnumType.STRING)
     protected VehicleModeEnumeration transportMode;
     @Enumerated(EnumType.STRING)
-    protected AirSubmodeEnumeration airSubmode = AirSubmodeEnumeration.UNKNOWN;
+    protected AirSubmodeEnumeration airSubmode;
     @Enumerated(EnumType.STRING)
     protected BusSubmodeEnumeration busSubmode;
     @Enumerated(EnumType.STRING)
