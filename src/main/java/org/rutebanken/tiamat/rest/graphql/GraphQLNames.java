@@ -68,6 +68,9 @@ public class GraphQLNames {
     public static final String INPUT_TYPE_TARIFF_ZONE = "TariffZone" + INPUT_TYPE_POSTFIX;
     public static final String TARIFF_ZONES = "tariffZones";
 
+    public static final String OUTPUT_TYPE_STOPPLACE_CHANGELOG="StopPlaceChangelog";
+    public static final String STOP_PLACE_CHANGELOG ="stopPlaceChangelog";
+
     public static final String OUTPUT_TYPE_ADDRESSABLE_PLACE = "AddressablePlace";
 
     public static final String OUTPUT_TYPE_VALID_BETWEEN = "ValidBetween";

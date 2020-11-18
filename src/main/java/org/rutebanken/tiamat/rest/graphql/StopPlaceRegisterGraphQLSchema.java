@@ -105,6 +105,15 @@ public class StopPlaceRegisterGraphQLSchema {
     private TariffZoneObjectTypeCreator tariffZoneObjectTypeCreator;
 
     @Autowired
+
+    private StopPlaceChangelogObjectTypeCreator stopPlaceChangelogObjectTypeCreator;
+
+
+    @Autowired
+
+    private StopPlaceChangelogCommonFieldListCreator stopPlaceChangelogCommonFieldListCreator;
+
+    @Autowired
     private AuthorizationCheckDataFetcher authorizationCheckDataFetcher;
 
     @Autowired
@@ -124,6 +133,9 @@ public class StopPlaceRegisterGraphQLSchema {
 
     @Autowired
     private DataFetcher<Page<TariffZone>> tariffZonesFetcher;
+
+    @Autowired
+    DataFetcher stopPlaceChangelogFetcher;
 
     @Autowired
     DataFetcher pathLinkFetcher;
@@ -191,6 +203,9 @@ public class StopPlaceRegisterGraphQLSchema {
 
         commonFieldsList.addAll(zoneCommandFieldList);
 
+        List<GraphQLFieldDefinition> stopPlaceChangelogFieldList = stopPlaceChangelogCommonFieldListCreator.create();
+        commonFieldsList.addAll(stopPlaceChangelogFieldList);
+
         GraphQLObjectType quayObjectType = createQuayObjectType(commonFieldsList);
 
         GraphQLObjectType validBetweenObjectType = createValidBetweenObjectType();
@@ -198,6 +213,8 @@ public class StopPlaceRegisterGraphQLSchema {
         GraphQLObjectType topographicPlaceObjectType = topographicPlaceObjectTypeCreator.create();
 
         GraphQLObjectType tariffZoneObjectType = tariffZoneObjectTypeCreator.create(zoneCommandFieldList);
+
+        GraphQLObjectType stopPlaceChangelogObjectType = stopPlaceChangelogObjectTypeCreator.create(stopPlaceChangelogFieldList);
 
         MutableTypeResolver stopPlaceTypeResolver = new MutableTypeResolver();
 
@@ -306,6 +323,13 @@ public class StopPlaceRegisterGraphQLSchema {
                         .argument(createFindTariffZonesArguments())
                         .dataFetcher(tariffZonesFetcher)
                         .build())
+                .field(newFieldDefinition()
+                        .name(STOP_PLACE_CHANGELOG)
+                        .type(new GraphQLList(stopPlaceChangelogObjectType))
+                        .description("Stop Place changelog")
+                        .argument(createStopPlaceChangelogArguments())
+                        .dataFetcher(stopPlaceChangelogFetcher)
+                        .build())
                 .build();
 
 
@@ -393,6 +417,17 @@ public class StopPlaceRegisterGraphQLSchema {
                 .name(OUTPUT_TYPE_ADDRESSABLE_PLACE)
                 .fields(commonFieldsList)
                 .build();
+    }
+
+    private List<GraphQLArgument> createStopPlaceChangelogArguments() {
+        //TODO: Add query arguments
+        List<GraphQLArgument> arguments = new ArrayList<>();
+        arguments.add(GraphQLArgument.newArgument()
+                .name(ID)
+                .type(GraphQLString)
+                .build());
+
+        return arguments;
     }
 
     private List<GraphQLArgument> createFindPathLinkArguments(GraphQLArgument allVersionsArgument) {
