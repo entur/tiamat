@@ -118,12 +118,6 @@
             <name>central</name>
             <url>https://repo.maven.apache.org/maven2</url>
         </repository>
-        <repository>
-            <id>repo.boundlessgeo.com-releases</id>
-            <name>repo.boundlessgeo.com-releases</name>
-            <url>http://repo.boundlessgeo.com/main</url>
-            <layout>default</layout>
-        </repository>
     </repositories>
 
     <dependencyManagement>
