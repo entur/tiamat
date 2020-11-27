@@ -16,9 +16,7 @@
 package org.rutebanken.tiamat.rest.graphql.types;
 
 import graphql.schema.GraphQLFieldDefinition;
-import graphql.schema.GraphQLList;
-import org.rutebanken.tiamat.rest.graphql.fetchers.OriginalIdsDataFetcher;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -26,37 +24,22 @@ import java.util.List;
 
 import static graphql.Scalars.GraphQLString;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.IMPORTED_ID;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.NAME;
-import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.embeddableMultilingualStringObjectType;
-import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.geometryFieldDefinition;
-import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.netexIdFieldDefinition;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.VERSION;
 
 @Component
 public class StopPlaceChangelogCommonFieldListCreator {
 
     //TODO: Update Common Field List
 
-    @Autowired
-    private OriginalIdsDataFetcher originalIdsDataFetcher;
 
-
-
-    public List<GraphQLFieldDefinition> create() {
+        public List<GraphQLFieldDefinition> create() {
 
         List<GraphQLFieldDefinition> stopPlaceChangelogFieldList = new ArrayList<>();
-        stopPlaceChangelogFieldList.add(netexIdFieldDefinition);
-        stopPlaceChangelogFieldList.add(newFieldDefinition().name(NAME).type(embeddableMultilingualStringObjectType).build());
-
-        stopPlaceChangelogFieldList.add(geometryFieldDefinition);
-
-        stopPlaceChangelogFieldList.add(newFieldDefinition()
-                .name(IMPORTED_ID)
-                .deprecate("Moved to keyValues")
-                .type(new GraphQLList(GraphQLString))
-                .dataFetcher(originalIdsDataFetcher)
-                .build());
-
+        stopPlaceChangelogFieldList.add(newFieldDefinition().name("netexId").type(GraphQLString).build());
+        stopPlaceChangelogFieldList.add(newFieldDefinition().name(NAME).type(GraphQLString).build());
+        stopPlaceChangelogFieldList.add(newFieldDefinition().name(VERSION).type(GraphQLString).build());
+        stopPlaceChangelogFieldList.add(newFieldDefinition().name("changeAt").type(GraphQLString).build());
 
 
         return stopPlaceChangelogFieldList;

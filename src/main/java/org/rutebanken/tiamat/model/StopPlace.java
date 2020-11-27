@@ -34,6 +34,15 @@ import java.util.*;
         uniqueConstraints = {
                 @UniqueConstraint(name = "stop_place_netex_id_version_constraint", columnNames = {"netexId", "version"})}
 )
+@SqlResultSetMapping(name ="stopPlaceChangelog",
+        columns = { @ColumnResult(name ="netex_id"),
+                @ColumnResult(name ="name"),
+                @ColumnResult(name ="version"),
+                @ColumnResult(name ="from_date"),
+                @ColumnResult(name ="to_date"),
+                @ColumnResult(name ="changed_date")
+        }
+)
 public class StopPlace
         extends Site_VersionStructure implements Serializable {
 

@@ -25,6 +25,7 @@ import org.hibernate.*;
 import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
 import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
 import org.rutebanken.tiamat.dtoassembling.dto.JbvCodeMappingDto;
+import org.rutebanken.tiamat.dtoassembling.dto.StopPlaceChangelogDto;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -720,6 +721,35 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         List<JbvCodeMappingDto> mappingResult = new ArrayList<>();
         for (Object[] row : result) {
             mappingResult.add(new JbvCodeMappingDto(row[0].toString(), null, row[1].toString()));
+        }
+
+        return mappingResult;
+    }
+
+    @Override
+    public List<StopPlaceChangelogDto>  findStopPlaceChangelog() {
+        //TODO implement query
+        String sql ="SELECT netex_id,name_value,version,stop_place_type,changed,from_date,to_date from stop_place limit 10";
+        final Query query = entityManager.createNativeQuery(sql);
+
+        //query.setParameter("stopPlaceType", StopTypeEnumeration.RAIL_STATION.toString());
+        final List<Object[]> resultList = query.getResultList();
+
+        List<StopPlaceChangelogDto>  mappingResult= new ArrayList<>();
+        for (Object[] row : resultList) {
+
+            var netexId = row[0].toString();
+            var name = row[1].toString();
+            var version = Integer.parseInt(row[2].toString());
+            var stopType = StopTypeEnumeration.BUS_STATION;
+
+
+            var changedAt =row[4] != null?((Timestamp) row[4]).toInstant():null;
+            var validFrom =row[5] != null?((Timestamp) row[5]).toInstant():null;
+            var validTo =row[5] != null?((Timestamp) row[6]).toInstant():null;
+
+            mappingResult.add(new StopPlaceChangelogDto(netexId, name, version, stopType,changedAt,validFrom,validTo));
+
         }
 
         return mappingResult;
