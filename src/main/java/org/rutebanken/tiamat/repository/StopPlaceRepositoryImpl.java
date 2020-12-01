@@ -30,6 +30,7 @@ import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
+import org.rutebanken.tiamat.model.ValidBetween;
 import org.rutebanken.tiamat.repository.iterator.ScrollableResultIterator;
 import org.rutebanken.tiamat.repository.search.ChangedStopPlaceSearch;
 import org.rutebanken.tiamat.repository.search.SearchHelper;
@@ -48,6 +49,7 @@ import javax.persistence.Query;
 import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -727,12 +729,14 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     }
 
     @Override
-    public List<StopPlaceChangelogDto>  findStopPlaceChangelog() {
+    public List<StopPlaceChangelogDto>  findStopPlaceChangelog(ChangedStopPlaceSearch search) {
         //TODO implement query
-        String sql ="SELECT netex_id,name_value,version,stop_place_type,changed,from_date,to_date from stop_place limit 10";
+        String sql ="SELECT sp.netex_id,sp.name_value,sp.version,sp.stop_place_type,sp.changed,sp.from_date,sp.to_date " + STOP_PLACE_WITH_EFFECTIVE_CHANGE_QUERY_BASE ;
         final Query query = entityManager.createNativeQuery(sql);
 
-        //query.setParameter("stopPlaceType", StopTypeEnumeration.RAIL_STATION.toString());
+
+        query.setParameter("from", search.getFrom());
+        query.setParameter("to", search.getTo());
         final List<Object[]> resultList = query.getResultList();
 
         List<StopPlaceChangelogDto>  mappingResult= new ArrayList<>();
@@ -741,14 +745,21 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
             var netexId = row[0].toString();
             var name = row[1].toString();
             var version = Integer.parseInt(row[2].toString());
-            var stopType = StopTypeEnumeration.BUS_STATION;
+            var stopType =row[3] != null? StopTypeEnumeration.valueOf(row[3].toString()): null;
 
 
             var changedAt =row[4] != null?((Timestamp) row[4]).toInstant():null;
-            var validFrom =row[5] != null?((Timestamp) row[5]).toInstant():null;
-            var validTo =row[5] != null?((Timestamp) row[6]).toInstant():null;
 
-            mappingResult.add(new StopPlaceChangelogDto(netexId, name, version, stopType,changedAt,validFrom,validTo));
+            var validity= new ValidBetween();
+            if (row[5] != null) {
+                validity.setFromDate(((Timestamp) row[5]).toInstant());
+            }
+            if (row[6] != null) {
+                validity.setToDate(((Timestamp) row[6]).toInstant());
+            }
+
+
+            mappingResult.add(new StopPlaceChangelogDto(netexId, name, version, stopType,changedAt,validity));
 
         }
 

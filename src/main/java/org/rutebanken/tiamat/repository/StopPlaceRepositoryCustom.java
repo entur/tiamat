@@ -79,7 +79,7 @@ public interface StopPlaceRepositoryCustom extends DataManagedObjectStructureRep
 
     List<JbvCodeMappingDto> findJbvCodeMappingsForStopPlace();
 
-    List<StopPlaceChangelogDto> findStopPlaceChangelog();
+    List<StopPlaceChangelogDto> findStopPlaceChangelog(ChangedStopPlaceSearch search);
 
     Iterator<StopPlace> scrollStopPlaces(Set<Long> stopPlacePrimaryIds);
 

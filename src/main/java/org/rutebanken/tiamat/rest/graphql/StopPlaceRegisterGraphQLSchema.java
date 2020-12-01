@@ -203,8 +203,7 @@ public class StopPlaceRegisterGraphQLSchema {
 
         commonFieldsList.addAll(zoneCommandFieldList);
 
-        List<GraphQLFieldDefinition> stopPlaceChangelogFieldList = stopPlaceChangelogCommonFieldListCreator.create();
-        commonFieldsList.addAll(stopPlaceChangelogFieldList);
+
 
         GraphQLObjectType quayObjectType = createQuayObjectType(commonFieldsList);
 
@@ -213,8 +212,6 @@ public class StopPlaceRegisterGraphQLSchema {
         GraphQLObjectType topographicPlaceObjectType = topographicPlaceObjectTypeCreator.create();
 
         GraphQLObjectType tariffZoneObjectType = tariffZoneObjectTypeCreator.create(zoneCommandFieldList);
-
-        GraphQLObjectType stopPlaceChangelogObjectType = stopPlaceChangelogObjectTypeCreator.create(stopPlaceChangelogFieldList);
 
         MutableTypeResolver stopPlaceTypeResolver = new MutableTypeResolver();
 
@@ -235,6 +232,11 @@ public class StopPlaceRegisterGraphQLSchema {
             }
             throw new IllegalArgumentException("StopPlaceTypeResolver cannot resolve type of Object " + object + ". Was expecting StopPlace");
         });
+
+        List<GraphQLFieldDefinition> stopPlaceChangelogFieldList = stopPlaceChangelogCommonFieldListCreator.create(validBetweenObjectType);
+        commonFieldsList.addAll(stopPlaceChangelogFieldList);
+
+        GraphQLObjectType stopPlaceChangelogObjectType = stopPlaceChangelogObjectTypeCreator.create(stopPlaceChangelogFieldList);
 
         GraphQLObjectType groupOfStopPlacesObjectType = groupOfStopPlaceObjectTypeCreator.create(stopPlaceInterface);
 

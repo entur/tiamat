@@ -16,6 +16,7 @@
 package org.rutebanken.tiamat.dtoassembling.dto;
 
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
+import org.rutebanken.tiamat.model.ValidBetween;
 
 import java.time.Instant;
 
@@ -30,18 +31,18 @@ public class StopPlaceChangelogDto {
     public int version;
     public StopTypeEnumeration stopTypeEnumeration;
     public Instant changeAt;
-    public Instant validFrom;
-    public Instant validTo;
+
+    public ValidBetween validBetween;
 
 
-    public StopPlaceChangelogDto(String netexId, String name, int version, StopTypeEnumeration stopTypeEnumeration, Instant changeAt, Instant validFrom, Instant validTo) {
+
+    public StopPlaceChangelogDto(String netexId, String name, int version, StopTypeEnumeration stopTypeEnumeration, Instant changeAt, ValidBetween validBetween) {
         this.netexId = netexId;
         this.name = name;
         this.version = version;
         this.stopTypeEnumeration = stopTypeEnumeration;
         this.changeAt = changeAt;
-        this.validFrom = validFrom;
-        this.validTo = validTo;
+        this.validBetween=validBetween;
     }
 
 }

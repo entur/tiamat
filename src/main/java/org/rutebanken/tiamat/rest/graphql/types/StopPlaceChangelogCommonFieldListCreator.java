@@ -17,6 +17,7 @@ package org.rutebanken.tiamat.rest.graphql.types;
 
 import graphql.schema.GraphQLFieldDefinition;
 
+import graphql.schema.GraphQLObjectType;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -25,6 +26,7 @@ import java.util.List;
 import static graphql.Scalars.GraphQLString;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.NAME;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.VALID_BETWEEN;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.VERSION;
 
 @Component
@@ -33,13 +35,16 @@ public class StopPlaceChangelogCommonFieldListCreator {
     //TODO: Update Common Field List
 
 
-        public List<GraphQLFieldDefinition> create() {
+        public List<GraphQLFieldDefinition> create(GraphQLObjectType validBetweenObjectType) {
 
         List<GraphQLFieldDefinition> stopPlaceChangelogFieldList = new ArrayList<>();
         stopPlaceChangelogFieldList.add(newFieldDefinition().name("netexId").type(GraphQLString).build());
         stopPlaceChangelogFieldList.add(newFieldDefinition().name(NAME).type(GraphQLString).build());
         stopPlaceChangelogFieldList.add(newFieldDefinition().name(VERSION).type(GraphQLString).build());
         stopPlaceChangelogFieldList.add(newFieldDefinition().name("changeAt").type(GraphQLString).build());
+        stopPlaceChangelogFieldList.add(newFieldDefinition()
+                .name(VALID_BETWEEN)
+                .type(validBetweenObjectType).build());
 
 
         return stopPlaceChangelogFieldList;

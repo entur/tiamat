@@ -20,12 +20,19 @@ import graphql.schema.DataFetchingEnvironment;
 import org.rutebanken.tiamat.dtoassembling.dto.StopPlaceChangelogDto;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 
+import org.rutebanken.tiamat.repository.search.ChangedStopPlaceSearch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 
@@ -42,7 +49,13 @@ class StopPlaceChangeLogFetcher implements DataFetcher {
     @Transactional
     public Object get(DataFetchingEnvironment environment) {
 
-                List<StopPlaceChangelogDto> stopPlaceChangelogDtoList = stopPlaceRepository.findStopPlaceChangelog();
+        var from = ZonedDateTime.of(2019,10,24,0,0,0,0, ZoneId.systemDefault()).toInstant();
+        var to = ZonedDateTime.of(2019,10,25,0,0,0,0, ZoneId.systemDefault()).toInstant();
+
+
+        final ChangedStopPlaceSearch changedStopPlaceSearch = new ChangedStopPlaceSearch(from,to, null);
+
+        List<StopPlaceChangelogDto> stopPlaceChangelogDtoList = stopPlaceRepository.findStopPlaceChangelog(changedStopPlaceSearch);
 
                 return getStopPlaces(environment,stopPlaceChangelogDtoList,stopPlaceChangelogDtoList.size());
 
