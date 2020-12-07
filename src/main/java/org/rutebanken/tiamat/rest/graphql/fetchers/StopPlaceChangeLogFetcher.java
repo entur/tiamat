@@ -27,18 +27,25 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.Period;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PAGE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.SIZE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.VALID_BETWEEN_FROM_DATE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.VALID_BETWEEN_TO_DATE;
+
 
 @Service("stopPlaceChangelogFetcher")
 @Transactional
 class StopPlaceChangeLogFetcher implements DataFetcher {
+    private static final int DEFAULT_CHANGELOG_DAYS = 7;
 
     //TODO: Update Stopplace changelog fetcher
 
@@ -48,9 +55,33 @@ class StopPlaceChangeLogFetcher implements DataFetcher {
     @Override
     @Transactional
     public Object get(DataFetchingEnvironment environment) {
+        Instant from;
+        Instant to;
 
-        var from = ZonedDateTime.of(2019,10,24,0,0,0,0, ZoneId.systemDefault()).toInstant();
-        var to = ZonedDateTime.of(2019,10,25,0,0,0,0, ZoneId.systemDefault()).toInstant();
+        //TODO Add date validation
+        final Object fromDateArgument = environment.getArgument(VALID_BETWEEN_FROM_DATE);
+        final Object toDateArgument = environment.getArgument(VALID_BETWEEN_TO_DATE);
+        if (toDateArgument instanceof Instant) {
+            to = (Instant) toDateArgument;
+        } else {
+            to  = Instant.now();
+        }
+        if (fromDateArgument instanceof Instant) {
+            from = (Instant) fromDateArgument;
+        } else {
+            from = to.minus(DEFAULT_CHANGELOG_DAYS, ChronoUnit.DAYS);
+        }
+
+        if (from.isAfter(to)) {
+            from = to.minus(DEFAULT_CHANGELOG_DAYS, ChronoUnit.DAYS);
+        }
+
+        final long duration = Duration.between(from,to).toDays();
+
+        if(duration > DEFAULT_CHANGELOG_DAYS) {
+            from = to.minus(DEFAULT_CHANGELOG_DAYS,ChronoUnit.DAYS);
+        }
+
 
 
         final ChangedStopPlaceSearch changedStopPlaceSearch = new ChangedStopPlaceSearch(from,to, null);
@@ -62,7 +93,7 @@ class StopPlaceChangeLogFetcher implements DataFetcher {
     }
 
     private PageImpl<StopPlaceChangelogDto> getStopPlaces(DataFetchingEnvironment environment, List<StopPlaceChangelogDto> stopPlaces, long size) {
-        return new PageImpl<>(stopPlaces, PageRequest.of(10, 10), size);
+        return new PageImpl<>(stopPlaces, PageRequest.of(environment.getArgument(PAGE), environment.getArgument(SIZE)), size);
     }
 
 }

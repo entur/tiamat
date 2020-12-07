@@ -90,6 +90,9 @@ public class GraphQLNames {
     public static final String DEFAULT_DURATION = "defaultDuration";
     public static final String DEFAULT_DURATION_DESCRIPTION = "Default duration in seconds";
 
+    public static final String DEFAULT_NUMBER_OF_DAYS = "defaultNumberOfDays";
+    public static final String DEFAULT_NUMBER_OF_DAYS_DESCRIPTION = "Default number of days in days";
+
     public static final String FREQUENT_TRAVELLER_DURATION = "frequentTravellerDuration";
     public static final String FREQUENT_TRAVELLER_DURATION_DESCRIPTION = "Frequent traveller duration in seconds";
 
@@ -304,6 +307,9 @@ public class GraphQLNames {
 
     public static final String SIZE = "size";
     public static final String SIZE_ARG_DESCRIPTION = "Number of hits per page when using pagination - default is " + DEFAULT_SIZE_VALUE;
+
+    public static final String NUMBER_OF_DAYS = "numberOfDays";
+    public static final String NUMBER_OF_DAYS_DESCRIPTION = "Number of days, last stop place changes -default is " + DEFAULT_NUMBER_OF_DAYS;
 
     public static final String ALL_VERSIONS = "allVersions";
     public static final String ALL_VERSIONS_ARG_DESCRIPTION = "Fetch all versions for entitites in result. Should not be combined with argument versionValidity";

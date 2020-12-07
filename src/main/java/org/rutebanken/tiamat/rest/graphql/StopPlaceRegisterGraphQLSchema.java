@@ -423,12 +423,18 @@ public class StopPlaceRegisterGraphQLSchema {
 
     private List<GraphQLArgument> createStopPlaceChangelogArguments() {
         //TODO: Add query arguments
-        List<GraphQLArgument> arguments = new ArrayList<>();
-        arguments.add(GraphQLArgument.newArgument()
-                .name(ID)
-                .type(GraphQLString)
-                .build());
+        List<GraphQLArgument> arguments = createPageAndSizeArguments();
 
+        arguments.add(GraphQLArgument.newArgument()
+                .name(VALID_BETWEEN_FROM_DATE)
+                .type(dateScalar.getGraphQLDateScalar())
+                .description(DATE_SCALAR_DESCRIPTION)
+                .build());
+        arguments.add(GraphQLArgument.newArgument()
+                .name(VALID_BETWEEN_TO_DATE)
+                .type(dateScalar.getGraphQLDateScalar())
+                .description(DATE_SCALAR_DESCRIPTION)
+                .build());
         return arguments;
     }
 
