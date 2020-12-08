@@ -435,6 +435,12 @@ public class StopPlaceRegisterGraphQLSchema {
                 .type(dateScalar.getGraphQLDateScalar())
                 .description(DATE_SCALAR_DESCRIPTION)
                 .build());
+
+        arguments.add(GraphQLArgument.newArgument()
+                .name(STOP_PLACE_TYPE)
+                .type(new GraphQLList(stopPlaceTypeEnum))
+                .description(STOP_PLACE_TYPE_ARG_DESCRIPTION)
+                .build());
         return arguments;
     }
 

@@ -18,6 +18,7 @@ package org.rutebanken.tiamat.rest.graphql.fetchers;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import org.rutebanken.tiamat.dtoassembling.dto.StopPlaceChangelogDto;
+import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 
 import org.rutebanken.tiamat.repository.search.ChangedStopPlaceSearch;
@@ -29,15 +30,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.Period;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
+
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PAGE;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.SIZE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.STOP_PLACE_TYPE;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.VALID_BETWEEN_FROM_DATE;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.VALID_BETWEEN_TO_DATE;
 
@@ -82,7 +82,14 @@ class StopPlaceChangeLogFetcher implements DataFetcher {
             from = to.minus(DEFAULT_CHANGELOG_DAYS,ChronoUnit.DAYS);
         }
 
-
+        List<StopTypeEnumeration> stopTypes = environment.getArgument(STOP_PLACE_TYPE);
+        if (stopTypes != null && !stopTypes.isEmpty()) {
+            //TODO: implement stoplaceChangelogSearchBuilder
+           // stopPlaceChangeLogSearchBuilder.setStopTypeEnumerations(stopTypes.stream()
+           //         .filter(type -> type != null)
+            //        .collect(Collectors.toList())
+           // );
+        }
 
         final ChangedStopPlaceSearch changedStopPlaceSearch = new ChangedStopPlaceSearch(from,to, null);
 
