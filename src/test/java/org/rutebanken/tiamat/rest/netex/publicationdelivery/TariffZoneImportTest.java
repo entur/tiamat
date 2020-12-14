@@ -23,6 +23,7 @@ import org.rutebanken.tiamat.importer.ImportParams;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,9 +35,11 @@ public class TariffZoneImportTest extends TiamatIntegrationTest {
 
     @Test
     public void publicationDeliveryWithTariffZone() throws Exception {
+        LocalDateTime validFrom = LocalDateTime.now().minusDays(3);
         TariffZone tariffZone = new TariffZone()
                 .withName(new MultilingualString().withValue("V02"))
                 .withVersion("1")
+                .withValidBetween(new ValidBetween().withFromDate(validFrom))
                 .withId("RUT:TariffZone:01");
 
         SiteFrame siteFrame = publicationDeliveryTestHelper.siteFrame()
@@ -56,9 +59,11 @@ public class TariffZoneImportTest extends TiamatIntegrationTest {
 
     @Test
     public void publicationDeliveryWithTariffZoneAndStopPlace() throws Exception {
+        LocalDateTime validFrom = LocalDateTime.now().minusDays(3);
         TariffZone tariffZone = new TariffZone()
                 .withName(new MultilingualString().withValue("V02"))
                 .withVersion("1")
+                .withValidBetween(new ValidBetween().withFromDate(validFrom))
                 .withId("RUT:TariffZone:05");
 
         StopPlace stopPlace = new StopPlace();
@@ -89,8 +94,8 @@ public class TariffZoneImportTest extends TiamatIntegrationTest {
 
         assertThat(actualZones).isNotEmpty();
         assertThat(actualZones.get(0).getName().getValue()).isEqualTo(tariffZone.getName().getValue());
-        // Versions for tariff zones are not incremented.
-        assertThat(actualZones.get(0).getVersion()).isEqualTo("1");
+        // Versions for tariff zones are incremented.
+        assertThat(actualZones.get(0).getVersion()).isEqualTo("2");
     }
 
     @Test
