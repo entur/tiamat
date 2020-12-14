@@ -24,14 +24,17 @@ import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.TariffZone;
+import org.rutebanken.tiamat.model.ValidBetween;
 import org.rutebanken.tiamat.netex.id.RandomizedTestNetexIdGenerator;
 import org.rutebanken.tiamat.repository.TariffZoneRepository;
-import org.rutebanken.tiamat.versioning.save.TariffZoneSaverService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
 
 @Transactional
 public class TariffZoneSaverServiceTest extends TiamatIntegrationTest {
@@ -72,6 +75,9 @@ public class TariffZoneSaverServiceTest extends TiamatIntegrationTest {
         LinearRing linearRing = new LinearRing(new CoordinateArraySequence(geometry.getCoordinates()), geometryFactory);
         existingTariffZone.setPolygon(geometryFactory.createPolygon(linearRing, null));
         existingTariffZone.setVersion(2L);
+        var zonedDateTime = ZonedDateTime.of(2020, 12, 01, 00, 00, 00, 000, ZoneId.systemDefault());
+        Instant fromDate = zonedDateTime.toInstant();
+        existingTariffZone.setValidBetween(new ValidBetween(fromDate,null));
         tariffZoneRepository.save(existingTariffZone);
 
         TariffZone newTariffZone = new TariffZone();
@@ -81,7 +87,7 @@ public class TariffZoneSaverServiceTest extends TiamatIntegrationTest {
 
         TariffZone actual = tariffZoneSaverService.saveNewVersion(newTariffZone);
         assertThat(actual.getPolygon()).isNull();
-        assertThat(actual.getVersion()).isEqualTo(2L);
+        assertThat(actual.getVersion()).isEqualTo(3L);
         assertThat(actual.getName().getValue()).isEqualTo(newTariffZone.getName().getValue());
     }
 
