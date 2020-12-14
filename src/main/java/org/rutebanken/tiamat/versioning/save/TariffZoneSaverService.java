@@ -16,18 +16,12 @@
 package org.rutebanken.tiamat.versioning.save;
 
 
-import org.rutebanken.tiamat.auth.UsernameFetcher;
 import org.rutebanken.tiamat.model.TariffZone;
 import org.rutebanken.tiamat.repository.TariffZoneRepository;
 import org.rutebanken.tiamat.service.TariffZonesLookupService;
-import org.rutebanken.tiamat.service.metrics.PrometheusMetricsService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.time.Instant;
 
 /**
  * No history for tariff zones. Overwrites existing version for tariff zone
@@ -35,49 +29,30 @@ import java.time.Instant;
 @Service
 public class TariffZoneSaverService {
 
-    private static final Logger logger = LoggerFactory.getLogger(TariffZoneSaverService.class);
-
     private final TariffZoneRepository tariffZoneRepository;
     private final TariffZonesLookupService tariffZonesLookupService;
-    private final UsernameFetcher usernameFetcher;
-    private final PrometheusMetricsService prometheusMetricsService;
+    private final DefaultVersionedSaverService defaultVersionedSaverService;
+
 
     @Autowired
-    public TariffZoneSaverService(TariffZoneRepository tariffZoneRepository, TariffZonesLookupService tariffZonesLookupService, UsernameFetcher usernameFetcher, PrometheusMetricsService prometheusMetricsService) {
+    public TariffZoneSaverService(TariffZoneRepository tariffZoneRepository,
+                                  TariffZonesLookupService tariffZonesLookupService,
+                                  DefaultVersionedSaverService defaultVersionedSaverService) {
         this.tariffZoneRepository = tariffZoneRepository;
         this.tariffZonesLookupService = tariffZonesLookupService;
-        this.usernameFetcher = usernameFetcher;
-        this.prometheusMetricsService = prometheusMetricsService;
-    }
-
-    public TariffZone saveNewVersion(TariffZone existingVersion, TariffZone newVersion) {
-        return saveNewVersion(newVersion);
+        this.defaultVersionedSaverService = defaultVersionedSaverService;
     }
 
     public TariffZone saveNewVersion(TariffZone newVersion) {
-
-        TariffZone existing = tariffZoneRepository.findFirstByNetexIdOrderByVersionDesc(newVersion.getNetexId());
-
-        TariffZone result;
-        if(existing != null) {
-            BeanUtils.copyProperties(newVersion, existing, "id", "created", "version");
-            existing.setValidBetween(null);
-            existing.setChanged(Instant.now());
-            result = tariffZoneRepository.save(existing);
-
+        TariffZone existingTariffZone;
+        if (newVersion.getNetexId() != null) {
+            existingTariffZone = tariffZoneRepository.findFirstByNetexIdOrderByVersionDesc(newVersion.getNetexId());
         } else {
-            newVersion.setCreated(Instant.now());
-            newVersion.setVersion(1L);
-            result = tariffZoneRepository.save(newVersion);
+            existingTariffZone = null;
         }
-
-        result.setChangedBy(usernameFetcher.getUserNameForAuthenticatedUser());
-
-        logger.info("Saved tariff zone {}, version {}, name {}", result.getNetexId(), result.getVersion(), result.getName());
-
+        TariffZone  saved = defaultVersionedSaverService.saveNewVersion(existingTariffZone, newVersion, tariffZoneRepository);
         tariffZonesLookupService.reset();
-        prometheusMetricsService.registerEntitySaved(newVersion.getClass(),1L);
-        return result;
+        return saved;
     }
 
 }
