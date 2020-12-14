@@ -23,9 +23,6 @@ import org.rutebanken.tiamat.service.TariffZonesLookupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-/**
- * No history for tariff zones. Overwrites existing version for tariff zone
- */
 @Service
 public class TariffZoneSaverService {
 
