@@ -18,7 +18,6 @@ package org.rutebanken.tiamat.repository;
 
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.SQLQuery;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
@@ -39,6 +38,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+import java.time.Instant;
 import java.util.*;
 
 @Repository
@@ -70,6 +70,24 @@ public class TariffZoneRepositoryImpl implements TariffZoneRepositoryCustom {
         return tariffZones;
     }
 
+    @Override
+    public Optional<TariffZone> findValidTariffZone(String netexId) {
+        Map<String, Object> parameters = new HashMap<>();
+        StringBuilder sql = new StringBuilder("SELECT tz.* FROM tariff_zone tz WHERE " +
+                "tz.version = (SELECT MAX(tzv.version) FROM tariff_zone tzv WHERE tzv.netex_id = tz.netex_id " +
+                "and (tzv.to_date is null or tzv.to_date > :pointInTime) and (tzv.from_date is null or tzv.from_date < :pointInTime))");
+        Instant pointInTime = Instant.now();
+        parameters.put("pointInTime", pointInTime);
+
+        sql.append("AND tz.netex_id =:netexId");
+        parameters.put("netexId", netexId);
+
+
+        Query query = entityManager.createNativeQuery(sql.toString(), TariffZone.class);
+        parameters.forEach(query::setParameter);
+
+        return query.getResultList().stream().findFirst();
+    }
     @Override
     public String findFirstByKeyValues(String key, Set<String> originalIds) {
         throw new NotImplementedException("findFirstByKeyValues not implemented for " + this.getClass().getSimpleName());
@@ -132,9 +150,18 @@ public class TariffZoneRepositoryImpl implements TariffZoneRepositoryCustom {
                 "        tzr.version IS NOT NULL AND cast(tz1.version AS text) = tzr.version" +
                 "      )" +
                 "      OR (    " +
-                "        tzr.version IS NULL AND tz1.version = (SELECT MAX(tz2.version) FROM tariff_zone tz2 WHERE tz2.netex_id = tz1.netex_id)" +
+                "        tzr.version IS NULL AND tz1.version = (" +
+                "           SELECT MAX(tz2.version) FROM tariff_zone tz2 WHERE tz2.netex_id = tz1.netex_id " +
+                "               AND tz2.from_date < NOW()" +
+                "              )" +
                 "      )" +
                 "    ) " +
+                "   AND (" +
+                "        tz1.to_date IS NULL OR tz1.to_date > NOW()" +
+                "       )" +
+                "   AND (" +
+                "        tz1.from_date < NOW()" +
+                "       )" +
                 "   GROUP BY tz1.id ) tz1 " +
                 "JOIN tariff_zone tz ON tz.id = tz1.id");
 
