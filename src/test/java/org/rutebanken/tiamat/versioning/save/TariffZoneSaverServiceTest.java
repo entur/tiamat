@@ -91,4 +91,27 @@ public class TariffZoneSaverServiceTest extends TiamatIntegrationTest {
         assertThat(actual.getName().getValue()).isEqualTo(newTariffZone.getName().getValue());
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void updateTariffZoneShouldHaveValidFromDate() {
+        TariffZone existingTariffZone = new TariffZone();
+        existingTariffZone.setNetexId(randomizedTestNetexIdGenerator.generateRandomizedNetexId(existingTariffZone));
+        Geometry geometry = geometryFactory.createPoint(new Coordinate(9.84, 59.26)).buffer(20);
+        LinearRing linearRing = new LinearRing(new CoordinateArraySequence(geometry.getCoordinates()), geometryFactory);
+        existingTariffZone.setPolygon(geometryFactory.createPolygon(linearRing, null));
+        existingTariffZone.setVersion(2L);
+        var zonedDateTime = ZonedDateTime.of(2020, 12, 01, 00, 00, 00, 000, ZoneId.systemDefault());
+        Instant existingTariffZoneFromDate = zonedDateTime.toInstant();
+        existingTariffZone.setValidBetween(new ValidBetween(existingTariffZoneFromDate,null));
+        tariffZoneRepository.save(existingTariffZone);
+
+        TariffZone newTariffZone = new TariffZone();
+        newTariffZone.setNetexId(existingTariffZone.getNetexId());
+        newTariffZone.setName(new EmbeddableMultilingualString("name"));
+        newTariffZone.setPolygon(null);
+        Instant newTariffZoneFromDate= zonedDateTime.minusDays(1L).toInstant();
+        newTariffZone.setValidBetween(new ValidBetween(newTariffZoneFromDate, null));
+
+        tariffZoneSaverService.saveNewVersion(newTariffZone);
+    }
+
 }
