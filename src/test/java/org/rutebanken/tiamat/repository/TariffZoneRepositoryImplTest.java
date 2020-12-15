@@ -158,7 +158,7 @@ public class TariffZoneRepositoryImplTest extends TiamatIntegrationTest {
         TariffZone v2 = new TariffZone();
         v2.setVersion(2L);
         v2.setNetexId(tariffZoneNetexId);
-        var zonedDateTime2 = ZonedDateTime.of(2020, 12, 10, 00, 00, 00, 000, ZoneId.systemDefault());
+        var zonedDateTime2 = zonedDateTime.plusDays(10L);
         var fromDate2 = zonedDateTime2.toInstant();
         v2.setValidBetween(new ValidBetween(fromDate2,null));
         tariffZoneRepository.save(v2);
