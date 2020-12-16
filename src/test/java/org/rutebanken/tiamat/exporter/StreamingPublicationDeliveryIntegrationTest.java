@@ -53,6 +53,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
@@ -230,16 +232,23 @@ public class StreamingPublicationDeliveryIntegrationTest extends TiamatIntegrati
         TariffZone tariffZoneV1 = new TariffZone();
         tariffZoneV1.setNetexId(tariffZoneId);
         tariffZoneV1.setVersion(1L);
+        var zonedDateTime = ZonedDateTime.of(2020, 12, 01, 00, 00, 00, 000, ZoneId.systemDefault());
+        Instant fromDate = zonedDateTime.toInstant();
+        tariffZoneV1.setValidBetween(new ValidBetween(fromDate,null));
         tariffZoneV1 = tariffZoneRepository.save(tariffZoneV1);
 
         TariffZone tariffZoneV2 = new TariffZone();
         tariffZoneV2.setNetexId(tariffZoneId);
         tariffZoneV2.setVersion(2L);
+        var fromDate2 = zonedDateTime.plusDays(1L).toInstant();
+        tariffZoneV2.setValidBetween(new ValidBetween(fromDate2,null));
         tariffZoneV2 = tariffZoneRepository.save(tariffZoneV2);
 
         TariffZone tariffZoneV3 = new TariffZone();
         tariffZoneV3.setNetexId(tariffZoneId);
         tariffZoneV3.setVersion(3L);
+        var fromDate3 = zonedDateTime.plusDays(2L).toInstant();
+        tariffZoneV3.setValidBetween(new ValidBetween(fromDate3,null));
         tariffZoneV3 = tariffZoneRepository.save(tariffZoneV3);
 
         StopPlace stopPlace1 = new StopPlace(new EmbeddableMultilingualString("stop place in publication delivery"));

@@ -17,11 +17,10 @@ package org.rutebanken.tiamat.repository;
 
 import org.rutebanken.tiamat.exporter.params.TariffZoneSearch;
 import org.rutebanken.tiamat.model.TariffZone;
-import org.rutebanken.tiamat.model.TopographicPlace;
-import org.rutebanken.tiamat.model.TopographicPlaceTypeEnumeration;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 
@@ -34,4 +33,6 @@ public interface TariffZoneRepositoryCustom extends DataManagedObjectStructureRe
     Iterator<TariffZone> scrollTariffZones(Set<Long> stopPlaceDbIds);
 
     Iterator<TariffZone> scrollTariffZones();
+
+    Optional<TariffZone> findValidTariffZone(String netexId);
 }
