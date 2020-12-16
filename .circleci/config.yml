@@ -112,7 +112,7 @@ workflows:
       - build:
           context: org-carbon
       - deploy-docker:
-          context: org-carbon
+          context: global
           requires:
             - build
           filters:
