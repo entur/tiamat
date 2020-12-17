@@ -406,7 +406,10 @@ public class GraphQLNames {
     public static final String MUTATE_PARENT_STOPPLACE = "mutateParentStopPlace";
     public static final String MUTATE_PATH_LINK = "mutatePathlink";
     public static final String MUTATE_PARKING = "mutateParking";
+    public static final String TERMINATE_TARIFF_ZONE = "terminateTariffZone";
     public static final String MUTATE_GROUP_OF_STOP_PLACES = "mutateGroupOfStopPlaces";
+
+    public static final String TARIFF_ZONE_ID = "tariffZoneId";
 
     public static final String QUAY_ID = "quayId";
     public static final String STOP_PLACE_ID = "stopPlaceId";
