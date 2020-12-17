@@ -20,6 +20,7 @@ import org.rutebanken.tiamat.model.TariffZone;
 import org.rutebanken.tiamat.repository.TariffZoneRepository;
 import org.rutebanken.tiamat.service.TariffZonesLookupService;
 
+import org.rutebanken.tiamat.versioning.validate.VersionValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,15 +30,17 @@ public class TariffZoneSaverService {
     private final TariffZoneRepository tariffZoneRepository;
     private final TariffZonesLookupService tariffZonesLookupService;
     private final DefaultVersionedSaverService defaultVersionedSaverService;
-
+    private final VersionValidator versionValidator;
 
     @Autowired
     public TariffZoneSaverService(TariffZoneRepository tariffZoneRepository,
                                   TariffZonesLookupService tariffZonesLookupService,
-                                  DefaultVersionedSaverService defaultVersionedSaverService) {
+                                  DefaultVersionedSaverService defaultVersionedSaverService,
+                                  VersionValidator versionValidator) {
         this.tariffZoneRepository = tariffZoneRepository;
         this.tariffZonesLookupService = tariffZonesLookupService;
         this.defaultVersionedSaverService = defaultVersionedSaverService;
+        this.versionValidator = versionValidator;
     }
 
     public TariffZone saveNewVersion(TariffZone newVersion) {
@@ -48,6 +51,13 @@ public class TariffZoneSaverService {
             existingTariffZone = null;
         }
         TariffZone  saved = defaultVersionedSaverService.saveNewVersion(existingTariffZone, newVersion, tariffZoneRepository);
+        tariffZonesLookupService.reset();
+        return saved;
+    }
+
+    public TariffZone saveNewVersion(TariffZone existingVersion, TariffZone newVersion) {
+        versionValidator.validate(existingVersion, newVersion);
+        TariffZone  saved = defaultVersionedSaverService.saveNewVersion(existingVersion, newVersion, tariffZoneRepository);
         tariffZonesLookupService.reset();
         return saved;
     }
