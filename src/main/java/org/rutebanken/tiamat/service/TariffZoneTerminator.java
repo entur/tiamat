@@ -49,6 +49,8 @@ public class TariffZoneTerminator {
             final TariffZone tariffZone = tariffZoneRepository.findFirstByNetexIdOrderByVersionDesc(tariffZoneId);
 
             if (tariffZone != null) {
+                // If TariffZone already has a to_date and is in future, it is possible change to before future date, but its not other way around i.e. extend to_date,
+                // or to_date after future date, this is to avoid duplicated tariff zones.
                 if (tariffZone.getValidBetween() != null && tariffZone.getValidBetween().getToDate() != null && tariffZone.getValidBetween().getToDate().isBefore(timeOfTermination)) {
                     throw new IllegalArgumentException("The tariff zone " + tariffZoneId + ", version " + tariffZone.getVersion() + " is already terminated at " + tariffZone.getValidBetween().getToDate());
                 }
