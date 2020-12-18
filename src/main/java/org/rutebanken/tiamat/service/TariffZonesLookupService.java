@@ -105,7 +105,7 @@ public class TariffZonesLookupService {
         return tariffZones.get()
                        .stream()
                        .filter(pair -> point.coveredBy(pair.getSecond()))
-                       .map(pair -> tariffZoneRepository.findValidTariffZone(pair.getFirst()).get())
+                       .map(pair -> tariffZoneRepository.findValidTariffZone(pair.getFirst()).orElse(null))
                        .filter(Objects::nonNull)
                        .collect(toList());
     }

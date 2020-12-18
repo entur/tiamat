@@ -30,6 +30,7 @@ import org.rutebanken.tiamat.rest.graphql.resolvers.MutableTypeResolver;
 import org.rutebanken.tiamat.rest.graphql.scalars.DateScalar;
 import org.rutebanken.tiamat.rest.graphql.scalars.TransportModeScalar;
 import org.rutebanken.tiamat.rest.graphql.types.*;
+import org.rutebanken.tiamat.service.TariffZoneTerminator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
@@ -39,6 +40,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static graphql.Scalars.*;
+import static graphql.schema.GraphQLArgument.newArgument;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLInputObjectField.newInputObjectField;
 import static graphql.schema.GraphQLInputObjectType.newInputObject;
@@ -124,6 +126,9 @@ public class StopPlaceRegisterGraphQLSchema {
 
     @Autowired
     private DataFetcher<Page<TariffZone>> tariffZonesFetcher;
+
+    @Autowired
+    TariffZoneTerminator tariffZoneTerminator;
 
     @Autowired
     DataFetcher pathLinkFetcher;
@@ -368,6 +373,14 @@ public class StopPlaceRegisterGraphQLSchema {
                                 .type(new GraphQLList(parkingInputObjectType)))
                         .description("Create new or update existing " + OUTPUT_TYPE_PARKING)
                         .dataFetcher(parkingUpdater))
+                .field(newFieldDefinition()
+                        .type(tariffZoneObjectType)
+                        .name(TERMINATE_TARIFF_ZONE)
+                        .description("TariffZone will be terminated and no longer be active after the given date.")
+                        .argument(newArgument().name(TARIFF_ZONE_ID).type(new GraphQLNonNull(GraphQLString)))
+                        .argument(newArgument().name(VALID_BETWEEN_TO_DATE).type(new GraphQLNonNull(dateScalar.getGraphQLDateScalar())))
+                        .argument(newArgument().name(VERSION_COMMENT).type(GraphQLString))
+                        .dataFetcher(environment -> tariffZoneTerminator.terminateTariffZone(environment.getArgument(TARIFF_ZONE_ID), environment.getArgument(VALID_BETWEEN_TO_DATE), environment.getArgument(VERSION_COMMENT))))
                 .fields(tagOperationsBuilder.getTagOperations())
                 .fields(stopPlaceOperationsBuilder.getStopPlaceOperations(stopPlaceInterface))
                 .fields(parkingOperationsBuilder.getParkingOperations())
