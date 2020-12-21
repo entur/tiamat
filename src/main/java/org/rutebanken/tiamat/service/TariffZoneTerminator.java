@@ -1,9 +1,13 @@
 package org.rutebanken.tiamat.service;
 
+import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
 import org.rutebanken.tiamat.auth.UsernameFetcher;
 import org.rutebanken.tiamat.lock.MutateLock;
+import org.rutebanken.tiamat.model.DataManagedObjectStructure;
 import org.rutebanken.tiamat.model.TariffZone;
+import org.rutebanken.tiamat.model.VersionOfObjectRefStructure;
 import org.rutebanken.tiamat.repository.TariffZoneRepository;
+import org.rutebanken.tiamat.repository.reference.ReferenceResolver;
 import org.rutebanken.tiamat.service.batch.BackgroundJobs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,6 +15,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.Collections;
+
+import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
 
 @Service("tariffZoneTerminator")
 public class TariffZoneTerminator {
@@ -21,19 +28,29 @@ public class TariffZoneTerminator {
     private final UsernameFetcher usernameFetcher;
     private final MutateLock mutateLock;
     private final BackgroundJobs backgroundJobs;
+    private final ReflectionAuthorizationService authorizationService;
+    private final ReferenceResolver referenceResolver;
     @Autowired
     public TariffZoneTerminator(TariffZoneRepository tariffZoneRepository,
                                 UsernameFetcher usernameFetcher,
                                 MutateLock mutateLock,
-                                BackgroundJobs backgroundJobs) {
+                                BackgroundJobs backgroundJobs,
+                                ReflectionAuthorizationService authorizationService,
+                                ReferenceResolver referenceResolver) {
         this.tariffZoneRepository = tariffZoneRepository;
         this.usernameFetcher = usernameFetcher;
         this.mutateLock = mutateLock;
         this.backgroundJobs = backgroundJobs;
+        this.authorizationService = authorizationService;
+        this.referenceResolver = referenceResolver;
     }
 
     public TariffZone terminateTariffZone(String tariffZoneId, Instant suggestedTimeOfTermination, String versionComment) {
         return mutateLock.executeInLock(() -> {
+            String usernameForAuthenticatedUser = usernameFetcher.getUserNameForAuthenticatedUser();
+            logger.warn("About to terminate tariff zone by ID {}. User: {}", tariffZoneId, usernameForAuthenticatedUser);
+            DataManagedObjectStructure resolved = referenceResolver.resolve(new VersionOfObjectRefStructure(tariffZoneId));
+            authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Collections.singletonList(resolved));
             Instant now = Instant.now();
             Instant timeOfTermination;
 
@@ -47,7 +64,6 @@ public class TariffZoneTerminator {
             logger.info("User {} is terminating tariff zone {} at {} with comment '{}'", usernameFetcher.getUserNameForAuthenticatedUser(), tariffZoneId, timeOfTermination, versionComment);
 
             final TariffZone tariffZone = tariffZoneRepository.findFirstByNetexIdOrderByVersionDesc(tariffZoneId);
-
             if (tariffZone != null) {
                 // If TariffZone already has a to_date and is in future, it is possible change to before future date, but its not other way around i.e. extend to_date,
                 // or to_date after future date, this is to avoid duplicated tariff zones.
