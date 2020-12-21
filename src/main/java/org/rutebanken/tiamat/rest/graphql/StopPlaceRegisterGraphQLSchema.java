@@ -192,13 +192,14 @@ public class StopPlaceRegisterGraphQLSchema {
                         .build()
         );
 
-        List<GraphQLFieldDefinition> zoneCommandFieldList = zoneCommonFieldListCreator.create();
+        GraphQLObjectType validBetweenObjectType = createValidBetweenObjectType();
+
+        List<GraphQLFieldDefinition> zoneCommandFieldList = zoneCommonFieldListCreator.create(validBetweenObjectType);
 
         commonFieldsList.addAll(zoneCommandFieldList);
 
         GraphQLObjectType quayObjectType = createQuayObjectType(commonFieldsList);
 
-        GraphQLObjectType validBetweenObjectType = createValidBetweenObjectType();
 
         GraphQLObjectType topographicPlaceObjectType = topographicPlaceObjectTypeCreator.create();
 
