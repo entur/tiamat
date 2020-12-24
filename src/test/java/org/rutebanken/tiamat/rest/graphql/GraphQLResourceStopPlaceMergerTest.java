@@ -84,8 +84,8 @@ public class GraphQLResourceStopPlaceMergerTest extends AbstractGraphQLResourceI
         String graphQlJsonQuery = """
                 mutation {
                   stopPlace: mergeStopPlaces (
-                          fromStopPlaceId: "${fromStopPlace.getNetexId()}",
-                          toStopPlaceId:"${toStopPlace.getNetexId()}"
+                          fromStopPlaceId: "%s",
+                          toStopPlaceId:"%s"
                        ) {
                       id
                       importedId
@@ -100,7 +100,7 @@ public class GraphQLResourceStopPlaceMergerTest extends AbstractGraphQLResourceI
                       }
                     }
                 }
-                """;
+                """.formatted(fromStopPlace.getNetexId(),toStopPlace.getNetexId());
 
         Set<String> originalIds = new HashSet<>();
         originalIds.addAll(fromStopPlace.getOriginalIds());

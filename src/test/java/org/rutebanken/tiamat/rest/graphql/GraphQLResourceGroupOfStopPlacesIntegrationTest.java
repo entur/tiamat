@@ -20,6 +20,7 @@ import org.junit.Test;
 import org.rutebanken.tiamat.model.*;
 
 import static org.hamcrest.Matchers.*;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.MUTATE_GROUP_OF_STOP_PLACES;
 
 public class GraphQLResourceGroupOfStopPlacesIntegrationTest extends AbstractGraphQLResourceIntegrationTest {
 
@@ -40,12 +41,12 @@ public class GraphQLResourceGroupOfStopPlacesIntegrationTest extends AbstractGra
 
         String graphQlJsonQuery = """
                                     mutation {
-                                    group: ${MUTATE_GROUP_OF_STOP_PLACES}(GroupOfStopPlaces: {
-                                        name: {value: "${groupName}"},
-                                        versionComment: "${versionComment}",
+                                    group: %s(GroupOfStopPlaces: {
+                                        name: {value: "%s"},
+                                        versionComment: "%s",
                                         members: [
-                                            {ref: "${stopPlace1.getNetexId()}"},
-                                            {ref: "${stopPlace2.getNetexId()}"}],
+                                            {ref: "%s"},
+                                            {ref: "%s"}],
                                         }) {
                                     id
                                     version
@@ -65,7 +66,13 @@ public class GraphQLResourceGroupOfStopPlacesIntegrationTest extends AbstractGra
                                     }
                                   }
                                 }
-                                """;
+                                """.formatted(
+                                                MUTATE_GROUP_OF_STOP_PLACES,
+                                                groupName,
+                                                versionComment,
+                                                stopPlace1.getNetexId(),
+                                                stopPlace2.getNetexId()
+                                              );
 
         executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .body("data.group.name.value", equalTo(groupName))

@@ -55,8 +55,7 @@ public class GraphQLResourceParkingIntegrationTest extends AbstractGraphQLResour
         parking.setCentroid(geometryFactory.createPoint(new Coordinate(10.533212, 59.678080)));
         ParkingTypeEnumeration originalParkingType = ParkingTypeEnumeration.PARK_AND_RIDE;
         parking.setParkingType(originalParkingType);
-        parking.setParentSiteRef(new SiteRefStructure());
-
+        parking.setParentSiteRef(new SiteRefStructure(stopPlaceRepository.save(new StopPlace()).getNetexId()));
         parking = parkingVersionedSaverService.saveNewVersion(parking);
 
         String netexId = parking.getNetexId();
@@ -123,7 +122,7 @@ public class GraphQLResourceParkingIntegrationTest extends AbstractGraphQLResour
                 "    totalCapacity:1234, " +
                 "    parkingType:parkAndRide, " +
                 "    parkingVehicleTypes: [car, pedalCycle]" +
-                "    parentSiteRef:\\\"${stopPlace.netexId}\\\"" +
+                "    parentSiteRef:\\\"%s\\\"".formatted(stopPlace.getNetexId()) +
                 "    parkingLayout:covered " +
                 "    principalCapacity:22 " +
                 "    overnightParkingPermitted:true, " +
@@ -243,7 +242,7 @@ public class GraphQLResourceParkingIntegrationTest extends AbstractGraphQLResour
                 "      value: \\\"Parking name\\\" " +
                 "      lang: \\\"no\\\" " +
                 "    }" +
-                "    parentSiteRef:\\\"${stopPlace.netexId}\\\"" +
+                "    parentSiteRef:\\\"%s\\\"".formatted(stopPlace.getNetexId()) +
                 "    geometry: { " +
                 "      type:Point " +
                 "      coordinates:[[59.0, 10.5]] " +
@@ -369,7 +368,7 @@ public class GraphQLResourceParkingIntegrationTest extends AbstractGraphQLResour
                 "      value: \\\"Parking name\\\" " +
                 "      lang: \\\"no\\\" " +
                 "    }" +
-                "    parentSiteRef:\\\"${stopPlace.netexId}\\\"" +
+                "    parentSiteRef:\\\"%s\\\"".formatted(stopPlace.getNetexId()) +
                 "    geometry: { " +
                 "      type:Point " +
                 "      coordinates:[[59.0, 10.5]] " +
@@ -379,7 +378,7 @@ public class GraphQLResourceParkingIntegrationTest extends AbstractGraphQLResour
                 "      value: \\\"Parking name\\\" " +
                 "      lang: \\\"no\\\" " +
                 "    }" +
-                "    parentSiteRef:\\\"${stopPlace.netexId}\\\"" +
+                "    parentSiteRef:\\\"%s\\\"".formatted(stopPlace.getNetexId()) +
                 "    geometry: { " +
                 "      type:Point " +
                 "      coordinates:[[59.0, 10.5]] " +

@@ -71,7 +71,7 @@ public class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResou
         pathLinkRepository.save(pathLink);
 
         String graphQlJsonQuery = """
-                    { ${GraphQLNames.FIND_PATH_LINK} (id:"${pathLink.getNetexId()}") {
+                    { %s (id:"%s") {
                     id 
                     from {
                         id
@@ -88,7 +88,7 @@ public class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResou
                         }
                     }
                 }
-              }""";
+              }""".formatted(FIND_PATH_LINK,pathLink.getNetexId());
 
         executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .root("data.pathLink[0]")
@@ -123,7 +123,7 @@ public class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResou
         pathLinkRepository.save(pathLink);
 
         String graphQlJsonQuery = """
-                    { ${GraphQLNames.FIND_PATH_LINK} (stopPlaceId: "${stopPlace.getNetexId()}") {
+                    { %s (stopPlaceId: "%s") {
                     id
                     from {
                         id
@@ -141,7 +141,7 @@ public class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResou
                     }
                    }
                   }
-                """;
+                """.formatted(FIND_PATH_LINK,stopPlace.getNetexId());
 
 
         executeGraphqQLQueryOnly(graphQlJsonQuery)
@@ -206,9 +206,9 @@ public class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResou
 
         String query = """
                            mutation {
-                           pathLink: ${MUTATE_PATH_LINK} (PathLink: [{
-                                from: {placeRef: {ref: "${firstQuay.getNetexId()}", version:"${firstQuay.getVersion()}"}},
-                                    to: {placeRef: {ref: "${secondQuay.getNetexId()}"}}
+                           pathLink: %s (PathLink: [{
+                                from: {placeRef: {ref: "%s", version:"%s"}},
+                                    to: {placeRef: {ref: "%s"}}
                                     geometry: {
                                         type: LineString, coordinates: [[10.3, 59.9], [10.3, 59.9], [10.3, 59.9], [10.3, 59.9], [10.3, 59.9]]
                                     }
@@ -233,7 +233,7 @@ public class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResou
                                     }
                                 }
                             }
-                           }""";
+                           }""".formatted(MUTATE_PATH_LINK,firstQuay.getNetexId(),firstQuay.getVersion(),secondQuay.getNetexId());
         return new PathLinkQuery(firstQuay, secondQuay, query);
     }
 
@@ -256,9 +256,9 @@ public class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResou
 
         String graphQlJsonQuery = """
                 mutation {
-                pathLink: ${MUTATE_PATH_LINK} (PathLink: [{
-                    from: {placeRef: {ref: "${firstQuay.getNetexId()}", version:"${firstQuay.getVersion()}"}},
-                    to: {placeRef: {ref: "${secondQuay.getNetexId()}"}},
+                pathLink: %s (PathLink: [{
+                    from: {placeRef: {ref: "%s", version:"%s"}},
+                    to: {placeRef: {ref: "%s"}},
                     geometry: {
                         type: LineString,
                         coordinates: [[10.3, 59.9], [10.3, 59.9], [10.3, 59.9], [10.3, 59.9], [10.3, 59.9]]
@@ -270,7 +270,7 @@ public class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResou
                         coordinates
                        }
                     }
-                }""";
+                }""".formatted(MUTATE_PATH_LINK,firstQuay.getNetexId(),firstQuay.getVersion(),secondQuay.getNetexId());
 
         String pathLinkId = executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .root("data.pathLink[0]")
@@ -282,11 +282,11 @@ public class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResou
 
         String secondGraphQlJsonQuery = """
                     mutation {
-                    pathLink: ${MUTATE_PATH_LINK} (PathLink: {
-                        id: "${pathLinkId}",
-                        ${TRANSFER_DURATION}: {
-                            ${DEFAULT_DURATION}: 1,
-                            ${FREQUENT_TRAVELLER_DURATION}: 2,
+                    pathLink: %s (PathLink: {
+                        id: "%s",
+                        %s: {
+                            %s: 1,
+                            %s: 2,
                         }
                     }) {
                         id
@@ -294,12 +294,20 @@ public class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResou
                             type
                             coordinates
                         }
-                        ${TRANSFER_DURATION} {
-                            ${DEFAULT_DURATION}
-                            ${FREQUENT_TRAVELLER_DURATION}
+                        %s {
+                            %s
+                            %s
                         }
                     }
-                }""";
+                }""".formatted(MUTATE_PATH_LINK,
+                pathLinkId,
+                TRANSFER_DURATION,
+                DEFAULT_DURATION,
+                FREQUENT_TRAVELLER_DURATION,
+                TRANSFER_DURATION,
+                DEFAULT_DURATION,
+                FREQUENT_TRAVELLER_DURATION
+        );
 
         executeGraphqQLQueryOnly(secondGraphQlJsonQuery)
                 .body("errors", nullValue())
