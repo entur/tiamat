@@ -134,27 +134,13 @@ public class TagKeyValuesMapper {
                 Tag tag = tagsByNumber.get(number);
 
                 switch (keyParts[2]) {
-                    case ID_REFERENCE:
-                        tag.setIdreference(value);
-                        break;
-                    case NAME:
-                        tag.setName(value);
-                        break;
-                    case CREATED_BY:
-                        tag.setCreatedBy(value);
-                        break;
-                    case CREATED:
-                        tag.setCreated(Instant.ofEpochMilli(Longs.tryParse(value)));
-                        break;
-                    case REMOVED:
-                        tag.setRemoved(Instant.ofEpochMilli(Longs.tryParse(value)));
-                        break;
-                    case REMOVED_BY:
-                        tag.setRemovedBy(value);
-                        break;
-                    case COMMENT:
-                        tag.setComment(value);
-                        break;
+                    case ID_REFERENCE -> tag.setIdreference(value);
+                    case NAME -> tag.setName(value);
+                    case CREATED_BY -> tag.setCreatedBy(value);
+                    case CREATED -> tag.setCreated(Instant.ofEpochMilli(Longs.tryParse(value)));
+                    case REMOVED -> tag.setRemoved(Instant.ofEpochMilli(Longs.tryParse(value)));
+                    case REMOVED_BY -> tag.setRemovedBy(value);
+                    case COMMENT -> tag.setComment(value);
                 }
             }
         }

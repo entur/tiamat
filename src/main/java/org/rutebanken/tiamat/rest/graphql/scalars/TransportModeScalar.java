@@ -144,24 +144,17 @@ public class TransportModeScalar {
             StopPlace stopPlace = (StopPlace) o;
             VehicleModeEnumeration mode = stopPlace.getTransportMode();
             if (mode != null) {
-                switch (mode) {
-                    case BUS:
-                        return stopPlace.getBusSubmode();
-                    case TRAM:
-                        return stopPlace.getTramSubmode();
-                    case RAIL:
-                        return stopPlace.getRailSubmode();
-                    case METRO:
-                        return stopPlace.getMetroSubmode();
-                    case AIR:
-                        return stopPlace.getAirSubmode();
-                    case WATER:
-                        return stopPlace.getWaterSubmode();
-                    case CABLEWAY:
-                        return stopPlace.getTelecabinSubmode();
-                    case FUNICULAR:
-                        return stopPlace.getFunicularSubmode();
-                }
+                return switch (mode) {
+                    case BUS -> stopPlace.getBusSubmode();
+                    case TRAM -> stopPlace.getTramSubmode();
+                    case RAIL -> stopPlace.getRailSubmode();
+                    case METRO -> stopPlace.getMetroSubmode();
+                    case AIR -> stopPlace.getAirSubmode();
+                    case WATER -> stopPlace.getWaterSubmode();
+                    case CABLEWAY -> stopPlace.getTelecabinSubmode();
+                    case FUNICULAR -> stopPlace.getFunicularSubmode();
+                    default -> throw new IllegalStateException("Unexpected VehicleModeEnumeration  mode value: " + mode);
+                };
             }
         }
         return null;

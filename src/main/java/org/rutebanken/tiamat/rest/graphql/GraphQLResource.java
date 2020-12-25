@@ -135,18 +135,15 @@ public class GraphQLResource {
                 Response.Status status = Response.Status.INTERNAL_SERVER_ERROR;
                 for (GraphQLError error : errors) {
                     switch (error.getErrorType()) {
-                        case InvalidSyntax:
-                        case ValidationError:
-                            status = Response.Status.BAD_REQUEST;
-                            break;
-                        case DataFetchingException:
+                        case InvalidSyntax, ValidationError -> status = Response.Status.BAD_REQUEST;
+                        case DataFetchingException -> {
                             ExceptionWhileDataFetching exceptionWhileDataFetching = ((ExceptionWhileDataFetching) error);
                             if (exceptionWhileDataFetching.getException() != null) {
                                 status = getStatusCodeFromThrowable(exceptionWhileDataFetching.getException());
                                 break;
                             }
                             status = Response.Status.OK;
-                            break;
+                        }
                     }
                 }
 

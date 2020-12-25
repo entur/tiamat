@@ -46,18 +46,13 @@ public class PathLinkObjectTypeCreator {
             if (env.getSource() != null) {
                 TransferDuration transferDuration = (TransferDuration) env.getSource();
 
-                switch (env.getFields().get(0).getName()) {
-                    case DEFAULT_DURATION:
-                        return getSeconds(transferDuration.getDefaultDuration());
-                    case OCCASIONAL_TRAVELLER_DURATION:
-                        return getSeconds(transferDuration.getOccasionalTravellerDuration());
-                    case MOBILITY_RESTRICTED_TRAVELLER_DURATION:
-                        return getSeconds(transferDuration.getMobilityRestrictedTravellerDuration());
-                    case FREQUENT_TRAVELLER_DURATION:
-                        return getSeconds(transferDuration.getFrequentTravellerDuration());
-                    default:
-                        return null;
-                }
+                return switch (env.getFields().get(0).getName()) {
+                    case DEFAULT_DURATION -> getSeconds(transferDuration.getDefaultDuration());
+                    case OCCASIONAL_TRAVELLER_DURATION -> getSeconds(transferDuration.getOccasionalTravellerDuration());
+                    case MOBILITY_RESTRICTED_TRAVELLER_DURATION -> getSeconds(transferDuration.getMobilityRestrictedTravellerDuration());
+                    case FREQUENT_TRAVELLER_DURATION -> getSeconds(transferDuration.getFrequentTravellerDuration());
+                    default -> null;
+                };
             }
             return null;
         };
