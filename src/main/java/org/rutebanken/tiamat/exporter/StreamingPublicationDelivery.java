@@ -52,16 +52,21 @@ import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.ServiceFrame;
 import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.netex.id.NetexIdHelper;
+import org.rutebanken.tiamat.netex.id.ValidPrefixList;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.repository.GroupOfStopPlacesRepository;
 import org.rutebanken.tiamat.repository.ParkingRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.repository.TariffZoneRepository;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
+import org.rutebanken.tiamat.repository.search.ChangedStopPlaceSearch;
+import org.rutebanken.tiamat.service.stopplace.ChildStopPlacesFetcher;
+import org.rutebanken.tiamat.service.stopplace.ParentStopPlacesFetcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.xml.sax.SAXException;
@@ -85,12 +90,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.StreamSupport;
 
+import static java.util.stream.Collectors.toSet;
 import static javax.xml.bind.JAXBContext.newInstance;
 
 /**
  * Stream data objects inside already serialized publication delivery.
- * To be able to export many stop places wihtout keeping them all in memory.
+ * To be able to export many stop places without keeping them all in memory.
  */
 @Transactional(readOnly = true)
 @Component
@@ -101,9 +109,10 @@ public class StreamingPublicationDelivery {
     private static final JAXBContext publicationDeliveryContext = createContext(PublicationDeliveryStructure.class);
     private static final ObjectFactory netexObjectFactory = new ObjectFactory();
 
+    private static final AtomicLong publicationDeliveryId = new AtomicLong();
+
     private final StopPlaceRepository stopPlaceRepository;
     private final ParkingRepository parkingRepository;
-    private final PublicationDeliveryExporter publicationDeliveryExporter;
     private final TiamatSiteFrameExporter tiamatSiteFrameExporter;
     private final TiamatServiceFrameExporter tiamatServiceFrameExporter;
     private final NetexMapper netexMapper;
@@ -112,11 +121,25 @@ public class StreamingPublicationDelivery {
     private final GroupOfStopPlacesRepository groupOfStopPlacesRepository;
     private final NeTExValidator neTExValidator = NeTExValidator.getNeTExValidator();
     private final NetexIdHelper netexIdHelper;
+    private final ValidPrefixList validPrefixList;
     /**
      * Validate against netex schema using the {@link NeTExValidator}
      * Enabling this for large xml files can lead to high memory consumption and/or massive performance impact.
      */
     private final boolean validateAgainstSchema;
+
+
+    public enum MultiModalFetchMode {CHILDREN, PARENTS;}
+
+    @Autowired
+    private TariffZonesFromStopsExporter tariffZonesFromStopsExporter;
+    @Autowired
+    private TopographicPlacesExporter topographicPlacesExporter;
+    @Autowired
+    ChildStopPlacesFetcher childStopPlacesFetcher;
+    @Autowired
+    ParentStopPlacesFetcher parentStopPlacesFetcher;
+
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -124,7 +147,6 @@ public class StreamingPublicationDelivery {
     @Autowired
     public StreamingPublicationDelivery(StopPlaceRepository stopPlaceRepository,
                                         ParkingRepository parkingRepository,
-                                        PublicationDeliveryExporter publicationDeliveryExporter,
                                         TiamatSiteFrameExporter tiamatSiteFrameExporter,
                                         TiamatServiceFrameExporter tiamatServiceFrameExporter,
                                         NetexMapper netexMapper,
@@ -132,10 +154,10 @@ public class StreamingPublicationDelivery {
                                         TopographicPlaceRepository topographicPlaceRepository,
                                         GroupOfStopPlacesRepository groupOfStopPlacesRepository,
                                         NetexIdHelper netexIdHelper,
-                                        @Value("${asyncNetexExport.validateAgainstSchema:false}") boolean validateAgainstSchema) throws IOException, SAXException {
+                                        @Value("${asyncNetexExport.validateAgainstSchema:false}") boolean validateAgainstSchema,
+                                        ValidPrefixList validPrefixList) throws IOException, SAXException {
         this.stopPlaceRepository = stopPlaceRepository;
         this.parkingRepository = parkingRepository;
-        this.publicationDeliveryExporter = publicationDeliveryExporter;
         this.tiamatSiteFrameExporter = tiamatSiteFrameExporter;
         this.tiamatServiceFrameExporter = tiamatServiceFrameExporter;
         this.netexMapper = netexMapper;
@@ -144,6 +166,7 @@ public class StreamingPublicationDelivery {
         this.groupOfStopPlacesRepository = groupOfStopPlacesRepository;
         this.netexIdHelper = netexIdHelper;
         this.validateAgainstSchema = validateAgainstSchema;
+        this.validPrefixList = validPrefixList;
     }
 
     private static JAXBContext createContext(Class clazz) {
@@ -208,9 +231,9 @@ public class StreamingPublicationDelivery {
 
         if (exportParams.getServiceFrameExportMode() == ExportParams.ExportMode.ALL) {
             prepareScheduledStopPoints(stopPlacePrimaryIds, netexServiceFrame);
-            publicationDeliveryStructure = publicationDeliveryExporter.createPublicationDelivery(netexSiteFrame, netexServiceFrame);
+            publicationDeliveryStructure = createPublicationDelivery(netexSiteFrame, netexServiceFrame);
         } else {
-            publicationDeliveryStructure = publicationDeliveryExporter.createPublicationDelivery(netexSiteFrame);
+            publicationDeliveryStructure = createPublicationDelivery(netexSiteFrame);
         }
 
         Marshaller marshaller = createMarshaller();
@@ -224,6 +247,124 @@ public class StreamingPublicationDelivery {
                 mappedGroupOfStopPlacesCount,
                 mappedTariffZonesCount);
 
+    }
+
+    @SuppressWarnings("unchecked")
+    public PublicationDeliveryStructure createPublicationDelivery(org.rutebanken.netex.model.SiteFrame siteFrame) {
+        PublicationDeliveryStructure publicationDeliveryStructure = createPublicationDelivery();
+        publicationDeliveryStructure.withDataObjects(
+                new PublicationDeliveryStructure.DataObjects()
+                        .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(siteFrame)));
+
+        logger.info("Returning publication delivery {} with site frame", publicationDeliveryStructure);
+        return publicationDeliveryStructure;
+    }
+
+    @SuppressWarnings("unchecked")
+    public PublicationDeliveryStructure createPublicationDelivery(org.rutebanken.netex.model.SiteFrame siteFrame, org.rutebanken.netex.model.ServiceFrame serviceFrame) {
+        PublicationDeliveryStructure publicationDeliveryStructure = createPublicationDelivery();
+        final JAXBElement<SiteFrame> siteFrame1 = new ObjectFactory().createSiteFrame(siteFrame);
+        final JAXBElement<org.rutebanken.netex.model.ServiceFrame> serviceFrame1 = new ObjectFactory().createServiceFrame(serviceFrame);
+
+
+
+        publicationDeliveryStructure.withDataObjects
+                (
+                        new PublicationDeliveryStructure.DataObjects()
+                                .withCompositeFrameOrCommonFrame(serviceFrame1)
+                                .withCompositeFrameOrCommonFrame(siteFrame1)
+                );
+
+        logger.info("Returning publication delivery {} with site frame and  service frame", publicationDeliveryStructure);
+        return publicationDeliveryStructure;
+    }
+
+    public PublicationDeliveryStructure createPublicationDelivery() {
+        return new PublicationDeliveryStructure()
+                .withVersion(String.valueOf(publicationDeliveryId.incrementAndGet()))
+                .withPublicationTimestamp(LocalDateTime.now())
+                .withParticipantRef(validPrefixList.getValidNetexPrefix());
+    }
+
+    @Transactional(readOnly = true)
+    public PublicationDeliveryStructurePage exportStopPlacesWithEffectiveChangeInPeriod(ChangedStopPlaceSearch search, ExportParams exportParams) {
+        logger.info("Finding changed stop places with search params: {}", search);
+        Page<org.rutebanken.tiamat.model.StopPlace> stopPlacePage = stopPlaceRepository.findStopPlacesWithEffectiveChangeInPeriod(search);
+        logger.debug("Found {} changed stop places", stopPlacePage.getSize());
+
+        PublicationDeliveryStructure publicationDelivery = exportPublicationDeliveryWithStops(stopPlacePage.getContent(), exportParams, MultiModalFetchMode.CHILDREN);
+
+        PublicationDeliveryStructurePage publicationDeliveryStructure = new PublicationDeliveryStructurePage(
+                publicationDelivery,
+                stopPlacePage.getSize(),
+                stopPlacePage.getTotalElements(),
+                stopPlacePage.hasNext());
+        logger.debug("Returning publication delivery structure: {}", publicationDeliveryStructure);
+        return publicationDeliveryStructure;
+    }
+
+    /**
+     *
+     * @param stopPlaces
+     * @param exportParams
+     * @param multiModalFetchMode if parents or children should be fetched
+     * @return
+     */
+    public PublicationDeliveryStructure exportPublicationDeliveryWithStops(List<org.rutebanken.tiamat.model.StopPlace> stopPlaces, ExportParams exportParams, MultiModalFetchMode multiModalFetchMode) {
+        logger.info("Preparing publication delivery export");
+
+        if(multiModalFetchMode == null) {
+            multiModalFetchMode = MultiModalFetchMode.PARENTS;
+        }
+
+        if(multiModalFetchMode.equals(MultiModalFetchMode.CHILDREN)) {
+            stopPlaces = childStopPlacesFetcher.resolveChildren(stopPlaces);
+        } else if( multiModalFetchMode.equals(MultiModalFetchMode.PARENTS)){
+            stopPlaces = parentStopPlacesFetcher.resolveParents(stopPlaces, true);
+        }
+
+
+        org.rutebanken.tiamat.model.SiteFrame siteFrame = tiamatSiteFrameExporter.createTiamatSiteFrame("Site frame with stops");
+
+        tiamatSiteFrameExporter.addStopsToTiamatSiteFrame(siteFrame, stopPlaces);
+        topographicPlacesExporter.addTopographicPlacesToTiamatSiteFrame(exportParams.getTopographicPlaceExportMode(), siteFrame);
+
+        boolean relevantTariffZones = ExportParams.ExportMode.RELEVANT.equals(exportParams.getTariffZoneExportMode());
+
+        if (!relevantTariffZones && ExportParams.ExportMode.ALL.equals(exportParams.getTariffZoneExportMode())) {
+            tiamatSiteFrameExporter.addAllTariffZones(siteFrame);
+        }
+
+        Set<Long> stopPlaceIds = stopPlaces.stream().map(stopPlace -> stopPlace.getId()).collect(toSet());
+        tiamatSiteFrameExporter.addRelevantPathLinks(stopPlaceIds, siteFrame);
+
+        logger.info("Mapping site frame to netex model");
+        org.rutebanken.netex.model.SiteFrame convertedSiteFrame = netexMapper.mapToNetexModel(siteFrame);
+
+        if (convertedSiteFrame.getStopPlaces() != null) {
+            if (relevantTariffZones) {
+                tariffZonesFromStopsExporter.resolveTariffZones(convertedSiteFrame.getStopPlaces().getStopPlace(), convertedSiteFrame);
+            } else if (ExportParams.ExportMode.NONE.equals(exportParams.getTariffZoneExportMode())) {
+                logger.info("TariffZone export mode is NONE. Removing references from {} converted stop places", convertedSiteFrame.getStopPlaces().getStopPlace().size());
+                convertedSiteFrame.getStopPlaces().getStopPlace()
+                        .forEach(convertedStop -> convertedStop.setTariffZones(null));
+            }
+        }
+
+        if (ExportParams.ExportMode.NONE.equals(exportParams.getTopographicPlaceExportMode())) {
+            removeVersionFromTopographicPlaceReferences(convertedSiteFrame);
+        }
+
+        return createPublicationDelivery(convertedSiteFrame);
+    }
+
+    private void removeVersionFromTopographicPlaceReferences(org.rutebanken.netex.model.SiteFrame convertedSiteFrame) {
+        if (convertedSiteFrame.getStopPlaces() != null) {
+            convertedSiteFrame.getStopPlaces().getStopPlace()
+                    .stream()
+                    .filter(sp -> sp.getTopographicPlaceRef() != null)
+                    .forEach(sp -> sp.getTopographicPlaceRef().setVersion(null));
+        }
     }
 
     private void prepareTariffZones(ExportParams exportParams, Set<Long> stopPlacePrimaryIds, AtomicInteger mappedTariffZonesCount, SiteFrame netexSiteFrame, EntitiesEvictor evicter) {

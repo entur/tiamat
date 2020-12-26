@@ -104,27 +104,24 @@ public class AsyncPublicationDeliveryExporter {
         exportJob.setSubFolder(generateSubFolderName());
 
         exportJobRepository.save(exportJob);
-        String fileNameWithoutExtention = createFileNameWithoutExtention(exportJob.getId(), exportJob.getStarted());
-        exportJob.setFileName(fileNameWithoutExtention + ".zip");
+        String fileNameWithoutExtension = createFileNameWithoutExtension(exportJob.getId(), exportJob.getStarted());
+        exportJob.setFileName(fileNameWithoutExtension + ".zip");
 
-        ExportJobWorker exportJobWorker = new ExportJobWorker(exportJob, streamingPublicationDelivery, localExportPath, fileNameWithoutExtention, blobStoreService, exportJobRepository, netexXmlReferenceValidator);
+        ExportJobWorker exportJobWorker = new ExportJobWorker(exportJob, streamingPublicationDelivery, localExportPath, fileNameWithoutExtension, blobStoreService, exportJobRepository, netexXmlReferenceValidator);
         exportService.submit(exportJobWorker);
         logger.info("Returning started export job {}", exportJob);
         setJobUrl(exportJob);
         return exportJob;
     }
 
-    public String createFileNameWithoutExtention(long exportJobId, Instant started) {
+    public String createFileNameWithoutExtension(long exportJobId, Instant started) {
         return "tiamat-export-" + started.atZone(exportTimeZone.getDefaultTimeZoneId()).format(DATE_TIME_FORMATTER) + "-" +exportJobId;
     }
 
     public ExportJob getExportJob(long exportJobId) {
 
         Optional<ExportJob> exportJob = exportJobRepository.findById(exportJobId);
-        if(exportJob.isPresent()) {
-            return setJobUrl(exportJob.get());
-        }
-        return null;
+        return exportJob.map(this::setJobUrl).orElse(null);
     }
 
     public InputStream getJobFileContent(ExportJob exportJob) {

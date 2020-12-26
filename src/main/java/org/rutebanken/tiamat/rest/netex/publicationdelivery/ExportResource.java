@@ -18,7 +18,6 @@ package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 import io.swagger.annotations.Api;
 import org.rutebanken.tiamat.dtoassembling.disassembler.ChangedStopPlaceSearchDisassembler;
 import org.rutebanken.tiamat.dtoassembling.dto.ChangedStopPlaceSearchDto;
-import org.rutebanken.tiamat.exporter.PublicationDeliveryExporter;
 import org.rutebanken.tiamat.exporter.PublicationDeliveryStructurePage;
 import org.rutebanken.tiamat.exporter.StreamingPublicationDelivery;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
@@ -49,8 +48,6 @@ public class ExportResource {
 
     private final PublicationDeliveryStreamingOutput publicationDeliveryStreamingOutput;
 
-    private final PublicationDeliveryExporter publicationDeliveryExporter;
-
     private final ChangedStopPlaceSearchDisassembler changedStopPlaceSearchDisassembler;
 
     @Qualifier("syncStreamingPublicationDelivery")
@@ -59,11 +56,9 @@ public class ExportResource {
 
     @Autowired
     public ExportResource(PublicationDeliveryStreamingOutput publicationDeliveryStreamingOutput,
-                          PublicationDeliveryExporter publicationDeliveryExporter,
                           ChangedStopPlaceSearchDisassembler changedStopPlaceSearchDisassembler) {
 
         this.publicationDeliveryStreamingOutput = publicationDeliveryStreamingOutput;
-        this.publicationDeliveryExporter = publicationDeliveryExporter;
         this.changedStopPlaceSearchDisassembler = changedStopPlaceSearchDisassembler;
     }
 
@@ -96,7 +91,7 @@ public class ExportResource {
         ChangedStopPlaceSearch search = changedStopPlaceSearchDisassembler.disassemble(searchDTO);
         logger.info("Exporting stop places. Search: {}, topographic export mode: {}", search, exportParams.getTopographicPlaceExportMode());
         PublicationDeliveryStructurePage resultPage =
-                publicationDeliveryExporter.exportStopPlacesWithEffectiveChangeInPeriod(search, exportParams);
+                streamingPublicationDelivery.exportStopPlacesWithEffectiveChangeInPeriod(search, exportParams);
 
         if (resultPage.totalElements == 0) {
             logger.debug("Returning no content. No stops changed in period.");

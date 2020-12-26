@@ -18,7 +18,7 @@ package org.rutebanken.tiamat.importer;
 import org.rutebanken.helper.organisation.NotAuthenticatedException;
 import org.rutebanken.helper.organisation.RoleAssignmentExtractor;
 import org.rutebanken.netex.model.*;
-import org.rutebanken.tiamat.exporter.PublicationDeliveryExporter;
+import org.rutebanken.tiamat.exporter.StreamingPublicationDelivery;
 import org.rutebanken.tiamat.importer.handler.*;
 import org.rutebanken.tiamat.importer.log.ImportLogger;
 import org.rutebanken.tiamat.importer.log.ImportLoggerTask;
@@ -45,7 +45,7 @@ public class PublicationDeliveryImporter {
 
 
     private final PublicationDeliveryHelper publicationDeliveryHelper;
-    private final PublicationDeliveryExporter publicationDeliveryExporter;
+    private final StreamingPublicationDelivery streamingPublicationDelivery;
     private final PathLinkImportHandler pathLinkImportHandler;
     private final TariffZoneImportHandler tariffZoneImportHandler;
     private final StopPlaceImportHandler stopPlaceImportHandler;
@@ -56,8 +56,7 @@ public class PublicationDeliveryImporter {
 
     @Autowired
     public PublicationDeliveryImporter(PublicationDeliveryHelper publicationDeliveryHelper, NetexMapper netexMapper,
-                                       PublicationDeliveryExporter publicationDeliveryExporter,
-                                       PathLinkImportHandler pathLinkImportHandler,
+                                       StreamingPublicationDelivery streamingPublicationDelivery, PathLinkImportHandler pathLinkImportHandler,
                                        TopographicPlaceImportHandler topographicPlaceImportHandler,
                                        TariffZoneImportHandler tariffZoneImportHandler,
                                        StopPlaceImportHandler stopPlaceImportHandler,
@@ -65,8 +64,8 @@ public class PublicationDeliveryImporter {
                                        RoleAssignmentExtractor roleAssignmentExtractor,
                                        BackgroundJobs backgroundJobs) {
         this.publicationDeliveryHelper = publicationDeliveryHelper;
+        this.streamingPublicationDelivery = streamingPublicationDelivery;
         this.parkingsImportHandler = parkingsImportHandler;
-        this.publicationDeliveryExporter = publicationDeliveryExporter;
         this.pathLinkImportHandler = pathLinkImportHandler;
         this.topographicPlaceImportHandler = topographicPlaceImportHandler;
         this.tariffZoneImportHandler = tariffZoneImportHandler;
@@ -137,7 +136,7 @@ public class PublicationDeliveryImporter {
             if(responseSiteframe.getTariffZones() != null || responseSiteframe.getTopographicPlaces() != null) {
                 backgroundJobs.triggerStopPlaceUpdate();
             }
-            return publicationDeliveryExporter.createPublicationDelivery(responseSiteframe);
+            return streamingPublicationDelivery.createPublicationDelivery(responseSiteframe);
         } finally {
             MDC.remove(IMPORT_CORRELATION_ID);
             loggerTimer.cancel();

@@ -41,7 +41,7 @@ import static org.rutebanken.tiamat.exporter.params.ExportParams.newExportParams
 public class PublicationDeliveryExporterTest extends TiamatIntegrationTest {
 
     @Autowired
-    private PublicationDeliveryExporter publicationDeliveryExporter;
+    private StreamingPublicationDelivery streamingPublicationDelivery;
 
     @Autowired
     private PublicationDeliveryTestHelper publicationDeliveryTestHelper;
@@ -73,7 +73,7 @@ public class PublicationDeliveryExporterTest extends TiamatIntegrationTest {
 
         ExportParams exportParams = ExportParams.newExportParamsBuilder().build();
 
-        PublicationDeliveryStructurePage publicationDeliveryStructurePage = publicationDeliveryExporter.exportStopPlacesWithEffectiveChangeInPeriod(changedStopPlaceSearch, exportParams);
+        PublicationDeliveryStructurePage publicationDeliveryStructurePage = streamingPublicationDelivery.exportStopPlacesWithEffectiveChangeInPeriod(changedStopPlaceSearch, exportParams);
 
         PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryStructurePage.publicationDeliveryStructure;
 
@@ -119,7 +119,7 @@ public class PublicationDeliveryExporterTest extends TiamatIntegrationTest {
 
         ExportParams exportParams = ExportParams.newExportParamsBuilder().build();
 
-        PublicationDeliveryStructurePage publicationDeliveryStructurePage = publicationDeliveryExporter.exportStopPlacesWithEffectiveChangeInPeriod(changedStopPlaceSearch, exportParams);
+        PublicationDeliveryStructurePage publicationDeliveryStructurePage = streamingPublicationDelivery.exportStopPlacesWithEffectiveChangeInPeriod(changedStopPlaceSearch, exportParams);
 
         PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryStructurePage.publicationDeliveryStructure;
 
