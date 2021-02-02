@@ -1,5 +1,7 @@
-FROM openjdk:11-jre
-ADD target/tiamat-*-SNAPSHOT.jar tiamat.jar
-
+FROM adoptopenjdk/openjdk11:alpine-jre
+WORKDIR /deployments
+COPY target/tiamat-*-SNAPSHOT.jar tiamat.jar
+RUN addgroup appuser && adduser --disabled-password appuser --ingroup appuser
+USER appuser
 EXPOSE 8777
-CMD java $JAVA_OPTIONS -jar /tiamat.jar
+CMD java $JAVA_OPTIONS -jar tiamat.jar
