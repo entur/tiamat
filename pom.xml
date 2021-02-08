@@ -64,7 +64,7 @@
         <spring-boot-plugin.version>2.3.4.RELEASE</spring-boot-plugin.version>
         <spring-boot.version>2.3.4.RELEASE</spring-boot.version>
         <spring.security.version>5.3.5.RELEASE</spring.security.version>
-        <keycloak.version>4.8.3.Final</keycloak.version>
+        <keycloak.version>12.0.0</keycloak.version>
         <postgresql.version>42.2.4</postgresql.version>
         <geodb.version>0.9</geodb.version>
         <geotools.version>20.1</geotools.version>
@@ -594,8 +594,7 @@
                                     <classpath refid="maven.test.classpath"/>
                                 </taskdef>
                                 <mkdir dir="${project.build.testOutputDirectory}"/>
-                                <groovyc destdir="${project.build.testOutputDirectory}"
-                                         srcdir="${basedir}/src/test/groovy/" listfiles="true">
+                                <groovyc destdir="${project.build.testOutputDirectory}" srcdir="${basedir}/src/test/groovy/" listfiles="true">
                                     <classpath refid="maven.test.classpath"/>
                                 </groovyc>
                             </tasks>
