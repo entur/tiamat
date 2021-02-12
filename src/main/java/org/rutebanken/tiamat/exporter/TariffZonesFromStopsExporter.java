@@ -15,10 +15,12 @@
 
 package org.rutebanken.tiamat.exporter;
 
+import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.SiteFrame;
 import org.rutebanken.netex.model.StopPlace;
 import org.rutebanken.netex.model.TariffZone;
 import org.rutebanken.netex.model.TariffZonesInFrame_RelStructure;
+import org.rutebanken.netex.model.Zone_VersionStructure;
 import org.rutebanken.tiamat.model.TariffZoneRef;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.repository.reference.ReferenceResolver;
@@ -28,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.xml.bind.JAXBElement;
 import java.util.*;
 
 @Component
@@ -51,11 +54,11 @@ public class TariffZonesFromStopsExporter {
      */
     public void resolveTariffZones(Collection<StopPlace> importedNetexStopPlaces, SiteFrame responseSiteFrame) {
 
-        Map<String, TariffZone> tariffZoneMap = new HashMap<>();
+        Map<String, JAXBElement<? extends Zone_VersionStructure>> tariffZoneMap = new HashMap<>();
 
         if(responseSiteFrame.getTariffZones() != null && responseSiteFrame.getTariffZones().getTariffZone() != null) {
             responseSiteFrame.getTariffZones().getTariffZone()
-                    .forEach(tariffZone -> tariffZoneMap.put(key(tariffZone.getId(), tariffZone.getVersion()), tariffZone));
+                    .forEach(tariffZone -> tariffZoneMap.put(key(tariffZone.getValue().getId(), tariffZone.getValue().getVersion()), tariffZone));
         }
 
         importedNetexStopPlaces.stream()
@@ -74,7 +77,7 @@ public class TariffZonesFromStopsExporter {
                 .filter(Objects::nonNull)
                 .peek(tiamatTariffZone -> logger.debug("Resolved tariffZone: {}", tiamatTariffZone))
                 .map(tiamatTariffZone -> netexMapper.getFacade().map(tiamatTariffZone, TariffZone.class))
-                .forEach(tariffZone -> tariffZoneMap.put(key(tariffZone.getId(), tariffZone.getVersion()), tariffZone));
+                .forEach(tariffZone -> tariffZoneMap.put(key(tariffZone.getId(), tariffZone.getVersion()), new ObjectFactory().createTariffZone(tariffZone)));
 
         if(tariffZoneMap.values().isEmpty()) {
             logger.info("No relevant tariff zones to return");

@@ -167,6 +167,10 @@ public class NetexMapper {
         return facade.map(topographicPlace, TopographicPlace.class);
     }
 
+    public TariffZone mapToNetexModel(org.rutebanken.tiamat.model.TariffZone tariffZone) {
+        return facade.map(tariffZone, TariffZone.class);
+    }
+
     public SiteFrame mapToNetexModel(org.rutebanken.tiamat.model.SiteFrame tiamatSiteFrame) {
         SiteFrame siteFrame = facade.map(tiamatSiteFrame, SiteFrame.class);
         return siteFrame;
