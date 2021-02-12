@@ -181,6 +181,11 @@ public class NetexMapper {
         return serviceFrame;
     }
 
+    public FareFrame mapToNetexModel(org.rutebanken.tiamat.model.FareFrame tiamatFareFrame) {
+        FareFrame fareFrame = facade.map(tiamatFareFrame, FareFrame.class);
+        return fareFrame;
+    }
+
     public StopPlace mapToNetexModel(org.rutebanken.tiamat.model.StopPlace tiamatStopPlace) {
         return facade.map(tiamatStopPlace, StopPlace.class);
     }
