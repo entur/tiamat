@@ -53,8 +53,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import javax.xml.bind.JAXBElement;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 @Component
 public class TariffZoneImportHandler {
@@ -67,7 +69,9 @@ public class TariffZoneImportHandler {
 
     private final TariffZoneImporter tariffZoneImporter;
 
-    public TariffZoneImportHandler(PublicationDeliveryHelper publicationDeliveryHelper, NetexMapper netexMapper, TariffZoneImporter tariffZoneImporter) {
+    public TariffZoneImportHandler(PublicationDeliveryHelper publicationDeliveryHelper,
+                                   NetexMapper netexMapper,
+                                   TariffZoneImporter tariffZoneImporter) {
         this.publicationDeliveryHelper = publicationDeliveryHelper;
         this.netexMapper = netexMapper;
         this.tariffZoneImporter = tariffZoneImporter;
@@ -77,9 +81,13 @@ public class TariffZoneImportHandler {
     public void handleTariffZones(SiteFrame netexSiteFrame, ImportParams importParams, AtomicInteger tariffZoneImportedCounter, SiteFrame responseSiteframe) {
 
         if (publicationDeliveryHelper.hasTariffZones(netexSiteFrame) && importParams.importType != ImportType.ID_MATCH) {
-            List<org.rutebanken.tiamat.model.TariffZone> tiamatTariffZones = netexMapper.getFacade().mapAsList(netexSiteFrame.getTariffZones().getTariffZone(), org.rutebanken.tiamat.model.TariffZone.class);
-            logger.debug("Mapped {} tariff zones from netex to internal model", tiamatTariffZones.size());
-            List<TariffZone> importedTariffZones = tariffZoneImporter.importTariffZones(tiamatTariffZones);
+            List<org.rutebanken.tiamat.model.TariffZone> tiamatTariffZones = netexSiteFrame.getTariffZones().getTariffZone().stream()
+                    .map(jaxbElement -> (TariffZone) jaxbElement.getValue())
+                    .map(netexMapper::mapToTiamatModel)
+                    .collect(Collectors.toList());
+             logger.debug("Mapped {} tariff zones from netex to internal model", tiamatTariffZones.size());
+            List<JAXBElement<? extends Zone_VersionStructure>> importedTariffZones = tariffZoneImporter.importTariffZones(tiamatTariffZones).stream()
+                    .map(tariffZone -> new ObjectFactory().createTariffZone(tariffZone)).collect(Collectors.toList());
             logger.debug("Got {} imported tariffZones ", importedTariffZones.size());
             if (!importedTariffZones.isEmpty()) {
                 responseSiteframe.withTariffZones(new TariffZonesInFrame_RelStructure().withTariffZone(importedTariffZones));
