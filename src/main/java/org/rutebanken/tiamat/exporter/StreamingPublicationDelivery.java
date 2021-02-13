@@ -244,17 +244,18 @@ public class StreamingPublicationDelivery {
             tariffZoneIterator = Collections.emptyIterator();
         }
 
-        if (tariffZoneIterator.hasNext()) {
+        List<JAXBElement<? extends Zone_VersionStructure>> netexTariffZones = new ArrayList<>();
+        while (tariffZoneIterator.hasNext()) {
             final TariffZone tariffZone = netexMapper.mapToNetexModel(tariffZoneIterator.next());
             final JAXBElement<TariffZone> tariffZoneJAXBElement = new ObjectFactory().createTariffZone(tariffZone);
-
-            List<JAXBElement<? extends Zone_VersionStructure>> netexTariffZones = new ArrayList<>();
-
             netexTariffZones.add(tariffZoneJAXBElement);
+            mappedTariffZonesCount.incrementAndGet();
 
-            TariffZonesInFrame_RelStructure tariffZonesInFrame_relStructure = new TariffZonesInFrame_RelStructure();
-            setField(TariffZonesInFrame_RelStructure.class, "tariffZone", tariffZonesInFrame_relStructure, netexTariffZones);
-            netexSiteFrame.setTariffZones(tariffZonesInFrame_relStructure);
+        }
+        if (!netexTariffZones.isEmpty()) {
+            var tariffZonesInFrameRelStructure = new TariffZonesInFrame_RelStructure();
+            setField(TariffZonesInFrame_RelStructure.class, "tariffZone", tariffZonesInFrameRelStructure, netexTariffZones);
+            netexSiteFrame.setTariffZones(tariffZonesInFrameRelStructure);
         } else {
             logger.info("No tariff zones to export");
             netexSiteFrame.setTariffZones(null);
