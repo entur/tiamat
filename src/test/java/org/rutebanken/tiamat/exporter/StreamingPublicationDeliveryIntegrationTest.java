@@ -360,13 +360,13 @@ public class StreamingPublicationDeliveryIntegrationTest extends TiamatIntegrati
 
 
         //TODO: Fix test
-        /*
+
         assertThat(siteFrame.getTariffZones().getTariffZone())
                 .extracting(tariffZone -> tariffZone.getValue().getId() + "-" + tariffZone.getValue().getVersion())
                 .as("Both tariff zones exists in publication delivery. But not the one not being reffered to (v2)")
                .containsOnly(tariffZoneId + "-" + 1, tariffZoneId + "-" + 3);
 
-         */
+
 
 
 
