@@ -17,6 +17,7 @@ package org.rutebanken.tiamat.config;
 
 import org.rutebanken.tiamat.exporter.PublicationDeliveryExporter;
 import org.rutebanken.tiamat.exporter.StreamingPublicationDelivery;
+import org.rutebanken.tiamat.exporter.TiamatFareFrameExporter;
 import org.rutebanken.tiamat.exporter.TiamatServiceFrameExporter;
 import org.rutebanken.tiamat.exporter.TiamatSiteFrameExporter;
 import org.rutebanken.tiamat.netex.id.NetexIdHelper;
@@ -47,6 +48,9 @@ public class StreamingPublicationDeliveryConfig {
 
     @Autowired
     private TiamatServiceFrameExporter tiamatServiceFrameExporter;
+
+    @Autowired
+    private TiamatFareFrameExporter tiamatFareFrameExporter;
 
     @Autowired
     private NetexMapper netexMapper;
@@ -81,7 +85,7 @@ public class StreamingPublicationDeliveryConfig {
 
     private StreamingPublicationDelivery createStreamingPublicationDelivery(boolean validate) throws IOException, SAXException {
         return new StreamingPublicationDelivery(stopPlaceRepository, parkingRepository, publicationDeliveryExporter,
-                tiamatSiteFrameExporter,tiamatServiceFrameExporter, netexMapper, tariffZoneRepository, topographicPlaceRepository,
+                tiamatSiteFrameExporter,tiamatServiceFrameExporter,tiamatFareFrameExporter, netexMapper, tariffZoneRepository, topographicPlaceRepository,
                 groupOfStopPlacesRepository, netexIdHelper, validate);
     }
 }

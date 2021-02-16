@@ -17,6 +17,7 @@ package org.rutebanken.tiamat.exporter;
 
 import org.hibernate.Session;
 import org.hibernate.internal.SessionImpl;
+import org.rutebanken.netex.model.AuthorityRefStructure;
 import org.rutebanken.netex.model.FareZone;
 import org.rutebanken.netex.model.FareZoneRefStructure;
 import org.rutebanken.netex.model.FareZoneRefs_RelStructure;
@@ -24,6 +25,7 @@ import org.rutebanken.netex.model.FareZonesInFrame_RelStructure;
 import org.rutebanken.netex.model.GroupsOfStopPlacesInFrame_RelStructure;
 import org.rutebanken.netex.model.MultilingualString;
 import org.rutebanken.netex.model.ObjectFactory;
+import org.rutebanken.netex.model.OrganisationRefStructure;
 import org.rutebanken.netex.model.Parking;
 import org.rutebanken.netex.model.ParkingsInFrame_RelStructure;
 import org.rutebanken.netex.model.PassengerStopAssignment;
@@ -32,6 +34,7 @@ import org.rutebanken.netex.model.QuayRefStructure;
 import org.rutebanken.netex.model.ScheduledStopPoint;
 import org.rutebanken.netex.model.ScheduledStopPointRefStructure;
 import org.rutebanken.netex.model.ScheduledStopPointsInFrame_RelStructure;
+import org.rutebanken.netex.model.ScopingMethodEnumeration;
 import org.rutebanken.netex.model.SiteFrame;
 import org.rutebanken.netex.model.StopAssignment_VersionStructure;
 import org.rutebanken.netex.model.StopAssignmentsInFrame_RelStructure;
@@ -55,7 +58,6 @@ import org.rutebanken.tiamat.exporter.eviction.SessionEntitiesEvictor;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.model.FareFrame;
 import org.rutebanken.tiamat.model.GroupOfStopPlaces;
-import org.rutebanken.tiamat.model.MultilingualStringEntity;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.ServiceFrame;
 import org.rutebanken.tiamat.model.TopographicPlace;
@@ -245,6 +247,8 @@ public class StreamingPublicationDelivery {
 
     private void prepareFareZones(org.rutebanken.netex.model.FareFrame netexFareFrame) {
 
+        //TODO: Just a placeholder
+
         /*
         <FareZone id="TST:FareZone:1" version="1">
           <Name lang="nob">Farezone Test</Name>
@@ -262,6 +266,7 @@ public class StreamingPublicationDelivery {
         fareZone.withId("TST:FareZone:1");
         fareZone.withName(new MultilingualString().withValue("TestFZ").withLang("no"));
         fareZone.setZoneTopology(ZoneTopologyEnumeration.OTHER);
+        fareZone.setScopingMethod(ScopingMethodEnumeration.EXPLICIT_STOPS);
 
 
         FareZoneRefs_RelStructure fareZoneNeighbours = new FareZoneRefs_RelStructure().withFareZoneRef(new FareZoneRefStructure().withRef("TST:FareZone:2"));
@@ -292,10 +297,12 @@ public class StreamingPublicationDelivery {
             tariffZoneIterator = Collections.emptyIterator();
         }
 
-
-        if (tariffZoneIterator.hasNext()) {
-            NetexMappingIterator<org.rutebanken.tiamat.model.TariffZone, TariffZone> tariffZoneMappingIterator =
-                    new NetexMappingIterator<>(netexMapper, tariffZoneIterator, TariffZone.class, mappedTariffZonesCount, evicter);
+        List<JAXBElement<? extends Zone_VersionStructure>> netexTariffZones = new ArrayList<>();
+        while (tariffZoneIterator.hasNext()) {
+            final TariffZone tariffZone = netexMapper.mapToNetexModel(tariffZoneIterator.next());
+            final JAXBElement<TariffZone> tariffZoneJAXBElement = new ObjectFactory().createTariffZone(tariffZone);
+            netexTariffZones.add(tariffZoneJAXBElement);
+            mappedTariffZonesCount.incrementAndGet();
 
         }
         if (!netexTariffZones.isEmpty()) {
