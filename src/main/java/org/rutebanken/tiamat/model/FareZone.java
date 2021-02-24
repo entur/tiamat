@@ -13,11 +13,11 @@
  * limitations under the Licence.
  */
 
-package org.rutebanken.tiamat.repository;
+package org.rutebanken.tiamat.model;
 
-import org.rutebanken.tiamat.model.TariffZone;
+import javax.persistence.Entity;
 
-public interface TariffZoneRepository extends EntityInVersionRepository<TariffZone>, TariffZoneRepositoryCustom {
 
+@Entity
+public class FareZone extends Zone_VersionStructure {
 }
-

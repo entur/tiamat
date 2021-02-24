@@ -68,11 +68,13 @@ public class TariffZonesFromStopsExporter {
                 .map(tariffZoneRef -> netexMapper.getFacade().map(tariffZoneRef, TariffZoneRef.class))
                 .peek(mappedTariffZoneRef -> logger.debug("Resolving ref: {}", mappedTariffZoneRef))
                 .map(mappedTariffZoneRef -> {
-                    org.rutebanken.tiamat.model.TariffZone tiamatTariffZone = referenceResolver.resolve(mappedTariffZoneRef);
-                    if(tiamatTariffZone == null) {
+                    Object tariffFareZone = referenceResolver.resolve(mappedTariffZoneRef);
+                    if(tariffFareZone instanceof org.rutebanken.tiamat.model.TariffZone) {
+                        return  (org.rutebanken.tiamat.model.TariffZone) tariffFareZone;
+                    } else {
                         logger.warn("Resolved tariff zone to null from reference: {}", mappedTariffZoneRef);
+                        return null;
                     }
-                    return tiamatTariffZone;
                 })
                 .filter(Objects::nonNull)
                 .peek(tiamatTariffZone -> logger.debug("Resolved tariffZone: {}", tiamatTariffZone))

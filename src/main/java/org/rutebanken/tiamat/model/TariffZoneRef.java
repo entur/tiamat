@@ -34,6 +34,12 @@ public class TariffZoneRef extends ZoneRefStructure {
         this.setVersion(String.valueOf(tariffZone.getVersion()));
     }
 
+
+    public TariffZoneRef(FareZone fareZone) {
+        this.setRef(fareZone.getNetexId());
+        this.setVersion(String.valueOf(fareZone.getVersion()));
+    }
+
     public TariffZoneRef(String netexId) {
         this.setRef(netexId);
     }

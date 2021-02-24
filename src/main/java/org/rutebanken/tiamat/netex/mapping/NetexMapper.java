@@ -89,6 +89,10 @@ public class NetexMapper {
                 .byDefault()
                 .register();
 
+        mapperFactory.classMap(FareZone.class, org.rutebanken.tiamat.model.FareZone.class)
+                .byDefault()
+                .register();
+
 
         mapperFactory.classMap(Parking.class, org.rutebanken.tiamat.model.Parking.class)
                 .exclude("paymentMethods")
@@ -201,6 +205,10 @@ public class NetexMapper {
 
     public org.rutebanken.tiamat.model.TariffZone mapToTiamatModel(TariffZone tariffZone) {
         return facade.map(tariffZone, org.rutebanken.tiamat.model.TariffZone.class);
+    }
+
+    public org.rutebanken.tiamat.model.FareZone mapToTiamatModel(FareZone fareZone) {
+        return facade.map(fareZone,org.rutebanken.tiamat.model.FareZone.class);
     }
 
     public List<org.rutebanken.tiamat.model.StopPlace> mapStopsToTiamatModel(List<StopPlace> stopPlaces) {

@@ -15,6 +15,10 @@
 
 package org.rutebanken.tiamat.exporter;
 
+import net.opengis.gml._3.AbstractRingPropertyType;
+import net.opengis.gml._3.DirectPositionListType;
+import net.opengis.gml._3.LinearRingType;
+import net.opengis.gml._3.PolygonType;
 import org.hibernate.Session;
 import org.hibernate.internal.SessionImpl;
 import org.rutebanken.netex.model.AuthorityRefStructure;
@@ -42,9 +46,11 @@ import org.rutebanken.netex.model.StopPlace;
 import org.rutebanken.netex.model.StopPlaceRefStructure;
 import org.rutebanken.netex.model.StopPlacesInFrame_RelStructure;
 import org.rutebanken.netex.model.TariffZone;
+import org.rutebanken.netex.model.TariffZoneRef;
 import org.rutebanken.netex.model.TariffZonesInFrame_RelStructure;
 import org.rutebanken.netex.model.TopographicPlacesInFrame_RelStructure;
 import org.rutebanken.netex.model.ValidBetween;
+import org.rutebanken.netex.model.ZoneRefStructure;
 import org.rutebanken.netex.model.ZoneTopologyEnumeration;
 import org.rutebanken.netex.model.Zone_VersionStructure;
 import org.rutebanken.netex.validation.NeTExValidator;
@@ -247,7 +253,7 @@ public class StreamingPublicationDelivery {
 
     private void prepareFareZones(org.rutebanken.netex.model.FareFrame netexFareFrame) {
 
-        //TODO: Just a placeholder
+        //TODO: Just a place    holder
 
         /*
         <FareZone id="TST:FareZone:1" version="1">
@@ -262,17 +268,64 @@ public class StreamingPublicationDelivery {
          */
 
         List<FareZone> fareZones = new ArrayList<>();
-        final FareZone fareZone = new FareZone().withVersion("1");
-        fareZone.withId("TST:FareZone:1");
-        fareZone.withName(new MultilingualString().withValue("TestFZ").withLang("no"));
-        fareZone.setZoneTopology(ZoneTopologyEnumeration.OTHER);
-        fareZone.setScopingMethod(ScopingMethodEnumeration.EXPLICIT_STOPS);
+        final FareZone fareZone1 = new FareZone().withVersion("1");
+        fareZone1.withId("RUT:FareZone:1");
+        fareZone1.withName(new MultilingualString().withValue("Ruter# FareZone 1").withLang("no"));
+        fareZone1.setZoneTopology(ZoneTopologyEnumeration.TILED);
+        fareZone1.setScopingMethod(ScopingMethodEnumeration.IMPLICIT_SPATIAL_PROJECTION);
+
+        net.opengis.gml._3.ObjectFactory openGisObjectFactory = new net.opengis.gml._3.ObjectFactory();
+
+        List<Double> values = new ArrayList<>();
+        values.add(9.8468);
+        values.add(59.2649);
+        values.add(9.8456);
+        values.add(59.2654);
+        values.add(9.8457);
+        values.add(59.2655);
+        values.add(9.8443);
+        values.add(59.2663);
+        values.add(values.get(0));
+        values.add(values.get(1));
+
+        DirectPositionListType positionList = new DirectPositionListType().withValue(values);
+
+        LinearRingType linearRing = new LinearRingType()
+                .withPosList(positionList);
+
+        PolygonType polygonType = new PolygonType()
+                .withId("RUT-01")
+                .withExterior(new AbstractRingPropertyType()
+                        .withAbstractRing(openGisObjectFactory.createLinearRing(linearRing)));
+
+        fareZone1.withPolygon(polygonType);
+
+        fareZone1.withParentZoneRef(new ZoneRefStructure().withRef("RUT:TariffZone:2Ø").withValue("1"));
 
 
-        FareZoneRefs_RelStructure fareZoneNeighbours = new FareZoneRefs_RelStructure().withFareZoneRef(new FareZoneRefStructure().withRef("TST:FareZone:2"));
-        fareZone.withNeighbours(fareZoneNeighbours);
+        final JAXBElement<AuthorityRefStructure> authorityRef = new ObjectFactory().createAuthorityRef(new AuthorityRefStructure().withRef("ENT:Authority:RUT"));
+        fareZone1.withTransportOrganisationRef(authorityRef);
 
-        fareZones.add(fareZone);
+        FareZoneRefs_RelStructure fareZoneNeighbours = new FareZoneRefs_RelStructure().withFareZoneRef(new FareZoneRefStructure().withRef("RUT:FareZone:2V").withVersion("1"));
+        fareZone1.withNeighbours(fareZoneNeighbours);
+
+        fareZones.add(fareZone1);
+
+        final FareZone fareZone2V = new FareZone().withVersion("1");
+        fareZone2V.withId("RUT:FareZone:2V");
+        fareZone2V.withName(new MultilingualString().withValue("Ruter# FareZone 2V").withLang("no"));
+        fareZone2V.setZoneTopology(ZoneTopologyEnumeration.TILED);
+        fareZone2V.setScopingMethod(ScopingMethodEnumeration.IMPLICIT_SPATIAL_PROJECTION);
+
+
+        fareZone1.withTransportOrganisationRef(authorityRef);
+
+        FareZoneRefs_RelStructure fareZoneNeighbours2V = new FareZoneRefs_RelStructure().withFareZoneRef(new FareZoneRefStructure().withRef("RUT:FareZone:1").withVersion("1"));
+        fareZone2V.withNeighbours(fareZoneNeighbours2V);
+
+
+
+        fareZones.add(fareZone2V);
 
 
         FareZonesInFrame_RelStructure fareZonesInFrameRelStructure = new FareZonesInFrame_RelStructure();

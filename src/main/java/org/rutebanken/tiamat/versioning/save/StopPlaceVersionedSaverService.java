@@ -140,9 +140,9 @@ public class StopPlaceVersionedSaverService {
 
         if (newVersion.getTariffZones() != null) {
             for (TariffZoneRef tariffZoneRef : newVersion.getTariffZones()) {
-                TariffZone tariffZone = referenceResolver.resolve(tariffZoneRef);
-                if (tariffZone == null) {
-                    throw new IllegalArgumentException("StopPlace refers to non existing tariff zone: " + tariffZoneRef);
+                //TariffZone tariffZone = referenceResolver.resolve(tariffZoneRef);
+                if (referenceResolver.resolve(tariffZoneRef) == null) {
+                    throw new IllegalArgumentException("StopPlace refers to non existing tariff zone or fare zone: " + tariffZoneRef);
                 }
             }
         }

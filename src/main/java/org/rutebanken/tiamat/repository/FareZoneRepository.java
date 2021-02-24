@@ -15,9 +15,9 @@
 
 package org.rutebanken.tiamat.repository;
 
-import org.rutebanken.tiamat.model.TariffZone;
+import org.rutebanken.tiamat.model.FareZone;
 
-public interface TariffZoneRepository extends EntityInVersionRepository<TariffZone>, TariffZoneRepositoryCustom {
+public interface FareZoneRepository extends EntityInVersionRepository<FareZone>, FareZoneRepositoryCustom {
 
 }
 
