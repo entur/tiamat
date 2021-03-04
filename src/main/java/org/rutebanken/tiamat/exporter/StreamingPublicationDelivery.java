@@ -15,21 +15,13 @@
 
 package org.rutebanken.tiamat.exporter;
 
-import net.opengis.gml._3.AbstractRingPropertyType;
-import net.opengis.gml._3.DirectPositionListType;
-import net.opengis.gml._3.LinearRingType;
-import net.opengis.gml._3.PolygonType;
 import org.hibernate.Session;
 import org.hibernate.internal.SessionImpl;
-import org.rutebanken.netex.model.AuthorityRefStructure;
 import org.rutebanken.netex.model.FareZone;
-import org.rutebanken.netex.model.FareZoneRefStructure;
-import org.rutebanken.netex.model.FareZoneRefs_RelStructure;
 import org.rutebanken.netex.model.FareZonesInFrame_RelStructure;
 import org.rutebanken.netex.model.GroupsOfStopPlacesInFrame_RelStructure;
 import org.rutebanken.netex.model.MultilingualString;
 import org.rutebanken.netex.model.ObjectFactory;
-import org.rutebanken.netex.model.OrganisationRefStructure;
 import org.rutebanken.netex.model.Parking;
 import org.rutebanken.netex.model.ParkingsInFrame_RelStructure;
 import org.rutebanken.netex.model.PassengerStopAssignment;
@@ -38,7 +30,6 @@ import org.rutebanken.netex.model.QuayRefStructure;
 import org.rutebanken.netex.model.ScheduledStopPoint;
 import org.rutebanken.netex.model.ScheduledStopPointRefStructure;
 import org.rutebanken.netex.model.ScheduledStopPointsInFrame_RelStructure;
-import org.rutebanken.netex.model.ScopingMethodEnumeration;
 import org.rutebanken.netex.model.SiteFrame;
 import org.rutebanken.netex.model.StopAssignment_VersionStructure;
 import org.rutebanken.netex.model.StopAssignmentsInFrame_RelStructure;
@@ -46,12 +37,9 @@ import org.rutebanken.netex.model.StopPlace;
 import org.rutebanken.netex.model.StopPlaceRefStructure;
 import org.rutebanken.netex.model.StopPlacesInFrame_RelStructure;
 import org.rutebanken.netex.model.TariffZone;
-import org.rutebanken.netex.model.TariffZoneRef;
 import org.rutebanken.netex.model.TariffZonesInFrame_RelStructure;
 import org.rutebanken.netex.model.TopographicPlacesInFrame_RelStructure;
 import org.rutebanken.netex.model.ValidBetween;
-import org.rutebanken.netex.model.ZoneRefStructure;
-import org.rutebanken.netex.model.ZoneTopologyEnumeration;
 import org.rutebanken.netex.model.Zone_VersionStructure;
 import org.rutebanken.netex.validation.NeTExValidator;
 import org.rutebanken.tiamat.exporter.async.NetexMappingIterator;
@@ -69,6 +57,7 @@ import org.rutebanken.tiamat.model.ServiceFrame;
 import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.netex.id.NetexIdHelper;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
+import org.rutebanken.tiamat.repository.FareZoneRepository;
 import org.rutebanken.tiamat.repository.GroupOfStopPlacesRepository;
 import org.rutebanken.tiamat.repository.ParkingRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -125,6 +114,7 @@ public class StreamingPublicationDelivery {
     private final TiamatFareFrameExporter tiamatFareFrameExporter;
     private final NetexMapper netexMapper;
     private final TariffZoneRepository tariffZoneRepository;
+    private final FareZoneRepository fareZoneRepository;
     private final TopographicPlaceRepository topographicPlaceRepository;
     private final GroupOfStopPlacesRepository groupOfStopPlacesRepository;
     private final NeTExValidator neTExValidator = NeTExValidator.getNeTExValidator();
@@ -147,6 +137,7 @@ public class StreamingPublicationDelivery {
                                         TiamatFareFrameExporter tiamatFareFrameExporter,
                                         NetexMapper netexMapper,
                                         TariffZoneRepository tariffZoneRepository,
+                                        FareZoneRepository fareZoneRepository,
                                         TopographicPlaceRepository topographicPlaceRepository,
                                         GroupOfStopPlacesRepository groupOfStopPlacesRepository,
                                         NetexIdHelper netexIdHelper,
@@ -159,6 +150,7 @@ public class StreamingPublicationDelivery {
         this.tiamatFareFrameExporter = tiamatFareFrameExporter;
         this.netexMapper = netexMapper;
         this.tariffZoneRepository = tariffZoneRepository;
+        this.fareZoneRepository = fareZoneRepository;
         this.topographicPlaceRepository = topographicPlaceRepository;
         this.groupOfStopPlacesRepository = groupOfStopPlacesRepository;
         this.netexIdHelper = netexIdHelper;
@@ -191,6 +183,7 @@ public class StreamingPublicationDelivery {
         AtomicInteger mappedStopPlaceCount = new AtomicInteger();
         AtomicInteger mappedParkingCount = new AtomicInteger();
         AtomicInteger mappedTariffZonesCount = new AtomicInteger();
+        AtomicInteger mappedFareZonesCount = new AtomicInteger();
         AtomicInteger mappedTopographicPlacesCount = new AtomicInteger();
         AtomicInteger mappedGroupOfStopPlacesCount = new AtomicInteger();
 
@@ -224,6 +217,7 @@ public class StreamingPublicationDelivery {
         prepareTopographicPlaces(exportParams, stopPlacePrimaryIds, mappedTopographicPlacesCount, netexSiteFrame, entitiesEvictor);
         prepareTariffZones(exportParams, stopPlacePrimaryIds, mappedTariffZonesCount, netexSiteFrame, entitiesEvictor);
         prepareStopPlaces(exportParams, stopPlacePrimaryIds, mappedStopPlaceCount, netexSiteFrame, entitiesEvictor);
+        prepareFareZones(stopPlacePrimaryIds,mappedFareZonesCount,netexFareFrame,entitiesEvictor);
         prepareParkings(exportParams, stopPlacePrimaryIds, mappedParkingCount, netexSiteFrame, entitiesEvictor);
         prepareGroupOfStopPlaces(exportParams, stopPlacePrimaryIds, mappedGroupOfStopPlacesCount, netexSiteFrame, entitiesEvictor);
 
@@ -232,10 +226,9 @@ public class StreamingPublicationDelivery {
 
         if (exportParams.getServiceFrameExportMode() == ExportParams.ExportMode.ALL) {
             prepareScheduledStopPoints(stopPlacePrimaryIds, netexServiceFrame);
-            prepareFareZones(netexFareFrame);
             publicationDeliveryStructure = publicationDeliveryExporter.createPublicationDelivery(netexSiteFrame, netexServiceFrame,netexFareFrame);
         } else {
-            publicationDeliveryStructure = publicationDeliveryExporter.createPublicationDelivery(netexSiteFrame);
+            publicationDeliveryStructure = publicationDeliveryExporter.createPublicationDelivery(netexSiteFrame,netexFareFrame);
         }
 
         Marshaller marshaller = createMarshaller();
@@ -251,86 +244,21 @@ public class StreamingPublicationDelivery {
 
     }
 
-    private void prepareFareZones(org.rutebanken.netex.model.FareFrame netexFareFrame) {
+    private void prepareFareZones(Set<Long> stopPlacePrimaryIds, AtomicInteger mappedFareZonesCount, org.rutebanken.netex.model.FareFrame netexFareFrame, EntitiesEvictor evictor) {
 
-        //TODO: Just a place    holder
+        int fareZoneCount = fareZoneRepository.countResult(stopPlacePrimaryIds);
+        if (fareZoneCount > 0) {
+            // Only set fare zones if they will exist during marshalling.
+            logger.info("FareZone count is {}, will create fare zones in publication delivery", fareZoneCount);
+            FareZonesInFrame_RelStructure fareZonesInFrameRelStructure = new FareZonesInFrame_RelStructure();
+            List<FareZone> netexFareZone = new NetexMappingIteratorList<>(() -> new NetexMappingIterator<>(netexMapper, fareZoneRepository.scrollFareZones(stopPlacePrimaryIds),
+                    FareZone.class, mappedFareZonesCount, evictor));
 
-        /*
-        <FareZone id="TST:FareZone:1" version="1">
-          <Name lang="nob">Farezone Test</Name>
-          <ZoneTopology>sequence</ZoneTopology>
-          <ScopingMethod>explicitStops</ScopingMethod>
-          <AuthorityRef ref="TST:Authority:TST"/>
-          <neighbours>
-            <FareZoneRef ref="TST:FareZone:2"/>
-          </neighbours>
-        </FareZone>
-         */
-
-        List<FareZone> fareZones = new ArrayList<>();
-        final FareZone fareZone1 = new FareZone().withVersion("1");
-        fareZone1.withId("RUT:FareZone:1");
-        fareZone1.withName(new MultilingualString().withValue("Ruter# FareZone 1").withLang("no"));
-        fareZone1.setZoneTopology(ZoneTopologyEnumeration.TILED);
-        fareZone1.setScopingMethod(ScopingMethodEnumeration.IMPLICIT_SPATIAL_PROJECTION);
-
-        net.opengis.gml._3.ObjectFactory openGisObjectFactory = new net.opengis.gml._3.ObjectFactory();
-
-        List<Double> values = new ArrayList<>();
-        values.add(9.8468);
-        values.add(59.2649);
-        values.add(9.8456);
-        values.add(59.2654);
-        values.add(9.8457);
-        values.add(59.2655);
-        values.add(9.8443);
-        values.add(59.2663);
-        values.add(values.get(0));
-        values.add(values.get(1));
-
-        DirectPositionListType positionList = new DirectPositionListType().withValue(values);
-
-        LinearRingType linearRing = new LinearRingType()
-                .withPosList(positionList);
-
-        PolygonType polygonType = new PolygonType()
-                .withId("RUT-01")
-                .withExterior(new AbstractRingPropertyType()
-                        .withAbstractRing(openGisObjectFactory.createLinearRing(linearRing)));
-
-        fareZone1.withPolygon(polygonType);
-
-        fareZone1.withParentZoneRef(new ZoneRefStructure().withRef("RUT:TariffZone:2Ø").withValue("1"));
-
-
-        final JAXBElement<AuthorityRefStructure> authorityRef = new ObjectFactory().createAuthorityRef(new AuthorityRefStructure().withRef("ENT:Authority:RUT"));
-        fareZone1.withTransportOrganisationRef(authorityRef);
-
-        FareZoneRefs_RelStructure fareZoneNeighbours = new FareZoneRefs_RelStructure().withFareZoneRef(new FareZoneRefStructure().withRef("RUT:FareZone:2V").withVersion("1"));
-        fareZone1.withNeighbours(fareZoneNeighbours);
-
-        fareZones.add(fareZone1);
-
-        final FareZone fareZone2V = new FareZone().withVersion("1");
-        fareZone2V.withId("RUT:FareZone:2V");
-        fareZone2V.withName(new MultilingualString().withValue("Ruter# FareZone 2V").withLang("no"));
-        fareZone2V.setZoneTopology(ZoneTopologyEnumeration.TILED);
-        fareZone2V.setScopingMethod(ScopingMethodEnumeration.IMPLICIT_SPATIAL_PROJECTION);
-
-
-        fareZone1.withTransportOrganisationRef(authorityRef);
-
-        FareZoneRefs_RelStructure fareZoneNeighbours2V = new FareZoneRefs_RelStructure().withFareZoneRef(new FareZoneRefStructure().withRef("RUT:FareZone:1").withVersion("1"));
-        fareZone2V.withNeighbours(fareZoneNeighbours2V);
-
-
-
-        fareZones.add(fareZone2V);
-
-
-        FareZonesInFrame_RelStructure fareZonesInFrameRelStructure = new FareZonesInFrame_RelStructure();
-        setField(FareZonesInFrame_RelStructure.class,"fareZone", fareZonesInFrameRelStructure, fareZones);
-        netexFareFrame.setFareZones(fareZonesInFrameRelStructure);
+            setField(FareZonesInFrame_RelStructure.class,"fareZone", fareZonesInFrameRelStructure, netexFareZone);
+            netexFareFrame.setFareZones(fareZonesInFrameRelStructure);
+        } else {
+            logger.info("No fare zones to export based on stop places");
+        }
     }
 
     private void prepareTariffZones(ExportParams exportParams, Set<Long> stopPlacePrimaryIds, AtomicInteger mappedTariffZonesCount, SiteFrame netexSiteFrame, EntitiesEvictor evicter) {

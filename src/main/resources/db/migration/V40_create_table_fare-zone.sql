@@ -1,0 +1,3 @@
+create table fare_zone (id int8 not null, netex_id varchar(255), changed timestamp, created timestamp, from_date timestamp, to_date timestamp, version int8 not null, changed_by varchar(255), version_comment varchar(255), description_lang varchar(5), description_value varchar(4000), name_lang varchar(5), name_value varchar(255), private_code_type varchar(255), private_code_value varchar(255), centroid GEOMETRY, polygon_id int8, primary key (id))
+create table fare_zone_key_values (fare_zone_id int8 not null, key_values_id int8 not null, key_values_key varchar(255) not null, primary key (fare_zone_id, key_values_key))
+

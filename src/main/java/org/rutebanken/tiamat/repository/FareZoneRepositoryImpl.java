@@ -38,6 +38,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+import java.math.BigInteger;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -174,5 +175,46 @@ public class FareZoneRepositoryImpl implements FareZoneRepositoryCustom {
         String sql = sqlStringBuilder.toString();
         logger.info(sql);
         return sql;
+    }
+
+    @Override
+    public int countResult(Set<Long> stopPlaceIds) {
+        StringBuilder sqlStringBuilder = new StringBuilder("SELECT COUNT(fz.*) " +
+                "FROM " +
+                "  ( SELECT fz1.id " +
+                "   FROM stop_place_tariff_zones sptz " +
+                "   INNER JOIN tariff_zone_ref tzr ON sptz.tariff_zones_id = tzr.id " +
+                "   AND sptz.stop_place_id IN( ");
+
+        sqlStringBuilder.append(StringUtils.join(stopPlaceIds, ','));
+
+        sqlStringBuilder.append(") " +
+                "   INNER JOIN fare_zone fz1 ON fz1.netex_id = tzr.ref " +
+                "   AND (" +
+                "      (" +
+                "        tzr.version IS NOT NULL AND cast(fz1.version AS text) = tzr.version" +
+                "      )" +
+                "      OR (    " +
+                "        tzr.version IS NULL AND fz1.version = (" +
+                "           SELECT MAX(fz2.version) FROM fare_zone fz2 WHERE fz2.netex_id = fz1.netex_id " +
+                "               AND fz2.from_date < NOW()" +
+                "              )" +
+                "      )" +
+                "    ) " +
+                "   AND (" +
+                "        fz1.to_date IS NULL OR fz1.to_date > NOW()" +
+                "       )" +
+                "   AND (" +
+                "        fz1.from_date < NOW()" +
+                "       )" +
+                "   GROUP BY fz1.id ) fz1 " +
+                "JOIN fare_zone fz ON fz.id = fz1.id");
+
+        String sql = sqlStringBuilder.toString();
+        logger.info(sql);
+
+        Session session = entityManager.unwrap(Session.class);
+        NativeQuery query = session.createNativeQuery(sql);
+        return ((BigInteger) query.uniqueResult()).intValue();
     }
 }

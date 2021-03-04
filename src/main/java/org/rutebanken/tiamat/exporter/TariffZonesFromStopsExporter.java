@@ -15,6 +15,7 @@
 
 package org.rutebanken.tiamat.exporter;
 
+import org.rutebanken.netex.model.FareZone;
 import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.SiteFrame;
 import org.rutebanken.netex.model.StopPlace;
@@ -71,6 +72,8 @@ public class TariffZonesFromStopsExporter {
                     Object tariffFareZone = referenceResolver.resolve(mappedTariffZoneRef);
                     if(tariffFareZone instanceof org.rutebanken.tiamat.model.TariffZone) {
                         return  (org.rutebanken.tiamat.model.TariffZone) tariffFareZone;
+                    }else if(tariffFareZone instanceof  org.rutebanken.tiamat.model.FareZone) {
+                        return (org.rutebanken.tiamat.model.FareZone) tariffFareZone;
                     } else {
                         logger.warn("Resolved tariff zone to null from reference: {}", mappedTariffZoneRef);
                         return null;
@@ -78,8 +81,20 @@ public class TariffZonesFromStopsExporter {
                 })
                 .filter(Objects::nonNull)
                 .peek(tiamatTariffZone -> logger.debug("Resolved tariffZone: {}", tiamatTariffZone))
-                .map(tiamatTariffZone -> netexMapper.getFacade().map(tiamatTariffZone, TariffZone.class))
-                .forEach(tariffZone -> tariffZoneMap.put(key(tariffZone.getId(), tariffZone.getVersion()), new ObjectFactory().createTariffZone(tariffZone)));
+                .map(tiamatTariffZone -> {
+                    if (tiamatTariffZone instanceof org.rutebanken.tiamat.model.TariffZone) {
+                        return netexMapper.getFacade().map(tiamatTariffZone, TariffZone.class);
+                    } else {
+                        return netexMapper.getFacade().map(tiamatTariffZone, FareZone.class);
+                    }
+                })
+                .forEach(tariffZone -> {
+                    if (tariffZone instanceof TariffZone) {
+                        tariffZoneMap.put(key(tariffZone.getId(), tariffZone.getVersion()), new ObjectFactory().createTariffZone((TariffZone) tariffZone));
+                    } else {
+                        tariffZoneMap.put(key(tariffZone.getId(), tariffZone.getVersion()), new ObjectFactory().createFareZone((FareZone) tariffZone));
+                    }
+                });
 
         if(tariffZoneMap.values().isEmpty()) {
             logger.info("No relevant tariff zones to return");

@@ -15,9 +15,59 @@
 
 package org.rutebanken.tiamat.model;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.OneToMany;
+import java.util.HashSet;
+import java.util.Set;
 
 
 @Entity
 public class FareZone extends Zone_VersionStructure {
+
+    @Enumerated(EnumType.STRING)
+    protected ScopingMethodEnumeration scopingMethod;
+
+    @Enumerated(EnumType.STRING)
+    private ZoneTopologyEnumeration zoneTopology;
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<TariffZoneRef> neighbours = new HashSet<>();
+
+
+    private String transportOrganisationRef;
+
+    public ScopingMethodEnumeration getScopingMethod() {
+        return scopingMethod;
+    }
+
+    public void setScopingMethod(ScopingMethodEnumeration scopingMethod) {
+        this.scopingMethod = scopingMethod;
+    }
+
+    public ZoneTopologyEnumeration getZoneTopology() {
+        return zoneTopology;
+    }
+
+    public void setZoneTopology(ZoneTopologyEnumeration zoneTopology) {
+        this.zoneTopology = zoneTopology;
+    }
+
+    public Set<TariffZoneRef> getNeighbours() {
+        return neighbours;
+    }
+
+    public void setNeighbours(Set<TariffZoneRef> neighbours) {
+        this.neighbours = neighbours;
+    }
+
+    public String getTransportOrganisationRef() {
+        return transportOrganisationRef;
+    }
+
+    public void setTransportOrganisationRef(String transportOrganisationRef) {
+        this.transportOrganisationRef = transportOrganisationRef;
+    }
 }

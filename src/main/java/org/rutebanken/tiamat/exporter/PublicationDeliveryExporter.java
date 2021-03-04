@@ -130,6 +130,21 @@ public class PublicationDeliveryExporter {
     }
 
     @SuppressWarnings("unchecked")
+    public PublicationDeliveryStructure createPublicationDelivery(org.rutebanken.netex.model.SiteFrame siteFrame, org.rutebanken.netex.model.FareFrame fareFrame) {
+        PublicationDeliveryStructure publicationDeliveryStructure = createPublicationDelivery();
+        publicationDeliveryStructure.withDataObjects(
+                new PublicationDeliveryStructure.DataObjects()
+                        .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(siteFrame))
+                        .withCompositeFrameOrCommonFrame(new ObjectFactory().createFareFrame(fareFrame))
+        );
+
+        logger.info("Returning publication delivery {} with site frame and fare frame", publicationDeliveryStructure);
+        return publicationDeliveryStructure;
+    }
+
+
+
+    @SuppressWarnings("unchecked")
     public PublicationDeliveryStructure createPublicationDelivery(org.rutebanken.netex.model.SiteFrame siteFrame,
                                                                   org.rutebanken.netex.model.ServiceFrame serviceFrame,
                                                                   org.rutebanken.netex.model.FareFrame fareFrame) {

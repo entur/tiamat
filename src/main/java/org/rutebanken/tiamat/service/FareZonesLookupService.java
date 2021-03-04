@@ -60,7 +60,7 @@ public class FareZonesLookupService {
 
     @Autowired
     public FareZonesLookupService(FareZoneRepository fareZoneRepository,
-                                  @Value("${farezoneLookupService.resetReferences:false}") boolean removeExistingReferences) {
+                                  @Value("${fareZoneLookupService.resetReferences:false}") boolean removeExistingReferences) {
         this.fareZoneRepository = fareZoneRepository;
         this.removeExistingReferences = removeExistingReferences;
     }
@@ -80,11 +80,11 @@ public class FareZonesLookupService {
 
             Set<TariffZoneRef> matches = findFareZones(stopPlace.getCentroid())
                     .stream()
-                    .filter(tariffZone -> {
+                    .filter(fareZone -> {
                         if (!stopPlace.getTariffZones().isEmpty()) {
                             stopPlace.getTariffZones()
                                     .stream()
-                                    .noneMatch(tariffZoneRef -> tariffZone.getNetexId().equals(tariffZoneRef.getRef()) && tariffZone.getVersion() == Long.parseLong(tariffZoneRef.getVersion()));
+                                    .noneMatch(tariffZoneRef -> fareZone.getNetexId().equals(tariffZoneRef.getRef()) && fareZone.getVersion() == Long.parseLong(tariffZoneRef.getVersion()));
                         }
                         return true;
                     })

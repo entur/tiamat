@@ -35,4 +35,6 @@ public interface FareZoneRepositoryCustom extends DataManagedObjectStructureRepo
     Iterator<FareZone> scrollFareZones();
 
     Optional<FareZone> findValidFareZone(String netexId);
+
+    int countResult(Set<Long> stopPlaceIds);
 }

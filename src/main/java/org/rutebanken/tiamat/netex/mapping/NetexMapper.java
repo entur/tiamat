@@ -90,6 +90,9 @@ public class NetexMapper {
                 .register();
 
         mapperFactory.classMap(FareZone.class, org.rutebanken.tiamat.model.FareZone.class)
+                .exclude("transportOrganisationRef")
+                .exclude("neighbours")
+                .customize(new FareZoneMapper())
                 .byDefault()
                 .register();
 
@@ -173,6 +176,10 @@ public class NetexMapper {
 
     public TariffZone mapToNetexModel(org.rutebanken.tiamat.model.TariffZone tariffZone) {
         return facade.map(tariffZone, TariffZone.class);
+    }
+
+    public FareZone mapToNetexModel(org.rutebanken.tiamat.model.FareZone fareZone) {
+        return facade.map(fareZone, FareZone.class);
     }
 
     public SiteFrame mapToNetexModel(org.rutebanken.tiamat.model.SiteFrame tiamatSiteFrame) {
