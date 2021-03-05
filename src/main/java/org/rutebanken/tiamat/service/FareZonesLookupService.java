@@ -81,9 +81,7 @@ public class FareZonesLookupService {
 
             Set<TariffZoneRef> matches = findFareZones(stopPlace.getCentroid())
                     .stream()
-                    .filter(fareZone -> stopPlace.getTariffZones().isEmpty() || stopPlace.getTariffZones()
-                            .stream()
-                            .noneMatch(tariffZoneRef -> fareZone.getNetexId().equals(tariffZoneRef.getRef()) && tariffZoneRef.getVersion().equals(String.valueOf(fareZone.getVersion()))))
+                    .filter(fareZone -> stopPlace.getTariffZones().isEmpty() || isNoneMatch(stopPlace, fareZone))
                     .map(TariffZoneRef::new)
                     .collect(toSet());
 
@@ -94,6 +92,19 @@ public class FareZonesLookupService {
             return !Sets.symmetricDifference(refsBefore, refsAfter).isEmpty();
         }
         return false;
+    }
+
+    private boolean isNoneMatch(StopPlace stopPlace, FareZone fareZone) {
+        for (TariffZoneRef tariffZoneRef : stopPlace.getTariffZones()) {
+            if (fareZone.getScopingMethod().equals(ScopingMethodEnumeration.EXPLICIT_STOPS) && !fareZone.getNeighbours().isEmpty()) {
+                return fareZone.getNeighbours().contains(tariffZoneRef);
+            }
+
+            if (fareZone.getScopingMethod().equals(ScopingMethodEnumeration.IMPLICIT_SPATIAL_PROJECTION)) {
+                return fareZone.getNetexId().equals(tariffZoneRef.getRef()) && tariffZoneRef.getVersion().equals(String.valueOf(fareZone.getVersion()));
+            }
+        }
+        return true;
     }
 
     private Set<String> mapToIdStrings(Set<TariffZoneRef> tariffZoneRefs) {
@@ -114,7 +125,7 @@ public class FareZonesLookupService {
             logger.info("Fetching and memoizing tariff zones from repository");
             return fareZoneRepository.findAll()
                     .stream()
-                    .filter(fareZone -> fareZone.getPolygon() != null && fareZone.getScopingMethod().equals(ScopingMethodEnumeration.IMPLICIT_SPATIAL_PROJECTION))
+                    .filter(fareZone -> fareZone.getPolygon() != null)
                     .collect(
                             groupingBy(FareZone::getNetexId,
                                     maxBy(Comparator.comparingLong(EntityInVersionStructure::getVersion))))
