@@ -77,14 +77,9 @@ public class TariffZonesLookupService {
 
             Set<TariffZoneRef> matches = findTariffZones(stopPlace.getCentroid())
                     .stream()
-                    .filter(tariffZone -> {
-                        if (!stopPlace.getTariffZones().isEmpty()) {
-                            stopPlace.getTariffZones()
-                                    .stream()
-                                    .noneMatch(tariffZoneRef -> tariffZone.getNetexId().equals(tariffZoneRef.getRef()) && tariffZone.getVersion() == Long.parseLong(tariffZoneRef.getVersion()));
-                        }
-                        return true;
-                    })
+                    .filter(tariffZone -> stopPlace.getTariffZones().isEmpty() || stopPlace.getTariffZones()
+                            .stream()
+                            .noneMatch(tariffZoneRef -> tariffZone.getNetexId().equals(tariffZoneRef.getRef()) && tariffZoneRef.getVersion().equals(String.valueOf(tariffZone.getVersion()))))
                     .map(TariffZoneRef::new)
                     .collect(toSet());
 
