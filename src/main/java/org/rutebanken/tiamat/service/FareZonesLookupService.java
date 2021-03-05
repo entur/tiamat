@@ -22,6 +22,7 @@ import org.locationtech.jts.geom.Polygon;
 import org.rutebanken.tiamat.general.ResettableMemoizer;
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
 import org.rutebanken.tiamat.model.FareZone;
+import org.rutebanken.tiamat.model.ScopingMethodEnumeration;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.TariffZoneRef;
 import org.rutebanken.tiamat.repository.FareZoneRepository;
@@ -80,14 +81,9 @@ public class FareZonesLookupService {
 
             Set<TariffZoneRef> matches = findFareZones(stopPlace.getCentroid())
                     .stream()
-                    .filter(fareZone -> {
-                        if (!stopPlace.getTariffZones().isEmpty()) {
-                            stopPlace.getTariffZones()
-                                    .stream()
-                                    .noneMatch(tariffZoneRef -> fareZone.getNetexId().equals(tariffZoneRef.getRef()) && fareZone.getVersion() == Long.parseLong(tariffZoneRef.getVersion()));
-                        }
-                        return true;
-                    })
+                    .filter(fareZone -> stopPlace.getTariffZones().isEmpty() || stopPlace.getTariffZones()
+                            .stream()
+                            .noneMatch(tariffZoneRef -> fareZone.getNetexId().equals(tariffZoneRef.getRef()) && tariffZoneRef.getVersion().equals(String.valueOf(fareZone.getVersion()))))
                     .map(TariffZoneRef::new)
                     .collect(toSet());
 
@@ -118,7 +114,7 @@ public class FareZonesLookupService {
             logger.info("Fetching and memoizing tariff zones from repository");
             return fareZoneRepository.findAll()
                     .stream()
-                    .filter(tariffZone -> tariffZone.getPolygon() != null)
+                    .filter(fareZone -> fareZone.getPolygon() != null && fareZone.getScopingMethod().equals(ScopingMethodEnumeration.IMPLICIT_SPATIAL_PROJECTION))
                     .collect(
                             groupingBy(FareZone::getNetexId,
                                     maxBy(Comparator.comparingLong(EntityInVersionStructure::getVersion))))
