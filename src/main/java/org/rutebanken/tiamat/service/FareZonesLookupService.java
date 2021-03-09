@@ -81,7 +81,10 @@ public class FareZonesLookupService {
 
             Set<TariffZoneRef> matches = findFareZones(stopPlace.getCentroid())
                     .stream()
-                    .filter(fareZone -> stopPlace.getTariffZones().isEmpty() || isNoneMatch(stopPlace, fareZone))
+                    .filter(fareZone -> stopPlace.getTariffZones().isEmpty() || stopPlace.getTariffZones()
+                            .stream()
+                            .noneMatch(tariffZoneRef -> fareZone.getNetexId().equals(tariffZoneRef.getRef()) && tariffZoneRef.getVersion().equals(String.valueOf(fareZone.getVersion()))))
+
                     .map(TariffZoneRef::new)
                     .collect(toSet());
 

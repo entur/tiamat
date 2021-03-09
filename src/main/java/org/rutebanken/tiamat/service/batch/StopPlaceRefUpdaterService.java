@@ -1,6 +1,5 @@
 package org.rutebanken.tiamat.service.batch;
 
-import com.google.common.collect.Lists;
 import org.hibernate.Session;
 import org.hibernate.internal.SessionImpl;
 import org.rutebanken.tiamat.exporter.async.ParentStopFetchingIterator;
@@ -22,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import java.time.Instant;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
