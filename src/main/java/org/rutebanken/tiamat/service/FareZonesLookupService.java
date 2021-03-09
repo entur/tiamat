@@ -125,7 +125,7 @@ public class FareZonesLookupService {
 
     public Supplier<List<Pair<String, Polygon>>> getFareZones() {
         return () -> {
-            logger.info("Fetching and memoizing tariff zones from repository");
+            logger.info("Fetching and memoizing fare zones from repository");
             return fareZoneRepository.findAll()
                     .stream()
                     .filter(fareZone -> fareZone.getPolygon() != null)
