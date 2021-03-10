@@ -81,10 +81,7 @@ public class FareZonesLookupService {
 
             Set<TariffZoneRef> matches = findFareZones(stopPlace.getCentroid())
                     .stream()
-                    .filter(fareZone -> stopPlace.getTariffZones().isEmpty() || stopPlace.getTariffZones()
-                            .stream()
-                            .noneMatch(tariffZoneRef -> fareZone.getNetexId().equals(tariffZoneRef.getRef()) && tariffZoneRef.getVersion().equals(String.valueOf(fareZone.getVersion()))))
-
+                    .filter(fareZone -> stopPlace.getTariffZones().isEmpty() || isNoneMatch(stopPlace, fareZone))
                     .map(TariffZoneRef::new)
                     .collect(toSet());
 
@@ -98,16 +95,17 @@ public class FareZonesLookupService {
     }
 
     private boolean isNoneMatch(StopPlace stopPlace, FareZone fareZone) {
-        for (TariffZoneRef tariffZoneRef : stopPlace.getTariffZones()) {
-            if (fareZone.getScopingMethod().equals(ScopingMethodEnumeration.EXPLICIT_STOPS) && !fareZone.getNeighbours().isEmpty()) {
-                return fareZone.getNeighbours().contains(tariffZoneRef);
-            }
-
-            if (fareZone.getScopingMethod().equals(ScopingMethodEnumeration.IMPLICIT_SPATIAL_PROJECTION)) {
-                return fareZone.getNetexId().equals(tariffZoneRef.getRef()) && tariffZoneRef.getVersion().equals(String.valueOf(fareZone.getVersion()));
-            }
+        if (fareZone.getScopingMethod().equals(ScopingMethodEnumeration.IMPLICIT_SPATIAL_PROJECTION)) {
+            return stopPlace.getTariffZones()
+                    .stream()
+                    .noneMatch(tariffZoneRef -> fareZone.getNetexId().equals(tariffZoneRef.getRef()) && tariffZoneRef.getVersion().equals(String.valueOf(fareZone.getVersion())));
+        }
+        if (fareZone.getScopingMethod().equals(ScopingMethodEnumeration.EXPLICIT_STOPS) && !fareZone.getFareZoneMembers().isEmpty()) {
+            return fareZone.getFareZoneMembers().stream()
+                    .anyMatch(member -> member.getRef().equals(stopPlace.getNetexId()));
         }
         return true;
+
     }
 
     private Set<String> mapToIdStrings(Set<TariffZoneRef> tariffZoneRefs) {

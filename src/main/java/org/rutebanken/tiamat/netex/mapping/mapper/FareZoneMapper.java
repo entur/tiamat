@@ -7,6 +7,11 @@ import org.rutebanken.netex.model.FareZone;
 import org.rutebanken.netex.model.FareZoneRefStructure;
 import org.rutebanken.netex.model.FareZoneRefs_RelStructure;
 import org.rutebanken.netex.model.ObjectFactory;
+import org.rutebanken.netex.model.PointRefStructure;
+import org.rutebanken.netex.model.PointRefs_RelStructure;
+import org.rutebanken.netex.model.ScheduledStopPointRefStructure;
+import org.rutebanken.netex.model.ScopingMethodEnumeration;
+import org.rutebanken.tiamat.model.StopPlaceReference;
 import org.rutebanken.tiamat.model.TariffZoneRef;
 
 import javax.xml.bind.JAXBElement;
@@ -33,6 +38,16 @@ public class FareZoneMapper extends CustomMapper<FareZone, org.rutebanken.tiamat
             }
             tiamatFareZone.setNeighbours(tiamatNeighbours);
         }
+
+        if (netexFareZone.getScopingMethod() != null && netexFareZone.getScopingMethod().equals(ScopingMethodEnumeration.EXPLICIT_STOPS)
+                && netexFareZone.getMembers() != null && !netexFareZone.getMembers().getPointRef().isEmpty()) {
+
+            var fareZoneMembers = netexFareZone.getMembers().getPointRef().stream()
+                    .map(jaxbElement -> new StopPlaceReference(jaxbElement.getValue().getRef()))
+                    .collect(Collectors.toSet());
+
+            tiamatFareZone.setFareZoneMembers(fareZoneMembers);
+        }
     }
 
     @Override
@@ -51,6 +66,14 @@ public class FareZoneMapper extends CustomMapper<FareZone, org.rutebanken.tiamat
             netexFareZone.withNeighbours(fareZoneRefsRelStructure);
         }
 
+        if (!tiamatFareZone.getFareZoneMembers().isEmpty()) {
+            List<JAXBElement<? extends PointRefStructure>> fareZoneMember = tiamatFareZone.getFareZoneMembers().stream()
+                    .map(members -> new ObjectFactory().createScheduledStopPointRef(new ScheduledStopPointRefStructure().withRef(members.getRef())))
+                    .collect(Collectors.toList());
+
+            PointRefs_RelStructure pointRefsRelStructure = new PointRefs_RelStructure().withPointRef(fareZoneMember);
+            netexFareZone.withMembers(pointRefsRelStructure);
+        }
 
     }
 }

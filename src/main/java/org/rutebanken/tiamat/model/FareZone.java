@@ -16,9 +16,12 @@
 package org.rutebanken.tiamat.model;
 
 import javax.persistence.CascadeType;
+import javax.persistence.CollectionTable;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import java.util.HashSet;
 import java.util.Set;
@@ -35,6 +38,12 @@ public class FareZone extends Zone_VersionStructure {
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<TariffZoneRef> neighbours = new HashSet<>();
+
+    @ElementCollection(targetClass = StopPlaceReference.class, fetch = FetchType.EAGER)
+    @CollectionTable(
+            name = "fare_zone_members"
+    )
+    private Set<StopPlaceReference> fareZoneMembers = new HashSet<>();
 
 
     private String transportOrganisationRef;
@@ -70,4 +79,13 @@ public class FareZone extends Zone_VersionStructure {
     public void setTransportOrganisationRef(String transportOrganisationRef) {
         this.transportOrganisationRef = transportOrganisationRef;
     }
+
+    public Set<StopPlaceReference> getFareZoneMembers() {
+        return fareZoneMembers;
+    }
+
+    public void setFareZoneMembers(Set<StopPlaceReference> fareZoneMembers) {
+        this.fareZoneMembers = fareZoneMembers;
+    }
+
 }
