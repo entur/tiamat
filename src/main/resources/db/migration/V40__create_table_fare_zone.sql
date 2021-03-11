@@ -73,3 +73,14 @@ ALTER TABLE ONLY fare_zone_neighbours
     ADD CONSTRAINT fklwjm9qu9fghulu2k425gl996x FOREIGN KEY (fare_zone_id)REFERENCES fare_zone(id);
 
 ALTER TABLE fare_zone_neighbours OWNER to tiamat;
+
+CREATE TABLE fare_zone_members(
+    fare_zone_id bigint NOT NULL,
+    ref character varying(255),
+    version character varying(255)
+);
+
+ALTER TABLE ONLY fare_zone_members
+    ADD CONSTRAINT fk5pcf1db54ci2k7cnbcam6b2ye FOREIGN KEY (fare_zone_id) REFERENCES fare_zone (id);
+
+ALTER TABLE fare_zone_members OWNER to tiamat;
