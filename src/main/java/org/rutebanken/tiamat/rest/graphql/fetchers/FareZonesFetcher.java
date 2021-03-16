@@ -51,31 +51,47 @@ import org.rutebanken.tiamat.exporter.params.FareZoneSearch;
 import org.rutebanken.tiamat.model.FareZone;
 import org.rutebanken.tiamat.repository.FareZoneRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.FARE_ZONES_AUTHORITY_REF;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.FARE_ZONES_SCOPING_METHOD;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.FARE_ZONES_ZONE_TOPOLOGY;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ID;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PAGE;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.QUERY;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.SIZE;
 
 @Service("fareZonesFetcher")
 @Transactional
-public class FareZonesFetcher implements DataFetcher<Page<FareZone>> {
+public class FareZonesFetcher implements DataFetcher {
 
     @Autowired
     private FareZoneRepository fareZoneRepository;
 
     @Override
     @Transactional
-    public Page<FareZone> get(DataFetchingEnvironment environment) {
+    public Object get(DataFetchingEnvironment environment) {
+        String netexId = environment.getArgument(ID);
+
+        if (netexId != null) {
+            final Optional<FareZone> validFareZone = fareZoneRepository.findValidFareZone(netexId);
+            if (validFareZone.isPresent()) {
+                return Collections.singletonList(validFareZone.get());
+            }
+        }
 
         FareZoneSearch fareZoneSearch = FareZoneSearch.newFareZoneSearchBuilder()
                 .query(environment.getArgument(QUERY))
+                .authorityRef(environment.getArgument(FARE_ZONES_AUTHORITY_REF))
+                .scopingMethod(environment.getArgument(FARE_ZONES_SCOPING_METHOD))
+                .zoneTopology(environment.getArgument(FARE_ZONES_ZONE_TOPOLOGY))
                 .build();
 
         List<FareZone> fareZones = fareZoneRepository.findFareZones(fareZoneSearch);

@@ -46,23 +46,42 @@
 package org.rutebanken.tiamat.exporter.params;
 
 import com.google.common.base.MoreObjects;
+import org.rutebanken.tiamat.model.ScopingMethodEnumeration;
+import org.rutebanken.tiamat.model.ZoneTopologyEnumeration;
 
 import javax.ws.rs.QueryParam;
 
 public class FareZoneSearch implements SearchObject {
 
     @QueryParam(value = "fareZoneQuery")
-    private String query;
+    private final String query;
+    private final String authorityRef;
+    private final ScopingMethodEnumeration scopingMethodEnumeration;
+    private final ZoneTopologyEnumeration zoneTopologyEnumeration;
 
 
     private FareZoneSearch(Builder builder) {
         this.query = builder.query;
+        this.authorityRef = builder.authorityRef;
+        this.scopingMethodEnumeration =builder.scopingMethodEnumeration;
+        this.zoneTopologyEnumeration = builder.zoneTopologyEnumeration;
     }
 
     public String getQuery() {
         return query;
     }
 
+    public String getAuthorityRef() {
+        return authorityRef;
+    }
+
+    public ScopingMethodEnumeration getScopingMethodEnumeration() {
+        return scopingMethodEnumeration;
+    }
+
+    public ZoneTopologyEnumeration getZoneTopologyEnumeration() {
+        return zoneTopologyEnumeration;
+    }
 
     @Override
     public String toString() {
@@ -79,9 +98,27 @@ public class FareZoneSearch implements SearchObject {
     public static class Builder {
 
         private String query;
+        private String authorityRef;
+        private ScopingMethodEnumeration scopingMethodEnumeration;
+        private ZoneTopologyEnumeration zoneTopologyEnumeration;
 
         public Builder query(String query) {
             this.query = query;
+            return this;
+        }
+
+        public Builder authorityRef(String authorityRef) {
+            this.authorityRef = authorityRef;
+            return this;
+        }
+
+        public Builder scopingMethod(ScopingMethodEnumeration scopingMethodEnumeration) {
+            this.scopingMethodEnumeration = scopingMethodEnumeration;
+            return this;
+        }
+
+        public Builder zoneTopology(ZoneTopologyEnumeration zoneTopologyEnumeration){
+            this.zoneTopologyEnumeration = zoneTopologyEnumeration;
             return this;
         }
 

@@ -74,8 +74,8 @@ public class GraphQLNames {
     public static final String FARE_ZONES_MEMBERS = "members";
     public static final String FARE_ZONES_NEIGHBOURS= "neighbours";
     public static final String FARE_ZONES_ZONE_TOPOLOGY= "zoneTopology";
-    public static final String FARE_ZONES_SCOPINGMETHOD ="scopingMethod";
-    public static final String FARE_ZONES_AUTHORITYREF ="authorityRef";
+    public static final String FARE_ZONES_SCOPING_METHOD ="scopingMethod";
+    public static final String FARE_ZONES_AUTHORITY_REF ="authorityRef";
 
     public static final String OUTPUT_TYPE_ADDRESSABLE_PLACE = "AddressablePlace";
 

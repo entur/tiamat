@@ -488,6 +488,25 @@ public class StopPlaceRegisterGraphQLSchema {
                 .name(QUERY)
                 .type(GraphQLString)
                 .build());
+        arguments.add(GraphQLArgument.newArgument()
+                .name(ID)
+                .type(GraphQLString)
+                .build());
+
+        arguments.add(GraphQLArgument.newArgument()
+                .name(FARE_ZONES_AUTHORITY_REF)
+                .type(GraphQLString)
+                .build());
+
+        arguments.add(GraphQLArgument.newArgument()
+                .name(FARE_ZONES_SCOPING_METHOD)
+                .type(scopingMethodEnumType)
+                .build());
+        arguments.add(GraphQLArgument.newArgument()
+                .name(FARE_ZONES_ZONE_TOPOLOGY)
+                .type(zoneTopologyEnumType)
+                .build());
+
         return arguments;
     }
 

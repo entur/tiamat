@@ -53,6 +53,21 @@ public class FareZoneQueryFromSearchBuilder {
             parameters.put("query", search.getQuery());
             orderByStatements.add("similarity(f.name_value, :query) desc");
         }
+        if (search.getAuthorityRef() != null) {
+            operators.add("and");
+            wheres.add("lower(f.transport_organisation_ref) = lower(:authRef) ");
+            parameters.put("authRef",search.getAuthorityRef());
+        }
+        if (search.getScopingMethodEnumeration() != null) {
+            operators.add("and");
+            wheres.add("f.scoping_method = :scopingMethod ");
+            parameters.put("scopingMethod",search.getScopingMethodEnumeration().name());
+        }
+        if (search.getZoneTopologyEnumeration() != null) {
+            operators.add("and");
+            wheres.add("f.zone_topology = :zoneTopology ");
+            parameters.put("zoneTopology",search.getZoneTopologyEnumeration().name());
+        }
 
         operators.add("and");
         wheres.add("f.version = (select max(fv.version) from fare_zone fv where fv.netex_id = f.netex_id)");

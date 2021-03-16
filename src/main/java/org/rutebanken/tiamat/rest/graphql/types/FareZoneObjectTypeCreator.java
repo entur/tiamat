@@ -38,10 +38,10 @@ import java.util.stream.Collectors;
 import static graphql.Scalars.GraphQLString;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLObjectType.newObject;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.FARE_ZONES_AUTHORITYREF;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.FARE_ZONES_AUTHORITY_REF;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.FARE_ZONES_MEMBERS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.FARE_ZONES_NEIGHBOURS;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.FARE_ZONES_SCOPINGMETHOD;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.FARE_ZONES_SCOPING_METHOD;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.FARE_ZONES_ZONE_TOPOLOGY;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.OUTPUT_TYPE_FARE_ZONE;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.OUTPUT_TYPE_STOPPLACE;
@@ -69,13 +69,13 @@ public class FareZoneObjectTypeCreator {
         List<GraphQLFieldDefinition> fareZoneFieldList = new ArrayList<>(zoneCommonFieldList);
 
         fareZoneFieldList.add(newFieldDefinition()
-                .name(FARE_ZONES_AUTHORITYREF)
+                .name(FARE_ZONES_AUTHORITY_REF)
                 .type(GraphQLString)
                 .dataFetcher(env -> env.getSource() instanceof FareZone ? ((FareZone) env.getSource()).getTransportOrganisationRef() : null)
                 .build());
         fareZoneFieldList.add(privateCodeFieldDefinition);
         fareZoneFieldList.add(newFieldDefinition().name(FARE_ZONES_ZONE_TOPOLOGY).type(zoneTopologyEnumType).build());
-        fareZoneFieldList.add(newFieldDefinition().name(FARE_ZONES_SCOPINGMETHOD).type(scopingMethodEnumType).build());
+        fareZoneFieldList.add(newFieldDefinition().name(FARE_ZONES_SCOPING_METHOD).type(scopingMethodEnumType).build());
 
         fareZoneFieldList.add(newFieldDefinition()
                 .name(FARE_ZONES_NEIGHBOURS)
