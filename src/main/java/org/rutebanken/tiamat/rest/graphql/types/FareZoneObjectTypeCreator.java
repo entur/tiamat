@@ -19,12 +19,14 @@ import graphql.schema.DataFetchingEnvironment;
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLObjectType;
+import graphql.schema.GraphQLTypeReference;
 import org.rutebanken.tiamat.model.FareZone;
+import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopPlaceReference;
 import org.rutebanken.tiamat.model.TariffZoneRef;
 import org.rutebanken.tiamat.repository.FareZoneRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -36,7 +38,13 @@ import java.util.stream.Collectors;
 import static graphql.Scalars.GraphQLString;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLObjectType.newObject;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.FARE_ZONES_AUTHORITYREF;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.FARE_ZONES_MEMBERS;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.FARE_ZONES_NEIGHBOURS;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.FARE_ZONES_SCOPINGMETHOD;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.FARE_ZONES_ZONE_TOPOLOGY;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.OUTPUT_TYPE_FARE_ZONE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.OUTPUT_TYPE_STOPPLACE;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.privateCodeFieldDefinition;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.scopingMethodEnumType;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.zoneTopologyEnumType;
@@ -45,28 +53,32 @@ import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.zoneTo
 @Component
 public class FareZoneObjectTypeCreator {
 
-    @Autowired
-    StopPlaceRepository stopPlaceRepository;
+
+    private final StopPlaceRepository stopPlaceRepository;
+    private final FareZoneRepository fareZoneRepository;
 
 
-    @Autowired
-    FareZoneRepository fareZoneRepository;
+    public FareZoneObjectTypeCreator(StopPlaceRepository stopPlaceRepository,
+                                     FareZoneRepository fareZoneRepository) {
+        this.stopPlaceRepository = stopPlaceRepository;
+        this.fareZoneRepository = fareZoneRepository;
+    }
 
     public GraphQLObjectType create(List<GraphQLFieldDefinition> zoneCommonFieldList) {
 
         List<GraphQLFieldDefinition> fareZoneFieldList = new ArrayList<>(zoneCommonFieldList);
 
         fareZoneFieldList.add(newFieldDefinition()
-                .name("authorityRef")
+                .name(FARE_ZONES_AUTHORITYREF)
                 .type(GraphQLString)
                 .dataFetcher(env -> env.getSource() instanceof FareZone ? ((FareZone) env.getSource()).getTransportOrganisationRef() : null)
                 .build());
         fareZoneFieldList.add(privateCodeFieldDefinition);
-        fareZoneFieldList.add(newFieldDefinition().name("ZoneTopology").type(zoneTopologyEnumType).build());
-        fareZoneFieldList.add(newFieldDefinition().name("ScopingMethod").type(scopingMethodEnumType).build());
+        fareZoneFieldList.add(newFieldDefinition().name(FARE_ZONES_ZONE_TOPOLOGY).type(zoneTopologyEnumType).build());
+        fareZoneFieldList.add(newFieldDefinition().name(FARE_ZONES_SCOPINGMETHOD).type(scopingMethodEnumType).build());
 
         fareZoneFieldList.add(newFieldDefinition()
-                .name("neighbours")
+                .name(FARE_ZONES_NEIGHBOURS)
                 .type(new GraphQLList(GraphQLTypeReference.typeRef(OUTPUT_TYPE_FARE_ZONE)))
                 .dataFetcher(this::fareZoneNeighboursType)
                 .build());
@@ -74,8 +86,8 @@ public class FareZoneObjectTypeCreator {
 
 
         fareZoneFieldList.add(newFieldDefinition()
-                .name("members")
-                .type(new GraphQLList(GraphQLTypeReference.typeRef("StopPlace")))
+                .name(FARE_ZONES_MEMBERS)
+                .type(new GraphQLList(GraphQLTypeReference.typeRef(OUTPUT_TYPE_STOPPLACE)))
                 .dataFetcher(this::fareZoneMemberType)
                 .build());
 
@@ -85,7 +97,7 @@ public class FareZoneObjectTypeCreator {
                 .build();
     }
 
-    private List fareZoneNeighboursType(DataFetchingEnvironment env) {
+    private List<FareZone> fareZoneNeighboursType(DataFetchingEnvironment env) {
         final Set<TariffZoneRef> neighbours = ((FareZone) env.getSource()).getNeighbours();
         if (!neighbours.isEmpty()) {
             return neighbours.stream()
@@ -96,7 +108,7 @@ public class FareZoneObjectTypeCreator {
 
     }
 
-    private List fareZoneMemberType(DataFetchingEnvironment env) {
+    private List<StopPlace> fareZoneMemberType(DataFetchingEnvironment env) {
         final Set<StopPlaceReference> fareZoneMembers = ((FareZone) env.getSource()).getFareZoneMembers();
         if (!fareZoneMembers.isEmpty()) {
             return fareZoneMembers.stream()

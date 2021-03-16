@@ -65,12 +65,17 @@ public class GraphQLNames {
     public static final String ENTITY_REF_VERSION_DESCRIPTION = "The version of the referenced entity.";
 
     public static final String OUTPUT_TYPE_TARIFF_ZONE = "TariffZone";
-    public static final String INPUT_TYPE_TARIFF_ZONE = "TariffZone" + INPUT_TYPE_POSTFIX;
+    public static final String INPUT_TYPE_TARIFF_ZONE = OUTPUT_TYPE_TARIFF_ZONE + INPUT_TYPE_POSTFIX;
     public static final String TARIFF_ZONES = "tariffZones";
 
     public static final String OUTPUT_TYPE_FARE_ZONE = "FareZone";
-    public static final String INPUT_TYPE_FARE_ZONE = "FareZone" + INPUT_TYPE_POSTFIX;
+    public static final String INPUT_TYPE_FARE_ZONE = OUTPUT_TYPE_FARE_ZONE + INPUT_TYPE_POSTFIX;
     public static final String FARE_ZONES = "fareZones";
+    public static final String FARE_ZONES_MEMBERS = "members";
+    public static final String FARE_ZONES_NEIGHBOURS= "neighbours";
+    public static final String FARE_ZONES_ZONE_TOPOLOGY= "zoneTopology";
+    public static final String FARE_ZONES_SCOPINGMETHOD ="scopingMethod";
+    public static final String FARE_ZONES_AUTHORITYREF ="authorityRef";
 
     public static final String OUTPUT_TYPE_ADDRESSABLE_PLACE = "AddressablePlace";
 
