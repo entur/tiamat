@@ -22,6 +22,9 @@ import graphql.schema.GraphQLObjectType;
 import org.rutebanken.tiamat.model.FareZone;
 import org.rutebanken.tiamat.model.StopPlaceReference;
 import org.rutebanken.tiamat.model.TariffZoneRef;
+import org.rutebanken.tiamat.repository.FareZoneRepository;
+import org.rutebanken.tiamat.repository.StopPlaceRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -42,6 +45,13 @@ import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.zoneTo
 @Component
 public class FareZoneObjectTypeCreator {
 
+    @Autowired
+    StopPlaceRepository stopPlaceRepository;
+
+
+    @Autowired
+    FareZoneRepository fareZoneRepository;
+
     public GraphQLObjectType create(List<GraphQLFieldDefinition> zoneCommonFieldList) {
 
         List<GraphQLFieldDefinition> fareZoneFieldList = new ArrayList<>(zoneCommonFieldList);
@@ -54,14 +64,18 @@ public class FareZoneObjectTypeCreator {
         fareZoneFieldList.add(privateCodeFieldDefinition);
         fareZoneFieldList.add(newFieldDefinition().name("ZoneTopology").type(zoneTopologyEnumType).build());
         fareZoneFieldList.add(newFieldDefinition().name("ScopingMethod").type(scopingMethodEnumType).build());
+
         fareZoneFieldList.add(newFieldDefinition()
                 .name("neighbours")
-                .type(new GraphQLList(GraphQLString))
+                .type(new GraphQLList(GraphQLTypeReference.typeRef(OUTPUT_TYPE_FARE_ZONE)))
                 .dataFetcher(this::fareZoneNeighboursType)
                 .build());
+
+
+
         fareZoneFieldList.add(newFieldDefinition()
                 .name("members")
-                .type(new GraphQLList(GraphQLString))
+                .type(new GraphQLList(GraphQLTypeReference.typeRef("StopPlace")))
                 .dataFetcher(this::fareZoneMemberType)
                 .build());
 
@@ -75,7 +89,7 @@ public class FareZoneObjectTypeCreator {
         final Set<TariffZoneRef> neighbours = ((FareZone) env.getSource()).getNeighbours();
         if (!neighbours.isEmpty()) {
             return neighbours.stream()
-                    .map(neighbour -> neighbour.getRef())
+                    .map(neighbour -> fareZoneRepository.findFirstByNetexIdOrderByVersionDesc(neighbour.getRef()))
                     .collect(Collectors.toList());
         }
         return Collections.emptyList();
@@ -86,7 +100,7 @@ public class FareZoneObjectTypeCreator {
         final Set<StopPlaceReference> fareZoneMembers = ((FareZone) env.getSource()).getFareZoneMembers();
         if (!fareZoneMembers.isEmpty()) {
             return fareZoneMembers.stream()
-                    .map(member -> member.getRef())
+                    .map(member -> stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(member.getRef()))
                     .collect(Collectors.toList());
         }
         return Collections.emptyList();
