@@ -2,6 +2,7 @@ package org.rutebanken.tiamat.netex.mapping.mapper;
 
 import ma.glasnost.orika.CustomMapper;
 import ma.glasnost.orika.MappingContext;
+import org.apache.commons.lang3.StringUtils;
 import org.rutebanken.netex.model.AuthorityRefStructure;
 import org.rutebanken.netex.model.FareZone;
 import org.rutebanken.netex.model.FareZoneRefStructure;
@@ -13,7 +14,6 @@ import org.rutebanken.netex.model.ScheduledStopPointRefStructure;
 import org.rutebanken.netex.model.ScopingMethodEnumeration;
 import org.rutebanken.tiamat.model.StopPlaceReference;
 import org.rutebanken.tiamat.model.TariffZoneRef;
-
 import javax.xml.bind.JAXBElement;
 import java.util.HashSet;
 import java.util.List;
@@ -68,12 +68,25 @@ public class FareZoneMapper extends CustomMapper<FareZone, org.rutebanken.tiamat
 
         if (!tiamatFareZone.getFareZoneMembers().isEmpty()) {
             List<JAXBElement<? extends PointRefStructure>> fareZoneMember = tiamatFareZone.getFareZoneMembers().stream()
-                    .map(members -> new ObjectFactory().createScheduledStopPointRef(new ScheduledStopPointRefStructure().withRef(members.getRef())))
+                    .map(members -> new ObjectFactory().createScheduledStopPointRef(new ScheduledStopPointRefStructure().withRef(convertStopPlaceRefToScheduledStopPointRef(members.getRef()))))
                     .collect(Collectors.toList());
 
             PointRefs_RelStructure pointRefsRelStructure = new PointRefs_RelStructure().withPointRef(fareZoneMember);
             netexFareZone.withMembers(pointRefsRelStructure);
         }
 
+    }
+
+    private String convertStopPlaceRefToScheduledStopPointRef(String netexId) {
+        if (netexId != null) {
+        if(StringUtils.countMatches(netexId, ":") != 2) {
+            throw new IllegalArgumentException("Number of colons in ID is not two: " + netexId);
+        }
+        var idPrefix = netexId.substring(0, netexId.indexOf(':'));
+        var id= netexId.substring(netexId.lastIndexOf(':') + 1).trim();
+        return String.format("%s:ScheduledStopPoint:S%s", idPrefix, id);
+        }
+
+        return null;
     }
 }
