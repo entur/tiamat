@@ -1,6 +1,5 @@
 package org.rutebanken.tiamat.service.batch;
 
-import com.google.common.collect.Lists;
 import org.hibernate.Session;
 import org.hibernate.internal.SessionImpl;
 import org.rutebanken.tiamat.exporter.async.ParentStopFetchingIterator;
@@ -11,6 +10,7 @@ import org.rutebanken.tiamat.lock.LockException;
 import org.rutebanken.tiamat.lock.TimeoutMaxLeaseTimeLock;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
+import org.rutebanken.tiamat.service.FareZonesLookupService;
 import org.rutebanken.tiamat.service.TariffZonesLookupService;
 import org.rutebanken.tiamat.service.TopographicPlaceLookupService;
 import org.slf4j.Logger;
@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import java.time.Instant;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -40,6 +41,7 @@ public class StopPlaceRefUpdaterService {
     private final StopPlaceRepository stopPlaceRepository;
 
     private final TariffZonesLookupService tariffZonesLookupService;
+    private final FareZonesLookupService fareZonesLookupService;
     private final TopographicPlaceLookupService topographicPlaceLookupService;
     private final EntityManager entityManager;
     private final TimeoutMaxLeaseTimeLock timeoutMaxLeaseTimeLock;
@@ -47,11 +49,13 @@ public class StopPlaceRefUpdaterService {
     @Autowired
     public StopPlaceRefUpdaterService(StopPlaceRepository stopPlaceRepository,
                                       TariffZonesLookupService tariffZonesLookupService,
+                                      FareZonesLookupService fareZonesLookupService,
                                       TopographicPlaceLookupService topographicPlaceLookupService,
                                       EntityManager entityManager,
                                       TimeoutMaxLeaseTimeLock timeoutMaxLeaseTimeLock) {
         this.stopPlaceRepository = stopPlaceRepository;
         this.tariffZonesLookupService = tariffZonesLookupService;
+        this.fareZonesLookupService = fareZonesLookupService;
         this.topographicPlaceLookupService = topographicPlaceLookupService;
         this.entityManager = entityManager;
         this.timeoutMaxLeaseTimeLock = timeoutMaxLeaseTimeLock;
@@ -111,6 +115,7 @@ public class StopPlaceRefUpdaterService {
 
                 Optional<StopPlace> optionalStopPlace = new StopPlaceRefUpdater(
                         tariffZonesLookupService,
+                        fareZonesLookupService,
                         topographicPlaceLookupService,
                         existingStopPlace,
                         updatedBecauseOfTariffZoneRefChange,

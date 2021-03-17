@@ -15,9 +15,9 @@
 
 package org.rutebanken.tiamat.importer;
 
-import org.rutebanken.netex.model.TariffZone;
+import org.rutebanken.netex.model.FareZone;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
-import org.rutebanken.tiamat.versioning.save.TariffZoneSaverService;
+import org.rutebanken.tiamat.versioning.save.FareZoneSaverService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,25 +30,26 @@ import static java.util.stream.Collectors.toList;
 
 @Transactional
 @Component
-public class TariffZoneImporter {
+public class FareZoneImporter {
 
-    private static final Logger logger = LoggerFactory.getLogger(TariffZoneImporter.class);
+    private static final Logger logger = LoggerFactory.getLogger(FareZoneImporter.class);
 
     @Autowired
     private NetexMapper netexMapper;
 
     @Autowired
-    private TariffZoneSaverService tariffZoneSaverService;
+    private FareZoneSaverService fareZoneSaverService;
 
-    public List<TariffZone> importTariffZones(List<org.rutebanken.tiamat.model.TariffZone> tariffZones) {
 
-        return tariffZones
+    public List<FareZone> importFareZones(List<org.rutebanken.tiamat.model.FareZone> fareZones) {
+
+        return fareZones
                 .stream()
-                .peek(incomingTariffZone -> logger.info("Importing tariff zone {}, version {}, name {}. Has polygon? {}",
-                        incomingTariffZone.getNetexId(), incomingTariffZone.getVersion(),
-                        incomingTariffZone.getName(), incomingTariffZone.getPolygon() != null && incomingTariffZone.getPolygon().getExteriorRing() != null))
-                .map(incomingTariffZone -> tariffZoneSaverService.saveNewVersion(incomingTariffZone))
-                .map(savedTariffZone -> netexMapper.getFacade().map(savedTariffZone, TariffZone.class))
+                .peek(incomingFareZone -> logger.info("Importing fare zone {}, version {}, name {}. Has polygon? {}",
+                        incomingFareZone.getNetexId(), incomingFareZone.getVersion(),
+                        incomingFareZone.getName(), incomingFareZone.getPolygon() == null ? false : incomingFareZone.getPolygon().getExteriorRing() != null))
+                .map(incomingFareZone -> fareZoneSaverService.saveNewVersion(incomingFareZone))
+                .map(savedFareZone -> netexMapper.getFacade().map(savedFareZone, FareZone.class))
                 .collect(toList());
     }
 

@@ -17,6 +17,8 @@ package org.rutebanken.tiamat.exporter;
 
 import org.hibernate.Session;
 import org.hibernate.internal.SessionImpl;
+import org.rutebanken.netex.model.FareZone;
+import org.rutebanken.netex.model.FareZonesInFrame_RelStructure;
 import org.rutebanken.netex.model.GroupsOfStopPlacesInFrame_RelStructure;
 import org.rutebanken.netex.model.MultilingualString;
 import org.rutebanken.netex.model.ObjectFactory;
@@ -48,12 +50,14 @@ import org.rutebanken.tiamat.exporter.async.ParentTreeTopographicPlaceFetchingIt
 import org.rutebanken.tiamat.exporter.eviction.EntitiesEvictor;
 import org.rutebanken.tiamat.exporter.eviction.SessionEntitiesEvictor;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
+import org.rutebanken.tiamat.model.FareFrame;
 import org.rutebanken.tiamat.model.GroupOfStopPlaces;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.ServiceFrame;
 import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.netex.id.NetexIdHelper;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
+import org.rutebanken.tiamat.repository.FareZoneRepository;
 import org.rutebanken.tiamat.repository.GroupOfStopPlacesRepository;
 import org.rutebanken.tiamat.repository.ParkingRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -107,8 +111,10 @@ public class StreamingPublicationDelivery {
     private final PublicationDeliveryExporter publicationDeliveryExporter;
     private final TiamatSiteFrameExporter tiamatSiteFrameExporter;
     private final TiamatServiceFrameExporter tiamatServiceFrameExporter;
+    private final TiamatFareFrameExporter tiamatFareFrameExporter;
     private final NetexMapper netexMapper;
     private final TariffZoneRepository tariffZoneRepository;
+    private final FareZoneRepository fareZoneRepository;
     private final TopographicPlaceRepository topographicPlaceRepository;
     private final GroupOfStopPlacesRepository groupOfStopPlacesRepository;
     private final NeTExValidator neTExValidator = NeTExValidator.getNeTExValidator();
@@ -128,8 +134,10 @@ public class StreamingPublicationDelivery {
                                         PublicationDeliveryExporter publicationDeliveryExporter,
                                         TiamatSiteFrameExporter tiamatSiteFrameExporter,
                                         TiamatServiceFrameExporter tiamatServiceFrameExporter,
+                                        TiamatFareFrameExporter tiamatFareFrameExporter,
                                         NetexMapper netexMapper,
                                         TariffZoneRepository tariffZoneRepository,
+                                        FareZoneRepository fareZoneRepository,
                                         TopographicPlaceRepository topographicPlaceRepository,
                                         GroupOfStopPlacesRepository groupOfStopPlacesRepository,
                                         NetexIdHelper netexIdHelper,
@@ -139,8 +147,10 @@ public class StreamingPublicationDelivery {
         this.publicationDeliveryExporter = publicationDeliveryExporter;
         this.tiamatSiteFrameExporter = tiamatSiteFrameExporter;
         this.tiamatServiceFrameExporter = tiamatServiceFrameExporter;
+        this.tiamatFareFrameExporter = tiamatFareFrameExporter;
         this.netexMapper = netexMapper;
         this.tariffZoneRepository = tariffZoneRepository;
+        this.fareZoneRepository = fareZoneRepository;
         this.topographicPlaceRepository = topographicPlaceRepository;
         this.groupOfStopPlacesRepository = groupOfStopPlacesRepository;
         this.netexIdHelper = netexIdHelper;
@@ -168,9 +178,12 @@ public class StreamingPublicationDelivery {
         org.rutebanken.tiamat.model.SiteFrame siteFrame = tiamatSiteFrameExporter.createTiamatSiteFrame("Site frame " + exportParams);
         final ServiceFrame serviceFrame = tiamatServiceFrameExporter.createTiamatServiceFrame("Service frame " + exportParams);
 
+        final FareFrame fareFrame = tiamatFareFrameExporter.createTiamatFareFrame("Fare frame " + exportParams);
+
         AtomicInteger mappedStopPlaceCount = new AtomicInteger();
         AtomicInteger mappedParkingCount = new AtomicInteger();
         AtomicInteger mappedTariffZonesCount = new AtomicInteger();
+        AtomicInteger mappedFareZonesCount = new AtomicInteger();
         AtomicInteger mappedTopographicPlacesCount = new AtomicInteger();
         AtomicInteger mappedGroupOfStopPlacesCount = new AtomicInteger();
 
@@ -196,11 +209,15 @@ public class StreamingPublicationDelivery {
         logger.info("Mapping service frame to netex model");
         final org.rutebanken.netex.model.ServiceFrame netexServiceFrame = netexMapper.mapToNetexModel(serviceFrame);
 
+        logger.info("Mapping fare frame to netex model");
+        final org.rutebanken.netex.model.FareFrame netexFareFrame = netexMapper.mapToNetexModel(fareFrame);
+
 
         logger.info("Preparing scrollable iterators");
         prepareTopographicPlaces(exportParams, stopPlacePrimaryIds, mappedTopographicPlacesCount, netexSiteFrame, entitiesEvictor);
         prepareTariffZones(exportParams, stopPlacePrimaryIds, mappedTariffZonesCount, netexSiteFrame, entitiesEvictor);
         prepareStopPlaces(exportParams, stopPlacePrimaryIds, mappedStopPlaceCount, netexSiteFrame, entitiesEvictor);
+        prepareFareZones(stopPlacePrimaryIds,mappedFareZonesCount,netexFareFrame,entitiesEvictor);
         prepareParkings(exportParams, stopPlacePrimaryIds, mappedParkingCount, netexSiteFrame, entitiesEvictor);
         prepareGroupOfStopPlaces(exportParams, stopPlacePrimaryIds, mappedGroupOfStopPlacesCount, netexSiteFrame, entitiesEvictor);
 
@@ -209,9 +226,9 @@ public class StreamingPublicationDelivery {
 
         if (exportParams.getServiceFrameExportMode() == ExportParams.ExportMode.ALL) {
             prepareScheduledStopPoints(stopPlacePrimaryIds, netexServiceFrame);
-            publicationDeliveryStructure = publicationDeliveryExporter.createPublicationDelivery(netexSiteFrame, netexServiceFrame);
+            publicationDeliveryStructure = publicationDeliveryExporter.createPublicationDelivery(netexSiteFrame, netexServiceFrame,netexFareFrame);
         } else {
-            publicationDeliveryStructure = publicationDeliveryExporter.createPublicationDelivery(netexSiteFrame);
+            publicationDeliveryStructure = publicationDeliveryExporter.createPublicationDelivery(netexSiteFrame,netexFareFrame);
         }
 
         Marshaller marshaller = createMarshaller();
@@ -225,6 +242,23 @@ public class StreamingPublicationDelivery {
                 mappedGroupOfStopPlacesCount,
                 mappedTariffZonesCount);
 
+    }
+
+    private void prepareFareZones(Set<Long> stopPlacePrimaryIds, AtomicInteger mappedFareZonesCount, org.rutebanken.netex.model.FareFrame netexFareFrame, EntitiesEvictor evictor) {
+
+        int fareZoneCount = fareZoneRepository.countResult(stopPlacePrimaryIds);
+        if (fareZoneCount > 0) {
+            // Only set fare zones if they will exist during marshalling.
+            logger.info("FareZone count is {}, will create fare zones in publication delivery", fareZoneCount);
+            FareZonesInFrame_RelStructure fareZonesInFrameRelStructure = new FareZonesInFrame_RelStructure();
+            List<FareZone> netexFareZone = new NetexMappingIteratorList<>(() -> new NetexMappingIterator<>(netexMapper, fareZoneRepository.scrollFareZones(stopPlacePrimaryIds),
+                    FareZone.class, mappedFareZonesCount, evictor));
+
+            setField(FareZonesInFrame_RelStructure.class,"fareZone", fareZonesInFrameRelStructure, netexFareZone);
+            netexFareFrame.setFareZones(fareZonesInFrameRelStructure);
+        } else {
+            logger.info("No fare zones to export based on stop places");
+        }
     }
 
     private void prepareTariffZones(ExportParams exportParams, Set<Long> stopPlacePrimaryIds, AtomicInteger mappedTariffZonesCount, SiteFrame netexSiteFrame, EntitiesEvictor evicter) {

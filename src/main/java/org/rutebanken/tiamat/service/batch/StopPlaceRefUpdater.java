@@ -1,12 +1,10 @@
 package org.rutebanken.tiamat.service.batch;
 
 import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.repository.StopPlaceRepository;
+import org.rutebanken.tiamat.service.FareZonesLookupService;
 import org.rutebanken.tiamat.service.TariffZonesLookupService;
 import org.rutebanken.tiamat.service.TopographicPlaceLookupService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.transaction.annotation.Transactional;
+
 
 import java.util.Optional;
 import java.util.concurrent.*;
@@ -14,20 +12,21 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class StopPlaceRefUpdater implements Callable<Optional<StopPlace>> {
 
-    private static final Logger logger = LoggerFactory.getLogger(StopPlaceRefUpdater.class);
-
     private final TariffZonesLookupService tariffZonesLookupService;
+    private final FareZonesLookupService fareZonesLookupService;
     private final TopographicPlaceLookupService topographicPlaceLookupService;
     private final StopPlace stopPlace;
     private final AtomicInteger updatedBecauseOfTariffZoneRefChange;
     private final AtomicInteger updatedBecauseOfTopographicPlaceRef;
 
     public StopPlaceRefUpdater(TariffZonesLookupService tariffZonesLookupService,
+                               FareZonesLookupService fareZonesLookupService,
                                TopographicPlaceLookupService topographicPlaceLookupService,
                                StopPlace stopPlace,
                                AtomicInteger updatedBecauseOfTariffZoneRefChange,
                                AtomicInteger updatedBecauseOfTopographicPlaceRef) {
         this.tariffZonesLookupService = tariffZonesLookupService;
+        this.fareZonesLookupService = fareZonesLookupService;
         this.topographicPlaceLookupService = topographicPlaceLookupService;
         this.stopPlace = stopPlace;
         this.updatedBecauseOfTariffZoneRefChange = updatedBecauseOfTariffZoneRefChange;
@@ -40,7 +39,9 @@ public class StopPlaceRefUpdater implements Callable<Optional<StopPlace>> {
 
         boolean tariffZoneRefsChanged = tariffZonesLookupService.populateTariffZone(stopPlace);
 
-        if(tariffZoneRefsChanged) {
+        boolean fareZoneRefsChanged = fareZonesLookupService.populateFareZone(stopPlace);
+
+        if (tariffZoneRefsChanged || fareZoneRefsChanged) {
             updatedBecauseOfTariffZoneRefChange.incrementAndGet();
         }
 

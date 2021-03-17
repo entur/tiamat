@@ -16,6 +16,7 @@
 package org.rutebanken.tiamat.exporter;
 
 import com.fasterxml.classmate.AnnotationOverrides;
+import org.rutebanken.netex.model.FareFrame;
 import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.netex.model.SiteFrame;
@@ -129,18 +130,33 @@ public class PublicationDeliveryExporter {
     }
 
     @SuppressWarnings("unchecked")
-    public PublicationDeliveryStructure createPublicationDelivery(org.rutebanken.netex.model.SiteFrame siteFrame, org.rutebanken.netex.model.ServiceFrame serviceFrame) {
+    public PublicationDeliveryStructure createPublicationDelivery(org.rutebanken.netex.model.SiteFrame siteFrame, org.rutebanken.netex.model.FareFrame fareFrame) {
         PublicationDeliveryStructure publicationDeliveryStructure = createPublicationDelivery();
-        final JAXBElement<SiteFrame> siteFrame1 = new ObjectFactory().createSiteFrame(siteFrame);
-        final JAXBElement<org.rutebanken.netex.model.ServiceFrame> serviceFrame1 = new ObjectFactory().createServiceFrame(serviceFrame);
+        publicationDeliveryStructure.withDataObjects(
+                new PublicationDeliveryStructure.DataObjects()
+                        .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(siteFrame))
+                        .withCompositeFrameOrCommonFrame(new ObjectFactory().createFareFrame(fareFrame))
+        );
+
+        logger.info("Returning publication delivery {} with site frame and fare frame", publicationDeliveryStructure);
+        return publicationDeliveryStructure;
+    }
 
 
+
+    @SuppressWarnings("unchecked")
+    public PublicationDeliveryStructure createPublicationDelivery(org.rutebanken.netex.model.SiteFrame siteFrame,
+                                                                  org.rutebanken.netex.model.ServiceFrame serviceFrame,
+                                                                  org.rutebanken.netex.model.FareFrame fareFrame) {
+        PublicationDeliveryStructure publicationDeliveryStructure = createPublicationDelivery();
 
         publicationDeliveryStructure.withDataObjects
                 (
                 new PublicationDeliveryStructure.DataObjects()
-                        .withCompositeFrameOrCommonFrame(serviceFrame1)
-                        .withCompositeFrameOrCommonFrame(siteFrame1)
+                        .withCompositeFrameOrCommonFrame(new ObjectFactory().createServiceFrame(serviceFrame))
+                        .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(siteFrame))
+                        .withCompositeFrameOrCommonFrame(new ObjectFactory().createFareFrame(fareFrame))
+
                 );
 
         logger.info("Returning publication delivery {} with site frame and  service frame", publicationDeliveryStructure);

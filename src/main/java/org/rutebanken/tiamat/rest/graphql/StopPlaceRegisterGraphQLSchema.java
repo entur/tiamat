@@ -16,6 +16,7 @@
 package org.rutebanken.tiamat.rest.graphql;
 
 import graphql.schema.*;
+import org.rutebanken.tiamat.model.FareZone;
 import org.rutebanken.tiamat.model.GroupOfStopPlaces;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -107,6 +108,9 @@ public class StopPlaceRegisterGraphQLSchema {
     private TariffZoneObjectTypeCreator tariffZoneObjectTypeCreator;
 
     @Autowired
+    private FareZoneObjectTypeCreator fareZoneObjectTypeCreator;
+
+    @Autowired
     private AuthorizationCheckDataFetcher authorizationCheckDataFetcher;
 
     @Autowired
@@ -126,6 +130,9 @@ public class StopPlaceRegisterGraphQLSchema {
 
     @Autowired
     private DataFetcher<Page<TariffZone>> tariffZonesFetcher;
+
+    @Autowired
+    private DataFetcher<Page<FareZone>> fareZonesFetcher;
 
     @Autowired
     TariffZoneTerminator tariffZoneTerminator;
@@ -204,10 +211,11 @@ public class StopPlaceRegisterGraphQLSchema {
         GraphQLObjectType topographicPlaceObjectType = topographicPlaceObjectTypeCreator.create();
 
         GraphQLObjectType tariffZoneObjectType = tariffZoneObjectTypeCreator.create(zoneCommandFieldList);
+        GraphQLObjectType fareZoneObjectType = fareZoneObjectTypeCreator.create(zoneCommandFieldList);
 
         MutableTypeResolver stopPlaceTypeResolver = new MutableTypeResolver();
 
-        List<GraphQLFieldDefinition> stopPlaceInterfaceFields = stopPlaceInterfaceCreator.createCommonInterfaceFields(tariffZoneObjectType, topographicPlaceObjectType, validBetweenObjectType);
+        List<GraphQLFieldDefinition> stopPlaceInterfaceFields = stopPlaceInterfaceCreator.createCommonInterfaceFields(tariffZoneObjectType,fareZoneObjectType, topographicPlaceObjectType, validBetweenObjectType);
         GraphQLInterfaceType stopPlaceInterface = stopPlaceInterfaceCreator.createInterface(stopPlaceInterfaceFields, commonFieldsList, stopPlaceTypeResolver);
 
         GraphQLObjectType stopPlaceObjectType = stopPlaceObjectTypeCreator.create(stopPlaceInterface, stopPlaceInterfaceFields, commonFieldsList, quayObjectType);
@@ -311,6 +319,13 @@ public class StopPlaceRegisterGraphQLSchema {
                         .description("Tariff zones")
                         .argument(createFindTariffZonesArguments())
                         .dataFetcher(tariffZonesFetcher)
+                        .build())
+                .field(newFieldDefinition()
+                        .name(FARE_ZONES)
+                        .type(new GraphQLList(fareZoneObjectType))
+                        .description("Fare zones")
+                        .argument(createFindFareZonesArguments())
+                        .dataFetcher(fareZonesFetcher)
                         .build())
                 .build();
 
@@ -464,6 +479,34 @@ public class StopPlaceRegisterGraphQLSchema {
                 .name(QUERY)
                 .type(GraphQLString)
                 .build());
+        return arguments;
+    }
+
+    private List<GraphQLArgument> createFindFareZonesArguments() {
+        List<GraphQLArgument> arguments = createPageAndSizeArguments();
+        arguments.add(GraphQLArgument.newArgument()
+                .name(QUERY)
+                .type(GraphQLString)
+                .build());
+        arguments.add(GraphQLArgument.newArgument()
+                .name(ID)
+                .type(GraphQLString)
+                .build());
+
+        arguments.add(GraphQLArgument.newArgument()
+                .name(FARE_ZONES_AUTHORITY_REF)
+                .type(GraphQLString)
+                .build());
+
+        arguments.add(GraphQLArgument.newArgument()
+                .name(FARE_ZONES_SCOPING_METHOD)
+                .type(scopingMethodEnumType)
+                .build());
+        arguments.add(GraphQLArgument.newArgument()
+                .name(FARE_ZONES_ZONE_TOPOLOGY)
+                .type(zoneTopologyEnumType)
+                .build());
+
         return arguments;
     }
 

@@ -15,9 +15,26 @@
 
 package org.rutebanken.tiamat.repository;
 
-import org.rutebanken.tiamat.model.TariffZone;
+import org.rutebanken.tiamat.exporter.params.FareZoneSearch;
+import org.rutebanken.tiamat.model.FareZone;
 
-public interface TariffZoneRepository extends EntityInVersionRepository<TariffZone>, TariffZoneRepositoryCustom {
+import java.util.Iterator;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
+
+public interface FareZoneRepositoryCustom extends DataManagedObjectStructureRepository<FareZone> {
+
+    List<FareZone> findFareZones(FareZoneSearch search);
+
+    List<FareZone> getFareZonesFromStopPlaceIds(Set<Long> stopPlaceIds);
+
+    Iterator<FareZone> scrollFareZones(Set<Long> stopPlaceDbIds);
+
+    Iterator<FareZone> scrollFareZones();
+
+    Optional<FareZone> findValidFareZone(String netexId);
+
+    int countResult(Set<Long> stopPlaceIds);
 }
-

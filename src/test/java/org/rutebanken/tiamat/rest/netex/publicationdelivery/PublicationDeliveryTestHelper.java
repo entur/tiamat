@@ -80,6 +80,15 @@ public class PublicationDeliveryTestHelper {
                         .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(siteFrame)));
     }
 
+    public PublicationDeliveryStructure publicationDelivery(FareFrame fareFrame) {
+        return new PublicationDeliveryStructure()
+                .withPublicationTimestamp(LocalDateTime.now())
+                .withVersion("1")
+                .withParticipantRef("test")
+                .withDataObjects(new PublicationDeliveryStructure.DataObjects()
+                .withCompositeFrameOrCommonFrame(new ObjectFactory().createFareFrame(fareFrame)));
+    }
+
     public SiteFrame siteFrame() {
         SiteFrame siteFrame = new SiteFrame();
         siteFrame.setVersion("1");
@@ -89,6 +98,18 @@ public class PublicationDeliveryTestHelper {
                         .withDefaultLocale(
                                 new LocaleStructure().withTimeZone(defaultTimeZone)));
         return siteFrame;
+    }
+
+    public FareFrame fareFrame() {
+        FareFrame fareFrame = new FareFrame();
+        fareFrame.setVersion("1");
+        fareFrame.setId(UUID.randomUUID().toString());
+        fareFrame.setFrameDefaults(
+                new VersionFrameDefaultsStructure()
+                .withDefaultLocale(
+                        new LocaleStructure().withTimeZone(defaultTimeZone)));
+
+        return fareFrame;
     }
 
 
@@ -241,7 +262,7 @@ public class PublicationDeliveryTestHelper {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         output.write(outputStream);
 
-        return fromString(new String(outputStream.toByteArray()));
+        return fromString(outputStream.toString());
     }
 
     public Response postPublicationDelivery(PublicationDeliveryStructure publicationDeliveryStructure, ImportParams importParams) throws JAXBException, IOException, SAXException {
@@ -280,6 +301,34 @@ public class PublicationDeliveryTestHelper {
                 .flatMap(frames -> frames.getCommonFrame().stream())
                 .filter(jaxbElement -> jaxbElement.getValue() instanceof SiteFrame)
                 .map(jaxbElement -> (SiteFrame) jaxbElement.getValue())
+                .findAny().get();
+    }
+
+    public FareFrame findFareFrame(PublicationDeliveryStructure publicationDelivery) {
+
+        List<JAXBElement<? extends Common_VersionFrameStructure>> compositeFrameOrCommonFrame = publicationDelivery.getDataObjects().getCompositeFrameOrCommonFrame();
+
+        Optional<FareFrame> fareFrame = compositeFrameOrCommonFrame
+                .stream()
+                .filter(element -> element.getValue() instanceof FareFrame)
+                .map(element -> (FareFrame) element.getValue())
+                .findFirst();
+
+        if (fareFrame.isPresent()) {
+            logger.info("Found fare frame from compositeFrameOrCommonFrame {}", fareFrame.get().getFareZones());
+            return fareFrame.get();
+        }
+
+
+
+        return compositeFrameOrCommonFrame
+                .stream()
+                .filter(element -> element.getValue() instanceof CompositeFrame)
+                .map(element -> (CompositeFrame) element.getValue())
+                .map(compositeFrame -> compositeFrame.getFrames())
+                .flatMap(frames -> frames.getCommonFrame().stream())
+                .filter(jaxbElement -> jaxbElement.getValue() instanceof SiteFrame)
+                .map(jaxbElement -> (FareFrame) jaxbElement.getValue())
                 .findAny().get();
     }
 

@@ -17,8 +17,8 @@ package org.rutebanken.tiamat.rest.graphql.fetchers;
 
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
+import org.rutebanken.tiamat.model.FareZone;
 import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.model.TariffZone;
 import org.rutebanken.tiamat.repository.reference.ReferenceResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -29,11 +29,11 @@ import java.util.Objects;
 import static java.util.stream.Collectors.toList;
 
 /**
- * Fetches tariff zones for stop place.
- * Resolves tariff zone references to tariff zone entities.
+ * Fetches fare zones for stop place.
+ * Resolves fare zone references to fare zone entities.
  */
 @Component
-public class StopPlaceTariffZoneFetcher implements DataFetcher {
+public class StopPlaceFareZoneFetcher implements DataFetcher {
 
     @Autowired
     private ReferenceResolver referenceResolver;
@@ -46,7 +46,7 @@ public class StopPlaceTariffZoneFetcher implements DataFetcher {
                     .stream()
                     .map(tariffZoneRef -> referenceResolver.resolve(tariffZoneRef))
                     .filter(Objects::nonNull)
-                    .filter(tz -> tz instanceof TariffZone)
+                    .filter(fz -> fz instanceof FareZone)
                     .collect(toList());
         }
         return new ArrayList<>();
