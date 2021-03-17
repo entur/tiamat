@@ -41,6 +41,7 @@ data:
     spring.datasource.url=jdbc:postgresql://localhost:5432/{{ .Values.deployment.name }}
     spring.datasource.username=tiamat
     spring.datasource.platform=postgres
+    graphql.query.max.depth =100
 
     # Keycloak Properties
     authorization.enabled=true
