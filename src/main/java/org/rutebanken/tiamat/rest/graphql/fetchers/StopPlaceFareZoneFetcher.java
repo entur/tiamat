@@ -46,7 +46,7 @@ public class StopPlaceFareZoneFetcher implements DataFetcher {
                     .stream()
                     .map(tariffZoneRef -> referenceResolver.resolve(tariffZoneRef))
                     .filter(Objects::nonNull)
-                    .filter(tz -> tz instanceof FareZone)
+                    .filter(fz -> fz instanceof FareZone)
                     .collect(toList());
         }
         return new ArrayList<>();

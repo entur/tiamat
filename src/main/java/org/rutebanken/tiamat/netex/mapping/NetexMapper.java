@@ -92,7 +92,6 @@ public class NetexMapper {
         mapperFactory.classMap(FareZone.class, org.rutebanken.tiamat.model.FareZone.class)
                 .exclude("transportOrganisationRef")
                 .exclude("neighbours")
-                //TODO: farezone members for scopingMehtod explicitStops not implemented yet
                 .exclude("members")
                 .customize(new FareZoneMapper())
                 .byDefault()
