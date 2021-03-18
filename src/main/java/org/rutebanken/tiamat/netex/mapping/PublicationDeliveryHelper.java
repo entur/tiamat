@@ -49,6 +49,9 @@ public class PublicationDeliveryHelper {
     public boolean hasTariffZones(SiteFrame netexSiteFrame) {
         return netexSiteFrame.getTariffZones() != null && netexSiteFrame.getTariffZones().getTariffZone() != null;
     }
+    public boolean hasFareZones(FareFrame netexFareFrame){
+        return netexFareFrame.getFareZones() != null && netexFareFrame.getFareZones().getFareZone() != null;
+    }
 
     public boolean hasPathLinks(SiteFrame netexSiteFrame) {
         return netexSiteFrame.getPathLinks() != null && netexSiteFrame.getPathLinks().getPathLink() != null;
@@ -72,20 +75,41 @@ public class PublicationDeliveryHelper {
                 .map(element -> (SiteFrame) element.getValue())
                 .findFirst();
 
-        if (optionalSiteframe.isPresent()) {
-            return optionalSiteframe.get();
-        }
-
-        return compositeFrameOrCommonFrame
+        return optionalSiteframe.orElseGet(() -> compositeFrameOrCommonFrame
                 .stream()
                 .filter(element -> element.getValue() instanceof CompositeFrame)
                 .map(element -> (CompositeFrame) element.getValue())
-                .map(compositeFrame -> compositeFrame.getFrames())
+                .map(Composite_VersionFrameStructure::getFrames)
                 .flatMap(frames -> frames.getCommonFrame().stream())
                 .filter(jaxbElement -> jaxbElement.getValue() instanceof SiteFrame)
                 .map(jaxbElement -> (SiteFrame) jaxbElement.getValue())
-                .findAny().get();
+                .findAny().orElse(null));
+
     }
+
+    public FareFrame findFareFrame(PublicationDeliveryStructure incomingPublicationDelivery){
+
+        List<JAXBElement<? extends Common_VersionFrameStructure>> compositeFrameOrCommonFrame = incomingPublicationDelivery.getDataObjects().getCompositeFrameOrCommonFrame();
+
+        Optional<FareFrame> optionalFareFrame = compositeFrameOrCommonFrame
+                .stream()
+                .filter(element -> element.getValue() instanceof FareFrame)
+                .map(element -> (FareFrame) element.getValue())
+                .findFirst();
+
+        return optionalFareFrame.orElseGet(() -> compositeFrameOrCommonFrame
+                .stream()
+                .filter(element -> element.getValue() instanceof CompositeFrame)
+                .map(element -> (CompositeFrame) element.getValue())
+                .map(Composite_VersionFrameStructure::getFrames)
+                .flatMap(frames -> frames.getCommonFrame().stream())
+                .filter(jaxbElement -> jaxbElement.getValue() instanceof FareFrame)
+                .map(jaxbElement -> (FareFrame) jaxbElement.getValue())
+                .findAny().orElse(null));
+    }
+
+
+
 
     public Set<String> getImportedIds(DataManagedObjectStructure dataManagedObject) {
 

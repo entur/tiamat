@@ -15,6 +15,7 @@
 
 package org.rutebanken.tiamat.netex.mapping;
 
+import org.rutebanken.netex.model.FareFrame;
 import org.rutebanken.netex.model.LocaleStructure;
 import org.rutebanken.netex.model.SiteFrame;
 import org.rutebanken.netex.model.VersionFrameDefaultsStructure;
@@ -51,4 +52,19 @@ public class NetexMappingContextThreadLocal {
         NetexMappingContextThreadLocal.set(netexMappingContext);
         logger.info("Setting default time zone for netex mapping context to {}", NetexMappingContextThreadLocal.get().defaultTimeZone);
     }
+
+    public static void updateMappingContext(FareFrame netexFareFrame) {
+        String timeZoneString = Optional.of(netexFareFrame)
+                .map(FareFrame::getFrameDefaults)
+                .map(VersionFrameDefaultsStructure::getDefaultLocale)
+                .map(LocaleStructure::getTimeZone)
+                .orElseThrow(() -> new NetexMappingException("Cannot resolve time zone from FrameDefaults in fare frame " + netexFareFrame.getId()));
+
+        NetexMappingContext netexMappingContext = new NetexMappingContext();
+        netexMappingContext.defaultTimeZone = ZoneId.of(timeZoneString);
+        NetexMappingContextThreadLocal.set(netexMappingContext);
+        logger.info("Setting default time zone for netex mapping context to {}", NetexMappingContextThreadLocal.get().defaultTimeZone);
+    }
+
+
 }

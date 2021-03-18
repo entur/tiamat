@@ -17,6 +17,7 @@ import org.rutebanken.tiamat.model.TariffZoneRef;
 import javax.xml.bind.JAXBElement;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -43,7 +44,7 @@ public class FareZoneMapper extends CustomMapper<FareZone, org.rutebanken.tiamat
                 && netexFareZone.getMembers() != null && !netexFareZone.getMembers().getPointRef().isEmpty()) {
 
             var fareZoneMembers = netexFareZone.getMembers().getPointRef().stream()
-                    .map(jaxbElement -> new StopPlaceReference(jaxbElement.getValue().getRef()))
+                    .map(jaxbElement -> new StopPlaceReference(convertScheduledStopPointRefToStopPlaceRef(jaxbElement.getValue().getRef())))
                     .collect(Collectors.toSet());
 
             tiamatFareZone.setFareZoneMembers(fareZoneMembers);
@@ -78,15 +79,24 @@ public class FareZoneMapper extends CustomMapper<FareZone, org.rutebanken.tiamat
     }
 
     private String convertStopPlaceRefToScheduledStopPointRef(String netexId) {
-        if (netexId != null) {
+        validateNetexId(netexId);
+        var idPrefix = netexId.substring(0, netexId.indexOf(':'));
+        var id= netexId.substring(netexId.lastIndexOf(':') + 1).trim();
+        return idPrefix + ":ScheduledStopPoint:S" + id;
+    }
+
+    private String convertScheduledStopPointRefToStopPlaceRef(String netexId) {
+        validateNetexId(netexId);
+        var idPrefix = netexId.substring(0, netexId.indexOf(':'));
+        var id= netexId.substring(netexId.lastIndexOf(':') + 1).trim().substring(1);
+        return idPrefix + ":StopPlace:" + id;
+
+    }
+
+    private void validateNetexId(String netexId) {
+        Objects.requireNonNull(netexId);
         if(StringUtils.countMatches(netexId, ":") != 2) {
             throw new IllegalArgumentException("Number of colons in ID is not two: " + netexId);
         }
-        var idPrefix = netexId.substring(0, netexId.indexOf(':'));
-        var id= netexId.substring(netexId.lastIndexOf(':') + 1).trim();
-        return String.format("%s:ScheduledStopPoint:S%s", idPrefix, id);
-        }
-
-        return null;
     }
 }
