@@ -18,7 +18,6 @@ package org.rutebanken.tiamat.repository.search;
 
 import org.hibernate.SQLQuery;
 import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
-import org.hibernate.query.NativeQuery;
 import org.rutebanken.tiamat.exporter.params.SearchObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +47,7 @@ public class SearchHelper {
         }
     }
 
-    public void addParams(NativeQuery sqlQuery, Map<String, Object> parameters) {
+    public void addParams(SQLQuery sqlQuery, Map<String, Object> parameters) {
         if(parameters != null && sqlQuery != null) {
             parameters.forEach((parameter, value) -> {
                 if(value != null) {

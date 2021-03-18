@@ -21,7 +21,6 @@ import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.hibernate.internal.SessionImpl;
-import org.hibernate.query.NativeQuery;
 import org.rutebanken.tiamat.exporter.params.GroupOfStopPlacesSearch;
 import org.rutebanken.tiamat.model.GroupOfStopPlaces;
 import org.rutebanken.tiamat.repository.iterator.ScrollableResultIterator;
@@ -55,7 +54,7 @@ public class GroupOfStopPlacesRepositoryImpl implements GroupOfStopPlacesReposit
 
         Pair<String, Map<String, Object>> pair = groupOfStopPlacesQueryFromSearchBuilder.buildQueryFromSearch(search);
         Session session = entityManager.unwrap(SessionImpl.class);
-        NativeQuery query = session.createNativeQuery(pair.getFirst());
+        SQLQuery query = session.createSQLQuery(pair.getFirst());
         query.addEntity(GroupOfStopPlaces.class);
 
         searchHelper.addParams(query, pair.getSecond());
@@ -115,11 +114,11 @@ public class GroupOfStopPlacesRepositoryImpl implements GroupOfStopPlacesReposit
                 "       FROM stop_place s " +
                 "       INNER JOIN group_of_stop_places_members members ON members.ref = s.netex_id " +
                 "       INNER JOIN group_of_stop_places gosp1 ON members.group_of_stop_places_id = gosp1.id " +
-                "       WHERE s.id IN (");
+                "       WHERE ");
 
-        sqlStringBuilder.append(StringUtils.join(stopPlaceDbIds, ','));
+        sqlStringBuilder.append(DbQueryUtil.createSaneWhereClause("s.id",stopPlaceDbIds));
 
-        sqlStringBuilder.append("   ) " +
+        sqlStringBuilder.append("" +
                 "      AND gosp1.version = " +
                 "       (SELECT max(gospv.version) " +
                 "           FROM group_of_stop_places gospv " +

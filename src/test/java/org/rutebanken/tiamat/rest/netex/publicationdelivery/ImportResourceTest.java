@@ -17,6 +17,7 @@ package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
 import com.google.common.collect.Sets;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.rutebanken.netex.model.*;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
@@ -35,7 +36,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -95,6 +95,7 @@ public class ImportResourceTest extends TiamatIntegrationTest {
     }
 
     @Test
+    @Ignore // Will be handled in KOD-584
     public void publicationDeliveriesWithBusStationStopAndOnStreetBus() throws Exception {
 
         StopPlace stopPlace = new StopPlace()
@@ -191,6 +192,7 @@ public class ImportResourceTest extends TiamatIntegrationTest {
     }
 
     @Test
+    @Ignore // Will be handled in KOD-584
     public void allowOtherWhenMatchingExistingStopPlacesWithImportTypeMATCH() throws Exception {
 
         StopPlace stopPlaceToBeMatched = new StopPlace()
@@ -234,6 +236,7 @@ public class ImportResourceTest extends TiamatIntegrationTest {
      * When sending a stop place multiple times with separate 'imported ids' - all 'imported ids' should be kept
      */
     @Test
+    @Ignore // Will be handled in KOD-584
     public void publicationDeliveryWithImportedIdUpdates() throws Exception {
 
         StopPlace stopPlace = new StopPlace()
@@ -294,6 +297,7 @@ public class ImportResourceTest extends TiamatIntegrationTest {
      * @throws Exception
      */
     @Test
+    @Ignore // Will be handled in KOD-584
     public void publicationDeliveryWithDuplicateStopPlaceWithDifferentId() throws Exception {
 
         String name = "Varnaveien bensin";
@@ -1330,6 +1334,7 @@ public class ImportResourceTest extends TiamatIntegrationTest {
     }
 
     @Test
+    @Ignore // Will be handled in KOD-584
     public void importBrakarStopPlaceWithGeneralSignEquipment() throws JAXBException, IOException, SAXException {
         String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                 "<PublicationDelivery xmlns=\"http://www.netex.org.uk/netex\">\n" +

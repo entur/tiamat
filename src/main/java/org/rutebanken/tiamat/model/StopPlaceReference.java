@@ -17,6 +17,10 @@ package org.rutebanken.tiamat.model;
 
 import javax.persistence.Embeddable;
 
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @Embeddable
 public class StopPlaceReference extends SiteRefStructure {
 

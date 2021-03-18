@@ -39,6 +39,7 @@ import org.rutebanken.tiamat.exporter.params.StopPlaceSearch;
 import org.rutebanken.tiamat.model.GroupOfStopPlaces;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
+import org.rutebanken.tiamat.model.TariffZone;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.repository.GroupOfStopPlacesRepository;
 import org.rutebanken.tiamat.service.stopplace.ParentStopPlacesFetcher;
@@ -66,8 +67,6 @@ import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 @Transactional
 public class GroupOfStopPlacesFetcher implements DataFetcher<Page<GroupOfStopPlaces>> {
 
-    private static final Logger logger = LoggerFactory.getLogger(GroupOfStopPlacesFetcher.class);
-
     @Autowired
     private GroupOfStopPlacesRepository groupOfStopPlacesRepository;
 
@@ -81,8 +80,10 @@ public class GroupOfStopPlacesFetcher implements DataFetcher<Page<GroupOfStopPla
                 .query(environment.getArgument(QUERY))
                 .build();
 
-        List<GroupOfStopPlaces> groupOfStopPlaces = groupOfStopPlacesRepository.findGroupOfStopPlaces(groupOfStopPlacesSearch);
-
-        return new PageImpl<>(groupOfStopPlaces, PageRequest.of(environment.getArgument(PAGE), environment.getArgument(SIZE)), groupOfStopPlaces.size());
+        List<GroupOfStopPlaces> allGroupOfStopPlaces = groupOfStopPlacesRepository.findGroupOfStopPlaces(groupOfStopPlacesSearch);
+        int pageSize = environment.getArgument(SIZE);
+        PagedList<GroupOfStopPlaces> pagedList = new PagedList<>(allGroupOfStopPlaces, pageSize);
+        List<GroupOfStopPlaces> currentPage = pagedList.getPage(environment.getArgument(PAGE));
+        return new PageImpl<>(currentPage, PageRequest.of(environment.getArgument(PAGE), pageSize), currentPage.size());
     }
 }

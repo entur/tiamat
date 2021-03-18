@@ -15,6 +15,7 @@
 
 package org.rutebanken.tiamat.model;
 
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import javax.persistence.*;
@@ -27,6 +28,7 @@ public abstract class SiteElement extends AddressablePlace {
 
     @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 50)
     private final List<AlternativeName> alternativeNames = new ArrayList<>();
 
     @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)

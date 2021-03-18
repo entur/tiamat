@@ -22,10 +22,7 @@ import org.rutebanken.tiamat.importer.ImportType;
 import org.rutebanken.tiamat.importer.ImportParams;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.xml.bind.JAXBElement;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -37,41 +34,32 @@ public class TariffZoneImportTest extends TiamatIntegrationTest {
 
     @Test
     public void publicationDeliveryWithTariffZone() throws Exception {
-        LocalDateTime validFrom = LocalDateTime.now().minusDays(3);
-        List<JAXBElement<? extends Zone_VersionStructure>> tariffZones = new ArrayList<>();
         TariffZone tariffZone = new TariffZone()
                 .withName(new MultilingualString().withValue("V02"))
                 .withVersion("1")
-                .withValidBetween(new ValidBetween().withFromDate(validFrom))
                 .withId("RUT:TariffZone:01");
 
-        tariffZones.add(new ObjectFactory().createTariffZone(tariffZone));
         SiteFrame siteFrame = publicationDeliveryTestHelper.siteFrame()
                 .withTariffZones(new TariffZonesInFrame_RelStructure()
-                .withTariffZone(tariffZones));
+                .withTariffZone(tariffZone));
 
         PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryTestHelper.publicationDelivery(siteFrame);
 
         PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDeliveryStructure);
 
-        final List<JAXBElement<? extends Zone_VersionStructure>> actualZones = publicationDeliveryTestHelper.findSiteFrame(response)
+        List<TariffZone> actualZones = publicationDeliveryTestHelper.findSiteFrame(response)
                 .getTariffZones().getTariffZone();
 
         assertThat(actualZones).isNotEmpty();
-        assertThat(actualZones.get(0).getValue().getName().getValue()).isEqualTo(tariffZone.getName().getValue());
+        assertThat(actualZones.get(0).getName().getValue()).isEqualTo(tariffZone.getName().getValue());
     }
 
     @Test
     public void publicationDeliveryWithTariffZoneAndStopPlace() throws Exception {
-        LocalDateTime validFrom = LocalDateTime.now().minusDays(3);
-        List<JAXBElement<? extends Zone_VersionStructure>> tariffZones = new ArrayList<>();
         TariffZone tariffZone = new TariffZone()
                 .withName(new MultilingualString().withValue("V02"))
                 .withVersion("1")
-                .withValidBetween(new ValidBetween().withFromDate(validFrom))
                 .withId("RUT:TariffZone:05");
-
-        tariffZones.add(new ObjectFactory().createTariffZone(tariffZone));
 
         StopPlace stopPlace = new StopPlace();
         stopPlace.withId("XYZ:StopPlace:32111");
@@ -83,7 +71,7 @@ public class TariffZoneImportTest extends TiamatIntegrationTest {
 
         SiteFrame siteFrame = publicationDeliveryTestHelper.siteFrame()
                 .withTariffZones(new TariffZonesInFrame_RelStructure()
-                        .withTariffZone(tariffZones))
+                        .withTariffZone(tariffZone))
                 .withStopPlaces(new StopPlacesInFrame_RelStructure().withStopPlace(stopPlace));
 
         PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryTestHelper.publicationDelivery(siteFrame);
@@ -96,15 +84,13 @@ public class TariffZoneImportTest extends TiamatIntegrationTest {
 
         PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDeliveryStructure, importParams);
 
-        List<JAXBElement<? extends Zone_VersionStructure>> actualZones = publicationDeliveryTestHelper.findSiteFrame(response)
+        List<TariffZone> actualZones = publicationDeliveryTestHelper.findSiteFrame(response)
                 .getTariffZones().getTariffZone();
 
         assertThat(actualZones).isNotEmpty();
-
-        assertThat(actualZones.get(0).getValue().getName().getValue()).isEqualTo(tariffZone.getName().getValue());
-        // Versions for tariff zones are incremented.
-        assertThat(actualZones.get(0).getValue().getVersion()).isEqualTo("2");
-
+        assertThat(actualZones.get(0).getName().getValue()).isEqualTo(tariffZone.getName().getValue());
+        // Versions for tariff zones are not incremented.
+        assertThat(actualZones.get(0).getVersion()).isEqualTo("1");
     }
 
     @Test
@@ -116,13 +102,11 @@ public class TariffZoneImportTest extends TiamatIntegrationTest {
                                 .withLatitude(new BigDecimal("9.6"))
                                 .withLongitude(new BigDecimal("76")));
 
-        List<JAXBElement<? extends Zone_VersionStructure>> tariffZones1 = new ArrayList<>();
-
         TariffZone tariffZone1 = new TariffZone()
                 .withName(new MultilingualString().withValue("V02"))
                 .withVersion("1")
                 .withId("RUT:TariffZone:01");
-        tariffZones1.add(new ObjectFactory().createTariffZone(tariffZone1));
+
         StopPlace stopPlace = new StopPlace()
                 .withId("RUT:StopPlace:321")
                 .withName(new MultilingualString().withValue("name"))
@@ -136,7 +120,7 @@ public class TariffZoneImportTest extends TiamatIntegrationTest {
 
         SiteFrame siteFrame = publicationDeliveryTestHelper.siteFrame()
                 .withTariffZones(new TariffZonesInFrame_RelStructure()
-                        .withTariffZone(tariffZones1))
+                        .withTariffZone(tariffZone1))
                 .withStopPlaces(new StopPlacesInFrame_RelStructure().withStopPlace(stopPlace));
 
         PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryTestHelper.publicationDelivery(siteFrame);
@@ -147,12 +131,11 @@ public class TariffZoneImportTest extends TiamatIntegrationTest {
         // First
         publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDeliveryStructure, importParams);
 
-        List<JAXBElement<? extends Zone_VersionStructure>> tariffZones2 = new ArrayList<>();
         TariffZone tariffZone2 = new TariffZone()
                 .withName(new MultilingualString().withValue("X09"))
                 .withVersion("1")
                 .withId("BRA:TariffZone:02");
-        tariffZones2.add(new ObjectFactory().createTariffZone(tariffZone2));
+
         stopPlace
                 .withId("BRA:Stopplace:3")
                 .withTariffZones(new TariffZoneRefs_RelStructure()
@@ -163,7 +146,7 @@ public class TariffZoneImportTest extends TiamatIntegrationTest {
 
         SiteFrame siteFrame2 = publicationDeliveryTestHelper.siteFrame()
                 .withTariffZones(new TariffZonesInFrame_RelStructure()
-                        .withTariffZone(tariffZones2))
+                        .withTariffZone(tariffZone2))
                 .withStopPlaces(new StopPlacesInFrame_RelStructure().withStopPlace(stopPlace));
 
         PublicationDeliveryStructure publicationDeliveryStructure2 = publicationDeliveryTestHelper.publicationDelivery(siteFrame2);
@@ -173,7 +156,7 @@ public class TariffZoneImportTest extends TiamatIntegrationTest {
         importParams.importType = ImportType.MATCH;
         PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDeliveryStructure2, importParams);
 
-        List<JAXBElement<? extends Zone_VersionStructure>> actualZones = publicationDeliveryTestHelper.findSiteFrame(response)
+        List<TariffZone> actualZones = publicationDeliveryTestHelper.findSiteFrame(response)
                 .getTariffZones().getTariffZone();
 
         assertThat(actualZones).isNotEmpty();
@@ -190,12 +173,11 @@ public class TariffZoneImportTest extends TiamatIntegrationTest {
                         .withLatitude(new BigDecimal("77"))
                         .withLongitude(new BigDecimal("9.7")));
 
-        List<JAXBElement<? extends Zone_VersionStructure>> tariffZones1 = new ArrayList<>();
         TariffZone tariffZone1 = new TariffZone()
                 .withName(new MultilingualString().withValue("V03"))
                 .withVersion("1")
                 .withId("ATB:TariffZone:01");
-        tariffZones1.add(new ObjectFactory().createTariffZone(tariffZone1));
+
         StopPlace stopPlace = new StopPlace()
                 .withId("ATB:StopPlace:322")
                 .withName(new MultilingualString().withValue("name"))
@@ -209,7 +191,7 @@ public class TariffZoneImportTest extends TiamatIntegrationTest {
 
         SiteFrame siteFrame = publicationDeliveryTestHelper.siteFrame()
                 .withTariffZones(new TariffZonesInFrame_RelStructure()
-                        .withTariffZone(tariffZones1))
+                        .withTariffZone(tariffZone1))
                 .withStopPlaces(new StopPlacesInFrame_RelStructure().withStopPlace(stopPlace));
 
         PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryTestHelper.publicationDelivery(siteFrame);
@@ -220,13 +202,11 @@ public class TariffZoneImportTest extends TiamatIntegrationTest {
         // First
         publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDeliveryStructure, importParams);
 
-        List<JAXBElement<? extends Zone_VersionStructure>> tariffZones2 = new ArrayList<>();
-
         TariffZone tariffZone2 = new TariffZone()
                 .withName(new MultilingualString().withValue("X08"))
                 .withVersion("1")
                 .withId("NTR:TariffZone:03");
-        tariffZones2.add(new ObjectFactory().createTariffZone(tariffZone2));
+
         StopPlace stopPlace2 = new StopPlace()
                 .withId("NTR:StopPlace:322")
                 .withVersion("2")
@@ -239,7 +219,7 @@ public class TariffZoneImportTest extends TiamatIntegrationTest {
 
         SiteFrame siteFrame2 = publicationDeliveryTestHelper.siteFrame()
                 .withTariffZones(new TariffZonesInFrame_RelStructure()
-                        .withTariffZone(tariffZones2))
+                        .withTariffZone(tariffZone2))
                 .withStopPlaces(new StopPlacesInFrame_RelStructure().withStopPlace(stopPlace2));
 
         PublicationDeliveryStructure publicationDeliveryStructure2 = publicationDeliveryTestHelper.publicationDelivery(siteFrame2);
@@ -249,7 +229,7 @@ public class TariffZoneImportTest extends TiamatIntegrationTest {
         importParams.importType = ImportType.MATCH;
         PublicationDeliveryStructure matchReponse = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDeliveryStructure2, importParams);
 
-        List<JAXBElement<? extends Zone_VersionStructure>> actualZones = publicationDeliveryTestHelper.findSiteFrame(matchReponse)
+        List<TariffZone> actualZones = publicationDeliveryTestHelper.findSiteFrame(matchReponse)
                 .getTariffZones().getTariffZone();
 
         assertThat(actualZones).isNotEmpty();

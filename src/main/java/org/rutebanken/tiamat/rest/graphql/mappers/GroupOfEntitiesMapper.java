@@ -15,21 +15,20 @@
 
 package org.rutebanken.tiamat.rest.graphql.mappers;
 
-import org.rutebanken.tiamat.model.*;
-import org.rutebanken.tiamat.service.AlternativeNameUpdater;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.DESCRIPTION;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.NAME;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.SHORT_NAME;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.VERSION_COMMENT;
+import static org.rutebanken.tiamat.rest.graphql.mappers.EmbeddableMultilingualStringMapper.getEmbeddableString;
+
+import java.util.Map;
+
+import org.rutebanken.tiamat.model.GroupOfEntities_VersionStructure;
+import org.rutebanken.tiamat.model.SiteElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
-import static org.rutebanken.tiamat.rest.graphql.mappers.EmbeddableMultilingualStringMapper.getEmbeddableString;
-import static org.rutebanken.tiamat.rest.graphql.mappers.PrivateCodeMapper.getPrivateCodeStructure;
 
 @Component
 public class GroupOfEntitiesMapper {
@@ -60,21 +59,7 @@ public class GroupOfEntitiesMapper {
             isUpdated = true;
         }
 
-        if (input.get(KEY_VALUES) != null) {
-            List<Map> keyValues = (List) input.get(KEY_VALUES);
-
-            entity.getKeyValues().clear();
-
-            keyValues.forEach(inputMap-> {
-                String key = (String)inputMap.get(KEY);
-                List<String> values = (List<String>)inputMap.get(VALUES);
-
-                Value value = new Value(values);
-                entity.getKeyValues().put(key, value);
-            });
-
-            isUpdated = true;
-        }
+        isUpdated |= KeyValuesMapper.populate(input, entity);
 
         if(entity instanceof SiteElement) {
             SiteElement siteElement = (SiteElement) entity;

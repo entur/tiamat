@@ -24,7 +24,7 @@ import java.time.Instant;
 
 public class EntityChangedEventJMSPublisherTest {
 
-    private EntityChangedEventActiveMQPublisher jmsPublisher = new EntityChangedEventActiveMQPublisher();
+    private EntityChangedEventJMSPublisher jmsPublisher = new EntityChangedEventJMSPublisher();
 
     private static Instant NOW = Instant.now();
 

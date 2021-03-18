@@ -17,6 +17,10 @@ package org.rutebanken.tiamat.model;
 
 import javax.persistence.Entity;
 
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @Entity
 public class TariffZone extends Zone_VersionStructure {
 }

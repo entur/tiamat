@@ -1,1 +1,1 @@
-alter table export_job add column sub_folder varchar(40);
+alter table export_job add sub_folder varchar(40);

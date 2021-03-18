@@ -15,15 +15,27 @@
 
 package org.rutebanken.tiamat.repository;
 
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+import javax.persistence.TypedQuery;
+import javax.transaction.Transactional;
+
+import org.hibernate.ScrollMode;
+import org.hibernate.ScrollableResults;
+import org.hibernate.Session;
 import org.hibernate.query.NativeQuery;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
-import org.apache.commons.lang3.StringUtils;
-import org.hibernate.SQLQuery;
-import org.hibernate.ScrollMode;
-import org.hibernate.ScrollableResults;
-import org.hibernate.Session;
 import org.rutebanken.tiamat.exporter.params.ParkingSearch;
 import org.rutebanken.tiamat.model.Parking;
 import org.rutebanken.tiamat.model.ParkingTypeEnumeration;
@@ -33,11 +45,6 @@ import org.rutebanken.tiamat.repository.search.SearchHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Repository;
-
-import javax.persistence.*;
-import javax.transaction.Transactional;
-import java.math.BigInteger;
-import java.util.*;
 
 @Repository
 @Transactional
@@ -71,14 +78,14 @@ public class ParkingRepositoryImpl implements ParkingRepositoryCustom {
     public String findFirstByKeyValues(String key, Set<String> values) {
 
         Query query = entityManager.createNativeQuery("SELECT p.netex_id " +
-                                                        "FROM parking p " +
-                                                        "INNER JOIN parking_key_values pkv " +
-                                                        "ON pkv.parking_id = p.id " +
-                                                        "INNER JOIN value_items v " +
-                                                        "ON pkv.key_values_id = v.value_id " +
-                                                        "WHERE pkv.key_values_key = :key " +
-                                                        "AND v.items IN ( :values ) " +
-                                                        "AND p.version = (SELECT MAX(pv.version) FROM parking pv WHERE pv.netex_id = p.netex_id)");
+                "FROM parking p " +
+                "INNER JOIN parking_key_values pkv " +
+                "ON pkv.parking_id = p.id " +
+                "INNER JOIN value_items v " +
+                "ON pkv.key_values_id = v.value_id " +
+                "WHERE pkv.key_values_key = :key " +
+                "AND v.items IN ( :values ) " +
+                "AND p.version = (SELECT MAX(pv.version) FROM parking pv WHERE pv.netex_id = p.netex_id)");
 
         query.setParameter("key", key);
         query.setParameter("values", values);
@@ -119,15 +126,15 @@ public class ParkingRepositoryImpl implements ParkingRepositoryCustom {
 
     @Override
     public int countResult(Set<Long> stopPlaceIds) {
-        if(stopPlaceIds == null || stopPlaceIds.isEmpty()) {
+        if (stopPlaceIds == null || stopPlaceIds.isEmpty()) {
             return 0;
         }
-        return countResult(getParkingsByStopPlaceIdsSQL(stopPlaceIds));
+        return countResult(getParkingsByStopPlaceIdsCountSQL(stopPlaceIds));
     }
 
     private int countResult(Pair<String, Map<String, Object>> sqlWithParams) {
         Session session = entityManager.unwrap(Session.class);
-        NativeQuery query = session.createNativeQuery("SELECT COUNT(*) from (" + sqlWithParams.getFirst() + ") as numberOfParkings");
+        NativeQuery query = session.createNativeQuery(sqlWithParams.getFirst());
         searchHelper.addParams(query, sqlWithParams.getSecond());
         return ((BigInteger) query.uniqueResult()).intValue();
     }
@@ -159,19 +166,41 @@ public class ParkingRepositoryImpl implements ParkingRepositoryCustom {
                 "      FROM parking p2 " +
                 "      INNER JOIN stop_place sp " +
                 "           ON sp.netex_id = p2.parent_site_ref " +
-                "           AND ( Cast(sp.version AS TEXT) = " +
+                "           AND ( cast(sp.version AS varchar) = " +
                 "                   p2.parent_site_ref_version " +
                 "                 OR p2.parent_site_ref_version IS NULL ) " +
-                "      WHERE sp.id in (");
+                "      WHERE ");
 
-        sql.append(StringUtils.join(stopPlaceIds, ','));
-        sql.append(')');
-        sql.append("   GROUP  BY p2.id) p2 ")
+        sql.append(DbQueryUtil.createSaneWhereClause("sp.id", stopPlaceIds));
+
+        sql.append("   GROUP  BY p2.id, p2.netex_id, p2.version) p2 ") // Added p2.netex_id, p2.version as they have to be in order to be selectable
                 .append("JOIN parking p ")
                 .append("ON p2.id = p.id ")
                 .append("WHERE ")
                 .append(SQL_MAX_VERSION_OF_PARKING)
                 .append("ORDER BY p.netex_id, p.version");
+
+        return Pair.of(sql.toString(), new HashMap<String, Object>(0));
+    }
+
+    private Pair<String, Map<String, Object>> getParkingsByStopPlaceIdsCountSQL(Set<Long> stopPlaceIds) {
+        StringBuilder sql = new StringBuilder("SELECT cast(count(*) as bigint) " +
+                "FROM (SELECT p2.id, " +
+                "           p2.netex_id, " +
+                "           p2.version " +
+                "      FROM parking p2 " +
+                "      INNER JOIN stop_place sp " +
+                "           ON sp.netex_id = p2.parent_site_ref " +
+                "           AND ( cast(sp.version AS varchar) = " +
+                "                   p2.parent_site_ref_version " +
+                "                 OR p2.parent_site_ref_version IS NULL ) " +
+                "      WHERE ");
+        sql.append(DbQueryUtil.createSaneWhereClause("sp.id", stopPlaceIds));
+        sql.append("   GROUP  BY p2.id, p2.netex_id, p2.version ) p2 ") // Added p2.netex_id, p2.version as they have to be in order to be selectable
+                .append("JOIN parking p ")
+                .append("ON p2.id = p.id ")
+                .append("WHERE ")
+                .append(SQL_MAX_VERSION_OF_PARKING);
 
         return Pair.of(sql.toString(), new HashMap<String, Object>(0));
     }
@@ -182,10 +211,10 @@ public class ParkingRepositoryImpl implements ParkingRepositoryCustom {
 
         TypedQuery<String> query = entityManager
                 .createQuery("SELECT p.netexId FROM Parking p " +
-                        "WHERE within(p.centroid, :filter) = true " +
-                        "AND p.version = (SELECT MAX(pv.version) FROM Parking pv WHERE pv.netexId = p.netexId) " +
-                        "AND p.name.value = :name " +
-                        (parkingTypeEnumeration != null ? "AND p.parkingType = :parkingType":""),
+                                "WHERE within(p.centroid, :filter) = true " +
+                                "AND p.version = (SELECT MAX(pv.version) FROM Parking pv WHERE pv.netexId = p.netexId) " +
+                                "AND p.name.value = :name " +
+                                (parkingTypeEnumeration != null ? "AND p.parkingType = :parkingType" : ""),
                         String.class);
 
         query.setParameter("filter", geometryFilter);
@@ -203,8 +232,7 @@ public class ParkingRepositoryImpl implements ParkingRepositoryCustom {
         String sql = "SELECT p.netex_id " +
                 "FROM parking p " +
                 "WHERE p.parent_site_ref = :netexStopPlaceId " +
-                "AND p.version = (SELECT MAX(pv.version) FROM Parking pv WHERE pv.netex_id = p.netex_id) "
-                ;
+                "AND p.version = (SELECT MAX(pv.version) FROM Parking pv WHERE pv.netex_id = p.netex_id) ";
 
         Query query = entityManager.createNativeQuery(sql);
         query.setParameter("netexStopPlaceId", netexStopPlaceId);

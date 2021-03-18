@@ -82,13 +82,13 @@ public class TopographicPlacesExporter {
         return null;
     }
 
-    public void addTopographicPlacesToTiamatSiteFrame(ExportParams.ExportMode topographicPlaceExportMode, org.rutebanken.tiamat.model.SiteFrame siteFrame) {
+    public void addTopographicPlacesToTiamatSiteFrame(ExportParams.ExportMode topographicPlaceExportMode, SiteFrame siteFrame) {
         Collection<org.rutebanken.tiamat.model.TopographicPlace> topographicPlacesForExport = getTopographicPlacesForExport(topographicPlaceExportMode, siteFrame.getStopPlaces());
         addTopographicPlacesToTiamatSiteFrame(topographicPlacesForExport, siteFrame);
     }
 
     // TODO: Handle allVersions attribute
-    public void addTopographicPlacesToTiamatSiteFrame(Collection<org.rutebanken.tiamat.model.TopographicPlace> topographicPlacesForExport, org.rutebanken.tiamat.model.SiteFrame siteFrame) {
+    public void addTopographicPlacesToTiamatSiteFrame(Collection<org.rutebanken.tiamat.model.TopographicPlace> topographicPlacesForExport, SiteFrame siteFrame) {
         if (!topographicPlacesForExport.isEmpty()) {
             Iterator<org.rutebanken.tiamat.model.TopographicPlace> topographicPlaceIterable = topographicPlacesForExport.iterator();
 

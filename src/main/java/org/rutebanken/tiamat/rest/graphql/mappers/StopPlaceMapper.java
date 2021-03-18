@@ -15,18 +15,47 @@
 
 package org.rutebanken.tiamat.rest.graphql.mappers;
 
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ADJACENT_SITES;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ENTITY_REF_REF;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.LANG;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PARENT_SITE_REF;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PRIVATE_CODE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PUBLIC_CODE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.QUAYS;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.SHORT_NAME;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.STOP_PLACE_TYPE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.SUBMODE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.TRANSPORT_MODE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.TYPE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.VALID_BETWEEN;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.VALUE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.WEIGHTING;
+
+import java.util.List;
+import java.util.Map;
+
 import com.google.api.client.util.Preconditions;
-import org.rutebanken.tiamat.model.*;
+import com.google.common.annotations.VisibleForTesting;
+import org.rutebanken.tiamat.model.AirSubmodeEnumeration;
+import org.rutebanken.tiamat.model.BusSubmodeEnumeration;
+import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
+import org.rutebanken.tiamat.model.FunicularSubmodeEnumeration;
+import org.rutebanken.tiamat.model.InterchangeWeightingEnumeration;
+import org.rutebanken.tiamat.model.MetroSubmodeEnumeration;
+import org.rutebanken.tiamat.model.PrivateCodeStructure;
+import org.rutebanken.tiamat.model.RailSubmodeEnumeration;
+import org.rutebanken.tiamat.model.SiteRefStructure;
+import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.StopTypeEnumeration;
+import org.rutebanken.tiamat.model.TelecabinSubmodeEnumeration;
+import org.rutebanken.tiamat.model.TramSubmodeEnumeration;
+import org.rutebanken.tiamat.model.VehicleModeEnumeration;
+import org.rutebanken.tiamat.model.WaterSubmodeEnumeration;
 import org.rutebanken.tiamat.rest.graphql.scalars.TransportModeScalar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
-import java.util.Map;
-
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 
 @Component
 public class StopPlaceMapper {
@@ -44,6 +73,17 @@ public class StopPlaceMapper {
 
     @Autowired
     private ValidBetweenMapper validBetweenMapper;
+
+    public StopPlaceMapper() {
+    }
+
+    @VisibleForTesting
+    StopPlaceMapper(QuayMapper quayMapper, GroupOfEntitiesMapper groupOfEntitiesMapper, StopPlaceTariffZoneRefsMapper stopPlaceTariffZoneRefsMapper, ValidBetweenMapper validBetweenMapper) {
+        this.quayMapper = quayMapper;
+        this.groupOfEntitiesMapper = groupOfEntitiesMapper;
+        this.stopPlaceTariffZoneRefsMapper = stopPlaceTariffZoneRefsMapper;
+        this.validBetweenMapper = validBetweenMapper;
+    }
 
     /**
      * @param input
@@ -77,7 +117,7 @@ public class StopPlaceMapper {
         if (input.get(ADJACENT_SITES) != null) {
             stopPlace.getAdjacentSites().clear();
             List adjacentSiteObjects = (List) input.get(ADJACENT_SITES);
-            for(Object adjacentSiteObject : adjacentSiteObjects) {
+            for (Object adjacentSiteObject : adjacentSiteObjects) {
                 Map adjacentMap = (Map) adjacentSiteObject;
                 SiteRefStructure siteRefStructure = new SiteRefStructure((String) adjacentMap.get(ENTITY_REF_REF));
                 logger.trace("Adding siteRefStructure {} for stop place {}", siteRefStructure, stopPlace);
@@ -91,13 +131,21 @@ public class StopPlaceMapper {
             isUpdated = true;
         }
 
-        if(input.get(PRIVATE_CODE) != null) {
+        if (input.get(PRIVATE_CODE) != null) {
             Map privateCodeInputMap = (Map) input.get(PRIVATE_CODE);
-            if(stopPlace.getPrivateCode() == null) {
+            if (stopPlace.getPrivateCode() == null) {
                 stopPlace.setPrivateCode(new PrivateCodeStructure());
             }
             stopPlace.getPrivateCode().setType((String) privateCodeInputMap.get(TYPE));
             stopPlace.getPrivateCode().setValue((String) privateCodeInputMap.get(VALUE));
+            isUpdated = true;
+        }
+
+        if (input.get(SHORT_NAME) != null) {
+            Map<String, String> map = (Map) input.get(SHORT_NAME);
+            String value = map.get(VALUE);
+            String lang = map.get(LANG);
+            stopPlace.setShortName(new EmbeddableMultilingualString(value, lang));
             isUpdated = true;
         }
 
@@ -164,10 +212,10 @@ public class StopPlaceMapper {
                     Preconditions.checkArgument(validSubmodes.contains(((WaterSubmodeEnumeration) submode).value()), errorMessage);
                     stopPlace.setWaterSubmode((WaterSubmodeEnumeration) submode);
                 } else if (submode instanceof TelecabinSubmodeEnumeration) {
-                    Preconditions.checkArgument(validSubmodes.contains(((TelecabinSubmodeEnumeration) submode).value()),errorMessage);
+                    Preconditions.checkArgument(validSubmodes.contains(((TelecabinSubmodeEnumeration) submode).value()), errorMessage);
                     stopPlace.setTelecabinSubmode((TelecabinSubmodeEnumeration) submode);
                 } else if (submode instanceof FunicularSubmodeEnumeration) {
-                    Preconditions.checkArgument(validSubmodes.contains(((FunicularSubmodeEnumeration) submode).value()),errorMessage);
+                    Preconditions.checkArgument(validSubmodes.contains(((FunicularSubmodeEnumeration) submode).value()), errorMessage);
                     stopPlace.setFunicularSubmode((FunicularSubmodeEnumeration) submode);
                 }
             }
@@ -175,6 +223,4 @@ public class StopPlaceMapper {
         }
         return false;
     }
-
-
 }

@@ -23,11 +23,7 @@ import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.TariffZone;
 import org.rutebanken.tiamat.model.TariffZoneRef;
-import org.rutebanken.tiamat.model.ValidBetween;
 
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -149,18 +145,13 @@ public class TariffZoneRepositoryImplTest extends TiamatIntegrationTest {
         TariffZone v1 = new TariffZone();
         v1.setVersion(1L);
         v1.setNetexId(tariffZoneNetexId);
-        var zonedDateTime = ZonedDateTime.of(2020, 12, 01, 00, 00, 00, 000, ZoneId.systemDefault());
-        Instant fromDate = zonedDateTime.toInstant();
-        v1.setValidBetween(new ValidBetween(fromDate,null));
 
         tariffZoneRepository.save(v1);
 
         TariffZone v2 = new TariffZone();
         v2.setVersion(2L);
         v2.setNetexId(tariffZoneNetexId);
-        var zonedDateTime2 = zonedDateTime.plusDays(10L);
-        var fromDate2 = zonedDateTime2.toInstant();
-        v2.setValidBetween(new ValidBetween(fromDate2,null));
+
         tariffZoneRepository.save(v2);
 
         StopPlace stopPlace = new StopPlace();

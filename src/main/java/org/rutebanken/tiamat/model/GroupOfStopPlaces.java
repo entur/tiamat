@@ -16,6 +16,9 @@
 package org.rutebanken.tiamat.model;
 
 import com.google.common.base.MoreObjects;
+import org.hibernate.annotations.BatchSize;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.locationtech.jts.geom.Point;
 
 import javax.persistence.*;
@@ -24,17 +27,27 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @Entity
 public class GroupOfStopPlaces extends GroupOfEntities_VersionStructure {
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<AlternativeName> alternativeNames = new ArrayList<>();
     @ElementCollection(targetClass = StopPlaceReference.class, fetch = FetchType.EAGER)
+    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+    @BatchSize(size = 50)
     @CollectionTable(
             name = "group_of_stop_places_members"
     )
     private Set<StopPlaceReference> members = new HashSet<>();
     private Point centroid;
+
+    @AttributeOverrides({
+            @AttributeOverride(name = "value", column = @Column(name = "shortName_value")),
+            @AttributeOverride(name = "lang", column = @Column(name = "shortName_lang", length = 5))
+    })
+    @Embedded
+    protected EmbeddableMultilingualString shortName;
 
     public GroupOfStopPlaces(EmbeddableMultilingualString embeddableMultilingualString) {
         super(embeddableMultilingualString);
@@ -59,6 +72,15 @@ public class GroupOfStopPlaces extends GroupOfEntities_VersionStructure {
         return alternativeNames;
     }
 
+    @Override
+    public EmbeddableMultilingualString getShortName() {
+        return shortName;
+    }
+
+    @Override
+    public void setShortName(EmbeddableMultilingualString shortName) {
+        this.shortName = shortName;
+    }
 
     @Override
     public String toString() {

@@ -25,6 +25,8 @@ import org.springframework.stereotype.Component;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
+import java.time.temporal.TemporalAccessor;
+import java.util.Locale;
 
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.DATE_SCALAR_DESCRIPTION;
 
@@ -48,8 +50,9 @@ public class DateScalar {
     public static final String PARSE_DATE_TIME_PATTERN = "[yyyyMMdd][yyyy-MM-dd][yyyy-DDD]['T'[HHmmss][HHmm][HH:mm:ss][HH:mm][.SSSSSSSSS][.SSSSSS][.SSS][.SS][.S]][OOOO][O][z][XXXXX][XXXX]['['VV']']";
 
 
-    public static final DateTimeFormatter PARSER = new DateTimeFormatterBuilder().appendPattern(PARSE_DATE_TIME_PATTERN)
-                                                           .toFormatter();
+    public static final DateTimeFormatter PARSER = new DateTimeFormatterBuilder()
+            .appendPattern(PARSE_DATE_TIME_PATTERN)
+            .toFormatter(new Locale("sv", "SE"));
 
     private static DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern(DATE_TIME_PATTERN);
 
@@ -75,7 +78,8 @@ public class DateScalar {
 
             @Override
             public Instant parseValue(Object input) {
-                return Instant.from(PARSER.parse((CharSequence) input));
+                TemporalAccessor parse = PARSER.parse((CharSequence) input);
+                return Instant.from(parse);
             }
 
             @Override

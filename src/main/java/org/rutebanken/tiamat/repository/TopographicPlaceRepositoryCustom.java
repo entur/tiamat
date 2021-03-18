@@ -32,7 +32,7 @@ public interface TopographicPlaceRepositoryCustom extends DataManagedObjectStruc
 
     List<TopographicPlace> findTopographicPlace(TopographicPlaceSearch topographicPlaceSearch);
 
-    List<TopographicPlace> findByNetexIdOrNameAndTypeMaxVersion(String name, TopographicPlaceTypeEnumeration topographicPlaceType);
+    List<TopographicPlace> findByNameAndTypeMaxVersion(String name, TopographicPlaceTypeEnumeration topographicPlaceType);
 
     Iterator<TopographicPlace> scrollTopographicPlaces(Set<Long> stopPlaceDbIds);
 

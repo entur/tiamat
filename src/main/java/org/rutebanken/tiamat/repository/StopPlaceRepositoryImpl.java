@@ -17,7 +17,6 @@ package org.rutebanken.tiamat.repository;
 
 
 import com.google.common.collect.Sets;
-import org.hibernate.query.NativeQuery;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -49,7 +48,6 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toSet;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.MERGED_ID_KEY;
@@ -59,12 +57,17 @@ import static org.rutebanken.tiamat.repository.QuayRepositoryImpl.JBV_CODE;
 @Transactional
 public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
-    private static final Logger logger = LoggerFactory.getLogger(StopPlaceRepositoryImpl.class);
-
-    private static final int SCROLL_FETCH_SIZE = 1000;
-
-    private static BasicFormatterImpl basicFormatter = new BasicFormatterImpl();
-
+    public static final String SQL_LEFT_JOIN_PARENT_STOP_TEMPLATE =
+            "LEFT JOIN stop_place %s ON s.parent_site_ref = %s.netex_id AND s.parent_site_ref_version = %s.version ";
+    /**
+     * Left join parent stop place p with stop place s on parent site ref and parent site ref version.
+     */
+    public static final String SQL_LEFT_JOIN_PARENT_STOP =
+            createLeftJoinParentStopQuery("p");
+    /**
+     * SQL for making sure the stop selected is not a parent stop place.
+     */
+    public static final String SQL_NOT_PARENT_STOP_PLACE = "s.parent_stop_place = 0 ";
     /**
      * Part of SQL that checks that either the stop place named as *s* or the parent named *p* is valid at the point in time.
      * The parameter "pointInTime" must be set.
@@ -82,40 +85,42 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     protected static final String SQL_STOP_PLACE_OR_PARENT_IS_VALID_IN_INTERVAL =
             " ((p.netex_id IS NOT NULL AND (p.from_date IS NULL OR p.from_date <= :validTo) AND (p.to_date IS NULL OR p.to_date > :validFrom))" +
                     "  OR (p.netex_id IS NULL AND (s.from_date IS NULL OR s.from_date <= :validTo) AND (s.to_date IS NULL OR s.to_date > :validFrom))) ";
-
-    /**
-     * Left join parent stop place p with stop place s on parent site ref and parent site ref version.
-     */
-    public static final String SQL_LEFT_JOIN_PARENT_STOP =
-            createLeftJoinParentStopQuery("p");
-
-    public static final String SQL_LEFT_JOIN_PARENT_STOP_TEMPLATE =
-            "LEFT JOIN stop_place %s ON s.parent_site_ref = %s.netex_id AND s.parent_site_ref_version = CAST(%s.version as text) ";
-
-    public static String createLeftJoinParentStopQuery(String parentAlias) {
-        return String.format(SQL_LEFT_JOIN_PARENT_STOP_TEMPLATE, Collections.nCopies(3, parentAlias).toArray());
-    }
-
     /**
      * When selecting stop places and there are multiple versions of the same stop place, and you only need the highest version by number.
      */
     protected static final String SQL_MAX_VERSION_OF_STOP_PLACE = "s.version = (select max(sv.version) from stop_place sv where sv.netex_id = s.netex_id) ";
-
     /**
      * Check stop place or it's parent for match in geometry filter.
      */
-    protected static final String SQL_CHILD_OR_PARENT_WITHIN = "(ST_within(s.centroid, :filter) = true OR ST_within(p.centroid, :filter) = true) ";
-
-    /**
-     * SQL for making sure the stop selected is not a parent stop place.
-     */
-    public static final String SQL_NOT_PARENT_STOP_PLACE = "s.parent_stop_place = false ";
-
+    protected static final String SQL_CHILD_OR_PARENT_WITHIN = "(s.centroid.STWithin(:filter) = 1 OR p.centroid.STWithin(:filter) = 1) ";
     /**
      * Ignore netex id for both stop place and its parent
      */
     protected static final String SQL_IGNORE_STOP_PLACE_ID = "(s.netex_id != :ignoreStopPlaceId AND (p.netex_id IS NULL OR p.netex_id != :ignoreStopPlaceId)) ";
-
+    private static final Logger logger = LoggerFactory.getLogger(StopPlaceRepositoryImpl.class);
+    private static final int SCROLL_FETCH_SIZE = 1000;
+    private static final String STOP_PLACE_WITH_EFFECTIVE_CHANGE_QUERY_BASE =
+            " from stop_place sp INNER JOIN " +
+                    "(SELECT spinner.netex_id, MAX(spinner.version) AS maxVersion " +
+                    "   FROM stop_place spinner " +
+                    " WHERE " +
+                    "   (spinner.from_date BETWEEN :from AND :to OR spinner.to_date BETWEEN :from AND :to ) " +
+                    "   AND spinner.parent_site_ref IS NULL " +
+                    // Make sure we do not fetch stop places that have become children of parent stops in "future" versions
+                    "   AND NOT EXISTS( " +
+                    "      SELECT sp2.id FROM stop_place sp2 " +
+                    "      INNER JOIN stop_place parent " +
+                    "        ON parent.netex_id = sp2.parent_site_ref " +
+                    "          AND cast(parent.version AS varchar) = sp2.parent_site_ref_version " +
+                    "          AND (parent.from_date BETWEEN :from AND :to OR parent.to_date BETWEEN :from AND :to ) " +
+                    "        WHERE sp2.netex_id = spinner.netex_id " +
+                    "          AND sp2.version > spinner.version " +
+                    "  )" +
+                    " GROUP BY spinner.netex_id " +
+                    ") sub " +
+                    "   ON sub.netex_id = sp.netex_id " +
+                    "   AND sub.maxVersion = sp.version";
+    private static BasicFormatterImpl basicFormatter = new BasicFormatterImpl();
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -127,6 +132,10 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
     @Autowired
     private SearchHelper searchHelper;
+
+    public static String createLeftJoinParentStopQuery(String parentAlias) {
+        return String.format(SQL_LEFT_JOIN_PARENT_STOP_TEMPLATE, Collections.nCopies(3, parentAlias).toArray());
+    }
 
     /**
      * Find nearby stop places that are valid 'now', specifying a bounding box.
@@ -150,21 +159,21 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
         String queryString;
         if (pointInTime != null) {
-        queryString = "SELECT s.* FROM stop_place s " +
-                                     SQL_LEFT_JOIN_PARENT_STOP +
-                                     "WHERE " +
-                                        SQL_CHILD_OR_PARENT_WITHIN +
-                                        "AND "
-                                        + SQL_NOT_PARENT_STOP_PLACE +
-                                        "AND "
-                                        + SQL_STOP_PLACE_OR_PARENT_IS_VALID_AT_POINT_IN_TIME;
-            if(ignoreStopPlaceId != null) {
+            queryString = "SELECT s.* FROM stop_place s " +
+                    SQL_LEFT_JOIN_PARENT_STOP +
+                    "WHERE " +
+                    SQL_CHILD_OR_PARENT_WITHIN +
+                    "AND "
+                    + SQL_NOT_PARENT_STOP_PLACE +
+                    "AND "
+                    + SQL_STOP_PLACE_OR_PARENT_IS_VALID_AT_POINT_IN_TIME;
+            if (ignoreStopPlaceId != null) {
                 queryString += "AND " + SQL_IGNORE_STOP_PLACE_ID;
 
             }
         } else {
             // If no point in time is set, use max version to only get one version per stop place
-            String subQueryString = "SELECT s.netex_id,max(s.version) FROM stop_place s " +
+            String subQueryString = "SELECT s.netex_id,max(s.version) as version FROM stop_place s " +
                     SQL_LEFT_JOIN_PARENT_STOP +
                     "WHERE " +
                     SQL_CHILD_OR_PARENT_WITHIN +
@@ -175,11 +184,28 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
             if (ignoreStopPlaceId != null) {
                 subQueryString += "AND " + SQL_IGNORE_STOP_PLACE_ID + "group by s.netex_id";
             } else {
-                subQueryString += "group by s.netex_id" ;
+                subQueryString += "group by s.netex_id";
             }
 
+            // SQL Server can't do multi-column WHERE ... IN clauses so we treat the subquery as table instead. Example output:
+            //
+            // SELECT TOP(5) s.* FROM stop_place s
+            // INNER JOIN (
+            //	    SELECT s.netex_id, max(s.version) as version FROM stop_place s
+            //	         LEFT JOIN stop_place p ON s.parent_site_ref = p.netex_id AND s.parent_site_ref_version = p.version
+            //      WHERE (s.centroid.STWithin(?) = true OR p.centroid.STWithin(?) = true) AND s.parent_stop_place = 0 group by s.netex_id
+            // ) stops_with_parent ON s.netex_id = stops_with_parent.netex_id AND s.version = stops_with_parent.version
+            //
+            // Instead of
+            //
+            // SELECT TOP(?) s.* FROM stop_place s
+            // WHERE (netex_id,version) in (
+            //      SELECT s.netex_id,max(s.version) FROM stop_place s
+            //      LEFT JOIN stop_place p ON s.parent_site_ref = p.netex_id AND s.parent_site_ref_version = p.version
+            //      WHERE (s.centroid.STWithin(?) = true OR p.centroid.STWithin(?) = true) AND s.parent_stop_place = 0 group by s.netex_id
+            // )
             queryString = "SELECT s.* FROM stop_place s " +
-                    "WHERE (netex_id,version) in (" + subQueryString + ")" ;
+                    "INNER JOIN (" + subQueryString + ") stops_with_parent ON s.netex_id = stops_with_parent.netex_id AND s.version = stops_with_parent.version";
 
         }
 
@@ -188,7 +214,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         final Query query = entityManager.createNativeQuery(queryString, StopPlace.class);
         query.setParameter("filter", geometryFilter);
 
-        if(ignoreStopPlaceId != null) {
+        if (ignoreStopPlaceId != null) {
             query.setParameter("ignoreStopPlaceId", ignoreStopPlaceId);
         }
 
@@ -215,9 +241,9 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         Geometry geometryFilter = geometryFactory.toGeometry(envelope);
 
         String sql = "SELECT sub.netex_id FROM " +
-                "(SELECT s.netex_id AS netex_id, similarity(s.name_value, :name) AS sim FROM stop_place s " +
+                "(SELECT s.netex_id AS netex_id, DIFFERENCE(s.name_value, :name) AS sim FROM stop_place s " +
                 SQL_LEFT_JOIN_PARENT_STOP +
-                "WHERE ST_Within(s.centroid, :filter) = true " +
+                "WHERE s.centroid.STWithin(:filter) = true " +
                 "AND " + SQL_STOP_PLACE_OR_PARENT_IS_VALID_AT_POINT_IN_TIME +
                 "AND s.stop_place_type = :stopPlaceType) sub " +
                 "WHERE sub.sim > 0.6 " +
@@ -236,27 +262,25 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         Geometry geometryFilter = geometryFactory.toGeometry(envelope);
 
         Query query = entityManager.createNativeQuery("SELECT s.netex_id FROM stop_place s " +
-                                                           SQL_LEFT_JOIN_PARENT_STOP +
-                                                           "WHERE ST_Within(s.centroid, :filter) = true " +
-                                                           "AND " + SQL_STOP_PLACE_OR_PARENT_IS_VALID_AT_POINT_IN_TIME +
-                                                           "AND s.name_value = :name ");
+                SQL_LEFT_JOIN_PARENT_STOP +
+                "WHERE s.centroid.STWithin(:filter) = true " +
+                "AND " + SQL_STOP_PLACE_OR_PARENT_IS_VALID_AT_POINT_IN_TIME +
+                "AND s.name_value = :name ");
         query.setParameter("filter", geometryFilter);
         query.setParameter("name", name);
         query.setParameter("pointInTime", Date.from(Instant.now()));
         return getOneOrNull(query);
     }
 
-
-
     @Override
     public List<String> findNearbyStopPlace(Envelope envelope, StopTypeEnumeration stopTypeEnumeration) {
         Geometry geometryFilter = geometryFactory.toGeometry(envelope);
 
         Query query = entityManager.createNativeQuery("SELECT s.netex_id FROM stop_place s " +
-                                                                SQL_LEFT_JOIN_PARENT_STOP +
-                                                                "WHERE ST_within(s.centroid, :filter) = true " +
-                                                                "AND " + SQL_STOP_PLACE_OR_PARENT_IS_VALID_AT_POINT_IN_TIME +
-                                                                "AND s.stop_place_type = :stopPlaceType");
+                SQL_LEFT_JOIN_PARENT_STOP +
+                "WHERE s.centroid.STWithin(:filter) = true " +
+                "AND " + SQL_STOP_PLACE_OR_PARENT_IS_VALID_AT_POINT_IN_TIME +
+                "AND s.stop_place_type = :stopPlaceType");
 
         query.setParameter("filter", geometryFilter);
         query.setParameter("stopPlaceType", stopTypeEnumeration.toString());
@@ -272,7 +296,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     @Override
     public String findFirstByKeyValues(String key, Set<String> values) {
         Set<String> matches = findByKeyValues(key, values);
-        if(matches.isEmpty()) {
+        if (matches.isEmpty()) {
             return null;
         }
         return matches.iterator().next();
@@ -282,7 +306,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     /**
      * Find stop place netex IDs by key value
      *
-     * @param key key in key values for stop
+     * @param key    key in key values for stop
      * @param values list of values to check for
      * @return set of stop place's netex IDs
      */
@@ -294,8 +318,8 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     /**
      * Find stop place netex IDs by key value
      *
-     * @param key key in key values for stop
-     * @param values list of values to check for
+     * @param key        key in key values for stop
+     * @param values     list of values to check for
      * @param exactMatch set to <code>true</code> to perform lookup instead of search
      * @return set of stop place's netex IDs
      */
@@ -303,14 +327,14 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     public Set<String> findByKeyValues(String key, Set<String> values, boolean exactMatch) {
 
         StringBuilder sqlQuery = new StringBuilder("SELECT s.netex_id " +
-                                                           "FROM stop_place s " +
-                                                            "INNER JOIN stop_place_key_values spkv " +
-                                                           "ON spkv.stop_place_id = s.id " +
-                                                           "INNER JOIN value_items v " +
-                                                           "ON spkv.key_values_id = v.value_id " +
-                                                           SQL_LEFT_JOIN_PARENT_STOP +
-                                                           "WHERE spkv.key_values_key = :key " +
-                                                           "AND " + SQL_STOP_PLACE_OR_PARENT_IS_VALID_AT_POINT_IN_TIME);
+                "FROM stop_place s " +
+                "INNER JOIN stop_place_key_values spkv " +
+                "ON spkv.stop_place_id = s.id " +
+                "INNER JOIN value_items v " +
+                "ON spkv.key_values_id = v.value_id " +
+                SQL_LEFT_JOIN_PARENT_STOP +
+                "WHERE spkv.key_values_key = :key " +
+                "AND " + SQL_STOP_PLACE_OR_PARENT_IS_VALID_AT_POINT_IN_TIME);
 
 
         List<String> parameters = new ArrayList<>(values.size());
@@ -321,7 +345,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         for (int parameterCounter = 0; parameterCounter < values.size(); parameterCounter++) {
             sqlQuery.append(" v.items LIKE :value").append(parameterCounter);
             parameters.add(parameterPrefix + parameterCounter);
-            parametervalues.add((exactMatch ? "":"%") + valuesIterator.next());
+            parametervalues.add((exactMatch ? "" : "%") + valuesIterator.next());
             if (parameterCounter + 1 < values.size()) {
                 sqlQuery.append(" OR ");
             }
@@ -343,15 +367,15 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     public List<String> searchByKeyValue(String key, String value) {
 
         Query query = entityManager.createNativeQuery("SELECT s.netex_id " +
-                                                              "FROM stop_place_key_values spkv " +
-                                                              "INNER JOIN value_items v " +
-                                                              "ON spkv.key_values_id = v.value_id " +
-                                                              "INNER JOIN stop_place s " +
-                                                              "ON spkv.stop_place_id = s.id " +
-                                                               SQL_LEFT_JOIN_PARENT_STOP +
-                                                              "WHERE  spkv.key_values_key = :key " +
-                                                              "AND v.items LIKE ( :value ) " +
-                                                              "AND " + SQL_STOP_PLACE_OR_PARENT_IS_VALID_AT_POINT_IN_TIME);
+                "FROM stop_place_key_values spkv " +
+                "INNER JOIN value_items v " +
+                "ON spkv.key_values_id = v.value_id " +
+                "INNER JOIN stop_place s " +
+                "ON spkv.stop_place_id = s.id " +
+                SQL_LEFT_JOIN_PARENT_STOP +
+                "WHERE  spkv.key_values_key = :key " +
+                "AND v.items LIKE ( :value ) " +
+                "AND " + SQL_STOP_PLACE_OR_PARENT_IS_VALID_AT_POINT_IN_TIME);
 
         query.setParameter("key", key);
         query.setParameter("value", "%" + value + "%");
@@ -381,14 +405,14 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     @Override
     public List<IdMappingDto> findKeyValueMappingsForStop(Instant validFrom, Instant validTo, int recordPosition, int recordsPerRoundTrip) {
         String sql = "SELECT v.items, s.netex_id, s.stop_place_type, s.from_date sFrom, s.to_date sTo, p.from_date pFrom, p.to_date pTo " +
-                             "FROM stop_place_key_values spkv " +
-                             "  INNER JOIN value_items v " +
-                             "      ON spkv.key_values_key in (:mappingIdKeys) AND spkv.key_values_id = v.value_id AND v.items NOT LIKE '' " +
-                             "  INNER JOIN stop_place s ON s.id = spkv.stop_place_id " +
-                             SQL_LEFT_JOIN_PARENT_STOP +
-                             "WHERE " +
-                              SQL_STOP_PLACE_OR_PARENT_IS_VALID_IN_INTERVAL +
-                             "ORDER BY s.id,spkv.key_values_id";
+                "FROM stop_place_key_values spkv " +
+                "  INNER JOIN value_items v " +
+                "      ON spkv.key_values_key in (:mappingIdKeys) AND spkv.key_values_id = v.value_id AND v.items NOT LIKE '' " +
+                "  INNER JOIN stop_place s ON s.id = spkv.stop_place_id " +
+                SQL_LEFT_JOIN_PARENT_STOP +
+                "WHERE " +
+                SQL_STOP_PLACE_OR_PARENT_IS_VALID_IN_INTERVAL +
+                "ORDER BY s.id,spkv.key_values_id";
 
 
         Query nativeQuery = entityManager.createNativeQuery(sql).setFirstResult(recordPosition).setMaxResults(recordsPerRoundTrip);
@@ -418,22 +442,20 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         return mappingResult;
     }
 
-
     private Instant parseInstant(Object timestampObject) {
         if (timestampObject instanceof Timestamp) {
-            return ((Timestamp)timestampObject).toInstant();
+            return ((Timestamp) timestampObject).toInstant();
         }
         return null;
     }
 
-
     @Override
     public Set<String> findUniqueStopPlaceIds(Instant validFrom, Instant validTo) {
         String sql = "SELECT DISTINCT s.netex_id FROM stop_place s " +
-                        SQL_LEFT_JOIN_PARENT_STOP +
-                        "WHERE " +
-                        SQL_STOP_PLACE_OR_PARENT_IS_VALID_IN_INTERVAL +
-                        "ORDER BY s.netex_id";
+                SQL_LEFT_JOIN_PARENT_STOP +
+                "WHERE " +
+                SQL_STOP_PLACE_OR_PARENT_IS_VALID_IN_INTERVAL +
+                "ORDER BY s.netex_id";
 
 
         Query nativeQuery = entityManager.createNativeQuery(sql);
@@ -449,34 +471,33 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         List<String> results = nativeQuery.getResultList();
 
         Set<String> ids = new HashSet<>();
-        for(String result : results) {
+        for (String result : results) {
             ids.add(result);
         }
         return ids;
     }
 
-
     @Override
     public List<String> findStopPlaceFromQuayOriginalId(String quayOriginalId, Instant pointInTime) {
         String sql = "SELECT DISTINCT s.netex_id " +
-                             "FROM stop_place s " +
-                             "  INNER JOIN stop_place_quays spq " +
-                             "    ON s.id = spq.stop_place_id " +
-                             "  INNER JOIN quay q " +
-                             "    ON spq.quays_id = q.id " +
-                             "  INNER JOIN quay_key_values qkv " +
-                             "    ON q.id = qkv.quay_id AND qkv.key_values_key in (:originalIdKey) " +
-                             "  INNER JOIN value_items vi " +
-                             "    ON vi.value_id = qkv.key_values_id AND vi.items LIKE :value " +
-                             SQL_LEFT_JOIN_PARENT_STOP +
-                             " WHERE " +
+                "FROM stop_place s " +
+                "  INNER JOIN stop_place_quays spq " +
+                "    ON s.id = spq.stop_place_id " +
+                "  INNER JOIN quay q " +
+                "    ON spq.quays_id = q.id " +
+                "  INNER JOIN quay_key_values qkv " +
+                "    ON q.id = qkv.quay_id AND qkv.key_values_key in (:originalIdKey) " +
+                "  INNER JOIN value_items vi " +
+                "    ON vi.value_id = qkv.key_values_id AND vi.items LIKE :value " +
+                SQL_LEFT_JOIN_PARENT_STOP +
+                " WHERE " +
                 SQL_STOP_PLACE_OR_PARENT_IS_VALID_AT_POINT_IN_TIME;
 
         Query query = entityManager.createNativeQuery(sql);
 
         query.setParameter("value", "%:" + quayOriginalId);
         query.setParameter("originalIdKey", ORIGINAL_ID_KEY);
-        query.setParameter("pointInTime",  Date.from(pointInTime));
+        query.setParameter("pointInTime", Date.from(pointInTime));
 
         try {
             @SuppressWarnings("unchecked")
@@ -510,7 +531,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
         Query query = entityManager.createNativeQuery(sql);
         query.setParameter("validTo", Date.from(validTo));
-        query.setParameter("validFrom",  Date.from(validFrom));
+        query.setParameter("validFrom", Date.from(validFrom));
 
         try {
             @SuppressWarnings("unchecked")
@@ -531,7 +552,6 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
             return null;
         }
     }
-
 
     @Override
     public Iterator<StopPlace> scrollStopPlaces() {
@@ -555,7 +575,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         Session session = entityManager.unwrap(Session.class);
 
         Pair<String, Map<String, Object>> queryWithParams = stopPlaceQueryFromSearchBuilder.buildQueryString(exportParams);
-        NativeQuery sqlQuery = session.createNativeQuery(queryWithParams.getFirst());
+        SQLQuery sqlQuery = session.createSQLQuery(queryWithParams.getFirst());
         searchHelper.addParams(sqlQuery, queryWithParams.getSecond());
 
         return scrollStopPlaces(sqlQuery, session);
@@ -568,7 +588,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         SQLQuery sqlQuery = session.createSQLQuery(generateStopPlaceQueryFromStopPlaceIds(stopPlacePrimaryIds));
 
         logger.info("Scrolling {} stop places", stopPlacePrimaryIds.size());
-       return scrollStopPlaces(sqlQuery, session);
+        return scrollStopPlaces(sqlQuery, session);
     }
 
     public Iterator<StopPlace> scrollStopPlaces(SQLQuery sqlQuery, Session session) {
@@ -578,42 +598,50 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         sqlQuery.setFetchSize(SCROLL_FETCH_SIZE);
         sqlQuery.setCacheable(false);
         ScrollableResults results = sqlQuery.scroll(ScrollMode.FORWARD_ONLY);
-
         ScrollableResultIterator<StopPlace> stopPlaceEntityIterator = new ScrollableResultIterator<>(results, SCROLL_FETCH_SIZE, session);
 
         return stopPlaceEntityIterator;
     }
 
     private String generateStopPlaceQueryFromStopPlaceIds(Set<Long> stopPlacePrimaryIds) {
-
-        Set<String> stopPlacePrimaryIdStrings = stopPlacePrimaryIds.stream().map(lvalue -> String.valueOf(lvalue)).collect(Collectors.toSet());
-        String joinedStopPlaceDbIds = String.join(",", stopPlacePrimaryIdStrings);
-        StringBuilder sql = new StringBuilder("SELECT s.* FROM stop_place s WHERE s.id IN(");
-        sql.append(joinedStopPlaceDbIds);
-        sql.append(")");
+        StringBuilder sql = new StringBuilder("SELECT s.* FROM stop_place s WHERE ");
+        sql.append(DbQueryUtil.createSaneWhereClause("s.id", stopPlacePrimaryIds));
         return sql.toString();
     }
 
     @Override
     public Set<String> getNetexIds(ExportParams exportParams) {
+        logger.info("getNetexIds called");
         Pair<String, Map<String, Object>> pair = stopPlaceQueryFromSearchBuilder.buildQueryString(exportParams);
         Session session = entityManager.unwrap(Session.class);
-        NativeQuery query = session.createNativeQuery("SELECT sub.netex_id from (" + pair.getFirst() + ") sub");
+        SQLQuery query = session.createSQLQuery("SELECT sub.netex_id from (" + pair.getFirst() + ") sub");
 
         searchHelper.addParams(query, pair.getSecond());
 
         @SuppressWarnings("unchecked")
-        Set<String> result =  new HashSet<>(query.list());
+        Set<String> result = new HashSet<>(query.list());
         return result;
     }
 
     @Override
     public Set<Long> getDatabaseIds(ExportParams exportParams, boolean ignorePaging) {
+        logger.info("getDatabaseIds called");
         Pair<String, Map<String, Object>> pair = stopPlaceQueryFromSearchBuilder.buildQueryString(exportParams);
         Session session = entityManager.unwrap(Session.class);
-        NativeQuery query = session.createNativeQuery("SELECT sub.id from (" + pair.getFirst() + ") sub");
 
-        if(!ignorePaging) {
+        // Fix SQL Server exception:
+        // The ORDER BY clause is invalid in views, inline functions, derived tables, subqueries,
+        // and common table expressions, unless TOP, OFFSET or FOR XML is also specified.
+        //
+        // Entur used a weird Inner Query thing here. Just fix the query and run it normally.
+        // Instead of running "Select top(?) sub.id from (select s.* from stop_place s ...) sub
+        // We simply run Select top(?) s.id from stop_place s ...
+
+        String fixedInnerQuery = pair.getFirst().replaceAll("select(\r|\n| )+s\\.\\*", "select s.id");
+        logger.info("Original inner query modified in order not to be nested: " + fixedInnerQuery);
+        SQLQuery<BigInteger> query = session.createSQLQuery(fixedInnerQuery);
+
+        if (!ignorePaging) {
             long firstResult = exportParams.getStopPlaceSearch().getPageable().getOffset();
             query.setFirstResult(Math.toIntExact(firstResult));
             query.setMaxResults(exportParams.getStopPlaceSearch().getPageable().getPageSize());
@@ -621,17 +649,17 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         searchHelper.addParams(query, pair.getSecond());
 
         Set<Long> result = new HashSet<>();
-        for(Object object : query.list()) {
-            BigInteger bigInteger = (BigInteger) object;
+        for (BigInteger bigInteger : query.list()) {
             result.add(bigInteger.longValue());
 
         }
-
+        logger.debug("getDatabaseIds is returning a set with " + result.size() + " entries");
         return result;
     }
 
     @Override
     public Page<StopPlace> findStopPlace(ExportParams exportParams) {
+        logger.debug("findStopPlace called");
         Pair<String, Map<String, Object>> queryWithParams = stopPlaceQueryFromSearchBuilder.buildQueryString(exportParams);
 
         final Query nativeQuery = entityManager.createNativeQuery(queryWithParams.getFirst(), StopPlace.class);
@@ -648,6 +676,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
     @Override
     public List<StopPlace> findAll(List<String> stopPlacesNetexIds) {
+        logger.debug("findAll called");
         final String queryString = "SELECT stopPlace FROM StopPlace stopPlace WHERE stopPlace.netexId IN :netexIds";
         final TypedQuery<StopPlace> typedQuery = entityManager.createQuery(queryString, StopPlace.class);
         typedQuery.setParameter("netexIds", stopPlacesNetexIds);
@@ -656,6 +685,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
     @Override
     public StopPlace findByQuay(Quay quay) {
+        logger.debug("findByQuay called");
         final String queryString = "select s from StopPlace s where :quay member of s.quays";
         final TypedQuery<StopPlace> typedQuery = entityManager.createQuery(queryString, StopPlace.class);
         typedQuery.setParameter("quay", quay);
@@ -664,23 +694,25 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
     /**
      * Returns parent stops only if multi modal stops
+     *
      * @param search
      * @return
      */
     public Page<StopPlace> findStopPlacesWithEffectiveChangeInPeriod(ChangedStopPlaceSearch search) {
+        logger.debug("findStopPlacesWithEffectiveChangeInPeriod called");
         final String queryString = "select sp.* " + STOP_PLACE_WITH_EFFECTIVE_CHANGE_QUERY_BASE + " order by sp.from_Date";
 
         long firstResult = search.getPageable().getOffset();
 
         List<StopPlace> stopPlaces = entityManager.createNativeQuery(queryString, StopPlace.class)
-                                             .setParameter("from", Date.from(search.getFrom()))
-                                             .setParameter("to", Date.from(search.getTo()))
-                                             .setFirstResult(Math.toIntExact(firstResult))
-                                             .setMaxResults(search.getPageable().getPageSize())
-                                             .getResultList();
+                .setParameter("from", Date.from(search.getFrom()))
+                .setParameter("to", Date.from(search.getTo()))
+                .setFirstResult(Math.toIntExact(firstResult))
+                .setMaxResults(search.getPageable().getPageSize())
+                .getResultList();
 
 
-        if(logger.isDebugEnabled()) {
+        if (logger.isDebugEnabled()) {
             final String generatedSql = basicFormatter.format(queryString.toString());
             logger.debug("sql: {}\nSearch object: {}", generatedSql, search);
         }
@@ -695,10 +727,12 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
     /**
      * Return jbv code mapping for rail stations. The stop place contains jbc code mapping. The quay contains the public code.
+     *
      * @return
      */
     @Override
     public List<JbvCodeMappingDto> findJbvCodeMappingsForStopPlace() {
+        logger.debug("findJbvCodeMappingsForStopPlace called");
         String sql = "SELECT DISTINCT vi.items, s.netex_id " +
                 "FROM stop_place_key_values skv " +
                 "   INNER JOIN stop_place s " +
@@ -727,31 +761,9 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
     private int countStopPlacesWithEffectiveChangeInPeriod(ChangedStopPlaceSearch search) {
         String queryString = "select count(sp.id) " + STOP_PLACE_WITH_EFFECTIVE_CHANGE_QUERY_BASE;
-        return ((Number)entityManager.createNativeQuery(queryString).setParameter("from", Date.from(search.getFrom()))
-                       .setParameter("to",  Date.from(search.getTo())).getSingleResult()).intValue();
+        return ((Number) entityManager.createNativeQuery(queryString).setParameter("from", Date.from(search.getFrom()))
+                .setParameter("to", Date.from(search.getTo())).getSingleResult()).intValue();
     }
-
-    private static final String STOP_PLACE_WITH_EFFECTIVE_CHANGE_QUERY_BASE =
-            " from stop_place sp INNER JOIN " +
-                    "(SELECT spinner.netex_id, MAX(spinner.version) AS maxVersion " +
-                    "   FROM stop_place spinner " +
-                    " WHERE " +
-                    "   (spinner.from_date BETWEEN :from AND :to OR spinner.to_date BETWEEN :from AND :to ) " +
-                    "   AND spinner.parent_site_ref IS NULL " +
-                    // Make sure we do not fetch stop places that have become children of parent stops in "future" versions
-                    "   AND NOT EXISTS( " +
-                    "      SELECT sp2.id FROM stop_place sp2 " +
-                    "      INNER JOIN stop_place parent " +
-                    "        ON parent.netex_id = sp2.parent_site_ref " +
-                    "          AND cast(parent.version AS TEXT) = sp2.parent_site_ref_version " +
-                    "          AND (parent.from_date BETWEEN :from AND :to OR parent.to_date BETWEEN :from AND :to ) " +
-                    "        WHERE sp2.netex_id = spinner.netex_id " +
-                    "          AND sp2.version > spinner.version " +
-                    "  )" +
-                    " GROUP BY spinner.netex_id " +
-                    ") sub " +
-                    "   ON sub.netex_id = sp.netex_id " +
-                    "   AND sub.maxVersion = sp.version";
 
     private <T> T getOneOrNull(TypedQuery<T> query) {
         try {

@@ -25,7 +25,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-public class BoardingPositionsConverter extends BidirectionalConverter<List<BoardingPosition>, org.rutebanken.netex.model.BoardingPositions_RelStructure> {
+public class BoardingPositionsConverter extends BidirectionalConverter<List<BoardingPosition>, BoardingPositions_RelStructure> {
     @Override
     public BoardingPositions_RelStructure convertTo(List<BoardingPosition> boardingPositions, Type<BoardingPositions_RelStructure> type, MappingContext mappingContext) {
         return null;

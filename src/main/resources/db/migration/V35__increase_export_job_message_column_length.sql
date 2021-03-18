@@ -1,1 +1,1 @@
-ALTER TABLE export_job ALTER COLUMN message TYPE text;
+ALTER TABLE export_job ALTER COLUMN message text;

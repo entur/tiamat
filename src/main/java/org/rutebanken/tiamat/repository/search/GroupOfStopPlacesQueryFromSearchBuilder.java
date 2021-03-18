@@ -62,7 +62,7 @@ public class GroupOfStopPlacesQueryFromSearchBuilder {
             wheres.add("lower(g.name_value) like concat('%', lower(:query), '%')");
             operators.add("and");
             parameters.put("query", search.getQuery());
-            orderByStatements.add("similarity(g.name_value, :query) desc");
+            orderByStatements.add("DIFFERENCE(g.name_value, :query) desc");
         }
 
         if(search.getStopPlaceId() != null) {

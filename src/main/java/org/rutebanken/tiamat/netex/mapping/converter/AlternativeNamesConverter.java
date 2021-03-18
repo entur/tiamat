@@ -37,7 +37,7 @@ public class AlternativeNamesConverter extends BidirectionalConverter<List<Alter
 
             List<org.rutebanken.netex.model.AlternativeName> netexAlternativeNames = new ArrayList<>();
 
-            for (org.rutebanken.tiamat.model.AlternativeName alternativeName : alternativeNames) {
+            for (AlternativeName alternativeName : alternativeNames) {
                 if (alternativeName != null
                         && alternativeName.getName() != null
                         && alternativeName.getName().getValue() != null

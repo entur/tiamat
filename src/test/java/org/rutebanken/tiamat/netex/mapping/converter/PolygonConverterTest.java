@@ -33,7 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class PolygonConverterTest {
 
-    private static final net.opengis.gml._3.ObjectFactory openGisObjectFactory = new ObjectFactory();
+    private static final ObjectFactory openGisObjectFactory = new ObjectFactory();
 
     private GeometryFactory geometryFactory = new GeometryFactoryConfig().geometryFactory();
     private final DoubleValuesToCoordinateSequence doubleValuesToCoordinateSequence = new DoubleValuesToCoordinateSequence();

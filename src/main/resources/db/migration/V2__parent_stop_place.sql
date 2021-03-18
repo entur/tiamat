@@ -1,1 +1,1 @@
-alter table stop_place add column parent_stop_place boolean not null default 'false';
+alter table stop_place add parent_stop_place bit not null CONSTRAINT df_stop_place_parent_stop_place default 0;

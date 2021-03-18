@@ -23,7 +23,6 @@ import org.rutebanken.tiamat.rest.graphql.fetchers.PolygonFetcher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static graphql.Scalars.GraphQLInt;
 import static graphql.Scalars.GraphQLString;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLObjectType.newObject;
@@ -60,10 +59,6 @@ public class TopographicPlaceObjectTypeCreator {
                 .field(newFieldDefinition()
                         .name(NAME)
                         .type(embeddableMultilingualStringObjectType))
-                .field(newFieldDefinition()
-                        .name(VERSION)
-                        .type(GraphQLInt))
-
                 .field(newFieldDefinition()
                         .name(PARENT_TOPOGRAPHIC_PLACE)
                         .type(new GraphQLTypeReference(OUTPUT_TYPE_TOPOGRAPHIC_PLACE))

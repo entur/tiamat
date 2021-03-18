@@ -38,8 +38,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronizationAdapter;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.time.Instant;
 import java.util.HashSet;
@@ -140,8 +138,9 @@ public class StopPlaceVersionedSaverService {
 
         if (newVersion.getTariffZones() != null) {
             for (TariffZoneRef tariffZoneRef : newVersion.getTariffZones()) {
-                if (referenceResolver.resolve(tariffZoneRef) == null) {
-                    throw new IllegalArgumentException("StopPlace refers to non existing tariff zone or fare zone: " + tariffZoneRef);
+                TariffZone tariffZone = referenceResolver.resolve(tariffZoneRef);
+                if (tariffZone == null) {
+                    throw new IllegalArgumentException("StopPlace refers to non existing tariff zone: " + tariffZoneRef);
                 }
             }
         }
@@ -211,20 +210,9 @@ public class StopPlaceVersionedSaverService {
 
         nearbyStopPlaceFinder.update(newVersion);
         newVersion.getChildren().forEach(nearbyStopPlaceFinder::update);
-        sendToJMS(newVersion);
+        entityChangedListener.onChange(newVersion);
 
         return newVersion;
-    }
-
-    //This is to make sure entity is persisted before sending message
-    @Transactional
-    public void sendToJMS(StopPlace stopPlace) {
-        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter(){
-            public void afterCommit(){
-                logger.debug(String.format("send pubsub message on change: %s", stopPlace.toString()));
-                entityChangedListener.onChange(stopPlace);
-            }
-        });
     }
 
     private void validateAdjacentSites(StopPlace newVersion) {

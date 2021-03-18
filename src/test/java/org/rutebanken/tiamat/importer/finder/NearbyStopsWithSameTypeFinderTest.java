@@ -15,6 +15,7 @@
 
 package org.rutebanken.tiamat.importer.finder;
 
+import org.junit.Ignore;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Point;
 import org.geotools.referencing.GeodeticCalculator;
@@ -50,6 +51,7 @@ public class NearbyStopsWithSameTypeFinderTest extends TiamatIntegrationTest {
     }
 
     @Test
+    @Ignore // Will be handled in KOD-584
     public void findNearbyAirport() throws FactoryException, TransformException {
 
         Point point = geometryFactory.createPoint(OSL_GARDERMOEN);
@@ -68,6 +70,7 @@ public class NearbyStopsWithSameTypeFinderTest extends TiamatIntegrationTest {
     }
 
     @Test
+    @Ignore // Will be handled in KOD-584
     public void findNoNearbyRailStation() throws FactoryException, TransformException {
 
         Point point = geometryFactory.createPoint(OSL_GARDERMOEN);
@@ -84,6 +87,7 @@ public class NearbyStopsWithSameTypeFinderTest extends TiamatIntegrationTest {
     }
 
     @Test
+    @Ignore // Will be handled in KOD-584
     public void noNearByAirport() throws FactoryException, TransformException {
         Point point = geometryFactory.createPoint(OSL_GARDERMOEN);
         createSavedStopPlace("OSL Gardermoen", StopTypeEnumeration.AIRPORT, point);

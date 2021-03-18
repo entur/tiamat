@@ -15,15 +15,19 @@
 
 package org.rutebanken.tiamat.netex.mapping.converter;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.List;
+
 import com.google.common.base.Strings;
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.Point;
 import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Point;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CRSAuthorityFactory;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -35,10 +39,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.List;
 
 @Component
 public class SimplePointVersionStructureConverter extends BidirectionalConverter<Point, SimplePoint_VersionStructure> {
@@ -58,7 +58,7 @@ public class SimplePointVersionStructureConverter extends BidirectionalConverter
     @Autowired
     public SimplePointVersionStructureConverter(GeometryFactory geometryFactory) {
         this.geometryFactory = geometryFactory;
-         internalSrsName = "EPSG:" + geometryFactory.getSRID();
+        internalSrsName = "EPSG:" + geometryFactory.getSRID();
         try {
             epsg4326 = factory.createCoordinateReferenceSystem(internalSrsName);
         } catch (FactoryException e) {
@@ -70,7 +70,7 @@ public class SimplePointVersionStructureConverter extends BidirectionalConverter
 
     @Override
     public SimplePoint_VersionStructure convertTo(Point point, Type<SimplePoint_VersionStructure> type, MappingContext mappingContext) {
-        if(point == null) {
+        if (point == null) {
             return null;
         }
 
@@ -79,33 +79,33 @@ public class SimplePointVersionStructureConverter extends BidirectionalConverter
 
         return new SimplePoint_VersionStructure()
                 .withLocation(new LocationStructure()
-                    .withLongitude(longitude)
-                    .withLatitude(latitude));
+                        .withLongitude(longitude)
+                        .withLatitude(latitude));
     }
 
     @Override
     public Point convertFrom(SimplePoint_VersionStructure simplePoint, Type<Point> type, MappingContext mappingContext) {
 
-        if(simplePoint != null
+        if (simplePoint != null
                 && simplePoint.getLocation() != null) {
 
-            if(noCoordinatesSet(simplePoint)) {
+            if (noCoordinatesSet(simplePoint)) {
                 logger.warn("Could not find long/lat or pos from location: {}", simplePoint.getLocation());
                 return null;
             }
 
-            if(hasLongLat(simplePoint)) {
+            if (hasLongLat(simplePoint)) {
                 logger.debug("Detected longitude and latitude: {}", simplePoint);
                 String sourceSrsName = simplePoint.getLocation().getSrsName();
                 Coordinate coordinate = convertAndRoundLongLat(simplePoint);
                 return transformIfDifferentSrs(coordinate, sourceSrsName);
 
-            } else if(simplePoint.getLocation().getPos() != null) {
+            } else if (simplePoint.getLocation().getPos() != null) {
                 logger.debug("Detected pos value: {}", simplePoint);
                 String sourceSrsName = simplePoint.getLocation().getPos().getSrsName();
 
                 List<Double> values = simplePoint.getLocation().getPos().getValue();
-                if(values.size() < 2) {
+                if (values.size() < 2) {
                     logger.warn("Pos list does not contain 2 or more coordinates: {}", simplePoint);
                     return null;
                 }
@@ -119,11 +119,11 @@ public class SimplePointVersionStructureConverter extends BidirectionalConverter
 
     private Point transformIfDifferentSrs(Coordinate coordinate, String sourceSrsName) {
 
-        if(Strings.isNullOrEmpty(sourceSrsName)) {
+        if (Strings.isNullOrEmpty(sourceSrsName)) {
             logger.debug("SRS is null or empty. Assuming {}: {}", geometryFactory.getSRID(), sourceSrsName);
-        } else if(!sourceSrsName.equals(internalSrsName)) {
+        } else if (!sourceSrsName.equals(internalSrsName)) {
             Coordinate transformed = transform(coordinate, sourceSrsName);
-            if(transformed == null) {
+            if (transformed == null) {
                 return null;
             } else {
                 return geometryFactory.createPoint(transformed);
@@ -141,7 +141,7 @@ public class SimplePointVersionStructureConverter extends BidirectionalConverter
             logger.debug("Transformed {} into {}", source, destination);
             return destination;
 
-        } catch (TransformException|FactoryException e) {
+        } catch (TransformException | FactoryException e) {
             logger.warn("Cannot transform coordinate {} to internal coordinate reference system", source, e);
             // Do not return coordinate without transformation
             return null;
@@ -160,7 +160,7 @@ public class SimplePointVersionStructureConverter extends BidirectionalConverter
         logger.debug("Converting point {}", simplePoint);
 
         return new Coordinate(round(simplePoint.getLocation().getLongitude()).doubleValue(),
-                        round(simplePoint.getLocation().getLatitude()).doubleValue());
+                round(simplePoint.getLocation().getLatitude()).doubleValue());
     }
 
     private BigDecimal round(BigDecimal bigDecimal) {

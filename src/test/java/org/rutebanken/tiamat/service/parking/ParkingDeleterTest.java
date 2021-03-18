@@ -21,12 +21,11 @@ import org.rutebanken.tiamat.model.Parking;
 import org.rutebanken.tiamat.model.SiteRefStructure;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
-
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 
 public class ParkingDeleterTest extends TiamatIntegrationTest {
@@ -35,7 +34,6 @@ public class ParkingDeleterTest extends TiamatIntegrationTest {
     private ParkingDeleter parkingDeleter;
 
     @Test
-    @Transactional
     public void deleteParking() throws Exception {
 
 

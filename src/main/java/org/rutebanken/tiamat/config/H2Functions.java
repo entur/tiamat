@@ -15,9 +15,6 @@
 
 package org.rutebanken.tiamat.config;
 
-import com.google.common.collect.ContiguousSet;
-import com.google.common.collect.DiscreteDomain;
-import com.google.common.collect.Range;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,14 +45,13 @@ public class H2Functions implements InitializingBean {
     @Override
     public void afterPropertiesSet() throws Exception {
 
-        try(Connection connection = jdbcTemplate.getDataSource().getConnection()) {
+        try {
+            Connection connection = jdbcTemplate.getDataSource().getConnection();
             if (connection.getMetaData().getDatabaseProductName().contains("H2")) {
-                logger.info("H2 detected. Creating alias to method similarityOveridden.");
-                jdbcTemplate.execute("CREATE ALIAS IF NOT EXISTS similarity FOR \"org.rutebanken.tiamat.config.H2Functions.similarity\"");
-
-                    logger.info("H2. Creating alias to method generate_series");
-                    jdbcTemplate.execute("CREATE ALIAS IF NOT EXISTS generate_series FOR \"org.rutebanken.tiamat.config.H2Functions.generateSeries\"");
-                }
+                logger.info("H2. Doing H2 specific setup");
+                // Nothing to do here
+            }
+            connection.close();
         } catch (SQLException sqlException) {
             logger.warn("Cannot create h2 aliases", sqlException);
 
@@ -90,11 +86,5 @@ public class H2Functions implements InitializingBean {
 
         logger.info("Return similarity {}", similarityToReturn);
         return similarityToReturn;
-    }
-
-    public static Set<BigInteger> generateSeries(BigInteger start, BigInteger stop) {
-        Set<BigInteger> rangeSet = ContiguousSet.create(Range.closed(start, stop), DiscreteDomain.bigIntegers());
-        logger.info("Generated range set: {}", rangeSet);
-        return rangeSet;
     }
 }

@@ -67,7 +67,7 @@ public class ValidBetweenConverter extends BidirectionalConverter<List<ValidBetw
 
     @Override
     public List<ValidBetween> convertFrom(org.rutebanken.tiamat.model.ValidBetween validBetween, Type<List<ValidBetween>> type, MappingContext mappingContext) {
-        org.rutebanken.netex.model.ValidBetween netexValidBetween = new org.rutebanken.netex.model.ValidBetween();
+        ValidBetween netexValidBetween = new ValidBetween();
 
         if (validBetween.getFromDate() != null) {
             netexValidBetween.setFromDate(validBetween.getFromDate().atZone(exportTimeZone.getDefaultTimeZoneId()).toLocalDateTime());

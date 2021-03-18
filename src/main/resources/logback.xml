@@ -36,9 +36,9 @@
                                     "eventTime": "%date{\"yyyy-MM-dd'T'HH:mm:ss.SSS'000000Z'\", \"UTC\"}",
                                     "thread": "%thread",
                                     "message": "%message\n%ex{full}",
-                                    "severity": "%level",
+                                    "level": "%level",
+                                    "logger": "%logger",
                                     "reportLocation": {
-                                        "filePath": "%logger",
                                         "lineNumber": "%line",
                                         "functionName": "%method"
                                     },
@@ -56,8 +56,10 @@
             <logger name="com" level="INFO"/>
             <logger name="no" level="INFO"/>
             <logger name="org" level="INFO"/>
+            <logger name="org.rutebanken" level="INFO"/>
             <logger name="org.apache" level="INFO"/>
-            <logger name="org.hibernate.id" level="DEBUG" />
+            <logger name="org.eclipse" level="INFO"/>
+            <logger name="org.hibernate.id" level="INFO" />
             <root level="INFO">
                 <appender-ref ref="console"/>
             </root>

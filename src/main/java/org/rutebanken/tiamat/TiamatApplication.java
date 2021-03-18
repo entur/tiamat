@@ -20,18 +20,18 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+
 @SpringBootApplication
+@ServletComponentScan
 @Configuration
-@EnableAutoConfiguration
 @EnableTransactionManagement
 @EnableCaching
 @EntityScan(basePackageClasses = {StopPlace.class, Jsr310JpaConverters.class})
-@ComponentScan
 public class TiamatApplication {
 
     public static void main(String[] args) {

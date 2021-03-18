@@ -53,7 +53,7 @@ class TopographicPlaceFetcher implements DataFetcher {
             }
         }
         logger.debug("Returning topographic places with query: {} and type {}", environment.getArgument(QUERY), environment.getArgument(TOPOGRAPHIC_PLACE_TYPE));
-        return topographicPlaceRepository.findByNetexIdOrNameAndTypeMaxVersion(environment.getArgument(QUERY), environment.getArgument(TOPOGRAPHIC_PLACE_TYPE));
+        return topographicPlaceRepository.findByNameAndTypeMaxVersion(environment.getArgument(QUERY), environment.getArgument(TOPOGRAPHIC_PLACE_TYPE));
 
     }
 }

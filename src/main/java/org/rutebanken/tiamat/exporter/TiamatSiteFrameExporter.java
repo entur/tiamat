@@ -54,8 +54,8 @@ public class TiamatSiteFrameExporter {
     }
 
 
-    public org.rutebanken.tiamat.model.SiteFrame createTiamatSiteFrame(String description) {
-        org.rutebanken.tiamat.model.SiteFrame siteFrame = new org.rutebanken.tiamat.model.SiteFrame();
+    public SiteFrame createTiamatSiteFrame(String description) {
+        SiteFrame siteFrame = new SiteFrame();
         setFrameDefaultLocale(siteFrame);
         siteFrame.setDescription(new MultilingualStringEntity(description));
         // siteFrame.setCreated(Instant.now()); // Disabled because of OffsetDateTimeInstantConverter issues during test
@@ -64,7 +64,7 @@ public class TiamatSiteFrameExporter {
         return siteFrame;
     }
 
-    public void addStopsToTiamatSiteFrame(org.rutebanken.tiamat.model.SiteFrame siteFrame, Iterable<StopPlace> iterableStopPlaces) {
+    public void addStopsToTiamatSiteFrame(SiteFrame siteFrame, Iterable<StopPlace> iterableStopPlaces) {
         StopPlacesInFrame_RelStructure stopPlacesInFrame_relStructure = new StopPlacesInFrame_RelStructure();
 
         if (iterableStopPlaces != null) {
@@ -77,11 +77,11 @@ public class TiamatSiteFrameExporter {
         }
     }
 
-    public void addAllTariffZones(org.rutebanken.tiamat.model.SiteFrame siteFrame) {
+    public void addAllTariffZones(SiteFrame siteFrame) {
         addTariffZones(siteFrame, tariffZoneRepository.findAll());
     }
 
-    public void addTariffZones(org.rutebanken.tiamat.model.SiteFrame siteFrame, List<TariffZone> tariffZones) {
+    public void addTariffZones(SiteFrame siteFrame, List<TariffZone> tariffZones) {
         if (!tariffZones.isEmpty()) {
             siteFrame.setTariffZones(new TariffZonesInFrame_RelStructure(tariffZones));
             logger.info("Added {} tariffZones", tariffZones.size());
@@ -91,10 +91,10 @@ public class TiamatSiteFrameExporter {
     }
 
     public void addRelevantPathLinks(Set<Long> stopPlaceIds, SiteFrame siteFrame) {
-        List<org.rutebanken.tiamat.model.PathLink> pathLinks = pathLinkRepository.findByStopPlaceIds(stopPlaceIds);
+        List<PathLink> pathLinks = pathLinkRepository.findByStopPlaceIds(stopPlaceIds);
         if (!pathLinks.isEmpty()) {
             logger.info("Adding {} path links", pathLinks);
-            siteFrame.setPathLinks(new org.rutebanken.tiamat.model.PathLinksInFrame_RelStructure());
+            siteFrame.setPathLinks(new PathLinksInFrame_RelStructure());
             siteFrame.getPathLinks().getPathLink().addAll(pathLinks);
         } else {
             logger.info("There are no path links to export with the current filter");

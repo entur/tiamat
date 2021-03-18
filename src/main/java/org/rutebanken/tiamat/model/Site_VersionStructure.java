@@ -18,7 +18,6 @@ package org.rutebanken.tiamat.model;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import javax.persistence.*;
-import javax.xml.bind.JAXBElement;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -48,14 +47,14 @@ public abstract class Site_VersionStructure
     @Transient
     protected OrganisationRefStructure organisationRef;
 
-    @AttributeOverrides({
+    @AttributeOverrides( {
             @AttributeOverride(name = "ref", column = @Column(name = "parent_site_ref")),
             @AttributeOverride(name = "version", column = @Column(name = "parent_site_ref_version"))
     })
     @Embedded
     protected SiteRefStructure parentSiteRef;
 
-    @ElementCollection(targetClass = SiteRefStructure.class, fetch = FetchType.EAGER)
+    @ElementCollection(targetClass = SiteRefStructure.class, fetch = FetchType.LAZY)
     protected Set<SiteRefStructure> adjacentSites = new HashSet<>();
 
     @Transient

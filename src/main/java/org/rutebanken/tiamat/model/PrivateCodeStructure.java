@@ -62,9 +62,4 @@ public class PrivateCodeStructure implements Serializable {
         return Objects.equals(this.value, other.value)
                 && Objects.equals(this.type, other.type);
     }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(value, type);
-    }
 }

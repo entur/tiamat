@@ -15,13 +15,9 @@
 
 package org.rutebanken.tiamat.exporter;
 
-import com.fasterxml.classmate.AnnotationOverrides;
-import org.rutebanken.netex.model.FareFrame;
 import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
-import org.rutebanken.netex.model.SiteFrame;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
-import org.rutebanken.tiamat.model.ServiceFrame;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.id.ValidPrefixList;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
@@ -36,9 +32,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.xml.bind.JAXBElement;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
@@ -63,7 +57,6 @@ public class PublicationDeliveryExporter {
     private final StopPlaceRepository stopPlaceRepository;
     private final NetexMapper netexMapper;
     private final TiamatSiteFrameExporter tiamatSiteFrameExporter;
-    private final TiamatServiceFrameExporter tiamatServiceFrameExporter;
     private final TopographicPlacesExporter topographicPlacesExporter;
     private final TariffZonesFromStopsExporter tariffZonesFromStopsExporter;
     private final ParentStopPlacesFetcher parentStopPlacesFetcher;
@@ -76,7 +69,6 @@ public class PublicationDeliveryExporter {
     public PublicationDeliveryExporter(StopPlaceRepository stopPlaceRepository,
                                        NetexMapper netexMapper,
                                        TiamatSiteFrameExporter tiamatSiteFrameExporter,
-                                       TiamatServiceFrameExporter tiamatServiceFrameExporter,
                                        TopographicPlacesExporter topographicPlacesExporter,
                                        TariffZonesFromStopsExporter tariffZonesFromStopsExporter,
                                        ParentStopPlacesFetcher parentStopPlacesFetcher,
@@ -85,7 +77,6 @@ public class PublicationDeliveryExporter {
         this.stopPlaceRepository = stopPlaceRepository;
         this.netexMapper = netexMapper;
         this.tiamatSiteFrameExporter = tiamatSiteFrameExporter;
-        this.tiamatServiceFrameExporter = tiamatServiceFrameExporter;
         this.topographicPlacesExporter = topographicPlacesExporter;
         this.tariffZonesFromStopsExporter = tariffZonesFromStopsExporter;
         this.parentStopPlacesFetcher = parentStopPlacesFetcher;
@@ -129,39 +120,6 @@ public class PublicationDeliveryExporter {
         return publicationDeliveryStructure;
     }
 
-    @SuppressWarnings("unchecked")
-    public PublicationDeliveryStructure createPublicationDelivery(org.rutebanken.netex.model.SiteFrame siteFrame, org.rutebanken.netex.model.FareFrame fareFrame) {
-        PublicationDeliveryStructure publicationDeliveryStructure = createPublicationDelivery();
-        publicationDeliveryStructure.withDataObjects(
-                new PublicationDeliveryStructure.DataObjects()
-                        .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(siteFrame))
-                        .withCompositeFrameOrCommonFrame(new ObjectFactory().createFareFrame(fareFrame))
-        );
-
-        logger.info("Returning publication delivery {} with site frame and fare frame", publicationDeliveryStructure);
-        return publicationDeliveryStructure;
-    }
-
-
-
-    @SuppressWarnings("unchecked")
-    public PublicationDeliveryStructure createPublicationDelivery(org.rutebanken.netex.model.SiteFrame siteFrame,
-                                                                  org.rutebanken.netex.model.ServiceFrame serviceFrame,
-                                                                  org.rutebanken.netex.model.FareFrame fareFrame) {
-        PublicationDeliveryStructure publicationDeliveryStructure = createPublicationDelivery();
-
-        publicationDeliveryStructure.withDataObjects
-                (
-                new PublicationDeliveryStructure.DataObjects()
-                        .withCompositeFrameOrCommonFrame(new ObjectFactory().createServiceFrame(serviceFrame))
-                        .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(siteFrame))
-                        .withCompositeFrameOrCommonFrame(new ObjectFactory().createFareFrame(fareFrame))
-
-                );
-
-        logger.info("Returning publication delivery {} with site frame and  service frame", publicationDeliveryStructure);
-        return publicationDeliveryStructure;
-    }
     /**
      *
      * @param stopPlaces

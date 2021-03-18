@@ -81,6 +81,7 @@ public class Quay extends StopPlaceSpace_VersionStructure {
         Quay other = (Quay) object;
 
         return Objects.equals(this.name, other.name)
+                && Objects.equals(this.shortName, other.shortName)
                 && Objects.equals(this.centroid, other.centroid)
                 && Objects.equals(this.compassBearing, other.compassBearing)
                 && Objects.equals(this.publicCode, other.publicCode)
@@ -102,6 +103,7 @@ public class Quay extends StopPlaceSpace_VersionStructure {
                 .add("netexId", netexId)
                 .add("version", version)
                 .add("name", name)
+                .add("shortName", shortName)
                 .add("centroid", centroid)
                 .add("bearing", compassBearing)
                 .add("publicCode", publicCode)

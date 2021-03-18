@@ -32,9 +32,9 @@ package org.rutebanken.tiamat.rest.graphql.types;
 
 import graphql.schema.GraphQLInterfaceType;
 import graphql.schema.GraphQLList;
-import graphql.schema.GraphQLNonNull;
 import graphql.schema.GraphQLObjectType;
 import org.rutebanken.tiamat.rest.graphql.fetchers.GroupOfStopPlacesMembersFetcher;
+import org.rutebanken.tiamat.rest.graphql.fetchers.KeyValuesDataFetcher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -43,7 +43,10 @@ import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLObjectType.newObject;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.embeddableMultilingualStringObjectType;
+import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.geometryFieldDefinition;
+import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.keyValuesObjectType;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.netexIdFieldDefinition;
+import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.privateCodeFieldDefinition;
 
 @Component
 public class GroupOfStopPlacesObjectTypeCreator {
@@ -51,7 +54,10 @@ public class GroupOfStopPlacesObjectTypeCreator {
     @Autowired
     private GroupOfStopPlacesMembersFetcher groupOfStopPlacesMembersFetcher;
 
-    public GraphQLObjectType create(GraphQLInterfaceType stopPlaceInterface) {
+    @Autowired
+    private KeyValuesDataFetcher keyValuesDataFetcher;
+
+    public GraphQLObjectType create(GraphQLInterfaceType stopPlaceInterface, GraphQLObjectType validBetweenObjectType) {
 
         return newObject()
                 .name(OUTPUT_TYPE_GROUP_OF_STOPPLACES)
@@ -71,10 +77,19 @@ public class GroupOfStopPlacesObjectTypeCreator {
                 .field(newFieldDefinition()
                         .name(VERSION_COMMENT)
                         .type(GraphQLString))
+                .field(privateCodeFieldDefinition)
+                .field(newFieldDefinition()
+                        .name(KEY_VALUES)
+                        .type(new GraphQLList(keyValuesObjectType))
+                        .dataFetcher(keyValuesDataFetcher))
+                .field(newFieldDefinition()
+                        .name(VALID_BETWEEN)
+                        .type(validBetweenObjectType))
+                .field(geometryFieldDefinition)
                 .field(newFieldDefinition()
                         .name(GROUP_OF_STOP_PLACES_MEMBERS)
                         .type(new GraphQLList(stopPlaceInterface))
                         .dataFetcher(groupOfStopPlacesMembersFetcher))
-                        .build();
+                .build();
     }
 }

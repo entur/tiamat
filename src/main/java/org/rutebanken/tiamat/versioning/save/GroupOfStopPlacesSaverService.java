@@ -15,8 +15,10 @@
 
 package org.rutebanken.tiamat.versioning.save;
 
+import java.time.Instant;
+import java.util.Arrays;
+
 import com.google.api.client.util.Preconditions;
-import org.locationtech.jts.geom.Point;
 import org.rutebanken.helper.organisation.AuthorizationConstants;
 import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
 import org.rutebanken.tiamat.auth.UsernameFetcher;
@@ -33,10 +35,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.Instant;
-import java.util.Arrays;
-import java.util.Optional;
 
 /**
  * No history for group of stop places.
@@ -89,13 +87,27 @@ public class GroupOfStopPlacesSaverService {
             newVersion.setCreated(Instant.now());
             result = newVersion;
         }
-        result.setValidBetween(null);
+
         result.setChangedBy(usernameForAuthenticatedUser);
-        Optional<Point> point = groupOfStopPlacesCentroidComputer.compute(result);
-        if(point.isPresent()) {
-            logger.info("Setting centroid for group of stop place {} to {}", result.getNetexId(), point.get());
-            result.setCentroid(point.get());
+
+        if (newVersion.getValidBetween() != null) {
+            result.setValidBetween(newVersion.getValidBetween());
         }
+        if (newVersion.getCentroid() != null) {
+            result.setCentroid(newVersion.getCentroid());
+        }
+        if (newVersion.getShortName() != null) {
+            result.setShortName(newVersion.getShortName());
+        }
+        if (newVersion.getKeyValues() != null) {
+            result.setKeyValues(newVersion.getKeyValues());
+        }
+        // Original Tiamat code
+//        Optional<Point> point = groupOfStopPlacesCentroidComputer.compute(result);
+//        if(point.isPresent()) {
+//            logger.info("Setting centroid for group of stop place {} to {}", result.getNetexId(), point.get());
+//            result.setCentroid(point.get());
+//        }
 
         versionIncrementor.incrementVersion(result);
         result = groupOfStopPlacesRepository.save(result);
@@ -117,6 +129,4 @@ public class GroupOfStopPlacesSaverService {
             authorizationService.assertAuthorized(AuthorizationConstants.ROLE_EDIT_STOPS, Arrays.asList(resolvedMember));
         });
     }
-
-
 }

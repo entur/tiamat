@@ -19,6 +19,10 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @Entity
 public class TariffZoneRef extends ZoneRefStructure {
 
@@ -32,12 +36,6 @@ public class TariffZoneRef extends ZoneRefStructure {
     public TariffZoneRef(TariffZone tariffZone) {
         this.setRef(tariffZone.getNetexId());
         this.setVersion(String.valueOf(tariffZone.getVersion()));
-    }
-
-
-    public TariffZoneRef(FareZone fareZone) {
-        this.setRef(fareZone.getNetexId());
-        this.setVersion(String.valueOf(fareZone.getVersion()));
     }
 
     public TariffZoneRef(String netexId) {

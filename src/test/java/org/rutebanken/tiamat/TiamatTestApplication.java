@@ -23,6 +23,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
+import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
@@ -33,6 +34,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  * Run integration tests for the rest interface without security
  */
 @SpringBootApplication(exclude = { SecurityAutoConfiguration.class })
+@ServletComponentScan
 @EnableTransactionManagement
 @EnableCaching
 @EntityScan(basePackageClasses={StopPlace.class, Jsr310JpaConverters.class})

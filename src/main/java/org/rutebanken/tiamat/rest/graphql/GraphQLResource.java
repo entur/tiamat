@@ -19,15 +19,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.google.common.collect.Sets;
 import graphql.*;
-import graphql.analysis.MaxQueryDepthInstrumentation;
-import graphql.execution.AbortExecutionException;
+import graphql.execution.ExecutionPath;
+import graphql.schema.GraphQLSchema;
 import io.swagger.annotations.Api;
 import org.rutebanken.helper.organisation.NotAuthenticatedException;
 import org.rutebanken.tiamat.rest.exception.ErrorResponseEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.AccessDeniedException;
@@ -58,9 +57,6 @@ public class GraphQLResource {
     private static final Set<Class<? extends RuntimeException>> RETHROW_EXCEPTION_TYPES
             = Sets.newHashSet(NotAuthenticatedException.class, NotAuthorizedException.class, AccessDeniedException.class, DataIntegrityViolationException.class);
 
-    @Value("${graphql.query.max.depth:100}")
-    private int MAX_DEPTH = 100;
-
     @Autowired
     private StopPlaceRegisterGraphQLSchema stopPlaceRegisterGraphQLSchema;
 
@@ -75,12 +71,7 @@ public class GraphQLResource {
 
     @PostConstruct
     public void init() {
-        logger.info(String.format("max query depth is: %d", MAX_DEPTH));
-        graphQL = GraphQL.newGraphQL(stopPlaceRegisterGraphQLSchema.stopPlaceRegisterSchema)
-                .instrumentation(new MaxQueryDepthInstrumentation(MAX_DEPTH))
-                .build();
-
-
+        graphQL = GraphQL.newGraphQL(stopPlaceRegisterGraphQLSchema.stopPlaceRegisterSchema).build();
     }
 
     private GraphQL graphQL;
@@ -194,8 +185,6 @@ public class GraphQLResource {
                 content.put("errors", errors.stream().map(graphQLError -> {
                     if (graphQLError instanceof ExceptionWhileDataFetching) {
                         return new TiamatExceptionWhileDataFetching((ExceptionWhileDataFetching) graphQLError);
-                    } else if( graphQLError instanceof AbortExecutionException) {
-                        return new TiamatExceptionMaxDepth((AbortExecutionException) graphQLError);
                     }
                     else {
                         return graphQLError;

@@ -15,6 +15,7 @@
 
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
+import org.junit.Ignore;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Point;
 import org.assertj.core.api.AbstractListAssert;
@@ -117,6 +118,7 @@ public class ExportResourceTest extends TiamatIntegrationTest {
     }
 
     @Test
+    @Ignore // Will be handled in KOD-584
     public void exportGroupOfStopPlacesToNetex() throws Exception {
 
         org.rutebanken.tiamat.model.StopPlace stopPlace = new org.rutebanken.tiamat.model.StopPlace();

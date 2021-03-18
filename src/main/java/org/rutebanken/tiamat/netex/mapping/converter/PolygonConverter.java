@@ -48,7 +48,7 @@ public class PolygonConverter extends BidirectionalConverter<Polygon, PolygonTyp
 
     private static final Logger logger = LoggerFactory.getLogger(PolygonConverter.class);
 
-    private static final net.opengis.gml._3.ObjectFactory openGisObjectFactory = new ObjectFactory();
+    private static final ObjectFactory openGisObjectFactory = new ObjectFactory();
 
     private static final AtomicLong polygonIdCounter = new AtomicLong();
 

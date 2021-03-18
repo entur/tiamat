@@ -2,7 +2,7 @@ create sequence group_of_stop_places_seq start with 1 increment by 10;
 
 create table group_of_stop_places_members (group_of_stop_places_id bigint not null, ref varchar(255), version varchar(255));
 
-create table group_of_stop_places (id bigint not null, netex_id varchar(255), changed timestamp, created timestamp, from_date timestamp, to_date timestamp, version bigint not null, changed_by varchar(255), version_comment varchar(255), description_lang varchar(5), description_value varchar(4000), name_lang varchar(5), name_value varchar(255), private_code_type varchar(255), private_code_value varchar(255), short_name_lang varchar(5), short_name_value varchar(255), primary key (id));
+create table group_of_stop_places (id bigint not null, netex_id varchar(255), changed smalldatetime, created smalldatetime, from_date smalldatetime, to_date smalldatetime, version bigint not null, changed_by varchar(255), version_comment varchar(255), description_lang varchar(5), description_value varchar(4000), name_lang varchar(5), name_value varchar(255), private_code_type varchar(255), private_code_value varchar(255), short_name_lang varchar(5), short_name_value varchar(255), primary key (id));
 
 create table group_of_stop_places_alternative_names (group_of_stop_places_id bigint not null, alternative_names_id bigint not null);
 

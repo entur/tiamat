@@ -23,7 +23,6 @@ import org.junit.runner.RunWith;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.id.GeneratedIdState;
 import org.rutebanken.tiamat.repository.*;
-import org.rutebanken.tiamat.service.FareZonesLookupService;
 import org.rutebanken.tiamat.service.TariffZonesLookupService;
 import org.rutebanken.tiamat.service.TopographicPlaceLookupService;
 import org.rutebanken.tiamat.versioning.save.GroupOfStopPlacesSaverService;
@@ -47,7 +46,7 @@ import static org.rutebanken.tiamat.netex.id.GaplessIdGeneratorService.INITIAL_L
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment= SpringBootTest.WebEnvironment.RANDOM_PORT, classes = TiamatTestApplication.class)
-@ActiveProfiles({"geodb","gcs-blobstore","activemq"})
+@ActiveProfiles("geodb,gcs-blobstore")
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 public abstract class TiamatIntegrationTest {
 
@@ -90,10 +89,6 @@ public abstract class TiamatIntegrationTest {
     protected TariffZoneRepository tariffZoneRepository;
 
     @Autowired
-    protected FareZoneRepository fareZoneRepository;
-
-
-    @Autowired
     protected HazelcastInstance hazelcastInstance;
 
     @Autowired
@@ -107,9 +102,6 @@ public abstract class TiamatIntegrationTest {
 
     @Autowired
     private TariffZonesLookupService tariffZonesLookupService;
-
-    @Autowired
-    private FareZonesLookupService fareZonesLookupService;
 
     @Autowired
     private TagRepository tagRepository;
@@ -155,12 +147,6 @@ public abstract class TiamatIntegrationTest {
         tariffZoneRepository.deleteAll();
         tariffZoneRepository.flush();
         tariffZonesLookupService.reset();
-
-
-        fareZoneRepository.deleteAll();
-        fareZoneRepository.flush();
-        fareZonesLookupService.reset();
-
 
         clearIdGeneration();
 

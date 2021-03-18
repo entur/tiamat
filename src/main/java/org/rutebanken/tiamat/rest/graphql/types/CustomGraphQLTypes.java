@@ -80,8 +80,6 @@ public class CustomGraphQLTypes {
     public static GraphQLEnumType funicularSubmodeType = createCustomEnumType("FunicularSubmodeType", FunicularSubmodeEnumeration.class);
     public static GraphQLEnumType versionValidityEnumType = createCustomEnumType(ExportParams.VersionValidity.class.getSimpleName(), ExportParams.VersionValidity.class);
     public static GraphQLEnumType modificationEnumerationType = createCustomEnumType("ModificationEnumerationType", ModificationEnumeration.class);
-    public static GraphQLEnumType scopingMethodEnumType = createCustomEnumType("ScopingMethodEnumerationType", ScopingMethodEnumeration.class);
-    public static GraphQLEnumType zoneTopologyEnumType = createCustomEnumType("ZoneTopologyEnumerationType", ZoneTopologyEnumeration.class);
 
 
     public static GraphQLEnumType createCustomEnumType(String name, Class c) {
@@ -149,10 +147,13 @@ public class CustomGraphQLTypes {
             .dataFetcher(env -> {
                 if (env.getSource() instanceof Zone_VersionStructure) {
                     Zone_VersionStructure source = env.getSource();
-                    if (source.getCentroid()!=null) {
+                    if (source.getCentroid() != null) {
                         return source.getCentroid();
                     }
                     return source.getPolygon();
+                } else if (env.getSource() instanceof GroupOfStopPlaces) {
+                    GroupOfStopPlaces source = env.getSource();
+                    return source.getCentroid();
                 } else if (env.getSource() instanceof Link) {
                     Link link = env.getSource();
                     return link.getLineString();

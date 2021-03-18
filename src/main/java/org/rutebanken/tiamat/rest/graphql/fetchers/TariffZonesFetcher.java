@@ -45,6 +45,12 @@
 
 package org.rutebanken.tiamat.rest.graphql.fetchers;
 
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PAGE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.QUERY;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.SIZE;
+
+import java.util.List;
+
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import org.rutebanken.tiamat.exporter.params.TariffZoneSearch;
@@ -58,10 +64,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 
 @Service("tariffZonesFetcher")
 @Transactional
@@ -80,7 +82,10 @@ public class TariffZonesFetcher implements DataFetcher<Page<TariffZone>> {
                 .query(environment.getArgument(QUERY))
                 .build();
 
-        List<TariffZone> tariffZones = tariffZoneRepository.findTariffZones(tariffZoneSearch);
-        return new PageImpl<>(tariffZones, PageRequest.of(environment.getArgument(PAGE), environment.getArgument(SIZE)), tariffZones.size());
+        List<TariffZone> allTariffZones = tariffZoneRepository.findTariffZones(tariffZoneSearch);
+        int pageSize = environment.getArgument(SIZE);
+        PagedList<TariffZone> pagedList = new PagedList<>(allTariffZones, pageSize);
+        List<TariffZone> currentPage = pagedList.getPage(environment.getArgument(PAGE));
+        return new PageImpl<>(currentPage, PageRequest.of(environment.getArgument(PAGE), pageSize), currentPage.size());
     }
 }

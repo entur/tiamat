@@ -16,146 +16,155 @@
 package org.rutebanken.tiamat.repository;
 
 
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+
 import com.google.common.base.Strings;
 import org.apache.commons.lang3.NotImplementedException;
-import org.hibernate.*;
+import org.hibernate.ScrollMode;
+import org.hibernate.ScrollableResults;
+import org.hibernate.Session;
 import org.hibernate.query.NativeQuery;
 import org.rutebanken.tiamat.exporter.params.TopographicPlaceSearch;
-import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.model.TopographicPlace;
+import org.rutebanken.tiamat.model.TopographicPlaceTypeEnumeration;
 import org.rutebanken.tiamat.repository.iterator.ScrollableResultIterator;
 import org.rutebanken.tiamat.repository.search.TopographicPlaceQueryFromSearchBuilder;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.*;
-import javax.persistence.Query;
-import java.time.Instant;
-import java.util.*;
-import java.util.stream.Collectors;
-
 @Repository
 @Transactional
 public class TopographicPlaceRepositoryImpl implements TopographicPlaceRepositoryCustom {
 
-	@PersistenceContext
-	private EntityManager entityManager;
+    private static final Logger logger = LoggerFactory.getLogger(TopographicPlaceRepositoryImpl.class);
 
+    @PersistenceContext
+    private EntityManager entityManager;
 
-	@Autowired
-	private TopographicPlaceQueryFromSearchBuilder topographicPlaceQueryFromSearchBuilder;
+    @Autowired
+    private TopographicPlaceQueryFromSearchBuilder topographicPlaceQueryFromSearchBuilder;
 
-	@Override
-	public List<TopographicPlace> findTopographicPlace(TopographicPlaceSearch topographicPlaceSearch) {
+    @Override
+    public List<TopographicPlace> findTopographicPlace(TopographicPlaceSearch topographicPlaceSearch) {
 
-		Pair<String, Map<String, Object>> queryWithParams = topographicPlaceQueryFromSearchBuilder.buildQueryString(topographicPlaceSearch);
+        Pair<String, Map<String, Object>> queryWithParams = topographicPlaceQueryFromSearchBuilder.buildQueryString(topographicPlaceSearch);
 
-		final Query nativeQuery = entityManager.createNativeQuery(queryWithParams.getFirst(), TopographicPlace.class);
+        final Query nativeQuery = entityManager.createNativeQuery(queryWithParams.getFirst(), TopographicPlace.class);
 
-		queryWithParams.getSecond().forEach(nativeQuery::setParameter);
+        queryWithParams.getSecond().forEach(nativeQuery::setParameter);
 
-		List<TopographicPlace> topographicPlaces = nativeQuery.getResultList();
-		return topographicPlaces;
-	}
+        List<TopographicPlace> topographicPlaces = nativeQuery.getResultList();
+        return topographicPlaces;
+    }
 
-	@Override
-	public String findFirstByKeyValues(String key, Set<String> originalIds) {
-		throw new NotImplementedException("findByKeyvalue not implemented for topographic place");
-	}
+    @Override
+    public String findFirstByKeyValues(String key, Set<String> originalIds) {
+        throw new NotImplementedException("findByKeyvalue not implemented for topographic place");
+    }
 
-	@Override
-	public List<TopographicPlace> findByNetexIdOrNameAndTypeMaxVersion(String name, TopographicPlaceTypeEnumeration topographicPlaceType) {
+    @Override
+    public List<TopographicPlace> findByNameAndTypeMaxVersion(String name, TopographicPlaceTypeEnumeration topographicPlaceType) {
 
-		Map<String, Object> parameters = new HashMap<>();
-		StringBuilder sql = new StringBuilder("SELECT tp.* FROM topographic_place tp WHERE " +
-				"tp.version = (SELECT MAX(tpv.version) FROM topographic_place tpv WHERE tpv.netex_id = tp.netex_id " +
-				"and (tpv.to_date is null or tpv.to_date > :pointInTime) and (tpv.from_date is null or tpv.from_date < :pointInTime)) ");
-		Instant pointInTime = Instant.now();
-		parameters.put("pointInTime", pointInTime);
+        Map<String, Object> parameters = new HashMap<>();
+        StringBuilder sql = new StringBuilder("SELECT tp.* FROM topographic_place tp WHERE " +
+                "tp.version = (SELECT MAX(tpv.version) FROM topographic_place tpv WHERE tpv.netex_id = tp.netex_id " +
+                "and (tpv.to_date is null or tpv.to_date > :pointInTime) and (tpv.from_date is null or tpv.from_date < :pointInTime)) ");
+        Instant pointInTime = Instant.now();
+        parameters.put("pointInTime", pointInTime);
 
-        if(topographicPlaceType != null) {
+        if (topographicPlaceType != null) {
             sql.append("AND tp.topographic_place_type = :topographicPlaceType ");
             parameters.put("topographicPlaceType", topographicPlaceType.name());
         }
-		//or t.netex_id like concat('%', :query, '%'))
-        if(!Strings.isNullOrEmpty(name)) {
-            sql.append("AND (similarity(tp.name_value, :name) > 0.2 OR  similarity(tp.netex_id, :name) = 1)");
+
+        if (!Strings.isNullOrEmpty(name)) {
+            sql.append("AND DIFFERENCE(tp.name_value, :name) > 0.2 ");
             parameters.put("name", name);
-            sql.append("ORDER BY SIMILARITY(tp.name_value, :name) DESC");
+            sql.append("ORDER BY DIFFERENCE(tp.name_value, :name) DESC");
         }
 
-		Query query = entityManager.createNativeQuery(sql.toString(), TopographicPlace.class);
+        Query query = entityManager.createNativeQuery(sql.toString(), TopographicPlace.class);
         parameters.forEach(query::setParameter);
 
-		return query.getResultList();
-	}
+        return query.getResultList();
+    }
 
-	@Override
-	public Iterator<TopographicPlace> scrollTopographicPlaces(Set<Long> stopPlaceDbIds) {
+    @Override
+    public Iterator<TopographicPlace> scrollTopographicPlaces(Set<Long> stopPlaceDbIds) {
 
-		if(stopPlaceDbIds == null || stopPlaceDbIds.isEmpty()) {
-			return new ArrayList<TopographicPlace>().iterator();
-		}
+        if (stopPlaceDbIds == null || stopPlaceDbIds.isEmpty()) {
+            return new ArrayList<TopographicPlace>().iterator();
+        }
 
-		return scrollTopographicPlaces(generateTopographicPlacesQueryFromStopPlaceIds(stopPlaceDbIds));
-	}
+        return scrollTopographicPlaces(generateTopographicPlacesQueryFromStopPlaceIds(stopPlaceDbIds));
+    }
 
-	@Override
-	public Iterator<TopographicPlace> scrollTopographicPlaces() {
-		return scrollTopographicPlaces("SELECT t.* FROM topographic_place t");
-	}
+    @Override
+    public Iterator<TopographicPlace> scrollTopographicPlaces() {
+        return scrollTopographicPlaces("SELECT t.* FROM topographic_place t");
+    }
 
-	public Iterator<TopographicPlace> scrollTopographicPlaces(String sql) {
-		Session session = entityManager.unwrap(Session.class);
-		NativeQuery sqlQuery = session.createNativeQuery(sql);
+    public Iterator<TopographicPlace> scrollTopographicPlaces(String sql) {
+        Session session = entityManager.unwrap(Session.class);
+        NativeQuery sqlQuery = session.createNativeQuery(sql);
 
-		sqlQuery.addEntity(TopographicPlace.class);
-		sqlQuery.setReadOnly(true);
-		sqlQuery.setFetchSize(1000);
-		sqlQuery.setCacheable(false);
-		ScrollableResults results = sqlQuery.scroll(ScrollMode.FORWARD_ONLY);
-		ScrollableResultIterator<TopographicPlace> topographicPlaceIterator = new ScrollableResultIterator<>(results, 100, session);
-		return  topographicPlaceIterator;
-	}
+        sqlQuery.addEntity(TopographicPlace.class);
+        sqlQuery.setReadOnly(true);
+        sqlQuery.setFetchSize(1000);
+        sqlQuery.setCacheable(false);
+        ScrollableResults results = sqlQuery.scroll(ScrollMode.FORWARD_ONLY);
+        ScrollableResultIterator<TopographicPlace> topographicPlaceIterator = new ScrollableResultIterator<>(results, 100, session);
+        return topographicPlaceIterator;
+    }
 
-	@Override
-	public List<TopographicPlace> getTopographicPlacesFromStopPlaceIds(Set<Long> stopPlaceDbIds) {
-		if(stopPlaceDbIds == null || stopPlaceDbIds.isEmpty()) {
-			return new ArrayList<>();
-		}
-		Query query = entityManager.createNativeQuery(generateTopographicPlacesQueryFromStopPlaceIds(stopPlaceDbIds), TopographicPlace.class);
+    @Override
+    public List<TopographicPlace> getTopographicPlacesFromStopPlaceIds(Set<Long> stopPlaceDbIds) {
+        if (stopPlaceDbIds == null || stopPlaceDbIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+        Query query = entityManager.createNativeQuery(generateTopographicPlacesQueryFromStopPlaceIds(stopPlaceDbIds), TopographicPlace.class);
 
-		try {
-			@SuppressWarnings("unchecked")
-			List<TopographicPlace> results = query.getResultList();
-			if (results.isEmpty()) {
-				return null;
-			} else {
-				return results;
-			}
-		} catch (NoResultException noResultException) {
-			return null;
-		}
-	}
+        try {
+            @SuppressWarnings("unchecked")
+            List<TopographicPlace> results = query.getResultList();
+            if (results.isEmpty()) {
+                return null;
+            } else {
+                return results;
+            }
+        } catch (NoResultException noResultException) {
+            return null;
+        }
+    }
 
-	private String generateTopographicPlacesQueryFromStopPlaceIds(Set<Long> stopPlaceDbIds) {
+    private String generateTopographicPlacesQueryFromStopPlaceIds(Set<Long> stopPlaceDbIds) {
+        StringBuilder sql = new StringBuilder("SELECT tp.* " +
+                "FROM ( " +
+                "  SELECT tp1.id " +
+                "  FROM topographic_place tp1 " +
+                "  INNER JOIN stop_place sp " +
+                "    ON sp.topographic_place_id = tp1.id " +
+                "  WHERE ");
+        sql.append(DbQueryUtil.createSaneWhereClause("sp.id", stopPlaceDbIds));
+        sql.append(" " +
+                "  GROUP BY tp1.id " +
+                ") tp1 " +
+                "JOIN topographic_place tp ON tp.id = tp1.id");
+        return sql.toString();
+    }
 
-		Set<String> stopPlaceStringDbIds = stopPlaceDbIds.stream().map(lvalue -> String.valueOf(lvalue)).collect(Collectors.toSet());
-		String joinedStopPlaceDbIds = String.join(",", stopPlaceStringDbIds);
-		StringBuilder sql = new StringBuilder("SELECT tp.* " +
-				"FROM ( " +
-				"  SELECT tp1.id " +
-				"  FROM topographic_place tp1 " +
-				"  INNER JOIN stop_place sp " +
-				"    ON sp.topographic_place_id = tp1.id " +
-				"  WHERE sp.id IN(");
-		sql.append(joinedStopPlaceDbIds);
-		sql.append(") " +
-				"  GROUP BY tp1.id " +
-				") tp1 " +
-				"JOIN topographic_place tp ON tp.id = tp1.id");
-		return sql.toString();
-	}
 }

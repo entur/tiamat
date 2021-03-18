@@ -15,14 +15,29 @@
 
 package org.rutebanken.tiamat.model;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.Index;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.MoreObjects;
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-
-import javax.persistence.*;
-import java.io.Serializable;
-import java.util.*;
 
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @Entity
@@ -43,7 +58,7 @@ public class StopPlace
     @Enumerated(EnumType.STRING)
     protected VehicleModeEnumeration transportMode;
     @Enumerated(EnumType.STRING)
-    protected AirSubmodeEnumeration airSubmode;
+    protected AirSubmodeEnumeration airSubmode = AirSubmodeEnumeration.UNKNOWN;
     @Enumerated(EnumType.STRING)
     protected BusSubmodeEnumeration busSubmode;
     @Enumerated(EnumType.STRING)
@@ -79,12 +94,16 @@ public class StopPlace
     protected NavigationPaths_RelStructure navigationPaths;
     private boolean parentStopPlace;
     @OneToMany(cascade = CascadeType.ALL)
+    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+    @BatchSize(size = 50)
     private Set<Quay> quays = new HashSet<>();
 
     @OneToMany(cascade = CascadeType.ALL)
     private Set<StopPlace> children = new HashSet<>();
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+    @BatchSize(size = 50)
     private Set<TariffZoneRef> tariffZones = new HashSet<>();
 
     @Enumerated(EnumType.STRING)
@@ -297,6 +316,7 @@ public class StopPlace
         StopPlace other = (StopPlace) object;
 
         return Objects.equals(this.name, other.name)
+                && Objects.equals(this.shortName, other.shortName)
                 && Objects.equals(this.version, other.version)
                 && Objects.equals(this.centroid, other.centroid)
                 && Objects.equals(this.stopPlaceType, other.stopPlaceType)
@@ -310,7 +330,7 @@ public class StopPlace
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, version, centroid, stopPlaceType, parentStopPlace, accessSpaces, created, quays);
+        return Objects.hash(name, shortName, version, centroid, stopPlaceType, parentStopPlace, accessSpaces, created, quays);
     }
 
     @Override
@@ -321,6 +341,7 @@ public class StopPlace
                 .add("netexId", netexId)
                 .add("version", version)
                 .add("name", name)
+                .add("shortName", shortName)
                 .add("stopPlaceType", stopPlaceType)
                 .add("centroid", centroid)
                 .add("keyValues", getKeyValues())

@@ -15,12 +15,11 @@
 
 package org.rutebanken.tiamat.importer.modifier;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.junit.Test;
-import org.rutebanken.tiamat.importer.modifier.NameToDescriptionMover;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.StopPlace;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class NameToDescriptionMoverTest {
 
@@ -32,7 +31,7 @@ public class NameToDescriptionMoverTest {
     }
 
     @Test
-    public void strømsveien() {
+    public void stromsveien() {
         expectNameAndDescriptionToBeMoved("Alfaset (i Strømsveien)", "Alfaset", "i Strømsveien");
     }
 

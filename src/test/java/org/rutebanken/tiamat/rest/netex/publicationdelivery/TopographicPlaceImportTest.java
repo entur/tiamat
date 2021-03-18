@@ -31,7 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class TopographicPlaceImportTest extends TiamatIntegrationTest {
 
-    private static final net.opengis.gml._3.ObjectFactory openGisObjectFactory = new ObjectFactory();
+    private static final ObjectFactory openGisObjectFactory = new ObjectFactory();
 
     @Autowired
     private PublicationDeliveryTestHelper publicationDeliveryTestHelper;

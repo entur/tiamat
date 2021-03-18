@@ -15,6 +15,7 @@
 
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.rutebanken.netex.model.*;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
@@ -202,6 +203,7 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
      * fall back to look for nearby stops.
      */
     @Test
+    @Ignore // Will be handled in KOD-584
     public void matchNearByStopPlaceIfIDMatchIsTooFarAway() throws Exception {
 
         StopPlace tooFarAwayStopPlace = new StopPlace()

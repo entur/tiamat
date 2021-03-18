@@ -350,6 +350,24 @@ public class StopPlaceTest extends TiamatIntegrationTest {
     }
 
     @Test
+    public void persistStopPlaceWithName() {
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setName(new EmbeddableMultilingualString("name", "en"));
+        stopPlaceRepository.save(stopPlace);
+        StopPlace actualStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId());
+        assertThat(actualStopPlace.getName().getValue()).isEqualTo(stopPlace.getName().getValue());
+    }
+
+    @Test
+    public void persistStopPlaceWithShortName() {
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setShortName(new EmbeddableMultilingualString("shortname", "en"));
+        stopPlaceRepository.save(stopPlace);
+        StopPlace actualStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId());
+        assertThat(actualStopPlace.getShortName().getValue()).isEqualTo(stopPlace.getShortName().getValue());
+    }
+
+    @Test
     public void persistStopPlaceShortNameAndPublicCode() {
         StopPlace stopPlace = new StopPlace();
         stopPlace.setPublicCode("public-code");

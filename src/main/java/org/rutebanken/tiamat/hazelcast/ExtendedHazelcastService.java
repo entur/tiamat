@@ -38,7 +38,7 @@ public class ExtendedHazelcastService extends HazelCastService {
     /**
      * Evict cache when free heap percentage is below this value
      */
-    private static final int EVICT_WHEN_FREE_HEAP_PERCENTAGE_BELOW = 50;
+    private static final int EVICT_WHEN_FREE_HEAP_PERCENTAGE_BELOW = 10;
 
     public ExtendedHazelcastService(KubernetesService kubernetesService, String hazelcastManagementUrl) {
         super(kubernetesService, hazelcastManagementUrl);
@@ -56,7 +56,7 @@ public class ExtendedHazelcastService extends HazelCastService {
                 // Configure map for last entity identificators
                 new MapConfig()
                         .setName(LAST_IDS_FOR_ENTITY)
-                        .setBackupCount(DEFAULT_BACKUP_COUNT)
+                        .setBackupCount(0)
                         .setAsyncBackupCount(0)
                         .setTimeToLiveSeconds(0)
                         .setEvictionPolicy(EvictionPolicy.NONE));
@@ -69,11 +69,11 @@ public class ExtendedHazelcastService extends HazelCastService {
                         .setName(MAP_CONFIG_NAME_SECOND_LEVEL_CACHE)
                         // No sync backup for hibernate cache
                         .setBackupCount(0)
-                        .setAsyncBackupCount(2)
-                        .setEvictionPolicy(EvictionPolicy.LFU)
-                        .setTimeToLiveSeconds(604800)
-                        .setMaxSizeConfig(
-                                new MaxSizeConfig(EVICT_WHEN_FREE_HEAP_PERCENTAGE_BELOW, MaxSizeConfig.MaxSizePolicy.FREE_HEAP_PERCENTAGE)));
+                        .setAsyncBackupCount(0)
+                        .setEvictionPolicy(EvictionPolicy.RANDOM)
+                        .setTimeToLiveSeconds(86400 * 5) // 5 days
+                        .setMaxSizeConfig(new MaxSizeConfig(MaxSizeConfig.DEFAULT_MAX_SIZE, MaxSizeConfig.MaxSizePolicy.PER_NODE)));
+                        //.setMaxSizeConfig(new MaxSizeConfig(EVICT_WHEN_FREE_HEAP_PERCENTAGE_BELOW, MaxSizeConfig.MaxSizePolicy.FREE_HEAP_PERCENTAGE)));
 
         logger.info("Configured map for hibernate second level cache: {}", mapConfigs.get(1));
         return mapConfigs;

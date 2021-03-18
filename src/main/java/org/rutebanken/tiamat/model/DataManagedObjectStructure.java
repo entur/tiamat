@@ -15,6 +15,7 @@
 
 package org.rutebanken.tiamat.model;
 
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
@@ -34,6 +35,7 @@ public abstract class DataManagedObjectStructure
 
     @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 50)
     private final Map<String, Value> keyValues = new HashMap<>();
 
     @Transient
@@ -64,6 +66,13 @@ public abstract class DataManagedObjectStructure
 
     public Map<String, Value> getKeyValues() {
         return keyValues;
+    }
+
+    public void setKeyValues(Map<String, Value> keyValues) {
+        if (!this.keyValues.equals(keyValues)) {
+            this.keyValues.clear();
+            this.keyValues.putAll(keyValues);
+        }
     }
 
     public Set<String> getOrCreateValues(String key) {

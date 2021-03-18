@@ -15,6 +15,13 @@
 
 package org.rutebanken.tiamat.importer.merging;
 
+import java.time.Instant;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import com.google.common.base.Strings;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
@@ -28,10 +35,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
-import java.time.Instant;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 public class QuayMerger {
@@ -65,9 +68,9 @@ public class QuayMerger {
     }
 
 
-        /**
-         * Inspect quays from incoming AND matching stop place. If they do not exist from before, add them.
-         */
+    /**
+     * Inspect quays from incoming AND matching stop place. If they do not exist from before, add them.
+     */
     public boolean appendImportIds(StopPlace newStopPlace, StopPlace existingStopPlace, boolean addNewQuays, boolean lowDistanceCheckBeforeIdMatch) {
 
         AtomicInteger updatedQuays = new AtomicInteger();
@@ -98,41 +101,41 @@ public class QuayMerger {
     /**
      * Match new quays with existing quays, based on fields like geographic coordinates, compass bearing, name, original IDs and public code.
      *
-     * @param newStopPlace only used for logging
-     * @param newQuays incoming quays to match
-     * @param existingQuays existing quays to match against
+     * @param newStopPlace        only used for logging
+     * @param newQuays            incoming quays to match
+     * @param existingQuays       existing quays to match against
      * @param updatedQuaysCounter how many quays were updated
-     * @param addedQuaysCounter how many quays were added
-     * @param addNewQuays if allowed to add quays if not match found
+     * @param addedQuaysCounter   how many quays were added
+     * @param addNewQuays         if allowed to add quays if not match found
      * @return the resulting set of quays after matching, appending and adding.
      */
-     public Set<Quay> appendImportIds(StopPlace newStopPlace, Set<Quay> newQuays, Set<Quay> existingQuays, AtomicInteger updatedQuaysCounter, AtomicInteger addedQuaysCounter, boolean addNewQuays, boolean lowDistanceCheckBeforeIdMatch) {
+    public Set<Quay> appendImportIds(StopPlace newStopPlace, Set<Quay> newQuays, Set<Quay> existingQuays, AtomicInteger updatedQuaysCounter, AtomicInteger addedQuaysCounter, boolean addNewQuays, boolean lowDistanceCheckBeforeIdMatch) {
 
         Set<Quay> result = new HashSet<>();
-        if(existingQuays != null) {
+        if (existingQuays != null) {
             result.addAll(existingQuays);
         }
 
-        for(Quay incomingQuay : newQuays) {
+        for (Quay incomingQuay : newQuays) {
 
             Optional<Quay> matchingQuay;
-            if(lowDistanceCheckBeforeIdMatch) {
+            if (lowDistanceCheckBeforeIdMatch) {
                 matchingQuay = findMatch(incomingQuay, result, MERGE_DISTANCE_METERS_IGNORE_ID_MATCH);
             } else {
                 matchingQuay = Optional.empty();
             }
 
-            if(!matchingQuay.isPresent()) {
+            if (!matchingQuay.isPresent()) {
                 matchingQuay = findMatchOnOriginalId(incomingQuay, result);
             }
 
-            if(!matchingQuay.isPresent()) {
+            if (!matchingQuay.isPresent()) {
                 matchingQuay = findMatch(incomingQuay, result, MERGE_DISTANCE_METERS);
             }
 
-            if(matchingQuay.isPresent()) {
+            if (matchingQuay.isPresent()) {
                 updateIfChanged(matchingQuay.get(), incomingQuay, updatedQuaysCounter);
-            } else if(addNewQuays) {
+            } else if (addNewQuays) {
                 logger.info("Found no match for existing quay {}. Adding it!", incomingQuay);
                 result.add(incomingQuay);
                 incomingQuay.setCreated(Instant.now());
@@ -159,8 +162,8 @@ public class QuayMerger {
     }
 
     private Optional<Quay> findMatchOnOriginalId(Quay incomingQuay, Set<Quay> result) {
-        for(Quay alreadyAdded : result) {
-            if(originalIdMatcher.matchesOnOriginalId(incomingQuay, alreadyAdded)) {
+        for (Quay alreadyAdded : result) {
+            if (originalIdMatcher.matchesOnOriginalId(incomingQuay, alreadyAdded)) {
                 return Optional.of(alreadyAdded);
             }
         }
@@ -172,7 +175,7 @@ public class QuayMerger {
         boolean idUpdated = alreadyAdded.getOriginalIds().addAll(incomingQuay.getOriginalIds());
         boolean changedByMerge = mergeFields(incomingQuay, alreadyAdded);
 
-        if(idUpdated || changedByMerge) {
+        if (idUpdated || changedByMerge) {
             logger.debug("Quay changed. idUpdated: {}, merged fields? {}. Quay: {}", idUpdated, changedByMerge, alreadyAdded);
 
             alreadyAdded.setChanged(Instant.now());
@@ -182,11 +185,11 @@ public class QuayMerger {
 
     private boolean mergeFields(Quay from, Quay to) {
         boolean changed = false;
-        if(hasNameValue(from.getName()) && ! hasNameValue(to.getName())) {
+        if (hasNameValue(from.getName()) && !hasNameValue(to.getName())) {
             to.setName(from.getName());
             changed = true;
         }
-        if(from.getCompassBearing() != null && to.getCompassBearing() == null) {
+        if (from.getCompassBearing() != null && to.getCompassBearing() == null) {
             to.setCompassBearing(from.getCompassBearing());
             changed = true;
         }
@@ -204,10 +207,10 @@ public class QuayMerger {
                 && publicCodeMatch) {
             logger.trace("Matches: nameMatch {}, publicCodeMatch: {}, haveSimilarOrAnyNullCompassBearing: {}", nameMatch, publicCodeMatch, haveSimilarOrNullCompassBearing);
             return true;
-        } else if(nameMatch && publicCodeMatch && haveSimilarCompassBearing(incomingQuay, alreadyAdded)) {
+        } else if (nameMatch && publicCodeMatch && haveSimilarCompassBearing(incomingQuay, alreadyAdded)) {
             logger.trace("Name, public code and compass bearing match. Will compare with a greater limit of distance between quays. {}  {}", incomingQuay, alreadyAdded);
 
-            if(areClose(incomingQuay, alreadyAdded, MERGE_DISTANCE_METERS_EXTENDED)) {
+            if (areClose(incomingQuay, alreadyAdded, MERGE_DISTANCE_METERS_EXTENDED)) {
                 return true;
             }
         }
@@ -219,17 +222,17 @@ public class QuayMerger {
         boolean quay1HasName = hasNameValue(quay1.getName());
         boolean quay2HasName = hasNameValue(quay2.getName());
 
-        if(!quay1HasName && !quay2HasName) {
+        if (!quay1HasName && !quay2HasName) {
             logger.debug("None of the quays have name set. Treating as match. {} - {}", quay1.getName(), quay2.getName());
             return true;
         }
 
-        if((quay1HasName && !quay2HasName) || (!quay1HasName && quay2HasName)) {
+        if ((quay1HasName && !quay2HasName) || (!quay1HasName && quay2HasName)) {
             logger.debug("Only one of the quays have name set. Treating as match. {} - {}", quay1.getName(), quay2.getName());
             return true;
         }
 
-        if(quay1.getName().getValue().equals(quay2.getName().getValue())) {
+        if (quay1.getName().getValue().equals(quay2.getName().getValue())) {
             logger.debug("Quay names matches. {} - {}", quay1.getName(), quay2.getName());
             return true;
         }
@@ -268,7 +271,7 @@ public class QuayMerger {
 
     public boolean haveSimilarOrAnyNullCompassBearing(Quay quay1, Quay quay2) {
 
-        if(quay1.getCompassBearing() == null && quay2.getCompassBearing() == null) {
+        if (quay1.getCompassBearing() == null && quay2.getCompassBearing() == null) {
             return true;
         } else if ((quay1.getCompassBearing() == null && quay2.getCompassBearing() != null) || (quay1.getCompassBearing() != null && quay2.getCompassBearing() == null)) {
             return true;
@@ -279,7 +282,7 @@ public class QuayMerger {
 
     private boolean haveSimilarCompassBearing(Quay quay1, Quay quay2) {
 
-        if(quay1.getCompassBearing() == null || quay2.getCompassBearing() == null) {
+        if (quay1.getCompassBearing() == null || quay2.getCompassBearing() == null) {
             return false;
         }
         int quayBearing1 = Math.round(quay1.getCompassBearing());
@@ -297,7 +300,7 @@ public class QuayMerger {
     }
 
     private boolean haveMatchingPublicCodeOrOneIsMissing(Quay quay1, Quay quay2) {
-        if((quay1.getPublicCode() == null && quay2.getPublicCode() != null)
+        if ((quay1.getPublicCode() == null && quay2.getPublicCode() != null)
                 || (quay1.getPublicCode() != null && quay1.getPublicCode() == null)) {
             return true;
         }

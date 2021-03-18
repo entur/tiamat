@@ -33,6 +33,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -74,6 +75,8 @@ public class GaplessIdGeneratorService {
         this.hazelcastInstance = hazelcastInstance;
         this.generatedIdState = generatedIdState;
         this.fetchSize = DEFAULT_FETCH_SIZE;
+
+        repairDatabaseIfNeeded();
     }
 
     public GaplessIdGeneratorService(EntityManagerFactory entityManagerFactory, HazelcastInstance hazelcastInstance, GeneratedIdState generatedIdState, int fetchSize) {
@@ -87,7 +90,129 @@ public class GaplessIdGeneratorService {
         }
 
         this.fetchSize = fetchSize;
+        repairDatabaseIfNeeded();
+    }
 
+    /**
+     * Check if database tables are consistent with the id_generator table.
+     */
+    private void repairDatabaseIfNeeded() {
+        logger.info("repairDatabaseIfNeeded");
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
+        Map<String, Long> registeredIds = getManagedTables(entityManager);
+        logger.info("Found " + registeredIds.size() + " tables in id_generator");
+        for (String managedTable : registeredIds.keySet()) {
+            // Camel Case to snake case
+            String actualDatabaseTableName = managedTable.replaceAll("(.)([A-Z])", "$1_$2").toLowerCase();
+            logger.info("id_generator table name " + managedTable + " corresponds to database table " + actualDatabaseTableName);
+            if (!databaseTableExists(entityManager, actualDatabaseTableName)) {
+                logger.error("Table " + actualDatabaseTableName + " does not exist, no check/repair will be attempted");
+                continue;
+            }
+            long actualHighestId = getHighestIdFromTable(entityManager, actualDatabaseTableName);
+            long registeredHighestId = registeredIds.get(managedTable);
+            // We only care for the case where id_generator has missing ids. It isn't a problem when id_generator has registered too much ids,
+            // in that case some ids will simpy remain unused
+            if (actualHighestId > registeredHighestId) {
+                logger.error("!!! CRITICAL for future write-operations !!! ");
+                logger.error("Table id_generator is out of sync with table " + actualDatabaseTableName);
+                logger.error(actualDatabaseTableName + " has ids going up to " + actualHighestId
+                        + ", but id_generator has only registered up to " + registeredHighestId);
+                repairIdGeneratorTable(entityManager, managedTable, actualDatabaseTableName);
+            } else {
+                logger.info("Table id_generator seems to be in sync with " + actualDatabaseTableName + " (highest id is " + actualHighestId + ")");
+            }
+        }
+        entityManager.close();
+        logger.info("repairDatabaseIfNeeded done");
+    }
+
+    private boolean databaseTableExists(EntityManager entityManager, String actualDatabaseTableName) {
+        String sql = "SELECT count(*) as tables FROM sysobjects WHERE xtype = 'U' AND name = '" + actualDatabaseTableName + "'";
+        Query sqlQuery = entityManager.createNativeQuery(sql);
+        List<Integer> result = (List<Integer>) sqlQuery.getResultList();
+        if (result.isEmpty()) {
+            return false;
+        }
+        return result.get(0) > 0;
+    }
+
+    /**
+     * This method will attempt to add all ids present in a database table to id_generator, in order to ensure correct id generation.
+     * Note that this repair will only be done in one direction:
+     * missing rows in id_generator will be added, but unused ids will not be removed from id_generator
+     *
+     * @param idGeneratorTableValue   The name the table has in the id_generator table_name column.
+     * @param actualDatabaseTableName The name of the source table in the database.
+     */
+    private void repairIdGeneratorTable(EntityManager entityManager, String idGeneratorTableValue, String actualDatabaseTableName) {
+        logger.error("Starting attempt to repair id_generator table name " + idGeneratorTableValue + " based on " + actualDatabaseTableName);
+
+        // We calculate the missing ids on the SQL Server side.
+        List<Long> missingIds = getAllIdsFromDatabaseTableMissingInIdGeneratorTable(entityManager, idGeneratorTableValue,actualDatabaseTableName);
+        logger.error("Table id_generator is missing " + missingIds.size() + " ids for " + idGeneratorTableValue);
+
+        String missingIdLogString = missingIds.stream().map(String::valueOf).collect(Collectors.joining(","));
+        logger.error("The following ids are missing from id_generator " + idGeneratorTableValue + ": " + missingIdLogString);
+        addMissingIdsToIdGeneratorTable(entityManager, idGeneratorTableValue, actualDatabaseTableName);
+
+        // Check if we succeeded
+        missingIds = getAllIdsFromDatabaseTableMissingInIdGeneratorTable(entityManager, idGeneratorTableValue,actualDatabaseTableName);
+
+        logger.error("Finished repairing id_generator for table name " + idGeneratorTableValue + ". "
+                + "There are now " + missingIds.size() + " ids missing in id_generator.");
+    }
+
+    private long getHighestIdFromTable(EntityManager entityManager, String actualDatabaseTableName) {
+        String sql = "SELECT max(id) as max_id FROM " + actualDatabaseTableName;
+        Query sqlQuery = entityManager.createNativeQuery(sql);
+        List<BigInteger> result = (List<BigInteger>) sqlQuery.getResultList();
+        if (result.isEmpty()) {
+            return 0;
+        }
+        return result.get(0).longValue();
+    }
+
+    private List<Long> getAllIdsFromDatabaseTableMissingInIdGeneratorTable(EntityManager entityManager, String idGeneratorTableValue, String actualDatabaseTableName) {
+        String sql = "SELECT id FROM " + actualDatabaseTableName
+                + " EXCEPT SELECT id_value FROM id_generator WHERE table_name='" + idGeneratorTableValue + "'";
+        Query sqlQuery = entityManager.createNativeQuery(sql);
+        List<BigInteger> queryResult = (List<BigInteger>) sqlQuery.getResultList();
+        return queryResult.stream().map(BigInteger::longValue).collect(toList());
+    }
+
+
+    private void addMissingIdsToIdGeneratorTable(EntityManager entityManager, String idGeneratorTableValue, String actualDatabaseTableName) {
+        logger.warn("Adding missing ids to id_generator for table " + idGeneratorTableValue);
+        entityManager.getTransaction().begin();
+        // Fix everything on the SQL side, takes only a few seconds
+        String sql = "INSERT INTO id_generator(table_name, id_value) SELECT '" + idGeneratorTableValue + "', id FROM " + actualDatabaseTableName
+                + " EXCEPT (SELECT '" + idGeneratorTableValue + "', id_value FROM id_generator WHERE table_name='" + idGeneratorTableValue + "')";
+        logger.warn(sql);
+        Query sqlQuery = entityManager.createNativeQuery(sql);
+        sqlQuery.executeUpdate();
+
+        entityManager.getTransaction().commit();
+    }
+
+    /**
+     * Find the tables that are managed by this {@link GaplessIdGeneratorService}, along with the highest registered id.
+     *
+     * @param entityManager The entitymanager to use.
+     * @return A map of all tables present in dbo.id_generator, and their highest id registered in dbo.id_generator.
+     */
+    private Map<String, Long> getManagedTables(EntityManager entityManager) {
+        String sql = "SELECT DISTINCT table_name, max(id_value) as max_id FROM id_generator GROUP BY table_name";
+        Query sqlQuery = entityManager.createNativeQuery(sql);
+
+        Map<String, Long> registeredIds = new HashMap<>();
+        for (Object[] entry : (List<Object[]>) sqlQuery.getResultList()) {
+            String tableName = (String) entry[0];
+            Long highestId = ((BigInteger) entry[1]).longValue();
+            logger.debug("id_generator registered " + highestId + " as the latest id for table " + tableName);
+            registeredIds.put(tableName, highestId);
+        }
+        return registeredIds;
     }
 
     /**
@@ -209,7 +334,6 @@ public class GaplessIdGeneratorService {
         if (retrievedIds.isEmpty()) {
             generatedIdState.setLastIdForEntity(entityTypeName, lastId + fetchSize);
         } else {
-
             generatedIdState.setLastIdForEntity(entityTypeName, Collections.max(retrievedIds));
         }
         return retrievedIds;
@@ -256,12 +380,15 @@ public class GaplessIdGeneratorService {
         Query query = entityManager.createNativeQuery(sql);
         logger.trace(sql);
         int result = query.executeUpdate();
-        logger.trace("Inserted {} ids for {}", result, tableName);
+        logger.info("Inserted {} ids for {}", result, tableName);
+        if (result < list.size()) {
+            logger.warn("Inserted {} ids for {}, but should have inserted {}", result, tableName, list.size());
+        }
         entityManager.flush();
     }
 
     /**
-     * Use SQL command genererate_series to be able to find new IDs, without selecting the ones already used.
+     * Get a list of sequential ids, without the ones already used.
      * @param tableName The name of the entity.
      * @param lastId The last ID to avoid selecting the same window each time
      * @param entityManager The entity manager to use
@@ -273,19 +400,25 @@ public class GaplessIdGeneratorService {
         long lastIdPlusOne = lastId + 1;
         long upperBound = lastId + fetchSize;
 
-        String sql = "SELECT * FROM generate_series(" + lastIdPlusOne + "," + upperBound + ")  " +
-                "EXCEPT (SELECT id_value FROM id_generator WHERE table_name='" + tableName + "') ";
-
+        String sql = "SELECT id_value FROM id_generator WHERE table_name='" + tableName + "' AND id_value BETWEEN " + lastIdPlusOne + " AND " + upperBound;
         Query sqlQuery = entityManager.createNativeQuery(sql);
 
         @SuppressWarnings("unchecked")
-        List<BigInteger> results = sqlQuery.getResultList();
+        List<Long> alreadyUsedIds = ((List<BigInteger>) sqlQuery.getResultList())
+                .stream()
+                .map(BigInteger::longValue)
+                .collect(Collectors.toList());
 
-        logger.trace("Got generated values: {}", results);
+        List<Long> series = new ArrayList<>();
+        for (long i = lastIdPlusOne; i <= upperBound; i++) {
+            series.add(i);
+        }
+        series.removeAll(alreadyUsedIds);
 
-        return results.stream()
-                .map(bigInteger -> bigInteger.longValue())
-                .sorted((v1, v2) -> Long.compare(v1, v2))
+        logger.trace("Got generated values: {}", series);
+
+        return series.stream()
+                .sorted(Comparator.comparingLong(v -> v))
                 .collect(toList());
     }
 

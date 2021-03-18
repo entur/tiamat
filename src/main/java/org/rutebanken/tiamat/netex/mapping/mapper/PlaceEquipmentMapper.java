@@ -32,11 +32,11 @@ public class PlaceEquipmentMapper extends CustomMapper<PlaceEquipments_RelStruct
 
 
     @Override
-    public void mapAtoB(PlaceEquipments_RelStructure placeEquipments_relStructure, org.rutebanken.tiamat.model.PlaceEquipment placeEquipment, MappingContext context) {
+    public void mapAtoB(PlaceEquipments_RelStructure placeEquipments_relStructure, PlaceEquipment placeEquipment, MappingContext context) {
 
         super.mapAtoB(placeEquipments_relStructure, placeEquipment, context);
 
-        List<org.rutebanken.netex.model.InstalledEquipment_VersionStructure> netexInstalledEquipmentList = placeEquipments_relStructure
+        List<InstalledEquipment_VersionStructure> netexInstalledEquipmentList = placeEquipments_relStructure
                 .getInstalledEquipmentRefOrInstalledEquipment()
                 .stream()
                 .filter(jaxbElement -> {
@@ -58,12 +58,12 @@ public class PlaceEquipmentMapper extends CustomMapper<PlaceEquipments_RelStruct
     }
 
     @Override
-    public void mapBtoA(org.rutebanken.tiamat.model.PlaceEquipment placeEquipment, PlaceEquipments_RelStructure placeEquipments_relStructure, MappingContext context) {
+    public void mapBtoA(PlaceEquipment placeEquipment, PlaceEquipments_RelStructure placeEquipments_relStructure, MappingContext context) {
         mapperFacade.map(placeEquipment, placeEquipments_relStructure, context);
 
-        List<org.rutebanken.netex.model.InstalledEquipment_VersionStructure> installedEquipment_versionStructures = mapperFacade.mapAsList(placeEquipment.getInstalledEquipment(), org.rutebanken.netex.model.InstalledEquipment_VersionStructure.class, context);
+        List<InstalledEquipment_VersionStructure> installedEquipment_versionStructures = mapperFacade.mapAsList(placeEquipment.getInstalledEquipment(), InstalledEquipment_VersionStructure.class, context);
 
-        List<JAXBElement<? extends org.rutebanken.netex.model.InstalledEquipment_VersionStructure>> jaxbElements = installedEquipment_versionStructures
+        List<JAXBElement<? extends InstalledEquipment_VersionStructure>> jaxbElements = installedEquipment_versionStructures
                 .stream()
                 .filter(equipment -> (equipment instanceof SanitaryEquipment |
                         equipment instanceof TicketingEquipment |

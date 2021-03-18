@@ -29,7 +29,11 @@ public abstract class GroupOfEntities_VersionStructure
     protected EmbeddableMultilingualString name;
 
 
-    @Transient
+    @AttributeOverrides({
+            @AttributeOverride(name = "value", column = @Column(name = "short_name_value")),
+            @AttributeOverride(name = "lang", column = @Column(name = "short_name_lang", length = 5))
+    })
+    @Embedded
     protected EmbeddableMultilingualString shortName;
 
     @AttributeOverrides({

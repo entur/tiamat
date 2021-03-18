@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-public class AccessibilityLimitationsListConverter extends BidirectionalConverter<List<AccessibilityLimitation>, org.rutebanken.netex.model.AccessibilityLimitations_RelStructure> {
+public class AccessibilityLimitationsListConverter extends BidirectionalConverter<List<AccessibilityLimitation>, AccessibilityLimitations_RelStructure> {
 
     @Override
     public AccessibilityLimitations_RelStructure convertTo(List<AccessibilityLimitation> accessibilityLimitations,

@@ -79,8 +79,8 @@ public class TariffZonesLookupService {
                     .stream()
                     .filter(tariffZone -> stopPlace.getTariffZones().isEmpty() || stopPlace.getTariffZones()
                             .stream()
-                            .noneMatch(tariffZoneRef -> tariffZone.getNetexId().equals(tariffZoneRef.getRef()) && tariffZoneRef.getVersion().equals(String.valueOf(tariffZone.getVersion()))))
-                    .map(TariffZoneRef::new)
+                            .noneMatch(tariffZoneRef -> tariffZone.getNetexId().equals(tariffZoneRef.getRef())))
+                    .map(tariffZone -> new TariffZoneRef(tariffZone.getNetexId()))
                     .collect(toSet());
 
             stopPlace.getTariffZones().addAll(matches);
@@ -100,7 +100,7 @@ public class TariffZonesLookupService {
         return tariffZones.get()
                        .stream()
                        .filter(pair -> point.coveredBy(pair.getSecond()))
-                       .map(pair -> tariffZoneRepository.findValidTariffZone(pair.getFirst()).orElse(null))
+                       .map(pair -> tariffZoneRepository.findFirstByNetexIdOrderByVersionDesc(pair.getFirst()))
                        .filter(Objects::nonNull)
                        .collect(toList());
     }

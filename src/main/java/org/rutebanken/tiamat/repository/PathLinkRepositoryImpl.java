@@ -16,20 +16,24 @@
 package org.rutebanken.tiamat.repository;
 
 
-import org.apache.commons.lang3.StringUtils;
-import org.rutebanken.tiamat.model.PathLink;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+
+import org.apache.commons.lang3.StringUtils;
+import org.rutebanken.tiamat.model.PathLink;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PathLinkRepositoryImpl implements PathLinkRepositoryCustom {
+
+    private static final Logger logger = LoggerFactory.getLogger(PathLinkRepositoryImpl.class);
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -38,13 +42,13 @@ public class PathLinkRepositoryImpl implements PathLinkRepositoryCustom {
 
         Query query = entityManager.createNativeQuery("SELECT path_link_id " +
                 "FROM path_link_key_values plkv " +
-                    "INNER JOIN value_items v " +
-                        "ON plkv.key_values_id = v.value_id " +
-                    "INNER JOIN path_link pl " +
-                        "ON path_link_id = pl.id " +
+                "INNER JOIN value_items v " +
+                "ON plkv.key_values_id = v.value_id " +
+                "INNER JOIN path_link pl " +
+                "ON path_link_id = pl.id " +
                 "WHERE plkv.key_values_key = :key " +
-                    "AND v.items IN ( :values ) " +
-                    "AND pl.version = (SELECT MAX(plv.version) FROM path_link plv WHERE plv.netex_id = pl.netex_id)");
+                "AND v.items IN ( :values ) " +
+                "AND pl.version = (SELECT MAX(plv.version) FROM path_link plv WHERE plv.netex_id = pl.netex_id)");
 
         query.setParameter("key", key);
         query.setParameter("values", values);
@@ -93,26 +97,35 @@ public class PathLinkRepositoryImpl implements PathLinkRepositoryCustom {
     @Override
     public List<PathLink> findByStopPlaceIds(Set<Long> stopPlaceIds) {
 
-        if(stopPlaceIds.isEmpty()) {
+        if (stopPlaceIds.isEmpty()) {
             return new ArrayList<>();
         }
 
-        String sql = createFindPathLinkFromStopPlaceIdsSQL(stopPlaceIds);
+        logger.info("Finding pathlinks for " + stopPlaceIds.size() + " StopPlaceIds");
 
-        System.out.println(sql);
-        Query query = entityManager.createNativeQuery(sql, PathLink.class);
+        int pageStart = 0;
+        int pageSize = 1000;
+        List<PathLink> results = new ArrayList<>();
 
-        try {
-            @SuppressWarnings("unchecked")
-            List<PathLink> results = query.getResultList();
-            return results;
+        while (pageStart < stopPlaceIds.size()) {
+            logger.info("Finding pathlinks for " + pageSize + " StopPlaceIds starting at position " + pageStart);
+            Set<Long> stopPlaceIdsOnPage = stopPlaceIds.stream().skip(pageStart).limit(pageSize).collect(Collectors.toSet());
+            String sql = createFindPathLinkFromStopPlaceIdsSQL(stopPlaceIdsOnPage);
+            logger.debug(sql);
+            Query query = entityManager.createNativeQuery(sql, PathLink.class);
 
-        } catch (NoResultException noResultException) {
-            return new ArrayList<>();
+            try {
+                results.addAll((List<PathLink>) query.getResultList());
+            } catch (NoResultException noResultException) {
+                return results;
+            }
+            pageStart += pageSize;
         }
+        return results;
     }
 
     public String createFindPathLinkFromStopPlaceIdsSQL(Set<Long> stopPlaceIds) {
+        // ple.place_version is a varchar, s.version and q.version are BigInts
         return new StringBuilder(
                 "SELECT pl.* " +
                         "FROM (" +
@@ -122,9 +135,9 @@ public class PathLinkRepositoryImpl implements PathLinkRepositoryCustom {
                         "       LEFT OUTER JOIN quay q ON spq.quays_id = q.id" +
                         "       INNER JOIN path_link_end ple" +
                         "           ON (ple.place_ref = s.netex_id" +
-                        "               AND (ple.place_version = cast(s.version AS TEXT) OR ple.place_version is NULL))" +
+                        "               AND (ple.place_version = cast(s.version AS varchar) OR ple.place_version is NULL))" +
                         "           OR (ple.place_ref = q.netex_id" +
-                        "               AND (ple.place_version = cast(q.version AS TEXT) OR ple.place_version is NULL))" +
+                        "               AND (ple.place_version = cast(q.version AS varchar) OR ple.place_version is NULL))" +
                         "       INNER JOIN path_link pl2 ON ple.id = pl2.from_id" +
                         "           OR ple.id = pl2.to_id" +
                         "   WHERE s.id IN(")

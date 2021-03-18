@@ -72,7 +72,7 @@ public class StopPlaceByIdFinder {
                 .filter(set -> !set.isEmpty())
                 .flatMap(set -> set.stream())
                 .filter(Objects::nonNull)
-                .collect(collectingAndThen(toCollection(() -> new TreeSet<>(comparing(org.rutebanken.tiamat.model.StopPlace::getNetexId))), ArrayList::new));
+                .collect(collectingAndThen(toCollection(() -> new TreeSet<>(comparing(StopPlace::getNetexId))), ArrayList::new));
     }
 
     public List<StopPlace> findByQuayNetexId(StopPlace incomingStopPlace, boolean hasQuays) {

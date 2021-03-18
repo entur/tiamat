@@ -17,7 +17,7 @@ package org.rutebanken.tiamat.rest.graphql.types;
 
 import graphql.schema.*;
 import org.rutebanken.tiamat.model.GroupOfStopPlaces;
-import org.rutebanken.tiamat.rest.graphql.fetchers.StopPlaceFareZoneFetcher;
+import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.rest.graphql.fetchers.StopPlaceTariffZoneFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.TagFetcher;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,9 +41,6 @@ public class StopPlaceInterfaceCreator {
     private StopPlaceTariffZoneFetcher stopPlaceTariffZoneFetcher;
 
     @Autowired
-    private StopPlaceFareZoneFetcher stopPlaceFareZoneFetcher;
-
-    @Autowired
     private TagObjectTypeCreator tagObjectTypeCreator;
 
     @Autowired
@@ -53,7 +50,6 @@ public class StopPlaceInterfaceCreator {
     private TagFetcher tagFetcher;
 
     public List<GraphQLFieldDefinition> createCommonInterfaceFields(GraphQLObjectType tariffZoneObjectType,
-                                                                    GraphQLObjectType fareZoneObjectType,
                                                               GraphQLObjectType topographicPlaceObjectType,
                                                               GraphQLObjectType validBetweenObjectType) {
         List<GraphQLFieldDefinition> stopPlaceInterfaceFields = new ArrayList<>();
@@ -79,12 +75,6 @@ public class StopPlaceInterfaceCreator {
                 .name(TARIFF_ZONES)
                 .type(new GraphQLList(tariffZoneObjectType))
                 .dataFetcher(stopPlaceTariffZoneFetcher)
-                .build());
-
-        stopPlaceInterfaceFields.add(newFieldDefinition()
-                .name(FARE_ZONES)
-                .type(new GraphQLList(fareZoneObjectType))
-                .dataFetcher(stopPlaceFareZoneFetcher)
                 .build());
         stopPlaceInterfaceFields.add(newFieldDefinition()
                 .name(TAGS)

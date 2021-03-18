@@ -51,7 +51,7 @@ public class TariffZoneQueryFromSearchBuilder {
         if (search.getQuery() != null) {
             wheres.add("(lower(t.name_value) like concat('%', lower(:query), '%') or t.netex_id like concat('%', :query, '%'))");
             parameters.put("query", search.getQuery());
-            orderByStatements.add("similarity(t.name_value, :query) desc");
+            orderByStatements.add("DIFFERENCE(t.name_value, :query) desc");
         }
 
         // When it comes to tariff zones, max version is the current version.

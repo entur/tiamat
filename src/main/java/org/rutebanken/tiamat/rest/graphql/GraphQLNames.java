@@ -65,17 +65,8 @@ public class GraphQLNames {
     public static final String ENTITY_REF_VERSION_DESCRIPTION = "The version of the referenced entity.";
 
     public static final String OUTPUT_TYPE_TARIFF_ZONE = "TariffZone";
-    public static final String INPUT_TYPE_TARIFF_ZONE = OUTPUT_TYPE_TARIFF_ZONE + INPUT_TYPE_POSTFIX;
+    public static final String INPUT_TYPE_TARIFF_ZONE = "TariffZone" + INPUT_TYPE_POSTFIX;
     public static final String TARIFF_ZONES = "tariffZones";
-
-    public static final String OUTPUT_TYPE_FARE_ZONE = "FareZone";
-    public static final String INPUT_TYPE_FARE_ZONE = OUTPUT_TYPE_FARE_ZONE + INPUT_TYPE_POSTFIX;
-    public static final String FARE_ZONES = "fareZones";
-    public static final String FARE_ZONES_MEMBERS = "members";
-    public static final String FARE_ZONES_NEIGHBOURS= "neighbours";
-    public static final String FARE_ZONES_ZONE_TOPOLOGY= "zoneTopology";
-    public static final String FARE_ZONES_SCOPING_METHOD ="scopingMethod";
-    public static final String FARE_ZONES_AUTHORITY_REF ="authorityRef";
 
     public static final String OUTPUT_TYPE_ADDRESSABLE_PLACE = "AddressablePlace";
 
@@ -415,10 +406,8 @@ public class GraphQLNames {
     public static final String MUTATE_PARENT_STOPPLACE = "mutateParentStopPlace";
     public static final String MUTATE_PATH_LINK = "mutatePathlink";
     public static final String MUTATE_PARKING = "mutateParking";
-    public static final String TERMINATE_TARIFF_ZONE = "terminateTariffZone";
     public static final String MUTATE_GROUP_OF_STOP_PLACES = "mutateGroupOfStopPlaces";
-
-    public static final String TARIFF_ZONE_ID = "tariffZoneId";
+    public static final String MUTATE_TARIFF_ZONE = "mutateTariffZone";
 
     public static final String QUAY_ID = "quayId";
     public static final String STOP_PLACE_ID = "stopPlaceId";

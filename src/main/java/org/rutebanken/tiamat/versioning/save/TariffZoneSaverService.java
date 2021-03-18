@@ -16,50 +16,72 @@
 package org.rutebanken.tiamat.versioning.save;
 
 
+import java.time.Instant;
+
+import org.rutebanken.tiamat.auth.UsernameFetcher;
 import org.rutebanken.tiamat.model.TariffZone;
 import org.rutebanken.tiamat.repository.TariffZoneRepository;
 import org.rutebanken.tiamat.service.TariffZonesLookupService;
-
-import org.rutebanken.tiamat.versioning.validate.VersionValidator;
+import org.rutebanken.tiamat.service.metrics.PrometheusMetricsService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+/**
+ * No history for tariff zones. Overwrites existing version for tariff zone
+ */
 @Service
 public class TariffZoneSaverService {
 
+    private static final Logger logger = LoggerFactory.getLogger(TariffZoneSaverService.class);
+
     private final TariffZoneRepository tariffZoneRepository;
     private final TariffZonesLookupService tariffZonesLookupService;
-    private final DefaultVersionedSaverService defaultVersionedSaverService;
-    private final VersionValidator versionValidator;
+    private final UsernameFetcher usernameFetcher;
+    private final PrometheusMetricsService prometheusMetricsService;
 
     @Autowired
-    public TariffZoneSaverService(TariffZoneRepository tariffZoneRepository,
-                                  TariffZonesLookupService tariffZonesLookupService,
-                                  DefaultVersionedSaverService defaultVersionedSaverService,
-                                  VersionValidator versionValidator) {
+    public TariffZoneSaverService(TariffZoneRepository tariffZoneRepository, TariffZonesLookupService tariffZonesLookupService, UsernameFetcher usernameFetcher, PrometheusMetricsService prometheusMetricsService) {
         this.tariffZoneRepository = tariffZoneRepository;
         this.tariffZonesLookupService = tariffZonesLookupService;
-        this.defaultVersionedSaverService = defaultVersionedSaverService;
-        this.versionValidator = versionValidator;
-    }
-
-    public TariffZone saveNewVersion(TariffZone newVersion) {
-        TariffZone existingTariffZone;
-        if (newVersion.getNetexId() != null) {
-            existingTariffZone = tariffZoneRepository.findFirstByNetexIdOrderByVersionDesc(newVersion.getNetexId());
-        } else {
-            existingTariffZone = null;
-        }
-        TariffZone  saved = defaultVersionedSaverService.saveNewVersion(existingTariffZone, newVersion, tariffZoneRepository);
-        tariffZonesLookupService.reset();
-        return saved;
+        this.usernameFetcher = usernameFetcher;
+        this.prometheusMetricsService = prometheusMetricsService;
     }
 
     public TariffZone saveNewVersion(TariffZone existingVersion, TariffZone newVersion) {
-        versionValidator.validate(existingVersion, newVersion);
-        TariffZone  saved = defaultVersionedSaverService.saveNewVersion(existingVersion, newVersion, tariffZoneRepository);
+        return saveNewVersion(newVersion);
+    }
+
+    public TariffZone saveNewVersion(TariffZone newVersion) {
+
+        TariffZone existing = tariffZoneRepository.findFirstByNetexIdOrderByVersionDesc(newVersion.getNetexId());
+
+        TariffZone result;
+        if(existing != null) {
+            BeanUtils.copyProperties(newVersion, existing, "id", "created", "version");
+            existing.getKeyValues().clear();
+            existing.getKeyValues().putAll(newVersion.getKeyValues());
+            // DZ Removing the clearing of validBetween. It is sent in through the API.
+            // I do not know Enturs reasoning for setting it to null.
+            // existing.setValidBetween(null);
+            existing.setChanged(Instant.now());
+            result = tariffZoneRepository.save(existing);
+
+        } else {
+            newVersion.setCreated(Instant.now());
+            newVersion.setVersion(1L);
+            result = tariffZoneRepository.save(newVersion);
+        }
+
+        result.setChangedBy(usernameFetcher.getUserNameForAuthenticatedUser());
+
+        logger.info("Saved tariff zone {}, version {}, name {}", result.getNetexId(), result.getVersion(), result.getName());
+
         tariffZonesLookupService.reset();
-        return saved;
+        prometheusMetricsService.registerEntitySaved(newVersion.getClass(),1L);
+        return result;
     }
 
 }

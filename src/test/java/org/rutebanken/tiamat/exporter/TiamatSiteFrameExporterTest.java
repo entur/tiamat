@@ -31,7 +31,7 @@ public class TiamatSiteFrameExporterTest extends TiamatIntegrationTest {
 
     @Test
     public void exportTariffZonesInSiteFrame() {
-        org.rutebanken.tiamat.model.SiteFrame siteFrame = new org.rutebanken.tiamat.model.SiteFrame();
+        SiteFrame siteFrame = new SiteFrame();
 
         TariffZone tariffZone = new TariffZone();
         tariffZone.setName(new EmbeddableMultilingualString("name"));

@@ -14,17 +14,16 @@
   ~ limitations under the Licence.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.rutebanken</groupId>
-    <artifactId>tiamat</artifactId>
-    <version>0.0.2-SNAPSHOT</version>
+    <artifactId>nsr-tiamat</artifactId>
+    <version>0.0.18-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>Tiamat</name>
-    <description>Stop place register / holdeplassregister</description>
+    <name>nsr-tiamat</name>
+    <description>Stop place register</description>
 
     <licenses>
         <license>
@@ -44,32 +43,37 @@
     </organization>
 
     <distributionManagement>
+        <repository>
+            <id>maven.samtrafiken.se</id>
+            <name>Samtrafiken Release Repository</name>
+            <url>http://maven.samtrafiken.se/content/repositories/releases</url>
+        </repository>
         <snapshotRepository>
-            <id>snapshots</id>
-            <name>entur2-snapshots</name>
-            <url>https://entur2.jfrog.io/entur2/libs-snapshot-local</url>
+            <id>maven.samtrafiken.se</id>
+            <name>Samtrafiken Snapshot Repository</name>
+            <url>http://maven.samtrafiken.se/content/repositories/snapshots</url>
         </snapshotRepository>
     </distributionManagement>
 
     <scm>
-        <connection>scm:git:ssh://git@github.com:entur/tiamat.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com:entur/tiamat.git</developerConnection>
-    </scm>
+        <connection>scm:git:ssh://git@bitbucket.org/samtrafiken/nsr-tiamat.git</connection>
+      <tag>tiamat-0.0.2</tag>
+  </scm>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <spring-cloud-gcp.version>1.2.5.RELEASE</spring-cloud-gcp.version>
-        <maven.compiler.plugin.version>3.8.1</maven.compiler.plugin.version>
-        <plexus.compiler.javac.version>2.8.8</plexus.compiler.javac.version>
-        <spring-boot-plugin.version>2.3.4.RELEASE</spring-boot-plugin.version>
-        <spring-boot.version>2.3.4.RELEASE</spring-boot.version>
-        <spring.security.version>5.3.5.RELEASE</spring.security.version>
-        <keycloak.version>4.8.3.Final</keycloak.version>
-        <postgresql.version>42.2.4</postgresql.version>
+
+        <maven.compiler.plugin.version>3.8.0</maven.compiler.plugin.version>
+        <plexus.compiler.javac.version>2.8.5</plexus.compiler.javac.version>
+        <spring-boot-plugin.version>2.1.1.RELEASE</spring-boot-plugin.version>
+        <spring-boot.version>2.1.1.RELEASE</spring-boot.version>
+        <spring.security.version>5.0.7.RELEASE</spring.security.version>
+        <keycloak.version>9.0.2</keycloak.version>
         <geodb.version>0.9</geodb.version>
         <geotools.version>20.1</geotools.version>
         <activemq-client.version>5.15.9</activemq-client.version>
-        <maven-javadoc-plugin.version>2.10.4</maven-javadoc-plugin.version>
+        <maven-javadoc-plugin.version>3.2.0</maven-javadoc-plugin.version>
+        <maven.javadoc.failOnError>false</maven.javadoc.failOnError>
         <flyway-core.version>5.2.4</flyway-core.version>
         <logstash-logback.version>5.2</logstash-logback.version>
         <kubernetes-client.version>4.1.1</kubernetes-client.version>
@@ -85,28 +89,22 @@
         <graphql-java.version>11.0</graphql-java.version>
 
         <hazelcast-hibernate53.version>1.3.0</hazelcast-hibernate53.version>
-        <hibernate.version>5.4.0.Final</hibernate.version>
-        <hibernate-spatial.version>5.4.0.Final</hibernate-spatial.version>
+        <hibernate.version>5.4.14.Final</hibernate.version>
+        <hibernate-spatial.version>5.4.14.Final</hibernate-spatial.version>
 
         <groovy-all.version>2.5.4</groovy-all.version>
         <jaxb-version>2.3.0.1</jaxb-version>
-        <swagger-jersey2.version>1.6.2</swagger-jersey2.version>
-        <jackson-version>2.11.3</jackson-version>
-        <jacoco-maven-plugin.version>0.8.5</jacoco-maven-plugin.version>
-        <sonar-maven-plugin.version>3.7.0.1746</sonar-maven-plugin.version>
+        <swagger-jersey2.version>1.5.21</swagger-jersey2.version>
+        <jackson-version>2.9.10</jackson-version>
 
         <!-- NB: Concious choice of using snapshot version. This is to keep in
             sync, and fail fast if incompatibilities -->
-        <netex-java-model.version>1.0.12-SNAPSHOT</netex-java-model.version>
-        <hazelcast-helper.version>0.0.4-SNAPSHOT</hazelcast-helper.version>
-        <rutebanken-gcp-storage.version>0.0.4-SNAPSHOT</rutebanken-gcp-storage.version>
-        <rutebanken-organisation.version>0.0.4-SNAPSHOT</rutebanken-organisation.version>
-
-        <javax-jms.version>2.0.1</javax-jms.version>
-        <jts-core.version>1.16.0</jts-core.version>
-
-        <maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
-        <maven-antrun-plugin.version>1.8</maven-antrun-plugin.version>
+        <netex-java-model.version>1.0.9</netex-java-model.version>
+        <hazelcast-helper.version>1.0.12</hazelcast-helper.version>
+        <rutebanken-gcp-storage.version>1.0.12</rutebanken-gcp-storage.version>
+        <rutebanken-organisation.version>1.0.12</rutebanken-organisation.version>
+        <metrics.version>3.2.3</metrics.version>
+        <log4j2.version>2.11.1</log4j2.version>
     </properties>
 
     <!-- This repository list can be deleted, as it is now supplied by rutebanken nexus.
@@ -117,6 +115,12 @@
             <id>maven2</id>
             <name>central</name>
             <url>https://repo.maven.apache.org/maven2</url>
+        </repository>
+        <repository>
+            <id>repo.boundlessgeo.com-releases</id>
+            <name>repo.boundlessgeo.com-releases</name>
+            <url>http://repo.boundlessgeo.com/main</url>
+            <layout>default</layout>
         </repository>
     </repositories>
 
@@ -149,27 +153,22 @@
             </dependency>
 
             <dependency>
-                <groupId>org.springframework.cloud</groupId>
-                <artifactId>spring-cloud-gcp-dependencies</artifactId>
-                <version>${spring-cloud-gcp.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
+                <groupId>io.dropwizard.metrics</groupId>
+                <artifactId>metrics-graphite</artifactId>
+                <version>${metrics.version}</version>
             </dependency>
+
+            <dependency>
+                <groupId>io.dropwizard.metrics</groupId>
+                <artifactId>metrics-core</artifactId>
+                <version>${metrics.version}</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
 
     <dependencies>
-
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-gcp-starter-pubsub</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.integration</groupId>
-            <artifactId>spring-integration-core</artifactId>
-        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -217,7 +216,7 @@
         <dependency>
             <groupId>javax.jms</groupId>
             <artifactId>javax.jms-api</artifactId>
-            <version>${javax-jms.version}</version>
+            <version>2.0.1</version>
         </dependency>
         <dependency>
             <groupId>io.dropwizard.metrics</groupId>
@@ -357,12 +356,6 @@
         </dependency>
 
         <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <version>${postgresql.version}</version>
-        </dependency>
-
-        <dependency>
             <groupId>javax.el</groupId>
             <artifactId>javax.el-api</artifactId>
             <version>${javax.el.version}</version>
@@ -423,14 +416,14 @@
                 https://github.com/jboss/xerces/pull/14
                 https://issues.apache.org/jira/browse/XERCESJ-1276
             -->
-            <version>2.12.0.SP03-RB</version>
+            <version>2.12.0.SP02</version>
         </dependency>
 
 
         <dependency>
             <groupId>org.locationtech.jts</groupId>
             <artifactId>jts-core</artifactId>
-            <version>${jts-core.version}</version>
+            <version>1.16.0</version>
         </dependency>
 
         <dependency>
@@ -530,20 +523,73 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-jms</artifactId>
-            <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.apache.activemq</groupId>
             <artifactId>activemq-client</artifactId>
             <version>${activemq-client.version}</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.activemq</groupId>
             <artifactId>activemq-kahadb-store</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>com.microsoft.sqlserver</groupId>
+            <artifactId>mssql-jdbc</artifactId>
+            <version>8.2.2.jre11</version>
+        </dependency>
+
+        <dependency>
+            <groupId>se.samtrafiken.aws</groupId>
+            <artifactId>aws-commons</artifactId>
+            <version>0.0.33</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>ch.qos.logback</groupId>
+                    <artifactId>logback-classic</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.logging.log4j</groupId>
+                    <artifactId>log4j-to-slf4j</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.30</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+            <version>1.7.26</version>
+        </dependency>
+
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>1.2.17</version>
+        </dependency>
+
+        <!-- Fix for AWS error: "Transport scheme not recognized [vm]" -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-activemq</artifactId>
+            <version>${spring-boot.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>5.6.2</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
 
@@ -574,37 +620,15 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>${maven-surefire-plugin.version}</version>
+                <version>3.0.0-M1</version>
                 <configuration>
-                    <argLine>-Xms500m -Xmx500m -Xss256k</argLine>
-                    <runOrder>alphabetical</runOrder>
+                    <useSystemClassLoader>false</useSystemClassLoader>
+                    <argLine>-Xmx3G</argLine>
+                    <systemPropertyVariables combine.children="override">
+                        <spring.output.ansi.enabled>ALWAYS</spring.output.ansi.enabled>
+                        <env>dev</env>
+                    </systemPropertyVariables>
                 </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>${maven-antrun-plugin.version}</version>
-                <executions>
-                    <execution>
-                        <id>test-compile</id>
-                        <phase>test-compile</phase>
-                        <configuration>
-                            <tasks>
-                                <mkdir dir="${basedir}/src/test/groovy"/>
-                                <taskdef name="groovyc" classname="org.codehaus.groovy.ant.Groovyc">
-                                    <classpath refid="maven.test.classpath"/>
-                                </taskdef>
-                                <mkdir dir="${project.build.testOutputDirectory}"/>
-                                <groovyc destdir="${project.build.testOutputDirectory}"
-                                         srcdir="${basedir}/src/test/groovy/" listfiles="true">
-                                    <classpath refid="maven.test.classpath"/>
-                                </groovyc>
-                            </tasks>
-                        </configuration>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
@@ -622,14 +646,29 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.sonarsource.scanner.maven</groupId>
-                <artifactId>sonar-maven-plugin</artifactId>
-                <version>${sonar-maven-plugin.version}</version>
-            </plugin>
-            <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <version>${jacoco-maven-plugin.version}</version>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.8</version>
+                <executions>
+                    <execution>
+                        <id>test-compile</id>
+                        <phase>test-compile</phase>
+                        <configuration>
+                            <tasks>
+                                <mkdir dir="${basedir}/src/test/groovy" />
+                                <taskdef name="groovyc" classname="org.codehaus.groovy.ant.Groovyc">
+                                    <classpath refid="maven.test.classpath" />
+                                </taskdef>
+                                <mkdir dir="${project.build.testOutputDirectory}" />
+                                <groovyc destdir="${project.build.testOutputDirectory}" srcdir="${basedir}/src/test/groovy/" listfiles="true">
+                                    <classpath refid="maven.test.classpath" />
+                                </groovyc>
+                            </tasks>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

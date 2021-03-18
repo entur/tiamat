@@ -16,6 +16,7 @@
 package org.rutebanken.tiamat.rest.graphql.mappers;
 
 import com.google.api.client.util.Preconditions;
+import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.PrivateCodeStructure;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -75,6 +76,14 @@ public class QuayMapper {
             }
             quay.getPrivateCode().setType((String) privateCodeInputMap.get(TYPE));
             quay.getPrivateCode().setValue((String) privateCodeInputMap.get(VALUE));
+            isQuayUpdated = true;
+        }
+
+        if (quayInputMap.get(SHORT_NAME) != null) {
+            Map<String, String> map  = (Map) quayInputMap.get(SHORT_NAME);
+            String value = map.get(VALUE);
+            String lang = map.get(LANG);
+            quay.setShortName(new EmbeddableMultilingualString(value, lang));
             isQuayUpdated = true;
         }
 

@@ -17,23 +17,21 @@ package org.rutebanken.tiamat.service.stopplace;
 
 import org.junit.Test;
 import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
-import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.auth.UsernameFetcher;
 import org.rutebanken.tiamat.changelog.EntityChangedListener;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.lock.MutateLock;
-import org.springframework.transaction.annotation.Transactional;
 
-
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.function.Supplier;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-
+import static org.mockito.Matchers.anyList;
+import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Mockito.*;
 
-public class StopPlaceDeleterTest extends TiamatIntegrationTest {
+public class StopPlaceDeleterTest {
 
     private StopPlaceRepository stopPlaceRepository = mock(StopPlaceRepository.class);
 
@@ -55,18 +53,17 @@ public class StopPlaceDeleterTest extends TiamatIntegrationTest {
         parent.setParentStopPlace(true);
         parent.setNetexId("NSR:StopPlace:1");
 
-        when(stopPlaceRepository.findAll(anyList())).thenReturn(Collections.singletonList(parent));
+        when(stopPlaceRepository.findAll(anyListOf(String.class))).thenReturn(Arrays.asList(parent));
 
         stopPlaceDeleter.deleteStopPlace(parent.getNetexId());
     }
 
     @Test
-    @Transactional
     public void deleteMonomodalStopPlace() {
         StopPlace monoModalStopPlace = new StopPlace();
         monoModalStopPlace.setNetexId("NSR:StopPlace:");
 
-        when(stopPlaceRepository.findAll(anyList())).thenReturn(Collections.singletonList(monoModalStopPlace));
+        when(stopPlaceRepository.findAll(anyListOf(String.class))).thenReturn(Arrays.asList(monoModalStopPlace));
         when(usernameFetcher.getUserNameForAuthenticatedUser()).thenReturn("Rambo");
 
         boolean deleted = stopPlaceDeleter.deleteStopPlace(monoModalStopPlace.getNetexId());

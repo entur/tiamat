@@ -46,7 +46,7 @@ public class StopPlaceIdMatcher {
     private NetexMapper netexMapper;
 
 
-    public List<org.rutebanken.netex.model.StopPlace> matchStopPlaces(List<org.rutebanken.tiamat.model.StopPlace> tiamatStops, AtomicInteger stopPlaceMatched) {
+    public List<org.rutebanken.netex.model.StopPlace> matchStopPlaces(List<StopPlace> tiamatStops, AtomicInteger stopPlaceMatched) {
 
         List<org.rutebanken.netex.model.StopPlace> matchedStopPlaces = new ArrayList<>();
 

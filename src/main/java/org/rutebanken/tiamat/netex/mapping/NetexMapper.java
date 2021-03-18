@@ -89,14 +89,6 @@ public class NetexMapper {
                 .byDefault()
                 .register();
 
-        mapperFactory.classMap(FareZone.class, org.rutebanken.tiamat.model.FareZone.class)
-                .exclude("transportOrganisationRef")
-                .exclude("neighbours")
-                .exclude("members")
-                .customize(new FareZoneMapper())
-                .byDefault()
-                .register();
-
 
         mapperFactory.classMap(Parking.class, org.rutebanken.tiamat.model.Parking.class)
                 .exclude("paymentMethods")
@@ -175,27 +167,9 @@ public class NetexMapper {
         return facade.map(topographicPlace, TopographicPlace.class);
     }
 
-    public TariffZone mapToNetexModel(org.rutebanken.tiamat.model.TariffZone tariffZone) {
-        return facade.map(tariffZone, TariffZone.class);
-    }
-
-    public FareZone mapToNetexModel(org.rutebanken.tiamat.model.FareZone fareZone) {
-        return facade.map(fareZone, FareZone.class);
-    }
-
     public SiteFrame mapToNetexModel(org.rutebanken.tiamat.model.SiteFrame tiamatSiteFrame) {
         SiteFrame siteFrame = facade.map(tiamatSiteFrame, SiteFrame.class);
         return siteFrame;
-    }
-
-    public ServiceFrame mapToNetexModel(org.rutebanken.tiamat.model.ServiceFrame tiamatServiceFrame) {
-        ServiceFrame serviceFrame = facade.map(tiamatServiceFrame, ServiceFrame.class);
-        return serviceFrame;
-    }
-
-    public FareFrame mapToNetexModel(org.rutebanken.tiamat.model.FareFrame tiamatFareFrame) {
-        FareFrame fareFrame = facade.map(tiamatFareFrame, FareFrame.class);
-        return fareFrame;
     }
 
     public StopPlace mapToNetexModel(org.rutebanken.tiamat.model.StopPlace tiamatStopPlace) {
@@ -213,10 +187,6 @@ public class NetexMapper {
 
     public org.rutebanken.tiamat.model.TariffZone mapToTiamatModel(TariffZone tariffZone) {
         return facade.map(tariffZone, org.rutebanken.tiamat.model.TariffZone.class);
-    }
-
-    public org.rutebanken.tiamat.model.FareZone mapToTiamatModel(FareZone fareZone) {
-        return facade.map(fareZone,org.rutebanken.tiamat.model.FareZone.class);
     }
 
     public List<org.rutebanken.tiamat.model.StopPlace> mapStopsToTiamatModel(List<StopPlace> stopPlaces) {

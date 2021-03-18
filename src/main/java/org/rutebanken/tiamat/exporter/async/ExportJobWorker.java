@@ -29,6 +29,8 @@ import org.xml.sax.SAXException;
 import javax.xml.bind.JAXBException;
 import javax.xml.stream.XMLStreamException;
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Instant;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -44,7 +46,7 @@ public class ExportJobWorker implements Runnable {
     private final ExportJob exportJob;
     private final StreamingPublicationDelivery streamingPublicationDelivery;
     private final String localExportPath;
-    private final String fileNameWithoutExtension;
+    private final String fileNameWithoutExtention;
     private final BlobStoreService blobStoreService;
     private final ExportJobRepository exportJobRepository;
     private final NetexXmlReferenceValidator netexXmlReferenceValidator;
@@ -52,14 +54,14 @@ public class ExportJobWorker implements Runnable {
     public ExportJobWorker(ExportJob exportJob,
                            StreamingPublicationDelivery streamingPublicationDelivery,
                            String localExportPath,
-                           String fileNameWithoutExtension,
+                           String fileNameWithoutExtention,
                            BlobStoreService blobStoreService,
                            ExportJobRepository exportJobRepository,
                            NetexXmlReferenceValidator netexXmlReferenceValidator) {
         this.exportJob = exportJob;
         this.streamingPublicationDelivery = streamingPublicationDelivery;
         this.localExportPath = localExportPath;
-        this.fileNameWithoutExtension = fileNameWithoutExtension;
+        this.fileNameWithoutExtention = fileNameWithoutExtention;
         this.blobStoreService = blobStoreService;
         this.exportJobRepository = exportJobRepository;
         this.netexXmlReferenceValidator = netexXmlReferenceValidator;
@@ -69,7 +71,7 @@ public class ExportJobWorker implements Runnable {
     public void run() {
         logger.info("Started export job: {}", exportJob);
         final File localExportZipFile = new File(localExportPath + File.separator + exportJob.getFileName());
-        File localExportXmlFile = new File(localExportPath + File.separator + fileNameWithoutExtension + ".xml");
+        File localExportXmlFile = new File(localExportPath + File.separator + fileNameWithoutExtention + ".xml");
         try {
 
             exportToLocalXmlFile(localExportXmlFile);
@@ -122,7 +124,7 @@ public class ExportJobWorker implements Runnable {
         final ZipOutputStream zipOutputStream = new ZipOutputStream(fileOutputStream);
 
         try {
-            zipOutputStream.putNextEntry(new ZipEntry(fileNameWithoutExtension + ".xml"));
+            zipOutputStream.putNextEntry(new ZipEntry(fileNameWithoutExtention + ".xml"));
 
             InputStream fileInputStream = new FileInputStream(localExportZipFile);
             IOUtils.copy(fileInputStream, zipOutputStream);
@@ -132,7 +134,7 @@ public class ExportJobWorker implements Runnable {
             try {
                 zipOutputStream.close();
             } catch (IOException e) {
-                logger.error(String.format("Could not close zipoutput stream for file: %s", localZipFile), e);
+                throw new IOException("Could not close zipoutput stream for file: "+localZipFile, e);
             }
         }
     }

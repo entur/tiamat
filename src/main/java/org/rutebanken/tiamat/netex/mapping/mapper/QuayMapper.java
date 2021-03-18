@@ -39,7 +39,7 @@ public class QuayMapper extends CustomMapper<Quay, org.rutebanken.tiamat.model.Q
                 quay.getAlternativeNames().getAlternativeName() != null &&
                 !quay.getAlternativeNames().getAlternativeName().isEmpty()) {
             List<org.rutebanken.netex.model.AlternativeName> netexAlternativeName = quay.getAlternativeNames().getAlternativeName();
-            List<org.rutebanken.tiamat.model.AlternativeName> alternativeNames = new ArrayList<>();
+            List<AlternativeName> alternativeNames = new ArrayList<>();
 
             for (org.rutebanken.netex.model.AlternativeName netexAltName : netexAlternativeName) {
                 if (netexAltName != null
@@ -47,7 +47,7 @@ public class QuayMapper extends CustomMapper<Quay, org.rutebanken.tiamat.model.Q
                         && netexAltName.getName().getValue() != null
                         && !netexAltName.getName().getValue().isEmpty()) {
                     //Only include non-empty alternative names
-                    org.rutebanken.tiamat.model.AlternativeName tiamatAltName = new org.rutebanken.tiamat.model.AlternativeName();
+                    AlternativeName tiamatAltName = new AlternativeName();
                     mapperFacade.map(netexAltName, tiamatAltName);
                     alternativeNames.add(tiamatAltName);
                 }
@@ -74,7 +74,7 @@ public class QuayMapper extends CustomMapper<Quay, org.rutebanken.tiamat.model.Q
             List<AlternativeName> alternativeNames = quay.getAlternativeNames();
             List<org.rutebanken.netex.model.AlternativeName> netexAlternativeNames = new ArrayList<>();
 
-            for (org.rutebanken.tiamat.model.AlternativeName alternativeName : alternativeNames) {
+            for (AlternativeName alternativeName : alternativeNames) {
                 if (alternativeName != null
                         && alternativeName.getName() != null
                         && alternativeName.getName().getValue() != null

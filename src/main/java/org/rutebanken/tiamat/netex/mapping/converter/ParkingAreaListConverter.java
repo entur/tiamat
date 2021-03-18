@@ -41,7 +41,7 @@ public class ParkingAreaListConverter extends BidirectionalConverter<List<Parkin
 
         ParkingAreas_RelStructure parkingAreas_relStructure = new ParkingAreas_RelStructure();
 
-        logger.debug("Mapping {} parkingAreas to netex", parkingAreas.size());
+        logger.debug("Mapping {} parkingAreas to netex", parkingAreas != null ? parkingAreas.size() : 0);
 
         parkingAreas.forEach(parkingArea -> {
             org.rutebanken.netex.model.ParkingArea netexParkingArea = mapperFacade.map(parkingArea, org.rutebanken.netex.model.ParkingArea.class);

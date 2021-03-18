@@ -17,7 +17,6 @@ package org.rutebanken.tiamat.rest.graphql.types;
 
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLList;
-import graphql.schema.GraphQLObjectType;
 import org.rutebanken.tiamat.rest.graphql.fetchers.KeyValuesDataFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.OriginalIdsDataFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.PolygonFetcher;
@@ -31,7 +30,6 @@ import java.util.List;
 
 import static graphql.Scalars.GraphQLString;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
-import static graphql.schema.GraphQLObjectType.newObject;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.*;
 
@@ -49,7 +47,7 @@ public class ZoneCommonFieldListCreator {
     @Autowired
     private PolygonFetcher polygonFetcher;
 
-    public List<GraphQLFieldDefinition> create(GraphQLObjectType validBetweenObjectType) {
+    public List<GraphQLFieldDefinition> create() {
 
         List<GraphQLFieldDefinition> zoneFieldList = new ArrayList<>();
         zoneFieldList.add(netexIdFieldDefinition);
@@ -57,7 +55,6 @@ public class ZoneCommonFieldListCreator {
         zoneFieldList.add(newFieldDefinition().name(SHORT_NAME).type(embeddableMultilingualStringObjectType).build());
         zoneFieldList.add(newFieldDefinition().name(DESCRIPTION).type(embeddableMultilingualStringObjectType).build());
         zoneFieldList.add(newFieldDefinition().name(VERSION).type(GraphQLString).build());
-        zoneFieldList.add(newFieldDefinition().name(VALID_BETWEEN).type(validBetweenObjectType).build());
         zoneFieldList.add(geometryFieldDefinition);
 
         zoneFieldList.add(newFieldDefinition()

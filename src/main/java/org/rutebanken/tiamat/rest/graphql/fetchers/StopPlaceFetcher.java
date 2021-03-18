@@ -36,7 +36,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.text.MessageFormat;
+import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -92,14 +94,14 @@ class StopPlaceFetcher implements DataFetcher {
         setIfNonNull(environment, HAS_PARKING, stopPlaceSearchBuilder::setHasParking);
         setIfNonNull(environment, WITH_TAGS, stopPlaceSearchBuilder::setWithTags);
 
-        Instant pointInTime ;
+        Instant pointInTime;
         if (environment.getArgument(POINT_IN_TIME) != null) {
             pointInTime = environment.getArgument(POINT_IN_TIME);
         } else {
             pointInTime = null;
         }
 
-        if(environment.getArgument(VERSION_VALIDITY_ARG) != null) {
+        if (environment.getArgument(VERSION_VALIDITY_ARG) != null) {
             ExportParams.VersionValidity versionValidity = ExportParams.VersionValidity.valueOf(ExportParams.VersionValidity.class, environment.getArgument(VERSION_VALIDITY_ARG));
             stopPlaceSearchBuilder.setVersionValidity(versionValidity);
         }
@@ -108,7 +110,7 @@ class StopPlaceFetcher implements DataFetcher {
 
             try {
                 List<StopPlace> stopPlace;
-                if(version != null && version > 0) {
+                if (version != null && version > 0) {
                     stopPlace = Arrays.asList(stopPlaceRepository.findFirstByNetexIdAndVersion(netexId, version));
                     stopPlacesPage = getStopPlaces(environment, stopPlace, 1L);
                 } else {
@@ -117,7 +119,7 @@ class StopPlaceFetcher implements DataFetcher {
                 }
 
             } catch (NumberFormatException nfe) {
-                logger.info("Attempted to find stopPlace with invalid id [{}]", netexId);
+                logger.warn("Attempted to find stopPlace with invalid id [{}]", netexId);
             }
         } else if (importedId != null && !importedId.isEmpty()) {
 
@@ -224,16 +226,20 @@ class StopPlaceFetcher implements DataFetcher {
         }
 
         final List<StopPlace> stopPlaces = stopPlacesPage.getContent();
-        boolean onlyMonomodalStopplaces= false;
+        boolean onlyMonomodalStopplaces = false;
         if (environment.getArgument(ONLY_MONOMODAL_STOPPLACES) != null) {
             onlyMonomodalStopplaces = environment.getArgument(ONLY_MONOMODAL_STOPPLACES);
         }
         //By default stop should resolve parent stops
         if (onlyMonomodalStopplaces) {
-            return getStopPlaces(environment, stopPlaces, stopPlaces.size());
+            PageImpl<StopPlace> result = getStopPlaces(environment, stopPlaces, stopPlaces.size());
+            logger.info("Done searching for stopPlaces");
+            return result;
         } else {
             List<StopPlace> parentsResolved = parentStopPlacesFetcher.resolveParents(stopPlaces, KEEP_CHILDREN);
-            return getStopPlaces(environment,parentsResolved,parentsResolved.size());
+            PageImpl<StopPlace> result = getStopPlaces(environment, parentsResolved, parentsResolved.size());
+            logger.info("Done searching for stopPlaces");
+            return result;
         }
     }
 
@@ -242,7 +248,7 @@ class StopPlaceFetcher implements DataFetcher {
     }
 
     private <T> T setIfNonNull(DataFetchingEnvironment environment, String argumentName, Consumer<T> consumer) {
-        if(environment.getArgument(argumentName) != null) {
+        if (environment.getArgument(argumentName) != null) {
             T value = environment.getArgument(argumentName);
             consumer.accept(value);
             return value;

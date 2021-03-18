@@ -16,6 +16,7 @@
 package org.rutebanken.tiamat.rest.graphql.mappers;
 
 import org.rutebanken.tiamat.model.GroupOfStopPlaces;
+import org.rutebanken.tiamat.model.PrivateCodeStructure;
 import org.rutebanken.tiamat.model.StopPlaceReference;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -24,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
+import static org.rutebanken.tiamat.rest.graphql.mappers.EmbeddableMultilingualStringMapper.getEmbeddableString;
 
 @Component
 public class GroupOfStopPlacesMapper {
@@ -31,13 +33,35 @@ public class GroupOfStopPlacesMapper {
     private final GroupOfEntitiesMapper groupOfEntitiesMapper;
 
     @Autowired
+    private ValidBetweenMapper validBetweenMapper;
+
+    @Autowired
+    private GeometryMapper geometryMapper;
+
+    @Autowired
     public GroupOfStopPlacesMapper(GroupOfEntitiesMapper groupOfEntitiesMapper) {
         this.groupOfEntitiesMapper = groupOfEntitiesMapper;
     }
 
-    public boolean populate(Map input, GroupOfStopPlaces entity) {
+    public boolean populate(Map input, GroupOfStopPlaces entity)    {
 
         boolean isUpdated = groupOfEntitiesMapper.populate(input, entity);
+
+        if (input.get(PRIVATE_CODE) != null) {
+            Map<String, String> privateCodeInputMap = (Map) input.get(PRIVATE_CODE);
+            entity.setPrivateCode(PrivateCodeMapper.getPrivateCodeStructure(privateCodeInputMap));
+            isUpdated = true;
+        }
+
+        if (input.get(VALID_BETWEEN) != null) {
+            entity.setValidBetween(validBetweenMapper.map((Map) input.get(VALID_BETWEEN)));
+            isUpdated = true;
+        }
+
+        if (input.get(GEOMETRY) != null) {
+            entity.setCentroid(geometryMapper.createGeoJsonPoint((Map) input.get(GEOMETRY)));
+            isUpdated = true;
+        }
 
         if(input.get(GROUP_OF_STOP_PLACES_MEMBERS) != null) {
             List membersList = (List) input.get(GROUP_OF_STOP_PLACES_MEMBERS);

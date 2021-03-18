@@ -15,6 +15,7 @@
 
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.rutebanken.netex.model.*;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
@@ -40,6 +41,7 @@ public class StavangerImportTest  extends TiamatIntegrationTest {
      * Stop place does not have centroid. This causes tests to not interfer with each other.
      */
     @Test
+    @Ignore // Will be handled in KOD-584
     public void importStavangerWithHplNumbering() throws Exception {
 
         StopPlace stopPlace = new StopPlace()
@@ -75,6 +77,7 @@ public class StavangerImportTest  extends TiamatIntegrationTest {
      * The number should be moved to the Quay name.
      */
     @Test
+    @Ignore // Will be handled in KOD-584
     public void importStopWithSporAndNumbering() throws Exception {
 
         final String originalStopPlaceName = "Stavanger spor 2";
