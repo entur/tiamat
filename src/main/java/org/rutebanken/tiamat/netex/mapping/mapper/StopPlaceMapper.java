@@ -23,7 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+
 
 public class StopPlaceMapper extends CustomMapper<StopPlace, org.rutebanken.tiamat.model.StopPlace> {
 
@@ -124,12 +124,5 @@ public class StopPlaceMapper extends CustomMapper<StopPlace, org.rutebanken.tiam
                         .withKey(IS_PARENT_STOP_PLACE)
                         .withValue(String.valueOf(stopPlace.isParentStopPlace())));
 
-        if (!stopPlace.getTariffZones().isEmpty() && publicationDeliveryHelper.isIgnoreFareZones()) {
-            final List<TariffZoneRef> tariffZoneRefs = stopPlace.getTariffZones().stream()
-                    .filter(tariffZoneRef -> !tariffZoneRef.getRef().contains("FareZone"))
-                    .map(tariffZoneRef -> new ObjectFactory().createTariffZoneRef().withRef(tariffZoneRef.getRef()).withVersion(tariffZoneRef.getVersion()))
-                    .collect(Collectors.toList());
-            netexStopPlace.withTariffZones(new TariffZoneRefs_RelStructure().withTariffZoneRef(tariffZoneRefs));
-        }
     }
 }

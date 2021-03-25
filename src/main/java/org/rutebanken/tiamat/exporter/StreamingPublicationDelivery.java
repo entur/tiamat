@@ -114,7 +114,6 @@ public class StreamingPublicationDelivery {
     private final TiamatServiceFrameExporter tiamatServiceFrameExporter;
     private final TiamatFareFrameExporter tiamatFareFrameExporter;
     private final NetexMapper netexMapper;
-    private final PublicationDeliveryHelper publicationDeliveryHelper;
     private final TariffZoneRepository tariffZoneRepository;
     private final FareZoneRepository fareZoneRepository;
     private final TopographicPlaceRepository topographicPlaceRepository;
@@ -143,7 +142,6 @@ public class StreamingPublicationDelivery {
                                         TopographicPlaceRepository topographicPlaceRepository,
                                         GroupOfStopPlacesRepository groupOfStopPlacesRepository,
                                         NetexIdHelper netexIdHelper,
-                                        PublicationDeliveryHelper publicationDeliveryHelper,
                                         @Value("${asyncNetexExport.validateAgainstSchema:false}") boolean validateAgainstSchema) throws IOException, SAXException {
         this.stopPlaceRepository = stopPlaceRepository;
         this.parkingRepository = parkingRepository;
@@ -157,7 +155,6 @@ public class StreamingPublicationDelivery {
         this.topographicPlaceRepository = topographicPlaceRepository;
         this.groupOfStopPlacesRepository = groupOfStopPlacesRepository;
         this.netexIdHelper = netexIdHelper;
-        this.publicationDeliveryHelper = publicationDeliveryHelper;
         this.validateAgainstSchema = validateAgainstSchema;
     }
 
@@ -324,7 +321,6 @@ public class StreamingPublicationDelivery {
         // Override lists with custom iterator to be able to scroll database results on the fly.
         if (!stopPlacePrimaryIds.isEmpty()) {
             logger.info("There are stop places to export");
-            publicationDeliveryHelper.setIgnoreFareZones(exportParams.getServiceFrameExportMode() != ExportParams.ExportMode.ALL);
 
             final Iterator<org.rutebanken.tiamat.model.StopPlace> stopPlaceIterator = stopPlaceRepository.scrollStopPlaces(stopPlacePrimaryIds);
             StopPlacesInFrame_RelStructure stopPlacesInFrame_relStructure = new StopPlacesInFrame_RelStructure();

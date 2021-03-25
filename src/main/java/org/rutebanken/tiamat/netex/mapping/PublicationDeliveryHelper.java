@@ -28,8 +28,6 @@ import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_
 @Component
 public class PublicationDeliveryHelper {
 
-    private boolean ignoreFareZones;
-
     public boolean hasTopographicPlaces(SiteFrame netexSiteFrame) {
         return netexSiteFrame.getTopographicPlaces() != null
                 && netexSiteFrame.getTopographicPlaces().getTopographicPlace() != null
@@ -50,14 +48,6 @@ public class PublicationDeliveryHelper {
 
     public boolean hasTariffZones(SiteFrame netexSiteFrame) {
         return netexSiteFrame.getTariffZones() != null && netexSiteFrame.getTariffZones().getTariffZone() != null;
-    }
-
-    public boolean isIgnoreFareZones() {
-        return ignoreFareZones;
-    }
-
-    public void setIgnoreFareZones(boolean ignoreFareZones) {
-        this.ignoreFareZones = ignoreFareZones;
     }
 
     public boolean hasPathLinks(SiteFrame netexSiteFrame) {

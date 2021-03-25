@@ -15,11 +15,16 @@
 
 package org.rutebanken.tiamat.exporter.async;
 
+import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.StopPlace;
+import org.rutebanken.netex.model.TariffZoneRef;
+import org.rutebanken.netex.model.TariffZoneRefs_RelStructure;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class NetexReferenceRemovingIterator implements Iterator<StopPlace> {
 
@@ -28,6 +33,8 @@ public class NetexReferenceRemovingIterator implements Iterator<StopPlace> {
     private final Consumer<StopPlace> tariffZoneVersionRemover;
 
     private final Consumer<StopPlace> topographicPlaceVersionRemover;
+
+    private final Consumer<StopPlace> fareZoneRefRemover;
 
     private final Consumer<StopPlace> doNothingConsumer = s -> {
     };
@@ -47,6 +54,12 @@ public class NetexReferenceRemovingIterator implements Iterator<StopPlace> {
         } else {
             topographicPlaceVersionRemover = doNothingConsumer;
         }
+
+        if (!exportParams.getServiceFrameExportMode().equals(ExportParams.ExportMode.ALL)) {
+            fareZoneRefRemover = this::removeFareZoneRef;
+        } else {
+            fareZoneRefRemover = doNothingConsumer;
+        }
     }
 
     @Override
@@ -60,6 +73,7 @@ public class NetexReferenceRemovingIterator implements Iterator<StopPlace> {
         if(next != null) {
             tariffZoneVersionRemover.accept(next);
             topographicPlaceVersionRemover.accept(next);
+            fareZoneRefRemover.accept(next);
         }
         return next;
     }
@@ -73,6 +87,17 @@ public class NetexReferenceRemovingIterator implements Iterator<StopPlace> {
     private void removeTopographicPlaceRef(StopPlace stopPlace) {
         if(stopPlace.getTopographicPlaceRef() != null) {
             stopPlace.getTopographicPlaceRef().setVersion(null);
+        }
+    }
+
+    private void removeFareZoneRef(StopPlace stopPlace) {
+        if (stopPlace.getTariffZones() != null && !stopPlace.getTariffZones().getTariffZoneRef().isEmpty()) {
+                final List<TariffZoneRef> tariffZoneRefs = stopPlace.getTariffZones().getTariffZoneRef().stream()
+                        .filter(tariffZoneRef -> !tariffZoneRef.getRef().contains("FareZone"))
+                        .map(tariffZoneRef -> new ObjectFactory().createTariffZoneRef().withRef(tariffZoneRef.getRef()).withVersion(tariffZoneRef.getVersion()))
+                        .collect(Collectors.toList());
+                stopPlace.withTariffZones(new TariffZoneRefs_RelStructure().withTariffZoneRef(tariffZoneRefs));
+
         }
     }
 }

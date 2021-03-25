@@ -69,9 +69,6 @@ public class StreamingPublicationDeliveryConfig {
     private GroupOfStopPlacesRepository groupOfStopPlacesRepository;
 
     @Autowired
-    private PublicationDeliveryHelper publicationDeliveryHelper;
-
-    @Autowired
     private NetexIdHelper netexIdHelper;
 
     @Value("${asyncNetexExport.validateAgainstSchema:false}")
@@ -93,6 +90,6 @@ public class StreamingPublicationDeliveryConfig {
     private StreamingPublicationDelivery createStreamingPublicationDelivery(boolean validate) throws IOException, SAXException {
         return new StreamingPublicationDelivery(stopPlaceRepository, parkingRepository, publicationDeliveryExporter,
                 tiamatSiteFrameExporter,tiamatServiceFrameExporter,tiamatFareFrameExporter, netexMapper, tariffZoneRepository, fareZoneRepository, topographicPlaceRepository,
-                groupOfStopPlacesRepository, netexIdHelper, publicationDeliveryHelper, validate);
+                groupOfStopPlacesRepository, netexIdHelper, validate);
     }
 }

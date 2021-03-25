@@ -127,7 +127,7 @@ public class FareZoneImportTest extends TiamatIntegrationTest {
     }
 
     @Test
-    public void publicationDeliveryWithTariffZoneAndStopPlaceMergeZonesImportTypeMatch() throws Exception {
+    public void publicationDeliveryWithFareZoneAndStopPlaceMergeZonesImportTypeMatch() throws Exception {
 
 
         SimplePoint_VersionStructure point = new SimplePoint_VersionStructure()
@@ -188,7 +188,7 @@ public class FareZoneImportTest extends TiamatIntegrationTest {
         PublicationDeliveryStructure publicationDeliveryStructure2 = publicationDeliveryTestHelper.publicationDelivery(siteFrame2);
 
 
-        // Second import should match and merge tariffzones
+        // Second import should match and merge farezones
         importParams.importType = ImportType.MATCH;
         PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDeliveryStructure2, importParams);
 
@@ -201,7 +201,7 @@ public class FareZoneImportTest extends TiamatIntegrationTest {
     }
 
     @Test
-    public void mergeTariffZonesForStopPlace() throws Exception {
+    public void mergeFareZonesForStopPlace() throws Exception {
 
 
         SimplePoint_VersionStructure point = new SimplePoint_VersionStructure()
