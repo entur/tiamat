@@ -57,6 +57,7 @@ import org.rutebanken.tiamat.model.ServiceFrame;
 import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.netex.id.NetexIdHelper;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
+import org.rutebanken.tiamat.netex.mapping.PublicationDeliveryHelper;
 import org.rutebanken.tiamat.repository.FareZoneRepository;
 import org.rutebanken.tiamat.repository.GroupOfStopPlacesRepository;
 import org.rutebanken.tiamat.repository.ParkingRepository;
@@ -113,6 +114,7 @@ public class StreamingPublicationDelivery {
     private final TiamatServiceFrameExporter tiamatServiceFrameExporter;
     private final TiamatFareFrameExporter tiamatFareFrameExporter;
     private final NetexMapper netexMapper;
+    private final PublicationDeliveryHelper publicationDeliveryHelper;
     private final TariffZoneRepository tariffZoneRepository;
     private final FareZoneRepository fareZoneRepository;
     private final TopographicPlaceRepository topographicPlaceRepository;
@@ -141,6 +143,7 @@ public class StreamingPublicationDelivery {
                                         TopographicPlaceRepository topographicPlaceRepository,
                                         GroupOfStopPlacesRepository groupOfStopPlacesRepository,
                                         NetexIdHelper netexIdHelper,
+                                        PublicationDeliveryHelper publicationDeliveryHelper,
                                         @Value("${asyncNetexExport.validateAgainstSchema:false}") boolean validateAgainstSchema) throws IOException, SAXException {
         this.stopPlaceRepository = stopPlaceRepository;
         this.parkingRepository = parkingRepository;
@@ -154,6 +157,7 @@ public class StreamingPublicationDelivery {
         this.topographicPlaceRepository = topographicPlaceRepository;
         this.groupOfStopPlacesRepository = groupOfStopPlacesRepository;
         this.netexIdHelper = netexIdHelper;
+        this.publicationDeliveryHelper = publicationDeliveryHelper;
         this.validateAgainstSchema = validateAgainstSchema;
     }
 
@@ -214,10 +218,9 @@ public class StreamingPublicationDelivery {
 
 
         logger.info("Preparing scrollable iterators");
+        prepareStopPlaces(exportParams, stopPlacePrimaryIds, mappedStopPlaceCount, netexSiteFrame, entitiesEvictor);
         prepareTopographicPlaces(exportParams, stopPlacePrimaryIds, mappedTopographicPlacesCount, netexSiteFrame, entitiesEvictor);
         prepareTariffZones(exportParams, stopPlacePrimaryIds, mappedTariffZonesCount, netexSiteFrame, entitiesEvictor);
-        prepareStopPlaces(exportParams, stopPlacePrimaryIds, mappedStopPlaceCount, netexSiteFrame, entitiesEvictor);
-        prepareFareZones(stopPlacePrimaryIds,mappedFareZonesCount,netexFareFrame,entitiesEvictor);
         prepareParkings(exportParams, stopPlacePrimaryIds, mappedParkingCount, netexSiteFrame, entitiesEvictor);
         prepareGroupOfStopPlaces(exportParams, stopPlacePrimaryIds, mappedGroupOfStopPlacesCount, netexSiteFrame, entitiesEvictor);
 
@@ -225,10 +228,11 @@ public class StreamingPublicationDelivery {
         PublicationDeliveryStructure publicationDeliveryStructure;
 
         if (exportParams.getServiceFrameExportMode() == ExportParams.ExportMode.ALL) {
+            prepareFareZones(stopPlacePrimaryIds,mappedFareZonesCount,netexFareFrame,entitiesEvictor);
             prepareScheduledStopPoints(stopPlacePrimaryIds, netexServiceFrame);
             publicationDeliveryStructure = publicationDeliveryExporter.createPublicationDelivery(netexSiteFrame, netexServiceFrame,netexFareFrame);
         } else {
-            publicationDeliveryStructure = publicationDeliveryExporter.createPublicationDelivery(netexSiteFrame,netexFareFrame);
+            publicationDeliveryStructure = publicationDeliveryExporter.createPublicationDelivery(netexSiteFrame);
         }
 
         Marshaller marshaller = createMarshaller();
@@ -320,6 +324,7 @@ public class StreamingPublicationDelivery {
         // Override lists with custom iterator to be able to scroll database results on the fly.
         if (!stopPlacePrimaryIds.isEmpty()) {
             logger.info("There are stop places to export");
+            publicationDeliveryHelper.setIgnoreFareZones(exportParams.getServiceFrameExportMode() != ExportParams.ExportMode.ALL);
 
             final Iterator<org.rutebanken.tiamat.model.StopPlace> stopPlaceIterator = stopPlaceRepository.scrollStopPlaces(stopPlacePrimaryIds);
             StopPlacesInFrame_RelStructure stopPlacesInFrame_relStructure = new StopPlacesInFrame_RelStructure();

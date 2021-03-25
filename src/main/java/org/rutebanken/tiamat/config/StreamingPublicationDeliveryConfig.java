@@ -22,6 +22,7 @@ import org.rutebanken.tiamat.exporter.TiamatServiceFrameExporter;
 import org.rutebanken.tiamat.exporter.TiamatSiteFrameExporter;
 import org.rutebanken.tiamat.netex.id.NetexIdHelper;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
+import org.rutebanken.tiamat.netex.mapping.PublicationDeliveryHelper;
 import org.rutebanken.tiamat.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -68,6 +69,9 @@ public class StreamingPublicationDeliveryConfig {
     private GroupOfStopPlacesRepository groupOfStopPlacesRepository;
 
     @Autowired
+    private PublicationDeliveryHelper publicationDeliveryHelper;
+
+    @Autowired
     private NetexIdHelper netexIdHelper;
 
     @Value("${asyncNetexExport.validateAgainstSchema:false}")
@@ -89,6 +93,6 @@ public class StreamingPublicationDeliveryConfig {
     private StreamingPublicationDelivery createStreamingPublicationDelivery(boolean validate) throws IOException, SAXException {
         return new StreamingPublicationDelivery(stopPlaceRepository, parkingRepository, publicationDeliveryExporter,
                 tiamatSiteFrameExporter,tiamatServiceFrameExporter,tiamatFareFrameExporter, netexMapper, tariffZoneRepository, fareZoneRepository, topographicPlaceRepository,
-                groupOfStopPlacesRepository, netexIdHelper, validate);
+                groupOfStopPlacesRepository, netexIdHelper, publicationDeliveryHelper, validate);
     }
 }

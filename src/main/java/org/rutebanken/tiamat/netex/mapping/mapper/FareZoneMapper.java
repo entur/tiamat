@@ -17,6 +17,7 @@ import org.rutebanken.tiamat.model.TariffZoneRef;
 import javax.xml.bind.JAXBElement;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -43,7 +44,9 @@ public class FareZoneMapper extends CustomMapper<FareZone, org.rutebanken.tiamat
                 && netexFareZone.getMembers() != null && !netexFareZone.getMembers().getPointRef().isEmpty()) {
 
             var fareZoneMembers = netexFareZone.getMembers().getPointRef().stream()
-                    .map(jaxbElement -> new StopPlaceReference(jaxbElement.getValue().getRef()))
+                    .map(jaxbElement -> convertScheduledStopPointRefToStopPlaceRef(jaxbElement.getValue().getRef()))
+                    .filter(Objects::nonNull)
+                    .map(StopPlaceReference::new)
                     .collect(Collectors.toSet());
 
             tiamatFareZone.setFareZoneMembers(fareZoneMembers);
@@ -68,7 +71,9 @@ public class FareZoneMapper extends CustomMapper<FareZone, org.rutebanken.tiamat
 
         if (!tiamatFareZone.getFareZoneMembers().isEmpty()) {
             List<JAXBElement<? extends PointRefStructure>> fareZoneMember = tiamatFareZone.getFareZoneMembers().stream()
-                    .map(members -> new ObjectFactory().createScheduledStopPointRef(new ScheduledStopPointRefStructure().withRef(convertStopPlaceRefToScheduledStopPointRef(members.getRef()))))
+                    .map(members ->  convertStopPlaceRefToScheduledStopPointRef(members.getRef()))
+                    .filter(Objects::nonNull)
+                    .map(spRef -> new ObjectFactory().createScheduledStopPointRef(new ScheduledStopPointRefStructure().withRef(spRef)))
                     .collect(Collectors.toList());
 
             PointRefs_RelStructure pointRefsRelStructure = new PointRefs_RelStructure().withPointRef(fareZoneMember);
@@ -87,6 +92,18 @@ public class FareZoneMapper extends CustomMapper<FareZone, org.rutebanken.tiamat
         return String.format("%s:ScheduledStopPoint:S%s", idPrefix, id);
         }
 
+        return null;
+    }
+
+    private String convertScheduledStopPointRefToStopPlaceRef(String netexId) {
+        if (netexId != null) {
+            if(StringUtils.countMatches(netexId, ":") != 2) {
+                throw new IllegalArgumentException("Number of colons in ID is not two: " + netexId);
+            }
+            var idPrefix = netexId.substring(0, netexId.indexOf(':'));
+            var id= netexId.substring(netexId.lastIndexOf(':') + 1).trim().substring(1);
+            return String.format("%s:StopPlace:%s", idPrefix, id);
+        }
         return null;
     }
 }
