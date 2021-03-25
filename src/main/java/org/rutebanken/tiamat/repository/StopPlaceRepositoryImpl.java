@@ -16,6 +16,8 @@
 package org.rutebanken.tiamat.repository;
 
 
+import com.google.api.client.util.DateTime;
+import javax.persistence.Tuple;
 import com.google.common.collect.Sets;
 import org.hibernate.query.NativeQuery;
 import org.locationtech.jts.geom.Envelope;
@@ -47,6 +49,7 @@ import javax.persistence.Query;
 import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -628,6 +631,32 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         }
 
         return result;
+    }
+
+    @Override
+    public Map<Long, LocalDateTime> getDatabaseIdsWithToDate(ExportParams exportParams, boolean ignorePaging){
+        Pair<String, Map<String, Object>> pair = stopPlaceQueryFromSearchBuilder.buildQueryString(exportParams);
+        Session session = entityManager.unwrap(Session.class);
+        NativeQuery<Tuple> query = session.createNativeQuery("SELECT sub.id as stopPlaceId, sub.to_date as toDate from (" + pair.getFirst() + ") sub",Tuple.class);
+
+        if(!ignorePaging) {
+            long firstResult = exportParams.getStopPlaceSearch().getPageable().getOffset();
+            query.setFirstResult(Math.toIntExact(firstResult));
+            query.setMaxResults(exportParams.getStopPlaceSearch().getPageable().getPageSize());
+        }
+        searchHelper.addParams(query, pair.getSecond());
+
+        Map<Long, LocalDateTime> mapIdToDate = new HashMap<>();
+        final List<Tuple> resultList = query.getResultList();
+        for (Tuple tuple : resultList) {
+            final long stopPlaceId = ((Number) tuple.get("stopPlaceId")).longValue();
+            LocalDateTime dateTime= null;
+            if (tuple.get("toDate") != null) {
+                dateTime = ((Timestamp) tuple.get("toDate")).toLocalDateTime();
+            }
+            mapIdToDate.put(stopPlaceId,dateTime);
+        }
+        return mapIdToDate;
     }
 
     @Override
