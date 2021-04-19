@@ -35,6 +35,10 @@ public class NetexMappingIterator<T extends EntityStructure, N extends org.ruteb
     private final AtomicInteger mappedCount;
     private final EntitiesEvictor entitiesEvictor;
 
+    private long iteratorNextDuration;
+    private long iteratorMapDuration;
+    private long iteratorEvictDuration;
+
     public NetexMappingIterator(NetexMapper netexMapper, Iterator<T> iterator, Class<N> netexClass, AtomicInteger mappedCount) {
         this.netexMapper = netexMapper;
         this.iterator = iterator;
@@ -64,9 +68,23 @@ public class NetexMappingIterator<T extends EntityStructure, N extends org.ruteb
     public N next() {
 
 
+        var starTimeNext = System.currentTimeMillis();
         T next = iterator.next();
+        var endTimeNext = System.currentTimeMillis();
+
+        iteratorNextDuration += endTimeNext - starTimeNext;
+
+        var startTimeMap = System.currentTimeMillis();
         N mapped = netexMapper.getFacade().map(next, netexClass);
+        var endTimeMap = System.currentTimeMillis();
+        iteratorMapDuration += endTimeMap-startTimeMap;
+
+        var startTimeEvict = System.currentTimeMillis();
         entitiesEvictor.evictKnownEntitiesFromSession(next);
+        var endTimeEvict = System.currentTimeMillis();
+
+        iteratorEvictDuration +=endTimeEvict-startTimeEvict;
+
         logStatus();
         mappedCount.incrementAndGet();
         return mapped;
@@ -84,6 +102,8 @@ public class NetexMappingIterator<T extends EntityStructure, N extends org.ruteb
                 entityPerSecond = String.valueOf(count / (duration / 1000f));
             }
             logger.info("{} {}s marshalled. {} per second", count, netexClass.getSimpleName(), entityPerSecond);
+
+            logger.info("iteratorNextDuration {}, mappedDuration {} , evictionDuration {}", iteratorNextDuration, iteratorMapDuration, iteratorEvictDuration);
         }
     }
 }
