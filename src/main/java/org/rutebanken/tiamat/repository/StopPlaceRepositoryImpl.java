@@ -51,7 +51,7 @@ import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.toSet;
+
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.MERGED_ID_KEY;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
 import static org.rutebanken.tiamat.repository.QuayRepositoryImpl.JBV_CODE;
@@ -537,16 +537,17 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     public Iterator<StopPlace> scrollStopPlaces() {
         Session session = entityManager.unwrap(Session.class);
 
-        Criteria criteria = session.createCriteria(StopPlace.class);
+        final String queryString = "select s.* from stop_place s";
+        final NativeQuery<StopPlace> nativeQuery = session.createNativeQuery(queryString, StopPlace.class);
 
-        criteria.setReadOnly(true);
-        criteria.setFetchSize(SCROLL_FETCH_SIZE);
-        criteria.setCacheable(false);
-        ScrollableResults results = criteria.scroll(ScrollMode.FORWARD_ONLY);
+        nativeQuery.setReadOnly(true);
+        nativeQuery.setFetchSize(SCROLL_FETCH_SIZE);
+        nativeQuery.setCacheable(false);
 
-        ScrollableResultIterator<StopPlace> stopPlaceEntityIterator = new ScrollableResultIterator<>(results, SCROLL_FETCH_SIZE, session);
+        ScrollableResults results = nativeQuery.scroll(ScrollMode.FORWARD_ONLY);
 
-        return stopPlaceEntityIterator;
+       return new ScrollableResultIterator<>(results, SCROLL_FETCH_SIZE, session);
+
     }
 
     @Override
@@ -555,7 +556,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         Session session = entityManager.unwrap(Session.class);
 
         Pair<String, Map<String, Object>> queryWithParams = stopPlaceQueryFromSearchBuilder.buildQueryString(exportParams);
-        NativeQuery sqlQuery = session.createNativeQuery(queryWithParams.getFirst());
+        NativeQuery<StopPlace> sqlQuery = session.createNativeQuery(queryWithParams.getFirst(),StopPlace.class);
         searchHelper.addParams(sqlQuery, queryWithParams.getSecond());
 
         return scrollStopPlaces(sqlQuery, session);
@@ -565,13 +566,13 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     public Iterator<StopPlace> scrollStopPlaces(Set<Long> stopPlacePrimaryIds) {
         Session session = entityManager.unwrap(Session.class);
 
-        SQLQuery sqlQuery = session.createSQLQuery(generateStopPlaceQueryFromStopPlaceIds(stopPlacePrimaryIds));
+        NativeQuery<StopPlace> sqlQuery = session.createNativeQuery(generateStopPlaceQueryFromStopPlaceIds(stopPlacePrimaryIds), StopPlace.class);
 
         logger.info("Scrolling {} stop places", stopPlacePrimaryIds.size());
        return scrollStopPlaces(sqlQuery, session);
     }
 
-    public Iterator<StopPlace> scrollStopPlaces(SQLQuery sqlQuery, Session session) {
+    public Iterator<StopPlace> scrollStopPlaces(NativeQuery<StopPlace> sqlQuery, Session session) {
 
         sqlQuery.addEntity(StopPlace.class);
         sqlQuery.setReadOnly(true);
@@ -579,9 +580,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         sqlQuery.setCacheable(false);
         ScrollableResults results = sqlQuery.scroll(ScrollMode.FORWARD_ONLY);
 
-        ScrollableResultIterator<StopPlace> stopPlaceEntityIterator = new ScrollableResultIterator<>(results, SCROLL_FETCH_SIZE, session);
-
-        return stopPlaceEntityIterator;
+        return new ScrollableResultIterator<>(results, SCROLL_FETCH_SIZE, session);
     }
 
     private String generateStopPlaceQueryFromStopPlaceIds(Set<Long> stopPlacePrimaryIds) {
@@ -783,7 +782,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
             if (results.isEmpty()) {
                 return Sets.newHashSet();
             } else {
-                return results.stream().collect(toSet());
+                return new HashSet<>(results);
             }
         } catch (NoResultException noResultException) {
             return Sets.newHashSet();

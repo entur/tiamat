@@ -61,7 +61,7 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
 
     @Test
     public void scrollableResult() throws InterruptedException {
-        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("new stop place to be savced and scrolled back"));
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("new stop place to be saved and scrolled back"));
         stopPlace.setNetexId("NSR:StopPlace:123");
         stopPlace.getKeyValues().put("key", new Value("value"));
 
