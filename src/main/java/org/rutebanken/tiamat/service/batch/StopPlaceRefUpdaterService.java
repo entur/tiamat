@@ -21,7 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import java.time.Instant;
-import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -125,24 +124,30 @@ public class StopPlaceRefUpdaterService {
                 if (optionalStopPlace.isPresent()) {
                     stopsSaved.incrementAndGet();
                     StopPlace stopPlaceToSave = optionalStopPlace.get();
-                    stopPlaceToSave.setChanged(Instant.now());
+                    if (stopPlaceToSave.getValidBetween().getToDate() == null || stopPlaceToSave.getValidBetween().getToDate().isAfter(Instant.now())) {
+                        stopPlaceToSave.setChanged(Instant.now());
 
-                    // Issues with topographic place not being updated.
-                    // https://stackoverflow.com/a/2370276
-                    // https://stackoverflow.com/a/5709244
+                        // Issues with topographic place not being updated.
+                        // https://stackoverflow.com/a/2370276
+                        // https://stackoverflow.com/a/5709244
 
-                    if(session.contains(stopPlaceToSave)) {
-                        session.evict(stopPlaceToSave);
-                    }
-                    session.update(stopPlaceToSave);
+                        if (session.contains(stopPlaceToSave)) {
+                            session.evict(stopPlaceToSave);
+                        }
 
-                    logger.trace("Saved stop {}", stopPlaceToSave);
-                    session.flush();
-                    if (stopsIterated.get() % CLEAR_EACH == 0 && !stopPlaceIterator.hasNextParent()) {
-                        logger.trace("Flushing and clearing session at count {}", stopsIterated.get());
-                        session.clear();
+                        session.update(stopPlaceToSave);
+
+
+                        logger.trace("Saved stop {}", stopPlaceToSave);
+                        session.flush();
+                        if (stopsIterated.get() % CLEAR_EACH == 0 && !stopPlaceIterator.hasNextParent()) {
+                            logger.trace("Flushing and clearing session at count {}", stopsIterated.get());
+                            session.clear();
+                        } else {
+                            sessionEntitiesEvictor.evictKnownEntitiesFromSession(stopPlaceToSave);
+                        }
                     } else {
-                        sessionEntitiesEvictor.evictKnownEntitiesFromSession(stopPlaceToSave);
+                        logger.info("Skipping stop place update, cause its not current {}",stopPlaceToSave);
                     }
                 } else if (!stopPlaceIterator.hasNextParent()) {
                     session.flush();
@@ -153,6 +158,7 @@ public class StopPlaceRefUpdaterService {
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
+
         }
 
 
