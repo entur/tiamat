@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 import java.time.Instant;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -90,6 +91,7 @@ public class StopPlaceRefUpdaterService {
 
         SessionEntitiesEvictor sessionEntitiesEvictor = new SessionEntitiesEvictor((SessionImpl) session);
 
+
         ExportParams exportParams = ExportParams.newExportParamsBuilder()
                 .setStopPlaceSearch(
                         StopPlaceSearch.newStopPlaceSearchBuilder()
@@ -98,7 +100,7 @@ public class StopPlaceRefUpdaterService {
                 .build();
         logger.info("Created export params search for scrolling stop places {}", exportParams);
 
-        ParentStopFetchingIterator stopPlaceIterator = new ParentStopFetchingIterator(stopPlaceRepository.scrollStopPlaces(exportParams), stopPlaceRepository);
+        final Set<String> netexIds = stopPlaceRepository.getNetexIds(exportParams);
 
         AtomicInteger updatedBecauseOfTariffZoneRefChange = new AtomicInteger();
         AtomicInteger updatedBecauseOfTopographicPlaceChange = new AtomicInteger();
@@ -106,17 +108,17 @@ public class StopPlaceRefUpdaterService {
         AtomicInteger stopsIterated = new AtomicInteger();
         PerSecondLogger perSecondsLogger = new PerSecondLogger(startTime, stopsIterated, stopsSaved, "Progress while updating stop places references");
 
-        while (stopPlaceIterator.hasNext()) {
+        for (String netexId : netexIds) {
             try {
                 stopsIterated.incrementAndGet();
 
-                StopPlace existingStopPlace = stopPlaceIterator.next();
+                StopPlace stopPlace =stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(netexId);
 
                 Optional<StopPlace> optionalStopPlace = new StopPlaceRefUpdater(
                         tariffZonesLookupService,
                         fareZonesLookupService,
                         topographicPlaceLookupService,
-                        existingStopPlace,
+                        stopPlace,
                         updatedBecauseOfTariffZoneRefChange,
                         updatedBecauseOfTopographicPlaceChange)
                         .call();
@@ -127,6 +129,7 @@ public class StopPlaceRefUpdaterService {
                     if(stopPlaceToSave.getValidBetween() !=null) {
                         if (stopPlaceToSave.getValidBetween().getToDate() == null || stopPlaceToSave.getValidBetween().getToDate().isAfter(Instant.now())) {
                             stopPlaceToSave.setChanged(Instant.now());
+                            stopPlaceToSave.setChangedBy("SP_Ref_Update_Job");
 
                             // Issues with topographic place not being updated.
                             // https://stackoverflow.com/a/2370276
@@ -141,7 +144,7 @@ public class StopPlaceRefUpdaterService {
 
                             logger.trace("Saved stop {}", stopPlaceToSave);
                             session.flush();
-                            if (stopsIterated.get() % CLEAR_EACH == 0 && !stopPlaceIterator.hasNextParent()) {
+                            if (stopsIterated.get() % CLEAR_EACH == 0) {
                                 logger.trace("Flushing and clearing session at count {}", stopsIterated.get());
                                 session.clear();
                             } else {
@@ -153,9 +156,6 @@ public class StopPlaceRefUpdaterService {
                     } else {
                         logger.info("Skipping stop place update, cause getValidBetween is null {}", stopPlaceToSave);
                     }
-                } else if (!stopPlaceIterator.hasNextParent()) {
-                    session.flush();
-                    session.clear();
                 }
                 perSecondsLogger.log();
 
@@ -164,6 +164,8 @@ public class StopPlaceRefUpdaterService {
             }
 
         }
+        session.flush();
+        session.clear();
 
 
         long timeSpent = System.currentTimeMillis() - startTime;
