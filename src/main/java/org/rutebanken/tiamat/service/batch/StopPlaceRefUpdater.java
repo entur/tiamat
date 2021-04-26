@@ -51,7 +51,7 @@ public class StopPlaceRefUpdater implements Callable<Optional<StopPlace>> {
             updatedBecauseOfTopographicPlaceRef.incrementAndGet();
         }
 
-        if (tariffZoneRefsChanged || topographicPlaceRefChanged) {
+        if (fareZoneRefsChanged || tariffZoneRefsChanged || topographicPlaceRefChanged) {
             return Optional.of(stopPlace);
         }
 

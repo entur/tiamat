@@ -128,8 +128,8 @@ public class StopPlaceRefUpdaterService {
                     StopPlace stopPlaceToSave = optionalStopPlace.get();
                     if(stopPlaceToSave.getValidBetween() !=null) {
                         if (stopPlaceToSave.getValidBetween().getToDate() == null || stopPlaceToSave.getValidBetween().getToDate().isAfter(Instant.now())) {
+                            //TODO: should we update Changed time?
                             stopPlaceToSave.setChanged(Instant.now());
-                            stopPlaceToSave.setChangedBy("SP_Ref_Update_Job");
 
                             // Issues with topographic place not being updated.
                             // https://stackoverflow.com/a/2370276
