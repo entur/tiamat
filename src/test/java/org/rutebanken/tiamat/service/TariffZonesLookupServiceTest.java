@@ -20,6 +20,7 @@ import org.locationtech.jts.geom.impl.CoordinateArraySequence;
 import org.junit.Test;
 import org.rutebanken.tiamat.config.GeometryFactoryConfig;
 import org.rutebanken.tiamat.model.TariffZone;
+import org.rutebanken.tiamat.repository.FareZoneRepository;
 import org.rutebanken.tiamat.repository.TariffZoneRepository;
 import org.springframework.data.util.Pair;
 
@@ -34,10 +35,11 @@ public class TariffZonesLookupServiceTest {
 
 
     private TariffZoneRepository tariffZoneRepository = mock(TariffZoneRepository.class);
+    private FareZoneRepository fareZoneRepository = mock(FareZoneRepository.class);
 
     private GeometryFactory geometryFactory = new GeometryFactoryConfig().geometryFactory();
 
-    private TariffZonesLookupService tariffZonesLookupService = new TariffZonesLookupService(tariffZoneRepository, false);
+    private TariffZonesLookupService tariffZonesLookupService = new TariffZonesLookupService(tariffZoneRepository,fareZoneRepository, false);
 
     @Test
     public void getTariffZones() {

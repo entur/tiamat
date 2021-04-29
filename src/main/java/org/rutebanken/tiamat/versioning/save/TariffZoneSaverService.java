@@ -51,14 +51,14 @@ public class TariffZoneSaverService {
             existingTariffZone = null;
         }
         TariffZone  saved = defaultVersionedSaverService.saveNewVersion(existingTariffZone, newVersion, tariffZoneRepository);
-        tariffZonesLookupService.reset();
+        tariffZonesLookupService.resetTariffZone();
         return saved;
     }
 
     public TariffZone saveNewVersion(TariffZone existingVersion, TariffZone newVersion) {
         versionValidator.validate(existingVersion, newVersion);
         TariffZone  saved = defaultVersionedSaverService.saveNewVersion(existingVersion, newVersion, tariffZoneRepository);
-        tariffZonesLookupService.reset();
+        tariffZonesLookupService.resetTariffZone();
         return saved;
     }
 
