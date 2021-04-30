@@ -18,7 +18,7 @@ package org.rutebanken.tiamat.versioning.save;
 
 import org.rutebanken.tiamat.model.FareZone;
 import org.rutebanken.tiamat.repository.FareZoneRepository;
-import org.rutebanken.tiamat.service.FareZonesLookupService;
+import org.rutebanken.tiamat.service.TariffZonesLookupService;
 import org.rutebanken.tiamat.versioning.validate.VersionValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,17 +27,17 @@ import org.springframework.stereotype.Service;
 public class FareZoneSaverService {
 
     private final FareZoneRepository fareZoneRepository;
-    private final FareZonesLookupService fareZonesLookupService;
+    private final TariffZonesLookupService tariffZonesLookupService;
     private final DefaultVersionedSaverService defaultVersionedSaverService;
     private final VersionValidator versionValidator;
 
     @Autowired
     public FareZoneSaverService(FareZoneRepository fareZoneRepository,
-                                FareZonesLookupService fareZonesLookupService,
+                                TariffZonesLookupService tariffZonesLookupService,
                                 DefaultVersionedSaverService defaultVersionedSaverService,
                                 VersionValidator versionValidator) {
         this.fareZoneRepository = fareZoneRepository;
-        this.fareZonesLookupService = fareZonesLookupService;
+        this.tariffZonesLookupService = tariffZonesLookupService;
         this.defaultVersionedSaverService = defaultVersionedSaverService;
         this.versionValidator = versionValidator;
     }
@@ -50,14 +50,14 @@ public class FareZoneSaverService {
             existingFareZone = null;
         }
         FareZone  saved = defaultVersionedSaverService.saveNewVersion(existingFareZone, newVersion, fareZoneRepository);
-        fareZonesLookupService.reset();
+        tariffZonesLookupService.resetFareZone();
         return saved;
     }
 
     public FareZone saveNewVersion(FareZone existingVersion, FareZone newVersion) {
         versionValidator.validate(existingVersion, newVersion);
         FareZone  saved = defaultVersionedSaverService.saveNewVersion(existingVersion, newVersion, fareZoneRepository);
-        fareZonesLookupService.reset();
+        tariffZonesLookupService.resetFareZone();
         return saved;
     }
 

@@ -23,7 +23,6 @@ import org.junit.runner.RunWith;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.id.GeneratedIdState;
 import org.rutebanken.tiamat.repository.*;
-import org.rutebanken.tiamat.service.FareZonesLookupService;
 import org.rutebanken.tiamat.service.TariffZonesLookupService;
 import org.rutebanken.tiamat.service.TopographicPlaceLookupService;
 import org.rutebanken.tiamat.versioning.save.GroupOfStopPlacesSaverService;
@@ -109,9 +108,6 @@ public abstract class TiamatIntegrationTest {
     private TariffZonesLookupService tariffZonesLookupService;
 
     @Autowired
-    private FareZonesLookupService fareZonesLookupService;
-
-    @Autowired
     private TagRepository tagRepository;
 
     @Autowired
@@ -154,12 +150,12 @@ public abstract class TiamatIntegrationTest {
 
         tariffZoneRepository.deleteAll();
         tariffZoneRepository.flush();
-        tariffZonesLookupService.reset();
+        tariffZonesLookupService.resetTariffZone();
 
 
         fareZoneRepository.deleteAll();
         fareZoneRepository.flush();
-        fareZonesLookupService.reset();
+        tariffZonesLookupService.resetFareZone();
 
 
         clearIdGeneration();
