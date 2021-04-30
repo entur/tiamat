@@ -190,7 +190,7 @@ public class TariffZonesLookupService {
     }
 
     public void resetFareZone() {
-        tariffZones.reset();
+        fareZones.reset();
     }
 
 
