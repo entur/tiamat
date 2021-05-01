@@ -15,73 +15,70 @@
 
 package org.rutebanken.tiamat.auth;
 
-import org.keycloak.adapters.springsecurity.KeycloakSecurityComponents;
-import org.keycloak.adapters.springsecurity.authentication.KeycloakAuthenticationProvider;
-import org.keycloak.adapters.springsecurity.config.KeycloakWebSecurityConfigurerAdapter;
+
+import org.entur.oauth2.MultiIssuerAuthenticationManagerResolver;
+
 import org.rutebanken.tiamat.filter.CorsResponseFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.core.authority.mapping.SimpleAuthorityMapper;
-import org.springframework.security.core.session.SessionRegistryImpl;
-import org.springframework.security.web.access.channel.ChannelProcessingFilter;
-import org.springframework.security.web.authentication.session.RegisterSessionAuthenticationStrategy;
-import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 
-@Configuration
+import org.springframework.security.web.access.channel.ChannelProcessingFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
+
+import static org.springframework.security.config.Customizer.withDefaults;
+
+@Configuration()
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
-@ComponentScan(basePackageClasses = KeycloakSecurityComponents.class)
-public class TiamatSecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
+public class TiamatSecurityConfig extends WebSecurityConfigurerAdapter {
 
 	private static final Logger logger = LoggerFactory.getLogger(TiamatSecurityConfig.class);
 
-	/**
-	 * Registers the KeycloakAuthenticationProvider with the authentication
-	 * manager.
-	 */
-	@Autowired
-	public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-		auth.authenticationProvider(keycloakAuthenticationProvider());
+	private final MultiIssuerAuthenticationManagerResolver multiIssuerAuthenticationManagerResolver;
+
+	public TiamatSecurityConfig(MultiIssuerAuthenticationManagerResolver multiIssuerAuthenticationManagerResolver) {
+		this.multiIssuerAuthenticationManagerResolver = multiIssuerAuthenticationManagerResolver;
 	}
 
-	/**
-	 * Defines the session authentication strategy.
-	 */
 	@Bean
-	@Override
-	protected SessionAuthenticationStrategy sessionAuthenticationStrategy() {
-		return new RegisterSessionAuthenticationStrategy(new SessionRegistryImpl());
+	CorsConfigurationSource corsConfigurationSource() {
+		CorsConfiguration configuration = new CorsConfiguration();
+		configuration.setAllowedHeaders(Arrays.asList("Origin", "Accept", "X-Requested-With", "Content-Type", "Access-Control-Request-Method", "Access-Control-Request-Headers", "Authorization", "x-correlation-id"));
+		configuration.addAllowedOrigin("*");
+		configuration.setAllowedMethods(Arrays.asList("GET", "PUT", "POST", "DELETE"));
+		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+		source.registerCorsConfiguration("/**", configuration);
+		return source;
 	}
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-		super.configure(http);
 
 		logger.info("Configuring HttpSecurity");
-
-		http.csrf().disable()
+		http.cors(withDefaults())
+				.csrf().disable()
 				.addFilterBefore(new CorsResponseFilter(), ChannelProcessingFilter.class)
 				.authorizeRequests()
 				.anyRequest()
-				.permitAll();
-	}
-
-	@Override
-	protected KeycloakAuthenticationProvider keycloakAuthenticationProvider() {
-		KeycloakAuthenticationProvider keycloakAuthenticationProvider = super.keycloakAuthenticationProvider();
-
-		// Add mapper so we dont have to prefix all roles in keycloak with ROLE_
-		keycloakAuthenticationProvider.setGrantedAuthoritiesMapper(new SimpleAuthorityMapper());
-		return keycloakAuthenticationProvider;
+				.permitAll()
+				.and()
+				.oauth2ResourceServer().authenticationManagerResolver(this.multiIssuerAuthenticationManagerResolver)
+				.and()
+				.oauth2Client();
 
 	}
+
 
 }

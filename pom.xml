@@ -64,7 +64,6 @@
         <spring-boot-plugin.version>2.3.4.RELEASE</spring-boot-plugin.version>
         <spring-boot.version>2.3.4.RELEASE</spring-boot.version>
         <spring.security.version>5.3.5.RELEASE</spring.security.version>
-        <keycloak.version>4.8.3.Final</keycloak.version>
         <postgresql.version>42.2.4</postgresql.version>
         <geodb.version>0.9</geodb.version>
         <geotools.version>20.1</geotools.version>
@@ -101,6 +100,7 @@
         <hazelcast-helper.version>0.0.4-SNAPSHOT</hazelcast-helper.version>
         <rutebanken-gcp-storage.version>0.0.4-SNAPSHOT</rutebanken-gcp-storage.version>
         <rutebanken-organisation.version>0.0.4-SNAPSHOT</rutebanken-organisation.version>
+        <entur.helpers.version>1.0.42</entur.helpers.version>
 
         <javax-jms.version>2.0.1</javax-jms.version>
         <jts-core.version>1.16.0</jts-core.version>
@@ -146,6 +146,12 @@
                 <groupId>org.entur.helpers</groupId>
                 <artifactId>gcp-storage</artifactId>
                 <version>${rutebanken-gcp-storage.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.entur.helpers</groupId>
+                <artifactId>oauth2</artifactId>
+                <version>${entur.helpers.version}</version>
             </dependency>
 
             <dependency>
@@ -240,6 +246,25 @@
         <dependency>
             <groupId>org.entur.helpers</groupId>
             <artifactId>organisation</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.entur.helpers</groupId>
+            <artifactId>oauth2</artifactId>
+            <version>${entur.helpers.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-oauth2-resource-server</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-oauth2-jose</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-oauth2-client</artifactId>
         </dependency>
 
         <dependency>
@@ -490,25 +515,6 @@
             <version>${assertj-core.version}</version>
             <scope>test</scope>
         </dependency>
-
-        <dependency>
-            <groupId>org.keycloak</groupId>
-            <artifactId>keycloak-jetty94-adapter</artifactId>
-            <version>${keycloak.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.keycloak</groupId>
-            <artifactId>keycloak-spring-security-adapter</artifactId>
-            <version>${keycloak.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.keycloak</groupId>
-            <artifactId>keycloak-spring-boot-2-adapter</artifactId>
-            <version>${keycloak.version}</version>
-        </dependency>
-
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
