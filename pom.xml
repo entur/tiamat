@@ -140,6 +140,12 @@
                 <groupId>org.entur.helpers</groupId>
                 <artifactId>organisation</artifactId>
                 <version>${rutebanken-organisation.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.keycloak</groupId>
+                        <artifactId>keycloak-spring-security-adapter</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <dependency>

@@ -18,7 +18,7 @@ package org.rutebanken.tiamat.auth;
 
 import org.entur.oauth2.MultiIssuerAuthenticationManagerResolver;
 
-import org.rutebanken.tiamat.filter.CorsResponseFilter;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +30,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 
-import org.springframework.security.web.access.channel.ChannelProcessingFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -69,14 +68,10 @@ public class TiamatSecurityConfig extends WebSecurityConfigurerAdapter {
 		logger.info("Configuring HttpSecurity");
 		http.cors(withDefaults())
 				.csrf().disable()
-				.addFilterBefore(new CorsResponseFilter(), ChannelProcessingFilter.class)
 				.authorizeRequests()
-				.anyRequest()
-				.permitAll()
+				.anyRequest().permitAll()
 				.and()
-				.oauth2ResourceServer().authenticationManagerResolver(this.multiIssuerAuthenticationManagerResolver)
-				.and()
-				.oauth2Client();
+				.oauth2ResourceServer().authenticationManagerResolver(this.multiIssuerAuthenticationManagerResolver);
 
 	}
 
