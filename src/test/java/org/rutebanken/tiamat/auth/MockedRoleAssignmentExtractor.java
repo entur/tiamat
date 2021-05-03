@@ -17,6 +17,7 @@ package org.rutebanken.tiamat.auth;
 
 import org.rutebanken.helper.organisation.RoleAssignment;
 import org.rutebanken.helper.organisation.RoleAssignmentExtractor;
+import org.springframework.context.annotation.Primary;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +28,7 @@ import java.util.List;
  * For assigned user roles in integration tests. Defaults to full access.
  */
 @Service
+@Primary
 public class MockedRoleAssignmentExtractor implements RoleAssignmentExtractor {
 
 	private List<RoleAssignment> nextReturnedRoleAssignmentList;
