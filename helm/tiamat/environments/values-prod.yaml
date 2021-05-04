@@ -10,6 +10,11 @@ configMap:
   gcsBucketName: tiamat-production
   keycloakUrl: https://auth.entur.org/auth
 
+auth0:
+  ror:
+    url: https://auth2.entur.org
+    audience: https://ror.api.entur.io
+
 rbac:
   enabled: true
 
