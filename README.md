@@ -73,13 +73,10 @@ spring.datasource.url=jdbc:postgresql://localhost:5435/tiamat
 spring.datasource.username=tiamat
 spring.datasource.password=<PASSWORD>
 spring.datasource.initializationFailFast=false
-spring.profiles.active=default
+spring.profiles.active=local-blobstore,activemq
 spring.jpa.properties.hibernate.dialect=org.hibernate.spatial.dialect.postgis.PostgisDialect
-security.basic.enabled=false
 
-keycloak.realm=rutebanken
-keycloak.auth-server-url=https://beta.rutebanken.org/admin/neti/api
-keycloak.resource=Tiamat
+blobstore.local.folder=~/local-gcs-storage/tiamat/export
 
 ```
 
@@ -125,8 +122,6 @@ Both Tiamat and Abzu are set up to be used with Keycloak.
 - Add User and assign roles
 - Add User attribute roles `{"r":"editStops","o":"NSB","e":{"StopPlaceType":["*"]}}##{"r":"editStops","o":"RB","e":{"EntityType":["*"]}}##{"r":"deleteStops","o":"RB","e":{"EntityType":["StopPlace"]}}##{"r":"deleteStops","o":"RB"}##{"r":"editRouteData","o":"RUT"}`
 
-## Docker image
-Tiamat has the fabric8 docker plugin configured in the pom.file. It is optional to use.
 
 ## Validation for incoming and outgoing NeTEx publication delivery
 
@@ -284,10 +279,10 @@ If not, the application may complain about user not being authenticated if Sprin
 ## GraphQL
 GraphQL endpoint is available on
 ```
-https://api-test.entur.org/stop_places/1.0/graphql
+https://api.dev.entur.io/stop-places/v1/graphql
 ```
 
-Tip: GraphiQL UI available on https://www-test.entur.org/admin/shamash-nsr/ using *GraphiQL*:
+Tip: GraphiQL UI available on https://api.dev.entur.io/graphql-explorer/stop-places using *GraphiQL*:
 https://github.com/graphql/graphiql
 (Use e.g. `Modify Headers` for Chrome to add bearer-token for mutations)
 
