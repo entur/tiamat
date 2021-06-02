@@ -249,8 +249,8 @@ public class StreamingPublicationDelivery {
 
         Iterator<org.rutebanken.tiamat.model.FareZone> fareZoneIterator;
         if (exportParams.getFareZoneExportMode() == null || exportParams.getFareZoneExportMode().equals(ExportParams.ExportMode.ALL)) {
-            logger.info("Preparing to scroll all fare zones, regardless of version");
-            fareZoneIterator = fareZoneRepository.scrollFareZones();
+            logger.info("Preparing to scroll all or current fare zones, regardless of version");
+            fareZoneIterator = fareZoneRepository.scrollFareZones(exportParams);
         } else if (exportParams.getFareZoneExportMode().equals(ExportParams.ExportMode.RELEVANT)) {
             int fareZoneCount = fareZoneRepository.countResult(stopPlacePrimaryIds);
             logger.info("Preparing to scroll {} relevant fare zones from stop place ids", fareZoneCount);

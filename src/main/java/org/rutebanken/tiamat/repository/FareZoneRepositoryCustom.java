@@ -15,6 +15,7 @@
 
 package org.rutebanken.tiamat.repository;
 
+import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.exporter.params.FareZoneSearch;
 import org.rutebanken.tiamat.model.FareZone;
 
@@ -32,7 +33,7 @@ public interface FareZoneRepositoryCustom extends DataManagedObjectStructureRepo
 
     Iterator<FareZone> scrollFareZones(Set<Long> stopPlaceDbIds);
 
-    Iterator<FareZone> scrollFareZones();
+    Iterator<FareZone> scrollFareZones(ExportParams exportParams);
 
     Optional<FareZone> findValidFareZone(String netexId);
 
