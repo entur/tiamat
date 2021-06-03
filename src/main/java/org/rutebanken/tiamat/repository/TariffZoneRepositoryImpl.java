@@ -23,6 +23,7 @@ import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.hibernate.internal.SessionImpl;
 import org.hibernate.query.NativeQuery;
+import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.exporter.params.TariffZoneSearch;
 import org.rutebanken.tiamat.model.TariffZone;
 import org.rutebanken.tiamat.repository.iterator.ScrollableResultIterator;
@@ -124,13 +125,25 @@ public class TariffZoneRepositoryImpl implements TariffZoneRepositoryCustom {
         sqlQuery.setFetchSize(100);
         sqlQuery.setCacheable(false);
         ScrollableResults results = sqlQuery.scroll(ScrollMode.FORWARD_ONLY);
-        ScrollableResultIterator<TariffZone> tariffZoneIterator = new ScrollableResultIterator<>(results, 100, session);
-        return tariffZoneIterator;
+        return new ScrollableResultIterator<>(results, 100, session);
     }
 
     @Override
-    public Iterator<TariffZone> scrollTariffZones() {
-        return scrollTariffZones("select tz.* from tariff_zone tz");
+    public Iterator<TariffZone> scrollTariffZones(ExportParams exportParams) {
+        var sql = new StringBuilder("select tz.* from tariff_zone tz");
+
+        if (exportParams.getStopPlaceSearch() != null && exportParams.getStopPlaceSearch().getVersionValidity() !=null) {
+            if (exportParams.getStopPlaceSearch().getVersionValidity().equals(ExportParams.VersionValidity.CURRENT)) {
+                logger.info("Preparing to scroll only current tariff zones");
+                sql.append(" WHERE tz.version = (SELECT MAX(tzv.version) FROM tariff_zone fzv WHERE tzv.netex_id = tz.netex_id " +
+                        "and (tzv.to_date is null or tzv.to_date > now()) and (tzv.from_date is null or tzv.from_date < now()))");
+            } else if (exportParams.getStopPlaceSearch().getVersionValidity().equals(ExportParams.VersionValidity.CURRENT_FUTURE)) {
+                logger.info("Preparing to scroll current and future tariff zones");
+                sql.append(" WHERE (tz.to_date is null or tz.to_date > now()))");
+            }
+        }
+
+        return scrollTariffZones(sql.toString());
     }
 
     private String generateTariffZoneQueryFromStopPlaceIds(Set<Long> stopPlaceDbIds) {

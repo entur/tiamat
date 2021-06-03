@@ -274,7 +274,7 @@ public class StreamingPublicationDelivery {
         if (exportParams.getTariffZoneExportMode() == null || exportParams.getTariffZoneExportMode().equals(ExportParams.ExportMode.ALL)) {
 
             logger.info("Preparing to scroll all tariff zones, regardless of version");
-            tariffZoneIterator = tariffZoneRepository.scrollTariffZones();
+            tariffZoneIterator = tariffZoneRepository.scrollTariffZones(exportParams);
         } else if (exportParams.getTariffZoneExportMode().equals(ExportParams.ExportMode.RELEVANT)) {
 
             logger.info("Preparing to scroll relevant tariff zones from stop place ids");
