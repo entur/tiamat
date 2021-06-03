@@ -141,11 +141,15 @@ public class FareZoneRepositoryImpl implements FareZoneRepositoryCustom {
 
         var sql = new StringBuilder("select fz.* from fare_zone fz");
 
-        if (exportParams.getStopPlaceSearch() != null && exportParams.getStopPlaceSearch().getVersionValidity() !=null && exportParams.getStopPlaceSearch().getVersionValidity().equals(ExportParams.VersionValidity.CURRENT)) {
-            logger.info("Preparing to scroll only current fare zones");
-            sql.append(" WHERE " +
-                    "fz.version = (SELECT MAX(fzv.version) FROM fare_zone fzv WHERE fzv.netex_id = fz.netex_id " +
-                    "and (fzv.to_date is null or fzv.to_date > now()) and (fzv.from_date is null or fzv.from_date < now()))");
+        if (exportParams.getStopPlaceSearch() != null && exportParams.getStopPlaceSearch().getVersionValidity() !=null) {
+            if (exportParams.getStopPlaceSearch().getVersionValidity().equals(ExportParams.VersionValidity.CURRENT)) {
+                logger.info("Preparing to scroll only current fare zones");
+                sql.append(" WHERE fz.version = (SELECT MAX(fzv.version) FROM fare_zone fzv WHERE fzv.netex_id = fz.netex_id " +
+                        "and (fzv.to_date is null or fzv.to_date > now()) and (fzv.from_date is null or fzv.from_date < now()))");
+            } else if (exportParams.getStopPlaceSearch().getVersionValidity().equals(ExportParams.VersionValidity.CURRENT_FUTURE)) {
+                logger.info("Preparing to scroll current and future fare zones");
+                sql.append(" WHERE (fz.to_date is null or fz.to_date > now()))");
+            }
         }
 
         return scrollFareZones(sql.toString());
