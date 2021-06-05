@@ -139,7 +139,7 @@ public class TariffZoneRepositoryImpl implements TariffZoneRepositoryCustom {
                         "and (tzv.to_date is null or tzv.to_date > now()) and (tzv.from_date is null or tzv.from_date < now()))");
             } else if (exportParams.getStopPlaceSearch().getVersionValidity().equals(ExportParams.VersionValidity.CURRENT_FUTURE)) {
                 logger.info("Preparing to scroll current and future tariff zones");
-                sql.append(" WHERE (tz.to_date is null or tz.to_date > now()))");
+                sql.append(" WHERE (tz.to_date is null or tz.to_date > now())");
             }
         }
 

@@ -148,7 +148,7 @@ public class FareZoneRepositoryImpl implements FareZoneRepositoryCustom {
                         "and (fzv.to_date is null or fzv.to_date > now()) and (fzv.from_date is null or fzv.from_date < now()))");
             } else if (exportParams.getStopPlaceSearch().getVersionValidity().equals(ExportParams.VersionValidity.CURRENT_FUTURE)) {
                 logger.info("Preparing to scroll current and future fare zones");
-                sql.append(" WHERE (fz.to_date is null or fz.to_date > now()))");
+                sql.append(" WHERE (fz.to_date is null or fz.to_date > now())");
             }
         }
 
