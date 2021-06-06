@@ -63,7 +63,7 @@
         <plexus.compiler.javac.version>2.8.8</plexus.compiler.javac.version>
         <spring-boot-plugin.version>2.3.4.RELEASE</spring-boot-plugin.version>
         <spring-boot.version>2.3.4.RELEASE</spring-boot.version>
-        <spring.security.version>5.3.5.RELEASE</spring.security.version>
+        <spring.security.version>5.3.7.RELEASE</spring.security.version>
         <postgresql.version>42.2.4</postgresql.version>
         <geodb.version>0.9</geodb.version>
         <geotools.version>20.1</geotools.version>
@@ -593,8 +593,7 @@
                                     <classpath refid="maven.test.classpath"/>
                                 </taskdef>
                                 <mkdir dir="${project.build.testOutputDirectory}"/>
-                                <groovyc destdir="${project.build.testOutputDirectory}"
-                                         srcdir="${basedir}/src/test/groovy/" listfiles="true">
+                                <groovyc destdir="${project.build.testOutputDirectory}" srcdir="${basedir}/src/test/groovy/" listfiles="true">
                                     <classpath refid="maven.test.classpath"/>
                                 </groovyc>
                             </tasks>
