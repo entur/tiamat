@@ -2,6 +2,7 @@ package org.rutebanken.tiamat.service.batch;
 
 import org.hibernate.Session;
 import org.hibernate.internal.SessionImpl;
+import org.rutebanken.tiamat.exporter.async.ParentStopFetchingIterator;
 import org.rutebanken.tiamat.exporter.eviction.SessionEntitiesEvictor;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.exporter.params.StopPlaceSearch;
@@ -20,7 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 import java.time.Instant;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -86,7 +86,6 @@ public class StopPlaceRefUpdaterService {
 
         SessionEntitiesEvictor sessionEntitiesEvictor = new SessionEntitiesEvictor((SessionImpl) session);
 
-
         ExportParams exportParams = ExportParams.newExportParamsBuilder()
                 .setStopPlaceSearch(
                         StopPlaceSearch.newStopPlaceSearchBuilder()
@@ -95,7 +94,7 @@ public class StopPlaceRefUpdaterService {
                 .build();
         logger.info("Created export params search for scrolling stop places {}", exportParams);
 
-        final Set<String> netexIds = stopPlaceRepository.getNetexIds(exportParams);
+        ParentStopFetchingIterator stopPlaceIterator = new ParentStopFetchingIterator(stopPlaceRepository.scrollStopPlaces(exportParams), stopPlaceRepository);
 
         AtomicInteger updatedBecauseOfTariffZoneRefChange = new AtomicInteger();
         AtomicInteger updatedBecauseOfTopographicPlaceChange = new AtomicInteger();
@@ -103,16 +102,16 @@ public class StopPlaceRefUpdaterService {
         AtomicInteger stopsIterated = new AtomicInteger();
         PerSecondLogger perSecondsLogger = new PerSecondLogger(startTime, stopsIterated, stopsSaved, "Progress while updating stop places references");
 
-        for (String netexId : netexIds) {
+        while (stopPlaceIterator.hasNext()) {
             try {
                 stopsIterated.incrementAndGet();
 
-                StopPlace stopPlace =stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(netexId);
+                StopPlace existingStopPlace = stopPlaceIterator.next();
 
                 Optional<StopPlace> optionalStopPlace = new StopPlaceRefUpdater(
                         tariffZonesLookupService,
                         topographicPlaceLookupService,
-                        stopPlace,
+                        existingStopPlace,
                         updatedBecauseOfTariffZoneRefChange,
                         updatedBecauseOfTopographicPlaceChange)
                         .call();
@@ -138,7 +137,7 @@ public class StopPlaceRefUpdaterService {
 
                             logger.trace("Saved stop {}", stopPlaceToSave);
                             session.flush();
-                            if (stopsIterated.get() % CLEAR_EACH == 0) {
+                    if (stopsIterated.get() % CLEAR_EACH == 0 && !stopPlaceIterator.hasNextParent()) {
                                 logger.trace("Flushing and clearing session at count {}", stopsIterated.get());
                                 session.clear();
                             } else {
@@ -150,16 +149,16 @@ public class StopPlaceRefUpdaterService {
                     } else {
                         logger.info("Skipping stop place update, cause getValidBetween is null {}", stopPlaceToSave);
                     }
+                } else if (!stopPlaceIterator.hasNextParent()) {
+                    session.flush();
+                    session.clear();
                 }
                 perSecondsLogger.log();
 
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
-
         }
-        session.flush();
-        session.clear();
 
 
         long timeSpent = System.currentTimeMillis() - startTime;
