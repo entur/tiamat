@@ -69,6 +69,7 @@ public class CustomGraphQLTypes {
     public static GraphQLEnumType signContentTypeEnum = createCustomEnumType(SIGN_CONTENT_TYPE, SignContentEnumeration.class);
     public static GraphQLEnumType genderTypeEnum = createCustomEnumType(GENDER, GenderLimitationEnumeration.class);
     public static GraphQLEnumType nameTypeEnum = createCustomEnumType(NAME_TYPE, NameTypeEnumeration.class);
+    public static GraphQLEnumType boardingPositionTypeEnum = createCustomEnumType("BoardingPositionType", BoardingPositionTypeEnumeration.class);
     public static GraphQLEnumType allVehiclesModesOfTransportationEnum = createCustomEnumType(TRANSPORT_MODE_TYPE, VehicleModeEnumeration.class);
     public static GraphQLEnumType busSubmodeType = createCustomEnumType("BusSubmodeType", BusSubmodeEnumeration.class);
     public static GraphQLEnumType tramSubmodeType = createCustomEnumType("TramSubmodeType", TramSubmodeEnumeration.class);
@@ -574,6 +575,29 @@ public class CustomGraphQLTypes {
                     .name(NAME)
                     .type(new GraphQLNonNull(embeddableMultiLingualStringInputObjectType)))
             .build();
+
+    public static GraphQLObjectType boardingPositionsObjectType = GraphQLObjectType.newObject()
+            .name(OUTPUT_TYPE_BOARDING_POSITION)
+            .field(newFieldDefinition()
+            .name(LABEL)
+            .type(embeddableMultilingualStringObjectType))
+            .field(newFieldDefinition()
+            .name(BOARDING_POSITION_TYPE)
+            .type(boardingPositionTypeEnum))
+            .build();
+
+
+    public static GraphQLInputObjectType boardingPositionsInputObjectType = GraphQLInputObjectType.newInputObject()
+            .name(INPUT_TYPE_BOARDING_POSITION)
+            .field(newInputObjectField()
+                .name(LABEL)
+                .type(embeddableMultiLingualStringInputObjectType))
+            .field(newInputObjectField()
+                .name(BOARDING_POSITION_TYPE)
+                .type(boardingPositionTypeEnum))
+            .build();
+
+
 
     public static GraphQLInputObjectType topographicPlaceInputObjectType = GraphQLInputObjectType.newInputObject()
             .name(INPUT_TYPE_TOPOGRAPHIC_PLACE)

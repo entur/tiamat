@@ -16,6 +16,7 @@
 package org.rutebanken.tiamat.rest.graphql.mappers;
 
 import com.google.api.client.util.Preconditions;
+import org.rutebanken.tiamat.model.BoardingPosition;
 import org.rutebanken.tiamat.model.PrivateCodeStructure;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -26,6 +27,7 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -38,6 +40,9 @@ public class QuayMapper {
 
     @Autowired
     private GroupOfEntitiesMapper groupOfEntitiesMapper;
+
+    @Autowired
+    private BoardingPositionMapper boardingPositionMapper;
 
     public boolean populateQuayFromInput(StopPlace stopPlace, Map quayInputMap) {
         Quay quay;
@@ -61,6 +66,13 @@ public class QuayMapper {
 
         if (quayInputMap.get(COMPASS_BEARING) != null) {
             quay.setCompassBearing(((BigDecimal) quayInputMap.get(COMPASS_BEARING)).floatValue());
+            isQuayUpdated = true;
+        }
+
+        if (quayInputMap.get(BOARDING_POSITIONS) != null) {
+            List boardingPositionObjects = (List) quayInputMap.get(BOARDING_POSITIONS);
+            final List<BoardingPosition> boardingPositions = boardingPositionMapper.mapBoardingPositions(boardingPositionObjects);
+            quay.getBoardingPositions().addAll(boardingPositions);
             isQuayUpdated = true;
         }
         if (quayInputMap.get(PUBLIC_CODE) != null) {

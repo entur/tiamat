@@ -719,6 +719,10 @@ public class StopPlaceRegisterGraphQLSchema {
                     .field(newFieldDefinition()
                             .name(ALTERNATIVE_NAMES)
                             .type(new GraphQLList(alternativeNameObjectType)))
+                    .field(newFieldDefinition()
+                            .name(BOARDING_POSITIONS)
+                            .type(new GraphQLList(boardingPositionsObjectType))
+                    )
                     .build();
     }
 
@@ -838,6 +842,9 @@ public class StopPlaceRegisterGraphQLSchema {
                 .field(newInputObjectField()
                         .name(COMPASS_BEARING)
                         .type(GraphQLBigDecimal))
+                .field(newInputObjectField()
+                .name(BOARDING_POSITIONS)
+                .type(new GraphQLList(boardingPositionsInputObjectType)))
                 .build();
     }
 

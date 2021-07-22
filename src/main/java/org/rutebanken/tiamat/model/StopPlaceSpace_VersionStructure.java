@@ -15,6 +15,9 @@
 
 package org.rutebanken.tiamat.model;
 
+import javax.persistence.AttributeOverride;
+import javax.persistence.AttributeOverrides;
+import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Transient;
@@ -23,6 +26,10 @@ import javax.persistence.Transient;
 public abstract class StopPlaceSpace_VersionStructure
         extends StopPlaceComponent_VersionStructure {
 
+    @AttributeOverrides({
+            @AttributeOverride(name = "value", column = @Column(name = "label_value")),
+            @AttributeOverride(name = "lang", column = @Column(name = "label_lang"))
+    })
     @Embedded
     protected EmbeddableMultilingualString label;
 
