@@ -18,8 +18,12 @@ package org.rutebanken.tiamat.netex.mapping.mapper;
 import ma.glasnost.orika.CustomMapper;
 import ma.glasnost.orika.MappingContext;
 import org.rutebanken.netex.model.AlternativeNames_RelStructure;
+import org.rutebanken.netex.model.BoardingPositionTypeEnumeration;
+import org.rutebanken.netex.model.BoardingPositions_RelStructure;
+import org.rutebanken.netex.model.MultilingualString;
 import org.rutebanken.netex.model.Quay;
 import org.rutebanken.tiamat.model.AlternativeName;
+import org.rutebanken.tiamat.model.BoardingPosition;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,6 +59,29 @@ public class QuayMapper extends CustomMapper<Quay, org.rutebanken.tiamat.model.Q
 
             if (!alternativeNames.isEmpty()) {
                 quay2.getAlternativeNames().addAll(alternativeNames);
+            }
+        }
+
+        if (quay.getBoardingPositions() != null
+                && quay.getBoardingPositions().getBoardingPositionRefOrBoardingPosition() != null
+                && !quay.getBoardingPositions().getBoardingPositionRefOrBoardingPosition().isEmpty()) {
+            final List<Object> netexBoardingPositions = quay.getBoardingPositions().getBoardingPositionRefOrBoardingPosition();
+            List<BoardingPosition> tiamatBoardingPositions = new ArrayList<>();
+            for (Object netexBoardingPosition : netexBoardingPositions) {
+                if (netexBoardingPosition instanceof org.rutebanken.netex.model.BoardingPosition) {
+                    final org.rutebanken.netex.model.BoardingPosition netexBoardingPosition1 = (org.rutebanken.netex.model.BoardingPosition) netexBoardingPosition;
+                    if (netexBoardingPosition1.getLabel() != null
+                            && netexBoardingPosition1.getLabel().getValue() != null
+                            && !netexBoardingPosition1.getLabel().getValue().isEmpty()) {
+                        final BoardingPosition tiamatBoardingPosition = new BoardingPosition();
+                        mapperFacade.map(netexBoardingPosition1,tiamatBoardingPosition);
+                        tiamatBoardingPositions.add(tiamatBoardingPosition);
+                    }
+                }
+            }
+
+            if (!tiamatBoardingPositions.isEmpty()) {
+                quay2.getBoardingPositions().addAll(tiamatBoardingPositions);
             }
         }
     }
@@ -94,6 +121,32 @@ public class QuayMapper extends CustomMapper<Quay, org.rutebanken.tiamat.model.Q
             }
         } else {
             quay2.setAlternativeNames(null);
+        }
+
+        if (quay.getBoardingPositions() != null && !quay.getBoardingPositions().isEmpty()) {
+            final List<BoardingPosition> boardingPositions = quay.getBoardingPositions();
+            List<org.rutebanken.netex.model.BoardingPosition> netexBoardingPositions = new ArrayList<>();
+            for (BoardingPosition boardingPosition : boardingPositions) {
+                if (boardingPosition != null
+                        && boardingPosition.getLabel() != null
+                        && boardingPosition.getLabel().getValue() != null
+                        && !boardingPosition.getLabel().getValue().isEmpty()) {
+                    // Only Include non-empty boarding-positions
+                    final org.rutebanken.netex.model.BoardingPosition netexBoardingPosition = new org.rutebanken.netex.model.BoardingPosition();
+                    mapperFacade.map(boardingPosition,netexBoardingPosition);
+                    netexBoardingPosition.setId(boardingPosition.getNetexId());
+                    netexBoardingPosition.setLabel(new MultilingualString().withValue(boardingPosition.getLabel().getValue()).withLang(boardingPosition.getLabel().getLang()));
+                    netexBoardingPosition.setBoardingPositionType(BoardingPositionTypeEnumeration.fromValue(boardingPosition.getBoardingPositionType().value()));
+                    netexBoardingPositions.add(netexBoardingPosition);
+
+                }
+            }
+            if (!netexBoardingPositions.isEmpty()) {
+                final BoardingPositions_RelStructure boardingPositionsRelStructure = new BoardingPositions_RelStructure();
+                boardingPositionsRelStructure.getBoardingPositionRefOrBoardingPosition().addAll(netexBoardingPositions);
+                quay2.setBoardingPositions(boardingPositionsRelStructure);
+            }
+
         }
     }
 }
