@@ -20,6 +20,7 @@ import org.rutebanken.tiamat.model.BoardingPosition;
 import org.rutebanken.tiamat.model.PrivateCodeStructure;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.service.BoardingPositionUpdater;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +44,9 @@ public class QuayMapper {
 
     @Autowired
     private BoardingPositionMapper boardingPositionMapper;
+
+    @Autowired
+    private BoardingPositionUpdater boardingPositionUpdater;
 
     public boolean populateQuayFromInput(StopPlace stopPlace, Map quayInputMap) {
         Quay quay;
@@ -71,9 +75,14 @@ public class QuayMapper {
 
         if (quayInputMap.get(BOARDING_POSITIONS) != null) {
             List boardingPositionObjects = (List) quayInputMap.get(BOARDING_POSITIONS);
+
             final List<BoardingPosition> boardingPositions = boardingPositionMapper.mapBoardingPositions(boardingPositionObjects);
-            quay.getBoardingPositions().addAll(boardingPositions);
-            isQuayUpdated = true;
+            if (boardingPositionUpdater.update(quay, boardingPositions)) {
+                isQuayUpdated = true;
+            } else {
+                logger.info("Boarding Positions not changed");
+            }
+
         }
         if (quayInputMap.get(PUBLIC_CODE) != null) {
             quay.setPublicCode((String) quayInputMap.get(PUBLIC_CODE));
