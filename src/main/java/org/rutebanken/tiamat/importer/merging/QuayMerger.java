@@ -191,6 +191,11 @@ public class QuayMerger {
             changed = true;
         }
 
+        if (!from.getBoardingPositions().isEmpty() && to.getBoardingPositions().isEmpty()) {
+            to.getBoardingPositions().addAll(from.getBoardingPositions());
+            changed = true;
+        }
+
         return changed;
     }
 
