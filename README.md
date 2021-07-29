@@ -112,8 +112,8 @@ It's all initiated by an entity listener annotated with `PrePersist` on the clas
 `NetexIdAssigner` determines if the entity already has an ID or not. `NetexIdProvider` either return a new ID or handles explicity claimed IDs if the configured prefix matches. See `ValidPrefixList` for the configuration of valid prefixes, and prefixes for IDs generated elsewhere. The `GaplessIdGeneratorService` uses Hazelcast to sync state between instances and avoid conflicts.
 
 
-## Keycloak
-Both Tiamat and Abzu are set up to be used with Keycloak.
+## Keycloak/Auth0
+Both Tiamat and Abzu are set up to be used with Keycloak or Auth0.
 ### Keycloak configuraiton
 - Create realm e.g. Entur
 - Create client for frontend e.g. abzu
