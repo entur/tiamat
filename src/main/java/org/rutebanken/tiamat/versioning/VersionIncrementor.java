@@ -87,7 +87,6 @@ public class VersionIncrementor {
      * Increment versions for stop place with children.
      * The object must have their netexId set, or else they will get an initial version
      * @param stopPlace with quays and accessibility assessment
-     * @param validFrom
      * @return modified StopPlace
      */
     public StopPlace initiateOrIncrementVersions(StopPlace stopPlace) {
@@ -99,6 +98,10 @@ public class VersionIncrementor {
             stopPlace.getQuays().forEach(quay -> {
                 initiateOrIncrementSiteElementVersion(quay);
                 initiateOrIncrementPlaceEquipment(quay.getPlaceEquipments());
+
+                if (quay.getBoardingPositions() != null) {
+                    quay.getBoardingPositions().forEach(this::initiateOrIncrementBoardingPositions);
+                }
             });
         }
 
@@ -116,6 +119,12 @@ public class VersionIncrementor {
             if(placeEquipment.getInstalledEquipment() != null) {
                 placeEquipment.getInstalledEquipment().forEach(this::initiateOrIncrement);
             }
+        }
+    }
+
+    public void initiateOrIncrementBoardingPositions(BoardingPosition boardingPosition) {
+        if (boardingPosition != null) {
+            initiateOrIncrement(boardingPosition);
         }
     }
 }
