@@ -15,13 +15,21 @@
 
 package org.rutebanken.tiamat.versioning.save;
 
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.Point;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Point;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
-import org.rutebanken.tiamat.model.*;
-import org.rutebanken.tiamat.versioning.save.StopPlaceVersionedSaverService;
+import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
+import org.rutebanken.tiamat.model.PlaceEquipment;
+import org.rutebanken.tiamat.model.Quay;
+import org.rutebanken.tiamat.model.SanitaryEquipment;
+import org.rutebanken.tiamat.model.SiteRefStructure;
+import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.TicketingEquipment;
+import org.rutebanken.tiamat.model.TopographicPlace;
+import org.rutebanken.tiamat.model.ValidBetween;
+import org.rutebanken.tiamat.model.WaitingRoomEquipment;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.Authentication;

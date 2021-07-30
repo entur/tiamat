@@ -15,14 +15,16 @@
 
 package org.rutebanken.tiamat.rest.graphql
 
-import org.locationtech.jts.geom.Coordinate
 import org.junit.Test
-import org.rutebanken.tiamat.model.*
+import org.locationtech.jts.geom.Coordinate
+import org.rutebanken.tiamat.model.StopPlace
+import org.rutebanken.tiamat.model.StopTypeEnumeration
 import org.rutebanken.tiamat.time.ExportTimeZone
 import org.springframework.beans.factory.annotation.Autowired
 
-import static org.hamcrest.Matchers.*
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*
+import static org.hamcrest.Matchers.equalTo
+import static org.hamcrest.Matchers.nullValue
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.MUTATE_GROUP_OF_STOP_PLACES
 
 def class GraphQLResourceGroupOfStopPlacesIntegrationTest extends AbstractGraphQLResourceIntegrationTest {
 

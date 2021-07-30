@@ -15,8 +15,13 @@
 
 package org.rutebanken.tiamat.rest.graphql.operations;
 
+import graphql.schema.GraphQLFieldDefinition;
+import graphql.schema.GraphQLInputObjectField;
+import graphql.schema.GraphQLInputObjectType;
+import graphql.schema.GraphQLList;
+import graphql.schema.GraphQLNonNull;
+import graphql.schema.GraphQLObjectType;
 import org.locationtech.jts.geom.Point;
-import graphql.schema.*;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.ValidBetween;
 import org.rutebanken.tiamat.rest.graphql.mappers.GeometryMapper;
@@ -34,7 +39,17 @@ import static graphql.schema.GraphQLArgument.newArgument;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLInputObjectField.newInputObjectField;
 import static graphql.schema.GraphQLInputObjectType.newInputObject;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ADD_TO_MULTIMODAL_STOPPLACE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.CREATE_MULTI_MODAL_STOPPLACE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.DESCRIPTION;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.GEOMETRY;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.NAME;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PARENT_SITE_REF;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.REMOVE_FROM_MULTIMODAL_STOPPLACE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.STOP_PLACE_ID;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.STOP_PLACE_IDS;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.VALID_BETWEEN;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.VERSION_COMMENT;
 import static org.rutebanken.tiamat.rest.graphql.mappers.EmbeddableMultilingualStringMapper.getEmbeddableString;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.embeddableMultiLingualStringInputObjectType;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.geoJsonInputType;

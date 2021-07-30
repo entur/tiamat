@@ -26,7 +26,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ALL_VERSIONS;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ID;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.QUERY;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.TOPOGRAPHIC_PLACE_TYPE;
 
 @Service("topographicPlaceFetcher")
 @Transactional

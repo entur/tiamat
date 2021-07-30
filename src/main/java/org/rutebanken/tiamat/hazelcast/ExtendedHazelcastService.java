@@ -15,7 +15,9 @@
 
 package org.rutebanken.tiamat.hazelcast;
 
-import com.hazelcast.config.*;
+import com.hazelcast.config.EvictionPolicy;
+import com.hazelcast.config.MapConfig;
+import com.hazelcast.config.MaxSizeConfig;
 import com.hazelcast.core.HazelcastInstance;
 import org.rutebanken.hazelcasthelper.service.HazelCastService;
 import org.rutebanken.hazelcasthelper.service.KubernetesService;

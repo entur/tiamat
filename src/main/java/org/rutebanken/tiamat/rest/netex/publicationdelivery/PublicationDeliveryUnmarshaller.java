@@ -15,8 +15,6 @@
 
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
-import com.google.common.io.ByteStreams;
-import javassist.bytecode.ByteArray;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.netex.validation.NeTExValidator;
 import org.slf4j.Logger;
@@ -25,12 +23,17 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.xml.sax.SAXException;
 
-import javax.xml.bind.*;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 import static com.google.common.io.ByteStreams.toByteArray;
-import static javax.xml.bind.JAXBContext.*;
+import static javax.xml.bind.JAXBContext.newInstance;
 
 @Component
 public class PublicationDeliveryUnmarshaller {

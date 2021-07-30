@@ -21,7 +21,6 @@ import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
-import org.rutebanken.tiamat.service.stopplace.StopPlaceQuayMover;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 

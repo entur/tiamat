@@ -18,7 +18,6 @@ package org.rutebanken.tiamat.repository;
 
 import org.apache.commons.lang3.StringUtils;
 import org.rutebanken.tiamat.model.PathLink;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;

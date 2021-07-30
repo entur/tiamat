@@ -16,15 +16,12 @@
 package org.rutebanken.tiamat.repository;
 
 import org.locationtech.jts.geom.Point;
-import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.exporter.params.TopographicPlaceSearch;
 import org.rutebanken.tiamat.model.IanaCountryTldEnumeration;
 import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.model.TopographicPlaceTypeEnumeration;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.QueryHints;
-import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 
 import javax.persistence.QueryHint;

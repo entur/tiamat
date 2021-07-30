@@ -3,7 +3,6 @@ package org.rutebanken.tiamat.repository;
 import com.google.common.collect.Sets;
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
-import org.rutebanken.tiamat.exporter.params.ParkingSearch;
 import org.rutebanken.tiamat.model.Parking;
 import org.rutebanken.tiamat.model.SiteRefStructure;
 import org.rutebanken.tiamat.model.StopPlace;

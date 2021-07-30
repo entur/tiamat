@@ -15,14 +15,7 @@
 
 package org.rutebanken.tiamat.netex.id;
 
-import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IQueue;
-import org.hibernate.Hibernate;
-import org.hibernate.SQLQuery;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.engine.spi.SessionFactoryImplementor;
-import org.hibernate.jpa.HibernateEntityManagerFactory;
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
@@ -31,7 +24,6 @@ import org.rutebanken.tiamat.model.StopPlace;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import java.math.BigInteger;

@@ -15,15 +15,14 @@
 
 package org.rutebanken.tiamat.repository;
 
+import org.apache.commons.lang3.StringUtils;
+import org.hibernate.ScrollMode;
+import org.hibernate.ScrollableResults;
+import org.hibernate.Session;
 import org.hibernate.query.NativeQuery;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
-import org.apache.commons.lang3.StringUtils;
-import org.hibernate.SQLQuery;
-import org.hibernate.ScrollMode;
-import org.hibernate.ScrollableResults;
-import org.hibernate.Session;
 import org.rutebanken.tiamat.exporter.params.ParkingSearch;
 import org.rutebanken.tiamat.model.Parking;
 import org.rutebanken.tiamat.model.ParkingTypeEnumeration;
@@ -34,10 +33,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Repository;
 
-import javax.persistence.*;
+import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+import javax.persistence.TypedQuery;
 import javax.transaction.Transactional;
 import java.math.BigInteger;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Repository
 @Transactional

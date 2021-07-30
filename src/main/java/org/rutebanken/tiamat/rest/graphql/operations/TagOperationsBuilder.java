@@ -30,7 +30,14 @@ import java.util.List;
 import static graphql.Scalars.GraphQLString;
 import static graphql.schema.GraphQLArgument.newArgument;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.CREATE_TAG;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.REMOVE_TAG;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.TAG_COMMENT;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.TAG_COMMENT_DESCRIPTION;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.TAG_ID_REFERENCE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.TAG_ID_REFERENCE_DESCRIPTION;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.TAG_NAME;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.TAG_NAME_DESCRIPTION;
 
 @Component
 public class TagOperationsBuilder {

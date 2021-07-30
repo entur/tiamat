@@ -19,7 +19,6 @@ package org.rutebanken.tiamat.versioning.save;
 import org.rutebanken.tiamat.model.TariffZone;
 import org.rutebanken.tiamat.repository.TariffZoneRepository;
 import org.rutebanken.tiamat.service.TariffZonesLookupService;
-
 import org.rutebanken.tiamat.versioning.validate.VersionValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

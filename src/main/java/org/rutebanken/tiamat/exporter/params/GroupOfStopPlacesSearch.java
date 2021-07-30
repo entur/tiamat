@@ -31,12 +31,9 @@
 package org.rutebanken.tiamat.exporter.params;
 
 import com.google.common.base.MoreObjects;
-import org.rutebanken.tiamat.model.GroupOfStopPlaces;
 
-import javax.ws.rs.DefaultValue;
 import javax.ws.rs.QueryParam;
 import java.util.List;
-import java.util.Set;
 
 public class GroupOfStopPlacesSearch implements SearchObject {
 

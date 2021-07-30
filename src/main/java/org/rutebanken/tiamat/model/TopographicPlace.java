@@ -19,7 +19,16 @@ import com.google.common.base.MoreObjects;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
-import javax.persistence.*;
+import javax.persistence.AttributeOverride;
+import javax.persistence.AttributeOverrides;
+import javax.persistence.Column;
+import javax.persistence.Embedded;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.Index;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @Entity

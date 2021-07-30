@@ -22,7 +22,8 @@ import org.rutebanken.tiamat.model.TopographicPlaceTypeEnumeration
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository
 import org.springframework.beans.factory.annotation.Autowired
 
-import static org.hamcrest.Matchers.*
+import static org.hamcrest.Matchers.hasSize
+import static org.hamcrest.Matchers.notNullValue
 
 class GraphQLResourceTopographicPlaceIntegrationTest extends AbstractGraphQLResourceIntegrationTest{
 

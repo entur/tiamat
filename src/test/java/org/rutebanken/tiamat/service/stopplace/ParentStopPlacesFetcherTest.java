@@ -18,7 +18,11 @@ package org.rutebanken.tiamat.service.stopplace;
 import org.hibernate.Session;
 import org.junit.Before;
 import org.junit.Test;
-import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
+import org.rutebanken.tiamat.model.EntityInVersionStructure;
+import org.rutebanken.tiamat.model.MultilingualString;
+import org.rutebanken.tiamat.model.SiteRefStructure;
+import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 
 import javax.persistence.EntityManager;

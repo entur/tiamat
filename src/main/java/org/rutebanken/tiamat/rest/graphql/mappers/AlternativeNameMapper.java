@@ -15,7 +15,9 @@
 
 package org.rutebanken.tiamat.rest.graphql.mappers;
 
-import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.model.AlternativeName;
+import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
+import org.rutebanken.tiamat.model.NameTypeEnumeration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -23,11 +25,9 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.NAME;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.NAME_TYPE;
 import static org.rutebanken.tiamat.rest.graphql.mappers.EmbeddableMultilingualStringMapper.getEmbeddableString;
 
 @Component

@@ -20,23 +20,19 @@ import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.netex.model.StopPlace;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
-import org.rutebanken.tiamat.exporter.params.StopPlaceSearch;
 import org.rutebanken.tiamat.model.SiteRefStructure;
 import org.rutebanken.tiamat.model.ValidBetween;
 import org.rutebanken.tiamat.repository.search.ChangedStopPlaceSearch;
 import org.rutebanken.tiamat.rest.netex.publicationdelivery.PublicationDeliveryTestHelper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import javax.xml.bind.JAXBException;
-
 import java.time.Instant;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.rutebanken.tiamat.exporter.params.ExportParams.newExportParamsBuilder;
 
 public class PublicationDeliveryExporterTest extends TiamatIntegrationTest {
 

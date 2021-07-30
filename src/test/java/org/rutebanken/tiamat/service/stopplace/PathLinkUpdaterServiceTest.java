@@ -17,7 +17,10 @@ package org.rutebanken.tiamat.service.stopplace;
 
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
-import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.model.AddressablePlaceRefStructure;
+import org.rutebanken.tiamat.model.PathLink;
+import org.rutebanken.tiamat.model.PathLinkEnd;
+import org.rutebanken.tiamat.model.StopPlace;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

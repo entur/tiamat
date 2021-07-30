@@ -15,7 +15,15 @@
 
 package org.rutebanken.tiamat.model;
 
-import javax.persistence.*;
+import javax.persistence.AttributeOverride;
+import javax.persistence.AttributeOverrides;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Embedded;
+import javax.persistence.MappedSuperclass;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.Transient;
 import java.util.List;
 
 

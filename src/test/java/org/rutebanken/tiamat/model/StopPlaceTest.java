@@ -15,9 +15,9 @@
 
 package org.rutebanken.tiamat.model;
 
-import org.locationtech.jts.geom.Coordinate;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.locationtech.jts.geom.Coordinate;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.exporter.params.StopPlaceSearch;

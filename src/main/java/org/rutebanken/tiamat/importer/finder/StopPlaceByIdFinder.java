@@ -15,7 +15,6 @@
 
 package org.rutebanken.tiamat.importer.finder;
 
-import com.google.common.collect.Sets;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.id.NetexIdHelper;
 import org.rutebanken.tiamat.repository.QuayRepository;
@@ -25,11 +24,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.TreeSet;
 import java.util.function.Function;
 
 import static java.util.Comparator.comparing;
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.toCollection;
+import static java.util.stream.Collectors.toList;
 
 @Component
 public class StopPlaceByIdFinder {

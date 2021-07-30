@@ -14,6 +14,7 @@ import org.rutebanken.netex.model.ScheduledStopPointRefStructure;
 import org.rutebanken.netex.model.ScopingMethodEnumeration;
 import org.rutebanken.tiamat.model.StopPlaceReference;
 import org.rutebanken.tiamat.model.TariffZoneRef;
+
 import javax.xml.bind.JAXBElement;
 import java.util.HashSet;
 import java.util.List;

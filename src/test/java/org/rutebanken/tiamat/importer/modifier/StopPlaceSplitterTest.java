@@ -15,10 +15,9 @@
 
 package org.rutebanken.tiamat.importer.modifier;
 
-import com.google.common.collect.Sets;
+import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
-import org.junit.Test;
 import org.rutebanken.tiamat.config.GeometryFactoryConfig;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.Quay;

@@ -16,13 +16,13 @@
 package org.rutebanken.tiamat.service.stopplace;
 
 import org.rutebanken.tiamat.geo.StopPlaceCentroidComputer;
+import org.rutebanken.tiamat.lock.MutateLock;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
-import org.rutebanken.tiamat.lock.MutateLock;
-import org.rutebanken.tiamat.versioning.util.CopiedEntity;
 import org.rutebanken.tiamat.versioning.save.StopPlaceVersionedSaverService;
+import org.rutebanken.tiamat.versioning.util.CopiedEntity;
 import org.rutebanken.tiamat.versioning.util.StopPlaceCopyHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

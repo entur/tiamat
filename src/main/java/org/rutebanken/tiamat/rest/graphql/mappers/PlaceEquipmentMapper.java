@@ -15,7 +15,16 @@
 
 package org.rutebanken.tiamat.rest.graphql.mappers;
 
-import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.model.CycleStorageEnumeration;
+import org.rutebanken.tiamat.model.CycleStorageEquipment;
+import org.rutebanken.tiamat.model.GenderLimitationEnumeration;
+import org.rutebanken.tiamat.model.GeneralSign;
+import org.rutebanken.tiamat.model.PlaceEquipment;
+import org.rutebanken.tiamat.model.SanitaryEquipment;
+import org.rutebanken.tiamat.model.ShelterEquipment;
+import org.rutebanken.tiamat.model.SignContentEnumeration;
+import org.rutebanken.tiamat.model.TicketingEquipment;
+import org.rutebanken.tiamat.model.WaitingRoomEquipment;
 import org.springframework.stereotype.Component;
 
 import java.math.BigInteger;
@@ -23,7 +32,27 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.CONTENT;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.CYCLE_STORAGE_EQUIPMENT;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.CYCLE_STORAGE_TYPE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ENCLOSED;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.GENDER;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.GENERAL_SIGN;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.HEATED;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.NUMBER_OF_MACHINES;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.NUMBER_OF_SPACES;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.NUMBER_OF_TOILETS;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PLACE_EQUIPMENTS;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PRIVATE_CODE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.SANITARY_EQUIPMENT;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.SEATS;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.SHELTER_EQUIPMENT;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.SIGN_CONTENT_TYPE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.STEP_FREE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.TICKETING_EQUIPMENT;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.TICKET_MACHINES;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.TICKET_OFFICE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.WAITING_ROOM_EQUIPMENT;
 import static org.rutebanken.tiamat.rest.graphql.mappers.EmbeddableMultilingualStringMapper.getEmbeddableString;
 import static org.rutebanken.tiamat.rest.graphql.mappers.PrivateCodeMapper.getPrivateCodeStructure;
 

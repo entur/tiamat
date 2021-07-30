@@ -17,13 +17,13 @@ package org.rutebanken.tiamat.service.stopplace;
 
 import org.locationtech.jts.geom.Point;
 import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
+import org.rutebanken.tiamat.lock.MutateLock;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.ValidBetween;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
-import org.rutebanken.tiamat.lock.MutateLock;
-import org.rutebanken.tiamat.versioning.save.StopPlaceVersionedSaverService;
 import org.rutebanken.tiamat.versioning.VersionCreator;
+import org.rutebanken.tiamat.versioning.save.StopPlaceVersionedSaverService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

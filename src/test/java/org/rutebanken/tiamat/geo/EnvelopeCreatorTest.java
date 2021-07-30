@@ -15,19 +15,18 @@
 
 package org.rutebanken.tiamat.geo;
 
+import org.geotools.geometry.jts.JTS;
+import org.geotools.referencing.crs.DefaultGeographicCRS;
+import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
-import org.geotools.geometry.jts.JTS;
-import org.geotools.referencing.crs.DefaultGeographicCRS;
-import org.junit.Test;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
 import org.rutebanken.tiamat.config.GeometryFactoryConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
 
 
 public class EnvelopeCreatorTest {

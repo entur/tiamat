@@ -16,7 +16,12 @@
 package org.rutebanken.tiamat.exporter;
 
 import org.junit.Test;
-import org.rutebanken.netex.model.*;
+import org.rutebanken.netex.model.ObjectFactory;
+import org.rutebanken.netex.model.SiteFrame;
+import org.rutebanken.netex.model.StopPlace;
+import org.rutebanken.netex.model.TariffZoneRef;
+import org.rutebanken.netex.model.TariffZoneRefs_RelStructure;
+import org.rutebanken.netex.model.TariffZonesInFrame_RelStructure;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.TariffZone;
 import org.rutebanken.tiamat.repository.TariffZoneRepository;

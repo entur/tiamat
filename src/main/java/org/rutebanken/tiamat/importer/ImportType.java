@@ -15,10 +15,10 @@
 
 package org.rutebanken.tiamat.importer;
 
-import org.rutebanken.tiamat.importer.matching.TransactionalMatchingAppendingStopPlaceImporter;
-import org.rutebanken.tiamat.importer.matching.StopPlaceIdMatcher;
-import org.rutebanken.tiamat.importer.merging.TransactionalMergingStopPlacesImporter;
 import org.rutebanken.tiamat.importer.initial.ParallelInitialStopPlaceImporter;
+import org.rutebanken.tiamat.importer.matching.StopPlaceIdMatcher;
+import org.rutebanken.tiamat.importer.matching.TransactionalMatchingAppendingStopPlaceImporter;
+import org.rutebanken.tiamat.importer.merging.TransactionalMergingStopPlacesImporter;
 
 /**
  * Different netex import types. Mainly related to behaviour of stop places import.

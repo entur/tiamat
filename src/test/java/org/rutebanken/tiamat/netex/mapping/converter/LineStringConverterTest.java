@@ -15,16 +15,16 @@
 
 package org.rutebanken.tiamat.netex.mapping.converter;
 
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.CoordinateSequence;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.LineString;
-import org.locationtech.jts.geom.impl.CoordinateArraySequence;
 import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.metadata.TypeBuilder;
 import net.opengis.gml._3.DirectPositionListType;
 import net.opengis.gml._3.LineStringType;
 import org.junit.Test;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.CoordinateSequence;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.impl.CoordinateArraySequence;
 import org.rutebanken.tiamat.config.GeometryFactoryConfig;
 import org.rutebanken.tiamat.geo.DoubleValuesToCoordinateSequence;
 

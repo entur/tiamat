@@ -22,7 +22,6 @@ import org.entur.oauth2.MultiIssuerAuthenticationManagerResolver;
 import org.entur.oauth2.RorAuth0RolesClaimAdapter;
 import org.rutebanken.helper.organisation.RoleAssignmentExtractor;
 import org.springframework.beans.factory.annotation.Value;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

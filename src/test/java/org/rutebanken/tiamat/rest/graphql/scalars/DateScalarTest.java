@@ -19,7 +19,11 @@ import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.time.*;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.rutebanken.tiamat.rest.graphql.scalars.DateScalar.EXAMPLE_DATE_TIME;

@@ -19,7 +19,11 @@ import org.junit.Test;
 import org.rutebanken.tiamat.netex.mapping.PublicationDeliveryHelper;
 import org.xml.sax.SAXException;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 

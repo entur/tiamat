@@ -34,13 +34,13 @@ import com.google.api.client.util.Preconditions;
 import graphql.language.Field;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
+import org.rutebanken.tiamat.lock.MutateLock;
 import org.rutebanken.tiamat.model.GroupOfStopPlaces;
 import org.rutebanken.tiamat.repository.GroupOfStopPlacesRepository;
 import org.rutebanken.tiamat.rest.graphql.helpers.CleanupHelper;
 import org.rutebanken.tiamat.rest.graphql.mappers.GroupOfStopPlacesMapper;
-import org.rutebanken.tiamat.lock.MutateLock;
-import org.rutebanken.tiamat.versioning.save.GroupOfStopPlacesSaverService;
 import org.rutebanken.tiamat.versioning.VersionCreator;
+import org.rutebanken.tiamat.versioning.save.GroupOfStopPlacesSaverService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,7 +50,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Map;
 
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ID;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.MUTATE_GROUP_OF_STOP_PLACES;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.OUTPUT_TYPE_GROUP_OF_STOPPLACES;
 
 @Service("groupOfStopPlacesUpdater")
 @Transactional

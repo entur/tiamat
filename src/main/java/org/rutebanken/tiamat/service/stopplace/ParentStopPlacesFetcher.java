@@ -26,8 +26,7 @@ import org.springframework.stereotype.Service;
 import javax.persistence.EntityManager;
 import java.util.List;
 
-import static java.util.Comparator.comparing;
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.toList;
 
 /**
  * Resolve and fetch parent stop places from a list of stops

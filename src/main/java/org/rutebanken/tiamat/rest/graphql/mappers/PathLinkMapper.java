@@ -27,7 +27,19 @@ import org.springframework.stereotype.Component;
 import java.time.Duration;
 import java.util.Map;
 
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.DEFAULT_DURATION;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ENTITY_REF_REF;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ENTITY_REF_VERSION;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.FREQUENT_TRAVELLER_DURATION;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.GEOMETRY;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ID;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.MOBILITY_RESTRICTED_TRAVELLER_DURATION;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.OCCASIONAL_TRAVELLER_DURATION;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PATH_LINK_END_PLACE_REF;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PATH_LINK_FROM;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PATH_LINK_TO;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.TRANSFER_DURATION;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.VERSION;
 
 @Component
 public class PathLinkMapper {

@@ -32,7 +32,6 @@ package org.rutebanken.tiamat.rest.graphql.types;
 
 import graphql.schema.GraphQLInterfaceType;
 import graphql.schema.GraphQLList;
-import graphql.schema.GraphQLNonNull;
 import graphql.schema.GraphQLObjectType;
 import org.rutebanken.tiamat.rest.graphql.fetchers.GroupOfStopPlacesMembersFetcher;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +40,13 @@ import org.springframework.stereotype.Component;
 import static graphql.Scalars.GraphQLString;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLObjectType.newObject;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.DESCRIPTION;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.GROUP_OF_STOP_PLACES_MEMBERS;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.NAME;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.OUTPUT_TYPE_GROUP_OF_STOPPLACES;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.SHORT_NAME;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.VERSION;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.VERSION_COMMENT;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.embeddableMultilingualStringObjectType;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.netexIdFieldDefinition;
 

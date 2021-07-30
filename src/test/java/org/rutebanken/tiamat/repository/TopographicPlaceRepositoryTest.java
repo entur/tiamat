@@ -15,20 +15,28 @@
 
 package org.rutebanken.tiamat.repository;
 
-import org.locationtech.jts.geom.*;
+import org.junit.Test;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LinearRing;
 import org.locationtech.jts.geom.impl.CoordinateArraySequence;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.exporter.params.TopographicPlaceSearch;
-import org.rutebanken.tiamat.model.*;
-import org.junit.Test;
+import org.rutebanken.tiamat.model.CountryRef;
+import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
+import org.rutebanken.tiamat.model.IanaCountryTldEnumeration;
+import org.rutebanken.tiamat.model.TopographicPlace;
+import org.rutebanken.tiamat.model.TopographicPlaceTypeEnumeration;
+import org.rutebanken.tiamat.model.ValidBetween;
 import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.Instant;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class TopographicPlaceRepositoryTest extends TiamatIntegrationTest {
 

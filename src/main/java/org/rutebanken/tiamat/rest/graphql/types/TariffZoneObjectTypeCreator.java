@@ -18,9 +18,11 @@ package org.rutebanken.tiamat.rest.graphql.types;
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLObjectType;
 import org.springframework.stereotype.Component;
+
 import java.util.List;
+
 import static graphql.schema.GraphQLObjectType.newObject;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.OUTPUT_TYPE_TARIFF_ZONE;
 
 @Component
 public class TariffZoneObjectTypeCreator {

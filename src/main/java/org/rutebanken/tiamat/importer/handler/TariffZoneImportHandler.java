@@ -45,8 +45,16 @@
 
 package org.rutebanken.tiamat.importer.handler;
 
-import org.rutebanken.netex.model.*;
-import org.rutebanken.tiamat.importer.*;
+import org.rutebanken.netex.model.FareZone;
+import org.rutebanken.netex.model.ObjectFactory;
+import org.rutebanken.netex.model.SiteFrame;
+import org.rutebanken.netex.model.TariffZone;
+import org.rutebanken.netex.model.TariffZonesInFrame_RelStructure;
+import org.rutebanken.netex.model.Zone_VersionStructure;
+import org.rutebanken.tiamat.importer.FareZoneImporter;
+import org.rutebanken.tiamat.importer.ImportParams;
+import org.rutebanken.tiamat.importer.ImportType;
+import org.rutebanken.tiamat.importer.TariffZoneImporter;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.netex.mapping.PublicationDeliveryHelper;
 import org.slf4j.Logger;

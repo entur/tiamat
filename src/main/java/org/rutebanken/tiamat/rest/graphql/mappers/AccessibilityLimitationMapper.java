@@ -21,8 +21,11 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.AUDIBLE_SIGNALS_AVAILABLE;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ESCALATOR_FREE_ACCESS;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.LIFT_FREE_ACCESS;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.STEP_FREE_ACCESS;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.WHEELCHAIR_ACCESS;
 
 @Component
 public class AccessibilityLimitationMapper {

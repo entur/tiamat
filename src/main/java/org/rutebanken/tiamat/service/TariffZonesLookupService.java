@@ -44,7 +44,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.maxBy;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 
 @Service
 @Transactional

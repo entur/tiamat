@@ -18,7 +18,12 @@ package org.rutebanken.tiamat.model;
 import com.google.common.base.MoreObjects;
 import org.locationtech.jts.geom.Point;
 
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.CollectionTable;
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.OneToMany;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;

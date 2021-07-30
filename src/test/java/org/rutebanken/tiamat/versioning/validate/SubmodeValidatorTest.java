@@ -19,7 +19,6 @@ import org.junit.Test;
 import org.rutebanken.tiamat.model.BusSubmodeEnumeration;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.TramSubmodeEnumeration;
-import org.rutebanken.tiamat.versioning.validate.SubmodeValidator;
 
 public class SubmodeValidatorTest {
 

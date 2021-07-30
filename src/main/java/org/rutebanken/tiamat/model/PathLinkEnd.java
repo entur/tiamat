@@ -20,7 +20,14 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
 
-import javax.persistence.*;
+import javax.persistence.AttributeOverride;
+import javax.persistence.AttributeOverrides;
+import javax.persistence.Column;
+import javax.persistence.Embedded;
+import javax.persistence.Entity;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
+import javax.persistence.Transient;
 
 @Entity
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)

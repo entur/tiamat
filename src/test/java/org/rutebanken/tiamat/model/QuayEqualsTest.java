@@ -15,9 +15,9 @@
 
 package org.rutebanken.tiamat.model;
 
+import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
-import org.junit.Test;
 import org.rutebanken.tiamat.config.GeometryFactoryConfig;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 

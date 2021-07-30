@@ -15,14 +15,22 @@
 
 package org.rutebanken.tiamat.versioning;
 
-import org.locationtech.jts.geom.Coordinate;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.locationtech.jts.geom.Coordinate;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
-import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.model.AddressablePlaceRefStructure;
+import org.rutebanken.tiamat.model.InstalledEquipment_VersionStructure;
+import org.rutebanken.tiamat.model.PathLink;
+import org.rutebanken.tiamat.model.PathLinkEnd;
+import org.rutebanken.tiamat.model.PlaceEquipment;
+import org.rutebanken.tiamat.model.Quay;
+import org.rutebanken.tiamat.model.SiteRefStructure;
+import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.TicketingEquipment;
+import org.rutebanken.tiamat.model.ValidBetween;
 import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
 import org.rutebanken.tiamat.netex.id.RandomizedTestNetexIdGenerator;
-import org.rutebanken.tiamat.rest.netex.publicationdelivery.PublicationDeliveryTestHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 

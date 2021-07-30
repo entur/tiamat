@@ -60,9 +60,6 @@
 
 package org.rutebanken.tiamat.service.groupofstopplaces;
 
-import com.google.api.client.util.Preconditions;
-import graphql.schema.DataFetcher;
-import graphql.schema.DataFetchingEnvironment;
 import org.rutebanken.helper.organisation.AuthorizationConstants;
 import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
 import org.rutebanken.tiamat.auth.UsernameFetcher;
@@ -73,11 +70,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ID;
 
 @Service
 public class GroupOfStopPlacesDeleter {

@@ -16,11 +16,11 @@
 package org.rutebanken.tiamat.importer.merging;
 
 import com.google.common.collect.Sets;
+import org.geotools.referencing.GeodeticCalculator;
+import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
-import org.geotools.referencing.GeodeticCalculator;
-import org.junit.Test;
 import org.rutebanken.tiamat.config.GeometryFactoryConfig;
 import org.rutebanken.tiamat.importer.matching.OriginalIdMatcher;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
@@ -31,7 +31,12 @@ import org.rutebanken.tiamat.netex.id.ValidPrefixList;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 
 import java.awt.geom.Point2D;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.stream.Collectors.toList;

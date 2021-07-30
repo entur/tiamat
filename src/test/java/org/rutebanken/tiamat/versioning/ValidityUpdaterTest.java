@@ -17,18 +17,13 @@ package org.rutebanken.tiamat.versioning;
 
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
-import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.ValidBetween;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.persistence.Version;
-import javax.persistence.criteria.CriteriaBuilder;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.*;
 
 public class ValidityUpdaterTest extends TiamatIntegrationTest {
 

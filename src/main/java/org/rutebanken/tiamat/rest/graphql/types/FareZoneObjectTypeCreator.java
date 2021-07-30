@@ -26,7 +26,6 @@ import org.rutebanken.tiamat.model.StopPlaceReference;
 import org.rutebanken.tiamat.model.TariffZoneRef;
 import org.rutebanken.tiamat.repository.FareZoneRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
-
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;

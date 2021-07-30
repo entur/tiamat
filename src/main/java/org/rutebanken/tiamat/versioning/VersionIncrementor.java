@@ -15,7 +15,14 @@
 
 package org.rutebanken.tiamat.versioning;
 
-import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.model.AccessibilityAssessment;
+import org.rutebanken.tiamat.model.AccessibilityLimitation;
+import org.rutebanken.tiamat.model.AlternativeName;
+import org.rutebanken.tiamat.model.BoardingPosition;
+import org.rutebanken.tiamat.model.EntityInVersionStructure;
+import org.rutebanken.tiamat.model.PlaceEquipment;
+import org.rutebanken.tiamat.model.SiteElement;
+import org.rutebanken.tiamat.model.StopPlace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;

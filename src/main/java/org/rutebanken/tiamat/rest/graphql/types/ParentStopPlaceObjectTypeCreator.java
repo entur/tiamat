@@ -15,21 +15,18 @@
 
 package org.rutebanken.tiamat.rest.graphql.types;
 
-import graphql.schema.*;
-import org.rutebanken.tiamat.model.SiteRefStructure;
-import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.rest.graphql.scalars.TransportModeScalar;
-import org.springframework.beans.factory.annotation.Autowired;
+import graphql.schema.GraphQLFieldDefinition;
+import graphql.schema.GraphQLInterfaceType;
+import graphql.schema.GraphQLList;
+import graphql.schema.GraphQLObjectType;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-import static graphql.Scalars.GraphQLString;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLObjectType.newObject;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
-import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.interchangeWeightingEnum;
-import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.stopPlaceTypeEnum;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.CHILDREN;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.OUTPUT_TYPE_PARENT_STOPPLACE;
 
 @Component
 public class ParentStopPlaceObjectTypeCreator {

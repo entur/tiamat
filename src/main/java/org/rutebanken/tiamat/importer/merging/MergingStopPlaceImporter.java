@@ -16,17 +16,17 @@
 package org.rutebanken.tiamat.importer.merging;
 
 import org.rutebanken.tiamat.geo.StopPlaceCentroidComputer;
+import org.rutebanken.tiamat.geo.ZoneDistanceChecker;
 import org.rutebanken.tiamat.importer.KeyValueListAppender;
 import org.rutebanken.tiamat.importer.finder.NearbyStopPlaceFinder;
 import org.rutebanken.tiamat.importer.finder.NearbyStopsWithSameTypeFinder;
 import org.rutebanken.tiamat.importer.finder.StopPlaceFromOriginalIdFinder;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.geo.ZoneDistanceChecker;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
-import org.rutebanken.tiamat.versioning.save.StopPlaceVersionedSaverService;
 import org.rutebanken.tiamat.versioning.VersionCreator;
+import org.rutebanken.tiamat.versioning.save.StopPlaceVersionedSaverService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -16,10 +16,24 @@
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
 
-import org.rutebanken.netex.model.*;
+import org.rutebanken.netex.model.Common_VersionFrameStructure;
+import org.rutebanken.netex.model.CompositeFrame;
+import org.rutebanken.netex.model.DataManagedObjectStructure;
+import org.rutebanken.netex.model.FareFrame;
+import org.rutebanken.netex.model.GroupOfStopPlaces;
+import org.rutebanken.netex.model.LocaleStructure;
+import org.rutebanken.netex.model.ObjectFactory;
+import org.rutebanken.netex.model.PathLink;
+import org.rutebanken.netex.model.PathLinksInFrame_RelStructure;
+import org.rutebanken.netex.model.PublicationDeliveryStructure;
+import org.rutebanken.netex.model.Quay;
+import org.rutebanken.netex.model.SiteFrame;
+import org.rutebanken.netex.model.StopPlace;
+import org.rutebanken.netex.model.StopPlacesInFrame_RelStructure;
+import org.rutebanken.netex.model.TopographicPlace;
+import org.rutebanken.netex.model.TopographicPlacesInFrame_RelStructure;
+import org.rutebanken.netex.model.VersionFrameDefaultsStructure;
 import org.rutebanken.tiamat.importer.ImportParams;
-import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
-import org.rutebanken.tiamat.netex.id.NetexIdHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,21 +42,27 @@ import org.xml.sax.SAXException;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
-import javax.xml.bind.*;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 import static javax.xml.bind.JAXBContext.newInstance;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
 
 @Component

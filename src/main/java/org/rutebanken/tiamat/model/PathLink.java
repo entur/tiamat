@@ -19,10 +19,12 @@ import com.google.common.base.MoreObjects;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Embedded;
+import javax.persistence.Entity;
+import javax.persistence.OneToOne;
+import javax.persistence.Transient;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)

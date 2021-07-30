@@ -19,7 +19,9 @@ import com.google.common.collect.Sets;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Define alternative types.

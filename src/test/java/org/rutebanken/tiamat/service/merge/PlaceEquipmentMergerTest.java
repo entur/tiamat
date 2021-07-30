@@ -17,7 +17,11 @@ package org.rutebanken.tiamat.service.merge;
 
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
-import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.model.GeneralSign;
+import org.rutebanken.tiamat.model.InstalledEquipment_VersionStructure;
+import org.rutebanken.tiamat.model.PlaceEquipment;
+import org.rutebanken.tiamat.model.PrivateCodeStructure;
+import org.rutebanken.tiamat.model.SignContentEnumeration;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;

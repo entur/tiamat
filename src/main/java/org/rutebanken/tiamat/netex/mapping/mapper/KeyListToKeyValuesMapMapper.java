@@ -17,7 +17,6 @@ package org.rutebanken.tiamat.netex.mapping.mapper;
 
 import ma.glasnost.orika.CustomMapper;
 import ma.glasnost.orika.MappingContext;
-import org.rutebanken.netex.model.DataManagedObjectStructure;
 import org.rutebanken.netex.model.KeyListStructure;
 import org.rutebanken.netex.model.KeyValueStructure;
 import org.rutebanken.tiamat.model.Value;

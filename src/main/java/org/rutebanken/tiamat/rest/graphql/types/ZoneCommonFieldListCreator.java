@@ -31,9 +31,19 @@ import java.util.List;
 
 import static graphql.Scalars.GraphQLString;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
-import static graphql.schema.GraphQLObjectType.newObject;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
-import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.*;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.DESCRIPTION;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.IMPORTED_ID;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.KEY_VALUES;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.NAME;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.POLYGON;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.SHORT_NAME;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.VALID_BETWEEN;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.VERSION;
+import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.embeddableMultilingualStringObjectType;
+import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.geoJsonObjectType;
+import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.geometryFieldDefinition;
+import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.keyValuesObjectType;
+import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.netexIdFieldDefinition;
 
 @Component
 public class ZoneCommonFieldListCreator {

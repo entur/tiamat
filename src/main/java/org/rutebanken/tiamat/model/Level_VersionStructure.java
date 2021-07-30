@@ -15,7 +15,11 @@
 
 package org.rutebanken.tiamat.model;
 
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.FetchType;
+import javax.persistence.MappedSuperclass;
+import javax.persistence.OneToOne;
+import javax.persistence.Transient;
 import javax.xml.bind.JAXBElement;
 
 

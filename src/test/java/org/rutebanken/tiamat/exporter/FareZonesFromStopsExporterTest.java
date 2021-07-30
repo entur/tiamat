@@ -24,8 +24,6 @@ import org.rutebanken.netex.model.TariffZoneRefs_RelStructure;
 import org.rutebanken.netex.model.TariffZonesInFrame_RelStructure;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.FareZone;
-import org.rutebanken.tiamat.model.TariffZone;
-import org.rutebanken.tiamat.repository.TariffZoneRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Arrays;

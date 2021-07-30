@@ -17,7 +17,6 @@ package org.rutebanken.tiamat.service.stopplace;
 
 import com.google.common.collect.Sets;
 import org.junit.Test;
-import org.junit.runner.notification.StoppedByUserException;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -28,7 +27,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 

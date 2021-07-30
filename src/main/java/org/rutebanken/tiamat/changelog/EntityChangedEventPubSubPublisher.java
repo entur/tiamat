@@ -19,8 +19,6 @@ import org.rutebanken.tiamat.config.GooglePubSubConfig;
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
 import org.rutebanken.tiamat.model.EntityStructure;
 import org.rutebanken.tiamat.model.StopPlace;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;

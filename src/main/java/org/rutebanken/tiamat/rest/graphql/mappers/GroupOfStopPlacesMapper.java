@@ -23,7 +23,8 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Map;
 
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ENTITY_REF_REF;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.GROUP_OF_STOP_PLACES_MEMBERS;
 
 @Component
 public class GroupOfStopPlacesMapper {

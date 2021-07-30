@@ -15,7 +15,6 @@
 
 package org.rutebanken.tiamat.versioning;
 
-import org.locationtech.jts.geom.Point;
 import ma.glasnost.orika.CustomConverter;
 import ma.glasnost.orika.MapperFacade;
 import ma.glasnost.orika.MapperFactory;
@@ -23,7 +22,21 @@ import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.converter.builtin.PassThroughConverter;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
 import ma.glasnost.orika.metadata.Type;
-import org.rutebanken.tiamat.model.*;
+import org.locationtech.jts.geom.Point;
+import org.rutebanken.tiamat.model.AlternativeName;
+import org.rutebanken.tiamat.model.CycleStorageEquipment;
+import org.rutebanken.tiamat.model.EntityInVersionStructure;
+import org.rutebanken.tiamat.model.GeneralSign;
+import org.rutebanken.tiamat.model.InstalledEquipment_VersionStructure;
+import org.rutebanken.tiamat.model.PathLink;
+import org.rutebanken.tiamat.model.PathLinkEnd;
+import org.rutebanken.tiamat.model.PlaceEquipment;
+import org.rutebanken.tiamat.model.SanitaryEquipment;
+import org.rutebanken.tiamat.model.ShelterEquipment;
+import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.TicketingEquipment;
+import org.rutebanken.tiamat.model.TopographicPlace;
+import org.rutebanken.tiamat.model.WaitingRoomEquipment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

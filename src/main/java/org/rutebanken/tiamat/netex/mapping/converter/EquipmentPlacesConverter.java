@@ -18,8 +18,8 @@ package org.rutebanken.tiamat.netex.mapping.converter;
 import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;
-import org.rutebanken.tiamat.model.EquipmentPlace;
 import org.rutebanken.netex.model.EquipmentPlaces_RelStructure;
+import org.rutebanken.tiamat.model.EquipmentPlace;
 import org.springframework.stereotype.Component;
 
 import java.util.List;

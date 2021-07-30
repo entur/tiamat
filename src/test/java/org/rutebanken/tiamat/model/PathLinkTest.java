@@ -15,11 +15,11 @@
 
 package org.rutebanken.tiamat.model;
 
+import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.CoordinateSequence;
 import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.impl.CoordinateArraySequence;
-import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.springframework.transaction.annotation.Transactional;
 

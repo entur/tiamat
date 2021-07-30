@@ -27,7 +27,20 @@ import javax.ws.rs.QueryParam;
 import java.time.Instant;
 import java.util.List;
 
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ALL_VERSIONS_ARG_DESCRIPTION;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.HAS_PARKING;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PAGE_ARG_DESCRIPTION;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.POINT_IN_TIME_ARG_DESCRIPTION;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.QUERY_ARG_DESCRIPTION;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.SIZE_ARG_DESCRIPTION;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.STOP_PLACE_TYPE_ARG_DESCRIPTION;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.TAGS_ARG_DESCRIPTION;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.VERSION_VALIDITY_ARG_DESCRIPTION;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.WITHOUT_LOCATION_ONLY_ARG_DESCRIPTION;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.WITHOUT_QUAYS_ONLY_ARG_DESCRIPTION;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.WITH_DUPLICATED_QUAY_IMPORTED_IDS_ARG_DESCRIPTION;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.WITH_NEARBY_SIMILAR_DUPLICATES_ARG_DESCRIPTION;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.WITH_TAGS_ARG_DESCRIPTION;
 
 /**
  * Search params relevant for searching for stop places.

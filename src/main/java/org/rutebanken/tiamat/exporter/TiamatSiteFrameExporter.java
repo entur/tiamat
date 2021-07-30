@@ -15,7 +15,14 @@
 
 package org.rutebanken.tiamat.exporter;
 
-import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.model.LocaleStructure;
+import org.rutebanken.tiamat.model.MultilingualStringEntity;
+import org.rutebanken.tiamat.model.SiteFrame;
+import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.StopPlacesInFrame_RelStructure;
+import org.rutebanken.tiamat.model.TariffZone;
+import org.rutebanken.tiamat.model.TariffZonesInFrame_RelStructure;
+import org.rutebanken.tiamat.model.VersionFrameDefaultsStructure;
 import org.rutebanken.tiamat.netex.id.NetexIdHelper;
 import org.rutebanken.tiamat.repository.PathLinkRepository;
 import org.rutebanken.tiamat.repository.TariffZoneRepository;
@@ -26,7 +33,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.List;
+import java.util.Set;
 
 @Service
 public class TiamatSiteFrameExporter {

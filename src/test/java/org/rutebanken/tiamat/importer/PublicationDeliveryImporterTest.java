@@ -16,20 +16,16 @@
 package org.rutebanken.tiamat.importer;
 
 import org.junit.Test;
-import org.rutebanken.netex.model.*;
+import org.rutebanken.netex.model.CompositeFrame;
+import org.rutebanken.netex.model.Frames_RelStructure;
+import org.rutebanken.netex.model.ObjectFactory;
+import org.rutebanken.netex.model.PublicationDeliveryStructure;
+import org.rutebanken.netex.model.SiteFrame;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
-import org.rutebanken.tiamat.exporter.PublicationDeliveryExporter;
-import org.rutebanken.tiamat.exporter.TopographicPlacesExporter;
-import org.rutebanken.tiamat.importer.modifier.StopPlacePreSteps;
-import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.netex.mapping.PublicationDeliveryHelper;
-import org.rutebanken.tiamat.rest.netex.publicationdelivery.PublicationDeliveryTestHelper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.Mockito.mock;
 
 public class PublicationDeliveryImporterTest extends TiamatIntegrationTest {
 

@@ -19,7 +19,11 @@ import com.google.common.base.MoreObjects;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
 
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.FetchType;
+import javax.persistence.MappedSuperclass;
+import javax.persistence.OneToOne;
+import javax.persistence.Transient;
 
 
 @MappedSuperclass

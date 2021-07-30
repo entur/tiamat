@@ -4,9 +4,8 @@ import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.service.TariffZonesLookupService;
 import org.rutebanken.tiamat.service.TopographicPlaceLookupService;
 
-
 import java.util.Optional;
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class StopPlaceRefUpdater implements Callable<Optional<StopPlace>> {

@@ -15,11 +15,11 @@
 
 package org.rutebanken.tiamat.rest.graphql.scalars;
 
-import org.locationtech.jts.geom.Coordinate;
 import graphql.language.ArrayValue;
 import graphql.language.FloatValue;
 import graphql.schema.Coercing;
 import graphql.schema.GraphQLScalarType;
+import org.locationtech.jts.geom.Coordinate;
 
 import java.util.ArrayList;
 import java.util.List;

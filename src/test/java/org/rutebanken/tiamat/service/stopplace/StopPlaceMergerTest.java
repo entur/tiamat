@@ -15,7 +15,6 @@
 
 package org.rutebanken.tiamat.service.stopplace;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.rutebanken.tiamat.TiamatIntegrationTest;

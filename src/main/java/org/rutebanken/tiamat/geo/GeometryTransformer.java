@@ -15,10 +15,9 @@
 
 package org.rutebanken.tiamat.geo;
 
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.Point;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
+import org.locationtech.jts.geom.Geometry;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CRSAuthorityFactory;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;

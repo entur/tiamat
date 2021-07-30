@@ -15,32 +15,38 @@
 
 package org.rutebanken.tiamat.netex.mapping;
 
-import org.locationtech.jts.geom.Coordinate;
-import ma.glasnost.orika.MappingContext;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.rutebanken.netex.model.*;
+import org.locationtech.jts.geom.Coordinate;
+import org.rutebanken.netex.model.AccessibilityLimitations_RelStructure;
+import org.rutebanken.netex.model.KeyListStructure;
+import org.rutebanken.netex.model.KeyValueStructure;
 import org.rutebanken.netex.model.MultilingualString;
+import org.rutebanken.netex.model.SiteRefs_RelStructure;
+import org.rutebanken.netex.model.StopPlaceRefStructure;
+import org.rutebanken.netex.model.TopographicPlacesInFrame_RelStructure;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.AccessibilityAssessment;
 import org.rutebanken.tiamat.model.AccessibilityLimitation;
 import org.rutebanken.tiamat.model.AddressablePlaceRefStructure;
 import org.rutebanken.tiamat.model.AlternativeName;
 import org.rutebanken.tiamat.model.CountryRef;
-import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.GroupOfStopPlaces;
 import org.rutebanken.tiamat.model.IanaCountryTldEnumeration;
 import org.rutebanken.tiamat.model.LimitationStatusEnumeration;
 import org.rutebanken.tiamat.model.NameTypeEnumeration;
 import org.rutebanken.tiamat.model.PathLink;
+import org.rutebanken.tiamat.model.PathLinkEnd;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.SiteFrame;
 import org.rutebanken.tiamat.model.SiteRefStructure;
 import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.StopPlaceReference;
 import org.rutebanken.tiamat.model.StopPlacesInFrame_RelStructure;
 import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.model.TopographicPlaceRefStructure;
-import org.rutebanken.tiamat.netex.mapping.mapper.QuayMapper;
+import org.rutebanken.tiamat.model.Value;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.Instant;
@@ -48,8 +54,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.mock;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
 
 public class NetexMapperTest extends TiamatIntegrationTest {

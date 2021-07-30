@@ -21,7 +21,6 @@ import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;

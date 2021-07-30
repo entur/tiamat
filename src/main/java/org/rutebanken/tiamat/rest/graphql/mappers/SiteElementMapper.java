@@ -15,20 +15,28 @@
 
 package org.rutebanken.tiamat.rest.graphql.mappers;
 
-import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.model.AccessibilityAssessment;
+import org.rutebanken.tiamat.model.AccessibilityLimitation;
+import org.rutebanken.tiamat.model.AlternativeName;
+import org.rutebanken.tiamat.model.LimitationStatusEnumeration;
+import org.rutebanken.tiamat.model.PlaceEquipment;
+import org.rutebanken.tiamat.model.SiteComponent_VersionStructure;
+import org.rutebanken.tiamat.model.SiteElement;
+import org.rutebanken.tiamat.model.Site_VersionStructure;
 import org.rutebanken.tiamat.service.AlternativeNameUpdater;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ACCESSIBILITY_ASSESSMENT;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ALTERNATIVE_NAMES;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.GEOMETRY;
 
 @Component
 public class SiteElementMapper {

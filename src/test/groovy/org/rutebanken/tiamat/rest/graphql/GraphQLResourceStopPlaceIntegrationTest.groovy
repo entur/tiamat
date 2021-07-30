@@ -15,11 +15,11 @@
 
 package org.rutebanken.tiamat.rest.graphql
 
-import org.locationtech.jts.geom.Coordinate
-import org.locationtech.jts.geom.Point
 import org.hamcrest.Matchers
 import org.junit.Before
 import org.junit.Test
+import org.locationtech.jts.geom.Coordinate
+import org.locationtech.jts.geom.Point
 import org.rutebanken.tiamat.changelog.EntityChangedEvent
 import org.rutebanken.tiamat.changelog.EntityChangedJMSListener
 import org.rutebanken.tiamat.model.*

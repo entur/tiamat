@@ -37,13 +37,46 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.text.MessageFormat;
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static org.rutebanken.tiamat.exporter.params.ExportParams.newExportParamsBuilder;
 import static org.rutebanken.tiamat.exporter.params.StopPlaceSearch.newStopPlaceSearchBuilder;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ALL_VERSIONS;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.COUNTRY_REF;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.COUNTY_REF;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.HAS_PARKING;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ID;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.IGNORE_STOPPLACE_ID;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.IMPORTED_ID_QUERY;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.INCLUDE_EXPIRED;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.KEY;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.LATITUDE_MAX;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.LATITUDE_MIN;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.LONGITUDE_MAX;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.LONGITUDE_MIN;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.MUNICIPALITY_REF;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ONLY_MONOMODAL_STOPPLACES;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PAGE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.POINT_IN_TIME;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.QUERY;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.SEARCH_WITH_CODE_SPACE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.SIZE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.STOP_PLACE_TYPE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.TAGS;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.VALUES;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.VERSION;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.VERSION_VALIDITY_ARG;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.WITHOUT_LOCATION_ONLY;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.WITHOUT_QUAYS_ONLY;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.WITH_DUPLICATED_QUAY_IMPORTED_IDS;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.WITH_NEARBY_SIMILAR_DUPLICATES;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.WITH_TAGS;
 
 @Service("stopPlaceFetcher")
 @Transactional

@@ -30,14 +30,12 @@
 
 package org.rutebanken.tiamat.service;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.rutebanken.tiamat.model.AlternativeName;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.NameTypeEnumeration;
 import org.rutebanken.tiamat.model.StopPlace;
 
-import java.time.Instant;
 import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.assertThat;

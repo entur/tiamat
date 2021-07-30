@@ -48,23 +48,13 @@ package org.rutebanken.tiamat.rest.graphql.fetchers;
 import com.google.api.client.util.Preconditions;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
-import org.rutebanken.helper.organisation.AuthorizationConstants;
-import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
-import org.rutebanken.tiamat.auth.UsernameFetcher;
-import org.rutebanken.tiamat.model.GroupOfStopPlaces;
-import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.repository.GroupOfStopPlacesRepository;
 import org.rutebanken.tiamat.service.groupofstopplaces.GroupOfStopPlacesDeleter;
-import org.rutebanken.tiamat.service.groupofstopplaces.GroupOfStopPlacesMembersResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ID;
 
 @Service("groupOfStopPlacesDeleterFetcher")
 public class GroupOfStopPlacesDeleterFetcher implements DataFetcher<Boolean> {

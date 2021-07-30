@@ -18,7 +18,6 @@ package org.rutebanken.tiamat.importer.finder;
 import org.junit.Test;
 import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.model.TopographicPlaceRefStructure;
-import org.rutebanken.tiamat.rest.netex.publicationdelivery.PublicationDeliveryTestHelper;
 
 import java.util.ArrayList;
 import java.util.List;

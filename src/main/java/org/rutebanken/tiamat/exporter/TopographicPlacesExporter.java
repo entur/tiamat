@@ -17,7 +17,10 @@ package org.rutebanken.tiamat.exporter;
 
 import org.rutebanken.netex.model.TopographicPlace;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
-import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.StopPlacesInFrame_RelStructure;
+import org.rutebanken.tiamat.model.TopographicPlaceRefStructure;
+import org.rutebanken.tiamat.model.TopographicPlacesInFrame;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.slf4j.Logger;
@@ -27,7 +30,12 @@ import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 

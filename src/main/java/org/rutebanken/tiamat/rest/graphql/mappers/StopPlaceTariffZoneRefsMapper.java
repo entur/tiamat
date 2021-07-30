@@ -15,15 +15,14 @@
 
 package org.rutebanken.tiamat.rest.graphql.mappers;
 
-import org.rutebanken.tiamat.model.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.TariffZoneRef;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
 
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ENTITY_REF_REF;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.GROUP_OF_STOP_PLACES_MEMBERS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.TARIFF_ZONES;
 
 @Component

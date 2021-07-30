@@ -16,14 +16,9 @@
 package org.rutebanken.tiamat.exporter.params;
 
 import com.google.common.base.MoreObjects;
-import org.rutebanken.tiamat.model.StopTypeEnumeration;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.QueryParam;
-import java.time.Instant;
-import java.util.List;
 import java.util.Set;
 
 public class ParkingSearch implements SearchObject{

@@ -22,7 +22,10 @@ import java.util.ArrayList;
 
 import static junit.framework.TestCase.assertEquals;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.rutebanken.tiamat.model.LimitationStatusEnumeration.*;
+import static org.rutebanken.tiamat.model.LimitationStatusEnumeration.FALSE;
+import static org.rutebanken.tiamat.model.LimitationStatusEnumeration.PARTIAL;
+import static org.rutebanken.tiamat.model.LimitationStatusEnumeration.TRUE;
+import static org.rutebanken.tiamat.model.LimitationStatusEnumeration.UNKNOWN;
 
 public class MobilityImpairedAccessCalculatorTest {
 

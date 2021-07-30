@@ -17,12 +17,14 @@ package org.rutebanken.tiamat.repository;
 
 
 import com.google.common.collect.Sets;
+import org.hibernate.ScrollMode;
+import org.hibernate.ScrollableResults;
+import org.hibernate.Session;
+import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
 import org.hibernate.query.NativeQuery;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
-import org.hibernate.*;
-import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
 import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
 import org.rutebanken.tiamat.dtoassembling.dto.JbvCodeMappingDto;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
@@ -42,15 +44,26 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.util.Pair;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.*;
+import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
+import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+import javax.persistence.TypedQuery;
 import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
-
 
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.MERGED_ID_KEY;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;

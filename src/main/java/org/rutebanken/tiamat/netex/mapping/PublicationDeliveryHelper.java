@@ -15,11 +15,20 @@
 
 package org.rutebanken.tiamat.netex.mapping;
 
-import org.rutebanken.netex.model.*;
+import org.rutebanken.netex.model.Common_VersionFrameStructure;
+import org.rutebanken.netex.model.CompositeFrame;
+import org.rutebanken.netex.model.DataManagedObjectStructure;
+import org.rutebanken.netex.model.PublicationDeliveryStructure;
+import org.rutebanken.netex.model.SiteFrame;
+import org.rutebanken.netex.model.TopographicPlace;
 import org.springframework.stereotype.Component;
 
 import javax.xml.bind.JAXBElement;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toSet;

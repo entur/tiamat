@@ -8,7 +8,9 @@ import org.springframework.stereotype.Service;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ALL_VERSIONS;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.POINT_IN_TIME;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.VERSION;
 
 @Service
 public class ExportParamsAndStopPlaceSearchValidator {

@@ -30,11 +30,15 @@ import java.util.List;
 import static graphql.Scalars.GraphQLString;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLObjectType.newObject;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ADJACENT_SITES;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ADJACENT_SITES_DESCRIPTION;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.OUTPUT_TYPE_STOPPLACE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PARENT_SITE_REF;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.QUAYS;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.STOP_PLACE_TYPE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.WEIGHTING;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.interchangeWeightingEnum;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.stopPlaceTypeEnum;
-import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.versionLessRefInputObjectType;
 import static org.rutebanken.tiamat.rest.graphql.types.VersionLessEntityRef.versionLessEntityRef;
 
 @Component

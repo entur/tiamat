@@ -18,7 +18,6 @@ package org.rutebanken.tiamat.rest.graphql.resolvers;
 import graphql.TypeResolutionEnvironment;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.TypeResolver;
-import org.springframework.stereotype.Component;
 
 import java.util.function.Function;
 

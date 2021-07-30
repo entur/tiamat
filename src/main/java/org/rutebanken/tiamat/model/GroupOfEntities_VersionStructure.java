@@ -15,7 +15,12 @@
 
 package org.rutebanken.tiamat.model;
 
-import javax.persistence.*;
+import javax.persistence.AttributeOverride;
+import javax.persistence.AttributeOverrides;
+import javax.persistence.Column;
+import javax.persistence.Embedded;
+import javax.persistence.MappedSuperclass;
+import javax.persistence.Transient;
 
 @MappedSuperclass
 public abstract class GroupOfEntities_VersionStructure

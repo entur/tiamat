@@ -15,11 +15,11 @@
 
 package org.rutebanken.tiamat.importer.finder;
 
+import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
-import org.junit.Test;
-import org.rutebanken.tiamat.general.PeriodicCacheLogger;
 import org.rutebanken.tiamat.config.GeometryFactoryConfig;
+import org.rutebanken.tiamat.general.PeriodicCacheLogger;
 import org.rutebanken.tiamat.importer.AlternativeStopTypes;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -28,7 +28,6 @@ import org.rutebanken.tiamat.repository.StopPlaceRepository;
 
 import java.util.concurrent.TimeUnit;
 
-import static org.assertj.core.api.Assertions.anyOf;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;

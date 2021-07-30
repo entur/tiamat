@@ -16,17 +16,26 @@
 package org.rutebanken.tiamat.repository;
 
 import com.google.common.collect.Sets;
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.Envelope;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Envelope;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.config.H2Functions;
 import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.exporter.params.StopPlaceSearch;
-import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
+import org.rutebanken.tiamat.model.EntityStructure;
+import org.rutebanken.tiamat.model.Quay;
+import org.rutebanken.tiamat.model.SiteRefStructure;
+import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.StopTypeEnumeration;
+import org.rutebanken.tiamat.model.TopographicPlace;
+import org.rutebanken.tiamat.model.TopographicPlaceRefStructure;
+import org.rutebanken.tiamat.model.ValidBetween;
+import org.rutebanken.tiamat.model.Value;
 import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
 import org.rutebanken.tiamat.model.tag.Tag;
 import org.rutebanken.tiamat.repository.search.ChangedStopPlaceSearch;
@@ -40,7 +49,13 @@ import org.springframework.util.CollectionUtils;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.rutebanken.tiamat.exporter.params.ExportParams.newExportParamsBuilder;

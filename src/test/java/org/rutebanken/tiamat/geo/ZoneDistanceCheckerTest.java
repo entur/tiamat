@@ -15,13 +15,12 @@
 
 package org.rutebanken.tiamat.geo;
 
+import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
-import org.junit.Test;
 import org.rutebanken.tiamat.config.GeometryFactoryConfig;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.model.StopTypeEnumeration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

@@ -16,15 +16,20 @@
 package org.rutebanken.tiamat.repository;
 
 import org.junit.Test;
-import org.mockito.internal.util.collections.Sets;;
+import org.mockito.internal.util.collections.Sets;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
-import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.model.AddressablePlaceRefStructure;
+import org.rutebanken.tiamat.model.PathLink;
+import org.rutebanken.tiamat.model.PathLinkEnd;
+import org.rutebanken.tiamat.model.Quay;
+import org.rutebanken.tiamat.model.StopPlace;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+
+;
 
 
 public class PathLinkRepositoryTest extends TiamatIntegrationTest {

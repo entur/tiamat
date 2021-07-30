@@ -15,20 +15,16 @@
 
 package org.rutebanken.tiamat.service.stopplace;
 
-import org.locationtech.jts.geom.Coordinate;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
+import org.locationtech.jts.geom.Coordinate;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.service.stopplace.StopPlaceDeleter;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.transaction.Transactional;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.Mockito.mock;
 
 public class StopPlaceDeleterIntegrationTest extends TiamatIntegrationTest {
 

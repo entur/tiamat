@@ -15,10 +15,19 @@
 
 package org.rutebanken.tiamat.rest.graphql.operations;
 
-import graphql.schema.*;
+import graphql.schema.GraphQLFieldDefinition;
+import graphql.schema.GraphQLInterfaceType;
+import graphql.schema.GraphQLList;
+import graphql.schema.GraphQLNonNull;
 import org.rutebanken.tiamat.rest.graphql.scalars.DateScalar;
 import org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes;
-import org.rutebanken.tiamat.service.stopplace.*;
+import org.rutebanken.tiamat.service.stopplace.StopPlaceDeleter;
+import org.rutebanken.tiamat.service.stopplace.StopPlaceMerger;
+import org.rutebanken.tiamat.service.stopplace.StopPlaceQuayDeleter;
+import org.rutebanken.tiamat.service.stopplace.StopPlaceQuayMerger;
+import org.rutebanken.tiamat.service.stopplace.StopPlaceQuayMover;
+import org.rutebanken.tiamat.service.stopplace.StopPlaceReopener;
+import org.rutebanken.tiamat.service.stopplace.StopPlaceTerminator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -29,7 +38,26 @@ import static graphql.Scalars.GraphQLBoolean;
 import static graphql.Scalars.GraphQLString;
 import static graphql.schema.GraphQLArgument.newArgument;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.DELETE_QUAY_FROM_STOP_PLACE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.DELETE_STOP_PLACE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.DRY_RUN;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.FROM_QUAY_ID;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.FROM_STOP_PLACE_ID;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.FROM_VERSION_COMMENT;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.MERGE_QUAYS;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.MERGE_STOP_PLACES;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.MODIFICATION_ENUMERATION;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.MOVE_QUAYS_TO_STOP;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.QUAY_ID;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.QUAY_IDS;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.REOPEN_STOP_PLACE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.STOP_PLACE_ID;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.TERMINATE_STOP_PLACE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.TO_QUAY_ID;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.TO_STOP_PLACE_ID;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.TO_VERSION_COMMENT;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.VALID_BETWEEN_TO_DATE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.VERSION_COMMENT;
 
 @Component
 public class StopPlaceOperationsBuilder {

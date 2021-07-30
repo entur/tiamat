@@ -15,11 +15,13 @@
 
 package org.rutebanken.tiamat.rest.graphql.scalars;
 
-import graphql.schema.*;
+import graphql.schema.DataFetchingEnvironment;
+import graphql.schema.GraphQLEnumType;
+import graphql.schema.GraphQLEnumValueDefinition;
+import graphql.schema.GraphQLFieldDefinition;
+import graphql.schema.GraphQLInputObjectField;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.VehicleModeEnumeration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.YamlMapFactoryBean;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
@@ -31,8 +33,19 @@ import java.util.Map;
 import static graphql.schema.GraphQLEnumType.newEnum;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLInputObjectField.newInputObjectField;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
-import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.*;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.SUBMODE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.SUBMODE_TYPE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.TRANSPORT_MODE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.TRANSPORT_MODE_TYPE;
+import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.airSubmodeType;
+import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.allVehiclesModesOfTransportationEnum;
+import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.busSubmodeType;
+import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.cablewaySubmodeType;
+import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.funicularSubmodeType;
+import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.metroSubmodeType;
+import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.railSubmodeType;
+import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.tramSubmodeType;
+import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.waterSubmodeType;
 
 @Component
 public class TransportModeScalar {

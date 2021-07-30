@@ -2,8 +2,6 @@ package org.rutebanken.tiamat.model;
 
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
-import org.rutebanken.tiamat.repository.GroupOfStopPlacesRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

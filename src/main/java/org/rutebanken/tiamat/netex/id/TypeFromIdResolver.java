@@ -15,7 +15,6 @@
 
 package org.rutebanken.tiamat.netex.id;
 
-import org.rutebanken.tiamat.model.DataManagedObjectStructure;
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

@@ -17,9 +17,9 @@ package org.rutebanken.tiamat.importer;
 
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
-import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.model.AddressablePlaceRefStructure;
 import org.rutebanken.tiamat.model.PathLink;
+import org.rutebanken.tiamat.model.PathLinkEnd;
 import org.rutebanken.tiamat.model.Quay;
 import org.springframework.beans.factory.annotation.Autowired;
 

@@ -27,7 +27,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -35,7 +34,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.FIND_BY_STOP_PLACE_ID;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PAGE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.SIZE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.VERSION;
 
 @Service("parkingFetcher")
 @Transactional

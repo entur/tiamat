@@ -16,7 +16,11 @@
 package org.rutebanken.tiamat.rest.netex.publicationdelivery.async;
 
 import com.google.common.base.MoreObjects;
-import org.rutebanken.netex.model.*;
+import org.rutebanken.netex.model.NavigationPath;
+import org.rutebanken.netex.model.Parking;
+import org.rutebanken.netex.model.PublicationDeliveryStructure;
+import org.rutebanken.netex.model.StopPlace;
+import org.rutebanken.netex.model.TopographicPlace;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;

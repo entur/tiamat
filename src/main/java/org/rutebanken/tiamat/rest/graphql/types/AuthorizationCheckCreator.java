@@ -22,13 +22,13 @@ import graphql.schema.GraphQLObjectType;
 import java.util.ArrayList;
 import java.util.List;
 
-import static graphql.Scalars.GraphQLBoolean;
 import static graphql.Scalars.GraphQLString;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLObjectType.newObject;
-import static org.rutebanken.helper.organisation.AuthorizationConstants.ENTITY_CLASSIFIER_ALL_TYPES;
-import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.AUTHORIZATION_CHECK_DESCRIPTION;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.AUTHORIZATION_CHECK_ROLES;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ID;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.OUTPUT_TYPE_AUTHORIZATION_CHECK;
 
 public class AuthorizationCheckCreator {
 

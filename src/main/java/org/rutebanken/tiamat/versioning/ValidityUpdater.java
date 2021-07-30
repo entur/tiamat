@@ -22,7 +22,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.Optional;
 
 @Service
 public class ValidityUpdater {

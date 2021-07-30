@@ -15,12 +15,12 @@
 
 package org.rutebanken.tiamat.rest.graphql.mappers;
 
-import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.PrivateCodeStructure;
 
 import java.util.Map;
 
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.TYPE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.VALUE;
 
 public class PrivateCodeMapper {
     public static PrivateCodeStructure getPrivateCodeStructure(Map<String, String> pCode) {

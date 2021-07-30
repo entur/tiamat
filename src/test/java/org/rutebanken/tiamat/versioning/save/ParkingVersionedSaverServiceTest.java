@@ -15,17 +15,16 @@
 
 package org.rutebanken.tiamat.versioning.save;
 
+import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
-import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.Parking;
 import org.rutebanken.tiamat.model.SiteRefStructure;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.ParkingRepository;
-import org.rutebanken.tiamat.versioning.save.ParkingVersionedSaverService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.Instant;

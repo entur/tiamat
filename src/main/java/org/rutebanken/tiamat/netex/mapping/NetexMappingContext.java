@@ -16,7 +16,6 @@
 package org.rutebanken.tiamat.netex.mapping;
 
 import java.time.ZoneId;
-import java.util.TimeZone;
 
 public class NetexMappingContext {
 

@@ -32,7 +32,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.BOARDING_POSITIONS;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.COMPASS_BEARING;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ID;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PRIVATE_CODE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PUBLIC_CODE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.TYPE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.VALUE;
 
 @Component
 public class QuayMapper {

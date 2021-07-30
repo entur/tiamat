@@ -23,12 +23,9 @@ import org.rutebanken.tiamat.time.ExportTimeZone;
 
 import java.time.Instant;
 import java.time.OffsetDateTime;
-import java.time.ZoneId;
-import java.time.temporal.TemporalUnit;
 import java.util.HashMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.in;
 
 public class OffsetDateTimeInstantConverterTest {
 

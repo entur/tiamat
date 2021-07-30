@@ -19,15 +19,11 @@ import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;
 import org.rutebanken.netex.model.TariffZoneRefs_RelStructure;
-import org.rutebanken.netex.model.TariffZone_VersionStructure;
-import org.rutebanken.tiamat.model.TariffZone;
 import org.rutebanken.tiamat.model.TariffZoneRef;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.Set;
 
-import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 

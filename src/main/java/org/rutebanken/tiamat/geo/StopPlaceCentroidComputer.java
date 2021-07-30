@@ -16,10 +16,9 @@
 package org.rutebanken.tiamat.geo;
 
 import com.google.common.base.MoreObjects;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.Point;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
+import org.locationtech.jts.geom.Point;
 import org.opengis.referencing.operation.TransformException;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.slf4j.Logger;

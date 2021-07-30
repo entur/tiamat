@@ -20,9 +20,10 @@ import graphql.schema.GraphQLObjectType;
 import static graphql.Scalars.GraphQLString;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLObjectType.newObject;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ENTITY_REF_VERSION;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ENTITY_REF_VERSION_DESCRIPTION;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ENTITY_REF_REF;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ENTITY_REF_REF_DESCRIPTION;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.OUTPUT_TYPE_VERSION_LESS_ENTITY_REF;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.VERSION_LESS_ENTITY_REF_DESCRIPTION;
 
 public class VersionLessEntityRef {
 

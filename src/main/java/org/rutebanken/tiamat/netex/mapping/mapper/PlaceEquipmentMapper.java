@@ -17,7 +17,15 @@ package org.rutebanken.tiamat.netex.mapping.mapper;
 
 import ma.glasnost.orika.CustomMapper;
 import ma.glasnost.orika.MappingContext;
-import org.rutebanken.netex.model.*;
+import org.rutebanken.netex.model.CycleStorageEquipment;
+import org.rutebanken.netex.model.GeneralSign;
+import org.rutebanken.netex.model.InstalledEquipment_VersionStructure;
+import org.rutebanken.netex.model.ObjectFactory;
+import org.rutebanken.netex.model.PlaceEquipments_RelStructure;
+import org.rutebanken.netex.model.SanitaryEquipment;
+import org.rutebanken.netex.model.ShelterEquipment;
+import org.rutebanken.netex.model.TicketingEquipment;
+import org.rutebanken.netex.model.WaitingRoomEquipment;
 import org.rutebanken.tiamat.model.PlaceEquipment;
 import org.springframework.stereotype.Component;
 

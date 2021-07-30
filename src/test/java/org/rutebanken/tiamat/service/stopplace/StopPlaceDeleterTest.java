@@ -20,18 +20,20 @@ import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.auth.UsernameFetcher;
 import org.rutebanken.tiamat.changelog.EntityChangedListener;
+import org.rutebanken.tiamat.lock.MutateLock;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
-import org.rutebanken.tiamat.lock.MutateLock;
 import org.springframework.transaction.annotation.Transactional;
-
 
 import java.util.Collections;
 import java.util.function.Supplier;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.anyList;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class StopPlaceDeleterTest extends TiamatIntegrationTest {
 

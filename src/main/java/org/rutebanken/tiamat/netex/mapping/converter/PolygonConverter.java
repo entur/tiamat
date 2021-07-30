@@ -16,11 +16,6 @@
 package org.rutebanken.tiamat.netex.mapping.converter;
 
 
-import org.locationtech.jts.geom.CoordinateSequence;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.LineString;
-import org.locationtech.jts.geom.LinearRing;
-import org.locationtech.jts.geom.Polygon;
 import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;
@@ -30,6 +25,11 @@ import net.opengis.gml._3.LinearRingType;
 import net.opengis.gml._3.ObjectFactory;
 import net.opengis.gml._3.PolygonType;
 import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.CoordinateSequence;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.LinearRing;
+import org.locationtech.jts.geom.Polygon;
 import org.rutebanken.tiamat.geo.DoubleValuesToCoordinateSequence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

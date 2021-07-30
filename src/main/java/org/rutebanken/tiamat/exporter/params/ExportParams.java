@@ -26,8 +26,8 @@ import javax.ws.rs.QueryParam;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.COUNTY_REF_ARG_DESCRIPTION;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.COUNTRY_REF_ARG_DESCRIPTION;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.COUNTY_REF_ARG_DESCRIPTION;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.MUNICIPALITY_REF_ARG_DESCRIPTION;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.SEARCH_WITH_CODE_SPACE_ARG_DESCRIPTION;
 

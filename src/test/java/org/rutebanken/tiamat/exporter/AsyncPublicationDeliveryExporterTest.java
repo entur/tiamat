@@ -19,12 +19,12 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
+import org.rutebanken.tiamat.exporter.params.StopPlaceSearch;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.job.ExportJob;
 import org.rutebanken.tiamat.model.job.JobStatus;
 import org.rutebanken.tiamat.repository.ExportJobRepository;
-import org.rutebanken.tiamat.exporter.params.StopPlaceSearch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.xml.sax.SAXException;
 

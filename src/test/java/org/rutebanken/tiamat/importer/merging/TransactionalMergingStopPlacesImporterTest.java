@@ -16,10 +16,9 @@
 package org.rutebanken.tiamat.importer.merging;
 
 
-import org.locationtech.jts.geom.Coordinate;
 import org.junit.Test;
+import org.locationtech.jts.geom.Coordinate;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
-import org.rutebanken.tiamat.importer.merging.TransactionalMergingStopPlacesImporter;
 import org.rutebanken.tiamat.model.AccessibilityAssessment;
 import org.rutebanken.tiamat.model.AccessibilityLimitation;
 import org.rutebanken.tiamat.model.LimitationStatusEnumeration;

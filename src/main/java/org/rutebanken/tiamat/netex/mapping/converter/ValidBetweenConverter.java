@@ -19,7 +19,6 @@ import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;
 import org.rutebanken.netex.model.ValidBetween;
-import org.rutebanken.tiamat.netex.mapping.NetexMappingContext;
 import org.rutebanken.tiamat.netex.mapping.NetexMappingContextThreadLocal;
 import org.rutebanken.tiamat.time.ExportTimeZone;
 import org.slf4j.Logger;

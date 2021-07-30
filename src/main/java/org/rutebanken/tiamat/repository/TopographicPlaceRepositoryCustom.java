@@ -15,13 +15,9 @@
 
 package org.rutebanken.tiamat.repository;
 
-import org.locationtech.jts.geom.Envelope;
-import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
 import org.rutebanken.tiamat.exporter.params.TopographicPlaceSearch;
-import org.rutebanken.tiamat.model.*;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.repository.query.Param;
+import org.rutebanken.tiamat.model.TopographicPlace;
+import org.rutebanken.tiamat.model.TopographicPlaceTypeEnumeration;
 
 import java.util.Iterator;
 import java.util.List;

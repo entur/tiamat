@@ -15,14 +15,21 @@
 
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.Point;
-import org.assertj.core.api.AbstractListAssert;
 import org.glassfish.jersey.uri.internal.JerseyUriBuilder;
 import org.junit.Assert;
 import org.junit.Test;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Point;
 import org.mockito.Mockito;
-import org.rutebanken.netex.model.*;
+import org.rutebanken.netex.model.GroupOfStopPlaces;
+import org.rutebanken.netex.model.LocationStructure;
+import org.rutebanken.netex.model.MultilingualString;
+import org.rutebanken.netex.model.PublicationDeliveryStructure;
+import org.rutebanken.netex.model.SimplePoint_VersionStructure;
+import org.rutebanken.netex.model.SiteFrame;
+import org.rutebanken.netex.model.StopPlace;
+import org.rutebanken.netex.model.StopPlaceRefStructure;
+import org.rutebanken.netex.model.ValidBetween;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.dtoassembling.dto.ChangedStopPlaceSearchDto;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
@@ -35,19 +42,15 @@ import org.xml.sax.SAXException;
 
 import javax.ws.rs.core.Link;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriInfo;
 import javax.xml.bind.JAXBException;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static javax.xml.bind.JAXBContext.newInstance;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.rutebanken.tiamat.exporter.params.ExportParams.newExportParamsBuilder;
 import static org.rutebanken.tiamat.exporter.params.StopPlaceSearch.newStopPlaceSearchBuilder;
 

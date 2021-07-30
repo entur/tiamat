@@ -17,12 +17,13 @@ package org.rutebanken.tiamat.service.stopplace;
 
 import com.google.common.base.Strings;
 import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Resolve and fetch child stop places from parent stop places from a list of stops

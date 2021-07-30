@@ -17,8 +17,11 @@ package org.rutebanken.tiamat.versioning.save;
 
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
-import org.rutebanken.tiamat.model.*;
-import org.rutebanken.tiamat.versioning.save.GroupOfStopPlacesSaverService;
+import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
+import org.rutebanken.tiamat.model.GroupOfStopPlaces;
+import org.rutebanken.tiamat.model.SiteRefStructure;
+import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.StopPlaceReference;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;

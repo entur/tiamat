@@ -20,7 +20,12 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
-import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
+import org.rutebanken.tiamat.model.Quay;
+import org.rutebanken.tiamat.model.SiteRefStructure;
+import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.ValidBetween;
+import org.rutebanken.tiamat.model.Value;
 import org.rutebanken.tiamat.versioning.VersionCreator;
 import org.springframework.beans.factory.annotation.Autowired;
 

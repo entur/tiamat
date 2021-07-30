@@ -20,8 +20,6 @@ import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.repository.ExportJobRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.swing.text.html.Option;
-
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;

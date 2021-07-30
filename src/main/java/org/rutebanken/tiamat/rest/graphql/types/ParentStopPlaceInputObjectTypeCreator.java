@@ -27,7 +27,10 @@ import java.util.List;
 import static graphql.Scalars.GraphQLString;
 import static graphql.schema.GraphQLInputObjectField.newInputObjectField;
 import static graphql.schema.GraphQLInputObjectType.newInputObject;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.CHILDREN;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.INPUT_TYPE_PARENT_STOPPLACE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.VALID_BETWEEN;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.VERSION_COMMENT;
 
 @Component
 public class ParentStopPlaceInputObjectTypeCreator {

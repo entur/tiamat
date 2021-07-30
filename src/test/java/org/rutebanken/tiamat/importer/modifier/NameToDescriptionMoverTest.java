@@ -16,7 +16,6 @@
 package org.rutebanken.tiamat.importer.modifier;
 
 import org.junit.Test;
-import org.rutebanken.tiamat.importer.modifier.NameToDescriptionMover;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.StopPlace;
 

@@ -15,11 +15,19 @@
 
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
-import org.locationtech.jts.geom.Coordinate;
-import net.opengis.gml._3.*;
+import net.opengis.gml._3.AbstractRingPropertyType;
+import net.opengis.gml._3.DirectPositionListType;
+import net.opengis.gml._3.LinearRingType;
 import net.opengis.gml._3.ObjectFactory;
+import net.opengis.gml._3.PolygonType;
 import org.junit.Test;
-import org.rutebanken.netex.model.*;
+import org.rutebanken.netex.model.CountryRef;
+import org.rutebanken.netex.model.MultilingualString;
+import org.rutebanken.netex.model.PublicationDeliveryStructure;
+import org.rutebanken.netex.model.TopographicPlace;
+import org.rutebanken.netex.model.TopographicPlaceDescriptor_VersionedChildStructure;
+import org.rutebanken.netex.model.TopographicPlaceRefStructure;
+import org.rutebanken.netex.model.TopographicPlaceTypeEnumeration;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.netex.mapping.converter.PolygonConverter;
 import org.springframework.beans.factory.annotation.Autowired;

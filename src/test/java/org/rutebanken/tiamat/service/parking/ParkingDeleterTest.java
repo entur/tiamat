@@ -23,7 +23,6 @@ import org.rutebanken.tiamat.model.StopPlace;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
-
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;

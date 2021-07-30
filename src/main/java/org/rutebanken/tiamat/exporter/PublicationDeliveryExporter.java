@@ -15,13 +15,9 @@
 
 package org.rutebanken.tiamat.exporter;
 
-import com.fasterxml.classmate.AnnotationOverrides;
-import org.rutebanken.netex.model.FareFrame;
 import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
-import org.rutebanken.netex.model.SiteFrame;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
-import org.rutebanken.tiamat.model.ServiceFrame;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.id.ValidPrefixList;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
@@ -36,9 +32,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.xml.bind.JAXBElement;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;

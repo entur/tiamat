@@ -23,7 +23,8 @@ import org.springframework.stereotype.Component;
 import java.time.Instant;
 import java.util.Map;
 
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.VALID_BETWEEN_FROM_DATE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.VALID_BETWEEN_TO_DATE;
 
 @Component
 public class ValidBetweenMapper {

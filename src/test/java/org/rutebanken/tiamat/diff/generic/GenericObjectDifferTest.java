@@ -17,15 +17,18 @@ package org.rutebanken.tiamat.diff.generic;
 
 
 import com.google.common.collect.Sets;
+import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
-import org.junit.Test;
 import org.rutebanken.tiamat.config.GeometryFactoryConfig;
-import org.rutebanken.tiamat.diff.generic.Difference;
-import org.rutebanken.tiamat.diff.generic.GenericDiffConfig;
-import org.rutebanken.tiamat.diff.generic.GenericObjectDiffer;
-import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.model.AccessibilityAssessment;
+import org.rutebanken.tiamat.model.AccessibilityLimitation;
+import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
+import org.rutebanken.tiamat.model.Quay;
+import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.TariffZone;
+import org.rutebanken.tiamat.model.TariffZoneRef;
 
 import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;

@@ -27,7 +27,21 @@ import static graphql.Scalars.GraphQLInt;
 import static graphql.Scalars.GraphQLString;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLObjectType.newObject;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.DEFAULT_DURATION;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.DEFAULT_DURATION_DESCRIPTION;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.FREQUENT_TRAVELLER_DURATION;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.FREQUENT_TRAVELLER_DURATION_DESCRIPTION;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.MOBILITY_RESTRICTED_TRAVELLER_DURATION;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.MOBILITY_RESTRICTED_TRAVELLER_DURATION_DESCRIPTION;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.OCCASIONAL_TRAVELLER_DURATION;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.OCCASIONAL_TRAVELLER_DURATION_DESCRIPTION;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.OUTPUT_TYPE_PATH_LINK;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.OUTPUT_TYPE_TRANSFER_DURATION;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PATH_LINK_FROM;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PATH_LINK_TO;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.TRANSFER_DURATION;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.TRANSFER_DURATION_DESCRIPTION;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.VERSION;
 
 @Component
 public class PathLinkObjectTypeCreator {

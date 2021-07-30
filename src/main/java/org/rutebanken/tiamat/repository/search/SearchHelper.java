@@ -16,7 +16,6 @@
 package org.rutebanken.tiamat.repository.search;
 
 
-import org.hibernate.SQLQuery;
 import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
 import org.hibernate.query.NativeQuery;
 import org.rutebanken.tiamat.exporter.params.SearchObject;
@@ -24,7 +23,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import javax.persistence.Query;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;

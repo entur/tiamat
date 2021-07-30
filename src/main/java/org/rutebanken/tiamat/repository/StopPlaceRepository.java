@@ -17,7 +17,6 @@ package org.rutebanken.tiamat.repository;
 
 import org.locationtech.jts.geom.Point;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
-import org.rutebanken.tiamat.exporter.params.StopPlaceSearch;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

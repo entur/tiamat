@@ -15,15 +15,15 @@
 
 package org.rutebanken.tiamat.netex.mapping.converter;
 
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.Point;
 import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.metadata.Type;
 import ma.glasnost.orika.metadata.TypeBuilder;
 import net.opengis.gml._3.DirectPositionType;
 import org.assertj.core.data.Percentage;
 import org.junit.Test;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Point;
 import org.rutebanken.netex.model.LocationStructure;
 import org.rutebanken.netex.model.SimplePoint_VersionStructure;
 import org.rutebanken.tiamat.config.GeometryFactoryConfig;
@@ -33,7 +33,6 @@ import java.util.HashMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.mock;
 
 public class SimplePointVersionStructureConverterTest {
 

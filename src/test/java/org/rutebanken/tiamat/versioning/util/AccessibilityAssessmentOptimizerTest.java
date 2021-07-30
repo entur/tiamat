@@ -17,7 +17,12 @@ package org.rutebanken.tiamat.versioning.util;
 
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
-import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.model.AccessibilityAssessment;
+import org.rutebanken.tiamat.model.AccessibilityLimitation;
+import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
+import org.rutebanken.tiamat.model.LimitationStatusEnumeration;
+import org.rutebanken.tiamat.model.Quay;
+import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.versioning.save.StopPlaceVersionedSaverService;
@@ -31,7 +36,10 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
-import static org.rutebanken.tiamat.model.LimitationStatusEnumeration.*;
+import static org.rutebanken.tiamat.model.LimitationStatusEnumeration.FALSE;
+import static org.rutebanken.tiamat.model.LimitationStatusEnumeration.PARTIAL;
+import static org.rutebanken.tiamat.model.LimitationStatusEnumeration.TRUE;
+import static org.rutebanken.tiamat.model.LimitationStatusEnumeration.UNKNOWN;
 
 
 @Transactional

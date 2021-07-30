@@ -61,7 +61,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PAGE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.QUERY;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.SIZE;
 
 @Service("tariffZonesFetcher")
 @Transactional

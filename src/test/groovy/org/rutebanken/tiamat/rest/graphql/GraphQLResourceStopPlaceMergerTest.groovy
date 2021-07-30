@@ -15,8 +15,8 @@
 
 package org.rutebanken.tiamat.rest.graphql
 
-import org.locationtech.jts.geom.Coordinate
 import org.junit.Test
+import org.locationtech.jts.geom.Coordinate
 import org.rutebanken.tiamat.model.*
 
 import static org.hamcrest.Matchers.*

@@ -17,18 +17,13 @@ package org.rutebanken.tiamat.importer;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.model.TopographicPlaceTypeEnumeration;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Transactional
 @Service

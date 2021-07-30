@@ -16,12 +16,8 @@
 package org.rutebanken.tiamat.repository;
 
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
-import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.QueryHints;
-import org.springframework.data.jpa.repository.support.JpaEntityInformation;
-import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import org.springframework.data.repository.NoRepositoryBean;
 
 import javax.persistence.QueryHint;

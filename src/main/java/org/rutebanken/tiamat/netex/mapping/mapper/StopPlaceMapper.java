@@ -17,7 +17,11 @@ package org.rutebanken.tiamat.netex.mapping.mapper;
 
 import ma.glasnost.orika.CustomMapper;
 import ma.glasnost.orika.MappingContext;
-import org.rutebanken.netex.model.*;
+import org.rutebanken.netex.model.AlternativeName;
+import org.rutebanken.netex.model.AlternativeNames_RelStructure;
+import org.rutebanken.netex.model.KeyListStructure;
+import org.rutebanken.netex.model.KeyValueStructure;
+import org.rutebanken.netex.model.StopPlace;
 import org.rutebanken.tiamat.netex.mapping.PublicationDeliveryHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 

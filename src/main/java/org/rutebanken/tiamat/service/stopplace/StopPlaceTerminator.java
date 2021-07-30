@@ -16,13 +16,13 @@
 package org.rutebanken.tiamat.service.stopplace;
 
 import org.rutebanken.tiamat.auth.UsernameFetcher;
+import org.rutebanken.tiamat.lock.MutateLock;
 import org.rutebanken.tiamat.model.ModificationEnumeration;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.ValidBetween;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
-import org.rutebanken.tiamat.lock.MutateLock;
-import org.rutebanken.tiamat.versioning.save.StopPlaceVersionedSaverService;
 import org.rutebanken.tiamat.versioning.VersionCreator;
+import org.rutebanken.tiamat.versioning.save.StopPlaceVersionedSaverService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

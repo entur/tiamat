@@ -57,7 +57,6 @@ import org.rutebanken.tiamat.model.ServiceFrame;
 import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.netex.id.NetexIdHelper;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
-import org.rutebanken.tiamat.netex.mapping.PublicationDeliveryHelper;
 import org.rutebanken.tiamat.repository.FareZoneRepository;
 import org.rutebanken.tiamat.repository.GroupOfStopPlacesRepository;
 import org.rutebanken.tiamat.repository.ParkingRepository;

@@ -31,12 +31,21 @@ import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static java.util.stream.Collectors.toList;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.MERGED_ID_KEY;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
-import static org.rutebanken.tiamat.repository.StopPlaceRepositoryImpl.*;
+import static org.rutebanken.tiamat.repository.StopPlaceRepositoryImpl.SQL_LEFT_JOIN_PARENT_STOP;
+import static org.rutebanken.tiamat.repository.StopPlaceRepositoryImpl.SQL_NOT_PARENT_STOP_PLACE;
+import static org.rutebanken.tiamat.repository.StopPlaceRepositoryImpl.createLeftJoinParentStopQuery;
 
 /**
  * Builds query from stop place search params

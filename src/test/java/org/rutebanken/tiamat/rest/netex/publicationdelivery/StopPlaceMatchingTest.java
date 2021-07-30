@@ -16,10 +16,19 @@
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
 import org.junit.Test;
-import org.rutebanken.netex.model.*;
+import org.rutebanken.netex.model.KeyListStructure;
+import org.rutebanken.netex.model.KeyValueStructure;
+import org.rutebanken.netex.model.LocationStructure;
+import org.rutebanken.netex.model.MultilingualString;
+import org.rutebanken.netex.model.PublicationDeliveryStructure;
+import org.rutebanken.netex.model.Quay;
+import org.rutebanken.netex.model.Quays_RelStructure;
+import org.rutebanken.netex.model.SimplePoint_VersionStructure;
+import org.rutebanken.netex.model.StopPlace;
+import org.rutebanken.netex.model.StopTypeEnumeration;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
-import org.rutebanken.tiamat.importer.ImportType;
 import org.rutebanken.tiamat.importer.ImportParams;
+import org.rutebanken.tiamat.importer.ImportType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.xml.sax.SAXException;
 

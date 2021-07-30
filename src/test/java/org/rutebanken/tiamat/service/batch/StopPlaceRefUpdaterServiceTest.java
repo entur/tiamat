@@ -1,14 +1,18 @@
 package org.rutebanken.tiamat.service.batch;
 
+import org.junit.Ignore;
+import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.LinearRing;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.impl.CoordinateArraySequence;
-import org.junit.Ignore;
-import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
-import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
+import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.TariffZone;
+import org.rutebanken.tiamat.model.TopographicPlace;
+import org.rutebanken.tiamat.model.TopographicPlaceTypeEnumeration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;

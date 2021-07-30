@@ -16,7 +16,6 @@
 package org.rutebanken.tiamat.service.groupofstopplaces;
 
 import org.locationtech.jts.geom.Point;
-import org.rutebanken.netex.model.GroupCheckInEnumeration;
 import org.rutebanken.tiamat.geo.CentroidComputer;
 import org.rutebanken.tiamat.model.GroupOfStopPlaces;
 import org.slf4j.Logger;

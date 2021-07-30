@@ -16,16 +16,14 @@
 package org.rutebanken.tiamat.netex.id;
 
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.IList;
 import com.hazelcast.core.IQueue;
 import com.hazelcast.core.ISet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.Serializable;
-import java.util.List;
 import java.util.Set;
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentMap;
 
 import static org.rutebanken.tiamat.netex.id.GaplessIdGeneratorService.INITIAL_LAST_ID;
 

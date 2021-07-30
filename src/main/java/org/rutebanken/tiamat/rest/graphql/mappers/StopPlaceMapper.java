@@ -16,7 +16,20 @@
 package org.rutebanken.tiamat.rest.graphql.mappers;
 
 import com.google.api.client.util.Preconditions;
-import org.rutebanken.tiamat.model.*;
+import org.rutebanken.tiamat.model.AirSubmodeEnumeration;
+import org.rutebanken.tiamat.model.BusSubmodeEnumeration;
+import org.rutebanken.tiamat.model.FunicularSubmodeEnumeration;
+import org.rutebanken.tiamat.model.InterchangeWeightingEnumeration;
+import org.rutebanken.tiamat.model.MetroSubmodeEnumeration;
+import org.rutebanken.tiamat.model.PrivateCodeStructure;
+import org.rutebanken.tiamat.model.RailSubmodeEnumeration;
+import org.rutebanken.tiamat.model.SiteRefStructure;
+import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.StopTypeEnumeration;
+import org.rutebanken.tiamat.model.TelecabinSubmodeEnumeration;
+import org.rutebanken.tiamat.model.TramSubmodeEnumeration;
+import org.rutebanken.tiamat.model.VehicleModeEnumeration;
+import org.rutebanken.tiamat.model.WaterSubmodeEnumeration;
 import org.rutebanken.tiamat.rest.graphql.scalars.TransportModeScalar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +39,19 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Map;
 
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ADJACENT_SITES;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ENTITY_REF_REF;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PARENT_SITE_REF;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PRIVATE_CODE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PUBLIC_CODE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.QUAYS;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.STOP_PLACE_TYPE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.SUBMODE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.TRANSPORT_MODE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.TYPE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.VALID_BETWEEN;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.VALUE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.WEIGHTING;
 
 @Component
 public class StopPlaceMapper {

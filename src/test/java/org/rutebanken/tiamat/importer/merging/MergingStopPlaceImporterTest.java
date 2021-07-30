@@ -15,11 +15,15 @@
 
 package org.rutebanken.tiamat.importer.merging;
 
+import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Point;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
-import org.rutebanken.tiamat.model.*;
-import org.junit.Test;
+import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
+import org.rutebanken.tiamat.model.Quay;
+import org.rutebanken.tiamat.model.SiteFrame;
+import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,7 +31,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.concurrent.ExecutionException;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.any;
 
 /**
  * Test stop place importer with geodb and repository.

@@ -25,8 +25,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 
 public class TimeoutMaxLeaseTimeLockTest extends TiamatIntegrationTest {
 
