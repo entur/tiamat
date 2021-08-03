@@ -15,8 +15,18 @@
 
 package org.rutebanken.tiamat.model;
 
+import javax.persistence.Embeddable;
+
+@Embeddable
 public class PurposeOfGroupingRefStructure
         extends TypeOfValueRefStructure {
-
-
+    public PurposeOfGroupingRefStructure() {
+        super();
+    }
+    public PurposeOfGroupingRefStructure(String ref, String version) {
+        super(ref, version);
+    }
+    public PurposeOfGroupingRefStructure(String ref) {
+        super(ref);
+    }
 }

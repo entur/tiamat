@@ -15,8 +15,20 @@
 
 package org.rutebanken.tiamat.model;
 
+import javax.persistence.MappedSuperclass;
+
+@MappedSuperclass
 public class TypeOfValueRefStructure
         extends VersionOfObjectRefStructure {
+    public TypeOfValueRefStructure() {
+        super();
+    }
 
+    public TypeOfValueRefStructure(String ref, String version) {
+        super(ref, version);
+    }
 
+    public TypeOfValueRefStructure(String ref) {
+        super(ref);
+    }
 }
