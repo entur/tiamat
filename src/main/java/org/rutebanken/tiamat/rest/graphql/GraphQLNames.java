@@ -154,6 +154,10 @@ public class GraphQLNames {
     public static final String GROUP_OF_STOP_PLACES = "groupOfStopPlaces";
     public static final String STOP_PLACE_GROUPS = "groups";
 
+    public static final String GROUP_OF_TARIFF_ZONES = "groupOfTariffZones";
+    public static final String GROUP_OF_TARIFF_ZONES_MEMBERS = "members";
+    public static final String OUTPUT_TYPE_GROUP_OF_TARIFF_ZONES ="GroupOfTariffZones";
+
 
     public static final String OUTPUT_TYPE_QUAY = "Quay";
     public static final String INPUT_TYPE_QUAY = OUTPUT_TYPE_QUAY + INPUT_TYPE_POSTFIX;
@@ -415,6 +419,8 @@ public class GraphQLNames {
 
     public static final String FIND_BY_STOP_PLACE_ID = "stopPlaceId";
     public static final String FIND_BY_GROUP_OF_STOP_PLACEs_ID = "groupOfStopPlacesId";
+
+    public static final String FIND_BY_TARIFF_ZONE_ID ="tariffZoneId";
 
     public static final String MUTATE_STOPPLACE = "mutateStopPlace";
     public static final String MUTATE_PARENT_STOPPLACE = "mutateParentStopPlace";

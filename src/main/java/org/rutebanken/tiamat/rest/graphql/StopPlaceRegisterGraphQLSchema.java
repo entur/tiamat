@@ -27,6 +27,7 @@ import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLSchema;
 import org.rutebanken.tiamat.model.FareZone;
 import org.rutebanken.tiamat.model.GroupOfStopPlaces;
+import org.rutebanken.tiamat.model.GroupOfTariffZones;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.TariffZone;
@@ -42,6 +43,7 @@ import org.rutebanken.tiamat.rest.graphql.scalars.TransportModeScalar;
 import org.rutebanken.tiamat.rest.graphql.types.EntityRefObjectTypeCreator;
 import org.rutebanken.tiamat.rest.graphql.types.FareZoneObjectTypeCreator;
 import org.rutebanken.tiamat.rest.graphql.types.GroupOfStopPlacesObjectTypeCreator;
+import org.rutebanken.tiamat.rest.graphql.types.GroupOfTariffZonesObjectTypeCreator;
 import org.rutebanken.tiamat.rest.graphql.types.ParentStopPlaceInputObjectTypeCreator;
 import org.rutebanken.tiamat.rest.graphql.types.ParentStopPlaceObjectTypeCreator;
 import org.rutebanken.tiamat.rest.graphql.types.PathLinkEndObjectTypeCreator;
@@ -138,6 +140,9 @@ public class StopPlaceRegisterGraphQLSchema {
     private GroupOfStopPlacesObjectTypeCreator groupOfStopPlaceObjectTypeCreator;
 
     @Autowired
+    private GroupOfTariffZonesObjectTypeCreator groupOfTariffZonesObjectTypeCreator;
+
+    @Autowired
     private ParentStopPlaceObjectTypeCreator parentStopPlaceObjectTypeCreator;
 
     @Autowired
@@ -172,6 +177,10 @@ public class StopPlaceRegisterGraphQLSchema {
 
     @Autowired
     private DataFetcher<Page<GroupOfStopPlaces>> groupOfStopPlacesFetcher;
+
+    @Autowired
+
+    private DataFetcher<Page<GroupOfTariffZones>> groupOfTariffZonesFetcher;
 
     @Autowired
     private DataFetcher<GroupOfStopPlaces> groupOfStopPlacesUpdater;
@@ -285,6 +294,7 @@ public class StopPlaceRegisterGraphQLSchema {
         });
 
         GraphQLObjectType groupOfStopPlacesObjectType = groupOfStopPlaceObjectTypeCreator.create(stopPlaceInterface);
+        GraphQLObjectType groupOfTariffZonesObjectType = groupOfTariffZonesObjectTypeCreator.create();
 
         GraphQLObjectType addressablePlaceObjectType = createAddressablePlaceObjectType(commonFieldsList);
 
@@ -363,6 +373,14 @@ public class StopPlaceRegisterGraphQLSchema {
                         .description("Group of stop places")
                         .argument(createFindGroupOfStopPlacesArguments())
                         .dataFetcher(groupOfStopPlacesFetcher)
+                        .build())
+
+                .field(newFieldDefinition()
+                        .name(GROUP_OF_TARIFF_ZONES)
+                        .type(new GraphQLList(groupOfTariffZonesObjectType))
+                        .description("Group of tariff zones")
+                        .argument(createFindGroupOfTariffZonesArguments())
+                        .dataFetcher(groupOfTariffZonesFetcher)
                         .build())
                 .field(newFieldDefinition()
                         .name(TARIFF_ZONES)
@@ -519,6 +537,23 @@ public class StopPlaceRegisterGraphQLSchema {
                 .build());
         arguments.add(GraphQLArgument.newArgument()
                 .name(FIND_BY_STOP_PLACE_ID)
+                .type(GraphQLString)
+                .build());
+        return arguments;
+    }
+
+    private List<GraphQLArgument> createFindGroupOfTariffZonesArguments() {
+        List<GraphQLArgument> arguments = createPageAndSizeArguments();
+        arguments.add(GraphQLArgument.newArgument()
+                .name(ID)
+                .type(GraphQLString)
+                .build());
+        arguments.add(GraphQLArgument.newArgument()
+                .name(QUERY)
+                .type(GraphQLString)
+                .build());
+        arguments.add(GraphQLArgument.newArgument()
+                .name(FIND_BY_TARIFF_ZONE_ID)
                 .type(GraphQLString)
                 .build());
         return arguments;
