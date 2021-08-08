@@ -15,11 +15,13 @@
 
 package org.rutebanken.tiamat.exporter;
 
+import org.checkerframework.checker.units.qual.A;
 import org.hibernate.Session;
 import org.hibernate.internal.SessionImpl;
 import org.rutebanken.netex.model.FareZone;
 import org.rutebanken.netex.model.FareZonesInFrame_RelStructure;
 import org.rutebanken.netex.model.GroupsOfStopPlacesInFrame_RelStructure;
+import org.rutebanken.netex.model.GroupsOfTariffZonesInFrame_RelStructure;
 import org.rutebanken.netex.model.MultilingualString;
 import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.Parking;
@@ -52,6 +54,7 @@ import org.rutebanken.tiamat.exporter.eviction.SessionEntitiesEvictor;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.model.FareFrame;
 import org.rutebanken.tiamat.model.GroupOfStopPlaces;
+import org.rutebanken.tiamat.model.GroupOfTariffZones;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.ServiceFrame;
 import org.rutebanken.tiamat.model.TopographicPlace;
@@ -59,6 +62,7 @@ import org.rutebanken.tiamat.netex.id.NetexIdHelper;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.repository.FareZoneRepository;
 import org.rutebanken.tiamat.repository.GroupOfStopPlacesRepository;
+import org.rutebanken.tiamat.repository.GroupOfTariffZonesRepository;
 import org.rutebanken.tiamat.repository.ParkingRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.repository.TariffZoneRepository;
@@ -117,6 +121,7 @@ public class StreamingPublicationDelivery {
     private final FareZoneRepository fareZoneRepository;
     private final TopographicPlaceRepository topographicPlaceRepository;
     private final GroupOfStopPlacesRepository groupOfStopPlacesRepository;
+    private final GroupOfTariffZonesRepository groupOfTariffZonesRepository;
     private final NeTExValidator neTExValidator = NeTExValidator.getNeTExValidator();
     private final NetexIdHelper netexIdHelper;
     /**
@@ -140,6 +145,7 @@ public class StreamingPublicationDelivery {
                                         FareZoneRepository fareZoneRepository,
                                         TopographicPlaceRepository topographicPlaceRepository,
                                         GroupOfStopPlacesRepository groupOfStopPlacesRepository,
+                                        GroupOfTariffZonesRepository groupOfTariffZonesRepository,
                                         NetexIdHelper netexIdHelper,
                                         @Value("${asyncNetexExport.validateAgainstSchema:false}") boolean validateAgainstSchema) throws IOException, SAXException {
         this.stopPlaceRepository = stopPlaceRepository;
@@ -153,6 +159,7 @@ public class StreamingPublicationDelivery {
         this.fareZoneRepository = fareZoneRepository;
         this.topographicPlaceRepository = topographicPlaceRepository;
         this.groupOfStopPlacesRepository = groupOfStopPlacesRepository;
+        this.groupOfTariffZonesRepository = groupOfTariffZonesRepository;
         this.netexIdHelper = netexIdHelper;
         this.validateAgainstSchema = validateAgainstSchema;
     }
@@ -186,6 +193,7 @@ public class StreamingPublicationDelivery {
         AtomicInteger mappedFareZonesCount = new AtomicInteger();
         AtomicInteger mappedTopographicPlacesCount = new AtomicInteger();
         AtomicInteger mappedGroupOfStopPlacesCount = new AtomicInteger();
+        AtomicInteger mappedGroupOfTariffZonesCount = new AtomicInteger();
 
 
         EntitiesEvictor entitiesEvictor = instantiateEvictor();
@@ -224,7 +232,7 @@ public class StreamingPublicationDelivery {
         PublicationDeliveryStructure publicationDeliveryStructure;
 
         if (exportParams.getServiceFrameExportMode() == ExportParams.ExportMode.ALL) {
-            prepareFareZones(exportParams,stopPlacePrimaryIds,mappedFareZonesCount,netexFareFrame,entitiesEvictor);
+            prepareFareZones(exportParams,stopPlacePrimaryIds,mappedFareZonesCount,mappedGroupOfTariffZonesCount,netexSiteFrame,netexFareFrame,entitiesEvictor);
             prepareScheduledStopPoints(stopPlacePrimaryIds, netexServiceFrame);
             publicationDeliveryStructure = publicationDeliveryExporter.createPublicationDelivery(netexSiteFrame, netexServiceFrame,netexFareFrame);
         } else {
@@ -244,16 +252,21 @@ public class StreamingPublicationDelivery {
 
     }
 
-    private void prepareFareZones(ExportParams exportParams,Set<Long> stopPlacePrimaryIds, AtomicInteger mappedFareZonesCount, org.rutebanken.netex.model.FareFrame netexFareFrame, EntitiesEvictor evictor) {
+    private void prepareFareZones(ExportParams exportParams,Set<Long> stopPlacePrimaryIds, AtomicInteger mappedFareZonesCount, AtomicInteger mappedGroupOfTariffZonesCount, SiteFrame netexSiteFrame, org.rutebanken.netex.model.FareFrame netexFareFrame, EntitiesEvictor evictor) {
+
+        boolean exportGroupOfTariffZones =false;
 
         Iterator<org.rutebanken.tiamat.model.FareZone> fareZoneIterator;
         if (exportParams.getFareZoneExportMode() == null || exportParams.getFareZoneExportMode().equals(ExportParams.ExportMode.ALL)) {
             logger.info("Preparing to scroll fare zones, regardless of version");
             fareZoneIterator = fareZoneRepository.scrollFareZones(exportParams);
+            exportGroupOfTariffZones = true;
         } else if (exportParams.getFareZoneExportMode().equals(ExportParams.ExportMode.RELEVANT)) {
             int fareZoneCount = fareZoneRepository.countResult(stopPlacePrimaryIds);
             logger.info("Preparing to scroll {} relevant fare zones from stop place ids", fareZoneCount);
             fareZoneIterator = fareZoneRepository.scrollFareZones(stopPlacePrimaryIds);
+
+            exportGroupOfTariffZones = true;
         } else {
             logger.info("Fare zone export mode is {}. Will not export fare zones", exportParams.getFareZoneExportMode());
             fareZoneIterator = Collections.emptyIterator();
@@ -264,6 +277,10 @@ public class StreamingPublicationDelivery {
 
             setField(FareZonesInFrame_RelStructure.class,"fareZone", fareZonesInFrameRelStructure, netexFareZone);
             netexFareFrame.setFareZones(fareZonesInFrameRelStructure);
+
+        if (exportGroupOfTariffZones) {
+            prepareGroupOfTariffZones(exportParams,stopPlacePrimaryIds,mappedGroupOfTariffZonesCount,netexSiteFrame,evictor);
+        }
     }
 
     private void prepareTariffZones(ExportParams exportParams, Set<Long> stopPlacePrimaryIds, AtomicInteger mappedTariffZonesCount, SiteFrame netexSiteFrame, EntitiesEvictor evicter) {
@@ -514,6 +531,33 @@ public class StreamingPublicationDelivery {
         } else {
             netexSiteFrame.setGroupsOfStopPlaces(null);
         }
+    }
+
+    private void prepareGroupOfTariffZones(ExportParams exportParams, Set<Long> stopPlaceIds, AtomicInteger mappedGroupOfTariffZonesCount, SiteFrame netexSiteFrame, EntitiesEvictor evicter) {
+        Iterator<GroupOfTariffZones> groupOfTariffZonesIterator;
+        if (exportParams.getGroupOfTariffZonesExportMode() == null || exportParams.getGroupOfTariffZonesExportMode().equals(ExportParams.ExportMode.ALL)) {
+            logger.info("Prepare scrolling for all group of tariff zones");
+            groupOfTariffZonesIterator = groupOfTariffZonesRepository.scrollGroupOfTariffZones();
+        } else if (exportParams.getGroupOfTariffZonesExportMode().equals(ExportParams.ExportMode.RELEVANT)) {
+            logger.info("Prepare scrolling relevant group of tariff zones");
+            groupOfTariffZonesIterator = groupOfTariffZonesRepository.scrollGroupOfTariffZones(stopPlaceIds);
+
+        } else {
+            logger.info("Group of tariff zones export mode is {}. Will not export group of tariff zones", exportParams.getGroupOfStopPlacesExportMode());
+            groupOfTariffZonesIterator = Collections.emptyIterator();
+        }
+
+        if (groupOfTariffZonesIterator.hasNext()) {
+            NetexMappingIterator<GroupOfTariffZones, org.rutebanken.netex.model.GroupOfTariffZones> netexMappingIterator = new NetexMappingIterator<>(
+                    netexMapper, groupOfTariffZonesIterator, org.rutebanken.netex.model.GroupOfTariffZones.class,mappedGroupOfTariffZonesCount,evicter);
+
+            List<org.rutebanken.netex.model.GroupOfTariffZones> groupOfTariffZonesList = new NetexMappingIteratorList<>(() -> netexMappingIterator);
+
+            final GroupsOfTariffZonesInFrame_RelStructure groupsOfTariffZonesInFrame_relStructure = new GroupsOfTariffZonesInFrame_RelStructure();
+            setField(GroupsOfTariffZonesInFrame_RelStructure.class,"groupOfTariffZones", groupsOfTariffZonesInFrame_relStructure,groupOfTariffZonesList);
+            netexSiteFrame.setGroupsOfTariffZones(groupsOfTariffZonesInFrame_relStructure);
+        }
+
     }
 
     private EntitiesEvictor instantiateEvictor() {

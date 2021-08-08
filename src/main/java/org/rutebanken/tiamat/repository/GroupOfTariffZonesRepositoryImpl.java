@@ -35,6 +35,7 @@ import javax.persistence.PersistenceContext;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class GroupOfTariffZonesRepositoryImpl implements GroupOfTariffZonesRepositoryCustom {
 
@@ -69,10 +70,13 @@ public class GroupOfTariffZonesRepositoryImpl implements GroupOfTariffZonesRepos
     public Iterator<GroupOfTariffZones> scrollGroupOfTariffZones() {
 
         return scrollGroupOfTariffZones("select gotz.* from group_of_tariff_zones gotz where " +
-                "gotz.version = (select max(gotzv.version) from group_of_tariff_zones gotzv where gotzv.netex_id = gotz.netex_id");
+                "gotz.version = (select max(gotzv.version) from group_of_tariff_zones gotzv where gotzv.netex_id = gotz.netex_id)");
     }
 
-
+    @Override
+    public Iterator<GroupOfTariffZones> scrollGroupOfTariffZones(Set<Long> stopPlaceIds) {
+        return null;
+    }
 
     private Iterator<GroupOfTariffZones> scrollGroupOfTariffZones(String sql) {
         Session session = entityManager.unwrap(Session.class);

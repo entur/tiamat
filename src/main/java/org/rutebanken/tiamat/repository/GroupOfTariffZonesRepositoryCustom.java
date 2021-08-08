@@ -20,12 +20,15 @@ import org.rutebanken.tiamat.model.GroupOfTariffZones;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 public interface GroupOfTariffZonesRepositoryCustom {
 
     List<GroupOfTariffZones> findGroupOfTariffZones(GroupOfTariffZonesSearch search);
 
     Iterator<GroupOfTariffZones> scrollGroupOfTariffZones();
+
+    Iterator<GroupOfTariffZones> scrollGroupOfTariffZones(Set<Long> StopPlaceIds);
 
 
 }

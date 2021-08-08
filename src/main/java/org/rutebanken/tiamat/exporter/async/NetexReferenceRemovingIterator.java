@@ -15,6 +15,7 @@
 
 package org.rutebanken.tiamat.exporter.async;
 
+import org.rutebanken.netex.model.GroupOfTariffZones;
 import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.StopPlace;
 import org.rutebanken.netex.model.TariffZoneRef;
@@ -99,5 +100,9 @@ public class NetexReferenceRemovingIterator implements Iterator<StopPlace> {
                 stopPlace.withTariffZones(new TariffZoneRefs_RelStructure().withTariffZoneRef(tariffZoneRefs));
 
         }
+    }
+
+    private void removeFareZoneRef2(GroupOfTariffZones groupOfTariffZones) {
+        groupOfTariffZones.getMembers().getTariffZoneRef().forEach(tariffZoneRef -> tariffZoneRef.setVersion(null));
     }
 }
