@@ -15,35 +15,37 @@
 
 package org.rutebanken.tiamat.rest.graphql.mappers;
 
+import org.locationtech.jts.geom.Point;
 import org.rutebanken.tiamat.model.BoardingPosition;
-import org.rutebanken.tiamat.model.BoardingPositionTypeEnumeration;
-import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.BOARDING_POSITION_TYPE;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.LABEL;
-import static org.rutebanken.tiamat.rest.graphql.mappers.EmbeddableMultilingualStringMapper.getEmbeddableString;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.GEOMETRY;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PUBLIC_CODE;
 
 @Component
 public class BoardingPositionMapper {
 
     private static final Logger logger = LoggerFactory.getLogger(BoardingPositionMapper.class);
 
+    @Autowired
+    private GeometryMapper geometryMapper;
+
     @SuppressWarnings("unchecked")
     public BoardingPosition mapBoardingPosition(Map entry) {
 
-        EmbeddableMultilingualString label = getEmbeddableString((Map) entry.get(LABEL));
-        final BoardingPositionTypeEnumeration boardingPositionType = (BoardingPositionTypeEnumeration) entry.getOrDefault(BOARDING_POSITION_TYPE, BoardingPositionTypeEnumeration.UNKNOWN);
+        final String publicCode = (String) entry.get(PUBLIC_CODE);
+        final Point geoJsonPoint = geometryMapper.createGeoJsonPoint((Map) entry.get(GEOMETRY));
 
         BoardingPosition boardingPosition = new BoardingPosition();
-        boardingPosition.setLabel(label);
-        boardingPosition.setBoardingPositionType(boardingPositionType);
+        boardingPosition.setPublicCode(publicCode);
+        boardingPosition.setCentroid(geoJsonPoint);
 
         return boardingPosition;
     }

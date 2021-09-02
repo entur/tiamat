@@ -636,11 +636,9 @@ public class CustomGraphQLTypes {
                     .dataFetcher(env -> ((BoardingPosition)env.getSource()).getNetexId())
             )
             .field(newFieldDefinition()
-                .name(LABEL)
-                .type(embeddableMultilingualStringObjectType))
-            .field(newFieldDefinition()
-                .name(BOARDING_POSITION_TYPE)
-                .type(boardingPositionTypeEnum))
+                .name(PUBLIC_CODE)
+                .type(GraphQLString))
+            .field(geometryFieldDefinition)
             .build();
 
 
@@ -650,11 +648,11 @@ public class CustomGraphQLTypes {
                     .name(ID)
                     .type(GraphQLString))
             .field(newInputObjectField()
-                .name(LABEL)
-                .type(embeddableMultiLingualStringInputObjectType))
+                .name(PUBLIC_CODE)
+                .type(GraphQLString))
             .field(newInputObjectField()
-                .name(BOARDING_POSITION_TYPE)
-                .type(boardingPositionTypeEnum))
+                    .name(GEOMETRY)
+                    .type(geoJsonInputType))
             .build();
 
 

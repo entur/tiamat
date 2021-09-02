@@ -113,7 +113,6 @@ public class GraphQLNames {
 
     public static final String OUTPUT_TYPE_BOARDING_POSITION = "BoardingPosition";
     public static final String INPUT_TYPE_BOARDING_POSITION = OUTPUT_TYPE_BOARDING_POSITION + INPUT_TYPE_POSTFIX;
-    public static final String BOARDING_POSITION_TYPE="boardingPositionType";
 
     public static final String OUTPUT_TYPE_PLACE_EQUIPMENTS = "PlaceEquipments";
     public static final String INPUT_TYPE_PLACE_EQUIPMENTS = OUTPUT_TYPE_PLACE_EQUIPMENTS + INPUT_TYPE_POSTFIX;
