@@ -156,28 +156,40 @@ public class FareZoneRepositoryImpl implements FareZoneRepositoryCustom {
     }
 
     private String generateFareZoneQueryFromStopPlaceIds(Set<Long> stopPlaceDbIds, boolean countResult) {
-        StringBuilder sqlStringBuilder = new StringBuilder("SELECT ");
-        if (countResult) {
-            sqlStringBuilder.append("COUNT(f.*) ");
-        } else {
-            sqlStringBuilder.append("f.* ");
-        }
-            sqlStringBuilder.append("FROM " +
-                    "  ( SELECT " +
-                    "     fz1.netex_id," +
-                    "     fz1.version " +
-                    "   FROM fare_zone fz1 " +
-                    "   INNER JOIN stop_place_tariff_zones sptz ON fz1.netex_id = sptz.ref " +
-                    "   AND cast(fz1.version as text) = sptz.version " +
-                    "   AND sptz.stop_place_id IN( ");
+        String sub = countResult ? "COUNT(fz.*) " : "fz.* ";
+        var sql = "SELECT " +
+                    sub +
+                "    FROM" +
+                "        fare_zone fz     " +
+                "    INNER JOIN" +
+                "        stop_place_tariff_zones sptz             " +
+                "            ON fz.netex_id = sptz.ref             " +
+                "            AND (" +
+                "                (" +
+                "                    sptz.version IS NOT NULL                     " +
+                "                    AND cast(fz.version as text) = sptz.version                 " +
+                "                )                 " +
+                "                OR (" +
+                "                    sptz.version IS NULL                     " +
+                "                    AND fz.version =   (" +
+                "                        SELECT" +
+                "                            MAX(fzv.version)                     " +
+                "                    FROM" +
+                "                        fare_zone fzv                     " +
+                "                    WHERE" +
+                "                        fzv.netex_id=fz.netex_id                         " +
+                "                        AND fzv.from_date < NOW()                 " +
+                "                )             " +
+                "            )              " +
+                "            AND    (" +
+                "                fz.to_date IS NULL                 " +
+                "                OR fz.to_date > NOW()             " +
+                "            )             " +
+                "            AND fz.from_date < NOW()           " +
+                "        )             " +
+                "        AND sptz.stop_place_id IN(" + StringUtils.join(stopPlaceDbIds,',') +
+                "        )";
 
-        sqlStringBuilder.append(StringUtils.join(stopPlaceDbIds, ','));
-
-        sqlStringBuilder.append(") " +
-                "   GROUP BY fz1.netex_id,fz1.version ) fz " +
-                "JOIN fare_zone f ON fz.netex_id = f.netex_id AND fz.version=f.version");
-
-        String sql = sqlStringBuilder.toString();
         logger.info(sql);
         return sql;
     }
