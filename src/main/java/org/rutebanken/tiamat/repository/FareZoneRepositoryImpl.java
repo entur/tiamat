@@ -107,7 +107,7 @@ public class FareZoneRepositoryImpl implements FareZoneRepositoryCustom {
             return new ArrayList<>();
         }
 
-        Query query = entityManager.createNativeQuery(generateFareZoneQueryFromStopPlaceIds(stopPlaceIds), FareZone.class);
+        Query query = entityManager.createNativeQuery(generateFareZoneQueryFromStopPlaceIds(stopPlaceIds,false), FareZone.class);
 
         @SuppressWarnings("unchecked")
         List<FareZone> fareZones = query.getResultList();
@@ -120,7 +120,7 @@ public class FareZoneRepositoryImpl implements FareZoneRepositoryCustom {
         if (stopPlaceDbIds == null || stopPlaceDbIds.isEmpty()) {
             return new ArrayList<FareZone>().iterator();
         }
-        return scrollFareZones(generateFareZoneQueryFromStopPlaceIds(stopPlaceDbIds));
+        return scrollFareZones(generateFareZoneQueryFromStopPlaceIds(stopPlaceDbIds,false));
     }
 
     public Iterator<FareZone> scrollFareZones(String sql) {
@@ -155,37 +155,27 @@ public class FareZoneRepositoryImpl implements FareZoneRepositoryCustom {
         return scrollFareZones(sql.toString());
     }
 
-    private String generateFareZoneQueryFromStopPlaceIds(Set<Long> stopPlaceDbIds) {
-        StringBuilder sqlStringBuilder = new StringBuilder("SELECT fz.* " +
-                "FROM " +
-                "  ( SELECT fz1.id " +
-                "   FROM stop_place_tariff_zones sptz " +
-                "   INNER JOIN tariff_zone_ref tzr ON sptz.tariff_zones_id = tzr.id " +
-                "   AND sptz.stop_place_id IN( ");
+    private String generateFareZoneQueryFromStopPlaceIds(Set<Long> stopPlaceDbIds, boolean countResult) {
+        StringBuilder sqlStringBuilder = new StringBuilder("SELECT ");
+        if (countResult) {
+            sqlStringBuilder.append("COUNT(f.*) ");
+        } else {
+            sqlStringBuilder.append("f.* ");
+        }
+            sqlStringBuilder.append("FROM " +
+                    "  ( SELECT " +
+                    "     fz1.netex_id," +
+                    "     fz1.version " +
+                    "   FROM fare_zone fz1 " +
+                    "   INNER JOIN stop_place_tariff_zones sptz ON fz1.netex_id = sptz.ref " +
+                    "   AND cast(fz1.version as text) = sptz.version " +
+                    "   AND sptz.stop_place_id IN( ");
 
         sqlStringBuilder.append(StringUtils.join(stopPlaceDbIds, ','));
 
         sqlStringBuilder.append(") " +
-                "   INNER JOIN fare_zone fz1 ON fz1.netex_id = tzr.ref " +
-                "   AND (" +
-                "      (" +
-                "        tzr.version IS NOT NULL AND cast(fz1.version AS text) = tzr.version" +
-                "      )" +
-                "      OR (    " +
-                "        tzr.version IS NULL AND fz1.version = (" +
-                "           SELECT MAX(fz2.version) FROM fare_zone fz2 WHERE fz2.netex_id = fz1.netex_id " +
-                "               AND fz2.from_date < NOW()" +
-                "              )" +
-                "      )" +
-                "    ) " +
-                "   AND (" +
-                "        fz1.to_date IS NULL OR fz1.to_date > NOW()" +
-                "       )" +
-                "   AND (" +
-                "        fz1.from_date < NOW()" +
-                "       )" +
-                "   GROUP BY fz1.id ) fz1 " +
-                "JOIN fare_zone fz ON fz.id = fz1.id");
+                "   GROUP BY fz1.netex_id,fz1.version ) fz " +
+                "JOIN fare_zone f ON fz.netex_id = f.netex_id AND fz.version=f.version");
 
         String sql = sqlStringBuilder.toString();
         logger.info(sql);
@@ -194,38 +184,7 @@ public class FareZoneRepositoryImpl implements FareZoneRepositoryCustom {
 
     @Override
     public int countResult(Set<Long> stopPlaceIds) {
-        StringBuilder sqlStringBuilder = new StringBuilder("SELECT COUNT(fz.*) " +
-                "FROM " +
-                "  ( SELECT fz1.id " +
-                "   FROM stop_place_tariff_zones sptz " +
-                "   INNER JOIN tariff_zone_ref tzr ON sptz.tariff_zones_id = tzr.id " +
-                "   AND sptz.stop_place_id IN( ");
-
-        sqlStringBuilder.append(StringUtils.join(stopPlaceIds, ','));
-
-        sqlStringBuilder.append(") " +
-                "   INNER JOIN fare_zone fz1 ON fz1.netex_id = tzr.ref " +
-                "   AND (" +
-                "      (" +
-                "        tzr.version IS NOT NULL AND cast(fz1.version AS text) = tzr.version" +
-                "      )" +
-                "      OR (    " +
-                "        tzr.version IS NULL AND fz1.version = (" +
-                "           SELECT MAX(fz2.version) FROM fare_zone fz2 WHERE fz2.netex_id = fz1.netex_id " +
-                "               AND fz2.from_date < NOW()" +
-                "              )" +
-                "      )" +
-                "    ) " +
-                "   AND (" +
-                "        fz1.to_date IS NULL OR fz1.to_date > NOW()" +
-                "       )" +
-                "   AND (" +
-                "        fz1.from_date < NOW()" +
-                "       )" +
-                "   GROUP BY fz1.id ) fz1 " +
-                "JOIN fare_zone fz ON fz.id = fz1.id");
-
-        String sql = sqlStringBuilder.toString();
+        var sql= generateFareZoneQueryFromStopPlaceIds(stopPlaceIds,true);
         logger.info(sql);
 
         Session session = entityManager.unwrap(Session.class);

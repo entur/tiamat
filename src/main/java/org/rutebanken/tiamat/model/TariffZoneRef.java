@@ -15,16 +15,11 @@
 
 package org.rutebanken.tiamat.model;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.Embeddable;
 
-@Entity
+@Embeddable
 public class TariffZoneRef extends ZoneRefStructure {
 
-    @Id
-    @GeneratedValue(generator = "sequence_per_table_generator")
-    private Long id;
 
     public TariffZoneRef() {
     }

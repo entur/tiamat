@@ -21,6 +21,8 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import javax.persistence.CascadeType;
+import javax.persistence.CollectionTable;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -98,7 +100,10 @@ public class StopPlace
     @OneToMany(cascade = CascadeType.ALL)
     private Set<StopPlace> children = new HashSet<>();
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @ElementCollection(targetClass = TariffZoneRef.class, fetch = FetchType.EAGER)
+    @CollectionTable(
+            name = "stop_place_tariff_zones"
+    )
     private Set<TariffZoneRef> tariffZones = new HashSet<>();
 
     @Enumerated(EnumType.STRING)
