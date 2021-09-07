@@ -26,6 +26,7 @@ import org.rutebanken.netex.model.FareFrame;
 import org.rutebanken.netex.model.FareZone;
 import org.rutebanken.netex.model.GeneralSign;
 import org.rutebanken.netex.model.GroupOfStopPlaces;
+import org.rutebanken.netex.model.GroupOfTariffZones;
 import org.rutebanken.netex.model.InstalledEquipment_VersionStructure;
 import org.rutebanken.netex.model.Parking;
 import org.rutebanken.netex.model.PathLink;
@@ -92,6 +93,10 @@ public class NetexMapper {
                 .register();
 
         mapperFactory.classMap(GroupOfStopPlaces.class, org.rutebanken.tiamat.model.GroupOfStopPlaces.class)
+                .byDefault()
+                .register();
+
+        mapperFactory.classMap(GroupOfTariffZones.class, org.rutebanken.tiamat.model.GroupOfTariffZones.class)
                 .byDefault()
                 .register();
 

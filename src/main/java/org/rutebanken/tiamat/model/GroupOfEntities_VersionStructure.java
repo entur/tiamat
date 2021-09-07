@@ -44,9 +44,6 @@ public abstract class GroupOfEntities_VersionStructure
     @Embedded
     protected EmbeddableMultilingualString description;
 
-    @Transient
-    protected PurposeOfGroupingRefStructure purposeOfGroupingRef;
-
     @AttributeOverrides({
             @AttributeOverride(name = "value", column = @Column(name = "private_code_value")),
             @AttributeOverride(name = "type", column = @Column(name = "private_code_type"))
@@ -84,14 +81,6 @@ public abstract class GroupOfEntities_VersionStructure
 
     public void setDescription(EmbeddableMultilingualString value) {
         this.description = value;
-    }
-
-    public PurposeOfGroupingRefStructure getPurposeOfGroupingRef() {
-        return purposeOfGroupingRef;
-    }
-
-    public void setPurposeOfGroupingRef(PurposeOfGroupingRefStructure value) {
-        this.purposeOfGroupingRef = value;
     }
 
     public PrivateCodeStructure getPrivateCode() {
