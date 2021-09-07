@@ -36,7 +36,10 @@ public class FareZone extends Zone_VersionStructure {
     @Enumerated(EnumType.STRING)
     private ZoneTopologyEnumeration zoneTopology;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @ElementCollection(targetClass = TariffZoneRef.class, fetch = FetchType.EAGER)
+    @CollectionTable(
+            name = "fare_zone_neighbours"
+    )
     private Set<TariffZoneRef> neighbours = new HashSet<>();
 
     @ElementCollection(targetClass = StopPlaceReference.class, fetch = FetchType.EAGER)
