@@ -45,6 +45,7 @@ import org.rutebanken.netex.model.WaitingRoomEquipment;
 import org.rutebanken.tiamat.netex.mapping.mapper.AccessibilityAssessmentMapper;
 import org.rutebanken.tiamat.netex.mapping.mapper.DataManagedObjectStructureMapper;
 import org.rutebanken.tiamat.netex.mapping.mapper.FareZoneMapper;
+import org.rutebanken.tiamat.netex.mapping.mapper.GroupOfTariffZonesMapper;
 import org.rutebanken.tiamat.netex.mapping.mapper.KeyListToKeyValuesMapMapper;
 import org.rutebanken.tiamat.netex.mapping.mapper.ParkingMapper;
 import org.rutebanken.tiamat.netex.mapping.mapper.PlaceEquipmentMapper;
@@ -98,7 +99,9 @@ public class NetexMapper {
 
         mapperFactory.classMap(GroupOfTariffZones.class, org.rutebanken.tiamat.model.GroupOfTariffZones.class)
                 .byDefault()
+                .customize(new GroupOfTariffZonesMapper())
                 .register();
+
 
         mapperFactory.classMap(StopPlace.class, org.rutebanken.tiamat.model.StopPlace.class)
                 .fieldBToA("topographicPlace", "topographicPlaceRef")
@@ -294,5 +297,10 @@ public class NetexMapper {
 
     public MapperFacade getFacade() {
         return facade;
+    }
+
+    public org.rutebanken.tiamat.model.GroupOfTariffZones mapToTiamatModel(GroupOfTariffZones netexGroupOfTariffZones) {
+        final org.rutebanken.tiamat.model.GroupOfTariffZones groupOfTariffZones = facade.map(netexGroupOfTariffZones, org.rutebanken.tiamat.model.GroupOfTariffZones.class);
+        return groupOfTariffZones;
     }
 }

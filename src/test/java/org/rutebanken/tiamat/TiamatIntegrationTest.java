@@ -24,6 +24,7 @@ import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.id.GeneratedIdState;
 import org.rutebanken.tiamat.repository.FareZoneRepository;
 import org.rutebanken.tiamat.repository.GroupOfStopPlacesRepository;
+import org.rutebanken.tiamat.repository.GroupOfTariffZonesRepository;
 import org.rutebanken.tiamat.repository.ParkingRepository;
 import org.rutebanken.tiamat.repository.PathJunctionRepository;
 import org.rutebanken.tiamat.repository.PathLinkRepository;
@@ -63,6 +64,10 @@ public abstract class TiamatIntegrationTest {
 
     @Autowired
     protected GroupOfStopPlacesRepository groupOfStopPlacesRepository;
+
+    @Autowired
+
+    protected GroupOfTariffZonesRepository groupOfTariffZonesRepository;
 
     @Autowired
     protected GroupOfStopPlacesSaverService groupOfStopPlacesSaverService;
