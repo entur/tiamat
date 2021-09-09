@@ -45,6 +45,8 @@
 
 package org.rutebanken.tiamat.importer.handler;
 
+import com.google.api.client.util.Preconditions;
+import org.rutebanken.netex.model.FareZone;
 import org.rutebanken.netex.model.GroupOfTariffZones;
 import org.rutebanken.netex.model.GroupsOfTariffZonesInFrame_RelStructure;
 import org.rutebanken.netex.model.SiteFrame;
@@ -84,11 +86,18 @@ public class GroupOfTariffZonesImportHandler {
     public void handleGroupOfTariffZones(SiteFrame netexSiteFrame, ImportParams importParams, SiteFrame responseSiteframe) {
 
 
-        if (publicationDeliveryHelper.hasGroupOfTariffZones(netexSiteFrame) && importParams.importType != ImportType.ID_MATCH) {
+        if (publicationDeliveryHelper.hasTariffZones(netexSiteFrame) && publicationDeliveryHelper.hasGroupOfTariffZones(netexSiteFrame) && importParams.importType != ImportType.ID_MATCH) {
+            List<String> tariffZoneIds = netexSiteFrame.getTariffZones().getTariffZone().stream()
+                    .map(jaxbElement -> (FareZone) jaxbElement.getValue())
+                    .map(tz -> tz.getId())
+                    .collect(Collectors.toList());
+
             List<org.rutebanken.tiamat.model.GroupOfTariffZones> tiamatGroupOfTariffZones = netexSiteFrame.getGroupsOfTariffZones().getGroupOfTariffZones().stream()
                     .map(netexMapper::mapToTiamatModel)
                     .collect(Collectors.toList());
-            
+
+            //Checks if netex import file contains all the fare zones
+            validateMembers(tiamatGroupOfTariffZones,tariffZoneIds);
 
             logger.debug("Mapped {} group tariff zones from netex to internal model", tiamatGroupOfTariffZones.size());
             final List<GroupOfTariffZones> importedGroupOfTariffZones = groupOfTariffZonesImporter.importGroupOfTariffZones(tiamatGroupOfTariffZones);
@@ -101,6 +110,14 @@ public class GroupOfTariffZonesImportHandler {
             }
 
         }
+    }
+
+
+    private void validateMembers(List<org.rutebanken.tiamat.model.GroupOfTariffZones>  groupOfTariffZones, List<String> tariffZoneRefs) {
+        groupOfTariffZones.forEach(groupOfTariffZone -> groupOfTariffZone.getMembers().forEach(member ->
+                Preconditions.checkArgument(tariffZoneRefs.contains(member.getRef()),
+                "Member with reference " + member.getRef() + " does not exist when importing group of tariff zones " + groupOfTariffZones)));
+
     }
 
 }

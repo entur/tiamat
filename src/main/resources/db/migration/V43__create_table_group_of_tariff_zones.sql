@@ -53,11 +53,11 @@ CREATE TABLE group_of_tariff_zones_members
 (
     group_of_tariff_zones_id bigint NOT NULL,
     ref varchar(255) NOT NULL ,
-    version varchar(255) NOT NULL
+    version varchar(255)
 );
 
 ALTER TABLE ONLY group_of_tariff_zones_members
-    ADD CONSTRAINT group_of_tariff_zones_members_pkey PRIMARY KEY (group_of_tariff_zones_id, ref, version),
+    ADD CONSTRAINT group_of_tariff_zones_members_pkey PRIMARY KEY (group_of_tariff_zones_id, ref),
     ADD CONSTRAINT fk7sff4g5u4o584lwkrc1hiqsfa FOREIGN KEY (group_of_tariff_zones_id)REFERENCES group_of_tariff_zones(id);
 
 ALTER TABLE group_of_tariff_zones_members OWNER to tiamat;

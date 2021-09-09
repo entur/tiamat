@@ -16,7 +16,7 @@ public class GroupOfTariffZonesMapper extends CustomMapper<GroupOfTariffZones, o
         super.mapAtoB(netexGroupOfTariffZones, tiamatGroupOfTariffZones, context);
         if (netexGroupOfTariffZones.getMembers() != null && !netexGroupOfTariffZones.getMembers().getTariffZoneRef().isEmpty()) {
             final List<TariffZoneRef> tiamatTariffZoneRefList = netexGroupOfTariffZones.getMembers().getTariffZoneRef().stream()
-                    .map(tzr -> new TariffZoneRef(tzr.getRef(), tzr.getVersion())).collect(Collectors.toList());
+                    .map(tzr -> new TariffZoneRef(tzr.getRef())).collect(Collectors.toList());
 
             tiamatGroupOfTariffZones.getMembers().addAll(tiamatTariffZoneRefList);
         }
