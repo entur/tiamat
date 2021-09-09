@@ -121,4 +121,9 @@ public class PublicationDeliveryHelper {
                 .flatMap(values -> Stream.of(values))
                 .findFirst().orElse(null);
     }
+
+    public boolean hasGroupOfTariffZones(SiteFrame netexSiteFrame) {
+        return netexSiteFrame.getGroupsOfTariffZones() != null
+                && netexSiteFrame.getGroupsOfTariffZones().getGroupOfTariffZones() != null;
+    }
 }

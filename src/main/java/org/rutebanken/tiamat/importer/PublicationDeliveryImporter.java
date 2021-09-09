@@ -20,6 +20,7 @@ import org.rutebanken.helper.organisation.RoleAssignmentExtractor;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.netex.model.SiteFrame;
 import org.rutebanken.tiamat.exporter.PublicationDeliveryExporter;
+import org.rutebanken.tiamat.importer.handler.GroupOfTariffZonesImportHandler;
 import org.rutebanken.tiamat.importer.handler.ParkingsImportHandler;
 import org.rutebanken.tiamat.importer.handler.PathLinkImportHandler;
 import org.rutebanken.tiamat.importer.handler.StopPlaceImportHandler;
@@ -54,6 +55,7 @@ public class PublicationDeliveryImporter {
     private final PublicationDeliveryExporter publicationDeliveryExporter;
     private final PathLinkImportHandler pathLinkImportHandler;
     private final TariffZoneImportHandler tariffZoneImportHandler;
+    private final GroupOfTariffZonesImportHandler groupOfTariffZonesImportHandler;
     private final StopPlaceImportHandler stopPlaceImportHandler;
     private final ParkingsImportHandler parkingsImportHandler;
     private final TopographicPlaceImportHandler topographicPlaceImportHandler;
@@ -66,6 +68,7 @@ public class PublicationDeliveryImporter {
                                        PathLinkImportHandler pathLinkImportHandler,
                                        TopographicPlaceImportHandler topographicPlaceImportHandler,
                                        TariffZoneImportHandler tariffZoneImportHandler,
+                                       GroupOfTariffZonesImportHandler groupOfTariffZonesImportHandler,
                                        StopPlaceImportHandler stopPlaceImportHandler,
                                        ParkingsImportHandler parkingsImportHandler,
                                        RoleAssignmentExtractor roleAssignmentExtractor,
@@ -76,6 +79,7 @@ public class PublicationDeliveryImporter {
         this.pathLinkImportHandler = pathLinkImportHandler;
         this.topographicPlaceImportHandler = topographicPlaceImportHandler;
         this.tariffZoneImportHandler = tariffZoneImportHandler;
+        this.groupOfTariffZonesImportHandler = groupOfTariffZonesImportHandler;
         this.stopPlaceImportHandler = stopPlaceImportHandler;
         this.roleAssignmentExtractor = roleAssignmentExtractor;
         this.backgroundJobs = backgroundJobs;
@@ -136,6 +140,7 @@ public class PublicationDeliveryImporter {
 
             topographicPlaceImportHandler.handleTopographicPlaces(netexSiteFrame, importParams, topographicPlaceCounter ,responseSiteframe);
             tariffZoneImportHandler.handleTariffZones(netexSiteFrame, importParams, tariffZoneCounter, responseSiteframe);
+            groupOfTariffZonesImportHandler.handleGroupOfTariffZones(netexSiteFrame,importParams,responseSiteframe);
             stopPlaceImportHandler.handleStops(netexSiteFrame, importParams, stopPlaceCounter, responseSiteframe);
             parkingsImportHandler.handleParkings(netexSiteFrame, importParams, parkingCounter, responseSiteframe);
             pathLinkImportHandler.handlePathLinks(netexSiteFrame, importParams, pathLinkCounter, responseSiteframe);

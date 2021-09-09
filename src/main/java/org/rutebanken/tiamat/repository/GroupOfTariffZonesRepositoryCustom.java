@@ -13,20 +13,23 @@
  * limitations under the Licence.
  */
 
-package org.rutebanken.tiamat.model;
+package org.rutebanken.tiamat.repository;
 
-import javax.persistence.Embeddable;
+import org.rutebanken.tiamat.exporter.params.GroupOfTariffZonesSearch;
+import org.rutebanken.tiamat.model.GroupOfTariffZones;
 
-@Embeddable
-public class PurposeOfGroupingRefStructure
-        extends TypeOfValueRefStructure {
-    public PurposeOfGroupingRefStructure() {
-        super();
-    }
-    public PurposeOfGroupingRefStructure(String ref, String version) {
-        super(ref, version);
-    }
-    public PurposeOfGroupingRefStructure(String ref) {
-        super(ref);
-    }
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+
+public interface GroupOfTariffZonesRepositoryCustom {
+
+    List<GroupOfTariffZones> findGroupOfTariffZones(GroupOfTariffZonesSearch search);
+
+    Iterator<GroupOfTariffZones> scrollGroupOfTariffZones();
+
+    Iterator<GroupOfTariffZones> scrollGroupOfTariffZones(Set<Long> StopPlaceIds);
+
+
 }
+

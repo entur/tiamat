@@ -26,6 +26,7 @@ import org.rutebanken.netex.model.FareFrame;
 import org.rutebanken.netex.model.FareZone;
 import org.rutebanken.netex.model.GeneralSign;
 import org.rutebanken.netex.model.GroupOfStopPlaces;
+import org.rutebanken.netex.model.GroupOfTariffZones;
 import org.rutebanken.netex.model.InstalledEquipment_VersionStructure;
 import org.rutebanken.netex.model.Parking;
 import org.rutebanken.netex.model.PathLink;
@@ -44,6 +45,7 @@ import org.rutebanken.netex.model.WaitingRoomEquipment;
 import org.rutebanken.tiamat.netex.mapping.mapper.AccessibilityAssessmentMapper;
 import org.rutebanken.tiamat.netex.mapping.mapper.DataManagedObjectStructureMapper;
 import org.rutebanken.tiamat.netex.mapping.mapper.FareZoneMapper;
+import org.rutebanken.tiamat.netex.mapping.mapper.GroupOfTariffZonesMapper;
 import org.rutebanken.tiamat.netex.mapping.mapper.KeyListToKeyValuesMapMapper;
 import org.rutebanken.tiamat.netex.mapping.mapper.ParkingMapper;
 import org.rutebanken.tiamat.netex.mapping.mapper.PlaceEquipmentMapper;
@@ -94,6 +96,12 @@ public class NetexMapper {
         mapperFactory.classMap(GroupOfStopPlaces.class, org.rutebanken.tiamat.model.GroupOfStopPlaces.class)
                 .byDefault()
                 .register();
+
+        mapperFactory.classMap(GroupOfTariffZones.class, org.rutebanken.tiamat.model.GroupOfTariffZones.class)
+                .byDefault()
+                .customize(new GroupOfTariffZonesMapper())
+                .register();
+
 
         mapperFactory.classMap(StopPlace.class, org.rutebanken.tiamat.model.StopPlace.class)
                 .fieldBToA("topographicPlace", "topographicPlaceRef")
@@ -289,5 +297,10 @@ public class NetexMapper {
 
     public MapperFacade getFacade() {
         return facade;
+    }
+
+    public org.rutebanken.tiamat.model.GroupOfTariffZones mapToTiamatModel(GroupOfTariffZones netexGroupOfTariffZones) {
+        final org.rutebanken.tiamat.model.GroupOfTariffZones groupOfTariffZones = facade.map(netexGroupOfTariffZones, org.rutebanken.tiamat.model.GroupOfTariffZones.class);
+        return groupOfTariffZones;
     }
 }
