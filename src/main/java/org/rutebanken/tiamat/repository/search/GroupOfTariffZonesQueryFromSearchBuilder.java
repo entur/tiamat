@@ -71,6 +71,9 @@ public class GroupOfTariffZonesQueryFromSearchBuilder {
             parameters.put("tariffZoneIds", search.getTariffZoneId());
         }
 
+        operators.add("and");
+        wheres.add("g.version = (select max(gv.version) from group_of_tariff_zones gv where gv.netex_id = g.netex_id)");
+
         searchHelper.addWheres(queryString, wheres, operators);
         searchHelper.addOrderByStatements(queryString, orderByStatements);
         final String generatedSql = searchHelper.format(queryString.toString());
