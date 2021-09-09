@@ -156,33 +156,7 @@ public class FareZoneRepositoryImpl implements FareZoneRepositoryCustom {
     }
 
     private String generateFareZoneQueryFromStopPlaceIds(Set<Long> stopPlaceDbIds) {
-        String sql = "select" +
-                "        f.*" +
-                "    from" +
-                "        (     select" +
-                "            ref," +
-                "            version      " +
-                "        from" +
-                "            group_of_tariff_zones_members      " +
-                "        where" +
-                "            group_of_tariff_zones_id in (" +
-                "                select" +
-                "                    gotz.group_of_tariff_zones_id              " +
-                "                from" +
-                "                    group_of_tariff_zones_members gotz              " +
-                "                join" +
-                "                    stop_place_tariff_zones sptz                      " +
-                "                        on gotz.ref=sptz.ref                      " +
-                "                        and gotz.version = sptz.version                      " +
-                "                        and sptz. stop_place_id in (" + StringUtils.join(stopPlaceDbIds, ',') +
-                "                        )             " +
-                "                ) " +
-                "            ) gotz  " +
-                "    join" +
-                "        fare_zone f " +
-                "            on f.netex_id= gotz.ref " +
-                "            and cast(f.version as text) = gotz.version " + "UNION " +
-                "SELECT fz.* " +
+        String sql = "SELECT fz.* " +
                 "    FROM" +
                 "        fare_zone fz     " +
                 "    INNER JOIN" +
@@ -214,29 +188,6 @@ public class FareZoneRepositoryImpl implements FareZoneRepositoryCustom {
                 "        AND sptz.stop_place_id IN(" + StringUtils.join(stopPlaceDbIds,',') +
                 "        )";
 
-
-
-                /*
-                "select" +
-                "        f.*" +
-                "    from" +
-                "        (select" +
-                "            sptz.ref," +
-                "            sptz.version " +
-                "        from" +
-                "            stop_place_tariff_zones sptz " +
-                "        where" +
-                "            sptz.stop_place_id in (" + StringUtils.join(stopPlaceDbIds, ',') +
-                "            )  " +
-                "        GROUP BY" +
-                "            sptz.ref," +
-                "            sptz.version ) fz " +
-                "    JOIN" +
-                "        fare_zone f " +
-                "            ON fz.ref = f.netex_id " +
-                "            AND cast(f.version as text)=fz.version;";
-
-                 */
         logger.info(sql);
         return sql;
 
