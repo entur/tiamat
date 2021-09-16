@@ -153,38 +153,41 @@ public class TariffZoneRepositoryImpl implements TariffZoneRepositoryCustom {
     }
 
     private String generateTariffZoneQueryFromStopPlaceIds(Set<Long> stopPlaceDbIds) {
-        var sql = "SELECT" +
-                "        tz.*     " +
-                "    FROM" +
-                "        tariff_zone tz     " +
-                "    INNER JOIN" +
-                "        stop_place_tariff_zones sptz             " +
-                "            ON tz.netex_id = sptz.ref             " +
-                "            AND (" +
-                "                (" +
-                "                    sptz.version IS NOT NULL                     " +
-                "                    AND cast(tz.version as text) = sptz.version                 " +
+        var sql = "select" +
+                "        tz.* " +
+                "    from" +
+                "        (         select" +
+                "            tz1.id         " +
+                "        from" +
+                "            stop_place_tariff_zones sptz     " +
+                "        inner join" +
+                "            tariff_zone tz1              " +
+                "                ON tz1.netex_id = sptz.ref         " +
+                "                AND  sptz.stop_place_id IN(" + StringUtils.join(stopPlaceDbIds,',') +
+                "                )            " +
+                "                AND (" +
+                "                    (" +
+                "                        sptz.version IS NOT NULL                          " +
+                "                        AND cast(tz1.version AS text) = sptz.version                           " +
+                "                    )                                   " +
+                "                    OR (" +
+                "                        sptz.version IS NULL                          " +
+                "                        AND tz1.version = (" +
+                "                            SELECT" +
+                "                                MAX(tz2.version)                          " +
+                "                        FROM" +
+                "                            tariff_zone tz2                          " +
+                "                        WHERE" +
+                "                            tz2.netex_id = tz1.netex_id                                                         " +
+                "                            AND tz2.from_date < NOW()                                   " +
+                "                    )                       " +
                 "                )                 " +
-                "                OR (" +
-                "                    sptz.version IS NULL                     " +
-                "                    AND tz.version =   (" +
-                "                        SELECT" +
-                "                            MAX(tzv.version)                     " +
-                "                    FROM" +
-                "                        tariff_zone tzv                     " +
-                "                    WHERE" +
-                "                        tzv.netex_id=tz.netex_id                         " +
-                "                        AND tzv.from_date < NOW()                 " +
-                "                )             " +
-                "            )              " +
-                "            AND    (" +
-                "                tz.to_date IS NULL                 " +
-                "                OR tz.to_date > NOW()             " +
-                "            )             " +
-                "            AND tz.from_date < NOW()           " +
-                "        )             " +
-                "        AND sptz.stop_place_id IN(" + StringUtils.join(stopPlaceDbIds,',') +
-                "        )";
+                "            )           " +
+                "        GROUP BY" +
+                "            tz1.id      ) tz1      " +
+                "        join" +
+                "            tariff_zone tz      " +
+                "                on tz.id = tz1.id";
 
 
         logger.info(sql);

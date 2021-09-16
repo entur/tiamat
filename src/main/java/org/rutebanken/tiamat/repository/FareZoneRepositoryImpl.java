@@ -156,37 +156,41 @@ public class FareZoneRepositoryImpl implements FareZoneRepositoryCustom {
     }
 
     private String generateFareZoneQueryFromStopPlaceIds(Set<Long> stopPlaceDbIds) {
-        String sql = "SELECT fz.* " +
-                "    FROM" +
-                "        fare_zone fz     " +
-                "    INNER JOIN" +
-                "        stop_place_tariff_zones sptz             " +
-                "            ON fz.netex_id = sptz.ref             " +
-                "            AND (" +
-                "                (" +
-                "                    sptz.version IS NOT NULL                     " +
-                "                    AND cast(fz.version as text) = sptz.version                 " +
+        var sql = "select" +
+                "        fz.* " +
+                "    from" +
+                "        (         select" +
+                "            fz1.id         " +
+                "        from" +
+                "            stop_place_tariff_zones sptz     " +
+                "        inner join" +
+                "            fare_zone fz1              " +
+                "                ON fz1.netex_id = sptz.ref         " +
+                "                AND  sptz.stop_place_id IN(" + StringUtils.join(stopPlaceDbIds,',') +
+                "                )            " +
+                "                AND (" +
+                "                    (" +
+                "                        sptz.version IS NOT NULL                          " +
+                "                        AND cast(fz1.version AS text) = sptz.version                           " +
+                "                    )                                   " +
+                "                    OR (" +
+                "                        sptz.version IS NULL                          " +
+                "                        AND fz1.version = (" +
+                "                            SELECT" +
+                "                                MAX(fz2.version)                          " +
+                "                        FROM" +
+                "                            fare_zone fz2                          " +
+                "                        WHERE" +
+                "                            fz2.netex_id = fz1.netex_id                                                         " +
+                "                            AND fz2.from_date < NOW()                                   " +
+                "                    )                       " +
                 "                )                 " +
-                "                OR (" +
-                "                    sptz.version IS NULL                     " +
-                "                    AND fz.version =   (" +
-                "                        SELECT" +
-                "                            MAX(fzv.version)                     " +
-                "                    FROM" +
-                "                        fare_zone fzv                     " +
-                "                    WHERE" +
-                "                        fzv.netex_id=fz.netex_id                         " +
-                "                        AND fzv.from_date < NOW()                 " +
-                "                )             " +
-                "            )              " +
-                "            AND    (" +
-                "                fz.to_date IS NULL                 " +
-                "                OR fz.to_date > NOW()             " +
-                "            )             " +
-                "            AND fz.from_date < NOW()           " +
-                "        )             " +
-                "        AND sptz.stop_place_id IN(" + StringUtils.join(stopPlaceDbIds,',') +
-                "        )";
+                "            )           " +
+                "        GROUP BY" +
+                "            fz1.id      ) fz1      " +
+                "        join" +
+                "            fare_zone fz      " +
+                "                on fz.id = fz1.id";
 
         logger.info(sql);
         return sql;
