@@ -98,8 +98,8 @@
             sync, and fail fast if incompatibilities -->
         <netex-java-model.version>1.0.12-SNAPSHOT</netex-java-model.version>
         <hazelcast-helper.version>1.0.60</hazelcast-helper.version>
-        <rutebanken-gcp-storage.version>0.0.4-SNAPSHOT</rutebanken-gcp-storage.version>
-        <rutebanken-organisation.version>0.0.4-SNAPSHOT</rutebanken-organisation.version>
+        <rutebanken-gcp-storage.version>1.0.60</rutebanken-gcp-storage.version>
+        <rutebanken-organisation.version>1.0.60</rutebanken-organisation.version>
         <entur.helpers.version>1.0.42</entur.helpers.version>
 
         <javax-jms.version>2.0.1</javax-jms.version>
