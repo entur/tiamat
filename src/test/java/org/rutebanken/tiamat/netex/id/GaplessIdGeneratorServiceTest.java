@@ -15,7 +15,7 @@
 
 package org.rutebanken.tiamat.netex.id;
 
-import com.hazelcast.collection.IQueue;
+import com.hazelcast.core.IQueue;
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;

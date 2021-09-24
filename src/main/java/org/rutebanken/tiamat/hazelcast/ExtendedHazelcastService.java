@@ -15,10 +15,9 @@
 
 package org.rutebanken.tiamat.hazelcast;
 
-import com.hazelcast.config.EvictionConfig;
 import com.hazelcast.config.EvictionPolicy;
 import com.hazelcast.config.MapConfig;
-import com.hazelcast.config.MaxSizePolicy;
+import com.hazelcast.config.MaxSizeConfig;
 import com.hazelcast.core.HazelcastInstance;
 import org.rutebanken.hazelcasthelper.service.HazelCastService;
 import org.rutebanken.hazelcasthelper.service.KubernetesService;
@@ -39,17 +38,12 @@ public class ExtendedHazelcastService extends HazelCastService {
     private static final int DEFAULT_BACKUP_COUNT = 1;
 
     /**
-     * From Hazelcast documentation:
-     * <p>
-     * USED_HEAP_PERCENTAGE: Maximum used heap size percentage for each JVM. If, for example,
-     * JVM is configured to have 1000 MB and this value is 10, then the map entries will be evicted when used heap size exceeds 100 MB.
-     * <p>
+     * Evict cache when free heap percentage is below this value
      */
-    private static final int MAX_HEAP_PERCENTAGE_SECOND_LEVEL_CACHE = 2;
+    private static final int EVICT_WHEN_FREE_HEAP_PERCENTAGE_BELOW = 50;
 
-
-    public ExtendedHazelcastService(KubernetesService kubernetesService) {
-        super(kubernetesService);
+    public ExtendedHazelcastService(KubernetesService kubernetesService, String hazelcastManagementUrl) {
+        super(kubernetesService, hazelcastManagementUrl);
     }
 
     /**
@@ -67,7 +61,7 @@ public class ExtendedHazelcastService extends HazelCastService {
                         .setBackupCount(DEFAULT_BACKUP_COUNT)
                         .setAsyncBackupCount(0)
                         .setTimeToLiveSeconds(0)
-                        .setEvictionConfig(new EvictionConfig().setEvictionPolicy(EvictionPolicy.NONE)));
+                        .setEvictionPolicy(EvictionPolicy.NONE));
 
         logger.info("Configured map for last ids for entities: {}", mapConfigs.get(0));
 
@@ -78,11 +72,10 @@ public class ExtendedHazelcastService extends HazelCastService {
                         // No sync backup for hibernate cache
                         .setBackupCount(0)
                         .setAsyncBackupCount(2)
-                        .setEvictionConfig(new EvictionConfig().
-                                setEvictionPolicy(EvictionPolicy.LFU).
-                                setMaxSizePolicy(MaxSizePolicy.FREE_HEAP_PERCENTAGE)
-                                .setSize(MAX_HEAP_PERCENTAGE_SECOND_LEVEL_CACHE))
-                        .setTimeToLiveSeconds(604800));
+                        .setEvictionPolicy(EvictionPolicy.LFU)
+                        .setTimeToLiveSeconds(604800)
+                        .setMaxSizeConfig(
+                                new MaxSizeConfig(EVICT_WHEN_FREE_HEAP_PERCENTAGE_BELOW, MaxSizeConfig.MaxSizePolicy.FREE_HEAP_PERCENTAGE)));
 
         logger.info("Configured map for hibernate second level cache: {}", mapConfigs.get(1));
         return mapConfigs;
