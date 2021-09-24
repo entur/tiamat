@@ -83,7 +83,7 @@
         <guava.version>30.1.1-jre</guava.version>
         <graphql-java.version>11.0</graphql-java.version>
 
-        <hazelcast-hibernate53.version>1.3.0</hazelcast-hibernate53.version>
+        <hazelcast-hibernate53.version>1.3.3</hazelcast-hibernate53.version>
         <hibernate.version>5.4.0.Final</hibernate.version>
         <hibernate-spatial.version>5.4.0.Final</hibernate-spatial.version>
 
@@ -97,7 +97,7 @@
         <!-- NB: Concious choice of using snapshot version. This is to keep in
             sync, and fail fast if incompatibilities -->
         <netex-java-model.version>1.0.12-SNAPSHOT</netex-java-model.version>
-        <hazelcast-helper.version>0.0.4-SNAPSHOT</hazelcast-helper.version>
+        <hazelcast-helper.version>1.0.60</hazelcast-helper.version>
         <rutebanken-gcp-storage.version>0.0.4-SNAPSHOT</rutebanken-gcp-storage.version>
         <rutebanken-organisation.version>0.0.4-SNAPSHOT</rutebanken-organisation.version>
         <entur.helpers.version>1.0.42</entur.helpers.version>
