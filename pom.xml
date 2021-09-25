@@ -64,7 +64,7 @@
         <spring-boot-plugin.version>2.3.4.RELEASE</spring-boot-plugin.version>
         <spring-boot.version>2.3.4.RELEASE</spring-boot.version>
         <spring.security.version>5.3.5.RELEASE</spring.security.version>
-        <postgresql.version>42.2.4</postgresql.version>
+        <postgresql.version>42.2.24</postgresql.version>
         <geodb.version>0.9</geodb.version>
         <geotools.version>22.1</geotools.version>
         <activemq-client.version>5.15.9</activemq-client.version>
