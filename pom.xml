@@ -66,7 +66,7 @@
         <spring.security.version>5.3.5.RELEASE</spring.security.version>
         <postgresql.version>42.2.4</postgresql.version>
         <geodb.version>0.9</geodb.version>
-        <geotools.version>20.1</geotools.version>
+        <geotools.version>22.1</geotools.version>
         <activemq-client.version>5.15.9</activemq-client.version>
         <maven-javadoc-plugin.version>2.10.4</maven-javadoc-plugin.version>
         <flyway-core.version>5.2.4</flyway-core.version>
