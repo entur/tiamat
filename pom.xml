@@ -72,7 +72,7 @@
         <logstash-logback.version>5.2</logstash-logback.version>
         <kubernetes-client.version>5.8.0</kubernetes-client.version>
         <janino.version>3.1.6</janino.version>
-        <assertj-core.version>3.10.0</assertj-core.version>
+        <assertj-core.version>3.21.0</assertj-core.version>
         <rest-assured.version>3.1.0</rest-assured.version>
         <javax.el.version>3.0.0</javax.el.version>
         <com.h2database.version>1.4.197</com.h2database.version>
