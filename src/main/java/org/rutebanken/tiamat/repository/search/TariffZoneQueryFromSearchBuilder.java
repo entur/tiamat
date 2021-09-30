@@ -53,12 +53,8 @@ public class TariffZoneQueryFromSearchBuilder {
             parameters.put("query", search.getQuery());
             orderByStatements.add("similarity(t.name_value, :query) desc");
         }
-
-        // When it comes to tariff zones, max version is the current version.
-        // Previously, we did not use from_date, to_date for tariff zones.
-        // At the time of writing, we are re-saving the latest version of a tariff zone.
         operators.add("and");
-        wheres.add("t.version = (select max(tv.version) from tariff_zone tv where tv.netex_id = t.netex_id)");
+        wheres.add("t.version = (select max(tv.version) from tariff_zone tv where tv.netex_id = t.netex_id and (tv.to_date is null or tv.to_date > now()) and (tv.from_date is null or tv.from_date < now()))");
 
         searchHelper.addWheres(queryString, wheres, operators);
         searchHelper.addOrderByStatements(queryString, orderByStatements);

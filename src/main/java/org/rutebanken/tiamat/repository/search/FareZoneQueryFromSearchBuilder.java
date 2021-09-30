@@ -70,7 +70,7 @@ public class FareZoneQueryFromSearchBuilder {
         }
 
         operators.add("and");
-        wheres.add("f.version = (select max(fv.version) from fare_zone fv where fv.netex_id = f.netex_id)");
+        wheres.add("f.version = (select max(fv.version) from fare_zone fv where fv.netex_id = f.netex_id and (fv.to_date is null or fv.to_date > now()) and (fv.from_date is null or fv.from_date < now()))");
 
         searchHelper.addWheres(queryString, wheres, operators);
         searchHelper.addOrderByStatements(queryString, orderByStatements);
