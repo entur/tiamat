@@ -38,4 +38,6 @@ public interface FareZoneRepositoryCustom extends DataManagedObjectStructureRepo
     Optional<FareZone> findValidFareZone(String netexId);
 
     int countResult(Set<Long> stopPlaceIds);
+
+    public List<FareZone> findAllValidFareZones();
 }

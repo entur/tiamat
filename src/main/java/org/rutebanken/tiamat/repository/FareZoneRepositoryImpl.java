@@ -96,6 +96,21 @@ public class FareZoneRepositoryImpl implements FareZoneRepositoryCustom {
 
         return query.getResultList().stream().findFirst();
     }
+
+    @Override
+    public List<FareZone> findAllValidFareZones() {
+        Map<String, Object> parameters = new HashMap<>();
+        String sql = "SELECT fz.* FROM fare_zone fz WHERE " +
+                "fz.version = (SELECT MAX(fzv.version) FROM fare_zone fzv WHERE fzv.netex_id = fz.netex_id " +
+                "and (fzv.to_date is null or fzv.to_date > :pointInTime) and (fzv.from_date is null or fzv.from_date < :pointInTime))";
+        Instant pointInTime = Instant.now();
+        parameters.put("pointInTime", pointInTime);
+
+        Query query = entityManager.createNativeQuery(sql, FareZone.class);
+        parameters.forEach(query::setParameter);
+
+        return query.getResultList();
+    }
     @Override
     public String findFirstByKeyValues(String key, Set<String> originalIds) {
         throw new NotImplementedException("findFirstByKeyValues not implemented for " + this.getClass().getSimpleName());

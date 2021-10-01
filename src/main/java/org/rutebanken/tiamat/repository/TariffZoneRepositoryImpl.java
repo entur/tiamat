@@ -95,6 +95,22 @@ public class TariffZoneRepositoryImpl implements TariffZoneRepositoryCustom {
 
         return query.getResultList().stream().findFirst();
     }
+
+    @Override
+    public List<TariffZone> findAllValidTariffZones() {
+        Map<String, Object> parameters = new HashMap<>();
+        String sql = "SELECT tz.* FROM tariff_zone tz WHERE " +
+                "tz.version = (SELECT MAX(tzv.version) FROM tariff_zone tzv WHERE tzv.netex_id = tz.netex_id " +
+                "and (tzv.to_date is null or tzv.to_date > :pointInTime) and (tzv.from_date is null or tzv.from_date < :pointInTime))";
+        Instant pointInTime = Instant.now();
+        parameters.put("pointInTime", pointInTime);
+
+        Query query = entityManager.createNativeQuery(sql, TariffZone.class);
+        parameters.forEach(query::setParameter);
+
+        return query.getResultList();
+    }
+
     @Override
     public String findFirstByKeyValues(String key, Set<String> originalIds) {
         throw new NotImplementedException("findFirstByKeyValues not implemented for " + this.getClass().getSimpleName());

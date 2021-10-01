@@ -151,7 +151,7 @@ public class TariffZonesLookupService {
     public Supplier<List<Pair<String, Polygon>>> getTariffZones() {
         return () -> {
             logger.info("Fetching and memoizing tariff zones from repository");
-            return tariffZoneRepository.findAll()
+            return tariffZoneRepository.findAllValidTariffZones()
                     .stream()
                     .filter(tariffZone -> tariffZone.getPolygon() != null)
                     .collect(
@@ -171,7 +171,7 @@ public class TariffZonesLookupService {
     public Supplier<List<Pair<String, Polygon>>> getFareZones() {
         return () -> {
             logger.info("Fetching and memoizing fare zones from repository");
-            return fareZoneRepository.findAll()
+            return fareZoneRepository.findAllValidFareZones()
                     .stream()
                     .filter(fareZone -> fareZone.getPolygon() != null)
                     .collect(
