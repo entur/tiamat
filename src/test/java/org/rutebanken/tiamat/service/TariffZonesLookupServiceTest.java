@@ -68,7 +68,7 @@ public class TariffZonesLookupServiceTest {
         anotherOne.setVersion(3L);
         anotherOne.setPolygon(geometryFactory.createPolygon(linearRing, null));
 
-        when(tariffZoneRepository.findAll()).thenReturn(Arrays.asList(firstVersion, secondVersion, anotherOne));
+        when(tariffZoneRepository.findAllValidTariffZones()).thenReturn(Arrays.asList(firstVersion, secondVersion, anotherOne));
 
 
         java.util.function.Supplier<List<Pair<String, Polygon>>> actual = tariffZonesLookupService.getTariffZones();
