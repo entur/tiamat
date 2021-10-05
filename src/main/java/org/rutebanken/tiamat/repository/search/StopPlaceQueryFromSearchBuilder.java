@@ -33,7 +33,6 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -279,12 +278,12 @@ public class StopPlaceQueryFromSearchBuilder {
             wheres.add(pointInTimeCondition);
         } else if (ExportParams.VersionValidity.CURRENT.equals(versionValidity)) {
             operators.add("and");
-            parameters.put("pointInTime", Date.from(Instant.now()));
+            parameters.put("pointInTime", Timestamp.from(Instant.now()));
             String currentQuery = "(%s.from_date <= :pointInTime AND (%s.to_date >= :pointInTime or %s.to_date IS NULL))";
             wheres.add("(" + formatRepeatedValue(currentQuery, "s", 3) + " or " + formatRepeatedValue(currentQuery, "p", 3) + ")");
         } else if (ExportParams.VersionValidity.CURRENT_FUTURE.equals(versionValidity)) {
             operators.add("and");
-            parameters.put("pointInTime", Date.from(Instant.now()));
+            parameters.put("pointInTime", Timestamp.from(Instant.now()));
             String futureQuery = "p.netex_id is null and (s.to_date >= :pointInTime OR s.to_date IS NULL)";
             String parentFutureQuery = "p.netex_id is not null and (p.to_date >= :pointInTime OR p.to_date IS NULL)";
             wheres.add("((" + futureQuery + ") or (" + parentFutureQuery + "))");
