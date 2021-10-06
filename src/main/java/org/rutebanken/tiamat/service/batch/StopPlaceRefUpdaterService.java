@@ -9,12 +9,15 @@ import org.rutebanken.tiamat.exporter.params.StopPlaceSearch;
 import org.rutebanken.tiamat.lock.LockException;
 import org.rutebanken.tiamat.lock.TimeoutMaxLeaseTimeLock;
 import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.repository.FareZoneRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
+import org.rutebanken.tiamat.repository.TariffZoneRepository;
 import org.rutebanken.tiamat.service.TariffZonesLookupService;
 import org.rutebanken.tiamat.service.TopographicPlaceLookupService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,23 +40,33 @@ public class StopPlaceRefUpdaterService {
     public static final String BACKGROUND_UPDATE_STOPS_LOCK = "background-update-stops-lock";
 
     private final StopPlaceRepository stopPlaceRepository;
+    private final TariffZoneRepository tariffZoneRepository;
+    private final FareZoneRepository fareZoneRepository;
 
     private final TariffZonesLookupService tariffZonesLookupService;
     private final TopographicPlaceLookupService topographicPlaceLookupService;
     private final EntityManager entityManager;
     private final TimeoutMaxLeaseTimeLock timeoutMaxLeaseTimeLock;
 
+    private final boolean enableLegacyUpdater;
+
     @Autowired
     public StopPlaceRefUpdaterService(StopPlaceRepository stopPlaceRepository,
+                                      TariffZoneRepository tariffZoneRepository,
+                                      FareZoneRepository fareZoneRepository,
                                       TariffZonesLookupService tariffZonesLookupService,
                                       TopographicPlaceLookupService topographicPlaceLookupService,
                                       EntityManager entityManager,
-                                      TimeoutMaxLeaseTimeLock timeoutMaxLeaseTimeLock) {
+                                      TimeoutMaxLeaseTimeLock timeoutMaxLeaseTimeLock,
+                                      @Value("${stopPlaceRefUpdaterService.enableLegacyUpdater:false}") boolean enableLegacyUpdater) {
         this.stopPlaceRepository = stopPlaceRepository;
+        this.tariffZoneRepository = tariffZoneRepository;
+        this.fareZoneRepository = fareZoneRepository;
         this.tariffZonesLookupService = tariffZonesLookupService;
         this.topographicPlaceLookupService = topographicPlaceLookupService;
         this.entityManager = entityManager;
         this.timeoutMaxLeaseTimeLock = timeoutMaxLeaseTimeLock;
+        this.enableLegacyUpdater = enableLegacyUpdater;
     }
 
     public void updateAllStopPlaces() {
@@ -63,7 +76,11 @@ public class StopPlaceRefUpdaterService {
             timeoutMaxLeaseTimeLock.executeInLock(() -> {
 
                 try {
-                    updateStops();
+                    if (enableLegacyUpdater) {
+                        updateStopsLegacy();
+                    } else {
+                        updateStops();
+                    }
                 } catch (Exception e) {
                     logger.error("Error updating stops", e);
                 }
@@ -76,8 +93,29 @@ public class StopPlaceRefUpdaterService {
             logger.warn("Background job stopped because of exception", e);
         }
     }
-
+    /*
+     * Updates stop place tariff zone ref faster
+     * Note currently this method updates only tariff zone refs
+     * to update topographical places use updateStopsLegacy.
+     */
     public void updateStops() {
+        logger.info("About to update all currently valid stop places (tariff zone and fare zone refs)");
+        long startTime = System.currentTimeMillis();
+
+        stopPlaceRepository.deleteStopPlaceTariffZoneRefs();
+        tariffZoneRepository.updateStopPlaceTariffZoneRef();
+        fareZoneRepository.updateStopPlaceTariffZoneRef();
+
+        long timeSpent = System.currentTimeMillis() - startTime;
+        logger.info("Update stops in {} ms.", timeSpent);
+
+    }
+
+    /*
+     * Legacy updater stop-place ref  update stops one by one
+     */
+
+    public void updateStopsLegacy() {
 
         long startTime = System.currentTimeMillis();
 
