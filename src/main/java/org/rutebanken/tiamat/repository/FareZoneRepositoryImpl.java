@@ -238,4 +238,62 @@ public class FareZoneRepositoryImpl implements FareZoneRepositoryCustom {
         NativeQuery query = session.createNativeQuery(sql);
         return ((BigInteger) query.uniqueResult()).intValue();
     }
+
+    public int updateStopPlaceTariffZoneRef() {
+        String sql= "INSERT " +
+                "    INTO" +
+                "        STOP_PLACE_TARIFF_ZONES" +
+                "        SELECT" +
+                "            SP.ID," +
+                "            FZ.NETEX_ID," +
+                "            CAST(FZ.VERSION AS text)  " +
+                "        FROM" +
+                "            FARE_ZONE FZ " +
+                "        JOIN" +
+                "            PERSISTABLE_POLYGON PP " +
+                "                ON PP.ID = FZ.POLYGON_ID " +
+                "        JOIN" +
+                "            STOP_PLACE SP " +
+                "                ON ST_CONTAINS(PP.POLYGON," +
+                "            SP.CENTROID) " +
+                "            AND FZ.VERSION =  (SELECT" +
+                "                MAX(FZV.VERSION)   " +
+                "            FROM" +
+                "                FARE_ZONE FZV   " +
+                "            WHERE" +
+                "                FZV.NETEX_ID = FZ.NETEX_ID    " +
+                "                AND (" +
+                "                    FZV.TO_DATE IS NULL         " +
+                "                    OR FZV.TO_DATE > NOW()" +
+                "                )    " +
+                "                AND (" +
+                "                    FZV.FROM_DATE IS NULL         " +
+                "                    OR FZV.FROM_DATE < NOW()" +
+                "                ))                " +
+                "        LEFT JOIN" +
+                "            STOP_PLACE PSP " +
+                "                ON SP.PARENT_SITE_REF = PSP.NETEX_ID " +
+                "                AND sp.parent_site_ref_version = CAST(psp.version as text)  " +
+                "        where" +
+                "            (" +
+                "                (" +
+                "                    SP.FROM_DATE <= NOW()       " +
+                "                    AND (" +
+                "                        SP.TO_DATE >= NOW()            " +
+                "                        OR SP.TO_DATE IS NULL" +
+                "                    )" +
+                "                )      " +
+                "                OR (" +
+                "                    PSP.FROM_DATE <= NOW()          " +
+                "                    AND (" +
+                "                        PSP.TO_DATE >= NOW()               " +
+                "                        OR PSP.TO_DATE IS NULL" +
+                "                    )" +
+                "                )    " +
+                "            )";
+
+        final Query query = entityManager.createNativeQuery(sql);
+
+        return query.executeUpdate();
+    }
 }

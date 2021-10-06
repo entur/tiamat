@@ -694,7 +694,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
         if(logger.isDebugEnabled()) {
             final String generatedSql = basicFormatter.format(queryString.toString());
-            logger.debug("sql: {}\nSearch object: {}", generatedSql, search);
+            logger.debug("sql: {}Search object: {}", generatedSql, search);
         }
 
         int totalCnt = stopPlaces.size();
@@ -800,6 +800,25 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         } catch (NoResultException noResultException) {
             return Sets.newHashSet();
         }
+    }
+
+    public int deleteStopPlaceTariffZoneRefs() {
+        String sql = "DELETE " +
+                        "FROM STOP_PLACE_TARIFF_ZONES " +
+                            "WHERE STOP_PLACE_ID IN " +
+                                "(SELECT S.ID " +
+                                    "FROM STOP_PLACE S " +
+                                "LEFT JOIN STOP_PLACE P ON S.PARENT_SITE_REF = P.NETEX_ID " +
+                                "AND S.PARENT_SITE_REF_VERSION = CAST(P.VERSION AS text) " +
+                                    "WHERE ((S.FROM_DATE <= NOW() " +
+                                    "AND (S.TO_DATE >= NOW() " +
+                                    "OR S.TO_DATE IS NULL)) " +
+                                    "OR (P.FROM_DATE <= NOW() " +
+                                    "AND (P.TO_DATE >= NOW() " +
+                                    "OR P.TO_DATE IS NULL))))";
+
+        final Query nativeQuery = entityManager.createNativeQuery(sql);
+        return nativeQuery.executeUpdate();
     }
 }
 
