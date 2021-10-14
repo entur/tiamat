@@ -17,6 +17,7 @@ package org.rutebanken.tiamat.repository;
 
 
 import com.google.common.collect.Sets;
+import org.hibernate.CacheMode;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
@@ -573,6 +574,28 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         searchHelper.addParams(sqlQuery, queryWithParams.getSecond());
 
         return scrollStopPlaces(sqlQuery, session);
+    }
+
+    public List<StopPlace> findAllStopPlaces(ExportParams exportParams, boolean ignorePaging) {
+
+
+        Session session = entityManager.unwrap(Session.class);
+
+        Pair<String, Map<String, Object>> queryWithParams = stopPlaceQueryFromSearchBuilder.buildQueryString(exportParams);
+        NativeQuery<StopPlace> sqlQuery = session.createNativeQuery(queryWithParams.getFirst(),StopPlace.class);
+        if(!ignorePaging) {
+            long firstResult = exportParams.getStopPlaceSearch().getPageable().getOffset();
+            sqlQuery.setFirstResult(Math.toIntExact(firstResult));
+            sqlQuery.setMaxResults(exportParams.getStopPlaceSearch().getPageable().getPageSize());
+        }
+
+        sqlQuery.setReadOnly(true);
+        sqlQuery.setCacheMode(CacheMode.GET);
+        searchHelper.addParams(sqlQuery, queryWithParams.getSecond());
+
+        return sqlQuery.getResultList();
+
+
     }
 
     @Override

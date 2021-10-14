@@ -28,7 +28,7 @@ aliases:
   - &docker-build-and-push
     name: Docker build and push
     command: |
-      IMAGE="eu.gcr.io/entur-system-1287/${CIRCLE_PROJECT_REPONAME}"
+      IMAGE="eu.gcr.io/entur-system-1287/tiamat-exporter"
       echo "Image: ${IMAGE}"
       docker build -t $IMAGE .
       docker tag $IMAGE "${IMAGE}":"${VERSION}"
@@ -110,11 +110,13 @@ workflows:
   build_test_deploy:
     jobs:
       - build:
-          context: org-carbon
+          context: dev
       - deploy-docker:
           context: global
           requires:
             - build
           filters:
             branches:
-              only: master
+              only:
+                - master
+                - netex-exporter

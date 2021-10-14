@@ -28,7 +28,7 @@ variable "labels" {
        manager = "terraform"
        team    = "ror"
        slack   = "talk-ror"
-       app     = "tiamat"
+       app     = "tiamat-exporter"
      }
 }
 
@@ -76,10 +76,6 @@ variable "service_account_cloudsql_role" {
   default     = "roles/cloudsql.client"
 }
 
-variable "service_account_pubsub_role" {
-  description = "Role of the Service Account - more about roles https://cloud.google.com/pubsub/docs/access-control"
-  default     = "roles/pubsub.editor"
-}
 
 variable "prevent_destroy" {
   description = "Prevent destruction of bucket"
@@ -93,5 +89,5 @@ variable "load_config_file" {
 }
 
 variable ror-tiamat-db-password {
-  description = "Tiamat database password"
+  description = "Tiamat exporter database password"
 }

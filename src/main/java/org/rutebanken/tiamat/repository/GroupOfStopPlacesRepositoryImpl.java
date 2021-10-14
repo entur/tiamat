@@ -133,7 +133,7 @@ public class GroupOfStopPlacesRepositoryImpl implements GroupOfStopPlacesReposit
                 "JOIN group_of_stop_places g ON gosp.netex_id = g.netex_id");
 
         String sql = sqlStringBuilder.toString();
-        logger.info(sql);
+        logger.debug(sql);
         return sql;
     }
 }

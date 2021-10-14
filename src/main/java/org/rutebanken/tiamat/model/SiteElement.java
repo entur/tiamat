@@ -35,7 +35,7 @@ public abstract class SiteElement extends AddressablePlace {
     private final List<AlternativeName> alternativeNames = new ArrayList<>();
 
     @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     protected AccessibilityAssessment accessibilityAssessment;
 
     @Transient

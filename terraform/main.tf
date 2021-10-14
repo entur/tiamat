@@ -35,20 +35,6 @@ resource "google_storage_bucket_object" "content_folder" {
   content       = "Not really a directory, but it's empty."
   bucket        = google_storage_bucket.storage_bucket.name
 }
-# Create pubsub topic
-resource "google_pubsub_topic" "changelog" {
-  name   = "${var.labels.team}.${var.labels.app}.changelog"
-  project = var.pubsub_project
-  labels = var.labels
-}
-
-# Create pubsub subscription
-resource "google_pubsub_subscription" "changelog-subscription" {
-  name  = "${var.labels.team}.${var.labels.app}.changelog"
-  topic = google_pubsub_topic.changelog.name
-  project = var.pubsub_project
-  labels = var.labels
-  }
 
 
 # create service account
@@ -72,12 +58,6 @@ resource "google_project_iam_member" "project" {
   member = "serviceAccount:${google_service_account.tiamat_service_account.email}"
 }
 
-# add service account as member to the pubsub
-resource "google_project_iam_member" "pubsub_member" {
-  project = var.pubsub_project
-  role    = var.service_account_pubsub_role
-  member = "serviceAccount:${google_service_account.tiamat_service_account.email}"
-}
 
 # create key for service account
 resource "google_service_account_key" "tiamat_service_account_key" {

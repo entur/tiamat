@@ -94,7 +94,7 @@ public class StopPlace
     @Transient
     protected NavigationPaths_RelStructure navigationPaths;
     private boolean parentStopPlace;
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<Quay> quays = new HashSet<>();
 
     @OneToMany(cascade = CascadeType.ALL)

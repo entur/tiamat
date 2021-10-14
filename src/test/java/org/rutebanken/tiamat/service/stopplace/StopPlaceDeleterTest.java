@@ -19,7 +19,6 @@ import org.junit.Test;
 import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.auth.UsernameFetcher;
-import org.rutebanken.tiamat.changelog.EntityChangedListener;
 import org.rutebanken.tiamat.lock.MutateLock;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -39,7 +38,6 @@ public class StopPlaceDeleterTest extends TiamatIntegrationTest {
 
     private StopPlaceRepository stopPlaceRepository = mock(StopPlaceRepository.class);
 
-    private EntityChangedListener entityChangedListener = mock(EntityChangedListener.class);
     private ReflectionAuthorizationService authorizationService = mock(ReflectionAuthorizationService.class);
     private UsernameFetcher usernameFetcher = mock(UsernameFetcher.class);
     private MutateLock mutateLock = new MutateLock(null) {
@@ -49,7 +47,7 @@ public class StopPlaceDeleterTest extends TiamatIntegrationTest {
         }
     };
 
-    private StopPlaceDeleter stopPlaceDeleter = new StopPlaceDeleter(stopPlaceRepository, entityChangedListener, authorizationService, usernameFetcher, mutateLock);
+    private StopPlaceDeleter stopPlaceDeleter = new StopPlaceDeleter(stopPlaceRepository, authorizationService, usernameFetcher, mutateLock);
 
     @Test(expected = IllegalArgumentException.class)
     public void doNotDeleteParent() {

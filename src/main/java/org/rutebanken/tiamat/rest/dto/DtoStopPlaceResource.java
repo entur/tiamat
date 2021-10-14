@@ -15,7 +15,6 @@
 
 package org.rutebanken.tiamat.rest.dto;
 
-import io.swagger.annotations.Api;
 import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
 import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDtoCsvMapper;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -26,9 +25,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
@@ -41,9 +37,6 @@ import java.util.Map;
 import java.util.Set;
 
 @Component
-@Api(tags = {"Stop place resource"}, produces = "text/plain")
-@Produces("application/json")
-@Path("/")
 @Transactional
 public class DtoStopPlaceResource {
 
@@ -62,9 +55,7 @@ public class DtoStopPlaceResource {
         this.csvMapper = csvMapper;
     }
 
-    @GET
-    @Path("/mapping/stop_place")
-    @Produces("text/plain")
+
     public Response getIdMapping(@DefaultValue(value = "300000") @QueryParam(value = "recordsPerRoundTrip") int recordsPerRoundTrip,
                                         @QueryParam("includeStopType") boolean includeStopType, @QueryParam("includeFuture") boolean includeFuture) throws InterruptedException {
 
@@ -97,17 +88,14 @@ public class DtoStopPlaceResource {
         }
     }
 
-    @GET
-    @Path("/id/stop_place")
-    @Produces("text/plain")
+
     public String getIdUniqueStopPlaceIds(@QueryParam("includeFuture") boolean includeFuture) {
         Instant validFrom = Instant.now();
         Instant validTo = includeFuture ? null : validFrom;
         return String.join("\n", stopPlaceRepository.findUniqueStopPlaceIds(validFrom, validTo));
     }
 
-    @GET
-    @Path("/list/stop_place_quays")
+
     public Map<String, Set<String>> listStopPlaceQuays(@QueryParam("includeFuture") boolean includeFuture) {
         Instant validFrom = Instant.now();
         Instant validTo = includeFuture ? null : validFrom;

@@ -98,7 +98,6 @@ public class PathLinkRepositoryImpl implements PathLinkRepositoryCustom {
 
         String sql = createFindPathLinkFromStopPlaceIdsSQL(stopPlaceIds);
 
-        System.out.println(sql);
         Query query = entityManager.createNativeQuery(sql, PathLink.class);
 
         try {

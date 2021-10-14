@@ -42,7 +42,7 @@ public abstract class Site_VersionStructure
     private final List<Level> levels = new ArrayList<>();
 
     @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH)
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.DETACH)
     protected TopographicPlace topographicPlace;
 
     @Transient

@@ -33,7 +33,6 @@ package org.rutebanken.tiamat.service.parking;
 
 import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
 import org.rutebanken.tiamat.auth.UsernameFetcher;
-import org.rutebanken.tiamat.changelog.EntityChangedListener;
 import org.rutebanken.tiamat.model.DataManagedObjectStructure;
 import org.rutebanken.tiamat.model.Parking;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -48,8 +47,6 @@ import org.springframework.transaction.support.TransactionSynchronizationAdapter
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
@@ -59,7 +56,6 @@ public class ParkingDeleter {
 
     private static final Logger logger = LoggerFactory.getLogger(ParkingDeleter.class);
 
-    private final EntityChangedListener entityChangedListener;
 
     private final ReflectionAuthorizationService authorizationService;
 
@@ -71,11 +67,9 @@ public class ParkingDeleter {
 
     @Autowired
     public ParkingDeleter(ParkingRepository parkingRepository,
-                          EntityChangedListener entityChangedListener,
                           ReflectionAuthorizationService authorizationService,
                           UsernameFetcher usernameFetcher, ReferenceResolver referenceResolver) {
         this.parkingRepository = parkingRepository;
-        this.entityChangedListener = entityChangedListener;
         this.authorizationService = authorizationService;
         this.usernameFetcher = usernameFetcher;
         this.referenceResolver = referenceResolver;
@@ -117,7 +111,7 @@ public class ParkingDeleter {
     public void notifyDeleted(List<Parking> parkings) {
         TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter(){
             public void afterCommit(){
-                entityChangedListener.onDelete(Collections.max(parkings, Comparator.comparing(c -> c.getVersion())));
+
             }
         });
 

@@ -8,9 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.BufferedWriter;
@@ -20,9 +17,7 @@ import java.util.List;
 
 import static org.rutebanken.tiamat.repository.QuayRepositoryImpl.JBV_CODE;
 
-@Api
-@Produces("application/json")
-@Path("jbv_code_mapping")
+
 public class DtoJbvCodeMappingResource {
 
     private static final Logger logger = LoggerFactory.getLogger(DtoJbvCodeMappingResource.class);
@@ -42,8 +37,7 @@ public class DtoJbvCodeMappingResource {
     }
 
 
-    @GET
-    @Produces("text/plain")
+
     public Response getJbvCodeMapping() throws InterruptedException {
 
         dtoMappingSemaphore.aquire();

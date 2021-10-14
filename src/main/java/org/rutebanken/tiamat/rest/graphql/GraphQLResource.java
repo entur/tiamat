@@ -59,9 +59,7 @@ import java.util.Set;
 
 import static java.util.stream.Collectors.toList;
 
-@Component
-@Api(tags = {"GraphQL Resource"}, produces = "application/json")
-@Path("graphql")
+//@Component
 public class GraphQLResource {
 
     private static final Logger logger = LoggerFactory.getLogger(GraphQLResource.class);
@@ -100,10 +98,6 @@ public class GraphQLResource {
     private GraphQL graphQL;
 
 
-    @POST
-    @SuppressWarnings("unchecked")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
     public Response getGraphQL(HashMap<String, Object> query) {
         Map<String, Object> variables;
         if (query.get("variables") instanceof Map) {
@@ -129,9 +123,6 @@ public class GraphQLResource {
         return getGraphQLResponseInTransaction((String) query.get("query"), variables);
     }
 
-    @POST
-    @Consumes("application/graphql")
-    @Produces(MediaType.APPLICATION_JSON)
     public Response getGraphQL(String query) {
         return getGraphQLResponseInTransaction(query, new HashMap<>());
     }

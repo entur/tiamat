@@ -1,11 +1,11 @@
 sql:
-  instance: entur-ror-dev:europe-west1:tiamat-db-1=tcp:5432
+  instance: entur-ror-dev:europe-west1:tiamat-db-1-replica=tcp:5432
 
 configMap:
   blobstoreProjectId: entur-ror-dev
   pubsubProjectId: entur-ror-dev
   pubsbuTopicName: ror.tiamat.changelog
-  gcsBucketName: tiamat-dev
+  gcsBucketName: tiamat-exporter-dev
   keycloakUrl: https://kc-dev.devstage.entur.io/auth
 
 auth0:
@@ -15,8 +15,3 @@ auth0:
 
 rbac:
   enabled: true
-
-ingress:
-  enabled: true
-  loadBalancerIP: 35.205.170.68
-  domainName: .dev.entur.io

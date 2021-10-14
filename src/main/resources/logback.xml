@@ -31,7 +31,7 @@
                             <pattern>
                                 {
                                     "serviceContext": {
-                                        "service": "tiamat"
+                                        "service": "tiamat-exporter"
                                     },
                                     "eventTime": "%date{\"yyyy-MM-dd'T'HH:mm:ss.SSS'000000Z'\", \"UTC\"}",
                                     "thread": "%thread",

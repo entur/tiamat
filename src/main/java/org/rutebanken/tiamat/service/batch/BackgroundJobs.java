@@ -38,15 +38,15 @@ public class BackgroundJobs {
     @PostConstruct
     public void scheduleBackgroundJobs() {
         logger.info("Scheduling background job for gaplessIdGeneratorService");
-        backgroundJobExecutor.scheduleAtFixedRate(gaplessIdGeneratorService::persistClaimedIds, 15, 15, TimeUnit.SECONDS);
+        //backgroundJobExecutor.scheduleAtFixedRate(gaplessIdGeneratorService::persistClaimedIds, 15, 15, TimeUnit.SECONDS);
 
         // Initial delay for the background stop place reference updater service can be good to avoid conflicts when running tests
         logger.info("Scheduling background job for updating stop places");
-        backgroundJobExecutor.scheduleAtFixedRate(stopPlaceRefUpdaterService::updateAllStopPlaces, 1, 500, TimeUnit.MINUTES);
+        //backgroundJobExecutor.scheduleAtFixedRate(stopPlaceRefUpdaterService::updateAllStopPlaces, 1, 500, TimeUnit.MINUTES);
     }
 
     public void triggerStopPlaceUpdate() {
         logger.info("Job for updating stop place was triggered manually by thread {}. It will not be executed if a job is already running", Thread.currentThread().getName());
-        backgroundJobExecutor.submit(stopPlaceRefUpdaterService::updateAllStopPlaces);
+        //backgroundJobExecutor.submit(stopPlaceRefUpdaterService::updateAllStopPlaces);
     }
 }

@@ -17,7 +17,6 @@ package org.rutebanken.tiamat.versioning.save;
 
 import org.rutebanken.tiamat.auth.StopPlaceAuthorizationService;
 import org.rutebanken.tiamat.auth.UsernameFetcher;
-import org.rutebanken.tiamat.changelog.EntityChangedListener;
 import org.rutebanken.tiamat.diff.TiamatObjectDiffer;
 import org.rutebanken.tiamat.geo.ZoneDistanceChecker;
 import org.rutebanken.tiamat.importer.finder.NearbyStopPlaceFinder;
@@ -83,9 +82,6 @@ public class StopPlaceVersionedSaverService {
 
     @Autowired
     private NearbyStopPlaceFinder nearbyStopPlaceFinder;
-
-    @Autowired
-    private EntityChangedListener entityChangedListener;
 
     @Autowired
     private ReferenceResolver referenceResolver;
@@ -225,7 +221,6 @@ public class StopPlaceVersionedSaverService {
         TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter(){
             public void afterCommit(){
                 logger.debug(String.format("send pubsub message on change: %s", stopPlace.toString()));
-                entityChangedListener.onChange(stopPlace);
             }
         });
     }

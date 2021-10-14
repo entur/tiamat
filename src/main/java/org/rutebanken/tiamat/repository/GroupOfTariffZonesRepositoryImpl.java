@@ -114,7 +114,7 @@ public class GroupOfTariffZonesRepositoryImpl implements GroupOfTariffZonesRepos
                 "                on gotz.netex_id = g.netex_id " +
                 "                and g.version = gotz.version ";
 
-        logger.info(sql);
+        logger.debug(sql);
         return scrollGroupOfTariffZones(sql);
     }
 

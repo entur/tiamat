@@ -34,6 +34,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -89,7 +90,7 @@ public class ExportJobWorker implements Runnable {
 
             exportJob.setStatus(JobStatus.FINISHED);
             exportJob.setFinished(Instant.now());
-            logger.info("Export job done: {}", exportJob);
+            logger.warn("Duration(secs): {},Export job done: {} ",Duration.between(exportJob.getStarted(),exportJob.getFinished()).getSeconds(),exportJob);
 
         } catch (Exception e) {
             exportJob.setStatus(JobStatus.FAILED);

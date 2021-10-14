@@ -64,6 +64,8 @@ public interface StopPlaceRepositoryCustom extends DataManagedObjectStructureRep
 
     Iterator<StopPlace> scrollStopPlaces(ExportParams exportParams);
 
+    List<StopPlace> findAllStopPlaces(ExportParams exportParams, boolean ignorePaging);
+
     Set<String> getNetexIds(ExportParams exportParams);
 
     Set<Long> getDatabaseIds(ExportParams exportParams, boolean ignorePaging);

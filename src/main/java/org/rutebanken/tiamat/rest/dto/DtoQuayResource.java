@@ -15,7 +15,6 @@
 
 package org.rutebanken.tiamat.rest.dto;
 
-import io.swagger.annotations.Api;
 import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
 import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDtoCsvMapper;
 import org.rutebanken.tiamat.repository.QuayRepository;
@@ -25,9 +24,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
@@ -38,9 +34,6 @@ import java.time.Instant;
 import java.util.List;
 
 @Component
-@Api(tags = {"Quay resource"}, produces = "text/plain")
-@Produces("application/json")
-@Path("/")
 public class DtoQuayResource {
 
     private static final Logger logger = LoggerFactory.getLogger(DtoQuayResource.class);
@@ -58,9 +51,6 @@ public class DtoQuayResource {
         this.csvMapper = csvMapper;
     }
 
-    @GET
-    @Path("mapping/quay")
-    @Produces("text/plain")
     public Response getIdMapping(@DefaultValue(value = "300000") @QueryParam(value = "recordsPerRoundTrip") int recordsPerRoundTrip,
                                         @QueryParam("includeStopType") boolean includeStopType, @QueryParam("includeFuture") boolean includeFuture) throws InterruptedException {
 
@@ -97,9 +87,6 @@ public class DtoQuayResource {
     }
 
 
-    @GET
-    @Path("/id/quay")
-    @Produces("text/plain")
     public String getIdUniqueQuayIds(@QueryParam("includeFuture") boolean includeFuture) {
         Instant validFrom = Instant.now();
         Instant validTo = includeFuture ? null : validFrom;

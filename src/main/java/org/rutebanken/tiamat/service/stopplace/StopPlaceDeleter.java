@@ -18,7 +18,6 @@ package org.rutebanken.tiamat.service.stopplace;
 import com.google.api.client.util.Preconditions;
 import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
 import org.rutebanken.tiamat.auth.UsernameFetcher;
-import org.rutebanken.tiamat.changelog.EntityChangedListener;
 import org.rutebanken.tiamat.lock.MutateLock;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -43,7 +42,6 @@ public class StopPlaceDeleter {
 
     private final StopPlaceRepository stopPlaceRepository;
 
-    private final EntityChangedListener entityChangedListener;
 
     private final ReflectionAuthorizationService authorizationService;
 
@@ -52,9 +50,8 @@ public class StopPlaceDeleter {
     private final MutateLock mutateLock;
 
     @Autowired
-    public StopPlaceDeleter(StopPlaceRepository stopPlaceRepository, EntityChangedListener entityChangedListener, ReflectionAuthorizationService authorizationService, UsernameFetcher usernameFetcher, MutateLock mutateLock) {
+    public StopPlaceDeleter(StopPlaceRepository stopPlaceRepository, ReflectionAuthorizationService authorizationService, UsernameFetcher usernameFetcher, MutateLock mutateLock) {
         this.stopPlaceRepository = stopPlaceRepository;
-        this.entityChangedListener = entityChangedListener;
         this.authorizationService = authorizationService;
         this.usernameFetcher = usernameFetcher;
         this.mutateLock = mutateLock;
@@ -99,8 +96,7 @@ public class StopPlaceDeleter {
             public void afterCommit(){
                 Collections.sort(stopPlaces,
                         (o1, o2) -> Long.compare(o1.getVersion(), o2.getVersion()));
-                StopPlace newest = stopPlaces.get(stopPlaces.size() - 1);
-                entityChangedListener.onDelete(newest);
+
             }
         });
 

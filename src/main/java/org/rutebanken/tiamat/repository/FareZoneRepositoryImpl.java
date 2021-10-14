@@ -207,7 +207,7 @@ public class FareZoneRepositoryImpl implements FareZoneRepositoryCustom {
                 "            fare_zone fz      " +
                 "                on fz.id = fz1.id";
 
-        logger.info(sql);
+        logger.debug(sql);
         return sql;
 
     }
@@ -232,7 +232,7 @@ public class FareZoneRepositoryImpl implements FareZoneRepositoryCustom {
                 "JOIN fare_zone f ON fz.netex_id = f.netex_id AND fz.version=f.version");
 
         String sql = sqlStringBuilder.toString();
-        logger.info(sql);
+        logger.debug(sql);
 
         Session session = entityManager.unwrap(Session.class);
         NativeQuery query = session.createNativeQuery(sql);

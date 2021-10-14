@@ -28,9 +28,9 @@ data:
     spring.jpa.properties.javax.persistence.query.timeout=15000
     spring.jpa.properties.hibernate.dialect=org.hibernate.spatial.dialect.postgis.PostgisDialect
     spring.jpa.properties.hibernate.cache.region.factory_class=org.rutebanken.tiamat.hazelcast.TiamatHazelcastCacheRegionFactory
-    spring.jpa.properties.hibernate.cache.use_second_level_cache=true
-    spring.jpa.properties.hibernate.cache.use_minimal_puts=true
-    spring.jpa.properties.hibernate.cache.use_query_cache=true
+    spring.jpa.properties.hibernate.cache.use_second_level_cache=false
+    spring.jpa.properties.hibernate.cache.use_minimal_puts=false
+    spring.jpa.properties.hibernate.cache.use_query_cache=false
     spring.jpa.hibernate.ddl-auto=none
     spring.jpa.hibernate.use-new-id-generator-mappings=true
     spring.jpa.open-in-view=false

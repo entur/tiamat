@@ -122,10 +122,7 @@ public class AsyncPublicationDeliveryExporter {
     public ExportJob getExportJob(long exportJobId) {
 
         Optional<ExportJob> exportJob = exportJobRepository.findById(exportJobId);
-        if(exportJob.isPresent()) {
-            return setJobUrl(exportJob.get());
-        }
-        return null;
+        return exportJob.map(this::setJobUrl).orElse(null);
     }
 
     public InputStream getJobFileContent(ExportJob exportJob) {

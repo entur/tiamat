@@ -206,7 +206,7 @@ public class TariffZoneRepositoryImpl implements TariffZoneRepositoryCustom {
                 "                on tz.id = tz1.id";
 
 
-        logger.info(sql);
+        logger.debug(sql);
         return sql;
     }
 

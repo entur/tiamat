@@ -1,6 +1,5 @@
 gcp_project = "entur-ror-dev"
 cloudsql_project = "entur-ror-dev"
-pubsub_project = "entur-ror-dev"
 storage_project = "entur-ror-dev"
 kube_namespace = "dev"
 bucket_instance_suffix = "dev"

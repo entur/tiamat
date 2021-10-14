@@ -1,7 +1,7 @@
 replicas: 1
 
 deployment:
-  name: tiamat
+  name: tiamat-exporter
 
 rollingUpdate:
   maxSurge: 1
@@ -16,15 +16,15 @@ resources:
   xmx: 7g
 
 secretMount:
-   name: tiamat-key
+   name: tiamat-exporter-key
    mountPath: /etc/tiamat/credentials.json
    subPath: credentials.json
-   secretName: ror-tiamat-sa-key
+   secretName: ror-tiamat-exporter-sa-key
    readOnly: true
 
 
 configMapMount:
-   name: tiamat-config
+   name: tiamat-exporter-config
 
 image:
   identifier: ${artifact.metadata.image}
@@ -38,5 +38,4 @@ service:
     internalPort: 8778
 rbac:
   enabled: false
-ingress:
-  name: stop-places-v1
+

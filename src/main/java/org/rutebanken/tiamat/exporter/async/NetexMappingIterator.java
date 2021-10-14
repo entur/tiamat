@@ -79,11 +79,13 @@ public class NetexMappingIterator<T extends EntityStructure, N extends org.ruteb
         var endTimeMap = System.currentTimeMillis();
         iteratorMapDuration += endTimeMap-startTimeMap;
 
-        var startTimeEvict = System.currentTimeMillis();
-        entitiesEvictor.evictKnownEntitiesFromSession(next);
-        var endTimeEvict = System.currentTimeMillis();
+        if(entitiesEvictor !=null) {
+            var startTimeEvict = System.currentTimeMillis();
+            entitiesEvictor.evictKnownEntitiesFromSession(next);
+            var endTimeEvict = System.currentTimeMillis();
 
-        iteratorEvictDuration +=endTimeEvict-startTimeEvict;
+            iteratorEvictDuration += endTimeEvict - startTimeEvict;
+        }
 
         logStatus();
         mappedCount.incrementAndGet();
