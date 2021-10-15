@@ -1,1 +1,0 @@
-CREATE INDEX IF NOT EXISTS topographic_place_type_index ON topographic_place(topographic_place_type);

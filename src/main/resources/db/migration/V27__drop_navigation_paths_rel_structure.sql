@@ -1,3 +1,0 @@
-ALTER TABLE navigation_path DROP CONSTRAINT fk9m5x0ndxgplk60o86dsr1da8m;
-DROP TABLE IF EXISTS navigation_paths_rel_structure;
-DROP SEQUENCE IF EXISTS navigation_paths_rel_structure_seq;

@@ -1,1 +1,0 @@
-UPDATE topographic_place SET topographic_place_type = 'COUNTRY' WHERE topographic_place_type = 'STATE';

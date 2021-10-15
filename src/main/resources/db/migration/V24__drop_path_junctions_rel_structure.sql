@@ -1,3 +1,0 @@
-DROP TABLE path_junctions_rel_structure_path_junction_ref_or_path_junction;
-DROP TABLE path_junctions_rel_structure;
-DROP SEQUENCE path_junctions_rel_structure_seq;

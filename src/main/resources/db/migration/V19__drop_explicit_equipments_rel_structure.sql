@@ -1,3 +1,0 @@
-ALTER TABLE installed_equipment DROP CONSTRAINT fk2vtm888bpalre9vtw62crif92;
-DROP TABLE explicit_equipments_rel_structure;
-DROP SEQUENCE explicit_equipments_rel_structure_seq;

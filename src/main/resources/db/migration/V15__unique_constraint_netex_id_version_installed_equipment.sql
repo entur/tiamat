@@ -1,1 +1,0 @@
-ALTER TABLE installed_equipment_version_structure ADD CONSTRAINT installed_equipment_netex_id_version_constraint UNIQUE (netex_id, version);

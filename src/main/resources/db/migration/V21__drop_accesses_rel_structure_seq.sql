@@ -1,1 +1,0 @@
-DROP SEQUENCE accesses_rel_structure_seq;
