@@ -3,6 +3,6 @@
   terraform {
     backend "gcs" {
     bucket = "entur-system-tf-backend-ror"
-    prefix = "gcp/ror/tiamat"
+    prefix = "gcp/ror/tiamat-exporter"
     }
   }
