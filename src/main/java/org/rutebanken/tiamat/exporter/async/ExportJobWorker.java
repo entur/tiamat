@@ -17,7 +17,7 @@ package org.rutebanken.tiamat.exporter.async;
 
 import com.google.api.client.util.IOUtils;
 import org.rutebanken.tiamat.exporter.StreamingPublicationDelivery;
-import org.rutebanken.tiamat.model.job.ExportJob;
+import org.rutebanken.tiamat.model.job.ExportJob2;
 import org.rutebanken.tiamat.model.job.JobStatus;
 import org.rutebanken.tiamat.netex.validation.NetexXmlReferenceValidator;
 import org.rutebanken.tiamat.repository.ExportJobRepository;
@@ -47,7 +47,7 @@ public class ExportJobWorker implements Runnable {
      * Ignore paging for async export, to not let the default value interfer.
      */
     public static final boolean IGNORE_PAGING = true;
-    private final ExportJob exportJob;
+    private final ExportJob2 exportJob;
     private final StreamingPublicationDelivery streamingPublicationDelivery;
     private final String localExportPath;
     private final String fileNameWithoutExtension;
@@ -55,7 +55,7 @@ public class ExportJobWorker implements Runnable {
     private final ExportJobRepository exportJobRepository;
     private final NetexXmlReferenceValidator netexXmlReferenceValidator;
 
-    public ExportJobWorker(ExportJob exportJob,
+    public ExportJobWorker(ExportJob2 exportJob,
                            StreamingPublicationDelivery streamingPublicationDelivery,
                            String localExportPath,
                            String fileNameWithoutExtension,

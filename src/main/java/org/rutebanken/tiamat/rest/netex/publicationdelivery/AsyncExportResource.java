@@ -18,7 +18,7 @@ package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 import io.swagger.annotations.Api;
 import org.rutebanken.tiamat.exporter.AsyncPublicationDeliveryExporter;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
-import org.rutebanken.tiamat.model.job.ExportJob;
+import org.rutebanken.tiamat.model.job.ExportJob2;
 import org.rutebanken.tiamat.model.job.JobStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +56,7 @@ public class AsyncExportResource {
     }
 
     @GET
-    public Collection<ExportJob> getAsyncExportJobs() {
+    public Collection<ExportJob2> getAsyncExportJobs() {
         return asyncPublicationDeliveryExporter.getJobs();
     }
 
@@ -64,7 +64,7 @@ public class AsyncExportResource {
     @Path("{id}/status")
     public Response getAsyncExportJob(@PathParam(value = "id") long exportJobId) {
 
-        ExportJob exportJob = asyncPublicationDeliveryExporter.getExportJob(exportJobId);
+        ExportJob2 exportJob = asyncPublicationDeliveryExporter.getExportJob(exportJobId);
 
         if (exportJob == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
@@ -78,7 +78,7 @@ public class AsyncExportResource {
     @Path("{id}/content")
     public Response getAsyncExportJobContents(@PathParam(value = "id") long exportJobId) {
 
-        ExportJob exportJob = asyncPublicationDeliveryExporter.getExportJob(exportJobId);
+        ExportJob2 exportJob = asyncPublicationDeliveryExporter.getExportJob(exportJobId);
 
         if (exportJob == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
@@ -96,7 +96,7 @@ public class AsyncExportResource {
     @GET
     @Path("initiate")
     public Response asyncExport(@BeanParam ExportParams exportParams) {
-        ExportJob exportJob = asyncPublicationDeliveryExporter.startExportJob(exportParams);
+        ExportJob2 exportJob = asyncPublicationDeliveryExporter.startExportJob(exportParams);
         return Response.ok(exportJob).build();
     }
 }

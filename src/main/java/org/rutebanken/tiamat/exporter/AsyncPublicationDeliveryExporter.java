@@ -18,7 +18,7 @@ package org.rutebanken.tiamat.exporter;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.rutebanken.tiamat.exporter.async.ExportJobWorker;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
-import org.rutebanken.tiamat.model.job.ExportJob;
+import org.rutebanken.tiamat.model.job.ExportJob2;
 import org.rutebanken.tiamat.model.job.JobStatus;
 import org.rutebanken.tiamat.netex.validation.NetexXmlReferenceValidator;
 import org.rutebanken.tiamat.repository.ExportJobRepository;
@@ -40,11 +40,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static java.util.stream.Collectors.toList;
 import static org.rutebanken.tiamat.rest.netex.publicationdelivery.AsyncExportResource.ASYNC_JOB_PATH;
 
 @Service
@@ -55,7 +53,7 @@ public class AsyncPublicationDeliveryExporter {
     private static final ExecutorService exportService = Executors.newFixedThreadPool(3, new ThreadFactoryBuilder()
             .setNameFormat("exporter-%d").build());
 
-    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("YYYYMMdd-HHmmss");
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("YYYYMMdd-HHmmssSSS");
 
     private final ExportJobRepository exportJobRepository;
 
@@ -99,9 +97,10 @@ public class AsyncPublicationDeliveryExporter {
      * @param exportParams search params for stops
      * @return export job with information about the started process
      */
-    public ExportJob startExportJob(ExportParams exportParams) {
+    public ExportJob2 startExportJob(ExportParams exportParams) {
 
-        ExportJob exportJob = new ExportJob(JobStatus.PROCESSING);
+        ExportJob2 exportJob = new ExportJob2(JobStatus.PROCESSING);
+        exportJob.setId(1L);
         exportJob.setStarted(Instant.now());
         exportJob.setExportParams(exportParams);
         exportJob.setSubFolder(generateSubFolderName());
@@ -118,25 +117,25 @@ public class AsyncPublicationDeliveryExporter {
     }
 
     public String createFileNameWithoutExtention(long exportJobId, Instant started) {
-        return "tiamat-export-" + started.atZone(exportTimeZone.getDefaultTimeZoneId()).format(DATE_TIME_FORMATTER) + "-" +exportJobId;
+        return "tiamat-export-" + started.atZone(exportTimeZone.getDefaultTimeZoneId()).format(DATE_TIME_FORMATTER);
     }
 
-    public ExportJob getExportJob(long exportJobId) {
+    public ExportJob2 getExportJob(long exportJobId) {
 
-        Optional<ExportJob> exportJob = exportJobRepository.findById(exportJobId);
+        Optional<ExportJob2> exportJob = Optional.empty();
         return exportJob.map(this::setJobUrl).orElse(null);
     }
 
-    public InputStream getJobFileContent(ExportJob exportJob) {
+    public InputStream getJobFileContent(ExportJob2 exportJob) {
         return blobStoreService.download(exportJob.getSubFolder() + "/" + exportJob.getFileName());
     }
 
-    public Collection<ExportJob> getJobs() {
+    public Collection<ExportJob2> getJobs() {
 
         return Collections.emptyList();
     }
 
-    private ExportJob setJobUrl(ExportJob exportJobWithId) {
+    private ExportJob2 setJobUrl(ExportJob2 exportJobWithId) {
         exportJobWithId.setJobUrl(ASYNC_JOB_PATH + "/" + exportJobWithId.getId());
         return exportJobWithId;
     }
