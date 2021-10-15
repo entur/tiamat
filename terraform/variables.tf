@@ -7,12 +7,8 @@ variable "cloudsql_project" {
   description = "GCP project of sql database"
 }
 
-variable "pubsub_project" {
-  description = "GCP project of pubsub topic"
-}
-
 variable "storage_project" {
-  description = "GCP project of pubsub topic"
+  description = "GCP project of storage"
 }
 variable "location" {
   description = "GCP bucket location"
@@ -72,7 +68,7 @@ variable "service_account_bucket_role" {
 }
 
 variable "service_account_cloudsql_role" {
-  description = "Role of the Service Account - more about roles https://cloud.google.com/pubsub/docs/access-control"
+  description = "Role of the Service Account"
   default     = "roles/cloudsql.client"
 }
 
