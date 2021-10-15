@@ -103,7 +103,6 @@ public class AsyncPublicationDeliveryExporter {
 
         ExportJob exportJob = new ExportJob(JobStatus.PROCESSING);
         exportJob.setStarted(Instant.now());
-        exportJob.setId(UUID.randomUUID().timestamp());
         exportJob.setExportParams(exportParams);
         exportJob.setSubFolder(generateSubFolderName());
 
