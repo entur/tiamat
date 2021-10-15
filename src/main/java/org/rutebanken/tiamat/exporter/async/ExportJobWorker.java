@@ -102,7 +102,7 @@ public class ExportJobWorker implements Runnable {
                 Thread.currentThread().interrupt();
             }
         } finally {
-            exportJobRepository.save(exportJob);
+            //exportJobRepository.save(exportJob);
             logger.info("Removing local files: {},{}", localExportZipFile, localExportXmlFile);
             localExportZipFile.delete();
             localExportXmlFile.delete();

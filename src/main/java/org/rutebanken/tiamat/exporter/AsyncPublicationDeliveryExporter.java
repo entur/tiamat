@@ -38,7 +38,9 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -101,10 +103,11 @@ public class AsyncPublicationDeliveryExporter {
 
         ExportJob exportJob = new ExportJob(JobStatus.PROCESSING);
         exportJob.setStarted(Instant.now());
+        exportJob.setId(UUID.randomUUID().timestamp());
         exportJob.setExportParams(exportParams);
         exportJob.setSubFolder(generateSubFolderName());
 
-        exportJobRepository.save(exportJob);
+        //exportJobRepository.save(exportJob);
         String fileNameWithoutExtention = createFileNameWithoutExtention(exportJob.getId(), exportJob.getStarted());
         exportJob.setFileName(fileNameWithoutExtention + ".zip");
 
@@ -131,10 +134,7 @@ public class AsyncPublicationDeliveryExporter {
 
     public Collection<ExportJob> getJobs() {
 
-        return exportJobRepository.findAll()
-                .stream()
-                .map(this::setJobUrl)
-                .collect(toList());
+        return Collections.emptyList();
     }
 
     private ExportJob setJobUrl(ExportJob exportJobWithId) {
