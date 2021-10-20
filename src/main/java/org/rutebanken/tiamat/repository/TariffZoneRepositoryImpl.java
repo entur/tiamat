@@ -168,6 +168,30 @@ public class TariffZoneRepositoryImpl implements TariffZoneRepositoryCustom {
         return scrollTariffZones(sql.toString());
     }
 
+    @Override
+    public List<TariffZone> findTariffZones(ExportParams exportParams) {
+        var sql = new StringBuilder("select tz.* from tariff_zone tz");
+
+        if (exportParams.getStopPlaceSearch() != null && exportParams.getStopPlaceSearch().getVersionValidity() !=null) {
+            if (exportParams.getStopPlaceSearch().getVersionValidity().equals(ExportParams.VersionValidity.CURRENT)) {
+                logger.info("Preparing to scroll only current tariff zones");
+                sql.append(" WHERE tz.version = (SELECT MAX(tzv.version) FROM tariff_zone fzv WHERE tzv.netex_id = tz.netex_id " +
+                        "and (tzv.to_date is null or tzv.to_date > now()) and (tzv.from_date is null or tzv.from_date < now()))");
+            } else if (exportParams.getStopPlaceSearch().getVersionValidity().equals(ExportParams.VersionValidity.CURRENT_FUTURE)) {
+                logger.info("Preparing to scroll current and future tariff zones");
+                sql.append(" WHERE (tz.to_date is null or tz.to_date > now())");
+            }
+        }
+
+        Session session = entityManager.unwrap(Session.class);
+        NativeQuery sqlQuery = session.createNativeQuery(sql.toString());
+
+        sqlQuery.addEntity(TariffZone.class);
+        sqlQuery.setReadOnly(true);
+        sqlQuery.setCacheable(false);
+        return sqlQuery.getResultList();
+    }
+
     private String generateTariffZoneQueryFromStopPlaceIds(Set<Long> stopPlaceDbIds) {
         var sql = "select" +
                 "        tz.* " +
