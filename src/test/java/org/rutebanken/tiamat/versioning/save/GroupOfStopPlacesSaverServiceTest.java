@@ -15,6 +15,7 @@
 
 package org.rutebanken.tiamat.versioning.save;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
@@ -29,6 +30,7 @@ import java.util.List;
 import static org.assertj.core.api.Java6Assertions.assertThat;
 import static org.assertj.core.api.Java6Assertions.assertThatThrownBy;
 
+@Ignore
 public class GroupOfStopPlacesSaverServiceTest extends TiamatIntegrationTest {
 
     @Autowired
