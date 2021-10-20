@@ -34,7 +34,7 @@ public class GroupOfStopPlaces extends GroupOfEntities_VersionStructure {
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<AlternativeName> alternativeNames = new ArrayList<>();
-    @ElementCollection(targetClass = StopPlaceReference.class, fetch = FetchType.EAGER)
+    @ElementCollection(targetClass = StopPlaceReference.class, fetch = FetchType.LAZY)
     @CollectionTable(
             name = "group_of_stop_places_members"
     )

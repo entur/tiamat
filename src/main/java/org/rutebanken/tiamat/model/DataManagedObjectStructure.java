@@ -33,8 +33,8 @@ import java.util.Set;
 public abstract class DataManagedObjectStructure
         extends EntityInVersionStructure {
 
-    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @Cache(usage = CacheConcurrencyStrategy.READ_ONLY)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private final Map<String, Value> keyValues = new HashMap<>();
 
     @Transient

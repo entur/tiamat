@@ -64,7 +64,7 @@ public abstract class Site_VersionStructure
     @Embedded
     protected SiteRefStructure parentSiteRef;
 
-    @ElementCollection(targetClass = SiteRefStructure.class, fetch = FetchType.EAGER)
+    @ElementCollection(targetClass = SiteRefStructure.class, fetch = FetchType.LAZY)
     protected Set<SiteRefStructure> adjacentSites = new HashSet<>();
 
     @Transient

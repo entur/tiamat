@@ -100,7 +100,7 @@ public class StopPlace
     @OneToMany(cascade = CascadeType.ALL)
     private Set<StopPlace> children = new HashSet<>();
 
-    @ElementCollection(targetClass = TariffZoneRef.class, fetch = FetchType.EAGER)
+    @ElementCollection(targetClass = TariffZoneRef.class, fetch = FetchType.LAZY)
     @CollectionTable(
             name = "stop_place_tariff_zones"
     )

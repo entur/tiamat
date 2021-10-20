@@ -205,9 +205,11 @@ public class StreamingPublicationDelivery {
         // We need to know these IDs before marshalling begins.
         // To avoid marshalling empty parking element and to be able to gather relevant topographic places
         // The primary ID represents a stop place with a certain version
-
+        var start = System.currentTimeMillis();
         final List<org.rutebanken.tiamat.model.StopPlace> allStopPlaces =  stopPlaceRepository.findAllStopPlaces(exportParams, ignorePaging);
-        logger.info("Got {} stops from stop place search", allStopPlaces.size());
+        var end = System.currentTimeMillis();
+        var duration =  (end-start)/1000L;
+        logger.info("Got {} stops from stop place search in {} secs", allStopPlaces.size(),duration);
         final Set<Long> stopPlacePrimaryIds = allStopPlaces.stream().map(stopPlace -> stopPlace.getId()).collect(Collectors.toSet());
 
 
@@ -292,23 +294,27 @@ public class StreamingPublicationDelivery {
     private void prepareTariffZones(ExportParams exportParams, Set<Long> stopPlacePrimaryIds, AtomicInteger mappedTariffZonesCount, SiteFrame netexSiteFrame, EntitiesEvictor evicter) {
 
 
-        Iterator<org.rutebanken.tiamat.model.TariffZone> tariffZoneIterator;
+        List<org.rutebanken.tiamat.model.TariffZone> tariffZoneIterator;
         if (exportParams.getTariffZoneExportMode() == null || exportParams.getTariffZoneExportMode().equals(ExportParams.ExportMode.ALL)) {
 
             logger.info("Preparing to scroll all tariff zones, regardless of version");
-            tariffZoneIterator = tariffZoneRepository.scrollTariffZones(exportParams);
+            tariffZoneIterator = tariffZoneRepository.findTariffZones(exportParams);
         } else if (exportParams.getTariffZoneExportMode().equals(ExportParams.ExportMode.RELEVANT)) {
 
             logger.info("Preparing to scroll relevant tariff zones from stop place ids");
-            tariffZoneIterator = tariffZoneRepository.scrollTariffZones(stopPlacePrimaryIds);
+            var start = System.currentTimeMillis();
+            tariffZoneIterator = tariffZoneRepository.getTariffZonesFromStopPlaceIds(stopPlacePrimaryIds);
+            var end = System.currentTimeMillis();
+            var duration =(end-start)/1000L;
+            logger.info("Got {} TariffZone in {} secs",tariffZoneIterator.size(),duration);
         } else {
             logger.info("Tariff zone export mode is {}. Will not export tariff zones", exportParams.getTariffZoneExportMode());
-            tariffZoneIterator = Collections.emptyIterator();
+            tariffZoneIterator = Collections.emptyList();
         }
 
         List<JAXBElement<? extends Zone_VersionStructure>> netexTariffZones = new ArrayList<>();
-        while (tariffZoneIterator.hasNext()) {
-            final TariffZone tariffZone = netexMapper.mapToNetexModel(tariffZoneIterator.next());
+        for (org.rutebanken.tiamat.model.TariffZone tiamatTariffZone: tariffZoneIterator) {
+            final TariffZone tariffZone = netexMapper.mapToNetexModel(tiamatTariffZone);
             final JAXBElement<TariffZone> tariffZoneJAXBElement = new ObjectFactory().createTariffZone(tariffZone);
             netexTariffZones.add(tariffZoneJAXBElement);
             mappedTariffZonesCount.incrementAndGet();

@@ -16,7 +16,7 @@ import java.util.Set;
 @Entity
 public class GroupOfTariffZones extends GroupOfEntities_VersionStructure {
 
-    @ElementCollection(targetClass = TariffZoneRef.class, fetch = FetchType.EAGER)
+    @ElementCollection(targetClass = TariffZoneRef.class, fetch = FetchType.LAZY)
     @CollectionTable(name = "group_of_tariff_zones_members")
     private Set<TariffZoneRef> members = new HashSet<>();
 

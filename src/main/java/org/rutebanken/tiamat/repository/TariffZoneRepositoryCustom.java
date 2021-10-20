@@ -35,6 +35,8 @@ public interface TariffZoneRepositoryCustom extends DataManagedObjectStructureRe
 
     Iterator<TariffZone> scrollTariffZones(ExportParams exportParams);
 
+    List<TariffZone> findTariffZones(ExportParams exportParams);
+
     Optional<TariffZone> findValidTariffZone(String netexId);
 
     List<TariffZone> findAllValidTariffZones();
