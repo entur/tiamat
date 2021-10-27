@@ -17,7 +17,7 @@ package org.rutebanken.tiamat.model.job;
 
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
-import org.rutebanken.tiamat.repository.ExportJobRepository;
+import org.rutebanken.tiamat.service.ExportJobsLookupService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Optional;
@@ -27,15 +27,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class ExportJobTest extends TiamatIntegrationTest {
 
     @Autowired
-    private ExportJobRepository exportJobRepository;
+    ExportJobsLookupService exportJobsLookupService;
 
     @Test
     public void saveAndLoadExportJob() {
         ExportJob exportJob = new ExportJob();
         exportJob.setStatus(JobStatus.PROCESSING);
-        exportJobRepository.save(exportJob);
+        exportJobsLookupService.addExportJob(exportJob);
 
-        Optional<ExportJob> actual = exportJobRepository.findById(exportJob.getId());
+        Optional<ExportJob> actual = exportJobsLookupService.getExportJob(exportJob.getId());
         assertThat(actual).isPresent();
     }
 

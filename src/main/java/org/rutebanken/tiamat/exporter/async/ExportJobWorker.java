@@ -17,11 +17,11 @@ package org.rutebanken.tiamat.exporter.async;
 
 import com.google.api.client.util.IOUtils;
 import org.rutebanken.tiamat.exporter.StreamingPublicationDelivery;
-import org.rutebanken.tiamat.model.job.ExportJob2;
+import org.rutebanken.tiamat.model.job.ExportJob;
 import org.rutebanken.tiamat.model.job.JobStatus;
 import org.rutebanken.tiamat.netex.validation.NetexXmlReferenceValidator;
-import org.rutebanken.tiamat.repository.ExportJobRepository;
 import org.rutebanken.tiamat.service.BlobStoreService;
+import org.rutebanken.tiamat.service.ExportJobsLookupService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
@@ -47,27 +47,27 @@ public class ExportJobWorker implements Runnable {
      * Ignore paging for async export, to not let the default value interfer.
      */
     public static final boolean IGNORE_PAGING = true;
-    private final ExportJob2 exportJob;
+    private final ExportJob exportJob;
     private final StreamingPublicationDelivery streamingPublicationDelivery;
     private final String localExportPath;
     private final String fileNameWithoutExtension;
     private final BlobStoreService blobStoreService;
-    private final ExportJobRepository exportJobRepository;
+    private final ExportJobsLookupService exportJobsLookupService;
     private final NetexXmlReferenceValidator netexXmlReferenceValidator;
 
-    public ExportJobWorker(ExportJob2 exportJob,
+    public ExportJobWorker(ExportJob exportJob,
                            StreamingPublicationDelivery streamingPublicationDelivery,
                            String localExportPath,
                            String fileNameWithoutExtension,
                            BlobStoreService blobStoreService,
-                           ExportJobRepository exportJobRepository,
+                           ExportJobsLookupService exportJobsLookupService,
                            NetexXmlReferenceValidator netexXmlReferenceValidator) {
         this.exportJob = exportJob;
         this.streamingPublicationDelivery = streamingPublicationDelivery;
         this.localExportPath = localExportPath;
         this.fileNameWithoutExtension = fileNameWithoutExtension;
         this.blobStoreService = blobStoreService;
-        this.exportJobRepository = exportJobRepository;
+        this.exportJobsLookupService = exportJobsLookupService;
         this.netexXmlReferenceValidator = netexXmlReferenceValidator;
     }
 
@@ -102,7 +102,7 @@ public class ExportJobWorker implements Runnable {
                 Thread.currentThread().interrupt();
             }
         } finally {
-            //exportJobRepository.save(exportJob);
+            exportJobsLookupService.updateExportJob(exportJob);
             logger.info("Removing local files: {},{}", localExportZipFile, localExportXmlFile);
             localExportZipFile.delete();
             localExportXmlFile.delete();

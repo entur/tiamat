@@ -22,9 +22,8 @@ import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.exporter.params.StopPlaceSearch;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.model.job.ExportJob2;
+import org.rutebanken.tiamat.model.job.ExportJob;
 import org.rutebanken.tiamat.model.job.JobStatus;
-import org.rutebanken.tiamat.repository.ExportJobRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.xml.sax.SAXException;
 
@@ -44,9 +43,6 @@ public class AsyncPublicationDeliveryExporterTest extends TiamatIntegrationTest 
     @Autowired
     private AsyncPublicationDeliveryExporter asyncPublicationDeliveryExporter;
 
-    @Autowired
-    private ExportJobRepository exportJobRepository;
-
     @Ignore
     @Test
     public void test() throws JAXBException, ParserConfigurationException, IOException, SAXException, TransformerException, XMLStreamException, InterruptedException {
@@ -58,14 +54,14 @@ public class AsyncPublicationDeliveryExporterTest extends TiamatIntegrationTest 
 
         ExportParams exportParams = newExportParamsBuilder().setStopPlaceSearch(new StopPlaceSearch()).build();
 
-        ExportJob2 exportJob = asyncPublicationDeliveryExporter.startExportJob(exportParams);
+        ExportJob exportJob = asyncPublicationDeliveryExporter.startExportJob(exportParams);
 
         assertThat(exportJob.getId()).isGreaterThan(0L);
 
         long start = System.currentTimeMillis();
         long timeout = 10000;
         while (true) {
-            Optional<ExportJob2> actualExportJob = Optional.empty();
+            Optional<ExportJob> actualExportJob = Optional.empty();
             if (actualExportJob.get().getStatus().equals(exportJob.getStatus())) {
                 if (System.currentTimeMillis() - start > timeout) {
                     fail("Waited more than " + timeout + " millis for job status to change");

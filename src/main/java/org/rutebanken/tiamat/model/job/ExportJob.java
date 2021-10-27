@@ -20,22 +20,16 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.time.Instant;
 
 import static org.rutebanken.tiamat.rest.netex.publicationdelivery.AsyncExportResource.ASYNC_JOB_PATH;
 
-@Entity
 @XmlRootElement
 @ApiModel(description = "Export job model")
 public class ExportJob {
 
-    @Id
-    @GeneratedValue
+
     @ApiModelProperty("Unique id for the entity")
     private Long id;
 
@@ -57,7 +51,6 @@ public class ExportJob {
     @ApiModelProperty("Job status")
     private JobStatus status;
 
-    @Transient
     private ExportParams exportParams;
 
     public ExportJob() {

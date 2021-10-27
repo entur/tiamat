@@ -18,11 +18,11 @@ package org.rutebanken.tiamat.exporter;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.rutebanken.tiamat.exporter.async.ExportJobWorker;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
-import org.rutebanken.tiamat.model.job.ExportJob2;
+import org.rutebanken.tiamat.model.job.ExportJob;
 import org.rutebanken.tiamat.model.job.JobStatus;
 import org.rutebanken.tiamat.netex.validation.NetexXmlReferenceValidator;
-import org.rutebanken.tiamat.repository.ExportJobRepository;
 import org.rutebanken.tiamat.service.BlobStoreService;
+import org.rutebanken.tiamat.service.ExportJobsLookupService;
 import org.rutebanken.tiamat.time.ExportTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +38,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -54,8 +53,8 @@ public class AsyncPublicationDeliveryExporter {
             .setNameFormat("exporter-%d").build());
 
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("YYYYMMdd-HHmmssSSS");
+    private static final DateTimeFormatter DATE_TIME_FORMATTER2 = DateTimeFormatter.ofPattern("YYYYMMddHHmmssSSS");
 
-    private final ExportJobRepository exportJobRepository;
 
     private final BlobStoreService blobStoreService;
 
@@ -67,18 +66,19 @@ public class AsyncPublicationDeliveryExporter {
 
     private final String localExportPath;
 
+    private final ExportJobsLookupService exportJobsLookupService;
+
     @Autowired
-    public AsyncPublicationDeliveryExporter(ExportJobRepository exportJobRepository,
-                                            BlobStoreService blobStoreService,
+    public AsyncPublicationDeliveryExporter(BlobStoreService blobStoreService,
                                             @Qualifier("asyncStreamingPublicationDelivery") StreamingPublicationDelivery streamingPublicationDelivery,
                                             NetexXmlReferenceValidator netexXmlReferenceValidator, ExportTimeZone exportTimeZone,
-                                            @Value("${async.export.path:/deployments/data/}") String localExportPath) {
-        this.exportJobRepository = exportJobRepository;
+                                            @Value("${async.export.path:/deployments/data/}") String localExportPath, ExportJobsLookupService exportJobsLookupService) {
         this.blobStoreService = blobStoreService;
         this.streamingPublicationDelivery = streamingPublicationDelivery;
         this.netexXmlReferenceValidator = netexXmlReferenceValidator;
         this.exportTimeZone = exportTimeZone;
         this.localExportPath = localExportPath;
+        this.exportJobsLookupService = exportJobsLookupService;
 
         File exportFolder = new File(localExportPath);
         if(!exportFolder.exists() && !exportFolder.mkdirs()) {
@@ -97,45 +97,46 @@ public class AsyncPublicationDeliveryExporter {
      * @param exportParams search params for stops
      * @return export job with information about the started process
      */
-    public ExportJob2 startExportJob(ExportParams exportParams) {
+    public ExportJob startExportJob(ExportParams exportParams) {
 
-        ExportJob2 exportJob = new ExportJob2(JobStatus.PROCESSING);
-        exportJob.setId(1L);
-        exportJob.setStarted(Instant.now());
+        ExportJob exportJob = new ExportJob(JobStatus.PROCESSING);
+        final Instant now = Instant.now();
+        exportJob.setId(Long.valueOf(now.atZone(exportTimeZone.getDefaultTimeZoneId()).format(DATE_TIME_FORMATTER2)));
+        exportJob.setStarted(now);
         exportJob.setExportParams(exportParams);
         exportJob.setSubFolder(generateSubFolderName());
 
-        //exportJobRepository.save(exportJob);
-        String fileNameWithoutExtention = createFileNameWithoutExtention(exportJob.getId(), exportJob.getStarted());
+        exportJobsLookupService.addExportJob(exportJob);
+        String fileNameWithoutExtention = createFileNameWithoutExtention(exportJob.getStarted());
         exportJob.setFileName(fileNameWithoutExtention + ".zip");
 
-        ExportJobWorker exportJobWorker = new ExportJobWorker(exportJob, streamingPublicationDelivery, localExportPath, fileNameWithoutExtention, blobStoreService, exportJobRepository, netexXmlReferenceValidator);
+        ExportJobWorker exportJobWorker = new ExportJobWorker(exportJob, streamingPublicationDelivery, localExportPath, fileNameWithoutExtention, blobStoreService, exportJobsLookupService, netexXmlReferenceValidator);
         exportService.submit(exportJobWorker);
         logger.info("Returning started export job {}", exportJob);
         setJobUrl(exportJob);
         return exportJob;
     }
 
-    public String createFileNameWithoutExtention(long exportJobId, Instant started) {
+    public String createFileNameWithoutExtention(Instant started) {
         return "tiamat-export-" + started.atZone(exportTimeZone.getDefaultTimeZoneId()).format(DATE_TIME_FORMATTER);
     }
 
-    public ExportJob2 getExportJob(long exportJobId) {
+    public ExportJob getExportJob(long exportJobId) {
 
-        Optional<ExportJob2> exportJob = Optional.empty();
+        Optional<ExportJob> exportJob = exportJobsLookupService.getExportJob(exportJobId);
         return exportJob.map(this::setJobUrl).orElse(null);
     }
 
-    public InputStream getJobFileContent(ExportJob2 exportJob) {
+    public InputStream getJobFileContent(ExportJob exportJob) {
         return blobStoreService.download(exportJob.getSubFolder() + "/" + exportJob.getFileName());
     }
 
-    public Collection<ExportJob2> getJobs() {
+    public Collection<ExportJob> getJobs() {
 
-        return Collections.emptyList();
+        return exportJobsLookupService.getExportJob2List();
     }
 
-    private ExportJob2 setJobUrl(ExportJob2 exportJobWithId) {
+    private ExportJob setJobUrl(ExportJob exportJobWithId) {
         exportJobWithId.setJobUrl(ASYNC_JOB_PATH + "/" + exportJobWithId.getId());
         return exportJobWithId;
     }
