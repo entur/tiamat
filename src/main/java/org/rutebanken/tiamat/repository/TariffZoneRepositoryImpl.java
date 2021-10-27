@@ -157,7 +157,7 @@ public class TariffZoneRepositoryImpl implements TariffZoneRepositoryCustom {
         if (exportParams.getStopPlaceSearch() != null && exportParams.getStopPlaceSearch().getVersionValidity() !=null) {
             if (exportParams.getStopPlaceSearch().getVersionValidity().equals(ExportParams.VersionValidity.CURRENT)) {
                 logger.info("Preparing to scroll only current tariff zones");
-                sql.append(" WHERE tz.version = (SELECT MAX(tzv.version) FROM tariff_zone fzv WHERE tzv.netex_id = tz.netex_id " +
+                sql.append(" WHERE tz.version = (SELECT MAX(tzv.version) FROM tariff_zone tzv WHERE tzv.netex_id = tz.netex_id " +
                         "and (tzv.to_date is null or tzv.to_date > now()) and (tzv.from_date is null or tzv.from_date < now()))");
             } else if (exportParams.getStopPlaceSearch().getVersionValidity().equals(ExportParams.VersionValidity.CURRENT_FUTURE)) {
                 logger.info("Preparing to scroll current and future tariff zones");
