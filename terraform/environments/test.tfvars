@@ -1,0 +1,8 @@
+gcp_project = "entur-ror-test"
+cloudsql_project = "entur-ror-test"
+storage_project = "entur-ror-test"
+kube_namespace = "staging"
+bucket_instance_suffix = "test"
+location = "europe-west1"
+service_account_bucket_role = "roles/storage.objectCreator"
+bucket_instance_prefix="tiamat-exporter"

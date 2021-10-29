@@ -3,8 +3,6 @@ sql:
 
 configMap:
   blobstoreProjectId: entur-ror-dev
-  pubsubProjectId: entur-ror-dev
-  pubsbuTopicName: ror.tiamat.changelog
   gcsBucketName: tiamat-exporter-dev
   keycloakUrl: https://kc-dev.devstage.entur.io/auth
 
