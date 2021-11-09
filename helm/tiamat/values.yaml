@@ -1,4 +1,5 @@
 replicas: ${replicas.RUNNING_REPLICAS}
+default_replicas: 1
 
 deployment:
   name: tiamat-exporter
