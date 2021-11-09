@@ -7,7 +7,7 @@ metadata:
     {{- include "common.labels" . | indent 4 }}
 spec:
   progressDeadlineSeconds: 600
-  replicas: {{ .Values.replicas }}
+  replicas: {{ .Values.replicas | default 1}}
   selector:
     matchLabels:
       app: {{ .Values.deployment.name }}
