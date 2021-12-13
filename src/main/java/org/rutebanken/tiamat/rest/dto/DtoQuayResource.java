@@ -32,8 +32,10 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.BufferedWriter;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.List;
 
@@ -49,7 +51,7 @@ public class DtoQuayResource {
 
     private final DtoMappingSemaphore dtoMappingSemaphore;
 
-    private IdMappingDtoCsvMapper csvMapper;
+    private final IdMappingDtoCsvMapper csvMapper;
 
     @Autowired
     public DtoQuayResource(QuayRepository quayRepository, DtoMappingSemaphore dtoMappingSemaphore, IdMappingDtoCsvMapper csvMapper) {
@@ -58,6 +60,15 @@ public class DtoQuayResource {
         this.csvMapper = csvMapper;
     }
 
+    /**
+     * Return the list of Quay local references with their mappings to NSR IDs in CSV format:
+     * local reference, NSR ID, (stop place type), valid from, valid to
+     * @param recordsPerRoundTrip batch size
+     * @param includeStopType include the parent stop place type
+     * @param includeFuture include future (not-yet-valid) quays
+     * @return A plain-text HTTP response listing the local references with their mappings to NSR IDs as a CSV file.
+     * @throws InterruptedException
+     */
     @GET
     @Path("mapping/quay")
     @Produces("text/plain")
@@ -68,35 +79,60 @@ public class DtoQuayResource {
 
         dtoMappingSemaphore.aquire();
         try {
-
-            return Response.ok().entity((StreamingOutput) output -> {
-
-                int recordPosition = 0;
-                boolean lastEmpty = false;
-                Instant validFrom = Instant.now();
-                Instant validTo = includeFuture ? null : validFrom;
-                try (PrintWriter writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(output)))) {
-                    while (!lastEmpty) {
-                        List<IdMappingDto> quayMappings = quayRepository.findKeyValueMappingsForQuay(validFrom, validTo, recordPosition, recordsPerRoundTrip);
-                        for (IdMappingDto mapping : quayMappings) {
-                            writer.println(csvMapper.toCsvString(mapping, includeStopType, includeFuture));
-                            recordPosition++;
-                        }
-                        writer.flush();
-                        if (quayMappings.isEmpty()) lastEmpty = true;
-                    }
-                    writer.close();
-                } catch (Exception e) {
-                    logger.warn("Catched exception when streaming id map for quay: {}", e.getMessage(), e);
-                    throw e;
-                }
-            }).build();
+            return Response.ok().entity((StreamingOutput) output -> getMappings(recordsPerRoundTrip, includeStopType, includeFuture, includeFuture, true, output)).build();
         } finally {
             dtoMappingSemaphore.release();
         }
     }
 
+    /**
+     * Return the list of all Quay local references in CSV format (one column)
+     * @param recordsPerRoundTrip batch size
+     * @param includeFuture include future (not-yet-valid) quays
+     * @return A plain-text HTTP response listing all the local references as a CSV file.
+     * @throws InterruptedException
+     */
+    @GET
+    @Path("local_reference/quay")
+    @Produces("text/plain")
+    public Response getQuayLocalReferences(@DefaultValue(value = "300000") @QueryParam(value = "recordsPerRoundTrip") int recordsPerRoundTrip, @QueryParam("includeFuture") boolean includeFuture) throws InterruptedException {
 
+        logger.info("Fetching Quay local references...");
+        dtoMappingSemaphore.aquire();
+        try {
+            return Response.ok().entity((StreamingOutput) output -> getMappings(recordsPerRoundTrip, false, includeFuture, false, false, output)).build();
+        } finally {
+            dtoMappingSemaphore.release();
+        }
+    }
+
+    private void getMappings(int recordsPerRoundTrip, boolean includeStopType, boolean includeFuture, boolean includeValidity, boolean includeNsrId, OutputStream output) {
+        int recordPosition = 0;
+        boolean lastEmpty = false;
+        Instant validFrom = Instant.now();
+        Instant validTo = includeFuture ? null : validFrom;
+        try (PrintWriter writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(output, StandardCharsets.UTF_8)))) {
+            while (!lastEmpty) {
+                List<IdMappingDto> quayMappings = quayRepository.findKeyValueMappingsForQuay(validFrom, validTo, recordPosition, recordsPerRoundTrip);
+                for (IdMappingDto mapping : quayMappings) {
+                    writer.println(csvMapper.toCsvString(mapping, includeStopType, includeValidity, includeNsrId));
+                    recordPosition++;
+                }
+                writer.flush();
+                if (quayMappings.isEmpty()) lastEmpty = true;
+            }
+        } catch (Exception e) {
+            logger.warn("Catched exception when streaming id map for quay: {}", e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    /**
+     * Return the list of all Quay NSR IDs in CSV format (one column)
+     * @param includeFuture include future (not-yet-valid) quays
+     * @return A plain-text HTTP response listing all the NSR IDs as a CSV file.
+     * @throws InterruptedException
+     */
     @GET
     @Path("/id/quay")
     @Produces("text/plain")

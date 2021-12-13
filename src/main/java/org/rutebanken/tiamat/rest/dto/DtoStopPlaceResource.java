@@ -33,8 +33,10 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.BufferedWriter;
+    import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -62,41 +64,75 @@ public class DtoStopPlaceResource {
         this.csvMapper = csvMapper;
     }
 
+    /**
+     * Return the list of Stop Place local references with their mappings to NSR IDs in CSV format:
+     * local reference, NSR ID, (stop place type), valid from, valid to.
+     * @param recordsPerRoundTrip batch size.
+     * @param includeStopType include the stop place type.
+     * @param includeFuture include future (not-yet-valid) quays.
+     * @return A plain-text HTTP response listing the local references with their mappings to NSR IDs as a CSV file.
+     * @throws InterruptedException
+     */
     @GET
     @Path("/mapping/stop_place")
     @Produces("text/plain")
     public Response getIdMapping(@DefaultValue(value = "300000") @QueryParam(value = "recordsPerRoundTrip") int recordsPerRoundTrip,
                                         @QueryParam("includeStopType") boolean includeStopType, @QueryParam("includeFuture") boolean includeFuture) throws InterruptedException {
-
         dtoMappingSemaphore.aquire();
         try {
             logger.info("Fetching StopPlace mapping table...");
-
-            return Response.ok().entity((StreamingOutput) output -> {
-
-                int recordPosition = 0;
-                boolean lastEmpty = false;
-                Instant validFrom = Instant.now();
-                Instant validTo = includeFuture ? null : validFrom;
-                try (PrintWriter writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(output)))) {
-                    while (!lastEmpty) {
-
-                        List<IdMappingDto> stopPlaceMappings = stopPlaceRepository.findKeyValueMappingsForStop(validFrom, validTo, recordPosition, recordsPerRoundTrip);
-                        for (IdMappingDto mapping : stopPlaceMappings) {
-                            writer.println(csvMapper.toCsvString(mapping, includeStopType, includeFuture));
-                            recordPosition++;
-                        }
-                        writer.flush();
-                        if (stopPlaceMappings.isEmpty()) lastEmpty = true;
-                    }
-                    writer.close();
-                }
-            }).build();
+            return Response.ok().entity((StreamingOutput) output -> getMappings(recordsPerRoundTrip, includeStopType, includeFuture, includeFuture, true, output)).build();
         } finally {
             dtoMappingSemaphore.release();
         }
     }
 
+    /**
+     * Return the list of all StopPlace local references in CSV format (one column).
+     * @param recordsPerRoundTrip batch size.
+     * @param includeFuture include future (not-yet-valid) quays .
+     * @return A plain-text HTTP response listing all the local references as a CSV file.
+     * @throws InterruptedException
+     */
+    @GET
+    @Path("/local_reference/stop_place")
+    @Produces("text/plain")
+    public Response getStopPlaceLocalReferences(@DefaultValue(value = "300000") @QueryParam(value = "recordsPerRoundTrip") int recordsPerRoundTrip, @QueryParam("includeFuture") boolean includeFuture) throws InterruptedException {
+
+        dtoMappingSemaphore.aquire();
+        try {
+            logger.info("Fetching StopPlace local references...");
+            return Response.ok().entity((StreamingOutput) output -> getMappings(recordsPerRoundTrip, false, includeFuture, false, false, output)).build();
+        } finally {
+            dtoMappingSemaphore.release();
+        }
+    }
+
+    private void getMappings(int recordsPerRoundTrip, boolean includeStopType, boolean includeFuture, boolean includeValidity, boolean includeNsrId, OutputStream output) {
+        int recordPosition = 0;
+        boolean lastEmpty = false;
+        Instant validFrom = Instant.now();
+        Instant validTo = includeFuture ? null : validFrom;
+        try (PrintWriter writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(output, StandardCharsets.UTF_8)))) {
+            while (!lastEmpty) {
+
+                List<IdMappingDto> stopPlaceMappings = stopPlaceRepository.findKeyValueMappingsForStop(validFrom, validTo, recordPosition, recordsPerRoundTrip);
+                for (IdMappingDto mapping : stopPlaceMappings) {
+                    writer.println(csvMapper.toCsvString(mapping, includeStopType, includeValidity, includeNsrId));
+                    recordPosition++;
+                }
+                writer.flush();
+                if (stopPlaceMappings.isEmpty()) lastEmpty = true;
+            }
+        }
+    }
+
+    /**
+     * Return the list of all StopPlace NSR IDs in CSV format (one column).
+     * @param includeFuture include future (not-yet-valid) stop places.
+     * @return A plain-text HTTP response listing all the NSR IDs as a CSV file.
+     * @throws InterruptedException
+     */
     @GET
     @Path("/id/stop_place")
     @Produces("text/plain")
