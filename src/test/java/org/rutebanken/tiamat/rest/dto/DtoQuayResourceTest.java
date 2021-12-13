@@ -95,4 +95,26 @@ public class DtoQuayResourceTest {
         Assertions.assertEquals("original id", lines[0]);
     }
 
+    @Test
+    public void getMappings() throws IOException, InterruptedException {
+
+        when(quayRepository.findKeyValueMappingsForQuay(any(Instant.class), isNull(), anyInt(), anyInt()))
+                .thenReturn(List.of(new IdMappingDto("original id", BigInteger.ONE.toString(), now, now, StopTypeEnumeration.FERRY_STOP),
+                        new IdMappingDto("original id", BigInteger.TEN.toString(), now, now, StopTypeEnumeration.TRAM_STATION),
+                        new IdMappingDto("original id", BigInteger.ZERO.toString(), now, now, StopTypeEnumeration.BUS_STATION)))
+                .thenReturn(Collections.emptyList());
+
+        Response response = dtoQuayResource.getIdMapping(100, true,true);
+        StreamingOutput output = (StreamingOutput) response.getEntity();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        output.write(baos);
+        String payload = baos.toString();
+        Assertions.assertNotNull(payload );
+        String[] lines = payload.split("\n");
+        Assertions.assertEquals(3, lines.length);
+        String[] fields = lines[0].split(",");
+        Assertions.assertEquals(5, fields.length);
+        Assertions.assertEquals("original id", fields[0]);
+    }
+
 }
