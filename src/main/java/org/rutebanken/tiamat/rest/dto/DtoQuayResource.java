@@ -86,10 +86,10 @@ public class DtoQuayResource {
     }
 
     /**
-     * Return the list of all Quay local references in CSV format (one column)
+     * Return the list of all Quay local references in plain text format (one id per line)
      * @param recordsPerRoundTrip batch size
      * @param includeFuture include future (not-yet-valid) quays
-     * @return A plain-text HTTP response listing all the local references as a CSV file.
+     * @return A plain-text HTTP response listing all the local references.
      * @throws InterruptedException
      */
     @GET
@@ -128,9 +128,9 @@ public class DtoQuayResource {
     }
 
     /**
-     * Return the list of all Quay NSR IDs in CSV format (one column)
+     * Return the list of all Quay NSR IDs in plain text format (one id per line)
      * @param includeFuture include future (not-yet-valid) quays
-     * @return A plain-text HTTP response listing all the NSR IDs as a CSV file.
+     * @return A plain-text HTTP response listing all the NSR IDs.
      * @throws InterruptedException
      */
     @GET
