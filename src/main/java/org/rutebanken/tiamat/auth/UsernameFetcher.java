@@ -27,7 +27,7 @@ public class UsernameFetcher {
     /**
      * Gets username from Spring Security
      * <p>
-     * Expects property keycloak.principal-attribute=preferred_username
+     * Expects property auth0.principal-attribute=preferred_username
      */
     public String getUserNameForAuthenticatedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

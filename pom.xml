@@ -98,9 +98,7 @@
             sync, and fail fast if incompatibilities -->
         <netex-java-model.version>1.0.12-SNAPSHOT</netex-java-model.version>
         <hazelcast-helper.version>0.0.4-SNAPSHOT</hazelcast-helper.version>
-        <rutebanken-gcp-storage.version>0.0.4-SNAPSHOT</rutebanken-gcp-storage.version>
-        <rutebanken-organisation.version>0.0.4-SNAPSHOT</rutebanken-organisation.version>
-        <entur.helpers.version>1.0.42</entur.helpers.version>
+        <entur.helpers.version>1.0.59</entur.helpers.version>
 
         <javax-jms.version>2.0.1</javax-jms.version>
         <jts-core.version>1.16.0</jts-core.version>
@@ -139,19 +137,13 @@
             <dependency>
                 <groupId>org.entur.helpers</groupId>
                 <artifactId>organisation</artifactId>
-                <version>${rutebanken-organisation.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.keycloak</groupId>
-                        <artifactId>keycloak-spring-security-adapter</artifactId>
-                    </exclusion>
-                </exclusions>
+                <version>${entur.helpers.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>org.entur.helpers</groupId>
                 <artifactId>gcp-storage</artifactId>
-                <version>${rutebanken-gcp-storage.version}</version>
+                <version>${entur.helpers.version}</version>
             </dependency>
 
             <dependency>
