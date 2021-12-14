@@ -107,6 +107,8 @@
 
         <maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
         <maven-antrun-plugin.version>1.8</maven-antrun-plugin.version>
+        <!--TODO temporary manual upgrade of Logback-->
+        <logback.version>1.2.8</logback.version>
     </properties>
 
     <!-- This repository list can be deleted, as it is now supplied by rutebanken nexus.
@@ -281,6 +283,17 @@
             <groupId>net.logstash.logback</groupId>
             <artifactId>logstash-logback-encoder</artifactId>
             <version>${logstash-logback.version}</version>
+        </dependency>
+        <!--TODO temporary manual upgrade of Logback-->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
+            <version>${logback.version}</version>
         </dependency>
 
         <dependency>
