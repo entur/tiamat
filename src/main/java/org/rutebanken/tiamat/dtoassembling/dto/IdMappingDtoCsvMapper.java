@@ -25,6 +25,10 @@ public class IdMappingDtoCsvMapper {
     }
 
     public String toCsvString(IdMappingDto dto, boolean includeStopType, boolean includeValidityInterval) {
+        return toCsvString(dto, includeStopType, includeValidityInterval, true);
+    }
+
+    public String toCsvString(IdMappingDto dto, boolean includeStopType, boolean includeValidityInterval, boolean includeNsrId) {
 
         List<String> stringList = new ArrayList<>();
 
@@ -33,7 +37,11 @@ public class IdMappingDtoCsvMapper {
         if (includeStopType) {
             stringList.add(dto.stopType == null ? "" : dto.stopType.value());
         }
-        stringList.add(dto.netexId);
+
+        if(includeNsrId) {
+            stringList.add(dto.netexId);
+        }
+
         if (includeValidityInterval) {
             stringList.add(toString(dto.validFrom));
             stringList.add(toString(dto.validTo));
