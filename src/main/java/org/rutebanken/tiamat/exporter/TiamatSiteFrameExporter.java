@@ -31,6 +31,7 @@ import org.rutebanken.tiamat.time.ExportTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -41,6 +42,8 @@ public class TiamatSiteFrameExporter {
 
     private static final Logger logger = LoggerFactory.getLogger(TiamatSiteFrameExporter.class);
 
+
+    private final String defaultLanguage;
 
     private final TopographicPlaceRepository topographicPlaceRepository;
 
@@ -53,12 +56,19 @@ public class TiamatSiteFrameExporter {
     private final NetexIdHelper netexIdHelper;
 
     @Autowired
-    public TiamatSiteFrameExporter(TopographicPlaceRepository topographicPlaceRepository, TariffZoneRepository tariffZoneRepository, PathLinkRepository pathLinkRepository, ExportTimeZone exportTimeZone, NetexIdHelper netexIdHelper) {
+    public TiamatSiteFrameExporter(TopographicPlaceRepository topographicPlaceRepository,
+                                   TariffZoneRepository tariffZoneRepository,
+                                   PathLinkRepository pathLinkRepository,
+                                   ExportTimeZone exportTimeZone,
+                                   NetexIdHelper netexIdHelper,
+                                   @Value("${tiamat.locals.language.default:nor}") String defaultLanguage
+                                   ) {
         this.topographicPlaceRepository = topographicPlaceRepository;
         this.tariffZoneRepository = tariffZoneRepository;
         this.pathLinkRepository = pathLinkRepository;
         this.exportTimeZone = exportTimeZone;
         this.netexIdHelper = netexIdHelper;
+        this.defaultLanguage = defaultLanguage;
     }
 
 
@@ -114,6 +124,7 @@ public class TiamatSiteFrameExporter {
 
         LocaleStructure localeStructure = new LocaleStructure();
         localeStructure.setTimeZone(exportTimeZone.getDefaultTimeZoneId().toString());
+        localeStructure.setDefaultLanguage(defaultLanguage);
         VersionFrameDefaultsStructure versionFrameDefaultsStructure = new VersionFrameDefaultsStructure();
         versionFrameDefaultsStructure.setDefaultLocale(localeStructure);
         siteFrame.setFrameDefaults(versionFrameDefaultsStructure);
