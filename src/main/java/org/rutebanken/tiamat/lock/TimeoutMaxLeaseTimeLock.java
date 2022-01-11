@@ -1,7 +1,7 @@
 package org.rutebanken.tiamat.lock;
 
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.ILock;
+import com.hazelcast.cp.lock.FencedLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,11 +37,10 @@ public class TimeoutMaxLeaseTimeLock {
 
     public <T> T executeInLock(Supplier<T> supplier, String lockName, int waitTimeoutSeconds, int maxLeaseTimeSeconds) {
 
-        final ILock lock = hazelcastInstance.getLock(lockName);
+        final FencedLock lock = hazelcastInstance.getCPSubsystem().getLock(lockName);
 
-        try {
             logger.info("Waiting for lock {}", lockName);
-            if (lock.tryLock(waitTimeoutSeconds, TimeUnit.SECONDS, maxLeaseTimeSeconds, TimeUnit.SECONDS)) {
+            if (lock.tryLock(waitTimeoutSeconds, TimeUnit.SECONDS)) {
                 long started = System.currentTimeMillis();
                 try {
                     logger.info("Got lock {}", lockName);
@@ -59,9 +58,6 @@ public class TimeoutMaxLeaseTimeLock {
             } else {
                 throw new LockException("Timed out waiting to aquire lock " + lockName + " after " + waitTimeoutSeconds + " seconds");
             }
-        } catch (InterruptedException e) {
-            throw new LockException("Interrupted while waiting for lock: " + lockName, e);
-        }
     }
 
 }

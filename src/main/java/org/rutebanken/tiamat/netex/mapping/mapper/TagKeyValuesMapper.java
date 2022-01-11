@@ -91,12 +91,14 @@ public class TagKeyValuesMapper {
     public void addTagKeysToNetexKeyValue(DataManagedObjectStructure netexEntity, String prefix, Tag tag) {
         setKey(netexEntity, prefix, ID_REFERENCE, tag.getIdReference());
         setKey(netexEntity, prefix, NAME, tag.getName());
-        setKey(netexEntity, prefix, CREATED_BY, tag.getCreatedBy());
+        // Since netex export are  open data therefore it's not desirable to publish username.
+        //setKey(netexEntity, prefix, CREATED_BY, tag.getCreatedBy());
         setKey(netexEntity, prefix, COMMENT, tag.getComment());
         if (tag.getCreated() != null) {
             setKey(netexEntity, prefix, CREATED, String.valueOf(tag.getCreated().toEpochMilli()));
         }
-        setKey(netexEntity, prefix, REMOVED_BY, tag.getRemovedBy());
+        // Since netex export are  open data therefore it's not desirable to publish username.
+        //setKey(netexEntity, prefix, REMOVED_BY, tag.getRemovedBy());
         if (tag.getRemoved() != null) {
             setKey(netexEntity, prefix, REMOVED, String.valueOf(tag.getRemoved().toEpochMilli()));
         }
