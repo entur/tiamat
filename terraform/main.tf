@@ -53,7 +53,7 @@ resource "google_pubsub_subscription" "changelog-subscription" {
 
 # create service account
 resource "google_service_account" "tiamat_service_account" {
-  account_id   = "${var.labels.team}-${var.labels.app}-sa"
+  account_id   = "${var.labels.team}-${var.labels.app}-temp-sa"
   display_name = "${var.labels.team}-${var.labels.app} service account"
   project = var.gcp_project
 }
