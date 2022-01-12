@@ -148,7 +148,7 @@ public class StopPlaceImportHandler {
             if (importParams.importType != null && importParams.importType.equals(ImportType.ID_MATCH)) {
                 importedOrMatchedNetexStopPlaces = stopPlaceIdMatcher.matchStopPlaces(tiamatStops, stopPlacesCreatedMatchedOrUpdated);
             } else {
-                final Lock lock = hazelcastInstance.getCPSubsystem().getLock(STOP_PLACE_IMPORT_LOCK_KEY);
+                final Lock lock = hazelcastInstance.getLock(STOP_PLACE_IMPORT_LOCK_KEY);
                 lock.lock();
                 try {
                     if (importParams.importType == null || importParams.importType.equals(ImportType.MERGE)) {

@@ -66,8 +66,7 @@ public class DataManagedObjectStructureMapper extends CustomMapper<DataManagedOb
      * Properties to map to key values in netex format. Getters for the tiamat entity.
      */
     private static final Map<String, Function<org.rutebanken.tiamat.model.DataManagedObjectStructure, String>> tiamatEntityGetFunctions = new ImmutableMap.Builder<String, Function<org.rutebanken.tiamat.model.DataManagedObjectStructure, String>>()
-            // Since netex export are  open data therefore it's not desirable to publish username.
-            //.put(CHANGED_BY, org.rutebanken.tiamat.model.DataManagedObjectStructure::getChangedBy)
+            .put(CHANGED_BY, org.rutebanken.tiamat.model.DataManagedObjectStructure::getChangedBy)
             .put(VERSION_COMMENT, org.rutebanken.tiamat.model.DataManagedObjectStructure::getVersionComment)
             .build();
 
