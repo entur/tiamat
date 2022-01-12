@@ -1,0 +1,23 @@
+sql:
+  instance: entur-ror-dev:europe-west1:tiamat-db-1=tcp:5432
+
+configMap:
+  blobstoreProjectId: entur-ror-dev
+  pubsubProjectId: entur-ror-dev
+  pubsbuTopicName: ror.tiamat.changelog-temp
+  gcsBucketName: ror-tiamat-dev-temp
+  keycloakUrl: https://kc-dev.devstage.entur.io/auth
+
+auth0:
+  ror:
+    url: https://ror-entur-dev.eu.auth0.com
+    audience: https://ror.api.dev.entur.io
+
+rbac:
+  enabled: true
+
+ingress:
+  enabled: true
+  loadBalancerIP: 35.205.170.68
+  domainName: .dev.entur.io
+  name: stop-places-temp-v1
