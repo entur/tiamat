@@ -56,7 +56,7 @@ public class DataManagedObjectStructureMapperTest {
         org.rutebanken.netex.model.StopPlace netexStopPlace = new org.rutebanken.netex.model.StopPlace();
         dataManagedObjectStructureMapper.mapBtoA(tiamatStopPlace, netexStopPlace, mappingContext);
 
-        assertThat(publicationDeliveryHelper.getValueByKey(netexStopPlace, CHANGED_BY)).isNull();
+        assertThat(publicationDeliveryHelper.getValueByKey(netexStopPlace, CHANGED_BY)).isEqualTo(tiamatStopPlace.getChangedBy());
     }
 
     @Test

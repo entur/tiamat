@@ -67,8 +67,10 @@ public class TagKeyValuesMapperTest {
 
         assertThat(flattened).containsKeys(
                 "TAG-0-name",
+                "TAG-0-createdBy",
                 "TAG-0-created",
                 "TAG-0-removed",
+                "TAG-0-removedBy",
                 "TAG-0-comment",
                 "TAG-0-idReference");
 
@@ -99,9 +101,9 @@ public class TagKeyValuesMapperTest {
         Tag tag = new Tag();
         tag.setCreated(now);
         tag.setName("name");
-        //tag.setCreatedBy("also me");
+        tag.setCreatedBy("also me");
         tag.setIdreference(netexReference);
-        //tag.setRemovedBy("me");
+        tag.setRemovedBy("me");
         tag.setRemoved(now);
         tag.setComment("comment");
 
