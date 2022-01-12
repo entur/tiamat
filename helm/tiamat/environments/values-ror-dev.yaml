@@ -5,7 +5,7 @@ configMap:
   blobstoreProjectId: entur-ror-dev
   pubsubProjectId: entur-ror-dev
   pubsbuTopicName: ror.tiamat.changelog-temp
-  gcsBucketName: ror-tiamat-dev-temp
+  gcsBucketName: ror-tiamat-temp-dev
   keycloakUrl: https://kc-dev.devstage.entur.io/auth
 
 auth0:
