@@ -11,6 +11,10 @@ spec:
       port: {{ .Values.service.http.externalPort }}
       protocol: TCP
       targetPort: {{ .Values.service.http.internalPort }}
+    - name: hazelcast
+      port: 5701
+      protocol: TCP
+      targetPort: 5701
   selector:
     app: {{ .Values.deployment.name }}
   sessionAffinity: None
