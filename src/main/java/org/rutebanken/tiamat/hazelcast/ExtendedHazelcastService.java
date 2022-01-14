@@ -58,7 +58,7 @@ public class ExtendedHazelcastService extends HazelCastService {
                         .setBackupCount(DEFAULT_BACKUP_COUNT)
                         .setAsyncBackupCount(0)
                         .setTimeToLiveSeconds(0)
-                        .setEvictionConfig(new EvictionConfig().setEvictionPolicy(EvictionPolicy.NONE).setMaxSizePolicy(MaxSizePolicy.FREE_HEAP_PERCENTAGE)));
+                        .setEvictionConfig(new EvictionConfig().setEvictionPolicy(EvictionPolicy.NONE)));
 
         logger.info("Configured map for last ids for entities: {}", mapConfigs.get(0));
 
@@ -69,7 +69,11 @@ public class ExtendedHazelcastService extends HazelCastService {
                         // No sync backup for hibernate cache
                         .setBackupCount(0)
                         .setAsyncBackupCount(2)
-                        .setEvictionConfig(new EvictionConfig().setEvictionPolicy(EvictionPolicy.LFU).setMaxSizePolicy(MaxSizePolicy.FREE_HEAP_PERCENTAGE))
+                        .setEvictionConfig(new EvictionConfig()
+                                .setEvictionPolicy(EvictionPolicy.LFU)
+                                .setMaxSizePolicy(MaxSizePolicy.FREE_HEAP_PERCENTAGE)
+                                .setSize(EVICT_WHEN_FREE_HEAP_PERCENTAGE_BELOW)
+                        )
                         .setTimeToLiveSeconds(604800));
 
         logger.info("Configured map for hibernate second level cache: {}", mapConfigs.get(1));
