@@ -57,8 +57,7 @@ public class ExtendedHazelcastService extends HazelCastService {
                         .setName(LAST_IDS_FOR_ENTITY)
                         .setBackupCount(DEFAULT_BACKUP_COUNT)
                         .setAsyncBackupCount(0)
-                        .setTimeToLiveSeconds(0)
-                        .setEvictionConfig(new EvictionConfig().setEvictionPolicy(EvictionPolicy.NONE).setMaxSizePolicy(MaxSizePolicy.FREE_HEAP_PERCENTAGE)));
+                        .setTimeToLiveSeconds(0));
 
         logger.info("Configured map for last ids for entities: {}", mapConfigs.get(0));
 
