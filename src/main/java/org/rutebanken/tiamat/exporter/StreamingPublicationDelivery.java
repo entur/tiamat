@@ -15,8 +15,6 @@
 
 package org.rutebanken.tiamat.exporter;
 
-import org.checkerframework.checker.units.qual.A;
-import org.hibernate.Session;
 import org.hibernate.internal.SessionImpl;
 import org.rutebanken.netex.model.FareZone;
 import org.rutebanken.netex.model.FareZonesInFrame_RelStructure;
@@ -562,8 +560,8 @@ public class StreamingPublicationDelivery {
 
     private EntitiesEvictor instantiateEvictor() {
         if (entityManager != null) {
-            Session currentSession = entityManager.unwrap(Session.class);
-            return new SessionEntitiesEvictor((SessionImpl) currentSession);
+            SessionImpl currentSession = entityManager.unwrap(SessionImpl.class);
+            return new SessionEntitiesEvictor(currentSession);
         } else {
             return new EntitiesEvictor() {
                 @Override

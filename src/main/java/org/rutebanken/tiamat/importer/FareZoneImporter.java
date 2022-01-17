@@ -47,7 +47,7 @@ public class FareZoneImporter {
                 .stream()
                 .peek(incomingFareZone -> logger.info("Importing fare zone {}, version {}, name {}. Has polygon? {}",
                         incomingFareZone.getNetexId(), incomingFareZone.getVersion(),
-                        incomingFareZone.getName(), incomingFareZone.getPolygon() == null ? false : incomingFareZone.getPolygon().getExteriorRing() != null))
+                        incomingFareZone.getName(), incomingFareZone.getPolygon() != null && incomingFareZone.getPolygon().getExteriorRing() != null))
                 .map(incomingFareZone -> fareZoneSaverService.saveNewVersion(incomingFareZone))
                 .map(savedFareZone -> netexMapper.getFacade().map(savedFareZone, FareZone.class))
                 .collect(toList());

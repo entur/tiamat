@@ -87,7 +87,7 @@ public class ParkingsImportHandler {
             Collection<org.rutebanken.netex.model.Parking> importedParkings;
 
             if (importParams.importType == null || importParams.importType.equals(ImportType.MERGE)) {
-                final Lock lock = hazelcastInstance.getLock(PARKING_IMPORT_LOCK_KEY);
+                final Lock lock = hazelcastInstance.getCPSubsystem().getLock(PARKING_IMPORT_LOCK_KEY);
                 lock.lock();
                 try {
                     importedParkings = transactionalMergingParkingsImporter.importParkings(tiamatParking, parkingsCreatedOrUpdated);
