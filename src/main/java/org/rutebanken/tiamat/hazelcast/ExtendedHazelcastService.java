@@ -15,9 +15,10 @@
 
 package org.rutebanken.tiamat.hazelcast;
 
+import com.hazelcast.config.EvictionConfig;
 import com.hazelcast.config.EvictionPolicy;
 import com.hazelcast.config.MapConfig;
-import com.hazelcast.config.MaxSizeConfig;
+import com.hazelcast.config.MaxSizePolicy;
 import com.hazelcast.core.HazelcastInstance;
 import org.rutebanken.hazelcasthelper.service.HazelCastService;
 import org.rutebanken.hazelcasthelper.service.KubernetesService;
@@ -43,13 +44,9 @@ public class ExtendedHazelcastService extends HazelCastService {
     private static final int EVICT_WHEN_FREE_HEAP_PERCENTAGE_BELOW = 50;
 
     public ExtendedHazelcastService(KubernetesService kubernetesService, String hazelcastManagementUrl) {
-        super(kubernetesService, hazelcastManagementUrl);
+        super(kubernetesService);
     }
 
-    /**
-     * See <a href="http://docs.hazelcast.org/docs/3.5/manual/html/map-eviction.html">Map eviction</a>
-     * @return
-     */
     @Override
     public List<MapConfig> getAdditionalMapConfigurations() {
         List<MapConfig> mapConfigs = super.getAdditionalMapConfigurations();
@@ -77,7 +74,6 @@ public class ExtendedHazelcastService extends HazelCastService {
                                 .setSize(EVICT_WHEN_FREE_HEAP_PERCENTAGE_BELOW)
                         )
                         .setTimeToLiveSeconds(604800));
-
 
         logger.info("Configured map for hibernate second level cache: {}", mapConfigs.get(1));
         return mapConfigs;
