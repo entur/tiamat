@@ -57,13 +57,12 @@
     </scm>
 
     <properties>
-        <hazelcast.version>4.2.4</hazelcast.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring-cloud-gcp.version>1.2.5.RELEASE</spring-cloud-gcp.version>
         <maven.compiler.plugin.version>3.8.1</maven.compiler.plugin.version>
         <plexus.compiler.javac.version>2.8.8</plexus.compiler.javac.version>
-        <spring-boot-plugin.version>2.4.13</spring-boot-plugin.version>
-        <spring-boot.version>2.4.13</spring-boot.version>
+        <spring-boot-plugin.version>2.3.4.RELEASE</spring-boot-plugin.version>
+        <spring-boot.version>2.3.4.RELEASE</spring-boot.version>
         <spring.security.version>5.3.5.RELEASE</spring.security.version>
         <postgresql.version>42.2.4</postgresql.version>
         <geodb.version>0.9</geodb.version>
@@ -87,7 +86,8 @@
         <hazelcast-hibernate53.version>2.1.1</hazelcast-hibernate53.version>
         <hibernate.version>5.4.0.Final</hibernate.version>
         <hibernate-spatial.version>5.4.0.Final</hibernate-spatial.version>
-        <groovy-all.version>3.0.9</groovy-all.version>
+
+        <groovy-all.version>2.5.4</groovy-all.version>
         <jaxb-version>2.3.0.1</jaxb-version>
         <swagger-jersey2.version>1.6.2</swagger-jersey2.version>
         <jackson-version>2.11.3</jackson-version>
@@ -97,7 +97,7 @@
         <!-- NB: Concious choice of using snapshot version. This is to keep in
             sync, and fail fast if incompatibilities -->
         <netex-java-model.version>1.0.12-SNAPSHOT</netex-java-model.version>
-        <hazelcast-helper.version>1.0.62</hazelcast-helper.version>
+        <hazelcast-helper.version>0.0.4-SNAPSHOT</hazelcast-helper.version>
         <rutebanken-gcp-storage.version>0.0.4-SNAPSHOT</rutebanken-gcp-storage.version>
         <rutebanken-organisation.version>0.0.4-SNAPSHOT</rutebanken-organisation.version>
         <entur.helpers.version>1.0.42</entur.helpers.version>
@@ -106,7 +106,7 @@
         <jts-core.version>1.16.0</jts-core.version>
 
         <maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
-        <maven-antrun-plugin.version>3.0.0</maven-antrun-plugin.version>
+        <maven-antrun-plugin.version>1.8</maven-antrun-plugin.version>
         <!--TODO temporary manual upgrade of Logback-->
         <logback.version>1.2.8</logback.version>
     </properties>
@@ -134,7 +134,7 @@
 
             <dependency>
                 <groupId>org.entur.helpers</groupId>
-                <artifactId>hazelcast4-helper</artifactId>
+                <artifactId>hazelcast-helper</artifactId>
                 <version>${hazelcast-helper.version}</version>
             </dependency>
 
@@ -150,11 +150,6 @@
                 </exclusions>
             </dependency>
 
-            <dependency>
-                <groupId>com.hazelcast</groupId>
-                <artifactId>hazelcast</artifactId>
-                <version>${hazelcast.version}</version>
-            </dependency>
             <dependency>
                 <groupId>org.entur.helpers</groupId>
                 <artifactId>gcp-storage</artifactId>
@@ -253,7 +248,7 @@
         </dependency>
         <dependency>
             <groupId>org.entur.helpers</groupId>
-            <artifactId>hazelcast4-helper</artifactId>
+            <artifactId>hazelcast-helper</artifactId>
         </dependency>
 
         <dependency>
@@ -561,17 +556,6 @@
             <artifactId>activemq-kahadb-store</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.junit.vintage</groupId>
-            <artifactId>junit-vintage-engine</artifactId>
-            <scope>test</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.hamcrest</groupId>
-                    <artifactId>hamcrest-core</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
     </dependencies>
 
 
@@ -604,7 +588,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${maven-surefire-plugin.version}</version>
                 <configuration>
-                    <argLine>-Xms500m -Xmx1000m -Xss256k</argLine>
+                    <argLine>-Xms500m -Xmx500m -Xss256k</argLine>
                     <runOrder>alphabetical</runOrder>
                 </configuration>
             </plugin>
@@ -616,7 +600,7 @@
                         <id>test-compile</id>
                         <phase>test-compile</phase>
                         <configuration>
-                            <target>
+                            <tasks>
                                 <mkdir dir="${basedir}/src/test/groovy"/>
                                 <taskdef name="groovyc" classname="org.codehaus.groovy.ant.Groovyc">
                                     <classpath refid="maven.test.classpath"/>
@@ -626,7 +610,7 @@
                                          srcdir="${basedir}/src/test/groovy/" listfiles="true">
                                     <classpath refid="maven.test.classpath"/>
                                 </groovyc>
-                            </target>
+                            </tasks>
                         </configuration>
                         <goals>
                             <goal>run</goal>
