@@ -99,4 +99,5 @@ public class TiamatHazelcastCacheRegionFactory extends com.hazelcast.hibernate.H
         logger.info("Created factory with: {}", getHazelcastInstance());
     }
 
+
 }

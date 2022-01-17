@@ -15,7 +15,7 @@
 
 package org.rutebanken.tiamat.netex.id;
 
-import com.hazelcast.core.IQueue;
+import com.hazelcast.collection.IQueue;
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
@@ -126,7 +126,7 @@ public class GaplessIdGeneratorServiceTest extends TiamatIntegrationTest {
 
         assertThat(actual).as("generated id is last id plus one").isEqualTo(1L);
 
-        IQueue<Long> lastIds = generatedIdState.getQueueForEntity(testEntityName);
+        IQueue lastIds = generatedIdState.getQueueForEntity(testEntityName);
         assertThat(lastIds).as("Last ids for " + testEntityName + " is fetch size minus one used").hasSize(fetchSize - 1);
 
         long lastId = generatedIdState.getLastIdForEntity(testEntityName);
