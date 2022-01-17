@@ -37,14 +37,14 @@ resource "google_storage_bucket_object" "content_folder" {
 }
 # Create pubsub topic
 resource "google_pubsub_topic" "changelog" {
-  name   = "${var.labels.team}.${var.labels.app}.changelog-temp"
+  name   = "${var.labels.team}.${var.labels.app}.changelog"
   project = var.pubsub_project
   labels = var.labels
 }
 
 # Create pubsub subscription
 resource "google_pubsub_subscription" "changelog-subscription" {
-  name  = "${var.labels.team}.${var.labels.app}.changelog-temp"
+  name  = "${var.labels.team}.${var.labels.app}.changelog"
   topic = google_pubsub_topic.changelog.name
   project = var.pubsub_project
   labels = var.labels
