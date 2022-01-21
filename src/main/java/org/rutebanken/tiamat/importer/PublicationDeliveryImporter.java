@@ -15,8 +15,6 @@
 
 package org.rutebanken.tiamat.importer;
 
-import org.rutebanken.helper.organisation.NotAuthenticatedException;
-import org.rutebanken.helper.organisation.RoleAssignmentExtractor;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.netex.model.SiteFrame;
 import org.rutebanken.tiamat.exporter.PublicationDeliveryExporter;
@@ -40,7 +38,6 @@ import org.springframework.stereotype.Service;
 import java.util.Timer;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
 import static org.rutebanken.tiamat.netex.mapping.NetexMappingContextThreadLocal.updateMappingContext;
 
 @Service
@@ -59,7 +56,6 @@ public class PublicationDeliveryImporter {
     private final StopPlaceImportHandler stopPlaceImportHandler;
     private final ParkingsImportHandler parkingsImportHandler;
     private final TopographicPlaceImportHandler topographicPlaceImportHandler;
-    private final RoleAssignmentExtractor roleAssignmentExtractor;
     private final BackgroundJobs backgroundJobs;
 
     @Autowired
@@ -71,7 +67,6 @@ public class PublicationDeliveryImporter {
                                        GroupOfTariffZonesImportHandler groupOfTariffZonesImportHandler,
                                        StopPlaceImportHandler stopPlaceImportHandler,
                                        ParkingsImportHandler parkingsImportHandler,
-                                       RoleAssignmentExtractor roleAssignmentExtractor,
                                        BackgroundJobs backgroundJobs) {
         this.publicationDeliveryHelper = publicationDeliveryHelper;
         this.parkingsImportHandler = parkingsImportHandler;
@@ -81,7 +76,6 @@ public class PublicationDeliveryImporter {
         this.tariffZoneImportHandler = tariffZoneImportHandler;
         this.groupOfTariffZonesImportHandler = groupOfTariffZonesImportHandler;
         this.stopPlaceImportHandler = stopPlaceImportHandler;
-        this.roleAssignmentExtractor = roleAssignmentExtractor;
         this.backgroundJobs = backgroundJobs;
     }
 
@@ -92,12 +86,6 @@ public class PublicationDeliveryImporter {
 
     @SuppressWarnings("unchecked")
     public PublicationDeliveryStructure importPublicationDelivery(PublicationDeliveryStructure incomingPublicationDelivery, ImportParams importParams) {
-
-        if(roleAssignmentExtractor.getRoleAssignmentsForUser()
-                .stream()
-                .noneMatch(roleAssignment -> roleAssignment.r.equals(ROLE_EDIT_STOPS))) {
-            throw new NotAuthenticatedException("Role: '" + ROLE_EDIT_STOPS + "' required for import!");
-        }
 
         if (incomingPublicationDelivery.getDataObjects() == null) {
             String responseMessage = "Received publication delivery but it does not contain any data objects.";

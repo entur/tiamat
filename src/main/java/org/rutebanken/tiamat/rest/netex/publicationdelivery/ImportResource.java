@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 import org.xml.sax.SAXException;
 
@@ -42,6 +43,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Set;
 
+import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
+
 
 /**
  * Import publication deliveries
@@ -50,6 +53,7 @@ import java.util.Set;
 @Api(tags = {"Import resource"}, produces = "application/xml")
 @Produces(MediaType.APPLICATION_XML + "; charset=UTF-8")
 @Path("netex")
+@PreAuthorize("hasRole('"+ROLE_EDIT_STOPS+"')")
 public class ImportResource {
 
     private static final Logger logger = LoggerFactory.getLogger(ImportResource.class);
