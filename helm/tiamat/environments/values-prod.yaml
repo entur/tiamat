@@ -8,7 +8,6 @@ configMap:
   pubsubProjectId: entur-ror-prod
   pubsbuTopicName: ror.tiamat.changelog
   gcsBucketName: tiamat-production
-  keycloakUrl: https://auth.entur.org/auth
 
 auth0:
   ror:

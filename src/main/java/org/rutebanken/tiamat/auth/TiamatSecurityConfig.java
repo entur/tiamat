@@ -16,7 +16,7 @@
 package org.rutebanken.tiamat.auth;
 
 
-import org.entur.oauth2.MultiIssuerAuthenticationManagerResolver;
+import org.entur.oauth2.RorAuthenticationConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -42,12 +42,6 @@ public class TiamatSecurityConfig extends WebSecurityConfigurerAdapter {
 
 	private static final Logger logger = LoggerFactory.getLogger(TiamatSecurityConfig.class);
 
-	private final MultiIssuerAuthenticationManagerResolver multiIssuerAuthenticationManagerResolver;
-
-	public TiamatSecurityConfig(MultiIssuerAuthenticationManagerResolver multiIssuerAuthenticationManagerResolver) {
-		this.multiIssuerAuthenticationManagerResolver = multiIssuerAuthenticationManagerResolver;
-	}
-
 	@Bean
 	CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration configuration = new CorsConfiguration();
@@ -69,7 +63,7 @@ public class TiamatSecurityConfig extends WebSecurityConfigurerAdapter {
 				.authorizeRequests()
 				.anyRequest().permitAll()
 				.and()
-				.oauth2ResourceServer().authenticationManagerResolver(this.multiIssuerAuthenticationManagerResolver);
+				.oauth2ResourceServer().jwt().jwtAuthenticationConverter(new RorAuthenticationConverter());
 
 	}
 

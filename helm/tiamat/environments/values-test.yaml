@@ -8,7 +8,6 @@ configMap:
   pubsubProjectId: entur-ror-test
   pubsbuTopicName: ror.tiamat.changelog
   gcsBucketName: tiamat-test
-  keycloakUrl: https://kc-stage.devstage.entur.io/auth
 
 auth0:
   ror:

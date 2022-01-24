@@ -9,7 +9,6 @@ configMap:
   pubsubProjectId: entur-ror-dev
   pubsbuTopicName: ror.tiamat-nordic.changelog
   gcsBucketName: tiamat-nordic-dev
-  keycloakUrl: https://kc-dev.devstage.entur.io/auth
 
 auth0:
   ror:
