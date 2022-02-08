@@ -252,7 +252,7 @@ public class StreamingPublicationDelivery {
 
     private void prepareFareZones(ExportParams exportParams,Set<Long> stopPlacePrimaryIds, AtomicInteger mappedFareZonesCount, AtomicInteger mappedGroupOfTariffZonesCount, SiteFrame netexSiteFrame, org.rutebanken.netex.model.FareFrame netexFareFrame, EntitiesEvictor evictor) {
 
-        boolean exportGroupOfTariffZones =false;
+        boolean exportGroupOfTariffZones = false;
 
         Iterator<org.rutebanken.tiamat.model.FareZone> fareZoneIterator;
         if (exportParams.getFareZoneExportMode() == null || exportParams.getFareZoneExportMode().equals(ExportParams.ExportMode.ALL)) {
@@ -260,21 +260,27 @@ public class StreamingPublicationDelivery {
             fareZoneIterator = fareZoneRepository.scrollFareZones(exportParams);
             exportGroupOfTariffZones = true;
         } else if (exportParams.getFareZoneExportMode().equals(ExportParams.ExportMode.RELEVANT)) {
-            int fareZoneCount = fareZoneRepository.countResult(stopPlacePrimaryIds);
-            logger.info("Preparing to scroll {} relevant fare zones from stop place ids", fareZoneCount);
-            fareZoneIterator = fareZoneRepository.scrollFareZones(stopPlacePrimaryIds);
+            if (!stopPlacePrimaryIds.isEmpty()) {
+                int fareZoneCount = fareZoneRepository.countResult(stopPlacePrimaryIds);
+                logger.info("Preparing to scroll {} relevant fare zones from stop place ids", fareZoneCount);
+                fareZoneIterator = fareZoneRepository.scrollFareZones(stopPlacePrimaryIds);
 
-            exportGroupOfTariffZones = true;
+                exportGroupOfTariffZones = true;
+            } else {
+                logger.info("No stop places to export");
+                fareZoneIterator = Collections.emptyIterator();
+            }
         } else {
             logger.info("Fare zone export mode is {}. Will not export fare zones", exportParams.getFareZoneExportMode());
             fareZoneIterator = Collections.emptyIterator();
         }
-            var fareZonesInFrameRelStructure = new FareZonesInFrame_RelStructure();
-            List<FareZone> netexFareZone = new NetexMappingIteratorList<>(() -> new NetexMappingIterator<>(netexMapper, fareZoneIterator,
-                    FareZone.class, mappedFareZonesCount, evictor));
-
-            setField(FareZonesInFrame_RelStructure.class,"fareZone", fareZonesInFrameRelStructure, netexFareZone);
+        var fareZonesInFrameRelStructure = new FareZonesInFrame_RelStructure();
+        List<FareZone> netexFareZone = new NetexMappingIteratorList<>(() -> new NetexMappingIterator<>(netexMapper, fareZoneIterator,
+                FareZone.class, mappedFareZonesCount, evictor));
+        if (!netexFareZone.isEmpty()){
+            setField(FareZonesInFrame_RelStructure.class, "fareZone", fareZonesInFrameRelStructure, netexFareZone);
             netexFareFrame.setFareZones(fareZonesInFrameRelStructure);
+            }
 
         if (exportGroupOfTariffZones) {
             prepareGroupOfTariffZones(exportParams,stopPlacePrimaryIds,mappedGroupOfTariffZonesCount,netexSiteFrame,evictor);
