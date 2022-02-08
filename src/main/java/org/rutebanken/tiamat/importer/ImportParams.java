@@ -57,4 +57,8 @@ public class ImportParams {
     @ApiParam("Specify this to erase existing topographic places with matching id and topographic place type. Example: 'OSM;PLACE_OF_INTEREST'")
     @QueryParam(value = "eraseTopographicPlaceWithIdPrefixAndType")
     public String eraseTopographicPlaceWithIdPrefixAndType;
+
+    @ApiParam(value = "Import only tariff zones, fare zones and group of tariff zones, ignore rest e.g. stop places, topographic places etc")
+    @QueryParam(value = "importOnlyTariffZones")
+    public boolean importOnlyTariffZones = false;
 }

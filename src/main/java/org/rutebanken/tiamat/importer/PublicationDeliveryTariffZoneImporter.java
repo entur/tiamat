@@ -19,14 +19,7 @@ import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.netex.model.SiteFrame;
 import org.rutebanken.tiamat.exporter.PublicationDeliveryExporter;
 import org.rutebanken.tiamat.importer.handler.GroupOfTariffZonesImportHandler;
-import org.rutebanken.tiamat.importer.handler.ParkingsImportHandler;
-import org.rutebanken.tiamat.importer.handler.PathLinkImportHandler;
-import org.rutebanken.tiamat.importer.handler.StopPlaceImportHandler;
 import org.rutebanken.tiamat.importer.handler.TariffZoneImportHandler;
-import org.rutebanken.tiamat.importer.handler.TopographicPlaceImportHandler;
-import org.rutebanken.tiamat.importer.log.ImportLogger;
-import org.rutebanken.tiamat.importer.log.ImportLoggerTask;
-import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.netex.mapping.PublicationDeliveryHelper;
 import org.rutebanken.tiamat.service.batch.BackgroundJobs;
 import org.slf4j.Logger;
@@ -35,47 +28,34 @@ import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Timer;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.rutebanken.tiamat.netex.mapping.NetexMappingContextThreadLocal.updateMappingContext;
 
 @Service
-public class PublicationDeliveryImporter {
+public class PublicationDeliveryTariffZoneImporter {
 
-    private static final Logger logger = LoggerFactory.getLogger(PublicationDeliveryImporter.class);
+    private static final Logger logger = LoggerFactory.getLogger(PublicationDeliveryTariffZoneImporter.class);
 
     public static final String IMPORT_CORRELATION_ID = "importCorrelationId";
 
 
     private final PublicationDeliveryHelper publicationDeliveryHelper;
     private final PublicationDeliveryExporter publicationDeliveryExporter;
-    private final PathLinkImportHandler pathLinkImportHandler;
     private final TariffZoneImportHandler tariffZoneImportHandler;
     private final GroupOfTariffZonesImportHandler groupOfTariffZonesImportHandler;
-    private final StopPlaceImportHandler stopPlaceImportHandler;
-    private final ParkingsImportHandler parkingsImportHandler;
-    private final TopographicPlaceImportHandler topographicPlaceImportHandler;
     private final BackgroundJobs backgroundJobs;
 
     @Autowired
-    public PublicationDeliveryImporter(PublicationDeliveryHelper publicationDeliveryHelper, NetexMapper netexMapper,
-                                       PublicationDeliveryExporter publicationDeliveryExporter,
-                                       PathLinkImportHandler pathLinkImportHandler,
-                                       TopographicPlaceImportHandler topographicPlaceImportHandler,
-                                       TariffZoneImportHandler tariffZoneImportHandler,
-                                       GroupOfTariffZonesImportHandler groupOfTariffZonesImportHandler,
-                                       StopPlaceImportHandler stopPlaceImportHandler,
-                                       ParkingsImportHandler parkingsImportHandler,
-                                       BackgroundJobs backgroundJobs) {
+    public PublicationDeliveryTariffZoneImporter(PublicationDeliveryHelper publicationDeliveryHelper,
+                                                 PublicationDeliveryExporter publicationDeliveryExporter,
+                                                 TariffZoneImportHandler tariffZoneImportHandler,
+                                                 GroupOfTariffZonesImportHandler groupOfTariffZonesImportHandler,
+                                                 BackgroundJobs backgroundJobs) {
         this.publicationDeliveryHelper = publicationDeliveryHelper;
-        this.parkingsImportHandler = parkingsImportHandler;
         this.publicationDeliveryExporter = publicationDeliveryExporter;
-        this.pathLinkImportHandler = pathLinkImportHandler;
-        this.topographicPlaceImportHandler = topographicPlaceImportHandler;
         this.tariffZoneImportHandler = tariffZoneImportHandler;
         this.groupOfTariffZonesImportHandler = groupOfTariffZonesImportHandler;
-        this.stopPlaceImportHandler = stopPlaceImportHandler;
         this.backgroundJobs = backgroundJobs;
     }
 
@@ -103,11 +83,7 @@ public class PublicationDeliveryImporter {
                 incomingPublicationDelivery.getDataObjects().getCompositeFrameOrCommonFrame().size(),
                 incomingPublicationDelivery.getDescription());
 
-        AtomicInteger stopPlaceCounter = new AtomicInteger(0);
-        AtomicInteger parkingCounter = new AtomicInteger(0);
-        AtomicInteger topographicPlaceCounter = new AtomicInteger(0);
         AtomicInteger tariffZoneCounter = new AtomicInteger(0);
-        AtomicInteger pathLinkCounter = new AtomicInteger(0);
 
         // Currently only supporting one site frame per publication delivery
         SiteFrame netexSiteFrame = publicationDeliveryHelper.findSiteFrame(incomingPublicationDelivery);
@@ -115,8 +91,6 @@ public class PublicationDeliveryImporter {
         String requestId = netexSiteFrame.getId();
 
         updateMappingContext(netexSiteFrame);
-
-        Timer loggerTimer = new ImportLogger(new ImportLoggerTask(stopPlaceCounter, publicationDeliveryHelper.numberOfStops(netexSiteFrame), topographicPlaceCounter, netexSiteFrame.getId()));
 
         try {
             SiteFrame responseSiteFrame = new SiteFrame();
@@ -126,12 +100,8 @@ public class PublicationDeliveryImporter {
 
             responseSiteFrame.withId(requestId + "-response").withVersion("1");
 
-            topographicPlaceImportHandler.handleTopographicPlaces(netexSiteFrame, importParams, topographicPlaceCounter ,responseSiteFrame);
             tariffZoneImportHandler.handleTariffZones(netexSiteFrame, importParams, tariffZoneCounter, responseSiteFrame);
             groupOfTariffZonesImportHandler.handleGroupOfTariffZones(netexSiteFrame,importParams,responseSiteFrame);
-            stopPlaceImportHandler.handleStops(netexSiteFrame, importParams, stopPlaceCounter, responseSiteFrame);
-            parkingsImportHandler.handleParkings(netexSiteFrame, importParams, parkingCounter, responseSiteFrame);
-            pathLinkImportHandler.handlePathLinks(netexSiteFrame, importParams, pathLinkCounter, responseSiteFrame);
 
             if(responseSiteFrame.getTariffZones() != null || responseSiteFrame.getTopographicPlaces() != null) {
                 backgroundJobs.triggerStopPlaceUpdate();
@@ -139,7 +109,6 @@ public class PublicationDeliveryImporter {
             return publicationDeliveryExporter.createPublicationDelivery(responseSiteFrame);
         } finally {
             MDC.remove(IMPORT_CORRELATION_ID);
-            loggerTimer.cancel();
         }
     }
 

@@ -22,6 +22,7 @@ import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.tiamat.importer.ImportParams;
 import org.rutebanken.tiamat.importer.ImportType;
 import org.rutebanken.tiamat.importer.PublicationDeliveryImporter;
+import org.rutebanken.tiamat.importer.PublicationDeliveryTariffZoneImporter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,17 +65,21 @@ public class ImportResource {
 
     private final PublicationDeliveryImporter publicationDeliveryImporter;
 
+    private final PublicationDeliveryTariffZoneImporter publicationDeliveryTariffZoneImporter;
+
     private final Set<ImportType> enabledImportTypes;
 
     @Autowired
     public ImportResource(PublicationDeliveryUnmarshaller publicationDeliveryUnmarshaller,
                                  PublicationDeliveryStreamingOutput publicationDeliveryStreamingOutput,
                                  PublicationDeliveryImporter publicationDeliveryImporter,
+                                 PublicationDeliveryTariffZoneImporter publicationDeliveryTariffZoneImporter,
                                  @Value("#{'${netex.import.enabled.types:ID_MATCH}'.split(',')}") Set<ImportType> enabledImportTypes) {
 
         this.publicationDeliveryUnmarshaller = publicationDeliveryUnmarshaller;
         this.publicationDeliveryStreamingOutput = publicationDeliveryStreamingOutput;
         this.publicationDeliveryImporter = publicationDeliveryImporter;
+        this.publicationDeliveryTariffZoneImporter = publicationDeliveryTariffZoneImporter;
         this.enabledImportTypes = enabledImportTypes;
     }
 
@@ -88,6 +93,11 @@ public class ImportResource {
     public Response importPublicationDelivery(@ApiParam(hidden = true) InputStream inputStream, @BeanParam ImportParams importParams) throws IOException, JAXBException, SAXException {
         logger.info("Received Netex publication delivery, starting to parse...");
 
+        return importPublicationDelivery(inputStream, importParams,importParams.importOnlyTariffZones);
+    }
+
+
+    private Response importPublicationDelivery(InputStream inputStream, ImportParams importParams, boolean importOnlyTariffZones) throws JAXBException, IOException, SAXException {
         ImportType effectiveImportType = safeGetImportType(importParams);
         if (!enabledImportTypes.contains(effectiveImportType)) {
             String error = "ImportType: " + effectiveImportType + " not enabled!";
@@ -97,7 +107,12 @@ public class ImportResource {
 
         PublicationDeliveryStructure incomingPublicationDelivery = publicationDeliveryUnmarshaller.unmarshal(inputStream);
         try {
-            PublicationDeliveryStructure responsePublicationDelivery = publicationDeliveryImporter.importPublicationDelivery(incomingPublicationDelivery, importParams);
+            PublicationDeliveryStructure responsePublicationDelivery;
+            if(importOnlyTariffZones) {
+                responsePublicationDelivery = publicationDeliveryTariffZoneImporter.importPublicationDelivery(incomingPublicationDelivery,importParams);
+            } else {
+                responsePublicationDelivery = publicationDeliveryImporter.importPublicationDelivery(incomingPublicationDelivery, importParams);
+            }
             if (importParams != null && importParams.skipOutput) {
                 return Response.ok().build();
             } else {
