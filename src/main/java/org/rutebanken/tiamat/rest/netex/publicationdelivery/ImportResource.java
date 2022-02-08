@@ -92,8 +92,9 @@ public class ImportResource {
     @Produces(MediaType.APPLICATION_XML + "; charset=UTF-8")
     public Response importPublicationDelivery(@ApiParam(hidden = true) InputStream inputStream, @BeanParam ImportParams importParams) throws IOException, JAXBException, SAXException {
         logger.info("Received Netex publication delivery, starting to parse...");
+        boolean importOnlyTariffZones = importParams != null && importParams.importOnlyTariffZones;
 
-        return importPublicationDelivery(inputStream, importParams,importParams.importOnlyTariffZones);
+        return importPublicationDelivery(inputStream, importParams, importOnlyTariffZones);
     }
 
 
