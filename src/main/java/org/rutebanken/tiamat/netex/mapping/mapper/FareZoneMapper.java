@@ -72,7 +72,7 @@ public class FareZoneMapper extends CustomMapper<FareZone, org.rutebanken.tiamat
 
         if (!tiamatFareZone.getFareZoneMembers().isEmpty()) {
             List<JAXBElement<? extends PointRefStructure>> fareZoneMember = tiamatFareZone.getFareZoneMembers().stream()
-                    .map(members ->  convertStopPlaceRefToScheduledStopPointRef(members.getRef()))
+                    .map(members -> convertStopPlaceRefToScheduledStopPointRef(members.getRef()))
                     .filter(Objects::nonNull)
                     .map(spRef -> new ObjectFactory().createScheduledStopPointRef(new ScheduledStopPointRefStructure().withRef(spRef)))
                     .collect(Collectors.toList());
@@ -85,12 +85,12 @@ public class FareZoneMapper extends CustomMapper<FareZone, org.rutebanken.tiamat
 
     private String convertStopPlaceRefToScheduledStopPointRef(String netexId) {
         if (netexId != null) {
-        if(StringUtils.countMatches(netexId, ":") != 2) {
-            throw new IllegalArgumentException("Number of colons in ID is not two: " + netexId);
-        }
-        var idPrefix = netexId.substring(0, netexId.indexOf(':'));
-        var id= netexId.substring(netexId.lastIndexOf(':') + 1).trim();
-        return String.format("%s:ScheduledStopPoint:S%s", idPrefix, id);
+            if (StringUtils.countMatches(netexId, ":") != 2) {
+                throw new IllegalArgumentException("Number of colons in ID is not two: " + netexId);
+            }
+            var idPrefix = netexId.substring(0, netexId.indexOf(':'));
+            var id = netexId.substring(netexId.lastIndexOf(':') + 1).trim();
+            return String.format("%s:ScheduledStopPoint:S%s", idPrefix, id);
         }
 
         return null;
@@ -98,12 +98,17 @@ public class FareZoneMapper extends CustomMapper<FareZone, org.rutebanken.tiamat
 
     private String convertScheduledStopPointRefToStopPlaceRef(String netexId) {
         if (netexId != null) {
-            if(StringUtils.countMatches(netexId, ":") != 2) {
+            if (StringUtils.countMatches(netexId, ":") != 2) {
                 throw new IllegalArgumentException("Number of colons in ID is not two: " + netexId);
             }
-            var idPrefix = netexId.substring(0, netexId.indexOf(':'));
-            var id= netexId.substring(netexId.lastIndexOf(':') + 1).trim().substring(1);
-            return String.format("%s:StopPlace:%s", idPrefix, id);
+            var refType = netexId.substring(1, netexId.indexOf(':'));
+            if (Objects.equals(refType, "StopPlace")) {
+                return netexId;
+            } else if (Objects.equals(refType, "ScheduledStopPoint")) {
+                var idPrefix = netexId.substring(0, netexId.indexOf(':'));
+                var id = netexId.substring(netexId.lastIndexOf(':') + 1).trim().substring(1);
+                return String.format("%s:StopPlace:%s", idPrefix, id);
+            }
         }
         return null;
     }
