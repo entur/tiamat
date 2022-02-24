@@ -239,7 +239,36 @@ public class FareZoneRepositoryImpl implements FareZoneRepositoryCustom {
         return ((BigInteger) query.uniqueResult()).intValue();
     }
 
-    public int updateStopPlaceTariffZoneRef() {
+    public void updateStopPlaceTariffZoneRef() {
+        final Query explicitStopsQuery = entityManager.createNativeQuery(generateSqlQuery(true));
+        final Query implicitStopsQuery = entityManager.createNativeQuery(generateSqlQuery(false));
+
+        explicitStopsQuery.executeUpdate();
+        implicitStopsQuery.executeUpdate();
+    }
+
+    private String generateSqlQuery(boolean explicitStops) {
+        String subQuery;
+        if(explicitStops) {
+            subQuery = "       JOIN" +
+                    "                      FARE_ZONE_MEMBERS FZM " +
+                    "                                ON FZM.FARE_ZONE_ID = FZ.ID " +
+                    "                                JOIN" +
+                    "                                  STOP_PLACE SP " +
+                    "                                    ON SP.NETEX_ID = FZM.REF" +
+                    "                                    AND FZ.SCOPING_METHOD='EXPLICIT_STOPS'";
+        } else {
+            subQuery = "        JOIN" +
+                    "                     PERSISTABLE_POLYGON PP " +
+                    "                       ON PP.ID = FZ.POLYGON_ID " +
+                    "                        JOIN" +
+                    "                         STOP_PLACE SP " +
+                    "                           ON ST_CONTAINS(PP.POLYGON,SP.CENTROID) " +
+                    "                           AND FZ.SCOPING_METHOD='IMPLICIT_SPATIAL_PROJECTION' ";
+        }
+
+
+
         String sql= "INSERT " +
                 "    INTO" +
                 "        STOP_PLACE_TARIFF_ZONES" +
@@ -249,13 +278,7 @@ public class FareZoneRepositoryImpl implements FareZoneRepositoryCustom {
                 "            CAST(FZ.VERSION AS text)  " +
                 "        FROM" +
                 "            FARE_ZONE FZ " +
-                "        JOIN" +
-                "            PERSISTABLE_POLYGON PP " +
-                "                ON PP.ID = FZ.POLYGON_ID " +
-                "        JOIN" +
-                "            STOP_PLACE SP " +
-                "                ON ST_CONTAINS(PP.POLYGON," +
-                "            SP.CENTROID) " +
+                subQuery +
                 "            AND FZ.VERSION =  (SELECT" +
                 "                MAX(FZV.VERSION)   " +
                 "            FROM" +
@@ -292,8 +315,7 @@ public class FareZoneRepositoryImpl implements FareZoneRepositoryCustom {
                 "                )    " +
                 "            )";
 
-        final Query query = entityManager.createNativeQuery(sql);
-
-        return query.executeUpdate();
+        logger.debug(sql);
+        return sql;
     }
 }

@@ -41,5 +41,5 @@ public interface FareZoneRepositoryCustom extends DataManagedObjectStructureRepo
 
     public List<FareZone> findAllValidFareZones();
 
-    int updateStopPlaceTariffZoneRef();
+    void updateStopPlaceTariffZoneRef();
 }
