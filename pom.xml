@@ -57,7 +57,7 @@
     </scm>
 
     <properties>
-        <hazelcast.version>4.2.4</hazelcast.version>
+        <hazelcast.version>5.1</hazelcast.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring-cloud-gcp.version>1.2.5.RELEASE</spring-cloud-gcp.version>
         <maven.compiler.plugin.version>3.8.1</maven.compiler.plugin.version>
