@@ -1,14 +1,16 @@
 version: 2
 aliases:
-  - &GCP-auth
-    name: GCP Authenticate
+  - &google-sdk-container-config
+    docker:
+      - image: google/cloud-sdk:latest
+        auth:
+          username: $DOCKERHUB_LOGIN
+          password: $DOCKERHUB_PASSWORD
+  - &jfrog-login
+    name: Rename jfrog environment variable for maven setting.xml
     command: |
-      echo 'export GCLOUD_SERVICE_KEY="$GCLOUD_SERVICE_KEY"' >> $BASH_ENV
-      /tools/gcp_authenticate.sh
-  - &docker-login
-    name: Docker login
-    command: |
-      docker login -u _json_key --password-stdin https://eu.gcr.io <<< "${DOCKER_PASSWORD}"
+      echo "export JFROG_USER=$ARTIFACTORY_USER"  >> $BASH_ENV
+      echo "export JFROG_PASS=$ARTIFACTORY_PASSWORD"  >> $BASH_ENV
   - &tag-git-version
     name: Tag git commit with build version and push to github
     command: |
@@ -51,23 +53,22 @@ jobs:
   build:
     resource_class: large
     docker:
-      - image: eu.gcr.io/entur-system-1287/circleci-toolbox-image-java11
-        auth:
-          username: _json_key
-          password: $DOCKER_PASSWORD
+      - image: cimg/openjdk:11.0
     environment:
       MAVEN_OPTS: -Xmx5G
     steps:
       - checkout
       - restore_cache:
           key: dep-cache-{{ checksum "pom.xml" }}
-      - run: mvn org.apache.maven.plugins:maven-dependency-plugin:3.1.0:go-offline -s /tools/m2/settings.xml
+      - run: wget https://raw.githubusercontent.com/entur/circleci-toolbox-image-java11/master/tools/m2/settings.xml -O .circleci/settings.xml
+      - run: *jfrog-login
+      - run: mvn org.apache.maven.plugins:maven-dependency-plugin:3.1.0:go-offline -s .circleci/settings.xml
       - save_cache:
           paths:
             - ~/.m2
           key: dep-cache-{{ checksum "pom.xml" }}
       # Cannot use -o because of snapshot dependencies.
-      - run: mvn install -s /tools/m2/settings.xml
+      - run: mvn install -s .circleci/settings.xml
       - run: *sonar-scan
       - run:
           name: Save test results
@@ -89,20 +90,12 @@ jobs:
             - .circleci
             - ./version
   deploy-docker:
-    docker:
-      - image: eu.gcr.io/entur-system-1287/circleci-toolbox-image-java11
-        auth:
-          username: _json_key
-          password: $DOCKER_PASSWORD
-    environment:
-      DEBIAN_FRONTEND: "noninteractive"
+    <<: *google-sdk-container-config
     steps:
+      - setup_remote_docker:
+            version: 19.03.13
       - attach_workspace:
           at: ~/project
-      - setup_remote_docker:
-          docker_layer_caching: true
-      - run: *GCP-auth
-      - run: *docker-login
       - run: *read-image-version
       - run: *docker-build-and-push
 workflows:
@@ -110,7 +103,7 @@ workflows:
   build_test_deploy:
     jobs:
       - build:
-          context: org-carbon
+          context: global
       - deploy-docker:
           context: global
           requires:
