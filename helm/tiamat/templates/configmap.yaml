@@ -8,7 +8,6 @@ metadata:
 data:
   application.properties: |-
     server.port={{ .Values.service.http.internalPort }}
-    peliasReverseLookupEndpoint=http://pelias.default/v1/reverse
     nearbyStopsWithSameTypeFinder.limits={railStation:'200',airport:'3000'}
     tariffzoneLookupService.resetReferences=true
     publicationDeliveryStreamingOutput.validateAgainstSchema=true
