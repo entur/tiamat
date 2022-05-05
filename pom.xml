@@ -108,7 +108,7 @@
         <maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
         <maven-antrun-plugin.version>3.0.0</maven-antrun-plugin.version>
         <!--TODO temporary manual upgrade of Logback-->
-        <logback.version>1.2.8</logback.version>
+        <logback.version>1.2.9</logback.version>
     </properties>
 
     <!-- This repository list can be deleted, as it is now supplied by rutebanken nexus.
