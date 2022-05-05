@@ -43,6 +43,10 @@ data:
     graphql.query.max.depth =100
 
 
+    #flyway
+    spring.flyway.table =schema_version
+
+
 
     # Security config with auth0
 
