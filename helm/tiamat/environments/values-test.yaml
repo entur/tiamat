@@ -1,7 +1,7 @@
 replicas: 2
 
 sql:
-  instance: entur-ror-test:europe-west1:tiamat-db-1=tcp:5432
+  instance: entur-ror-test:europe-west1:tiamat-db=tcp:5432
 
 configMap:
   blobstoreProjectId: entur-ror-test
