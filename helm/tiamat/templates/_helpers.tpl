@@ -33,5 +33,6 @@ release: {{ .Values.deployment.name }}
 team: ror
 slack: talk-ror
 type: nsr
+environment: {{.Values.env }}
 namespace: {{ .Release.Namespace }}
 {{- end }}

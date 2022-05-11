@@ -1,3 +1,5 @@
+env: prod
+
 replicas: 2
 
 sql:

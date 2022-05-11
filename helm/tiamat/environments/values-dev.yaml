@@ -1,3 +1,4 @@
+env: dev
 sql:
   instance: entur-ror-dev:europe-west1:tiamat-db=tcp:5432
 

@@ -1,3 +1,5 @@
+env: test
+
 replicas: 2
 
 sql:
