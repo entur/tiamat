@@ -169,12 +169,7 @@ public class StopPlaceVersionedSaverService {
             logger.debug("About to terminate previous version for {},{}", existingVersion.getNetexId(), existingVersion.getVersion());
             StopPlace existingVersionRefetched = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(existingVersion.getNetexId());
             logger.debug("Found previous version {},{}. Terminating it.", existingVersionRefetched.getNetexId(), existingVersionRefetched.getVersion());
-            final Instant terminateAt = newVersionValidFrom.minusMillis(MILLIS_BETWEEN_VERSIONS);
-            validityUpdater.terminateVersion(existingVersionRefetched, terminateAt);
-            if(!existingVersionRefetched.getChildren().isEmpty()){
-                logger.debug("About to terminate previous version for child stops ");
-                terminateChildStops(existingVersionRefetched,terminateAt);
-            }
+            validityUpdater.terminateVersion(existingVersionRefetched, newVersionValidFrom.minusMillis(MILLIS_BETWEEN_VERSIONS));
             stopPlaceAuthorizationService.assertAuthorizedToEdit(existingVersionRefetched, newVersion, childStopsUpdated);
         }
 
@@ -222,14 +217,6 @@ public class StopPlaceVersionedSaverService {
         sendToJMS(newVersion);
 
         return newVersion;
-    }
-
-    private void terminateChildStops(StopPlace parentStopPlace, Instant terminateAt) {
-        parentStopPlace.getChildren().forEach(
-                child -> {
-                    validityUpdater.terminateVersion(child, terminateAt);
-                }
-        );
     }
 
     //This is to make sure entity is persisted before sending message
@@ -294,7 +281,7 @@ public class StopPlaceVersionedSaverService {
                 child.setName(null);
             }
 
-            //child.setValidBetween(null);
+            child.setValidBetween(null);
         });
     }
 
@@ -307,10 +294,7 @@ public class StopPlaceVersionedSaverService {
         long count = 0;
         if (parentStopPlace.getChildren() != null) {
             parentStopPlace.getChildren().stream()
-                    .forEach(child -> {
-                        child.setParentSiteRef(new SiteRefStructure(parentStopPlace.getNetexId(), String.valueOf(parentStopPlace.getVersion())));
-                        child.setValidBetween(parentStopPlace.getValidBetween());
-                    });
+                    .forEach(child -> child.setParentSiteRef(new SiteRefStructure(parentStopPlace.getNetexId(), String.valueOf(parentStopPlace.getVersion()))));
             count = parentStopPlace.getChildren().size();
         }
         logger.info("Updated {} childs with parent site refs", count);
