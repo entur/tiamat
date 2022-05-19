@@ -318,4 +318,14 @@ public class FareZoneRepositoryImpl implements FareZoneRepositoryCustom {
         logger.debug(sql);
         return sql;
     }
+
+    public List<String> findAllProviders() {
+
+        String sql = "SELECT DISTINCT SUBSTRING(netex_id,1,3) FROM fare_zone";
+        logger.info(sql);
+
+        Session session = entityManager.unwrap(Session.class);
+        NativeQuery query = session.createNativeQuery(sql);
+        return  query.getResultList();
+    }
 }
