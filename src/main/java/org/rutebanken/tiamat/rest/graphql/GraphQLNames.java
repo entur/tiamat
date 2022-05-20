@@ -225,6 +225,7 @@ public class GraphQLNames {
     public static final String PARKING_STAY_TYPE_ENUM = "ParkingStayType";
 
     public static final String ID = "id";
+    public static final String IDS = "ids";
     public static final String ID_ARG_DESCRIPTION = "IDs used to lookup StopPlace(s). When used - all other searchparameters are ignored.";
 
     public static final String STOP_PLACE_TYPE = "stopPlaceType";

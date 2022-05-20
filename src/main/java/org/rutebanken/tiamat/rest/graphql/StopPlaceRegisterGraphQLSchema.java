@@ -585,8 +585,8 @@ public class StopPlaceRegisterGraphQLSchema {
                 .type(GraphQLString)
                 .build());
         arguments.add(GraphQLArgument.newArgument()
-                .name(ID)
-                .type(GraphQLString)
+                .name(IDS)
+                .type(new GraphQLList(GraphQLString))
                 .build());
 
         arguments.add(GraphQLArgument.newArgument()
