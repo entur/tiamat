@@ -56,14 +56,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.FARE_ZONES_AUTHORITY_REF;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.FARE_ZONES_SCOPING_METHOD;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.FARE_ZONES_ZONE_TOPOLOGY;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ID;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.IDS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PAGE;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.QUERY;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.SIZE;
@@ -78,13 +76,10 @@ public class FareZonesFetcher implements DataFetcher {
     @Override
     @Transactional
     public Object get(DataFetchingEnvironment environment) {
-        String netexId = environment.getArgument(ID);
+        List<String> netexIds = environment.getArgument(IDS);
 
-        if (netexId != null) {
-            final Optional<FareZone> validFareZone = fareZoneRepository.findValidFareZone(netexId);
-            if (validFareZone.isPresent()) {
-                return Collections.singletonList(validFareZone.get());
-            }
+        if (!netexIds.isEmpty()) {
+            return fareZoneRepository.findValidFareZones(netexIds);
         }
 
         FareZoneSearch fareZoneSearch = FareZoneSearch.newFareZoneSearchBuilder()

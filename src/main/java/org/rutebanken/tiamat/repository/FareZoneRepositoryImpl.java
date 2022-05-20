@@ -42,6 +42,7 @@ import javax.persistence.Query;
 import java.math.BigInteger;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -76,6 +77,29 @@ public class FareZoneRepositoryImpl implements FareZoneRepositoryCustom {
         @SuppressWarnings("unchecked")
         List<FareZone> fareZones = nativeQuery.list();
         return fareZones;
+    }
+
+    @Override
+    public List<FareZone> findValidFareZones(List<String> netexIds) {
+        if (netexIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        Map<String, Object> parameters = new HashMap<>();
+        StringBuilder sql = new StringBuilder("SELECT fz.* FROM fare_zone fz WHERE " +
+                "fz.version = (SELECT MAX(fzv.version) FROM fare_zone fzv WHERE fzv.netex_id = fz.netex_id " +
+                "and (fzv.to_date is null or fzv.to_date > :pointInTime) and (fzv.from_date is null or fzv.from_date < :pointInTime))");
+        Instant pointInTime = Instant.now();
+        parameters.put("pointInTime", pointInTime);
+
+        sql.append("AND fz.netex_id in(:netexIds)");
+        parameters.put("netexIds", netexIds);
+
+
+        Query query = entityManager.createNativeQuery(sql.toString(), FareZone.class);
+        parameters.forEach(query::setParameter);
+
+        return query.getResultList();
     }
 
     @Override
