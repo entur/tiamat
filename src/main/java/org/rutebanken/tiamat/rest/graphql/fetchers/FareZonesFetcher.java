@@ -78,7 +78,7 @@ public class FareZonesFetcher implements DataFetcher {
     public Object get(DataFetchingEnvironment environment) {
         List<String> netexIds = environment.getArgument(IDS);
 
-        if (!netexIds.isEmpty()) {
+        if (netexIds != null) {
             return fareZoneRepository.findValidFareZones(netexIds);
         }
 
