@@ -32,7 +32,7 @@ import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.TariffZone;
 import org.rutebanken.tiamat.rest.graphql.fetchers.AuthorizationCheckDataFetcher;
-import org.rutebanken.tiamat.rest.graphql.fetchers.FareZoneProvidersFetcher;
+import org.rutebanken.tiamat.rest.graphql.fetchers.FareZoneAuthoritiesFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.TagFetcher;
 import org.rutebanken.tiamat.rest.graphql.operations.MultiModalityOperationsBuilder;
 import org.rutebanken.tiamat.rest.graphql.operations.ParkingOperationsBuilder;
@@ -223,7 +223,7 @@ public class StopPlaceRegisterGraphQLSchema {
     TransportModeScalar transportModeScalar;
 
     @Autowired
-    FareZoneProvidersFetcher fareZoneProvidersFetcher;
+    FareZoneAuthoritiesFetcher fareZoneAuthoritiesFetcher;
 
 
     @PostConstruct
@@ -401,10 +401,10 @@ public class StopPlaceRegisterGraphQLSchema {
                         .dataFetcher(fareZonesFetcher)
                         .build())
                 .field(newFieldDefinition()
-                        .name(FARE_ZONES_PROVIDERS)
+                        .name(FARE_ZONES_AUTHORITIES)
                         .type(new GraphQLList(GraphQLString))
-                        .description("List all farzone providers.")
-                        .dataFetcher(fareZoneProvidersFetcher)
+                        .description("List all fare zone authorities.")
+                        .dataFetcher(fareZoneAuthoritiesFetcher)
                         .build())
                 .build();
 
