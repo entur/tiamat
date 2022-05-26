@@ -343,9 +343,9 @@ public class FareZoneRepositoryImpl implements FareZoneRepositoryCustom {
         return sql;
     }
 
-    public List<String> findAllProviders() {
+    public List<String> findAllFareZoneAuthorities() {
 
-        String sql = "SELECT DISTINCT SUBSTRING(netex_id,1,3) FROM fare_zone";
+        String sql = "SELECT DISTINCT transport_organisation_ref FROM fare_zone";
         logger.info(sql);
 
         Session session = entityManager.unwrap(Session.class);

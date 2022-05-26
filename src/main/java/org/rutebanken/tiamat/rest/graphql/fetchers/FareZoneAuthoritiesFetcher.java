@@ -22,9 +22,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service("fareZoneProvidersFetcher")
+@Service("fareZoneAuthoritiesFetcher")
 @Transactional
-public class FareZoneProvidersFetcher implements DataFetcher {
+public class FareZoneAuthoritiesFetcher implements DataFetcher {
 
 
     @Autowired
@@ -33,7 +33,7 @@ public class FareZoneProvidersFetcher implements DataFetcher {
 
     @Override
     public Object get(DataFetchingEnvironment environment) {
-        return fareZoneRepository.findAllProviders();
+        return fareZoneRepository.findAllFareZoneAuthorities();
     }
 
 }
