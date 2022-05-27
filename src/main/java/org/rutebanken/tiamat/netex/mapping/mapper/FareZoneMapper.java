@@ -101,13 +101,12 @@ public class FareZoneMapper extends CustomMapper<FareZone, org.rutebanken.tiamat
             if (StringUtils.countMatches(netexId, ":") != 2) {
                 throw new IllegalArgumentException("Number of colons in ID is not two: " + netexId);
             }
-            var refType = netexId.substring(1, netexId.indexOf(':'));
+            var idParts= netexId.split(":");
+            var refType = idParts[1];
             if (Objects.equals(refType, "StopPlace")) {
                 return netexId;
             } else if (Objects.equals(refType, "ScheduledStopPoint")) {
-                var idPrefix = netexId.substring(0, netexId.indexOf(':'));
-                var id = netexId.substring(netexId.lastIndexOf(':') + 1).trim().substring(1);
-                return String.format("%s:StopPlace:%s", idPrefix, id);
+                return String.format("%s:StopPlace:%s", idParts[0], idParts[2]);
             }
         }
         return null;
