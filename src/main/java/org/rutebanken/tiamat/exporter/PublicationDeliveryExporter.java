@@ -28,6 +28,7 @@ import org.rutebanken.tiamat.service.stopplace.ParentStopPlacesFetcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,7 +36,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.StreamSupport;
 
 import static java.util.stream.Collectors.toSet;
@@ -52,8 +52,7 @@ import static java.util.stream.Collectors.toSet;
 public class PublicationDeliveryExporter {
 
     private static final Logger logger = LoggerFactory.getLogger(PublicationDeliveryExporter.class);
-    private static final AtomicLong publicationDeliveryId = new AtomicLong();
-
+    private final String publicationDeliveryId;
     private final StopPlaceRepository stopPlaceRepository;
     private final NetexMapper netexMapper;
     private final TiamatSiteFrameExporter tiamatSiteFrameExporter;
@@ -67,7 +66,8 @@ public class PublicationDeliveryExporter {
     public enum MultiModalFetchMode {CHILDREN, PARENTS}
 
     @Autowired
-    public PublicationDeliveryExporter(StopPlaceRepository stopPlaceRepository,
+    public PublicationDeliveryExporter(@Value("${netex.profile.version:1.12:NO-NeTEx-stops:1.4}") String publicationDeliveryId,
+                                       StopPlaceRepository stopPlaceRepository,
                                        NetexMapper netexMapper,
                                        TiamatSiteFrameExporter tiamatSiteFrameExporter,
                                        TiamatServiceFrameExporter tiamatServiceFrameExporter,
@@ -76,6 +76,7 @@ public class PublicationDeliveryExporter {
                                        ParentStopPlacesFetcher parentStopPlacesFetcher,
                                        ChildStopPlacesFetcher childStopPlacesFetcher,
                                        ValidPrefixList validPrefixList) {
+        this.publicationDeliveryId = publicationDeliveryId;
         this.stopPlaceRepository = stopPlaceRepository;
         this.netexMapper = netexMapper;
         this.tiamatSiteFrameExporter = tiamatSiteFrameExporter;
@@ -105,11 +106,10 @@ public class PublicationDeliveryExporter {
     }
 
     public PublicationDeliveryStructure createPublicationDelivery() {
-        PublicationDeliveryStructure publicationDeliveryStructure = new PublicationDeliveryStructure()
-                .withVersion(String.valueOf(publicationDeliveryId.incrementAndGet()))
+        return new PublicationDeliveryStructure()
+                .withVersion(publicationDeliveryId)
                 .withPublicationTimestamp(LocalDateTime.now())
                 .withParticipantRef(validPrefixList.getValidNetexPrefix());
-        return publicationDeliveryStructure;
     }
 
     @SuppressWarnings("unchecked")

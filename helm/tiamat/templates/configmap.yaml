@@ -16,6 +16,7 @@ data:
     changelog.publish.enabled=true
     spring.activemq.broker-url=tcp://activemq.default:61616?jms.redeliveryPolicy.maximumRedeliveries=0
     netex.id.valid.prefix.list={TopographicPlace:{'KVE','WOF','OSM','ENT','LAN'},TariffZone:{'*'},FareZone:{'*'},GroupOfTariffZones:{'*'}}
+    netex.profile.version=1.12:NO-NeTEx-stops:1.4
 
     # GCS properties
     blobstore.gcs.bucket.name={{.Values.configMap.gcsBucketName}}
