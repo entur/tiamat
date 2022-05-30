@@ -69,7 +69,7 @@ jobs:
             - ~/.m2
           key: dep-cache-{{ checksum "pom.xml" }}
       # Cannot use -o because of snapshot dependencies.
-      - run: mvn install -s .circleci/settings.xml
+      - run: mvn verify -s .circleci/settings.xml
       - run: *sonar-scan
       - run:
           name: Save test results
