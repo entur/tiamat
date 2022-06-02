@@ -179,7 +179,7 @@ public class ImportResourceTest extends TiamatIntegrationTest {
         List<StopPlace> result = publicationDeliveryTestHelper.extractStopPlaces(response);
 
         assertThat(result).hasSize(1);
-        assertThat(result.get(0).getStopPlaceType().equals(StopTypeEnumeration.METRO_STATION));
+        assertThat(result.get(0).getStopPlaceType()).isEqualTo(StopTypeEnumeration.METRO_STATION);
     }
 
     @Test
@@ -392,7 +392,7 @@ public class ImportResourceTest extends TiamatIntegrationTest {
 
         StopPlace actualStopPlace = publicationDeliveryTestHelper.findFirstStopPlace(firstResponse);
 
-        assertThat(actualStopPlace.getQuays()).isNotNull().as("quays should not be null");
+        assertThat(actualStopPlace.getQuays()).as("quays should not be null").isNotNull();
 
         Quay quay = actualStopPlace.getQuays()
                 .getQuayRefOrQuay().stream()
@@ -452,7 +452,7 @@ public class ImportResourceTest extends TiamatIntegrationTest {
 
         StopPlace actualStopPlace = publicationDeliveryTestHelper.findFirstStopPlace(mergeResponse);
 
-        assertThat(actualStopPlace.getQuays()).isNotNull().as("quays should not be null");
+        assertThat(actualStopPlace.getQuays()).as("quays should not be null").isNotNull();
 
         List<Quay> quays = publicationDeliveryTestHelper.extractQuays(actualStopPlace);
 
@@ -611,7 +611,7 @@ public class ImportResourceTest extends TiamatIntegrationTest {
         StopPlace actualStopPlace = publicationDeliveryTestHelper.findFirstStopPlace(response);
 
         List<Quay> actualQuays = publicationDeliveryTestHelper.extractQuays(actualStopPlace);
-        assertThat(actualQuays).isNotNull().as("quays should not be null");
+        assertThat(actualQuays).as("quays should not be null").isNotNull();
     }
 
     @Test
@@ -767,8 +767,9 @@ public class ImportResourceTest extends TiamatIntegrationTest {
         PublicationDeliveryStructure secondResponse = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(secondPublicationDelivery);
 
         StopPlace secondStopPlaceReturned = publicationDeliveryTestHelper.findFirstStopPlace(secondResponse);
-        assertThat(secondStopPlaceReturned.getId()).isEqualTo(firstStopPlaceReturned.getId())
-                .as("Expecting IDs to be the same, because the chouette ID is the same");
+        assertThat(secondStopPlaceReturned.getId())
+                .as("Expecting IDs to be the same, because the chouette ID is the same")
+                .isEqualTo(firstStopPlaceReturned.getId());
 
     }
 
@@ -804,10 +805,10 @@ public class ImportResourceTest extends TiamatIntegrationTest {
         Quay quay = actualStopPlace.getQuays()
                 .getQuayRefOrQuay()
                 .stream()
-                .peek(object -> System.out.println(object))
+                .peek(System.out::println)
                 .filter(object -> object instanceof Quay)
                 .map(object -> ((Quay) object))
-                .peek(q -> System.out.println(q))
+                .peek(System.out::println)
                 .findFirst().get();
 
         publicationDeliveryTestHelper.hasOriginalId(originalQuayId, quay);
