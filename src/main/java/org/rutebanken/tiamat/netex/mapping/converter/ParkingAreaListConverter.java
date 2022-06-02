@@ -38,33 +38,28 @@ public class ParkingAreaListConverter extends BidirectionalConverter<List<Parkin
             return null;
         }
 
-
-        ParkingAreas_RelStructure parkingAreas_relStructure = new ParkingAreas_RelStructure();
+        ParkingAreas_RelStructure parkingAreasRelStructure = new ParkingAreas_RelStructure();
 
         logger.debug("Mapping {} parkingAreas to netex", parkingAreas.size());
 
         parkingAreas.forEach(parkingArea -> {
             org.rutebanken.netex.model.ParkingArea netexParkingArea = mapperFacade.map(parkingArea, org.rutebanken.netex.model.ParkingArea.class);
-            parkingAreas_relStructure.getParkingAreaRefOrParkingArea().add(netexParkingArea);
+            parkingAreasRelStructure.getParkingAreaRefOrParkingArea().add(netexParkingArea);
         });
-        return parkingAreas_relStructure;
+        return parkingAreasRelStructure;
     }
 
     @Override
-    public List<ParkingArea> convertFrom(ParkingAreas_RelStructure parkingAreas_relStructure, Type<List<ParkingArea>> destinationType, MappingContext mappingContext) {
-        logger.debug("Mapping {} quays to internal model", parkingAreas_relStructure != null ? parkingAreas_relStructure.getParkingAreaRefOrParkingArea().size() : 0);
+    public List<ParkingArea> convertFrom(ParkingAreas_RelStructure parkingAreasRelStructure, Type<List<ParkingArea>> destinationType, MappingContext mappingContext) {
+        logger.debug("Mapping {} quays to internal model", parkingAreasRelStructure != null ? parkingAreasRelStructure.getParkingAreaRefOrParkingArea().size() : 0);
         List<ParkingArea> parkingAreas = new ArrayList<>();
-        if(parkingAreas_relStructure.getParkingAreaRefOrParkingArea() != null) {
-            parkingAreas_relStructure.getParkingAreaRefOrParkingArea().stream()
+        if(parkingAreasRelStructure != null && parkingAreasRelStructure.getParkingAreaRefOrParkingArea() != null) {
+            parkingAreasRelStructure.getParkingAreaRefOrParkingArea().stream()
                     .filter(object -> object instanceof org.rutebanken.netex.model.ParkingArea)
                     .map(object -> ((org.rutebanken.netex.model.ParkingArea) object))
-                    .map(netexParkingArea -> {
-                        ParkingArea tiamatQuay = mapperFacade.map(netexParkingArea, ParkingArea.class);
-                        return tiamatQuay;
-                    })
-                    .forEach(parkingArea -> parkingAreas.add(parkingArea));
+                    .map(netexParkingArea ->  mapperFacade.map(netexParkingArea, ParkingArea.class))
+                    .forEach(parkingAreas::add);
         }
-
         return parkingAreas;
     }
 }
