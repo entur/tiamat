@@ -25,7 +25,6 @@ public class ChildFromParentResolver {
         return parentStopPlace.getChildren()
                 .stream()
                 .filter(child -> child.getNetexId().equals(childNetexId) && (childVersion == 0 || child.getVersion() == childVersion))
-                .findFirst()
-                .get();
+                .findFirst().orElse(null);
     }
 }
