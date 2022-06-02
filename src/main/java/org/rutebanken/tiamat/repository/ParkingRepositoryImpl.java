@@ -105,12 +105,6 @@ public class ParkingRepositoryImpl implements ParkingRepositoryCustom {
     }
 
     @Override
-    public Iterator<Parking> scrollParkings() {
-
-        return scrollParkings();
-    }
-
-    @Override
     public Iterator<Parking> scrollParkings(ParkingSearch parkingSearch) {
         return scrollParkings(parkingQueryFromSearchBuilder.buildQueryFromSearch(parkingSearch));
     }

@@ -36,7 +36,6 @@ public interface ParkingRepositoryCustom extends DataManagedObjectStructureRepos
 
     String findNearbyParking(Envelope boundingBox, String value, ParkingTypeEnumeration parkingType);
 
-    Iterator<Parking> scrollParkings();
 
     Iterator<Parking> scrollParkings(ParkingSearch parkingSearch);
 
