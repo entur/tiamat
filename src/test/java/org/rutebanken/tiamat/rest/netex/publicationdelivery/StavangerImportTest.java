@@ -72,7 +72,7 @@ public class StavangerImportTest  extends TiamatIntegrationTest {
         assertThat(actualStopPlace.getName().getValue()).isEqualTo("Stavanger");
 
         List<Quay> actualQuays = publicationDeliveryTestHelper.extractQuays(actualStopPlace);
-        assertThat(actualQuays).isNotNull().as("quays should not be null");
+        assertThat(actualQuays).as("quays should not be null").isNotNull();
         assertThat(actualQuays.get(0).getPublicCode()).describedAs("Quay name should not be null").isNotNull();
         assertThat(actualQuays.get(0).getPublicCode()).isEqualTo("12");
     }
@@ -109,7 +109,7 @@ public class StavangerImportTest  extends TiamatIntegrationTest {
         assertThat(actualStopPlace.getName().getValue()).describedAs("Stop place name").isEqualTo("Stavanger");
 
         List<Quay> actualQuays = publicationDeliveryTestHelper.extractQuays(actualStopPlace);
-        assertThat(actualQuays).isNotNull().as("quays should not be null");
+        assertThat(actualQuays).as("quays should not be null").isNotNull();
         assertThat(actualQuays.get(0).getPublicCode()).describedAs("Quay name should not be null").isNotNull();
         assertThat(actualQuays.get(0).getPublicCode()).isEqualTo("2");
     }
