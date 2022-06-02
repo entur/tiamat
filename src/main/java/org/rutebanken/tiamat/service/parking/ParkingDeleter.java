@@ -81,6 +81,7 @@ public class ParkingDeleter {
         this.referenceResolver = referenceResolver;
     }
 
+    @Transactional
     public boolean deleteParking(String parkingId) {
 
         String usernameForAuthenticatedUser = usernameFetcher.getUserNameForAuthenticatedUser();
