@@ -40,7 +40,7 @@ public class QuayListConverter extends BidirectionalConverter<Set<Quay>, Quays_R
 
         Quays_RelStructure quays_relStructure = new Quays_RelStructure();
 
-        logger.debug("Mapping {} quays to netex", quays != null ? quays.size() : 0);
+        logger.debug("Mapping {} quays to netex", quays.size());
 
         quays.forEach(quay -> {
             org.rutebanken.netex.model.Quay netexQuay = mapperFacade.map(quay, org.rutebanken.netex.model.Quay.class);
@@ -53,7 +53,7 @@ public class QuayListConverter extends BidirectionalConverter<Set<Quay>, Quays_R
     public Set<Quay> convertFrom(Quays_RelStructure quays_relStructure, Type<Set<Quay>> type, MappingContext mappingContext) {
         logger.debug("Mapping {} quays to internal model", quays_relStructure != null ? quays_relStructure.getQuayRefOrQuay().size() : 0);
         Set<Quay> quays = new HashSet<>();
-        if(quays_relStructure.getQuayRefOrQuay() != null) {
+        if(quays_relStructure != null && quays_relStructure.getQuayRefOrQuay() != null) {
             quays_relStructure.getQuayRefOrQuay().stream()
                     .filter(object -> object instanceof org.rutebanken.netex.model.Quay)
                     .map(object -> ((org.rutebanken.netex.model.Quay) object))
