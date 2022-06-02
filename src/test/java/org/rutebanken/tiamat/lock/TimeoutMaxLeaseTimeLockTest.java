@@ -67,12 +67,11 @@ public class TimeoutMaxLeaseTimeLockTest extends TiamatIntegrationTest {
         long waited = gotLock - started;
         Assertions.assertThat(waited)
                 .as("waited ms")
-                .isGreaterThanOrEqualTo(sleep)
-                .as("ms thread slept within lock");
+                .isGreaterThanOrEqualTo(sleep);
     }
 
     @Test(expected = LockException.class)
-    public void testWaitingForLocktTimeout() throws InterruptedException {
+    public void testWaitingForLockTimeout() throws InterruptedException {
 
         int waitTimeoutSeconds = 1;
         TimeoutMaxLeaseTimeLock timeoutMaxLeaseTimeLock = new TimeoutMaxLeaseTimeLock(hazelcastInstance);
