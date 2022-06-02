@@ -200,7 +200,7 @@ public class GaplessIdGeneratorServiceTest extends TiamatIntegrationTest {
         for (long excpectedId : claimedIds) {
             long actual = selectSingleInsertedId(entityName, excpectedId);
 
-            assertThat(actual).as("Claimed ID found in the ID generator table+").isEqualTo(20L);
+            assertThat(actual).as("Claimed ID found in the ID generator table+").isEqualTo(excpectedId);
         }
 
         assertThat(generatedIdState.getClaimedIdListForEntity(entityName)).as("claimed ids for entity after writing").doesNotContainAnyElementsOf(claimedIds);
