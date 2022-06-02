@@ -83,8 +83,8 @@ public class ParkingFromOriginalIdFinder implements ParkingFinder {
     private Parking findByKeyValue(Set<String> originalIds) {
         for(String originalId : originalIds) {
             String cacheKey = keyValKey(ORIGINAL_ID_KEY, originalId);
-            Optional<String> matchingParkingNetexId = keyValueCache.getIfPresent(cacheKey);
-            if(matchingParkingNetexId != null && matchingParkingNetexId.isPresent()) {
+            Optional<String> matchingParkingNetexId = keyValueCache.asMap().getOrDefault(cacheKey,Optional.empty());
+            if(matchingParkingNetexId.isPresent()) {
                 logger.debug("Cache match. Key {}, parking id: {}", cacheKey, matchingParkingNetexId.get());
                 return parkingRepository.findFirstByNetexIdOrderByVersionDesc(matchingParkingNetexId.get());
             }
