@@ -50,8 +50,6 @@ import graphql.schema.DataFetchingEnvironment;
 import org.rutebanken.tiamat.exporter.params.TariffZoneSearch;
 import org.rutebanken.tiamat.model.TariffZone;
 import org.rutebanken.tiamat.repository.TariffZoneRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -61,6 +59,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.IDS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PAGE;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.QUERY;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.SIZE;
@@ -69,8 +68,6 @@ import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.SIZE;
 @Transactional
 public class TariffZonesFetcher implements DataFetcher<Page<TariffZone>> {
 
-    private static final Logger logger = LoggerFactory.getLogger(TariffZonesFetcher.class);
-
     @Autowired
     private TariffZoneRepository tariffZoneRepository;
 
@@ -78,11 +75,18 @@ public class TariffZonesFetcher implements DataFetcher<Page<TariffZone>> {
     @Transactional
     public Page<TariffZone> get(DataFetchingEnvironment environment) {
 
-        TariffZoneSearch tariffZoneSearch = TariffZoneSearch.newTariffZoneSearchBuilder()
-                .query(environment.getArgument(QUERY))
-                .build();
+        List<String> netexIds = environment.getArgument(IDS);
 
-        List<TariffZone> tariffZones = tariffZoneRepository.findTariffZones(tariffZoneSearch);
+        List<TariffZone> tariffZones;
+        if (netexIds != null) {
+            tariffZones = tariffZoneRepository.findValidTariffZones(netexIds);
+        } else {
+            TariffZoneSearch tariffZoneSearch = TariffZoneSearch.newTariffZoneSearchBuilder()
+                    .query(environment.getArgument(QUERY))
+                    .build();
+            tariffZones = tariffZoneRepository.findTariffZones(tariffZoneSearch);
+        }
+
         return new PageImpl<>(tariffZones, PageRequest.of(environment.getArgument(PAGE), environment.getArgument(SIZE)), tariffZones.size());
     }
 }

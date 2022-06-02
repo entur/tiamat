@@ -116,6 +116,33 @@ public class TariffZoneRepositoryImplTest extends TiamatIntegrationTest {
     }
 
     @Test
+    public void indTariffZonesByNetexIds() {
+        TariffZone tariffZone2V = new TariffZone();
+        tariffZone2V.setName(new EmbeddableMultilingualString("2V"));
+        tariffZone2V.setNetexId("RUT:TariffZone:2V");
+
+        TariffZone tariffZone2S = new TariffZone();
+        tariffZone2S.setName(new EmbeddableMultilingualString("2S"));
+        tariffZone2S.setNetexId("RUT:TariffZone:2S");
+
+        TariffZone tariffZone412 = new TariffZone();
+        tariffZone412.setNetexId("BRA:TariffZone:412");
+        tariffZone412.setName(new EmbeddableMultilingualString("Kongsberg"));
+
+        tariffZoneRepository.save(tariffZone2V);
+        tariffZoneRepository.save(tariffZone2S);
+        tariffZoneRepository.save(tariffZone412);
+
+        final List<String> netexIds = List.of("RUT:TariffZone:2V", "RUT:TariffZone:2S");
+        final List<TariffZone> validTariffZones = tariffZoneRepository.findValidTariffZones(netexIds);
+
+        assertThat(validTariffZones)
+                .hasSize(2)
+                .extracting(TariffZone::getNetexId)
+                .containsAll(netexIds);
+    }
+
+    @Test
     public void findTariffZonesByIdPrefix() throws Exception {
 
         TariffZone tariffZone2V = new TariffZone();

@@ -39,5 +39,7 @@ public interface TariffZoneRepositoryCustom extends DataManagedObjectStructureRe
 
     List<TariffZone> findAllValidTariffZones();
 
+    List<TariffZone> findValidTariffZones(List<String> netexIds);
+
     int updateStopPlaceTariffZoneRef();
 }

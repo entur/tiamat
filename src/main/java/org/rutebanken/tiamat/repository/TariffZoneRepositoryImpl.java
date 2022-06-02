@@ -41,6 +41,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -75,6 +76,29 @@ public class TariffZoneRepositoryImpl implements TariffZoneRepositoryCustom {
         @SuppressWarnings("unchecked")
         List<TariffZone> tariffZones = nativeQuery.list();
         return tariffZones;
+    }
+
+    @Override
+    public List<TariffZone> findValidTariffZones(List<String> netexIds) {
+        if (netexIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        Map<String, Object> parameters = new HashMap<>();
+        StringBuilder sql = new StringBuilder("SELECT tz.* FROM tariff_zone tz WHERE " +
+                "tz.version = (SELECT MAX(tzv.version) FROM tariff_zone tzv WHERE tzv.netex_id = tz.netex_id " +
+                "and (tzv.to_date is null or tzv.to_date > :pointInTime) and (tzv.from_date is null or tzv.from_date < :pointInTime))");
+        Instant pointInTime = Instant.now();
+        parameters.put("pointInTime", pointInTime);
+
+        sql.append("AND tz.netex_id in(:netexIds)");
+        parameters.put("netexIds", netexIds);
+
+
+        Query query = entityManager.createNativeQuery(sql.toString(), TariffZone.class);
+        parameters.forEach(query::setParameter);
+
+        return query.getResultList();
     }
 
     @Override
