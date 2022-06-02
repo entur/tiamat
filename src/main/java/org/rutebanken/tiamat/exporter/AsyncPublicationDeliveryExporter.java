@@ -53,7 +53,7 @@ public class AsyncPublicationDeliveryExporter {
     private static final ExecutorService exportService = Executors.newFixedThreadPool(3, new ThreadFactoryBuilder()
             .setNameFormat("exporter-%d").build());
 
-    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("YYYYMMdd-HHmmss");
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss");
 
     private final ExportJobRepository exportJobRepository;
 
@@ -81,12 +81,12 @@ public class AsyncPublicationDeliveryExporter {
         this.localExportPath = localExportPath;
 
         File exportFolder = new File(localExportPath);
-        if(!exportFolder.exists() && !exportFolder.mkdirs()) {
-            throw new RuntimeException("Cannot find or create export directory from path: " + localExportPath +
+        if (!exportFolder.exists() && !exportFolder.mkdirs()) {
+            throw new TiamatPublicationDeliveryExportException("Cannot find or create export directory from path: " + localExportPath +
                     ". Please create the directory with correct permissions, or configure a different path with the property async.export.path");
         }
-        if(!exportFolder.canWrite()) {
-            throw new RuntimeException("Cannot write to path: " + localExportPath +
+        if (!exportFolder.canWrite()) {
+            throw new TiamatPublicationDeliveryExportException("Cannot write to path: " + localExportPath +
                     ". Please create the directory with correct permissions, or configure a different path with the property async.export.path");
         }
         logger.info("Verified local export path {}", localExportPath);
@@ -94,6 +94,7 @@ public class AsyncPublicationDeliveryExporter {
 
     /**
      * Start export job with upload to google cloud storage
+     *
      * @param exportParams search params for stops
      * @return export job with information about the started process
      */
@@ -105,27 +106,24 @@ public class AsyncPublicationDeliveryExporter {
         exportJob.setSubFolder(generateSubFolderName());
 
         exportJobRepository.save(exportJob);
-        String fileNameWithoutExtention = createFileNameWithoutExtention(exportJob.getId(), exportJob.getStarted());
-        exportJob.setFileName(fileNameWithoutExtention + ".zip");
+        String fileNameWithoutExtension = createFileNameWithoutExtension(exportJob.getId(), exportJob.getStarted());
+        exportJob.setFileName(fileNameWithoutExtension + ".zip");
 
-        ExportJobWorker exportJobWorker = new ExportJobWorker(exportJob, streamingPublicationDelivery, localExportPath, fileNameWithoutExtention, blobStoreService, exportJobRepository, netexXmlReferenceValidator);
+        ExportJobWorker exportJobWorker = new ExportJobWorker(exportJob, streamingPublicationDelivery, localExportPath, fileNameWithoutExtension, blobStoreService, exportJobRepository, netexXmlReferenceValidator);
         exportService.submit(exportJobWorker);
         logger.info("Returning started export job {}", exportJob);
         setJobUrl(exportJob);
         return exportJob;
     }
 
-    public String createFileNameWithoutExtention(long exportJobId, Instant started) {
-        return "tiamat-export-" + started.atZone(exportTimeZone.getDefaultTimeZoneId()).format(DATE_TIME_FORMATTER) + "-" +exportJobId;
+    public String createFileNameWithoutExtension(long exportJobId, Instant started) {
+        return "tiamat-export-" + started.atZone(exportTimeZone.getDefaultTimeZoneId()).format(DATE_TIME_FORMATTER) + "-" + exportJobId;
     }
 
     public ExportJob getExportJob(long exportJobId) {
 
         Optional<ExportJob> exportJob = exportJobRepository.findById(exportJobId);
-        if(exportJob.isPresent()) {
-            return setJobUrl(exportJob.get());
-        }
-        return null;
+        return exportJob.map(this::setJobUrl).orElse(null);
     }
 
     public InputStream getJobFileContent(ExportJob exportJob) {
@@ -147,7 +145,6 @@ public class AsyncPublicationDeliveryExporter {
 
     private String generateSubFolderName() {
         LocalDateTime localDateTime = LocalDateTime.ofInstant(Instant.now(), ZoneId.systemDefault());
-        String gcpSubfolder = localDateTime.getYear() + "-" + String.format("%02d", localDateTime.getMonthValue());
-        return gcpSubfolder;
+        return localDateTime.getYear() + "-" + String.format("%02d", localDateTime.getMonthValue());
     }
 }
