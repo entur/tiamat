@@ -102,7 +102,7 @@ public class OsloBussterminalImportTest extends TiamatIntegrationTest {
         assertThat(actualStopPlace.getName().getValue()).isEqualTo("Oslo Bussterminal");
 
         List<Quay> actualQuays = publicationDeliveryTestHelper.extractQuays(actualStopPlace);
-        assertThat(actualQuays).isNotNull().as("quays should not be null");
+        assertThat(actualQuays).as("quays should not be null").isNotNull();
 
         assertThat(actualQuays.stream()
                 .filter(quay -> quay.getPublicCode() != null)
