@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import javax.sql.DataSource;
 import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -45,23 +46,6 @@ public class H2Functions implements InitializingBean {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
-
-        try(Connection connection = jdbcTemplate.getDataSource().getConnection()) {
-            if (connection.getMetaData().getDatabaseProductName().contains("H2")) {
-                logger.info("H2 detected. Creating alias to method similarityOveridden.");
-                jdbcTemplate.execute("CREATE ALIAS IF NOT EXISTS similarity FOR \"org.rutebanken.tiamat.config.H2Functions.similarity\"");
-
-                    logger.info("H2. Creating alias to method generate_series");
-                    jdbcTemplate.execute("CREATE ALIAS IF NOT EXISTS generate_series FOR \"org.rutebanken.tiamat.config.H2Functions.generateSeries\"");
-                }
-        } catch (SQLException sqlException) {
-            logger.warn("Cannot create h2 aliases", sqlException);
-
-        }
-    }
-
     /**
      * @param value from 0 to 1
      */
@@ -72,6 +56,7 @@ public class H2Functions implements InitializingBean {
     /**
      * Function for mimicking postgres similarity by using levenshtein distanc.
      * The return value can be overridden by calling ${setSimilarityOveridden}
+     *
      * @param value1
      * @param value2
      * @return similarity calculated from levenshteinDistance or overridden value
@@ -79,13 +64,13 @@ public class H2Functions implements InitializingBean {
     public static double similarity(String value1, String value2) {
 
         double similarityToReturn;
-        if(similarityOveridden != 1) {
+        if (similarityOveridden != 1) {
             similarityToReturn = similarityOveridden;
             similarityOveridden = 1;
         } else {
             int distance = StringUtils.getLevenshteinDistance(value1, value2);
             logger.info("Calculated levenshteinDistance {}", distance);
-            similarityToReturn = 1 -((double) distance) / (Math.max(value1.length(), value2.length()));
+            similarityToReturn = 1 - ((double) distance) / (Math.max(value1.length(), value2.length()));
         }
 
         logger.info("Return similarity {}", similarityToReturn);
@@ -96,5 +81,25 @@ public class H2Functions implements InitializingBean {
         Set<BigInteger> rangeSet = ContiguousSet.create(Range.closed(start, stop), DiscreteDomain.bigIntegers());
         logger.info("Generated range set: {}", rangeSet);
         return rangeSet;
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+
+        final DataSource dataSource = jdbcTemplate.getDataSource();
+        if (dataSource != null) {
+            try (Connection connection = dataSource.getConnection()) {
+                if (connection.getMetaData().getDatabaseProductName().contains("H2")) {
+                    logger.info("H2 detected. Creating alias to method similarityOveridden.");
+                    jdbcTemplate.execute("CREATE ALIAS IF NOT EXISTS similarity FOR \"org.rutebanken.tiamat.config.H2Functions.similarity\"");
+
+                    logger.info("H2. Creating alias to method generate_series");
+                    jdbcTemplate.execute("CREATE ALIAS IF NOT EXISTS generate_series FOR \"org.rutebanken.tiamat.config.H2Functions.generateSeries\"");
+                }
+            } catch (SQLException sqlException) {
+                logger.warn("Cannot create h2 aliases", sqlException);
+
+            }
+        }
     }
 }
