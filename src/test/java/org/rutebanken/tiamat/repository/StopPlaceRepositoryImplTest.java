@@ -263,7 +263,7 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
 
         Page<StopPlace> result = stopPlaceRepository.findStopPlacesWithin(southEastLongitude, southEastLatitude, northWestLongitude, northWestLatitude, null, pageable);
 
-        assertThat(result.getContent()).extracting(IdentifiedEntity::getNetexId).doesNotContain(stopPlace.getNetexId());
+        assertThat(result.getContent()).extracting(IdentifiedEntity::getNetexId).isEmpty();
     }
 
     @Test
@@ -284,7 +284,7 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         assertThat(result.getContent())
                 .extracting(IdentifiedEntity::getNetexId)
                 .as("Ignored stop place shall not be part of the result")
-                .doesNotContain(stopPlace.getNetexId());
+                .isEmpty();
     }
 
     @Test
@@ -1236,7 +1236,7 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         stopPlaceRepository.save(childStop);
 
         List<String> idMapping = stopPlaceRepository.findStopPlaceFromQuayOriginalId(importedIdPosix, now.minusSeconds(20));
-        assertThat(idMapping).doesNotContain(childStop.getNetexId());
+        assertThat(idMapping).isEmpty();
     }
 
     @Test
