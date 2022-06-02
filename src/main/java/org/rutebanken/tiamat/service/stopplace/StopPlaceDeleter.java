@@ -60,6 +60,7 @@ public class StopPlaceDeleter {
         this.mutateLock = mutateLock;
     }
 
+    @Transactional
     public boolean deleteStopPlace(String stopPlaceId) {
 
         return mutateLock.executeInLock(() -> {
