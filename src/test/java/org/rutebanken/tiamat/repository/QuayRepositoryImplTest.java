@@ -59,7 +59,9 @@ public class QuayRepositoryImplTest extends TiamatIntegrationTest {
 
         quayRepository.flush();
 
-        quayRepository.findFirstByKeyValues("test", Sets.newHashSet("value"));
+        final String firstByKeyValues = quayRepository.findFirstByKeyValues("test", Sets.newHashSet("value"));
+
+        assertThat(firstByKeyValues).as("Key values not null").isNotNull();
 
     }
 
@@ -120,7 +122,7 @@ public class QuayRepositoryImplTest extends TiamatIntegrationTest {
         List<IdMappingDto> idMapping = quayRepository.findKeyValueMappingsForQuay(now, now, 0, 10);
         assertThat(idMapping).extracting(idMappingDto -> idMappingDto.netexId)
                 .as("Quay " + quay.getNetexId() + " should not be returned in mapping as it belongs to a stop place with parent stop place wich is currently not valid")
-                .doesNotContain(quay.getNetexId());
+                .isEmpty();
     }
 
     @Test
