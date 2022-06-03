@@ -26,7 +26,7 @@ public class MobilityImpairedAccessCalculator {
     public static void calculateAndSetMobilityImpairedAccess(AccessibilityAssessment assessment) {
 
         List<AccessibilityLimitation> limitations = assessment.getLimitations();
-        if (limitations.size() > 0) {
+        if (!limitations.isEmpty()) {
             AccessibilityLimitation limitation = limitations.get(0);
 
             // Partial is default unless criteria below are matched
@@ -46,17 +46,17 @@ public class MobilityImpairedAccessCalculator {
                     limitation.getEscalatorFreeAccess() == LimitationStatusEnumeration.FALSE) {
                 // All false - return false
                 mobilityImpairedStatus = LimitationStatusEnumeration.FALSE;
-            } else if (limitation.getWheelchairAccess() == LimitationStatusEnumeration.UNKNOWN |
-                    limitation.getLiftFreeAccess() == LimitationStatusEnumeration.UNKNOWN |
-                    limitation.getStepFreeAccess() == LimitationStatusEnumeration.UNKNOWN |
-                    limitation.getAudibleSignalsAvailable() == LimitationStatusEnumeration.UNKNOWN |
+            } else if (limitation.getWheelchairAccess() == LimitationStatusEnumeration.UNKNOWN ||
+                    limitation.getLiftFreeAccess() == LimitationStatusEnumeration.UNKNOWN ||
+                    limitation.getStepFreeAccess() == LimitationStatusEnumeration.UNKNOWN ||
+                    limitation.getAudibleSignalsAvailable() == LimitationStatusEnumeration.UNKNOWN ||
                     limitation.getEscalatorFreeAccess() == LimitationStatusEnumeration.UNKNOWN) {
                 // At least one unknown - return unknown
                 mobilityImpairedStatus = LimitationStatusEnumeration.UNKNOWN;
-            } else if (limitation.getWheelchairAccess() == LimitationStatusEnumeration.PARTIAL |
-                    limitation.getLiftFreeAccess() == LimitationStatusEnumeration.PARTIAL |
-                    limitation.getStepFreeAccess() == LimitationStatusEnumeration.PARTIAL |
-                    limitation.getAudibleSignalsAvailable() == LimitationStatusEnumeration.PARTIAL |
+            } else if (limitation.getWheelchairAccess() == LimitationStatusEnumeration.PARTIAL ||
+                    limitation.getLiftFreeAccess() == LimitationStatusEnumeration.PARTIAL ||
+                    limitation.getStepFreeAccess() == LimitationStatusEnumeration.PARTIAL ||
+                    limitation.getAudibleSignalsAvailable() == LimitationStatusEnumeration.PARTIAL ||
                     limitation.getEscalatorFreeAccess() == LimitationStatusEnumeration.PARTIAL) {
                 // At least one partial - return partial
                 mobilityImpairedStatus = LimitationStatusEnumeration.PARTIAL;
