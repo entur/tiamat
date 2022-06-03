@@ -128,7 +128,7 @@ public class StopPlaceMapper {
 
         isUpdated |= stopPlaceTariffZoneRefsMapper.populate(input, stopPlace);
 
-        isUpdated = isUpdated | setTransportModeSubMode(stopPlace, input.get(TRANSPORT_MODE), input.get(SUBMODE));
+        isUpdated = isUpdated || setTransportModeSubMode(stopPlace, input.get(TRANSPORT_MODE), input.get(SUBMODE));
 
         if (input.get(QUAYS) != null) {
             List quays = (List) input.get(QUAYS);
@@ -142,7 +142,7 @@ public class StopPlaceMapper {
                 }
             }
         }
-        isUpdated = isUpdated | groupOfEntitiesMapper.populate(input, stopPlace);
+        isUpdated = isUpdated || groupOfEntitiesMapper.populate(input, stopPlace);
 
         return isUpdated;
     }
