@@ -46,7 +46,7 @@ public class TiamatSiteFrameExporterTest extends TiamatIntegrationTest {
 
 
     @Test
-    public void expectDefaultTimezone() {
+    public void expectDefaulTimzone() {
 
 
         SiteFrame siteFrame = tiamatSiteFrameExporter.createTiamatSiteFrame("A fine site frame");
@@ -54,7 +54,7 @@ public class TiamatSiteFrameExporterTest extends TiamatIntegrationTest {
         assertThat(siteFrame.getFrameDefaults()).isNotNull();
         assertThat(siteFrame.getFrameDefaults().getDefaultLocale()).isNotNull();
         assertThat(siteFrame.getFrameDefaults().getDefaultLocale().getTimeZone()).isNotNull();
-        assertThat(siteFrame.getFrameDefaults().getDefaultLocale().getTimeZone()).isNotNull();
+        assertThat(siteFrame.getFrameDefaults().getDefaultLocale().getTimeZone());
     }
 
 }

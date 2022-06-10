@@ -22,15 +22,13 @@ import org.rutebanken.tiamat.config.GeometryFactoryConfig;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 public class StopPlaceCentroidComputerTest {
 
-    private final GeometryFactory geometryFactory = new GeometryFactoryConfig().geometryFactory();
-    private final StopPlaceCentroidComputer stopPlaceCentroidComputer = new StopPlaceCentroidComputer(new CentroidComputer(geometryFactory));
+    private GeometryFactory geometryFactory = new GeometryFactoryConfig().geometryFactory();
+    private StopPlaceCentroidComputer stopPlaceCentroidComputer = new StopPlaceCentroidComputer(new CentroidComputer(geometryFactory));
 
     @Test
-    public void computeCentroidForStopPlaceWithQuayNullPointer() throws Exception {
+    public void computeCentroidForStopPlaceWithQuayNullpointer() throws Exception {
         StopPlace stopPlace = new StopPlace();
 
         Quay quay = new Quay();
@@ -38,8 +36,6 @@ public class StopPlaceCentroidComputerTest {
 
         stopPlace.getQuays().add(quay);
 
-        final boolean hasCentroid = stopPlaceCentroidComputer.computeCentroidForStopPlace(stopPlace);
-
-        assertThat(hasCentroid).isTrue();
+        stopPlaceCentroidComputer.computeCentroidForStopPlace(stopPlace);
     }
 }
