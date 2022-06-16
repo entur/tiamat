@@ -170,6 +170,11 @@ public class StopPlaceVersionedSaverService {
             StopPlace existingVersionRefetched = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(existingVersion.getNetexId());
             logger.debug("Found previous version {},{}. Terminating it.", existingVersionRefetched.getNetexId(), existingVersionRefetched.getVersion());
             validityUpdater.terminateVersion(existingVersionRefetched, newVersionValidFrom.minusMillis(MILLIS_BETWEEN_VERSIONS));
+            if (existingVersionRefetched.getChildren() != null) {
+                existingVersionRefetched.getChildren().forEach(
+                        child -> validityUpdater.terminateVersion(child, newVersionValidFrom.minusMillis(MILLIS_BETWEEN_VERSIONS))
+                );
+            }
             stopPlaceAuthorizationService.assertAuthorizedToEdit(existingVersionRefetched, newVersion, childStopsUpdated);
         }
 
@@ -281,7 +286,7 @@ public class StopPlaceVersionedSaverService {
                 child.setName(null);
             }
 
-            child.setValidBetween(null);
+            child.setValidBetween(stopPlaceToSave.getValidBetween());
         });
     }
 
