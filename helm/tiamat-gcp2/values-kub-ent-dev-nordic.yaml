@@ -1,4 +1,5 @@
 common:
+  app: tiamat-nordic
   env: dev
 
 configMap:

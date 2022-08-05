@@ -39,7 +39,7 @@ data:
     spring.jpa.show-sql=false
     spring.database.driverClassName=org.postgresql.Driver
     spring.datasource.hikari.maximumPoolSize=30
-    spring.datasource.url=jdbc:postgresql://localhost:5432/{{ .Values.common.app }}
+    spring.datasource.url=jdbc:postgresql://localhost:5432/{{ .Values.tiamat.database }}
     spring.datasource.username=tiamat
     spring.datasource.platform=postgres
     spring.datasource.password=${PGPASSWORD}

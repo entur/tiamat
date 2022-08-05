@@ -1,3 +1,5 @@
+tiamat:
+  database: tiamat-ns
 common:
   app: tiamat
   shortname: tiamatno 
@@ -41,6 +43,3 @@ common:
       TZ: Europe/Oslo
     enabled: true
     toEnv: true
-
-
-    
