@@ -111,4 +111,6 @@ workflows:
             - build
           filters:
             branches:
-              only: master
+              only:
+                - master
+                - prepare-gcp2
