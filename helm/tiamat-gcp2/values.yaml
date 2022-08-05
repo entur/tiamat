@@ -1,0 +1,46 @@
+common:
+  app: tiamat
+  shortname: tiamatno 
+  team: ror 
+  service:
+    internalPort: 8777
+  ingress:
+    host: stop-places-v1-nordic.dev.entur.io
+    trafficType: api
+  container:
+    image: ${artifact.metadata.image}
+    cpu: 1.2
+    memory: 7500
+    probes:
+      liveness:
+        path: /health/live
+      readiness:
+        path: /health/ready
+    envFrom:
+      - configMapRef:
+          name: tiamat-application
+    prometheus:
+      enabled: true
+      path: /health/scrape
+    volumeMounts:
+    - mountPath: /etc/application-config
+      name: application-config
+      readOnly: true
+    volumes:
+    - configMap:
+        defaultMode: 420
+        name: tiamat-nordic-config
+      name: application-config
+  postgres:
+    enabled: true
+  configmap:
+    data:
+      JAVA_OPTIONS: -server -Xss1024m -Xmx7g -Dspring.config.location=/etc/application-config/application.properties
+        -Dfile.encoding=UTF-8 -Drutebanken.kubernetes.enabled=true -Drutebanken.hazelcast.management.url=http://tiamat-hzmgmt/mancenter/
+        -Drutebanken.kubernetes.namespace=default -Dhazelcast.ignoreXxeProtectionFailures=true
+      TZ: Europe/Oslo
+    enabled: true
+    toEnv: true
+
+
+    

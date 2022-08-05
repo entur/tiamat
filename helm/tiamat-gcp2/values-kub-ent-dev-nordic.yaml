@@ -1,0 +1,13 @@
+common:
+  env: dev
+
+configMap:
+  blobstoreProjectId: entur-ror-dev
+  pubsubProjectId: entur-ror-dev
+  pubsubTopicName: ror.tiamat-nordic.changelog
+  gcsBucketName: tiamat-nordic-dev
+
+auth0:
+  ror:
+    url: https://ror-entur-dev.eu.auth0.com
+    audience: https://ror.api.dev.entur.io

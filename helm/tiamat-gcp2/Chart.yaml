@@ -1,0 +1,17 @@
+apiVersion: v2
+appVersion: "0.1.99.2"
+description: NSR (National Stoppalce Register)
+name: tiamat
+version: 0.1.0
+keywords:
+- kakka
+sources:
+- https://github.com/entur/tiamat
+maintainers:
+- name: 'team-ror'
+  email: team.rutedata@entur.org
+engine: gotpl
+dependencies:
+  - name: common
+    version: 1.0.2
+    repository: "https://entur.github.io/helm-charts"

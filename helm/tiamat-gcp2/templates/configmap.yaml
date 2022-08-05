@@ -1,0 +1,84 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tiamat-application
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: release-name
+    shortname: tiamatno
+    team: ror
+data:
+  application.properties: |-
+    server.port={{ .Values.common.service.internalPort }}
+    nearbyStopsWithSameTypeFinder.limits={railStation:'200',airport:'3000'}
+    tariffzoneLookupService.resetReferences=true
+    publicationDeliveryStreamingOutput.validateAgainstSchema=true
+    publicationDeliveryUnmarshaller.validateAgainstSchema=true
+    netex.import.enabled.types=MERGE
+    changelog.publish.enabled=true
+    spring.activemq.broker-url=tcp://activemq.default:61616?jms.redeliveryPolicy.maximumRedeliveries=0
+    netex.id.valid.prefix.list={TopographicPlace:{'KVE','WOF','OSM','ENT','LAN'},TariffZone:{'*'},FareZone:{'*'},GroupOfTariffZones:{'*'}}
+    netex.profile.version=1.12:NO-NeTEx-stops:1.4
+
+    # GCS properties
+    blobstore.gcs.bucket.name={{.Values.configMap.gcsBucketName}}
+    blobstore.gcs.blob.path=export
+    blobstore.gcs.project.id={{.Values.configMap.blobstoreProjectId}}
+
+    # Database properties
+    spring.jpa.properties.javax.persistence.query.timeout=15000
+    spring.jpa.properties.hibernate.dialect=org.hibernate.spatial.dialect.postgis.PostgisDialect
+    spring.jpa.properties.hibernate.cache.region.factory_class=org.rutebanken.tiamat.hazelcast.TiamatHazelcastCacheRegionFactory
+    spring.jpa.properties.hibernate.cache.use_second_level_cache=true
+    spring.jpa.properties.hibernate.cache.use_minimal_puts=true
+    spring.jpa.properties.hibernate.cache.use_query_cache=true
+    spring.jpa.hibernate.ddl-auto=none
+    spring.jpa.hibernate.use-new-id-generator-mappings=true
+    spring.jpa.open-in-view=false
+    spring.jpa.database=POSTGRESQL
+    spring.jpa.show-sql=false
+    spring.database.driverClassName=org.postgresql.Driver
+    spring.datasource.hikari.maximumPoolSize=30
+    spring.datasource.url=jdbc:postgresql://localhost:5432/{{ .Values.common.app }}
+    spring.datasource.username=tiamat
+    spring.datasource.platform=postgres
+    spring.datasource.password=${PGPASSWORD}
+    graphql.query.max.depth =100
+
+
+    #flyway
+    spring.flyway.table =schema_version
+
+
+
+    # Security config with auth0
+
+    authorization.enabled=true
+
+    #OAuth2 Resource Server
+    spring.security.oauth2.resourceserver.jwt.issuer-uri={{ .Values.auth0.ror.url }}/
+    tiamat.oauth2.resourceserver.auth0.ror.jwt.audience={{ .Values.auth0.ror.audience }}
+    tiamat.oauth2.resourceserver.auth0.ror.claim.namespace=https://ror.entur.io/
+
+
+    # Logging Properties
+    logging.level.org.rutebanken.tiamat=INFO
+    logging.level.org.rutebanken.tiamat.repository=DEBUG
+    logging.level.org.rutebanken.tiamat.importer.finder=INFO
+    logging.level.org.rutebanken.tiamat.dtoassembling.disassembler.StopPlaceSearchDisassembler=WARN
+    logging.level.org.rutebanken.tiamat.rest.netex.publicationdelivery.PublicationDeliveryUnmarshaller=INFO
+    logging.level.org.rutebanken.tiamat.rest.netex.publicationdelivery=INFO
+    logging.level.org.rutebanken.tiamat.rest.netex.publicationdelivery.PublicationDeliveryStreamingOutput=INFO
+    logging.level.org.springframework.orm.hibernate4.support=WARN
+    logging.level.org.hibernate.SQL=WARN
+    logging.level.org.hibernate.tool.hbm2ddl=INFO
+    logging.level.org.hibernate.type=WARN
+    logging.level.org.hibernate.id.enhanced=INFO
+
+    #Profile
+    spring.profiles.active=gcs-blobstore,google-pubsub
+
+    # pubsub
+    spring.cloud.gcp.project-id={{ .Values.configMap.pubsubProjectId }}
+    changelog.topic.name={{ .Values.configMap.pubsbuTopicName }}
+
