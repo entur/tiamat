@@ -31,7 +31,7 @@ common:
     volumes:
     - configMap:
         defaultMode: 420
-        name: tiamat-nordic
+        name: tiamat-application
       name: application-config
   postgres:
     enabled: true
