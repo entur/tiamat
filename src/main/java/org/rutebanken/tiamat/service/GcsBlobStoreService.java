@@ -20,7 +20,6 @@ import com.google.cloud.http.HttpTransportOptions;
 import com.google.cloud.storage.StorageOptions;
 import com.google.cloud.storage.StorageException;
 import org.rutebanken.helper.gcp.BlobStoreHelper;
-import org.rutebanken.helper.gcp.BlobStoreException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -70,7 +69,7 @@ public class GcsBlobStoreService implements BlobStoreService {
     public Storage getStorage() {
         logger.info("Get storage for project {}", projectId);
 
-        // TODO: file issue for rutebanken-helpers for BlobStoreException.getStorage w/o creds
+        // TODO: file issue for rutebanken-helpers for BlobStoreHelper.getStorage w/o creds
         try {
             HttpTransportOptions transportOptions = StorageOptions.getDefaultHttpTransportOptions();
             transportOptions = transportOptions.toBuilder().setConnectTimeout(CONNECT_AND_READ_TIMEOUT).setReadTimeout(CONNECT_AND_READ_TIMEOUT)
@@ -80,9 +79,8 @@ public class GcsBlobStoreService implements BlobStoreService {
                     .setProjectId(projectId)
                     .setTransportOptions(transportOptions)
                     .build().getService();
-        } catch (IOException e) {
-            throw new BlobStoreException(e);
-
+        } catch (RuntimeException e) {
+            throw new RuntimeException(e);
         }
     }
 
