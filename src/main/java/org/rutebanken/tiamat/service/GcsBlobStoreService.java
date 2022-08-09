@@ -16,6 +16,8 @@
 package org.rutebanken.tiamat.service;
 
 import com.google.cloud.storage.Storage;
+import com.google.cloud.http.HttpTransportOptions;
+import com.google.cloud.storage.StorageOptions;
 import org.rutebanken.helper.gcp.BlobStoreHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +25,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 
@@ -30,6 +33,7 @@ import java.io.InputStream;
 @Profile("gcs-blobstore")
 public class GcsBlobStoreService implements BlobStoreService {
 
+    private static final int CONNECT_AND_READ_TIMEOUT = 60000;
     private static final Logger logger = LoggerFactory.getLogger(GcsBlobStoreService.class);
 
     private final String bucketName;
