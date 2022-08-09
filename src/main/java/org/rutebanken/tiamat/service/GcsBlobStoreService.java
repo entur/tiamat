@@ -20,6 +20,7 @@ import com.google.cloud.http.HttpTransportOptions;
 import com.google.cloud.storage.StorageOptions;
 import com.google.cloud.storage.StorageException;
 import org.rutebanken.helper.gcp.BlobStoreHelper;
+import org.rutebanken.helper.gcp.BlobStoreException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
