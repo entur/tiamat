@@ -62,11 +62,21 @@ public class GcsBlobStoreService implements BlobStoreService {
     }
 
     public Storage getStorage() {
+        logger.info("Get storage for project {}", projectId);
+
+        // TODO: file issue for rutebanken-helpers for BlobStoreException.getStorage w/o creds
         try {
-            logger.info("Get storage for project {}", projectId);
-            return BlobStoreHelper.getStorage(credentialPath, projectId);
-        } catch (RuntimeException e) {
-            throw new RuntimeException("Error setting up BlobStore from blobstore.gcs.credential.path '" + credentialPath + "' and blobstore.gcs.project.id '" + projectId + "'", e);
+            HttpTransportOptions transportOptions = StorageOptions.getDefaultHttpTransportOptions();
+            transportOptions = transportOptions.toBuilder().setConnectTimeout(CONNECT_AND_READ_TIMEOUT).setReadTimeout(CONNECT_AND_READ_TIMEOUT)
+                    .build();
+
+            return StorageOptions.newBuilder()
+                    .setProjectId(projectId)
+                    .setTransportOptions(transportOptions)
+                    .build().getService();
+        } catch (IOException e) {
+            throw new BlobStoreException(e);
+
         }
     }
 
