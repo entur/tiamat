@@ -18,6 +18,7 @@ package org.rutebanken.tiamat.service;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.http.HttpTransportOptions;
 import com.google.cloud.storage.StorageOptions;
+import com.google.cloud.storage.StorageException;
 import org.rutebanken.helper.gcp.BlobStoreHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
