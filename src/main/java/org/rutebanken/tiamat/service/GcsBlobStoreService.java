@@ -40,18 +40,15 @@ public class GcsBlobStoreService implements BlobStoreService {
     private final String bucketName;
 
     private final String blobPath;
-    private final String credentialPath;
     private final String projectId;
 
 
-    public GcsBlobStoreService(@Value("${blobstore.gcs.credential.path}") String credentialPath,
-                            @Value("${blobstore.gcs.bucket.name}") String bucketName,
+    public GcsBlobStoreService(@Value("${blobstore.gcs.bucket.name}") String bucketName,
                             @Value("${blobstore.gcs.blob.path}") String blobPath,
                             @Value("${blobstore.gcs.project.id}") String projectId) {
 
         this.bucketName = bucketName;
         this.blobPath = blobPath;
-        this.credentialPath = credentialPath;
         this.projectId = projectId;
     }
 
