@@ -60,18 +60,18 @@ data:
 
 
     # Logging Properties
-    logging.level.org.rutebanken.tiamat=INFO
-    logging.level.org.rutebanken.tiamat.repository=DEBUG
-    logging.level.org.rutebanken.tiamat.importer.finder=INFO
+    logging.level.org.rutebanken.tiamat=WARN
+    logging.level.org.rutebanken.tiamat.repository=WARN
+    logging.level.org.rutebanken.tiamat.importer.finder=WARN
     logging.level.org.rutebanken.tiamat.dtoassembling.disassembler.StopPlaceSearchDisassembler=WARN
-    logging.level.org.rutebanken.tiamat.rest.netex.publicationdelivery.PublicationDeliveryUnmarshaller=INFO
-    logging.level.org.rutebanken.tiamat.rest.netex.publicationdelivery=INFO
-    logging.level.org.rutebanken.tiamat.rest.netex.publicationdelivery.PublicationDeliveryStreamingOutput=INFO
+    logging.level.org.rutebanken.tiamat.rest.netex.publicationdelivery.PublicationDeliveryUnmarshaller=WARN
+    logging.level.org.rutebanken.tiamat.rest.netex.publicationdelivery=WARN
+    logging.level.org.rutebanken.tiamat.rest.netex.publicationdelivery.PublicationDeliveryStreamingOutput=WARN
     logging.level.org.springframework.orm.hibernate4.support=WARN
     logging.level.org.hibernate.SQL=WARN
-    logging.level.org.hibernate.tool.hbm2ddl=INFO
+    logging.level.org.hibernate.tool.hbm2ddl=WARN
     logging.level.org.hibernate.type=WARN
-    logging.level.org.hibernate.id.enhanced=INFO
+    logging.level.org.hibernate.id.enhanced=WARN
 
     #Profile
     spring.profiles.active=gcs-blobstore,google-pubsub
