@@ -72,6 +72,9 @@ data:
     logging.level.org.hibernate.tool.hbm2ddl=WARN
     logging.level.org.hibernate.type=WARN
     logging.level.org.hibernate.id.enhanced=WARN
+    logging.level.io.micrometer.prometheus=WARN
+    logging.level.org.geotools=WARN
+    logging.level.hsqldb.db=WARN
 
     #Profile
     spring.profiles.active=gcs-blobstore,google-pubsub
