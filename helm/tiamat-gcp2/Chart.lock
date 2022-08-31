@@ -1,0 +1,6 @@
+dependencies:
+- name: common
+  repository: https://entur.github.io/helm-charts
+  version: 1.1.0
+digest: sha256:24dad2384359deaa8d9e7ec582eb58aef4980abedfce52a84d9c3c6eea3b8eb0
+generated: "2022-08-09T09:46:14.789654282+02:00"

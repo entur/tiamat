@@ -16,6 +16,8 @@
 package org.rutebanken.tiamat.service;
 
 import com.google.cloud.storage.Storage;
+import com.google.cloud.http.HttpTransportOptions;
+import com.google.cloud.storage.StorageOptions;
 import org.rutebanken.helper.gcp.BlobStoreHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,23 +32,21 @@ import java.io.InputStream;
 @Profile("gcs-blobstore")
 public class GcsBlobStoreService implements BlobStoreService {
 
+    private static final int CONNECT_AND_READ_TIMEOUT = 60000;
     private static final Logger logger = LoggerFactory.getLogger(GcsBlobStoreService.class);
 
     private final String bucketName;
 
     private final String blobPath;
-    private final String credentialPath;
     private final String projectId;
 
 
-    public GcsBlobStoreService(@Value("${blobstore.gcs.credential.path}") String credentialPath,
-                            @Value("${blobstore.gcs.bucket.name}") String bucketName,
+    public GcsBlobStoreService(@Value("${blobstore.gcs.bucket.name}") String bucketName,
                             @Value("${blobstore.gcs.blob.path}") String blobPath,
                             @Value("${blobstore.gcs.project.id}") String projectId) {
 
         this.bucketName = bucketName;
         this.blobPath = blobPath;
-        this.credentialPath = credentialPath;
         this.projectId = projectId;
     }
 
@@ -62,11 +62,19 @@ public class GcsBlobStoreService implements BlobStoreService {
     }
 
     public Storage getStorage() {
+        logger.info("Get storage for project {}", projectId);
+
         try {
-            logger.info("Get storage for project {}", projectId);
-            return BlobStoreHelper.getStorage(credentialPath, projectId);
+            HttpTransportOptions transportOptions = StorageOptions.getDefaultHttpTransportOptions();
+            transportOptions = transportOptions.toBuilder().setConnectTimeout(CONNECT_AND_READ_TIMEOUT).setReadTimeout(CONNECT_AND_READ_TIMEOUT)
+                    .build();
+
+            return StorageOptions.newBuilder()
+                    .setProjectId(projectId)
+                    .setTransportOptions(transportOptions)
+                    .build().getService();
         } catch (RuntimeException e) {
-            throw new RuntimeException("Error setting up BlobStore from blobstore.gcs.credential.path '" + credentialPath + "' and blobstore.gcs.project.id '" + projectId + "'", e);
+            throw new RuntimeException(e);
         }
     }
 
