@@ -1,13 +1,13 @@
 # Contains main description of bulk of terraform?
 terraform {
-  required_version = ">= 0.12"
+  required_version = ">= 0.13.2"
 }
 
 provider "google" {
-  version = "~> 2.19"
+  version = ">= 4.26"
 }
 provider "kubernetes" {
-  version = "~> 1.13.3"
+  version = ">= 2.13.1"
   load_config_file = var.load_config_file
 }
 
