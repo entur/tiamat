@@ -15,14 +15,6 @@ resources:
   xss: 1024m
   xmx: 7g
 
-secretMount:
-   name: tiamat-key
-   mountPath: /etc/tiamat/credentials.json
-   subPath: credentials.json
-   secretName: ror-tiamat-sa-key
-   readOnly: true
-
-
 configMapMount:
    name: tiamat-config
 
