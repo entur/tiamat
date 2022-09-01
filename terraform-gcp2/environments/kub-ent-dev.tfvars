@@ -1,6 +1,6 @@
 pubsub_project = "entur-ror-dev"
 storage_project = "entur-ror-dev"
-kube_namespace = "dev"
+kube_namespace = "tiamat"
 bucket_instance_suffix = "dev"
 location = "europe-west1"
 bucket_instance_prefix="ror-tiamat-gcp2"
