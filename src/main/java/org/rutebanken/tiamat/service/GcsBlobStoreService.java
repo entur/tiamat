@@ -64,6 +64,10 @@ public class GcsBlobStoreService implements BlobStoreService {
     public Storage getStorage() {
         try {
             logger.info("Get storage for project {}", projectId);
+            if (credentialPath == null || credentialPath.isEmpty()) {
+                // Use default default gcp credentials
+                return BlobStoreHelper.getStorage(projectId);
+            }
             return BlobStoreHelper.getStorage(credentialPath, projectId);
         } catch (RuntimeException e) {
             throw new RuntimeException("Error setting up BlobStore from blobstore.gcs.credential.path '" + credentialPath + "' and blobstore.gcs.project.id '" + projectId + "'", e);
