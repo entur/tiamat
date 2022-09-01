@@ -1,5 +1,5 @@
-pubsub_project = "entur-ror-dev"
-storage_project = "entur-ror-dev"
+pubsub_project = "ent-tiamat-dev"
+storage_project = "ent-tiamat-dev"
 kube_namespace = "tiamat"
 bucket_instance_suffix = "dev"
 location = "europe-west1"
