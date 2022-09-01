@@ -20,7 +20,7 @@ resource "google_storage_bucket" "storage_bucket" {
   storage_class      = var.storage_class
   bucket_policy_only = var.bucket_policy_only
   labels             = var.labels
-
+  uniform_bucket_level_access = true
   versioning {
     enabled = var.versioning
   }
