@@ -1,0 +1,42 @@
+replicas: 1
+
+deployment:
+  name: tiamat
+
+rollingUpdate:
+  maxSurge: 1
+  maxUnavailable: 1
+
+resources:
+  cpuLimit: 1200m
+  memLimit: 10000Mi
+  cpuRequest: 1200m
+  memRequest: 7500Mi
+  xss: 1024m
+  xmx: 7g
+
+secretMount:
+   name: tiamat-key
+   mountPath: /etc/tiamat/credentials.json
+   subPath: credentials.json
+   secretName: ror-tiamat-sa-key
+   readOnly: true
+
+
+configMapMount:
+   name: tiamat-config
+
+image:
+  identifier: ${artifact.metadata.image}
+  imagePullPolicy: Always
+
+service:
+  http:
+    externalPort: 80
+    internalPort: 8777
+  jolokia:
+    internalPort: 8778
+rbac:
+  enabled: false
+ingress:
+  name: stop-places-v1
