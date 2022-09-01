@@ -314,7 +314,7 @@
         </dependency>
 
         <dependency>
-            <groupId>org.entur.helpers</groupId>
+            <groupId>org.entur.ror.helpers</groupId>
             <artifactId>gcp-storage</artifactId>
             <exclusions>
                 <exclusion>
