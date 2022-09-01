@@ -39,4 +39,4 @@ service:
 rbac:
   enabled: false
 ingress:
-  name: stop-places-v1
+  name: stop-places-v1-gcp2
