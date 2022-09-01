@@ -39,7 +39,7 @@ public class GcsBlobStoreService implements BlobStoreService {
     private final String projectId;
 
 
-    public GcsBlobStoreService(@Value("${blobstore.gcs.credential.path}") String credentialPath,
+    public GcsBlobStoreService(@Value("${blobstore.gcs.credential.path:#{null}") String credentialPath,
                             @Value("${blobstore.gcs.bucket.name}") String bucketName,
                             @Value("${blobstore.gcs.blob.path}") String blobPath,
                             @Value("${blobstore.gcs.project.id}") String projectId) {
