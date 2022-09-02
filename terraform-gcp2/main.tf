@@ -48,6 +48,12 @@ resource "google_pubsub_subscription" "changelog-subscription" {
   labels = var.labels
   }
 
+# add service account as member to the pubsub
+resource "google_project_iam_member" "pubsub_member" {
+  project = var.pubsub_project
+  role    = var.service_account_pubsub_role
+  member = "serviceAccount:${var.app_service_account}"
+}
 #
 resource "kubernetes_secret" "ror-tiamat-db-password" {
   metadata {
