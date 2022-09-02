@@ -2,14 +2,6 @@ variable "pubsub_project" {
   description = "GCP project of pubsub topic"
 }
 
-variable "service_account_pubsub_role" {
-  description = "Role of the Service Account - more about roles https://cloud.google.com/pubsub/docs/access-control"
-  default     = "roles/pubsub.editor"
-}
-
-variable "app_service_account" {
-  description = "GCP service account"
-}
 variable "storage_project" {
   description = "GCP project of pubsub topic"
 }
