@@ -1,6 +1,6 @@
 {{- if .Values.rbac.enabled }}
 apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
+kind: RoleBinding
 metadata:
   name: {{ .Values.deployment.name }}-service-account
   namespace: {{ .Release.Namespace }}
@@ -8,7 +8,7 @@ metadata:
     {{- include "common.labels" . | indent 4 }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
+  kind: Role
   name: {{ .Values.deployment.name }}-service-account
 subjects:
   - kind: ServiceAccount
@@ -16,7 +16,7 @@ subjects:
     namespace: {{ .Release.Namespace }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
+kind: Role
 metadata:
   name: {{ .Values.deployment.name }}-service-account
   namespace: {{ .Release.Namespace }}
