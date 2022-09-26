@@ -111,7 +111,3 @@ variable "db_version" {
   description = "postgres version"
   default = "POSTGRES_13"
 }
-variable "db_deletion_protection" {
-  description = "Delete database replica"
-  default = "true"
-}
