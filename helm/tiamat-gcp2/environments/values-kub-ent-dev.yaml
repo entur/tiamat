@@ -2,7 +2,7 @@ env: dev
 gcp2:
   enabled: true
 sql:
-  instance: ent-tiamat-dev:europe-west1:tiamat-db=tcp:5432
+  instance: ent-tiamat-dev:europe-west1:tiamat-db-pg13=tcp:5432
 
 configMap:
   blobstoreProjectId: ent-tiamat-dev
