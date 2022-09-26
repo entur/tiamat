@@ -56,7 +56,9 @@ resource "google_sql_user" "db-user" {
 }
 
 # database read replica used by kingu
+
 resource "google_sql_database_instance" "db_instance_replica" {
+  deletion_protection = var.db_deletion_protection
   name = var.db_instance_replica_name
   master_instance_name = "${var.cloudsql_project}:${google_sql_database_instance.db_instance.name}"
   database_version = var.db_version
