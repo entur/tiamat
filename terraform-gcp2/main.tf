@@ -60,6 +60,7 @@ resource "google_sql_database_instance" "db_instance_replica" {
   name = var.db_instance_replica_name
   master_instance_name = "${var.cloudsql_project}:${google_sql_database_instance.db_instance.name}"
   database_version = var.db_version
+  project = var.cloudsql_project
   region = var.db_region
 
   replica_configuration {
