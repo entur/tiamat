@@ -98,7 +98,7 @@ variable "db_instance_replica_name" {
 }
 
 variable "ror-tiamat-db-username" {
-  default = "Tiamat database username"
+  description = "Tiamat database username"
 }
 variable ror-tiamat-db-password {
   description = "Tiamat database password"
