@@ -12,7 +12,7 @@ provider "kubernetes" {
 
 # Create database
 resource "google_sql_database_instance" "db_instance" {
-  name = "tiamat-db"
+  name = var.db_instance_name
   database_version = var.db_version
   project = var.cloudsql_project
   region = var.db_region
