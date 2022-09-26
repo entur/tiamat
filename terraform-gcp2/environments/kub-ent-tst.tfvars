@@ -1,0 +1,8 @@
+pubsub_project = "ent-tiamat-tst"
+storage_project = "ent-tiamat-tst"
+cloudsql_project="ent-tiamat-tst"
+kube_namespace = "tiamat"
+bucket_instance_suffix = "tst"
+location = "europe-west1"
+bucket_instance_prefix="ror-tiamat-gcp2"
+db_tier="db-custom-2-7680"
