@@ -1,0 +1,23 @@
+env: tst
+gcp2:
+  enabled: true
+sql:
+  instance: ent-tiamat-tst:europe-west1:tiamat-db-pg13=tcp:5432
+
+configMap:
+  blobstoreProjectId: ent-tiamat-tst
+  pubsubProjectId: ent-tiamat-tst
+  pubsbuTopicName: ror.tiamat.changelog
+  gcsBucketName: ror-tiamat-gcp2-tst
+
+auth0:
+  ror:
+    url: https://ror-entur-staging.eu.auth0.com
+    audience: https://ror.api.staging.entur.io
+
+rbac:
+  enabled: true
+
+ingress:
+  enabled: true
+  domainName: .staging.entur.io
