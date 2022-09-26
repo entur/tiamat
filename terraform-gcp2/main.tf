@@ -11,7 +11,8 @@ provider "kubernetes" {
 }
 
 # Create database
-resource "google_sql_database_instance" "db_instance" {
+# OBS: Intentionally  commented out config, create database and replicas manually
+/*resource "google_sql_database_instance" "db_instance" {
   name = var.db_instance_name
   database_version = var.db_version
   project = var.cloudsql_project
@@ -84,6 +85,7 @@ resource "google_sql_database_instance" "db_instance_replica" {
   }
 
 }
+*/
 # Create bucket
 resource "google_storage_bucket" "storage_bucket" {
   name               = "${var.bucket_instance_prefix}-${var.bucket_instance_suffix}"
