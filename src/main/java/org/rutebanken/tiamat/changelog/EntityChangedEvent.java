@@ -21,6 +21,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.time.Instant;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class EntityChangedEvent {
@@ -38,6 +39,8 @@ public class EntityChangedEvent {
     public Long entityVersion;
 
     public CrudAction crudAction;
+
+    public Instant changed;
 
     public String toString() {
         try {
