@@ -38,9 +38,9 @@ public class EntityChangedEvent {
 
     public Long entityVersion;
 
-    public CrudAction crudAction;
+    public Instant entityChanged;
 
-    public Instant changed;
+    public CrudAction crudAction;
 
     public String toString() {
         try {
