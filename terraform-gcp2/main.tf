@@ -8,7 +8,6 @@ provider "google" {
 }
 provider "kubernetes" {
   version = ">= 2.13.1"
-  config_path = "~/.kube/config"
 }
 # Create bucket
 resource "google_storage_bucket" "storage_bucket" {
