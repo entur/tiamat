@@ -62,6 +62,7 @@ public class EntityChangedEventPubSubPublisher implements EntityChangedListener 
         event.entityType = getEntityType(entity);
         event.entityId = entity.getNetexId();
         event.entityVersion = (entity).getVersion();
+        event.entityChanged = entity.getChanged();
 
         if (deleted) {
             event.crudAction = EntityChangedEvent.CrudAction.DELETE;
