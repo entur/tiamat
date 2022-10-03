@@ -23,14 +23,20 @@ resource "google_sql_database_instance" "db_instance" {
     disk_size = var.db_disk_size
     backup_configuration {
       enabled = true
+      point_in_time_recovery_enabled = true
+      transaction_log_retention_days = var.transaction_log_retention_days
       // 01:00 UTC
       start_time = "01:00"
+      backup_retention_settings {
+        retained_backups = var.retained_backups
+      }
     }
     maintenance_window {
       // Sunday
       day = 7
       // 02:00 UTC
       hour = 2
+      update_track = "stable"
     }
     insights_config {
       query_insights_enabled = true
@@ -42,6 +48,7 @@ resource "google_sql_database_instance" "db_instance" {
       require_ssl = true
     }
   }
+  deletion_protection = true
 }
 
 resource "google_sql_database" "db" {
@@ -90,5 +97,6 @@ resource "google_sql_database_instance" "db_instance_replica" {
       require_ssl = true
     }
   }
+  deletion_protection = true
 
 }

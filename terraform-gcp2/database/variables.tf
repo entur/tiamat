@@ -59,3 +59,10 @@ variable "db_version" {
   description = "postgres version"
   default = "POSTGRES_13"
 }
+
+variable "transaction_log_retention_days" {
+  default = "7"
+}
+variable "retained_backups" {
+  default = "7"
+}
