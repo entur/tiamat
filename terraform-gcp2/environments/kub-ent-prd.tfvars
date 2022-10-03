@@ -1,0 +1,6 @@
+pubsub_project = "ent-tiamat-prd"
+storage_project = "ent-tiamat-prd"
+kube_namespace = "tiamat"
+bucket_instance_suffix = "prd"
+location = "europe-west1"
+bucket_instance_prefix="ror-tiamat-gcp2"
