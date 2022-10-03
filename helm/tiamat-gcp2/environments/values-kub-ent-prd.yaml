@@ -1,0 +1,23 @@
+env: prd
+gcp2:
+  enabled: true
+sql:
+  instance: ent-tiamat-prd:europe-west1:tiamat-db-1=tcp:5432
+
+configMap:
+  blobstoreProjectId: ent-tiamat-prd
+  pubsubProjectId: ent-tiamat-prd
+  pubsbuTopicName: ror.tiamat.changelog
+  gcsBucketName: ror-tiamat-gcp2-prd
+
+auth0:
+  ror:
+    url: https://auth2.entur.org
+    audience: https://ror.api.entur.io
+
+rbac:
+  enabled: true
+
+ingress:
+  enabled: true
+  domainName: .entur.io
