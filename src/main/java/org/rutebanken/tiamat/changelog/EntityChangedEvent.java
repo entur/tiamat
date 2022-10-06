@@ -38,7 +38,7 @@ public class EntityChangedEvent {
 
     public Long entityVersion;
 
-    public Instant entityChanged;
+    public Long entityChanged;
 
     public CrudAction crudAction;
 
