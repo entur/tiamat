@@ -77,6 +77,7 @@ public class EntityChangedEventJMSPublisherTest {
         stopPlace.setNetexId("XXX:StopPlace:22");
         stopPlace.setVersion(version);
         stopPlace.setValidBetween(new ValidBetween(validFrom, validTo));
+        stopPlace.setChanged(Instant.now());
         return stopPlace;
     }
 
