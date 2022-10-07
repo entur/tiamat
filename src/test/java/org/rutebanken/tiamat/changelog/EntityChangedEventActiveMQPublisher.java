@@ -63,21 +63,30 @@ public class EntityChangedEventActiveMQPublisher implements EntityChangedListene
         event.entityType = getEntityType(entity);
         event.entityId = entity.getNetexId();
         event.entityVersion = (entity).getVersion();
-        event.entityChanged = entity.getChanged().toEpochMilli();
-
-        if (deleted) {
-            event.crudAction = EntityChangedEvent.CrudAction.DELETE;
-        } else if (entity.getVersion() == 1) {
-            event.crudAction = EntityChangedEvent.CrudAction.CREATE;
-        } else if (isDeactivated(entity)) {
-            event.crudAction = EntityChangedEvent.CrudAction.REMOVE;
-        } else {
-            event.crudAction = EntityChangedEvent.CrudAction.UPDATE;
-        }
-
+        event.entityChanged = getEntityChangedAsEpochMillis(entity);
+        event.crudAction = getCrudAction(entity, deleted);
         return event;
     }
 
+    private Long getEntityChangedAsEpochMillis(EntityInVersionStructure entity) {
+        if (entity.getChanged() != null) {
+            return entity.getChanged().toEpochMilli();
+        } else {
+            return null;
+        }
+    }
+
+    private EntityChangedEvent.CrudAction getCrudAction(EntityInVersionStructure entity, boolean deleted) {
+        if (deleted) {
+            return EntityChangedEvent.CrudAction.DELETE;
+        } else if (entity.getVersion() == 1) {
+            return EntityChangedEvent.CrudAction.CREATE;
+        } else if (isDeactivated(entity)) {
+            return EntityChangedEvent.CrudAction.REMOVE;
+        } else {
+            return EntityChangedEvent.CrudAction.UPDATE;
+        }
+    }
 
     private boolean isDeactivated(EntityInVersionStructure entity) {
         if (entity.getValidBetween() == null) {
