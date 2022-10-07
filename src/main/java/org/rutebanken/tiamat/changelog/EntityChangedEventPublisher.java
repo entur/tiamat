@@ -6,11 +6,11 @@ import org.rutebanken.tiamat.model.StopPlace;
 
 import java.util.UUID;
 
-abstract public class EntityChangedEventPublisher {
+public abstract class EntityChangedEventPublisher {
     protected boolean isLoggedEntity(EntityStructure entity) {
         return getEntityType(entity) != null;
     }
-    
+
     protected EntityChangedEvent toEntityChangedEvent(EntityInVersionStructure entity, boolean deleted) {
         EntityChangedEvent event = new EntityChangedEvent();
         event.msgId = UUID.randomUUID().toString();
