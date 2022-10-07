@@ -25,6 +25,8 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
+import java.util.Optional;
 import java.util.UUID;
 
 @Component
@@ -68,11 +70,7 @@ public class EntityChangedEventPubSubPublisher implements EntityChangedListener 
     }
 
     private Long getEntityChangedAsEpochMillis(EntityInVersionStructure entity) {
-        if (entity.getChanged() != null) {
-            return entity.getChanged().toEpochMilli();
-        } else {
-            return null;
-        }
+        return Optional.ofNullable(entity.getChanged()).map(Instant::toEpochMilli).orElse(null);
     }
 
     private EntityChangedEvent.CrudAction getCrudAction(EntityInVersionStructure entity, boolean deleted) {
