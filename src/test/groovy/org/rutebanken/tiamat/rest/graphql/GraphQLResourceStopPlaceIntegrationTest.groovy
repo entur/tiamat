@@ -745,7 +745,7 @@ def class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourc
                     .body("geometry.coordinates[0][1]", comparesEqualTo(lat))
                     .body("weighting", comparesEqualTo(InterchangeWeightingEnumeration.INTERCHANGE_ALLOWED.value()))
 
-        assertThat(entityChangedJMSListener.hasReceivedEvent(null, 1l, EntityChangedEvent.CrudAction.CREATE)).isTrue()
+        assertThat(entityChangedJMSListener.hasReceivedEvent(null, 1l, EntityChangedEvent.CrudAction.CREATE, null)).isTrue()
     }
 
     @Test
@@ -813,7 +813,7 @@ def class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourc
                 .body("keyValues[0].values[0]", equalTo(originalId.trim()))
 
 
-        assertThat(entityChangedJMSListener.hasReceivedEvent(null, 1l, EntityChangedEvent.CrudAction.CREATE)).isTrue()
+        assertThat(entityChangedJMSListener.hasReceivedEvent(null, 1l, EntityChangedEvent.CrudAction.CREATE, null)).isTrue()
     }
 
     @Test
@@ -1399,7 +1399,7 @@ def class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourc
                     .body("geometry.coordinates[0][1]", comparesEqualTo(lat))
                     .body("compassBearing", comparesEqualTo(compassBearing))
 
-        assertThat(entityChangedJMSListener.hasReceivedEvent(stopPlace.getNetexId(), stopPlace.getVersion() + 1, EntityChangedEvent.CrudAction.UPDATE)).isTrue()
+        assertThat(entityChangedJMSListener.hasReceivedEvent(stopPlace.getNetexId(), stopPlace.getVersion() + 1, EntityChangedEvent.CrudAction.UPDATE, stopPlace.getChanged())).isTrue()
     }
 
 
@@ -1496,7 +1496,7 @@ def class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourc
                     .body("geometry.coordinates[0][1]", comparesEqualTo(lat))
                     .body("compassBearing", comparesEqualTo(compassBearing))
 
-        assertThat(entityChangedJMSListener.hasReceivedEvent(stopPlace.getNetexId(), stopPlace.getVersion() + 1, EntityChangedEvent.CrudAction.UPDATE)).isTrue()
+        assertThat(entityChangedJMSListener.hasReceivedEvent(stopPlace.getNetexId(), stopPlace.getVersion() + 1, EntityChangedEvent.CrudAction.UPDATE, stopPlace.getChanged())).isTrue()
     }
 
     @Test

@@ -50,11 +50,11 @@ public class EntityChangedJMSListener {
 
     }
 
-    public boolean hasReceivedEvent(String entityId, Long version, EntityChangedEvent.CrudAction crudAction) {
-        return events.stream().anyMatch(e -> isMatch(e, entityId, version, crudAction));
+    public boolean hasReceivedEvent(String entityId, Long version, EntityChangedEvent.CrudAction crudAction, Long entityChanged) {
+        return events.stream().anyMatch(e -> isMatch(e, entityId, version, crudAction, entityChanged));
     }
 
-    private boolean isMatch(EntityChangedEvent event, String entityId, Long version, EntityChangedEvent.CrudAction crudAction) {
+    private boolean isMatch(EntityChangedEvent event, String entityId, Long version, EntityChangedEvent.CrudAction crudAction, Long entityChanged) {
         if (entityId != null && !entityId.equals(event.entityId)) {
             return false;
         }
@@ -62,6 +62,10 @@ public class EntityChangedJMSListener {
             return false;
         }
         if (crudAction != null && !crudAction.equals(event.crudAction)) {
+            return false;
+        }
+
+        if (entityChanged != null && !entityChanged.equals(event.entityChanged)) {
             return false;
         }
 
