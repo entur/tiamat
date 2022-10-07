@@ -70,7 +70,9 @@ public class EntityChangedEventPubSubPublisher implements EntityChangedListener 
     }
 
     private Long getEntityChangedAsEpochMillis(EntityInVersionStructure entity) {
-        return Optional.ofNullable(entity.getChanged()).map(Instant::toEpochMilli).orElse(null);
+        return Optional.ofNullable(entity.getChanged())
+                .map(Instant::toEpochMilli)
+                .orElse(null);
     }
 
     private EntityChangedEvent.CrudAction getCrudAction(EntityInVersionStructure entity, boolean deleted) {
