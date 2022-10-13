@@ -154,6 +154,7 @@ public class StopPlaceVersionedSaverService {
         submodeValidator.validate(newVersion);
 
         Instant changed = Instant.now();
+        newVersion.setChanged(changed);
 
         logger.debug("Rearrange accessibility assessments for: {}", newVersion);
         accessibilityAssessmentOptimizer.optimizeAccessibilityAssessments(newVersion);
@@ -165,7 +166,6 @@ public class StopPlaceVersionedSaverService {
             newVersion.setCreated(changed);
             stopPlaceAuthorizationService.assertAuthorizedToEdit(null, newVersion, childStopsUpdated);
         } else {
-            newVersion.setChanged(changed);
             logger.debug("About to terminate previous version for {},{}", existingVersion.getNetexId(), existingVersion.getVersion());
             StopPlace existingVersionRefetched = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(existingVersion.getNetexId());
             logger.debug("Found previous version {},{}. Terminating it.", existingVersionRefetched.getNetexId(), existingVersionRefetched.getVersion());
