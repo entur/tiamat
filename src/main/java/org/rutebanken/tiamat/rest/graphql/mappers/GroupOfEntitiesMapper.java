@@ -57,6 +57,9 @@ public class GroupOfEntitiesMapper {
         if (input.get(DESCRIPTION) != null) {
             entity.setDescription(getEmbeddableString((Map) input.get(DESCRIPTION)));
             isUpdated = true;
+        } else if (input.get(DESCRIPTION) == null){
+            entity.setDescription(null);
+            isUpdated = true;
         }
 
         if (input.get(VERSION_COMMENT) != null) {
