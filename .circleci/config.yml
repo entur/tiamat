@@ -59,8 +59,7 @@ jobs:
       MAVEN_OPTS: -Xmx5G
     steps:
       - checkout
-      - run: sh -c 'echo "$DOCKERHUB_LOGIN $DOCKERHUB_PASSWORD" > sec.txt'
-      - run: cat sec.txt
+      - run: env
       - restore_cache:
           key: dep-cache-{{ checksum "pom.xml" }}
       - run: wget https://raw.githubusercontent.com/entur/circleci-toolbox-image-java11/master/tools/m2/settings.xml -O .circleci/settings.xml
