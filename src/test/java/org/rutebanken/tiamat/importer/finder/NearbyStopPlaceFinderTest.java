@@ -17,6 +17,7 @@ package org.rutebanken.tiamat.importer.finder;
 
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.rutebanken.tiamat.config.GeometryFactoryConfig;
 import org.rutebanken.tiamat.general.PeriodicCacheLogger;
@@ -29,16 +30,15 @@ import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-
 public class NearbyStopPlaceFinderTest {
-    private GeometryFactory geometryFactory = new GeometryFactoryConfig().geometryFactory();
+    private final GeometryFactory geometryFactory = new GeometryFactoryConfig().geometryFactory();
 
-    private AlternativeStopTypes alternativeTypes = new AlternativeStopTypes();
-    private PeriodicCacheLogger periodicCacheLogger = new PeriodicCacheLogger();
+    private final AlternativeStopTypes alternativeTypes = new AlternativeStopTypes();
+    private final PeriodicCacheLogger periodicCacheLogger = new PeriodicCacheLogger();
 
     @Test
     public void nullCentroid() throws Exception {
@@ -75,14 +75,13 @@ public class NearbyStopPlaceFinderTest {
         stopPlace.setStopPlaceType(StopTypeEnumeration.BUS_STATION);
         stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(9, 40)));
 
-        org.locationtech.jts.geom.Geometry envelope = (org.locationtech.jts.geom.Geometry) stopPlace.getCentroid().getEnvelope().clone();
-
+        Geometry envelope = stopPlace.getCentroid().getEnvelope();
 
         when(stopPlaceRepository.findNearbyStopPlace(any(), any(), any())).thenReturn(stopPlaceId);
         when(stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlaceId)).thenReturn(stopPlace);
 
         StopPlace actual = nearbyStopPlaceFinder.find(stopPlace);
-        org.locationtech.jts.geom.Geometry actualEnvelope = (org.locationtech.jts.geom.Geometry) actual.getCentroid().getEnvelope().clone();
+        Geometry actualEnvelope = actual.getCentroid().getEnvelope();
 
         assertThat(actualEnvelope).isEqualTo(envelope);
     }

@@ -61,7 +61,7 @@ public class MultiModalityOperationsBuilder {
 
     public static final String ADD_TO_MULTI_MODAL_STOP_PLACE_INPUT = "addToMultiModalStopPlaceInput";
 
-    private static final String INPUT = "input";
+    public static final String INPUT = "input";
 
     @Autowired
     private MultiModalStopPlaceEditor parentStopPlaceEditor;
