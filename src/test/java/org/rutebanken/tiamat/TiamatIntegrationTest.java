@@ -60,13 +60,12 @@ import static org.rutebanken.tiamat.netex.id.GaplessIdGeneratorService.INITIAL_L
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 public abstract class TiamatIntegrationTest {
 
-    private static Logger logger = LoggerFactory.getLogger(TiamatIntegrationTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(TiamatIntegrationTest.class);
 
     @Autowired
     protected GroupOfStopPlacesRepository groupOfStopPlacesRepository;
 
     @Autowired
-
     protected GroupOfTariffZonesRepository groupOfTariffZonesRepository;
 
     @Autowired
@@ -104,7 +103,6 @@ public abstract class TiamatIntegrationTest {
 
     @Autowired
     protected FareZoneRepository fareZoneRepository;
-
 
     @Autowired
     protected HazelcastInstance hazelcastInstance;

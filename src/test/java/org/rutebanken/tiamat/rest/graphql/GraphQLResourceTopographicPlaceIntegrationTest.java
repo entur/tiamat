@@ -5,8 +5,6 @@ import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.model.TopographicPlaceTypeEnumeration;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.hamcrest.Matchers.hasSize;
@@ -14,37 +12,34 @@ import static org.hamcrest.Matchers.notNullValue;
 
 public class GraphQLResourceTopographicPlaceIntegrationTest extends AbstractGraphQLResourceIntegrationTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(GraphQLResourceTopographicPlaceIntegrationTest.class);
-
     @Autowired
     private TopographicPlaceRepository topographicPlaceRepository;
 
     @Test
     public void getTopographicPlaces() {
-        
+
         TopographicPlace topographicPlace = new TopographicPlace();
         topographicPlace.setName(new EmbeddableMultilingualString("Fylke"));
         topographicPlace.setTopographicPlaceType(TopographicPlaceTypeEnumeration.COUNTY);
 
         topographicPlaceRepository.save(topographicPlace);
 
-        String query = "{" +
-                "\"query\":\"" +
-                    "{ topographicPlace:" + GraphQLNames.TOPOGRAPHIC_PLACE + " {" +
-                    "    id" +
-                    "    name {" +
-                    "      value" +
-                    "      __typename" +
-                    "    }" +
-                    "    topographicPlaceType" +
-                    "    __typename" +
-                    "  }" +
-                    "}\",\"variables\":\"\"}";
+        String query = """
+                {
+                    topographicPlace: %s {
+                      id
+                      name {
+                        value
+                        __typename
+                      }
+                      topographicPlaceType
+                      __typename
+                    }
+                }
+                """.formatted(GraphQLNames.TOPOGRAPHIC_PLACE);
 
-        LOGGER.debug(query);
-
-        executeGraphQL(query)
-                .body("data.topographicPlace.find { it.id == \"" + topographicPlace.getNetexId() +"\" } ", notNullValue());
+        executeGraphQLQueryOnly(query)
+                .body("data.topographicPlace.find { it.id == \"" + topographicPlace.getNetexId() + "\" } ", notNullValue());
     }
 
     @Test
@@ -56,23 +51,26 @@ public class GraphQLResourceTopographicPlaceIntegrationTest extends AbstractGrap
 
         topographicPlaceRepository.save(topographicPlace);
 
-        String query = "{" +
-                "\"query\":\"" +
-                "{ topographicPlace:" + GraphQLNames.TOPOGRAPHIC_PLACE + " (query: \\\"vestfolD\\\") {" +
-                "    id" +
-                "    name {" +
-                "      value" +
-                "      __typename" +
-                "    }" +
-                "    topographicPlaceType" +
-                "    __typename" +
-                "  }" +
-                "}\",\"variables\":\"\"}";
+        String query = """
+                {
+                    topographicPlace: %s (
+                        query: "vestfolD"
+                    )
+                    {
+                        id
+                        name {
+                            value
+                            __typename
+                        }
+                        topographicPlaceType
+                        __typename
+                    }
+                }
+                """
+                .formatted(GraphQLNames.TOPOGRAPHIC_PLACE);
 
-        LOGGER.debug(query);
-
-        executeGraphQL(query)
-                .body("data.topographicPlace.find { it.id == \"" + topographicPlace.getNetexId() +"\" } ", notNullValue());
+        executeGraphQLQueryOnly(query)
+                .body("data.topographicPlace.find { it.id == \"" + topographicPlace.getNetexId() + "\" } ", notNullValue());
     }
 
     @Test
@@ -84,22 +82,25 @@ public class GraphQLResourceTopographicPlaceIntegrationTest extends AbstractGrap
 
         topographicPlaceRepository.save(topographicPlace);
 
-        String query = "{" +
-                "\"query\":\"" +
-                "{ topographicPlace:" + GraphQLNames.TOPOGRAPHIC_PLACE + " (query: \\\"SomethingElse\\\") {" +
-                "    id" +
-                "    name {" +
-                "      value" +
-                "      __typename" +
-                "    }" +
-                "    topographicPlaceType" +
-                "    __typename" +
-                "  }" +
-                "}\",\"variables\":\"\"}";
+        String query = """
+                {
+                    topographicPlace: %s (
+                        query: "SomethingElse"
+                    )
+                    {
+                        id
+                        name {
+                            value
+                            __typename
+                        }
+                        topographicPlaceType
+                        __typename
+                    }
+                }
+                """
+                .formatted(GraphQLNames.TOPOGRAPHIC_PLACE);
 
-        LOGGER.debug(query);
-
-        executeGraphQL(query)
+        executeGraphQLQueryOnly(query)
                 .body("data.topographicPlace ", hasSize(0));
     }
 
@@ -112,23 +113,26 @@ public class GraphQLResourceTopographicPlaceIntegrationTest extends AbstractGrap
 
         topographicPlaceRepository.save(topographicPlace);
 
-        String query = "{" +
-                "\"query\":\"" +
-                "{ topographicPlace:" + GraphQLNames.TOPOGRAPHIC_PLACE + " (query: \\\"tfolD\\\") {" +
-                "    id" +
-                "    name {" +
-                "      value" +
-                "      __typename" +
-                "    }" +
-                "    topographicPlaceType" +
-                "    __typename" +
-                "  }" +
-                "}\",\"variables\":\"\"}";
+        String query = """
+                {
+                    topographicPlace: %s (
+                        query: "tfolD"
+                    )
+                    {
+                        id
+                        name {
+                            value
+                            __typename
+                        }
+                        topographicPlaceType
+                        __typename
+                    }
+                }
+                """
+                .formatted(GraphQLNames.TOPOGRAPHIC_PLACE);
 
-        LOGGER.debug(query);
-
-        executeGraphQL(query)
-                .body("data.topographicPlace.find { it.id == \"" + topographicPlace.getNetexId() +"\" } ", notNullValue());
+        executeGraphQLQueryOnly(query)
+                .body("data.topographicPlace.find { it.id == \"" + topographicPlace.getNetexId() + "\" } ", notNullValue());
     }
 
     @Test
@@ -139,19 +143,22 @@ public class GraphQLResourceTopographicPlaceIntegrationTest extends AbstractGrap
 
         topographicPlaceRepository.save(topographicPlace);
 
-        String query = "{" +
-                "\"query\":\"" +
-                "{ topographicPlace:" + GraphQLNames.TOPOGRAPHIC_PLACE + " (topographicPlaceType: county) {" +
-                "    id" +
-                "    topographicPlaceType" +
-                "    __typename" +
-                "  }" +
-                "}\",\"variables\":\"\"}";
+        String query = """
+                {
+                    topographicPlace: %s (
+                        topographicPlaceType: county
+                    )
+                    {
+                        id
+                        topographicPlaceType
+                        __typename
+                    }
+                }
+                """
+                .formatted(GraphQLNames.TOPOGRAPHIC_PLACE);
 
-        LOGGER.debug(query);
-
-        executeGraphQL(query)
-                .body("data.topographicPlace.find { it.id == \"" + topographicPlace.getNetexId() +"\" } ", notNullValue());
+        executeGraphQLQueryOnly(query)
+                .body("data.topographicPlace.find { it.id == \"" + topographicPlace.getNetexId() + "\" } ", notNullValue());
     }
 
     @Test
@@ -163,22 +170,25 @@ public class GraphQLResourceTopographicPlaceIntegrationTest extends AbstractGrap
 
         topographicPlaceRepository.save(topographicPlace);
 
-        String query = "{" +
-                "\"query\":\"" +
-                "{ topographicPlace:" + GraphQLNames.TOPOGRAPHIC_PLACE + " (topographicPlaceType: county, query: \\\"Somewhere\\\") {" +
-                "    id" +
-                "    name {" +
-                "      value" +
-                "      __typename" +
-                "    }" +
-                "    topographicPlaceType" +
-                "    __typename" +
-                "  }" +
-                "}\",\"variables\":\"\"}";
+        String query = """
+                {
+                    topographicPlace: %s (
+                        topographicPlaceType: county,
+                        query: "Somewhere"
+                    )
+                    {
+                        id
+                        name {
+                            value
+                            __typename
+                        }
+                        topographicPlaceType
+                        __typename
+                    }
+                }"""
+                .formatted(GraphQLNames.TOPOGRAPHIC_PLACE);
 
-        LOGGER.debug(query);
-
-        executeGraphQL(query)
-                .body("data.topographicPlace.find { it.id == \"" + topographicPlace.getNetexId() +"\" } ", notNullValue());
+        executeGraphQLQueryOnly(query)
+                .body("data.topographicPlace.find { it.id == \"" + topographicPlace.getNetexId() + "\" } ", notNullValue());
     }
 }

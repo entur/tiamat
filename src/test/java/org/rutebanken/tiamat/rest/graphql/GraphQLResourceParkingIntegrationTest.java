@@ -8,7 +8,7 @@ import static org.hamcrest.Matchers.*;
 
 public class GraphQLResourceParkingIntegrationTest extends AbstractGraphQLResourceIntegrationTest {
     @Test
-    void searchForParkingById() throws Exception {
+    public void searchForParkingById() {
 
         Parking parking = new Parking();
         parking.setCentroid(geometryFactory.createPoint(new Coordinate(10.533212, 59.678080)));
@@ -17,23 +17,26 @@ public class GraphQLResourceParkingIntegrationTest extends AbstractGraphQLResour
 
         parkingVersionedSaverService.saveNewVersion(parking);
 
-        String graphQlJsonQuery = "{" +
-                "\"query\":\"{" +
-                "  parking: " + GraphQLNames.FIND_PARKING + " (id:\\\"" + parking.getNetexId() + "\\\") { " +
-                "    id " +
-                "    parkingType " +
-                "  } " +
-                "}\"," +
-                "\"variables\":\"\"}";
+        String graphQlJsonQuery = """
+                {
+                  parking: %s(
+                    id:"%s"
+                  )
+                  {
+                    id
+                    parkingType
+                  }
+                }
+                """
+                .formatted(GraphQLNames.FIND_PARKING, parking.getNetexId());
 
-        executeGraphQL(graphQlJsonQuery)
+        executeGraphQLQueryOnly(graphQlJsonQuery)
                 .body("data.parking[0].id", equalTo(parking.getNetexId()))
                 .body("data.parking[0].parkingType", equalTo(parking.getParkingType().value()));
-
     }
 
     @Test
-    void searchForParkingByIdAndVersion() throws Exception {
+    public void searchForParkingByIdAndVersion() {
 
         Parking parking = new Parking();
         parking.setCentroid(geometryFactory.createPoint(new Coordinate(10.533212, 59.678080)));
@@ -45,44 +48,71 @@ public class GraphQLResourceParkingIntegrationTest extends AbstractGraphQLResour
 
         String netexId = parking.getNetexId();
 
-        String version_1_GraphQlJsonQuery = "{" +
-                "\"query\":\"{" +
-                "  parking: " + GraphQLNames.FIND_PARKING + " (id:\\\"" + netexId + "\\\", version:1 ) { " +
-                "    id " +
-                "    version " +
-                "    parkingType " +
-                "  } " +
-                "}\"," +
-                "\"variables\":\"\"}";
+        String version_1_GraphQlJsonQuery = """
+                {
+                    parking: %s (
+                        id:"%s",
+                        version:1
+                    )
+                    {
+                        id
+                        version
+                        parkingType
+                    }
+                }
+                """
+                .formatted(GraphQLNames.FIND_PARKING, netexId);
 
-        executeGraphQL(version_1_GraphQlJsonQuery)
+        executeGraphQLQueryOnly(version_1_GraphQlJsonQuery)
                 .body("data.parking[0].id", equalTo(netexId))
-                .body("data.parking[0].version", equalTo(""+parking.getVersion()))
+                .body("data.parking[0].version", equalTo("" + parking.getVersion()))
                 .body("data.parking[0].parkingType", equalTo(parking.getParkingType().value()));
 
         String updatedParkingTypeValue = ParkingTypeEnumeration.PARKING_ZONE.value();
-        String version_2_GraphQlJsonQuery = "{" +
-                "\"query\":\"mutation { " +
-                "  parking:" + GraphQLNames.MUTATE_PARKING + " (Parking: {" +
-                "        id:\\\"" + netexId + "\\\" " +
-                "        parkingType: " + updatedParkingTypeValue +
-                "       }) { " +
-                "      id " +
-                "      version " +
-                "      parkingType " +
-                "    } " +
-                "}\"," +
-                "\"variables\":\"\"}";
+        String version_2_GraphQlJsonQuery = """
+                mutation {
+                    parking: %s (
+                        Parking: {
+                            id:"%s"
+                            parkingType:%s
+                        }
+                    )
+                    {
+                        id
+                        version
+                        parkingType
+                    }
+                }
+                """
+                .formatted(GraphQLNames.MUTATE_PARKING, netexId, updatedParkingTypeValue);
 
-        executeGraphQL(version_2_GraphQlJsonQuery)
+        executeGraphQLQueryOnly(version_2_GraphQlJsonQuery)
                 .body("data.parking[0].id", equalTo(netexId))
                 .body("data.parking[0].version", equalTo("2"))
                 .body("data.parking[0].parkingType", equalTo(updatedParkingTypeValue));
+    }
 
+    public static void main(String[] args) {
+        String version_1_GraphQlJsonQuery = """
+                {
+                    parking: %s (
+                        id:\\"%s\\",
+                        version:1
+                    )
+                    {
+                        id
+                        version
+                        parkingType
+                    }
+                }
+                """
+                .formatted(GraphQLNames.FIND_PARKING, 123);
+
+        System.out.println(version_1_GraphQlJsonQuery);
     }
 
     @Test
-    void testMutateParkingWithParentSiteRef() throws Exception {
+    public void testMutateParkingWithParentSiteRef() {
 
         StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("Brummunddal"));
         stopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
@@ -91,96 +121,99 @@ public class GraphQLResourceParkingIntegrationTest extends AbstractGraphQLResour
 
         stopPlace = stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
 
-        String graphQlQuery = "{\n" +
-                "\"query\": \"mutation { " +
-                "  parking: " + GraphQLNames.MUTATE_PARKING + " (Parking : {" +
-                "     name: {" +
-                "      value: \\\"Parking name\\\" " +
-                "      lang: \\\"no\\\" " +
-                "    }" +
-                "    geometry: { " +
-                "      type:Point " +
-                "      coordinates:[[59.0, 10.5]] " +
-                "    }" +
-                "    totalCapacity:1234, " +
-                "    parkingType:parkAndRide, " +
-                "    parkingVehicleTypes: [car, pedalCycle]" +
-                "    parentSiteRef:\\\"${stopPlace.netexId}\\\"" +
-                "    parkingLayout:covered " +
-                "    principalCapacity:22 " +
-                "    overnightParkingPermitted:true, " +
-                "    rechargingAvailable:false, " +
-                "    secure:false, " +
-                "    realTimeOccupancyAvailable:false, " +
-                "    parkingReservation:reservationAllowed, " +
-                "    bookingUrl:\\\"https://www.rutebanken.org\\\", " +
-                "    freeParkingOutOfHours:true, " +
-                "    parkingProperties: {, " +
-                "      parkingUserTypes:all," +
-                "      spaces: [{" +
-                "        parkingVehicleType:car," +
-                "        parkingStayType:unlimited," +
-                "        numberOfSpaces:123" +
-                "      }]" +
-                "    }" +
-                "    parkingAreas: [{" +
-                "      label: {value:\\\"Plan 1\\\"}" +
-                "      totalCapacity:432" +
-                "      parkingProperties: {" +
-                "          parkingUserTypes:all, " +
-                "          spaces : [{" +
-                "              parkingVehicleType:car" +
-                "              parkingStayType:shortStay" +
-                "              numberOfSpaces:123" +
-                "            }]" +
-                "      }" +
-                "      }]" +
-                "}) {" +
-                "    id, " +
-                "    version, " +
-                "    name {value lang}, " +
-                "    parentSiteRef, " +
-                "    parkingType," +
-                "    parkingVehicleTypes," +
-                "    parkingLayout," +
-                "    principalCapacity," +
-                "    totalCapacity," +
-                "    overnightParkingPermitted," +
-                "    rechargingAvailable," +
-                "    secure," +
-                "    realTimeOccupancyAvailable," +
-                "    parkingReservation," +
-                "    bookingUrl," +
-                "    freeParkingOutOfHours," +
-                "    parkingProperties {" +
-                "      parkingUserTypes," +
-                "      maximumStay," +
-                "      spaces {" +
-                "        parkingVehicleType" +
-                ",       parkingStayType," +
-                "        numberOfSpaces" +
-                "      }" +
-                "    }" +
-                "    parkingAreas {" +
-                "      label {value}" +
-                "      totalCapacity" +
-                "      parkingProperties {" +
-                "        parkingUserTypes," +
-//                "        maximumStay," +
-                "        spaces {," +
-                "          parkingVehicleType," +
-                "          parkingStayType," +
-                "          numberOfSpaces" +
-                "        }" +
-                "      }" +
-                "    }" +
-                "    geometry{" +
-                "      type," +
-                "      coordinates" +
-                "    }" +
-                "  }" +
-                "}\",\"variables\": \"\"}";
-        executeGraphQL(graphQlQuery)
+        String graphQlQuery = """
+                mutation {
+                  parking: %s(Parking : {
+                     name: {
+                      value: "Parking name"
+                      lang: "no"
+                    }
+                    parentSiteRef:"%s"
+                    geometry: {
+                      type:Point
+                      coordinates:[[59.0, 10.5]]
+                    }
+                    totalCapacity:1234,
+                    parkingType:parkAndRide,
+                    parkingVehicleTypes: [car, pedalCycle]
+                    parkingLayout:covered
+                    principalCapacity:22
+                    overnightParkingPermitted:true,
+                    rechargingAvailable:false,
+                    secure:false,
+                    realTimeOccupancyAvailable:false,
+                    parkingReservation:reservationAllowed,
+                    bookingUrl:"https://www.rutebanken.org",
+                    freeParkingOutOfHours:true,
+                    parkingProperties: {,
+                      parkingUserTypes:all,
+                      spaces: [{
+                        parkingVehicleType:car,
+                        parkingStayType:unlimited,
+                        numberOfSpaces:123
+                      }]
+                    }
+                    parkingAreas: [{
+                      label: {value:"Plan 1"}
+                      totalCapacity:432
+                      parkingProperties: {
+                          parkingUserTypes:all,
+                          spaces : [{
+                              parkingVehicleType:car
+                              parkingStayType:shortStay
+                              numberOfSpaces:123
+                            }]
+                      }
+                    }]
+                  })
+                  {
+                    id,
+                    version,
+                    name {value lang},
+                    parentSiteRef,
+                    parkingType,
+                    parkingVehicleTypes,
+                    parkingLayout,
+                    principalCapacity,
+                    totalCapacity,
+                    overnightParkingPermitted,
+                    rechargingAvailable,
+                    secure,
+                    realTimeOccupancyAvailable,
+                    parkingReservation,
+                    bookingUrl,
+                    freeParkingOutOfHours,
+                    parkingProperties {
+                      parkingUserTypes,
+                      maximumStay,
+                      spaces {
+                        parkingVehicleType,
+                        parkingStayType,
+                        numberOfSpaces
+                      }
+                    }
+                    parkingAreas {
+                      label {value}
+                      totalCapacity
+                      parkingProperties {
+                        parkingUserTypes,
+                        spaces {,
+                          parkingVehicleType,
+                          parkingStayType,
+                          numberOfSpaces
+                        }
+                      }
+                    }
+                    geometry{
+                      type,
+                      coordinates
+                    }
+                  }
+                }
+                """
+                .formatted(GraphQLNames.MUTATE_PARKING, stopPlace.getNetexId());
+
+        executeGraphQLQueryOnly(graphQlQuery)
                 .body("data.parking", notNullValue())
                 .root("data.parking[0]")
                 .body("id", notNullValue())
@@ -211,101 +244,103 @@ public class GraphQLResourceParkingIntegrationTest extends AbstractGraphQLResour
     }
 
     @Test
-    void testMutateParkingWithoutParentSiteRef() throws Exception {
+    public void testMutateParkingWithoutParentSiteRef() {
 
         StopPlace stopPlace = stopPlaceRepository.save(new StopPlace());
 
-        String graphQlQuery = "{\n" +
-                "\"query\": \"mutation { " +
-                "  parking: " + GraphQLNames.MUTATE_PARKING + " (Parking : {" +
+        String graphQlQuery = """
+                mutation {
+                  parking:  %s(Parking : {
+                     name: {
+                      value: "Parking name"
+                      lang: "no"
+                    }
+                    parentSiteRef:"%s"
+                    geometry: {
+                      type:Point
+                      coordinates:[[59.0, 10.5]]
+                    }
+                    totalCapacity:1234,
+                    parkingType:parkAndRide,
+                    parkingVehicleTypes: [car, pedalCycle]
+                    parkingLayout:covered
+                    principalCapacity:22
+                    overnightParkingPermitted:true,
+                    rechargingAvailable:false,
+                    secure:false,
+                    realTimeOccupancyAvailable:false,
+                    parkingReservation:reservationAllowed,
+                    bookingUrl:"https://www.rutebanken.org",
+                    freeParkingOutOfHours:true,
+                    parkingProperties: {,
+                      parkingUserTypes:all,
+                      spaces: [{
+                        parkingVehicleType:car,
+                        parkingStayType:unlimited,
+                        numberOfSpaces:123
+                      }]
+                    }
+                    parkingAreas: [{
+                      label: {value:"Plan 1"}
+                      totalCapacity:432
+                      parkingProperties: {
+                          parkingUserTypes:all,
+                          spaces : [{
+                              parkingVehicleType:car
+                              parkingStayType:shortStay
+                              numberOfSpaces:123
+                            }]
+                      }
+                    }]
+                  })
+                  {
+                    id,
+                    version,
+                    name {value lang},
+                    parentSiteRef,
+                    parkingType,
+                    parkingVehicleTypes,
+                    parkingLayout,
+                    principalCapacity,
+                    totalCapacity,
+                    overnightParkingPermitted,
+                    rechargingAvailable,
+                    secure,
+                    realTimeOccupancyAvailable,
+                    parkingReservation,
+                    bookingUrl,
+                    freeParkingOutOfHours,
+                    parkingProperties {
+                      parkingUserTypes,
+                      maximumStay,
+                      spaces {
+                        parkingVehicleType,
+                        parkingStayType,
+                        numberOfSpaces
+                      }
+                    }
+                    parkingAreas {
+                      label {value}
+                      totalCapacity
+                      parkingProperties {
+                        parkingUserTypes,
+                        spaces {,
+                          parkingVehicleType,
+                          parkingStayType,
+                          numberOfSpaces
+                        }
+                      }
+                    }
+                    geometry{
+                      type,
+                      coordinates
+                    }
+                  }
+                }
+                """
+                .formatted(GraphQLNames.MUTATE_PARKING, stopPlace.getNetexId());
 
-                "     name: {" +
-                "      value: \\\"Parking name\\\" " +
-                "      lang: \\\"no\\\" " +
-                "    }" +
-                "    parentSiteRef:\\\"${stopPlace.netexId}\\\"" +
-                "    geometry: { " +
-                "      type:Point " +
-                "      coordinates:[[59.0, 10.5]] " +
-                "    }" +
-                "    totalCapacity:1234, " +
-                "    parkingType:parkAndRide, " +
-                "    parkingVehicleTypes: [car, pedalCycle]" +
-                "    parkingLayout:covered " +
-                "    principalCapacity:22 " +
-                "    overnightParkingPermitted:true, " +
-                "    rechargingAvailable:false, " +
-                "    secure:false, " +
-                "    realTimeOccupancyAvailable:false, " +
-                "    parkingReservation:reservationAllowed, " +
-                "    bookingUrl:\\\"https://www.rutebanken.org\\\", " +
-                "    freeParkingOutOfHours:true, " +
-                "    parkingProperties: {, " +
-                "      parkingUserTypes:all," +
-                "      spaces: [{" +
-                "        parkingVehicleType:car," +
-                "        parkingStayType:unlimited," +
-                "        numberOfSpaces:123" +
-                "      }]" +
-                "    }" +
-                "    parkingAreas: [{" +
-                "      label: {value:\\\"Plan 1\\\"}" +
-                "      totalCapacity:432" +
-                "      parkingProperties: {" +
-                "          parkingUserTypes:all, " +
-                "          spaces : [{" +
-                "              parkingVehicleType:car" +
-                "              parkingStayType:shortStay" +
-                "              numberOfSpaces:123" +
-                "            }]" +
-                "      }" +
-                "      }]" +
-                "}) {" +
-                "    id, " +
-                "    version, " +
-                "    name {value lang}, " +
-                "    parentSiteRef, " +
-                "    parkingType," +
-                "    parkingVehicleTypes," +
-                "    parkingLayout," +
-                "    principalCapacity," +
-                "    totalCapacity," +
-                "    overnightParkingPermitted," +
-                "    rechargingAvailable," +
-                "    secure," +
-                "    realTimeOccupancyAvailable," +
-                "    parkingReservation," +
-                "    bookingUrl," +
-                "    freeParkingOutOfHours," +
-                "    parkingProperties {" +
-                "      parkingUserTypes," +
-                "      maximumStay," +
-                "      spaces {" +
-                "        parkingVehicleType" +
-                ",       parkingStayType," +
-                "        numberOfSpaces" +
-                "      }" +
-                "    }" +
-                "    parkingAreas {" +
-                "      label {value}" +
-                "      totalCapacity" +
-                "      parkingProperties {" +
-                "        parkingUserTypes," +
-//                "        maximumStay," +
-                "        spaces {," +
-                "          parkingVehicleType," +
-                "          parkingStayType," +
-                "          numberOfSpaces" +
-                "        }" +
-                "      }" +
-                "    }" +
-                "    geometry{" +
-                "      type," +
-                "      coordinates" +
-                "    }" +
-                "  }" +
-                "}\",\"variables\": \"\"}";
-        executeGraphQL(graphQlQuery)
+        executeGraphQLQueryOnly(graphQlQuery)
                 .body("data.parking", notNullValue())
                 .root("data.parking[0]")
                 .body("id", notNullValue())
@@ -337,43 +372,42 @@ public class GraphQLResourceParkingIntegrationTest extends AbstractGraphQLResour
     }
 
     @Test
-    void testMutateMultipleParking() throws Exception {
+    public void testMutateMultipleParking() {
 
         StopPlace stopPlace = stopPlaceRepository.save(new StopPlace());
 
-        String graphQlQuery = "{\n" +
-                "\"query\": \"mutation { " +
-                "  parking: " + GraphQLNames.MUTATE_PARKING + " (Parking : [{" +
-                "     name: {" +
-                "      value: \\\"Parking name\\\" " +
-                "      lang: \\\"no\\\" " +
-                "    }" +
-                "    parentSiteRef:\\\"${stopPlace.netexId}\\\"" +
-                "    geometry: { " +
-                "      type:Point " +
-                "      coordinates:[[59.0, 10.5]] " +
-                "    }" +
-                "  }, {" +
-                "     name: {" +
-                "      value: \\\"Parking name\\\" " +
-                "      lang: \\\"no\\\" " +
-                "    }" +
-                "    parentSiteRef:\\\"${stopPlace.netexId}\\\"" +
-                "    geometry: { " +
-                "      type:Point " +
-                "      coordinates:[[59.0, 10.5]] " +
-                "    }" +
-                "  }] ) {" +
-                "    id, " +
-                "    name {value lang}, " +
+        String graphQlQuery = """
+                mutation {
+                  parking:  %s(Parking : [{
+                     name: {
+                      value: "Parking name"
+                      lang: "no"
+                    }
+                    parentSiteRef:"%s"
+                    geometry: {
+                      type:Point
+                      coordinates:[[59.0, 10.5]]
+                    }
+                  }, {
+                     name: {
+                      value: "Parking name"
+                      lang: "no"
+                    }
+                    parentSiteRef:"%s"
+                    geometry: {
+                      type:Point
+                      coordinates:[[59.0, 10.5]]
+                    }
+                  }] ) {
+                    id,
+                    name {value lang},
+                  }
+                }
+                """
+                .formatted(GraphQLNames.MUTATE_PARKING, stopPlace.getNetexId(), stopPlace.getNetexId());
 
-                "  }" +
-                "}\",\"variables\": \"\"}";
-
-        executeGraphQL(graphQlQuery)
+        executeGraphQLQueryOnly(graphQlQuery)
                 .body("data.parking", notNullValue())
                 .body("data.parking", hasSize(2));
-
-
     }
 }

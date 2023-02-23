@@ -4,10 +4,10 @@ import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.nullValue;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.MUTATE_GROUP_OF_STOP_PLACES;
 
 public class GraphQLResourceGroupOfStopPlacesIntegrationTest extends AbstractGraphQLResourceIntegrationTest {
 
@@ -27,13 +27,13 @@ public class GraphQLResourceGroupOfStopPlacesIntegrationTest extends AbstractGra
         var versionComment = "VersionComment";
 
         var graphQlJsonQuery = """
-                    mutation {
-                    group: ${MUTATE_GROUP_OF_STOP_PLACES}(GroupOfStopPlaces: {
-                        name: {value: "${groupName}"},
-                        versionComment: "${versionComment}",
+                mutation {
+                    group: %s(GroupOfStopPlaces: {
+                        name: {value: "%s"},
+                        versionComment: "%s",
                         members: [
-                            {ref: "${stopPlace1.getNetexId()}"},
-                            {ref: "${stopPlace2.getNetexId()}"}],
+                            {ref: "%s"},
+                            {ref: "%s"}],
                         }) {
                     id
                     version
@@ -53,7 +53,13 @@ public class GraphQLResourceGroupOfStopPlacesIntegrationTest extends AbstractGra
                     }
                   }
                 }
-                """;
+                """.formatted(
+                MUTATE_GROUP_OF_STOP_PLACES,
+                groupName,
+                versionComment,
+                stopPlace1.getNetexId(),
+                stopPlace2.getNetexId()
+        );
 
         executeGraphQLQueryOnly(graphQlJsonQuery)
                 .body("data.group.name.value", equalTo(groupName))

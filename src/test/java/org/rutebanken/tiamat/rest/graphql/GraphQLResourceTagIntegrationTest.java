@@ -12,13 +12,13 @@ import java.time.Instant;
 
 import static org.hamcrest.Matchers.*;
 
-class GraphQLResourceTagIntegrationTest extends AbstractGraphQLResourceIntegrationTest {
+public class GraphQLResourceTagIntegrationTest extends AbstractGraphQLResourceIntegrationTest {
 
     @Autowired
     private TagRepository tagRepository;
 
     @Test
-    void addTagToStop() throws Exception {
+    public void addTagToStop() {
 
         String stopPlaceName = "StopPlace";
         StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(stopPlaceName));
@@ -29,19 +29,26 @@ class GraphQLResourceTagIntegrationTest extends AbstractGraphQLResourceIntegrati
         String tagName = "followup";
         String comment = "comment for tag";
 
-        String graphQlJsonQuery = "{" +
-                "\"query\":\"mutation { " +
-                "  tag: " + GraphQLNames.CREATE_TAG + " (idReference:\\\"" + stopPlace.getNetexId() + "\\\", name: \\\"" + tagName + "\\\", comment: \\\"" + comment + "\\\") { " +
-                "       idReference" +
-                "       name" +
-                "       comment" +
-                "       created" +
-                "       removed" +
-                "       removedBy" +
-                "  } " +
-                "}\",\"variables\":\"\"}";
+        String graphQlJsonQuery = """
+                mutation {
+                  tag: %s (
+                    idReference:"%s",
+                    name:"%s",
+                    comment:"%s"
+                    )
+                    {
+                       idReference
+                       name
+                       comment
+                       created
+                       removed
+                       removedBy
+                    }
+                }
+                """
+                .formatted(GraphQLNames.CREATE_TAG, stopPlace.getNetexId(), tagName, comment);
 
-        executeGraphQL(graphQlJsonQuery)
+        executeGraphQLQueryOnly(graphQlJsonQuery)
                 .body("data.tag.name", equalTo(tagName))
                 .body("data.tag.comment", equalTo(comment))
                 .body("data.tag.idReference", equalTo(stopPlace.getNetexId()))
@@ -51,7 +58,7 @@ class GraphQLResourceTagIntegrationTest extends AbstractGraphQLResourceIntegrati
     }
 
     @Test
-    void removeTagFromStop() throws Exception {
+    public void removeTagFromStop() {
 
         String stopPlaceName = "StopPlace";
         StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(stopPlaceName));
@@ -66,18 +73,24 @@ class GraphQLResourceTagIntegrationTest extends AbstractGraphQLResourceIntegrati
         tag.setCreated(Instant.now());
         tagRepository.save(tag);
 
-        String graphQlJsonQuery = "{" +
-                "\"query\":\"mutation { " +
-                "  tag: " + GraphQLNames.REMOVE_TAG + " (idReference:\\\"" + stopPlace.getNetexId() + "\\\", name: \\\"" + tagName + "\\\") { " +
-                "       idReference" +
-                "       name" +
-                "       created" +
-                "       removed" +
-                "       removedBy" +
-                "  } " +
-                "}\",\"variables\":\"\"}";
+        String graphQlJsonQuery = """
+                mutation {
+                    tag: %s (
+                        idReference:"%s",
+                        name:"%s"
+                    )
+                    {
+                        idReference
+                        name
+                        created
+                        removed
+                        removedBy
+                    }
+                }
+                """
+                .formatted(GraphQLNames.REMOVE_TAG, stopPlace.getNetexId(), tagName);
 
-        executeGraphQL(graphQlJsonQuery)
+        executeGraphQLQueryOnly(graphQlJsonQuery)
                 .body("data.tag.name", equalTo(tagName))
                 .body("data.tag.idReference", equalTo(stopPlace.getNetexId()))
                 .body("data.tag.created", notNullValue())

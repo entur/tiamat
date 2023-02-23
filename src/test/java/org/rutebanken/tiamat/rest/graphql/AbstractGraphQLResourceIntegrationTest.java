@@ -14,7 +14,7 @@ import javax.transaction.Transactional;
 import static io.restassured.RestAssured.given;
 import static org.rutebanken.tiamat.config.JerseyConfig.SERVICES_STOP_PLACE_PATH;
 
-public class AbstractGraphQLResourceIntegrationTest extends TiamatIntegrationTest {
+public abstract class AbstractGraphQLResourceIntegrationTest extends TiamatIntegrationTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractGraphQLResourceIntegrationTest.class);
 

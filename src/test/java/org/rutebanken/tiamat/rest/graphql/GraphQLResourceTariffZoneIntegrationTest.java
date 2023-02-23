@@ -13,13 +13,13 @@ import java.util.Arrays;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 
-class GraphQLResourceTariffZoneIntegrationTest extends AbstractGraphQLResourceIntegrationTest {
+public class GraphQLResourceTariffZoneIntegrationTest extends AbstractGraphQLResourceIntegrationTest {
 
     @Autowired
     private TariffZoneRepository tariffZoneRepository;
 
     @Test
-    void searchForTariffZone() throws Exception {
+    public void searchForTariffZone() {
 
         var tariffZone = new TariffZone();
         tariffZone.setNetexId("BRA:TariffZone:112");
@@ -30,27 +30,28 @@ class GraphQLResourceTariffZoneIntegrationTest extends AbstractGraphQLResourceIn
         tariffZoneRepository.save(tariffZone);
 
         String graphQlJsonQuery = """
-                        {
-                            tariffZones(query:"112") {
-                                id
-                                name {value}
-                                version
-                                    geometry {
-                                        type
-                                        coordinates
-                                    }
-                                    polygon {
-                                        type
-                                        coordinates
-                                    }
-                          }
-                        }""";
+                {
+                    tariffZones(query:"112") {
+                        id
+                        name {value}
+                        version
+                        geometry {
+                            type
+                            coordinates
+                        }
+                        polygon {
+                            type
+                            coordinates
+                        }
+                    }
+                }
+                """;
 
         executeGraphQLQueryOnly(graphQlJsonQuery)
                 .root("data.tariffZones[0]")
                 .body("name.value", equalTo(tariffZone.getName().getValue()))
                 .body("id", equalTo(tariffZone.getNetexId()))
                 .body("version", equalTo(Long.toString(tariffZone.getVersion())))
-                .body("polygon",notNullValue());
+                .body("polygon", notNullValue());
     }
 }

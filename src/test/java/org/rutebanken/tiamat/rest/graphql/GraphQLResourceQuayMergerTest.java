@@ -15,7 +15,7 @@ import static org.hamcrest.Matchers.*;
 public class GraphQLResourceQuayMergerTest extends AbstractGraphQLResourceIntegrationTest {
 
     @Test
-    void mergeQuays() {
+    public void mergeQuays() {
 
         StopPlace stopPlace = new StopPlace();
         stopPlace.setName(new EmbeddableMultilingualString("Name"));
@@ -53,9 +53,9 @@ public class GraphQLResourceQuayMergerTest extends AbstractGraphQLResourceIntegr
         String graphQlJsonQuery = """
                 mutation {
                   stopPlace: mergeQuays (
-                          stopPlaceId: "${stopPlace.getNetexId()}",
-                          fromQuayId: "${fromQuay.getNetexId()}",
-                          toQuayId: "${toQuay.getNetexId()}",
+                          stopPlaceId: "%s",
+                          fromQuayId: "%s",
+                          toQuayId: "%s",
                        ) {
                             id
                             importedId
@@ -69,8 +69,8 @@ public class GraphQLResourceQuayMergerTest extends AbstractGraphQLResourceIntegr
                                 }
                             }
                         }
-                 }""";
-
+                 }"""
+                .formatted(stopPlace.getNetexId(), fromQuay.getNetexId(), toQuay.getNetexId());
 
         Set<String> originalIds = new HashSet<>();
         originalIds.addAll(toQuay.getOriginalIds());
