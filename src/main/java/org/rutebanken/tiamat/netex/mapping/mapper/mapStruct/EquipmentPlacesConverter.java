@@ -13,36 +13,22 @@
  * limitations under the Licence.
  */
 
-package org.rutebanken.tiamat.model;
+package org.rutebanken.tiamat.netex.mapping.mapper.mapStruct;
 
-public enum ModificationEnumeration {
+import org.mapstruct.Mapper;
+import org.rutebanken.netex.model.EquipmentPlaces_RelStructure;
+import org.rutebanken.tiamat.model.EquipmentPlace;
 
+import java.util.List;
 
-    NEW("new"),
+@Mapper
+public class EquipmentPlacesConverter {
 
-    DELETE("delete"),
-
-    REVISE("revise"),
-    DELTA("delta"),
-    UNCHANGED("unchanged");
-
-    private final String value;
-
-    ModificationEnumeration(String v) {
-        value = v;
+    public EquipmentPlaces_RelStructure convertTo(List<EquipmentPlace> equipmentPlaces) {
+        return null;
     }
 
-    public static ModificationEnumeration fromValue(String v) {
-        for (ModificationEnumeration c : ModificationEnumeration.values()) {
-            if (c.value.equals(v)) {
-                return c;
-            }
-        }
-        throw new IllegalArgumentException(v);
+    public List<EquipmentPlace> convertFrom(EquipmentPlaces_RelStructure equipmentPlaces_relStructure) {
+        return null;
     }
-
-    public String value() {
-        return value;
-    }
-
 }

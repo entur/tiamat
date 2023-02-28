@@ -13,36 +13,20 @@
  * limitations under the Licence.
  */
 
-package org.rutebanken.tiamat.model;
+package org.rutebanken.tiamat.netex.mapping.mapper.mapStruct;
 
-public enum ModificationEnumeration {
+import org.mapstruct.Mapper;
 
+import java.time.Duration;
 
-    NEW("new"),
+@Mapper
+public class DurationConverter {
 
-    DELETE("delete"),
-
-    REVISE("revise"),
-    DELTA("delta"),
-    UNCHANGED("unchanged");
-
-    private final String value;
-
-    ModificationEnumeration(String v) {
-        value = v;
+    public Duration convertTo(Duration duration) {
+        return Duration.from(duration);
     }
 
-    public static ModificationEnumeration fromValue(String v) {
-        for (ModificationEnumeration c : ModificationEnumeration.values()) {
-            if (c.value.equals(v)) {
-                return c;
-            }
-        }
-        throw new IllegalArgumentException(v);
+    public Duration convertFrom(Duration duration) {
+        return Duration.from(duration);
     }
-
-    public String value() {
-        return value;
-    }
-
 }

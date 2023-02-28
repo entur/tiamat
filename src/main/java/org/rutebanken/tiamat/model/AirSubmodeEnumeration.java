@@ -32,8 +32,7 @@ public enum AirSubmodeEnumeration {
     DOMESTIC_CHARTER_FLIGHT("domesticCharterFlight"),
     SCHENGEN_AREA_FLIGHT("SchengenAreaFlight"),
     AIRSHIP_SERVICE("airshipService"),
-    SHORT_HAUL_INTERNATIONAL_FLIGHT("shortHaulInternationalFlight"),
-    CANAL_BARGE("canalBarge");
+    SHORT_HAUL_INTERNATIONAL_FLIGHT("shortHaulInternationalFlight");
     private final String value;
 
     AirSubmodeEnumeration(String v) {

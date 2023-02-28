@@ -38,7 +38,6 @@ public class NetexMappingContextThreadLocal {
         return threadLocalMappingContext.get();
     }
 
-
     public static void updateMappingContext(SiteFrame netexSiteFrame) {
         String timeZoneString = Optional.of(netexSiteFrame)
                 .map(SiteFrame::getFrameDefaults)

@@ -13,36 +13,17 @@
  * limitations under the Licence.
  */
 
-package org.rutebanken.tiamat.model;
+package org.rutebanken.tiamat.netex.mapping.mapper.mapStruct;
 
-public enum ModificationEnumeration {
+import org.mapstruct.Mapper;
+import org.mapstruct.ReportingPolicy;
+import org.rutebanken.tiamat.model.AlternativeName;
 
+@Mapper(uses = {LocalDateTimeInstantConverter.class, ValidBetweenConverter.class},
+        unmappedTargetPolicy = ReportingPolicy.IGNORE)
+public interface AlternativeNameMapper {
 
-    NEW("new"),
+    org.rutebanken.netex.model.AlternativeName convertTo(AlternativeName alternativeName);
 
-    DELETE("delete"),
-
-    REVISE("revise"),
-    DELTA("delta"),
-    UNCHANGED("unchanged");
-
-    private final String value;
-
-    ModificationEnumeration(String v) {
-        value = v;
-    }
-
-    public static ModificationEnumeration fromValue(String v) {
-        for (ModificationEnumeration c : ModificationEnumeration.values()) {
-            if (c.value.equals(v)) {
-                return c;
-            }
-        }
-        throw new IllegalArgumentException(v);
-    }
-
-    public String value() {
-        return value;
-    }
-
+    AlternativeName convertFrom(org.rutebanken.netex.model.AlternativeName alternativeName);
 }

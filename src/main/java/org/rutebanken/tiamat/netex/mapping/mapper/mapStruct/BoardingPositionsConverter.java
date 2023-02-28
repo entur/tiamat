@@ -13,36 +13,22 @@
  * limitations under the Licence.
  */
 
-package org.rutebanken.tiamat.model;
+package org.rutebanken.tiamat.netex.mapping.mapper.mapStruct;
 
-public enum ModificationEnumeration {
+import org.mapstruct.Mapper;
+import org.rutebanken.netex.model.BoardingPositions_RelStructure;
+import org.rutebanken.tiamat.model.BoardingPosition;
 
+import java.util.List;
 
-    NEW("new"),
+@Mapper
+public class BoardingPositionsConverter {
 
-    DELETE("delete"),
-
-    REVISE("revise"),
-    DELTA("delta"),
-    UNCHANGED("unchanged");
-
-    private final String value;
-
-    ModificationEnumeration(String v) {
-        value = v;
+    public BoardingPositions_RelStructure convertTo(List<BoardingPosition> boardingPositions) {
+        return null;
     }
 
-    public static ModificationEnumeration fromValue(String v) {
-        for (ModificationEnumeration c : ModificationEnumeration.values()) {
-            if (c.value.equals(v)) {
-                return c;
-            }
-        }
-        throw new IllegalArgumentException(v);
+    public List<BoardingPosition> convertFrom(BoardingPositions_RelStructure boardingPositions_relStructure) {
+        return null;
     }
-
-    public String value() {
-        return value;
-    }
-
 }

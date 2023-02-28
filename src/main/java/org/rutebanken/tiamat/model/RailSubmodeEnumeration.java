@@ -40,6 +40,8 @@ public enum RailSubmodeEnumeration {
     REPLACEMENT_RAIL_SERVICE("replacementRailService"),
     SPECIAL_TRAIN("specialTrain"),
     CROSS_COUNTRY_RAIL("crossCountryRail"),
+    INTERNATIONAL("international"),
+    AIRPORT_LINK_RAIL("airportLinkRail"),
 
     RACK_AND_PINION_RAILWAY("rackAndPinionRailway");
     private final String value;

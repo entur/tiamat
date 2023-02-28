@@ -38,6 +38,7 @@ public enum WaterSubmodeEnumeration {
     CABLE_FERRY("cableFerry"),
     RIVER_BUS("riverBus"),
     SCHEDULED_FERRY("scheduledFerry"),
+    CANAL_BARGE("canalBarge"),
     SHUTTLE_FERRY_SERVICE("shuttleFerryService");
     private final String value;
 
