@@ -8,7 +8,7 @@ rollingUpdate:
   maxUnavailable: 1
 
 resources:
-  cpuLimit: 1200m
+  cpuLimit: 7000m
   memLimit: 10000Mi
   cpuRequest: 1200m
   memRequest: 7500Mi
