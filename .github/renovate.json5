@@ -1,0 +1,17 @@
+{
+    $schema: "https://docs.renovatebot.com/renovate-schema.json",
+    extends: ["github>HSLdevcom/jore4-tools//renovatebot/jore4-default-preset.json5"],
+
+    // repository-specific additional rules about grouping, exclusions and inclusions
+    // Note: if the rule feels generic enough, should consider adding it to the jore4 default preset
+    packageRules: [
+        {
+            // restrict spring boot updates to <3 versions for now
+            groupName: "spring boot",
+            groupSlug: "spring-boot",
+            matchPackageNames: ["org.springframework.boot"],
+            matchPackagePrefixes: ["org.springframework.boot:"],
+            allowedVersions: "<3",
+        },
+    ],
+}
