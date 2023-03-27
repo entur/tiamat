@@ -96,7 +96,7 @@
 
         <!-- NB: Concious choice of using snapshot version. This is to keep in
             sync, and fail fast if incompatibilities -->
-        <netex-java-model.version>1.0.12-SNAPSHOT</netex-java-model.version>
+        <netex-java-model.version>1.0.14</netex-java-model.version>
         <hazelcast-helper.version>1.0.62</hazelcast-helper.version>
         <rutebanken-gcp-storage.version>1.83</rutebanken-gcp-storage.version>
         <rutebanken-organisation.version>1.0.61</rutebanken-organisation.version>
@@ -120,6 +120,17 @@
             <id>maven2</id>
             <name>central</name>
             <url>https://repo.maven.apache.org/maven2</url>
+        </repository>
+        <repository>
+            <id>osgeo</id>
+            <name>OSGeo Release Repository</name>
+            <url>https://repo.osgeo.org/repository/release/</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
         </repository>
     </repositories>
 
@@ -166,6 +177,8 @@
                 <groupId>org.entur.helpers</groupId>
                 <artifactId>oauth2</artifactId>
                 <version>${entur.helpers.version}</version>
+                <scope>system</scope>
+                <systemPath>${project.basedir}/src/main/resources/helper-jars/oauth2-1.89-SNAPSHOT.jar</systemPath>
             </dependency>
 
             <dependency>
@@ -254,11 +267,15 @@
         <dependency>
             <groupId>org.entur.helpers</groupId>
             <artifactId>hazelcast4-helper</artifactId>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/src/main/resources/helper-jars/hazelcast4-helper-1.89-SNAPSHOT.jar</systemPath>
         </dependency>
 
         <dependency>
             <groupId>org.entur.helpers</groupId>
             <artifactId>organisation</artifactId>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/src/main/resources/helper-jars/organisation-1.89-SNAPSHOT.jar</systemPath>
         </dependency>
 
         <dependency>
@@ -388,6 +405,15 @@
         </dependency>
 
         <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-oauth2-resource-server</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-oauth2-jose</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
         </dependency>
@@ -459,7 +485,7 @@
                 https://github.com/jboss/xerces/pull/14
                 https://issues.apache.org/jira/browse/XERCESJ-1276
             -->
-            <version>2.12.0.SP03-RB</version>
+            <version>2.12.2</version>
         </dependency>
 
 
@@ -688,4 +714,3 @@
 
 
 </project>
-
