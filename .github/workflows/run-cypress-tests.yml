@@ -1,0 +1,32 @@
+name: Run cypress tests
+
+on:
+  # this workflow is only called by others, won't be executed on itself
+  # as it uses the pre-built docker image that is produced in the upstream job
+  workflow_call:
+
+jobs:
+  run_cypress_tests:
+    name: Run cypress e2e tests from docker
+    runs-on: ubuntu-20.04
+
+    steps:
+      - name: Collect Workflow Telemetry
+        uses: runforesight/foresight-workflow-kit-action@v1
+        if: ${{ always() }}
+        with:
+          api_key: ${{ secrets.FORESIGHT_GITHUB_ACTIONS }}
+
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Extract metadata to env variables
+        uses: HSLdevcom/jore4-tools/github-actions/extract-metadata@extract-metadata-v1
+
+      - name: Start e2e env
+        uses: HSLdevcom/jore4-tools/github-actions/setup-e2e-environment@setup-e2e-environment-v1
+        # with:
+        # tiamat_version: "${{ env.IMAGE_NAME }}:${{ env.COMMIT_ID }}"
+
+      - name: Run e2e tests from github action
+        uses: HSLdevcom/jore4-tools/github-actions/run-cypress-tests@run-cypress-tests-v1
