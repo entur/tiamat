@@ -63,6 +63,8 @@ public class ParkingPropertiesListConverter extends BidirectionalConverter<List<
            final List<ParkingUserEnumeration> parkingUserEnumerations = mapperFacade.mapAsList(parkingProperties.getParkingUserTypes(), ParkingUserEnumeration.class);
             parkingCapacities_relStructure.getParkingCapacityRefOrParkingCapacity().addAll(parkingCapacityList);
             final org.rutebanken.netex.model.ParkingProperties netexParkingProperties = new org.rutebanken.netex.model.ParkingProperties();
+            netexParkingProperties.setId(parkingProperties.getNetexId());
+            netexParkingProperties.setVersion(String.valueOf(parkingProperties.getVersion()));
             netexParkingProperties.getParkingUserTypes().addAll(parkingUserEnumerations);
             netexParkingProperties.withSpaces(parkingCapacities_relStructure);
             parkingProperties_relStructure.getParkingProperties().add(netexParkingProperties);
