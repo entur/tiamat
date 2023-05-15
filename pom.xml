@@ -61,9 +61,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring-cloud-gcp.version>1.2.5.RELEASE</spring-cloud-gcp.version>
         <maven.compiler.plugin.version>3.8.1</maven.compiler.plugin.version>
-        <plexus.compiler.javac.version>2.8.8</plexus.compiler.javac.version>
-        <spring-boot-plugin.version>2.4.13</spring-boot-plugin.version>
-        <spring-boot.version>2.4.13</spring-boot.version>
+        <spring-boot-plugin.version>2.7.11</spring-boot-plugin.version>
+        <spring-boot.version>2.7.11</spring-boot.version>
         <spring.security.version>5.3.5.RELEASE</spring.security.version>
         <postgresql.version>42.2.4</postgresql.version>
         <geodb.version>0.9</geodb.version>
@@ -87,7 +86,6 @@
         <hazelcast-hibernate53.version>2.1.1</hazelcast-hibernate53.version>
         <hibernate.version>5.4.0.Final</hibernate.version>
         <hibernate-spatial.version>5.4.0.Final</hibernate-spatial.version>
-        <groovy-all.version>3.0.9</groovy-all.version>
         <jaxb-version>2.3.0.1</jaxb-version>
         <swagger-jersey2.version>1.6.2</swagger-jersey2.version>
         <jackson-version>2.11.3</jackson-version>
@@ -106,7 +104,6 @@
         <jts-core.version>1.16.0</jts-core.version>
 
         <maven-surefire-plugin.version>3.0.0-M6</maven-surefire-plugin.version>
-        <maven-antrun-plugin.version>3.0.0</maven-antrun-plugin.version>
         <argLine></argLine>
         <!--TODO temporary manual upgrade of Logback-->
         <logback.version>1.2.8</logback.version>
@@ -513,14 +510,6 @@
         </dependency>
 
         <dependency>
-            <groupId>org.codehaus.groovy</groupId>
-            <artifactId>groovy-all</artifactId>
-            <version>${groovy-all.version}</version>
-            <type>pom</type>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
             <version>${assertj-core.version}</version>
@@ -582,8 +571,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>${maven.compiler.plugin.version}</version>
                 <configuration>
-                    <source>11</source>
-                    <target>11</target>
+                    <source>17</source>
+                    <target>17</target>
                     <encoding>UTF-8</encoding>
                     <compilerArgs>
                         <!--arg>-Werror</arg-->
@@ -591,11 +580,6 @@
                     </compilerArgs>
                 </configuration>
                 <dependencies>
-                    <dependency>
-                        <groupId>org.codehaus.plexus</groupId>
-                        <artifactId>plexus-compiler-javac</artifactId>
-                        <version>${plexus.compiler.javac.version}</version>
-                    </dependency>
                 </dependencies>
             </plugin>
 
@@ -607,32 +591,6 @@
                     <argLine>@{argLine} -Xms500m -Xmx1000m -Xss256k</argLine>
                     <runOrder>alphabetical</runOrder>
                 </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>${maven-antrun-plugin.version}</version>
-                <executions>
-                    <execution>
-                        <id>test-compile</id>
-                        <phase>test-compile</phase>
-                        <configuration>
-                            <target>
-                                <mkdir dir="${basedir}/src/test/groovy"/>
-                                <taskdef name="groovyc" classname="org.codehaus.groovy.ant.Groovyc">
-                                    <classpath refid="maven.test.classpath"/>
-                                </taskdef>
-                                <mkdir dir="${project.build.testOutputDirectory}"/>
-                                <groovyc destdir="${project.build.testOutputDirectory}"
-                                         srcdir="${basedir}/src/test/groovy/" listfiles="true">
-                                    <classpath refid="maven.test.classpath"/>
-                                </groovyc>
-                            </target>
-                        </configuration>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>org.springframework.boot</groupId>

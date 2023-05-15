@@ -13,34 +13,36 @@
  * limitations under the Licence.
  */
 
-package org.rutebanken.tiamat.rest.graphql
+package org.rutebanken.tiamat.rest.graphql;
 
-import org.junit.Test
-import org.locationtech.jts.geom.Coordinate
-import org.locationtech.jts.geom.GeometryFactory
-import org.rutebanken.tiamat.model.EmbeddableMultilingualString
-import org.rutebanken.tiamat.model.TariffZone
-import org.rutebanken.tiamat.repository.TariffZoneRepository
-import org.springframework.beans.factory.annotation.Autowired
+import org.junit.Test;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
+import org.rutebanken.tiamat.model.TariffZone;
+import org.rutebanken.tiamat.repository.TariffZoneRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.hamcrest.Matchers.equalTo
-import static org.hamcrest.Matchers.notNullValue
+import java.util.Arrays;
 
-class GraphQLResourceTariffZoneIntegrationTest extends AbstractGraphQLResourceIntegrationTest {
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
+
+public class GraphQLResourceTariffZoneIntegrationTest extends AbstractGraphQLResourceIntegrationTest {
 
     @Autowired
-    private TariffZoneRepository tariffZoneRepository
+    private TariffZoneRepository tariffZoneRepository;
 
     @Test
-    void searchForTariffZone() throws Exception {
+    public void searchForTariffZone() throws Exception {
 
-        def tariffZone = new TariffZone()
-        tariffZone.netexId = "BRA:TariffZone:112"
-        tariffZone.name = new EmbeddableMultilingualString("Somewhere")
-        tariffZone.version = 1L;
+        var tariffZone = new TariffZone();
+        tariffZone.setNetexId("BRA:TariffZone:112");
+        tariffZone.setName( new EmbeddableMultilingualString("Somewhere"));
+        tariffZone.setVersion(1L);
         Coordinate[] coordinates = Arrays.asList(new Coordinate(0, 0), new Coordinate(1, 0), new Coordinate(1, 1), new Coordinate(0, 0)).toArray(new Coordinate[4]);
-        tariffZone.setPolygon(new GeometryFactory().createPolygon(coordinates))
-        tariffZoneRepository.save(tariffZone)
+        tariffZone.setPolygon(new GeometryFactory().createPolygon(coordinates));
+        tariffZoneRepository.save(tariffZone);
 
         String graphQlJsonQuery = """
                         {
@@ -57,14 +59,14 @@ class GraphQLResourceTariffZoneIntegrationTest extends AbstractGraphQLResourceIn
                                         coordinates
                                     }
                           }
-                        }"""
+                        }""";
 
         executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .root("data.tariffZones[0]")
-                .body("name.value", equalTo(tariffZone.name.value))
-                .body("id", equalTo(tariffZone.netexId))
-                .body("version", equalTo(Long.toString(tariffZone.version)))
-                .body("polygon",notNullValue())
+                .body("name.value", equalTo(tariffZone.getName().getValue()))
+                .body("id", equalTo(tariffZone.getNetexId()))
+                .body("version", equalTo(Long.toString(tariffZone.getVersion())))
+                .body("polygon",notNullValue());
     }
 
 }
