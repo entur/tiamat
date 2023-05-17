@@ -63,7 +63,7 @@
         <maven.compiler.plugin.version>3.8.1</maven.compiler.plugin.version>
         <spring-boot-plugin.version>2.7.11</spring-boot-plugin.version>
         <spring-boot.version>2.7.11</spring-boot.version>
-        <spring.security.version>5.3.5.RELEASE</spring.security.version>
+        <spring.security.version>5.7.8</spring.security.version>
         <postgresql.version>42.2.4</postgresql.version>
         <geodb.version>0.9</geodb.version>
         <geotools.version>27.2</geotools.version>
