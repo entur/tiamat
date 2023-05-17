@@ -66,7 +66,7 @@
         <spring.security.version>5.3.5.RELEASE</spring.security.version>
         <postgresql.version>42.2.4</postgresql.version>
         <geodb.version>0.9</geodb.version>
-        <geotools.version>20.1</geotools.version>
+        <geotools.version>27.2</geotools.version>
         <activemq-client.version>5.15.9</activemq-client.version>
         <maven-javadoc-plugin.version>2.10.4</maven-javadoc-plugin.version>
         <flyway-core.version>8.5.10</flyway-core.version>
@@ -74,7 +74,7 @@
         <kubernetes-client.version>4.1.1</kubernetes-client.version>
         <janino.version>3.0.8</janino.version>
         <assertj-core.version>3.10.0</assertj-core.version>
-        <rest-assured.version>3.1.0</rest-assured.version>
+        <rest-assured.version>5.3.0</rest-assured.version>
         <javax.el.version>3.0.0</javax.el.version>
         <com.h2database.version>1.4.197</com.h2database.version>
         <hikariCP.version>3.2.0</hikariCP.version>
@@ -84,11 +84,12 @@
         <graphql-java.version>11.0</graphql-java.version>
 
         <hazelcast-hibernate53.version>2.1.1</hazelcast-hibernate53.version>
-        <hibernate.version>5.4.0.Final</hibernate.version>
-        <hibernate-spatial.version>5.4.0.Final</hibernate-spatial.version>
-        <jaxb-version>2.3.0.1</jaxb-version>
+        <hibernate.version>5.6.15.Final</hibernate.version>
+        <hibernate-spatial.version>5.6.15.Final</hibernate-spatial.version>
+        <hibernate-entitymanager.version>5.6.15.Final</hibernate-entitymanager.version>
+        <jaxb-version>4.0.2</jaxb-version>
         <swagger-jersey2.version>1.6.2</swagger-jersey2.version>
-        <jackson-version>2.11.3</jackson-version>
+        <jackson-version>2.15.0</jackson-version>
         <jacoco-maven-plugin.version>0.8.8</jacoco-maven-plugin.version>
         <sonar-maven-plugin.version>3.9.1.2184</sonar-maven-plugin.version>
 
@@ -101,12 +102,14 @@
         <entur.helpers.version>1.0.64</entur.helpers.version>
 
         <javax-jms.version>2.0.1</javax-jms.version>
-        <jts-core.version>1.16.0</jts-core.version>
+        <jts-core.version>1.19.0</jts-core.version>
 
         <maven-surefire-plugin.version>3.0.0-M6</maven-surefire-plugin.version>
         <argLine></argLine>
         <!--TODO temporary manual upgrade of Logback-->
         <logback.version>1.2.8</logback.version>
+
+        <geotools-gt-jts-wrapper.version>24.6</geotools-gt-jts-wrapper.version>
     </properties>
 
     <!-- This repository list can be deleted, as it is now supplied by rutebanken nexus.
@@ -214,6 +217,14 @@
             <artifactId>jackson-databind</artifactId>
             <version>${jackson-version}</version>
         </dependency>
+
+        <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-annotations -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>${jackson-version}</version>
+        </dependency>
+
 
         <dependency>
             <groupId>com.sun.xml.bind</groupId>
@@ -421,6 +432,12 @@
         </dependency>
 
         <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-entitymanager</artifactId>
+            <version>${hibernate-entitymanager.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
             <version>${com.h2database.version}</version>
@@ -475,7 +492,7 @@
         <dependency>
             <groupId>org.geotools</groupId>
             <artifactId>gt-jts-wrapper</artifactId>
-            <version>${geotools.version}</version>
+            <version>${geotools-gt-jts-wrapper.version}</version>
         </dependency>
 
         <dependency>
@@ -506,6 +523,12 @@
             <groupId>io.rest-assured</groupId>
             <artifactId>rest-assured</artifactId>
             <version>${rest-assured.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.groovy</groupId>
+                    <artifactId>groovy-xml</artifactId>
+                </exclusion>
+            </exclusions>
             <scope>test</scope>
         </dependency>
 

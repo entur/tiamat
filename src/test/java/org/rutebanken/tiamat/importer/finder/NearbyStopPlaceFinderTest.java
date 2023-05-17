@@ -17,6 +17,7 @@ package org.rutebanken.tiamat.importer.finder;
 
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.rutebanken.tiamat.config.GeometryFactoryConfig;
 import org.rutebanken.tiamat.general.PeriodicCacheLogger;
@@ -29,7 +30,7 @@ import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -78,7 +79,7 @@ public class NearbyStopPlaceFinderTest {
         org.locationtech.jts.geom.Geometry envelope = (org.locationtech.jts.geom.Geometry) stopPlace.getCentroid().getEnvelope().clone();
 
 
-        when(stopPlaceRepository.findNearbyStopPlace(any(), any(), any())).thenReturn(stopPlaceId);
+        when(stopPlaceRepository.findNearbyStopPlace(isA(Envelope.class),isA(String.class),isA(StopTypeEnumeration.class))).thenReturn(stopPlaceId);
         when(stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlaceId)).thenReturn(stopPlace);
 
         StopPlace actual = nearbyStopPlaceFinder.find(stopPlace);
