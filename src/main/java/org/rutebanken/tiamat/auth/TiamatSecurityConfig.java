@@ -25,7 +25,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -38,34 +38,32 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @Configuration()
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
-public class TiamatSecurityConfig extends WebSecurityConfigurerAdapter {
+public class TiamatSecurityConfig {
 
-	private static final Logger logger = LoggerFactory.getLogger(TiamatSecurityConfig.class);
+    private static final Logger logger = LoggerFactory.getLogger(TiamatSecurityConfig.class);
 
-	@Bean
-	CorsConfigurationSource corsConfigurationSource() {
-		CorsConfiguration configuration = new CorsConfiguration();
-		configuration.setAllowedHeaders(Arrays.asList("Origin", "Accept", "X-Requested-With", "Content-Type", "Access-Control-Request-Method", "Access-Control-Request-Headers", "Authorization", "X-Correlation-Id","entur-pos","ET-Client-ID","ET-Client-Name"));
-		configuration.addAllowedOrigin("*");
-		configuration.setAllowedMethods(Arrays.asList("GET", "PUT", "POST", "DELETE"));
-		configuration.setMaxAge(3600L);
-		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-		source.registerCorsConfiguration("/**", configuration);
-		return source;
-	}
+    @Bean
+    CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedHeaders(Arrays.asList("Origin", "Accept", "X-Requested-With", "Content-Type", "Access-Control-Request-Method", "Access-Control-Request-Headers", "Authorization", "X-Correlation-Id", "entur-pos", "ET-Client-ID", "ET-Client-Name"));
+        configuration.addAllowedOrigin("*");
+        configuration.setAllowedMethods(Arrays.asList("GET", "PUT", "POST", "DELETE"));
+        configuration.setMaxAge(3600L);
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
 
-	@Override
-	protected void configure(HttpSecurity http) throws Exception {
-
-		logger.info("Configuring HttpSecurity");
-		http.cors(withDefaults())
-				.csrf().disable()
-				.authorizeRequests()
-				.anyRequest().permitAll()
-				.and()
-				.oauth2ResourceServer().jwt().jwtAuthenticationConverter(new RorAuthenticationConverter());
-
-	}
-
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        logger.info("Configuring HttpSecurity");
+        http.cors(withDefaults())
+                .csrf().disable()
+                .authorizeHttpRequests()
+                .anyRequest().permitAll()
+                .and()
+                .oauth2ResourceServer().jwt().jwtAuthenticationConverter(new RorAuthenticationConverter());
+        return http.build();
+    }
 
 }
