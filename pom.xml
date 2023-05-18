@@ -69,7 +69,7 @@
         <geotools.version>27.2</geotools.version>
         <activemq-client.version>5.18.1</activemq-client.version>
         <flyway-core.version>9.18.0</flyway-core.version>
-        <logstash-logback.version>5.2</logstash-logback.version>
+        <logstash-logback.version>7.3</logstash-logback.version>
         <kubernetes-client.version>4.1.1</kubernetes-client.version>
         <janino.version>3.0.8</janino.version>
         <assertj-core.version>3.10.0</assertj-core.version>
