@@ -74,7 +74,7 @@
         <assertj-core.version>3.24.2</assertj-core.version>
         <rest-assured.version>5.3.0</rest-assured.version>
         <com.h2database.version>1.4.197</com.h2database.version>
-        <hikariCP.version>3.2.0</hikariCP.version>
+        <hikariCP.version>5.0.1</hikariCP.version>
         <commons.lang3.version>3.7</commons.lang3.version>
         <orika-core.version>1.5.4</orika-core.version>
         <guava.version>30.1.1-jre</guava.version>
@@ -109,9 +109,9 @@
         <geotools-gt-jts-wrapper.version>24.6</geotools-gt-jts-wrapper.version>
     </properties>
 
-    <!-- This repository list can be deleted, as it is now supplied by rutebanken nexus.
-         But you have set up maven to use it as mirror in settings.xml
-    -->
+        <!-- This repository list can be deleted, as it is now supplied by rutebanken nexus.
+             But you have set up maven to use it as mirror in settings.xml
+        -->
     <repositories>
         <repository>
             <id>maven2</id>
