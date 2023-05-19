@@ -103,8 +103,6 @@
 
         <maven-surefire-plugin.version>3.0.0-M6</maven-surefire-plugin.version>
         <argLine></argLine>
-        <!--TODO temporary manual upgrade of Logback-->
-        <logback.version>1.2.8</logback.version>
 
         <geotools-gt-jts-wrapper.version>24.6</geotools-gt-jts-wrapper.version>
     </properties>
@@ -294,18 +292,6 @@
             <artifactId>logstash-logback-encoder</artifactId>
             <version>${logstash-logback.version}</version>
         </dependency>
-        <!--TODO temporary manual upgrade of Logback-->
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>${logback.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-core</artifactId>
-            <version>${logback.version}</version>
-        </dependency>
-
         <dependency>
             <groupId>org.entur</groupId>
             <artifactId>netex-java-model</artifactId>
