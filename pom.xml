@@ -107,17 +107,6 @@
         <geotools-gt-jts-wrapper.version>24.6</geotools-gt-jts-wrapper.version>
     </properties>
 
-        <!-- This repository list can be deleted, as it is now supplied by rutebanken nexus.
-             But you have set up maven to use it as mirror in settings.xml
-        -->
-    <repositories>
-        <repository>
-            <id>maven2</id>
-            <name>central</name>
-            <url>https://repo.maven.apache.org/maven2</url>
-        </repository>
-    </repositories>
-
     <dependencyManagement>
         <dependencies>
             <dependency>
