@@ -18,65 +18,65 @@ SET row_security = off;
 -- Name: topology; Type: SCHEMA; Schema: -; Owner: tiamat
 --
 
-CREATE SCHEMA topology;
+-- CREATE SCHEMA topology;
 
 
-ALTER SCHEMA topology OWNER TO tiamat;
+-- ALTER SCHEMA topology OWNER TO tiamat;
 
 --
 -- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: 
 --
 
-CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
+-- CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
 
 
 --
 -- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: 
 --
 
-COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
+-- COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
 
 
 --
 -- Name: pg_trgm; Type: EXTENSION; Schema: -; Owner: 
 --
 
-CREATE EXTENSION IF NOT EXISTS pg_trgm WITH SCHEMA public;
+-- CREATE EXTENSION IF NOT EXISTS pg_trgm WITH SCHEMA public;
 
 
 --
 -- Name: EXTENSION pg_trgm; Type: COMMENT; Schema: -; Owner: 
 --
 
-COMMENT ON EXTENSION pg_trgm IS 'text similarity measurement and index searching based on trigrams';
+-- COMMENT ON EXTENSION pg_trgm IS 'text similarity measurement and index searching based on trigrams';
 
 
 --
 -- Name: postgis; Type: EXTENSION; Schema: -; Owner: 
 --
 
-CREATE EXTENSION IF NOT EXISTS postgis WITH SCHEMA public;
+-- CREATE EXTENSION IF NOT EXISTS postgis WITH SCHEMA public;
 
 
 --
 -- Name: EXTENSION postgis; Type: COMMENT; Schema: -; Owner: 
 --
 
-COMMENT ON EXTENSION postgis IS 'PostGIS geometry, geography, and raster spatial types and functions';
+-- COMMENT ON EXTENSION postgis IS 'PostGIS geometry, geography, and raster spatial types and functions';
 
 
 --
 -- Name: postgis_topology; Type: EXTENSION; Schema: -; Owner: 
 --
 
-CREATE EXTENSION IF NOT EXISTS postgis_topology WITH SCHEMA topology;
+-- CREATE EXTENSION IF NOT EXISTS postgis_topology WITH SCHEMA topology;
 
 
 --
 -- Name: EXTENSION postgis_topology; Type: COMMENT; Schema: -; Owner: 
 --
 
-COMMENT ON EXTENSION postgis_topology IS 'PostGIS topology spatial types and functions';
+-- COMMENT ON EXTENSION postgis_topology IS 'PostGIS topology spatial types and functions';
 
 
 SET search_path = public, pg_catalog;
