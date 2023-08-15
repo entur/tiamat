@@ -15,13 +15,18 @@
 
 package org.rutebanken.tiamat.model;
 
+import javax.persistence.MappedSuperclass;
+import javax.persistence.Transient;
 import javax.xml.bind.JAXBElement;
 
 
+@MappedSuperclass
 public class PurposeOfGrouping_ValueStructure
         extends TypeOfValue_VersionStructure {
 
+    @Transient
     protected ClassRefs_RelStructure classes;
+    @Transient
     protected JAXBElement<? extends TypeOfEntity_VersionStructure> typeOfEntity;
 
     public ClassRefs_RelStructure getClasses() {

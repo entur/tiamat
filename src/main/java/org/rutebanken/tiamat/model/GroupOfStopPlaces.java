@@ -16,6 +16,7 @@
 package org.rutebanken.tiamat.model;
 
 import com.google.common.base.MoreObjects;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.locationtech.jts.geom.Point;
 
 import javax.persistence.CascadeType;
@@ -24,6 +25,7 @@ import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -40,6 +42,10 @@ public class GroupOfStopPlaces extends GroupOfEntities_VersionStructure {
     )
     private Set<StopPlaceReference> members = new HashSet<>();
     private Point centroid;
+
+    @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH)
+    private PurposeOfGrouping purposeOfGrouping;
 
     public GroupOfStopPlaces(EmbeddableMultilingualString embeddableMultilingualString) {
         super(embeddableMultilingualString);
@@ -64,6 +70,13 @@ public class GroupOfStopPlaces extends GroupOfEntities_VersionStructure {
         return alternativeNames;
     }
 
+    public PurposeOfGrouping getPurposeOfGrouping() {
+        return purposeOfGrouping;
+    }
+
+    public  void  setPurposeOfGrouping(PurposeOfGrouping purposeOfGrouping) {
+        this.purposeOfGrouping=purposeOfGrouping;
+    }
 
     @Override
     public String toString() {

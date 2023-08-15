@@ -19,6 +19,7 @@ import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.GroupOfStopPlaces;
+import org.rutebanken.tiamat.model.PurposeOfGrouping;
 import org.rutebanken.tiamat.model.SiteRefStructure;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopPlaceReference;
@@ -34,19 +35,32 @@ public class GroupOfStopPlacesSaverServiceTest extends TiamatIntegrationTest {
     @Autowired
     private GroupOfStopPlacesSaverService groupOfStopPlacesSaverService;
 
+    @Autowired
+    private PurposeOfGroupingSaverService purposeOfGroupingSaverService;
+
     @Test
     public void saveNewVersion() throws Exception {
 
         StopPlace stopPlace = new StopPlace();
         stopPlaceRepository.save(stopPlace);
 
+        PurposeOfGrouping purposeOfGrouping = new PurposeOfGrouping();
+        purposeOfGrouping.setName(new EmbeddableMultilingualString("generalization"));
+
+        purposeOfGroupingSaverService.saveNewVersion(purposeOfGrouping);
+
         GroupOfStopPlaces groupOfStopPlaces = new GroupOfStopPlaces();
         groupOfStopPlaces.setName(new EmbeddableMultilingualString("name"));
         groupOfStopPlaces.getMembers().add(new StopPlaceReference(stopPlace.getNetexId()));
+        groupOfStopPlaces.setPurposeOfGrouping(purposeOfGrouping);
 
         GroupOfStopPlaces saved = groupOfStopPlacesSaverService.saveNewVersion(groupOfStopPlaces);
         assertThat(saved.getVersion()).isOne();
         assertThat(saved.getMembers()).hasSize(1);
+        assertThat(saved.getPurposeOfGrouping()).isNotNull();
+        assertThat(saved.getPurposeOfGrouping().getNetexId()).isEqualTo("NSR:PurposeOfGrouping:1");
+        assertThat(saved.getPurposeOfGrouping().getName().getValue()).isEqualTo("generalization");
+
 
         saved.setName(new EmbeddableMultilingualString("name changed"));
 

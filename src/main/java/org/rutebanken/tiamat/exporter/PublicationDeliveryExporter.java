@@ -15,8 +15,12 @@
 
 package org.rutebanken.tiamat.exporter;
 
+import org.rutebanken.netex.model.DataManagedObjectStructure;
+import org.rutebanken.netex.model.MultilingualString;
 import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
+import org.rutebanken.netex.model.PurposeOfGrouping;
+import org.rutebanken.netex.model.ResourceFrame;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.id.ValidPrefixList;
@@ -33,7 +37,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.xml.bind.JAXBElement;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.StreamSupport;
@@ -117,19 +123,49 @@ public class PublicationDeliveryExporter {
         PublicationDeliveryStructure publicationDeliveryStructure = createPublicationDelivery();
         publicationDeliveryStructure.withDataObjects(
                 new PublicationDeliveryStructure.DataObjects()
-                        .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(siteFrame)));
+                        .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(siteFrame))
+                        .withCompositeFrameOrCommonFrame(new ObjectFactory().createResourceFrame(createResourceFrame()))
+        );
 
         logger.info("Returning publication delivery {} with site frame", publicationDeliveryStructure);
         return publicationDeliveryStructure;
     }
 
     @SuppressWarnings("unchecked")
-    public PublicationDeliveryStructure createPublicationDelivery(org.rutebanken.netex.model.SiteFrame siteFrame, org.rutebanken.netex.model.FareFrame fareFrame) {
+    public PublicationDeliveryStructure createPublicationDelivery(org.rutebanken.netex.model.SiteFrame siteFrame, ResourceFrame netexResourceFrame) {
+        PublicationDeliveryStructure publicationDeliveryStructure = createPublicationDelivery();
+        publicationDeliveryStructure.withDataObjects(
+                new PublicationDeliveryStructure.DataObjects()
+                        .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(siteFrame))
+                        .withCompositeFrameOrCommonFrame(new ObjectFactory().createResourceFrame(netexResourceFrame))
+        );
+
+        logger.info("Returning publication delivery {} with site frame", publicationDeliveryStructure);
+        return publicationDeliveryStructure;
+    }
+
+    private ResourceFrame createResourceFrame() {
+        List<JAXBElement<? extends DataManagedObjectStructure>> purposeOfGroupingList = new ArrayList<>();
+        final PurposeOfGrouping purposeOfGrouping = new ObjectFactory().createPurposeOfGrouping().withId("NSR:PurposeOfGrouping:3").withName(new MultilingualString().withValue("generalization")).withVersion("1");
+        final JAXBElement<PurposeOfGrouping> purposeOfGrouping2= new ObjectFactory().createPurposeOfGrouping(purposeOfGrouping);
+        purposeOfGroupingList.add(purposeOfGrouping2);
+
+
+        return new ResourceFrame().withId("NSR:RescourceFrame:1").withVersion("1")
+                .withTypesOfValue(new ObjectFactory()
+                                                    .createTypesOfValueInFrame_RelStructure().withValueSetOrTypeOfValue(purposeOfGroupingList ));
+    }
+
+    @SuppressWarnings("unchecked")
+    public PublicationDeliveryStructure createPublicationDelivery(org.rutebanken.netex.model.SiteFrame siteFrame,
+                                                                  org.rutebanken.netex.model.FareFrame fareFrame,
+                                                                  ResourceFrame netexResourceFrame) {
         PublicationDeliveryStructure publicationDeliveryStructure = createPublicationDelivery();
         publicationDeliveryStructure.withDataObjects(
                 new PublicationDeliveryStructure.DataObjects()
                         .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(siteFrame))
                         .withCompositeFrameOrCommonFrame(new ObjectFactory().createFareFrame(fareFrame))
+                        .withCompositeFrameOrCommonFrame(new ObjectFactory().createResourceFrame(netexResourceFrame))
         );
 
         logger.info("Returning publication delivery {} with site frame and fare frame", publicationDeliveryStructure);
@@ -141,7 +177,9 @@ public class PublicationDeliveryExporter {
     @SuppressWarnings("unchecked")
     public PublicationDeliveryStructure createPublicationDelivery(org.rutebanken.netex.model.SiteFrame siteFrame,
                                                                   org.rutebanken.netex.model.ServiceFrame serviceFrame,
-                                                                  org.rutebanken.netex.model.FareFrame fareFrame) {
+                                                                  org.rutebanken.netex.model.FareFrame fareFrame,
+                                                                  ResourceFrame netexResourceFrame
+    ) {
         PublicationDeliveryStructure publicationDeliveryStructure = createPublicationDelivery();
 
         publicationDeliveryStructure.withDataObjects
@@ -150,7 +188,7 @@ public class PublicationDeliveryExporter {
                         .withCompositeFrameOrCommonFrame(new ObjectFactory().createServiceFrame(serviceFrame))
                         .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(siteFrame))
                         .withCompositeFrameOrCommonFrame(new ObjectFactory().createFareFrame(fareFrame))
-
+                        .withCompositeFrameOrCommonFrame(new ObjectFactory().createResourceFrame(netexResourceFrame))
                 );
 
         logger.info("Returning publication delivery {} with site frame and  service frame", publicationDeliveryStructure);
