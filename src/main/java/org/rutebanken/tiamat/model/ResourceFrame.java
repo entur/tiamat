@@ -15,23 +15,9 @@
 
 package org.rutebanken.tiamat.model;
 
-import javax.persistence.Entity;
-import javax.persistence.Index;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
 
-@Entity
-@Table(
-        indexes = {
-                @Index(name = "purpose_of_grouping_name_value_index", columnList = "name_value")
-        },
-        uniqueConstraints = {
-                @UniqueConstraint(name = "purpose_of_grouping_netex_id_version_constraint", columnNames = {"netexId"}),
-                @UniqueConstraint(name = "purpose_of_grouping_name_value_constraint", columnNames = {"name_value"})
-        }
-)
-public class PurposeOfGrouping
-        extends PurposeOfGrouping_ValueStructure {
+public class ResourceFrame
+        extends Common_VersionFrameStructure {
 
 
 }

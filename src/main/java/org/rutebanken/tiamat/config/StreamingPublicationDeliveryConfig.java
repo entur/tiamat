@@ -18,6 +18,7 @@ package org.rutebanken.tiamat.config;
 import org.rutebanken.tiamat.exporter.PublicationDeliveryExporter;
 import org.rutebanken.tiamat.exporter.StreamingPublicationDelivery;
 import org.rutebanken.tiamat.exporter.TiamatFareFrameExporter;
+import org.rutebanken.tiamat.exporter.TiamatResourceFrameExporter;
 import org.rutebanken.tiamat.exporter.TiamatServiceFrameExporter;
 import org.rutebanken.tiamat.exporter.TiamatSiteFrameExporter;
 import org.rutebanken.tiamat.netex.id.NetexIdHelper;
@@ -26,6 +27,7 @@ import org.rutebanken.tiamat.repository.FareZoneRepository;
 import org.rutebanken.tiamat.repository.GroupOfStopPlacesRepository;
 import org.rutebanken.tiamat.repository.GroupOfTariffZonesRepository;
 import org.rutebanken.tiamat.repository.ParkingRepository;
+import org.rutebanken.tiamat.repository.PurposeOfGroupingRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.repository.TariffZoneRepository;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
@@ -59,6 +61,9 @@ public class StreamingPublicationDeliveryConfig {
     private TiamatFareFrameExporter tiamatFareFrameExporter;
 
     @Autowired
+    private TiamatResourceFrameExporter tiamatResourceFrameExporter;
+
+    @Autowired
     private NetexMapper netexMapper;
 
     @Autowired
@@ -69,6 +74,9 @@ public class StreamingPublicationDeliveryConfig {
 
     @Autowired
     private TopographicPlaceRepository topographicPlaceRepository;
+
+    @Autowired
+    private PurposeOfGroupingRepository purposeOfGroupingRepository;
 
     @Autowired
     private GroupOfStopPlacesRepository groupOfStopPlacesRepository;
@@ -97,7 +105,7 @@ public class StreamingPublicationDeliveryConfig {
 
     private StreamingPublicationDelivery createStreamingPublicationDelivery(boolean validate) throws IOException, SAXException {
         return new StreamingPublicationDelivery(stopPlaceRepository, parkingRepository, publicationDeliveryExporter,
-                tiamatSiteFrameExporter,tiamatServiceFrameExporter,tiamatFareFrameExporter, netexMapper, tariffZoneRepository, fareZoneRepository, topographicPlaceRepository,
-                groupOfStopPlacesRepository,groupOfTariffZonesRepository, netexIdHelper, validate);
+                tiamatSiteFrameExporter,tiamatServiceFrameExporter,tiamatFareFrameExporter,tiamatResourceFrameExporter, netexMapper, tariffZoneRepository, fareZoneRepository, topographicPlaceRepository,
+                groupOfStopPlacesRepository,groupOfTariffZonesRepository, netexIdHelper, validate, purposeOfGroupingRepository);
     }
 }

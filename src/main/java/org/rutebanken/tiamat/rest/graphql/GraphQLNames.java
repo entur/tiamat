@@ -148,7 +148,11 @@ public class GraphQLNames {
     public static final String INPUT_TYPE_PARENT_STOPPLACE = OUTPUT_TYPE_PARENT_STOPPLACE + INPUT_TYPE_POSTFIX;
 
     public static final String OUTPUT_TYPE_GROUP_OF_STOPPLACES = "GroupOfStopPlaces";
+
+    public static final String OUTPUT_TYPE_PURPOSE_OF_GROUPING="PurposeOfGrouping";
     public static final String INPUT_TYPE_GROUP_OF_STOPPLACES = OUTPUT_TYPE_GROUP_OF_STOPPLACES + INPUT_TYPE_POSTFIX;
+
+    public static final String INPUT_TYPE_PURPOSE_OF_GROUPING = OUTPUT_TYPE_PURPOSE_OF_GROUPING + INPUT_TYPE_POSTFIX;
 
     public static final String GROUP_OF_STOP_PLACES_MEMBERS = "members";
     public static final String GROUP_OF_STOP_PLACES = "groupOfStopPlaces";
@@ -232,6 +236,8 @@ public class GraphQLNames {
     public static final String STOP_PLACE_TYPE_ARG_DESCRIPTION = "Only return StopPlaces with given StopPlaceType(s).";
     public static final String SHORT_NAME = "shortName";
     public static final String DESCRIPTION = "description";
+
+    public static  final  String PURPOSE_OF_GROUPING = "purposeOfGrouping";
     public static final String ACCESSIBILITY_ASSESSMENT = "accessibilityAssessment";
     public static final String LIMITATIONS = "limitations";
     public static final String MOBILITY_IMPAIRED_ACCESS = "mobilityImpairedAccess";
@@ -429,6 +435,8 @@ public class GraphQLNames {
     public static final String MUTATE_PARKING = "mutateParking";
     public static final String TERMINATE_TARIFF_ZONE = "terminateTariffZone";
     public static final String MUTATE_GROUP_OF_STOP_PLACES = "mutateGroupOfStopPlaces";
+
+    public static final String MUTATE_PURPOSE_OF_GROUPING="mutatePurposeOfGrouping";
 
     public static final String TARIFF_ZONE_ID = "tariffZoneId";
 

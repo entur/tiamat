@@ -33,6 +33,7 @@ import org.rutebanken.netex.model.PathLink;
 import org.rutebanken.netex.model.PathLinkEndStructure;
 import org.rutebanken.netex.model.PlaceEquipments_RelStructure;
 import org.rutebanken.netex.model.Quay;
+import org.rutebanken.netex.model.ResourceFrame;
 import org.rutebanken.netex.model.SanitaryEquipment;
 import org.rutebanken.netex.model.ServiceFrame;
 import org.rutebanken.netex.model.ShelterEquipment;
@@ -45,6 +46,7 @@ import org.rutebanken.netex.model.WaitingRoomEquipment;
 import org.rutebanken.tiamat.netex.mapping.mapper.AccessibilityAssessmentMapper;
 import org.rutebanken.tiamat.netex.mapping.mapper.DataManagedObjectStructureMapper;
 import org.rutebanken.tiamat.netex.mapping.mapper.FareZoneMapper;
+import org.rutebanken.tiamat.netex.mapping.mapper.GroupOfStopPlacesMapper;
 import org.rutebanken.tiamat.netex.mapping.mapper.GroupOfTariffZonesMapper;
 import org.rutebanken.tiamat.netex.mapping.mapper.KeyListToKeyValuesMapMapper;
 import org.rutebanken.tiamat.netex.mapping.mapper.ParkingMapper;
@@ -95,6 +97,9 @@ public class NetexMapper {
 
         mapperFactory.classMap(GroupOfStopPlaces.class, org.rutebanken.tiamat.model.GroupOfStopPlaces.class)
                 .byDefault()
+                .fieldBToA("purposeOfGrouping", "purposeOfGroupingRef")
+                .fieldAToB("purposeOfGroupingRef.ref", "purposeOfGrouping.name")
+                .customize(new GroupOfStopPlacesMapper())
                 .register();
 
         mapperFactory.classMap(GroupOfTariffZones.class, org.rutebanken.tiamat.model.GroupOfTariffZones.class)
@@ -107,7 +112,6 @@ public class NetexMapper {
                 .fieldBToA("topographicPlace", "topographicPlaceRef")
                 .fieldAToB("topographicPlaceRef.ref", "topographicPlace.netexId")
                 .fieldAToB("topographicPlaceRef.version", "topographicPlace.version")
-                // TODO: Excluding some fields while waiting for NRP-1354
                 .exclude("localServices")
                 .exclude("postalAddress")
                 .exclude("roadAddress")
@@ -234,6 +238,11 @@ public class NetexMapper {
     public FareFrame mapToNetexModel(org.rutebanken.tiamat.model.FareFrame tiamatFareFrame) {
         FareFrame fareFrame = facade.map(tiamatFareFrame, FareFrame.class);
         return fareFrame;
+    }
+
+    public ResourceFrame mapToNetexModel(org.rutebanken.tiamat.model.ResourceFrame tiamatResourceFrame){
+         ResourceFrame resourceFrame = facade.map(tiamatResourceFrame, ResourceFrame.class);
+         return resourceFrame;
     }
 
     public StopPlace mapToNetexModel(org.rutebanken.tiamat.model.StopPlace tiamatStopPlace) {

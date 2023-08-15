@@ -34,6 +34,7 @@ import graphql.schema.GraphQLInterfaceType;
 import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLObjectType;
 import org.rutebanken.tiamat.rest.graphql.fetchers.GroupOfStopPlacesMembersFetcher;
+import org.rutebanken.tiamat.rest.graphql.fetchers.GroupOfStopPlacesPurposeOfGroupingFetcher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -44,6 +45,7 @@ import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.DESCRIPTION;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.GROUP_OF_STOP_PLACES_MEMBERS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.NAME;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.OUTPUT_TYPE_GROUP_OF_STOPPLACES;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PURPOSE_OF_GROUPING;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.SHORT_NAME;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.VERSION;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.VERSION_COMMENT;
@@ -56,7 +58,10 @@ public class GroupOfStopPlacesObjectTypeCreator {
     @Autowired
     private GroupOfStopPlacesMembersFetcher groupOfStopPlacesMembersFetcher;
 
-    public GraphQLObjectType create(GraphQLInterfaceType stopPlaceInterface) {
+    @Autowired
+    private GroupOfStopPlacesPurposeOfGroupingFetcher groupOfStopPlacesPurposeOfGroupingFetcher;
+
+    public GraphQLObjectType create(GraphQLInterfaceType stopPlaceInterface, GraphQLObjectType purposeOfGroupingType) {
 
         return newObject()
                 .name(OUTPUT_TYPE_GROUP_OF_STOPPLACES)
@@ -76,6 +81,10 @@ public class GroupOfStopPlacesObjectTypeCreator {
                 .field(newFieldDefinition()
                         .name(VERSION_COMMENT)
                         .type(GraphQLString))
+                .field(newFieldDefinition()
+                        .name(PURPOSE_OF_GROUPING)
+                        .type(purposeOfGroupingType)
+                        .dataFetcher(groupOfStopPlacesPurposeOfGroupingFetcher))
                 .field(newFieldDefinition()
                         .name(GROUP_OF_STOP_PLACES_MEMBERS)
                         .type(new GraphQLList(stopPlaceInterface))

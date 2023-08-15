@@ -28,6 +28,7 @@ import graphql.schema.GraphQLSchema;
 import org.rutebanken.tiamat.model.FareZone;
 import org.rutebanken.tiamat.model.GroupOfStopPlaces;
 import org.rutebanken.tiamat.model.GroupOfTariffZones;
+import org.rutebanken.tiamat.model.PurposeOfGrouping;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.TariffZone;
@@ -49,6 +50,7 @@ import org.rutebanken.tiamat.rest.graphql.types.ParentStopPlaceInputObjectTypeCr
 import org.rutebanken.tiamat.rest.graphql.types.ParentStopPlaceObjectTypeCreator;
 import org.rutebanken.tiamat.rest.graphql.types.PathLinkEndObjectTypeCreator;
 import org.rutebanken.tiamat.rest.graphql.types.PathLinkObjectTypeCreator;
+import org.rutebanken.tiamat.rest.graphql.types.PurposeOfGroupingTypeCreator;
 import org.rutebanken.tiamat.rest.graphql.types.StopPlaceInterfaceCreator;
 import org.rutebanken.tiamat.rest.graphql.types.StopPlaceObjectTypeCreator;
 import org.rutebanken.tiamat.rest.graphql.types.TagObjectTypeCreator;
@@ -142,6 +144,8 @@ public class StopPlaceRegisterGraphQLSchema {
 
     @Autowired
     private GroupOfTariffZonesObjectTypeCreator groupOfTariffZonesObjectTypeCreator;
+    @Autowired
+    private PurposeOfGroupingTypeCreator purposeOfGroupingTypeCreator;
 
     @Autowired
     private ParentStopPlaceObjectTypeCreator parentStopPlaceObjectTypeCreator;
@@ -185,6 +189,8 @@ public class StopPlaceRegisterGraphQLSchema {
 
     @Autowired
     private DataFetcher<GroupOfStopPlaces> groupOfStopPlacesUpdater;
+    @Autowired
+    private DataFetcher<PurposeOfGrouping> purposeOfGroupingUpdater;
 
     @Autowired
     private DataFetcher<Boolean> groupOfStopPlacesDeleterFetcher;
@@ -297,7 +303,8 @@ public class StopPlaceRegisterGraphQLSchema {
             throw new IllegalArgumentException("StopPlaceTypeResolver cannot resolve type of Object " + object + ". Was expecting StopPlace");
         });
 
-        GraphQLObjectType groupOfStopPlacesObjectType = groupOfStopPlaceObjectTypeCreator.create(stopPlaceInterface);
+        GraphQLObjectType purposeOfGroupingType =purposeOfGroupingTypeCreator.create();
+        GraphQLObjectType groupOfStopPlacesObjectType = groupOfStopPlaceObjectTypeCreator.create(stopPlaceInterface, purposeOfGroupingType);
         GraphQLObjectType groupOfTariffZonesObjectType = groupOfTariffZonesObjectTypeCreator.create();
 
         GraphQLObjectType addressablePlaceObjectType = createAddressablePlaceObjectType(commonFieldsList);
@@ -424,6 +431,8 @@ public class StopPlaceRegisterGraphQLSchema {
 
         GraphQLInputObjectType groupOfStopPlacesInputObjectType = createGroupOfStopPlacesInputObjectType();
 
+        GraphQLInputObjectType purposeOfGroupingInputObjectType =createPurposeOfGroupingInputObjectType();
+
         GraphQLObjectType stopPlaceRegisterMutation = newObject()
                 .name("StopPlaceMutation")
                 .description("Create and edit stopplaces")
@@ -451,6 +460,14 @@ public class StopPlaceRegisterGraphQLSchema {
                                 .name(OUTPUT_TYPE_GROUP_OF_STOPPLACES)
                                 .type(groupOfStopPlacesInputObjectType))
                         .dataFetcher(groupOfStopPlacesUpdater))
+                .field(newFieldDefinition()
+                        .name(MUTATE_PURPOSE_OF_GROUPING)
+                        .type(purposeOfGroupingType)
+                        .description("Mutate purpose of grouping")
+                        .argument(GraphQLArgument.newArgument().
+                                name(OUTPUT_TYPE_PURPOSE_OF_GROUPING)
+                                .type(purposeOfGroupingInputObjectType))
+                        .dataFetcher(purposeOfGroupingUpdater))
                 .field(newFieldDefinition()
                         .type(new GraphQLList(pathLinkObjectType))
                         .name(MUTATE_PATH_LINK)
@@ -904,11 +921,23 @@ public class StopPlaceRegisterGraphQLSchema {
                 .field(newInputObjectField().name(DESCRIPTION).type(embeddableMultiLingualStringInputObjectType))
                 .field(newInputObjectField().name(ALTERNATIVE_NAMES).type(new GraphQLList(alternativeNameInputObjectType)))
                 .field(newInputObjectField().name(VERSION_COMMENT).type(GraphQLString))
+                .field(newInputObjectField().name(PURPOSE_OF_GROUPING).type(versionLessRefInputObjectType).description("References to purpose of grouping"))
                 .field(newInputObjectField()
                         .name(GROUP_OF_STOP_PLACES_MEMBERS)
                         .description("References to group of stop places members. Stop place IDs.")
                         .type(new GraphQLList(versionLessRefInputObjectType)))
                 .build();
+    }
+
+    private GraphQLInputObjectType createPurposeOfGroupingInputObjectType() {
+        return newInputObject()
+                .name(INPUT_TYPE_PURPOSE_OF_GROUPING)
+                .field(newInputObjectField().name(ID).type(GraphQLString).description("Ignore ID when creating new"))
+                .field(newInputObjectField().name(NAME).type(new GraphQLNonNull(embeddableMultiLingualStringInputObjectType)))
+                .field(newInputObjectField().name(DESCRIPTION).type(embeddableMultiLingualStringInputObjectType))
+                .field(newInputObjectField().name(VERSION_COMMENT).type(GraphQLString))
+                .build();
+
     }
 
     private List<GraphQLInputObjectField> createCommonInputFieldList(GraphQLInputObjectType embeddableMultiLingualStringInputObjectType) {
