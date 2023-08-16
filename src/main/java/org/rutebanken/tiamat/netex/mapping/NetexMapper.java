@@ -32,6 +32,7 @@ import org.rutebanken.netex.model.Parking;
 import org.rutebanken.netex.model.PathLink;
 import org.rutebanken.netex.model.PathLinkEndStructure;
 import org.rutebanken.netex.model.PlaceEquipments_RelStructure;
+import org.rutebanken.netex.model.PurposeOfGrouping;
 import org.rutebanken.netex.model.Quay;
 import org.rutebanken.netex.model.ResourceFrame;
 import org.rutebanken.netex.model.SanitaryEquipment;
@@ -100,6 +101,10 @@ public class NetexMapper {
                 .fieldBToA("purposeOfGrouping", "purposeOfGroupingRef")
                 .fieldAToB("purposeOfGroupingRef.ref", "purposeOfGrouping.name")
                 .customize(new GroupOfStopPlacesMapper())
+                .register();
+
+        mapperFactory.classMap(PurposeOfGrouping.class, org.rutebanken.tiamat.model.PurposeOfGrouping.class)
+                .byDefault()
                 .register();
 
         mapperFactory.classMap(GroupOfTariffZones.class, org.rutebanken.tiamat.model.GroupOfTariffZones.class)
