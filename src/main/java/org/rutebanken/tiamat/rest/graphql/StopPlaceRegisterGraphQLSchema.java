@@ -184,6 +184,9 @@ public class StopPlaceRegisterGraphQLSchema {
     private DataFetcher<Page<GroupOfStopPlaces>> groupOfStopPlacesFetcher;
 
     @Autowired
+    private DataFetcher<Page<PurposeOfGrouping>> purposeOfGroupingFetcher;
+
+    @Autowired
 
     private DataFetcher<Page<GroupOfTariffZones>> groupOfTariffZonesFetcher;
 
@@ -385,6 +388,13 @@ public class StopPlaceRegisterGraphQLSchema {
                         .argument(createFindGroupOfStopPlacesArguments())
                         .dataFetcher(groupOfStopPlacesFetcher)
                         .build())
+                .field(newFieldDefinition()
+                        .name(PURPOSE_OF_GROUPING)
+                        .type(new GraphQLList(purposeOfGroupingType))
+                        .description("List all purpose of grouping")
+                        .argument(createFindPurposeOfGroupingArguments())
+                        .dataFetcher(purposeOfGroupingFetcher)
+                )
 
                 .field(newFieldDefinition()
                         .name(GROUP_OF_TARIFF_ZONES)
@@ -564,6 +574,19 @@ public class StopPlaceRegisterGraphQLSchema {
                 .build());
         arguments.add(GraphQLArgument.newArgument()
                 .name(FIND_BY_STOP_PLACE_ID)
+                .type(GraphQLString)
+                .build());
+        return arguments;
+    }
+
+    private List<GraphQLArgument> createFindPurposeOfGroupingArguments(){
+        List<GraphQLArgument> arguments = createPageAndSizeArguments();
+        arguments.add(GraphQLArgument.newArgument()
+                .name(ID)
+                .type(GraphQLString)
+                .build());
+        arguments.add(GraphQLArgument.newArgument()
+                .name(QUERY)
                 .type(GraphQLString)
                 .build());
         return arguments;
