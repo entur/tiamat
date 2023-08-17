@@ -18,6 +18,7 @@ package org.rutebanken.tiamat.rest.graphql.mappers;
 import org.junit.Test;
 import org.rutebanken.tiamat.model.GroupOfStopPlaces;
 import org.rutebanken.tiamat.model.StopPlaceReference;
+import org.rutebanken.tiamat.repository.PurposeOfGroupingRepository;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,7 +34,9 @@ public class GroupOfStopPlacesMapperTest {
 
     private GroupOfEntitiesMapper groupOfEntitiesMapper = mock(GroupOfEntitiesMapper.class);
 
-    private GroupOfStopPlacesMapper groupOfStopPlacesMapper = new GroupOfStopPlacesMapper(groupOfEntitiesMapper);
+    private PurposeOfGroupingRepository purposeOfGroupingRepository = mock(PurposeOfGroupingRepository.class);
+
+    private GroupOfStopPlacesMapper groupOfStopPlacesMapper = new GroupOfStopPlacesMapper(groupOfEntitiesMapper,purposeOfGroupingRepository);
 
     @Test
     public void populate() throws Exception {

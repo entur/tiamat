@@ -15,37 +15,59 @@
 
 package org.rutebanken.tiamat.model;
 
+import javax.persistence.AttributeOverride;
+import javax.persistence.AttributeOverrides;
+import javax.persistence.Column;
+import javax.persistence.Embedded;
+import javax.persistence.MappedSuperclass;
+import javax.persistence.Transient;
+
+@MappedSuperclass
 public abstract class TypeOfValue_VersionStructure
         extends DataManagedObjectStructure {
 
-    protected MultilingualStringEntity name;
-    protected MultilingualStringEntity shortName;
-    protected MultilingualStringEntity description;
+    @AttributeOverrides({
+            @AttributeOverride(name = "value", column = @Column(name = "name_value")),
+            @AttributeOverride(name = "lang", column = @Column(name = "name_lang", length = 5))
+    })
+    @Embedded
+    protected EmbeddableMultilingualString name;
+    @Transient
+    protected EmbeddableMultilingualString shortName;
+    @AttributeOverrides({
+            @AttributeOverride(name = "value", column = @Column(name = "description_value", length = 4000)),
+            @AttributeOverride(name = "lang", column = @Column(name = "description_lang", length = 5))
+    })
+    @Embedded
+    protected EmbeddableMultilingualString description;
+    @Transient
     protected String image;
+    @Transient
     protected String url;
+    @Transient
     protected PrivateCodeStructure privateCode;
 
-    public MultilingualStringEntity getName() {
+    public EmbeddableMultilingualString getName() {
         return name;
     }
 
-    public void setName(MultilingualStringEntity value) {
+    public void setName(EmbeddableMultilingualString value) {
         this.name = value;
     }
 
-    public MultilingualStringEntity getShortName() {
+    public EmbeddableMultilingualString getShortName() {
         return shortName;
     }
 
-    public void setShortName(MultilingualStringEntity value) {
+    public void setShortName(EmbeddableMultilingualString value) {
         this.shortName = value;
     }
 
-    public MultilingualStringEntity getDescription() {
+    public EmbeddableMultilingualString getDescription() {
         return description;
     }
 
-    public void setDescription(MultilingualStringEntity value) {
+    public void setDescription(EmbeddableMultilingualString value) {
         this.description = value;
     }
 

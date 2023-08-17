@@ -18,7 +18,6 @@ package org.rutebanken.tiamat.exporter;
 import org.rutebanken.tiamat.model.LocaleStructure;
 import org.rutebanken.tiamat.model.MultilingualStringEntity;
 import org.rutebanken.tiamat.model.ResourceFrame;
-import org.rutebanken.tiamat.model.ServiceFrame;
 import org.rutebanken.tiamat.model.VersionFrameDefaultsStructure;
 import org.rutebanken.tiamat.netex.id.NetexIdHelper;
 import org.rutebanken.tiamat.time.ExportTimeZone;
@@ -27,7 +26,7 @@ import org.springframework.stereotype.Service;
 
 
 @Service
-public class TiamatServiceFrameExporter {
+public class TiamatResourceFrameExporter {
 
     private final NetexIdHelper netexIdHelper;
 
@@ -35,22 +34,12 @@ public class TiamatServiceFrameExporter {
 
 
     @Autowired
-    public TiamatServiceFrameExporter(NetexIdHelper netexIdHelper, ExportTimeZone exportTimeZone) {
+    public TiamatResourceFrameExporter(NetexIdHelper netexIdHelper, ExportTimeZone exportTimeZone) {
 
         this.netexIdHelper = netexIdHelper;
         this.exportTimeZone = exportTimeZone;
     }
 
-
-    public ServiceFrame createTiamatServiceFrame(String description) {
-        ServiceFrame serviceFrame= new ServiceFrame();
-        serviceFrame.setDescription(new MultilingualStringEntity(description));
-        setFrameDefaultLocale(serviceFrame);
-        serviceFrame.setVersion(1L);
-        serviceFrame.setNetexId(netexIdHelper.getNetexId(serviceFrame, serviceFrame.hashCode()));
-
-        return serviceFrame;
-    }
 
     public ResourceFrame createTiamatResourceFrame(String description){
         ResourceFrame resourceFrame = new ResourceFrame();
@@ -61,13 +50,13 @@ public class TiamatServiceFrameExporter {
         return resourceFrame;
     }
 
-    public void setFrameDefaultLocale(ServiceFrame serviceFrame) {
+    public void setFrameDefaultLocale(ResourceFrame resourceFrame) {
 
         LocaleStructure localeStructure = new LocaleStructure();
         localeStructure.setTimeZone(exportTimeZone.getDefaultTimeZoneId().toString());
         VersionFrameDefaultsStructure versionFrameDefaultsStructure = new VersionFrameDefaultsStructure();
         versionFrameDefaultsStructure.setDefaultLocale(localeStructure);
-        serviceFrame.setFrameDefaults(versionFrameDefaultsStructure);
+        resourceFrame.setFrameDefaults(versionFrameDefaultsStructure);
     }
 
 }
