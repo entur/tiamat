@@ -503,8 +503,8 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         stopPlaceRepository.save(stopPlace);
 
         //Ensure that from- and toDate is before "now"
-        assertThat(fromDate.isBefore(now));
-        assertThat(toDate.isBefore(now));
+        assertThat(fromDate.isBefore(now)).isTrue();
+        assertThat(toDate.isBefore(now)).isTrue();
 
         String graphQlJsonQuery = """
                   {
