@@ -17,6 +17,7 @@ package org.rutebanken.tiamat.rest.graphql;
 
 import com.google.common.collect.Sets;
 import io.restassured.response.ValidatableResponse;
+import org.junit.Assert;
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.CoordinateSequence;
@@ -178,7 +179,8 @@ public class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResou
         mockedRoleAssignmentExtractor.setNextReturnedRoleAssignment(
                 RoleAssignmentListBuilder.builder().withStopPlaceOfType(StopTypeEnumeration.BUS_STATION).build());
         PathLinkQuery query = createNewPathLinkQuery(StopTypeEnumeration.FERRY_STOP);
-        executeGraphqQLQueryOnly(query.query, HttpStatus.FORBIDDEN.value());
+        final ValidatableResponse validatableResponse = executeGraphqQLQueryOnly(query.query, HttpStatus.FORBIDDEN.value());
+        Assert.assertNotNull(validatableResponse);
     }
 
     @Test
