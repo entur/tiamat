@@ -15,7 +15,7 @@
 
 package org.rutebanken.tiamat.repository.search;
 
-import net.logstash.logback.encoder.org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.rutebanken.tiamat.exporter.params.ParkingSearch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +50,7 @@ public class ParkingQueryFromSearchBuilder {
                 int counter = 0;
                 for(String parentSiteRef : parkingSearch.getParentSiteRefs()) {
                     stringBuilder.append("'")
-                            .append(StringEscapeUtils.escapeSql(parentSiteRef))
+                            .append(escapeSql(parentSiteRef))
                             .append("'");
                     if(++counter < parkingSearch.getParentSiteRefs().size()) {
                         stringBuilder.append(",");
@@ -71,5 +71,9 @@ public class ParkingQueryFromSearchBuilder {
         final String generatedSql = searchHelper.format(queryString.toString());
         searchHelper.logIfLoggable(generatedSql, parameters, parkingSearch, logger);
         return Pair.of(generatedSql, parameters);
+    }
+
+    private  String escapeSql(String str) {
+        return str == null ? null : StringUtils.replace(str, "'", "''");
     }
 }

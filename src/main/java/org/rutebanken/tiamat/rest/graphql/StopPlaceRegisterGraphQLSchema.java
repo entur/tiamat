@@ -246,10 +246,10 @@ public class StopPlaceRegisterGraphQLSchema {
                 .name(PLACE_EQUIPMENTS)
                 .type(equipmentType)
                 .dataFetcher(env -> {
-                    if (env.getSource() instanceof StopPlace) {
-                        return ((StopPlace)env.getSource()).getPlaceEquipments();
-                    } else if (env.getSource() instanceof Quay) {
-                        return ((Quay)env.getSource()).getPlaceEquipments();
+                    if (env.getSource() instanceof StopPlace stopPlace) {
+                        return stopPlace.getPlaceEquipments();
+                    } else if (env.getSource() instanceof Quay quay) {
+                        return quay.getPlaceEquipments();
                     }
                     return null;
                 })
@@ -295,8 +295,7 @@ public class StopPlaceRegisterGraphQLSchema {
         GraphQLObjectType parentStopPlaceObjectType = parentStopPlaceObjectTypeCreator.create(stopPlaceInterface, stopPlaceInterfaceFields, commonFieldsList, stopPlaceObjectType);
 
         stopPlaceTypeResolver.setResolveFunction(object -> {
-            if(object instanceof StopPlace) {
-                StopPlace stopPlace = (StopPlace) object;
+            if(object instanceof StopPlace stopPlace) {
                 if(stopPlace.isParentStopPlace()) {
                     return parentStopPlaceObjectType;
                 } else {

@@ -15,6 +15,7 @@
 
 package org.rutebanken.tiamat.changelog;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.slf4j.Logger;
@@ -43,6 +44,7 @@ public class EntityChangedJMSListener {
         try {
             ObjectMapper mapper = new ObjectMapper();
             mapper.registerModule(new JavaTimeModule());
+            mapper.enable(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_USING_DEFAULT_VALUE);
             events.add(mapper.readValue(message, EntityChangedEvent.class));
         } catch (IOException e) {
             logger.warn("Failed to process entity changed message: " + message);

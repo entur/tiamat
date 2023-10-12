@@ -61,36 +61,31 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring-cloud-gcp.version>1.2.5.RELEASE</spring-cloud-gcp.version>
         <maven.compiler.plugin.version>3.8.1</maven.compiler.plugin.version>
-        <plexus.compiler.javac.version>2.8.8</plexus.compiler.javac.version>
-        <spring-boot-plugin.version>2.4.13</spring-boot-plugin.version>
-        <spring-boot.version>2.4.13</spring-boot.version>
-        <spring.security.version>5.3.5.RELEASE</spring.security.version>
-        <postgresql.version>42.2.4</postgresql.version>
+        <spring-boot-plugin.version>2.7.11</spring-boot-plugin.version>
+        <spring-boot.version>2.7.11</spring-boot.version>
+        <spring.security.version>5.7.8</spring.security.version>
+        <postgresql.version>42.6.0</postgresql.version>
         <geodb.version>0.9</geodb.version>
-        <geotools.version>20.1</geotools.version>
-        <activemq-client.version>5.15.9</activemq-client.version>
-        <maven-javadoc-plugin.version>2.10.4</maven-javadoc-plugin.version>
-        <flyway-core.version>8.5.10</flyway-core.version>
-        <logstash-logback.version>5.2</logstash-logback.version>
-        <kubernetes-client.version>4.1.1</kubernetes-client.version>
-        <janino.version>3.0.8</janino.version>
-        <assertj-core.version>3.10.0</assertj-core.version>
-        <rest-assured.version>3.1.0</rest-assured.version>
-        <javax.el.version>3.0.0</javax.el.version>
+        <geotools.version>27.2</geotools.version>
+        <activemq-client.version>5.18.1</activemq-client.version>
+        <flyway-core.version>9.18.0</flyway-core.version>
+        <logstash-logback.version>7.3</logstash-logback.version>
+        <kubernetes-client.version>6.6.2</kubernetes-client.version>
+        <assertj-core.version>3.24.2</assertj-core.version>
+        <rest-assured.version>5.3.0</rest-assured.version>
         <com.h2database.version>1.4.197</com.h2database.version>
-        <hikariCP.version>3.2.0</hikariCP.version>
-        <commons.lang3.version>3.7</commons.lang3.version>
+        <hikariCP.version>5.0.1</hikariCP.version>
+        <commons.lang3.version>3.12.0</commons.lang3.version>
         <orika-core.version>1.5.4</orika-core.version>
-        <guava.version>30.1.1-jre</guava.version>
+        <guava.version>31.1-jre</guava.version>
         <graphql-java.version>11.0</graphql-java.version>
-
         <hazelcast-hibernate53.version>2.1.1</hazelcast-hibernate53.version>
-        <hibernate.version>5.4.0.Final</hibernate.version>
-        <hibernate-spatial.version>5.4.0.Final</hibernate-spatial.version>
-        <groovy-all.version>3.0.9</groovy-all.version>
-        <jaxb-version>2.3.0.1</jaxb-version>
+        <hibernate.version>5.6.15.Final</hibernate.version>
+        <hibernate-spatial.version>5.6.15.Final</hibernate-spatial.version>
+        <hibernate-entitymanager.version>5.6.15.Final</hibernate-entitymanager.version>
+        <jaxb-version>4.0.2</jaxb-version>
         <swagger-jersey2.version>1.6.2</swagger-jersey2.version>
-        <jackson-version>2.11.3</jackson-version>
+        <jackson-version>2.15.0</jackson-version>
         <jacoco-maven-plugin.version>0.8.8</jacoco-maven-plugin.version>
         <sonar-maven-plugin.version>3.9.1.2184</sonar-maven-plugin.version>
 
@@ -103,25 +98,13 @@
         <entur.helpers.version>1.0.64</entur.helpers.version>
 
         <javax-jms.version>2.0.1</javax-jms.version>
-        <jts-core.version>1.16.0</jts-core.version>
+        <jts-core.version>1.19.0</jts-core.version>
 
         <maven-surefire-plugin.version>3.0.0-M6</maven-surefire-plugin.version>
-        <maven-antrun-plugin.version>3.0.0</maven-antrun-plugin.version>
         <argLine></argLine>
-        <!--TODO temporary manual upgrade of Logback-->
-        <logback.version>1.2.8</logback.version>
-    </properties>
 
-    <!-- This repository list can be deleted, as it is now supplied by rutebanken nexus.
-         But you have set up maven to use it as mirror in settings.xml
-    -->
-    <repositories>
-        <repository>
-            <id>maven2</id>
-            <name>central</name>
-            <url>https://repo.maven.apache.org/maven2</url>
-        </repository>
-    </repositories>
+        <geotools-gt-jts-wrapper.version>24.6</geotools-gt-jts-wrapper.version>
+    </properties>
 
     <dependencyManagement>
         <dependencies>
@@ -218,6 +201,14 @@
             <version>${jackson-version}</version>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-annotations -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>${jackson-version}</version>
+        </dependency>
+
+
         <dependency>
             <groupId>com.sun.xml.bind</groupId>
             <artifactId>jaxb-impl</artifactId>
@@ -289,24 +280,6 @@
             <artifactId>logstash-logback-encoder</artifactId>
             <version>${logstash-logback.version}</version>
         </dependency>
-        <!--TODO temporary manual upgrade of Logback-->
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>${logback.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-core</artifactId>
-            <version>${logback.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.codehaus.janino</groupId>
-            <artifactId>janino</artifactId>
-            <version>${janino.version}</version>
-        </dependency>
-
         <dependency>
             <groupId>org.entur</groupId>
             <artifactId>netex-java-model</artifactId>
@@ -399,13 +372,6 @@
         </dependency>
 
         <dependency>
-            <groupId>javax.el</groupId>
-            <artifactId>javax.el-api</artifactId>
-            <version>${javax.el.version}</version>
-        </dependency>
-
-
-        <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-spatial</artifactId>
             <version>${hibernate-spatial.version}</version>
@@ -421,6 +387,12 @@
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-core</artifactId>
             <version>${hibernate.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-entitymanager</artifactId>
+            <version>${hibernate-entitymanager.version}</version>
         </dependency>
 
         <dependency>
@@ -478,7 +450,7 @@
         <dependency>
             <groupId>org.geotools</groupId>
             <artifactId>gt-jts-wrapper</artifactId>
-            <version>${geotools.version}</version>
+            <version>${geotools-gt-jts-wrapper.version}</version>
         </dependency>
 
         <dependency>
@@ -509,14 +481,12 @@
             <groupId>io.rest-assured</groupId>
             <artifactId>rest-assured</artifactId>
             <version>${rest-assured.version}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.codehaus.groovy</groupId>
-            <artifactId>groovy-all</artifactId>
-            <version>${groovy-all.version}</version>
-            <type>pom</type>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.groovy</groupId>
+                    <artifactId>groovy-xml</artifactId>
+                </exclusion>
+            </exclusions>
             <scope>test</scope>
         </dependency>
 
@@ -582,8 +552,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>${maven.compiler.plugin.version}</version>
                 <configuration>
-                    <source>11</source>
-                    <target>11</target>
+                    <source>17</source>
+                    <target>17</target>
                     <encoding>UTF-8</encoding>
                     <compilerArgs>
                         <!--arg>-Werror</arg-->
@@ -591,11 +561,6 @@
                     </compilerArgs>
                 </configuration>
                 <dependencies>
-                    <dependency>
-                        <groupId>org.codehaus.plexus</groupId>
-                        <artifactId>plexus-compiler-javac</artifactId>
-                        <version>${plexus.compiler.javac.version}</version>
-                    </dependency>
                 </dependencies>
             </plugin>
 
@@ -607,32 +572,6 @@
                     <argLine>@{argLine} -Xms500m -Xmx1000m -Xss256k</argLine>
                     <runOrder>alphabetical</runOrder>
                 </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>${maven-antrun-plugin.version}</version>
-                <executions>
-                    <execution>
-                        <id>test-compile</id>
-                        <phase>test-compile</phase>
-                        <configuration>
-                            <target>
-                                <mkdir dir="${basedir}/src/test/groovy"/>
-                                <taskdef name="groovyc" classname="org.codehaus.groovy.ant.Groovyc">
-                                    <classpath refid="maven.test.classpath"/>
-                                </taskdef>
-                                <mkdir dir="${project.build.testOutputDirectory}"/>
-                                <groovyc destdir="${project.build.testOutputDirectory}"
-                                         srcdir="${basedir}/src/test/groovy/" listfiles="true">
-                                    <classpath refid="maven.test.classpath"/>
-                                </groovyc>
-                            </target>
-                        </configuration>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>org.springframework.boot</groupId>

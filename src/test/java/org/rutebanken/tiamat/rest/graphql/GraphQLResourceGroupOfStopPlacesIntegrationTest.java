@@ -13,46 +13,42 @@
  * limitations under the Licence.
  */
 
-package org.rutebanken.tiamat.rest.graphql
+package org.rutebanken.tiamat.rest.graphql;
 
-import org.junit.Test
-import org.locationtech.jts.geom.Coordinate
-import org.rutebanken.tiamat.model.StopPlace
-import org.rutebanken.tiamat.model.StopTypeEnumeration
-import org.rutebanken.tiamat.time.ExportTimeZone
-import org.springframework.beans.factory.annotation.Autowired
+import org.junit.Test;
+import org.locationtech.jts.geom.Coordinate;
+import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.StopTypeEnumeration;
 
-import static org.hamcrest.Matchers.equalTo
-import static org.hamcrest.Matchers.nullValue
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.MUTATE_GROUP_OF_STOP_PLACES
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.nullValue;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.MUTATE_GROUP_OF_STOP_PLACES;
 
-def class GraphQLResourceGroupOfStopPlacesIntegrationTest extends AbstractGraphQLResourceIntegrationTest {
-
-    @Autowired
-    private ExportTimeZone exportTimeZone
+public class GraphQLResourceGroupOfStopPlacesIntegrationTest extends AbstractGraphQLResourceIntegrationTest {
 
     @Test
-    void "Create new group of stop places"() {
-        def stopPlace1 = new StopPlace()
-        stopPlace1.setCentroid(geometryFactory.createPoint(new Coordinate(12, 53)))
-        stopPlace1.setStopPlaceType(StopTypeEnumeration.BUS_STATION)
-        stopPlaceVersionedSaverService.saveNewVersion(stopPlace1)
+    public void create_new_group_of_stop_places() {
+        var stopPlace1 = new StopPlace();
+        stopPlace1.setCentroid(geometryFactory.createPoint(new Coordinate(12, 53)));
+        stopPlace1.setStopPlaceType(StopTypeEnumeration.BUS_STATION);
+        stopPlaceVersionedSaverService.saveNewVersion(stopPlace1);
 
-        def stopPlace2 = new StopPlace()
-        stopPlace2.setCentroid(geometryFactory.createPoint(new Coordinate(13, 61)))
-        stopPlace2.setStopPlaceType(StopTypeEnumeration.TRAM_STATION)
-        stopPlaceVersionedSaverService.saveNewVersion(stopPlace2)
+        var stopPlace2 = new StopPlace();
+        stopPlace2.setCentroid(geometryFactory.createPoint(new Coordinate(13, 61)));
+        stopPlace2.setStopPlaceType(StopTypeEnumeration.TRAM_STATION);
+        stopPlaceVersionedSaverService.saveNewVersion(stopPlace2);
         
-        def groupName = "Group name"
-        def versionComment = "VersionComment"
+        var groupName = "Group name";
+        var versionComment = "VersionComment";
 
-        def graphQlJsonQuery = """mutation {
-                                    group: ${MUTATE_GROUP_OF_STOP_PLACES}(GroupOfStopPlaces: {
-                                        name: {value: "${groupName}"},
-                                        versionComment: "${versionComment}",
+        String graphQlJsonQuery = """
+                                    mutation {
+                                    group: %s(GroupOfStopPlaces: {
+                                        name: {value: "%s"},
+                                        versionComment: "%s",
                                         members: [
-                                            {ref: "${stopPlace1.getNetexId()}"},
-                                            {ref: "${stopPlace2.getNetexId()}"}],
+                                            {ref: "%s"},
+                                            {ref: "%s"}],
                                         }) {
                                     id
                                     version
@@ -72,7 +68,13 @@ def class GraphQLResourceGroupOfStopPlacesIntegrationTest extends AbstractGraphQ
                                     }
                                   }
                                 }
-                                """
+                                """.formatted(
+                                                MUTATE_GROUP_OF_STOP_PLACES,
+                                                groupName,
+                                                versionComment,
+                                                stopPlace1.getNetexId(),
+                                                stopPlace2.getNetexId()
+                                              );
 
         executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .body("data.group.name.value", equalTo(groupName))
@@ -84,6 +86,6 @@ def class GraphQLResourceGroupOfStopPlacesIntegrationTest extends AbstractGraphQ
                 .root("data.group.members.find { it.id == '" + stopPlace1.getNetexId() + "'}")
                     .body("name", nullValue())
                     .body("stopPlaceType", equalTo(StopTypeEnumeration.BUS_STATION.value()))
-                    .body("version", equalTo(String.valueOf(stopPlace1.getVersion())))
+                    .body("version", equalTo(String.valueOf(stopPlace1.getVersion())));
     }
 }

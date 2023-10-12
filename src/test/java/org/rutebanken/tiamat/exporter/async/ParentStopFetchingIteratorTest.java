@@ -101,7 +101,7 @@ public class ParentStopFetchingIteratorTest {
                 .as("first child name")
                 .isNotNull()
                 .extracting(MultilingualString::getValue)
-                .containsExactly(parent.getName().getValue());
+                .isEqualTo(parent.getName().getValue());
         assertThat(parentStopFetchingIterator.hasNext()).isTrue();
 
         StopPlace actualParent = parentStopFetchingIterator.next();
@@ -113,7 +113,7 @@ public class ParentStopFetchingIteratorTest {
                 .as("second child name")
                 .isNotNull()
                 .extracting(MultilingualString::getValue)
-                .containsExactly(parent.getName().getValue());
+                .isEqualTo(parent.getName().getValue());
 
         assertThat(parentStopFetchingIterator.hasNext()).isFalse();
 

@@ -16,7 +16,7 @@ public abstract class EntityChangedEventPublisher {
         event.msgId = UUID.randomUUID().toString();
         event.entityType = getEntityType(entity);
         event.entityId = entity.getNetexId();
-        event.entityVersion = (entity).getVersion();
+        event.entityVersion = entity.getVersion();
         event.entityChanged = getEntityChangedAsEpochMillis(entity);
         event.crudAction = getCrudAction(entity, deleted);
         return event;
