@@ -119,7 +119,7 @@ public class StopPlaceRefUpdaterService {
 
         long startTime = System.currentTimeMillis();
 
-        Session session = entityManager.unwrap(Session.class);
+        Session session =  entityManager.unwrap(SessionImpl.class);
         logger.info("About to update all currently valid stop places (tariff zone and topographic place refs)");
 
         SessionEntitiesEvictor sessionEntitiesEvictor = new SessionEntitiesEvictor((SessionImpl) session);
