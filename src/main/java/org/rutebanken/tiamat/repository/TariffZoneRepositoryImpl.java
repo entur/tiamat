@@ -235,57 +235,59 @@ public class TariffZoneRepositoryImpl implements TariffZoneRepositoryCustom {
     }
 
     public int updateStopPlaceTariffZoneRef() {
-        String sql= "INSERT " +
-                "    INTO" +
-                "        STOP_PLACE_TARIFF_ZONES" +
-                "        SELECT" +
-                "            SP.ID," +
-                "            tz.netex_id," +
-                "            CAST(tz.version as text)  " +
-                "        FROM" +
-                "            TARIFF_ZONE TZ " +
-                "        JOIN" +
-                "            PERSISTABLE_POLYGON PP " +
-                "                ON PP.ID = TZ.POLYGON_ID " +
-                "        JOIN" +
-                "            STOP_PLACE SP " +
-                "                ON ST_CONTAINS(PP.POLYGON," +
-                "            SP.CENTROID) " +
-                "            AND TZ.VERSION =  (SELECT" +
-                "                MAX(TZV.VERSION)   " +
-                "            FROM" +
-                "                TARIFF_ZONE TZV   " +
-                "            WHERE" +
-                "                TZV.NETEX_ID = TZ.NETEX_ID    " +
-                "                AND (" +
-                "                    TZV.TO_DATE IS NULL         " +
-                "                    OR TZV.TO_DATE > NOW()" +
-                "                )    " +
-                "                AND (" +
-                "                    TZV.FROM_DATE IS NULL         " +
-                "                    OR TZV.FROM_DATE < NOW()" +
-                "                ))                " +
-                "        LEFT JOIN" +
-                "            STOP_PLACE PSP " +
-                "                ON SP.PARENT_SITE_REF = PSP.NETEX_ID " +
-                "                AND sp.parent_site_ref_version = CAST(psp.version as text)  " +
-                "        where" +
-                "            (" +
-                "                (" +
-                "                    SP.FROM_DATE <= NOW()       " +
-                "                    AND (" +
-                "                        SP.TO_DATE >= NOW()            " +
-                "                        OR SP.TO_DATE IS NULL" +
-                "                    )" +
-                "                )      " +
-                "                OR (" +
-                "                    PSP.FROM_DATE <= NOW()          " +
-                "                    AND (" +
-                "                        PSP.TO_DATE >= NOW()               " +
-                "                        OR PSP.TO_DATE IS NULL" +
-                "                    )" +
-                "                )    " +
-                "            )";
+        String sql= """
+                INSERT
+                    INTO
+                        STOP_PLACE_TARIFF_ZONES
+                        SELECT
+                            SP.ID,
+                            tz.netex_id,
+                            CAST(tz.version as text)
+                        FROM
+                            TARIFF_ZONE TZ
+                        JOIN
+                            PERSISTABLE_POLYGON PP
+                                ON PP.ID = TZ.POLYGON_ID
+                        JOIN
+                            STOP_PLACE SP
+                                ON ST_CONTAINS(PP.POLYGON,
+                            SP.CENTROID)
+                            AND TZ.VERSION =  (SELECT
+                                MAX(TZV.VERSION)
+                            FROM
+                                TARIFF_ZONE TZV
+                            WHERE
+                                TZV.NETEX_ID = TZ.NETEX_ID
+                                AND (
+                                    TZV.TO_DATE IS NULL
+                                    OR TZV.TO_DATE > NOW()
+                                )
+                                AND (
+                                    TZV.FROM_DATE IS NULL
+                                    OR TZV.FROM_DATE < NOW()
+                                ))
+                        LEFT JOIN
+                            STOP_PLACE PSP
+                                ON SP.PARENT_SITE_REF = PSP.NETEX_ID
+                                AND sp.parent_site_ref_version = CAST(psp.version as text)
+                        where
+                            (
+                                (
+                                    SP.FROM_DATE <= NOW()
+                                    AND (
+                                        SP.TO_DATE >= NOW()
+                                        OR SP.TO_DATE IS NULL
+                                    )
+                                )
+                                OR (
+                                    PSP.FROM_DATE <= NOW()
+                                    AND (
+                                        PSP.TO_DATE >= NOW()
+                                        OR PSP.TO_DATE IS NULL
+                                    )
+                                )
+                            )
+                """;
 
         final Query query = entityManager.createNativeQuery(sql);
 
