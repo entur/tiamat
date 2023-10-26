@@ -21,6 +21,7 @@ import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.ParseException;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -59,7 +60,7 @@ public class QuayTest extends TiamatIntegrationTest {
         String[] verifyColumns = new String[]{"id", "name.value", "version",
                 "created", "shortName.value", "covered", "description.value",
                 "label.value"};
-        assertThat(actualQuay).isEqualToComparingOnlyGivenFields(quay, verifyColumns);
+        assertThat(actualQuay).usingRecursiveComparison().isEqualTo(quay);
     }
 
     @Test
@@ -196,8 +197,8 @@ public class QuayTest extends TiamatIntegrationTest {
         EquipmentPosition equipmentPosition = new EquipmentPosition();
         equipmentPosition.setDescription(new MultilingualStringEntity("Seats on Platform 1 and 2. \"0 metres from platform entrance", "en"));
         equipmentPosition.setReferencePointRef(pointRefStructure);
-        equipmentPosition.setXOffset(new BigDecimal(1).setScale(2, BigDecimal.ROUND_HALF_UP));
-        equipmentPosition.setYOffset(new BigDecimal(20).setScale(2, BigDecimal.ROUND_HALF_UP));
+        equipmentPosition.setXOffset(new BigDecimal(1).setScale(2, RoundingMode.HALF_UP));
+        equipmentPosition.setYOffset(new BigDecimal(20).setScale(2, RoundingMode.HALF_UP));
 
         List<EquipmentPosition> equipmentPositions = new ArrayList<>();
         equipmentPositions.add(equipmentPosition);
@@ -225,7 +226,8 @@ public class QuayTest extends TiamatIntegrationTest {
         assertThat(actualEquipmentPlace.getEquipmentPositions()).isNotEmpty();
 
         EquipmentPosition actualEquipmentPosition = actualEquipmentPlace.getEquipmentPositions().get(0);
-        assertThat(actualEquipmentPosition).isEqualToComparingOnlyGivenFields(equipmentPosition, "description.value", "xOffset", "yOffset");
+
+        assertThat(actualEquipmentPlaces).usingRecursiveComparison().ignoringFields("id","version").isEqualTo(equipmentPlaces);
         assertThat(actualEquipmentPosition.getReferencePointRef().getRef()).isEqualTo(pointRefStructure.getRef());
     }
 
