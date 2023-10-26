@@ -206,7 +206,7 @@ public class GraphQLResourceParkingIntegrationTest extends AbstractGraphQLResour
                 "}\",\"variables\": \"\"}";
         executeGraphQL(graphQlQuery)
                 .body("data.parking", notNullValue())
-                .root("data.parking[0]")
+                .rootPath("data.parking[0]")
                     .body("id", notNullValue())
                     .body("version", notNullValue())
                     .body("name.value", notNullValue())
@@ -333,7 +333,7 @@ public class GraphQLResourceParkingIntegrationTest extends AbstractGraphQLResour
                 "}\",\"variables\": \"\"}";
         executeGraphQL(graphQlQuery)
                 .body("data.parking", notNullValue())
-                .root("data.parking[0]")
+                .rootPath("data.parking[0]")
                     .body("id", notNullValue())
                     .body("version", notNullValue())
                     .body("name.value", notNullValue())
