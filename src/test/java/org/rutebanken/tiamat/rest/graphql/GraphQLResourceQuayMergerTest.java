@@ -96,9 +96,9 @@ public class GraphQLResourceQuayMergerTest extends AbstractGraphQLResourceIntegr
         executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .body("data.stopPlace.id", comparesEqualTo(stopPlace.getNetexId()))
                 .body("data.stopPlace.quays", hasSize(2))
-                .root("data.stopPlace.quays.find { it.id == '" +toQuay.getNetexId() + "'}")
+                .rootPath("data.stopPlace.quays.find { it.id == '" +toQuay.getNetexId() + "'}")
                 .body("importedId", containsInAnyOrder(originalIds.toArray()))
-                .root("data.stopPlace.quays.find { it.id == '" + quayToKeepUnaltered.getNetexId() + "'}")
+                .rootPath("data.stopPlace.quays.find { it.id == '" + quayToKeepUnaltered.getNetexId() + "'}")
                 .body("importedId", containsInAnyOrder(quayToKeepUnaltered.getOriginalIds().toArray()));
 
     }
