@@ -62,7 +62,7 @@ public class GraphQLResourceTariffZoneIntegrationTest extends AbstractGraphQLRes
                         }""";
 
         executeGraphqQLQueryOnly(graphQlJsonQuery)
-                .root("data.tariffZones[0]")
+                .rootPath("data.tariffZones[0]")
                 .body("name.value", equalTo(tariffZone.getName().getValue()))
                 .body("id", equalTo(tariffZone.getNetexId()))
                 .body("version", equalTo(Long.toString(tariffZone.getVersion())))
