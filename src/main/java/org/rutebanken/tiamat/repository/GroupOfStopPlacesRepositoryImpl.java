@@ -16,7 +16,6 @@
 package org.rutebanken.tiamat.repository;
 
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.SQLQuery;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
@@ -100,7 +99,7 @@ public class GroupOfStopPlacesRepositoryImpl implements GroupOfStopPlacesReposit
 
     private Iterator<GroupOfStopPlaces> scrollGroupOfStopPlaces(String sql) {
         Session session = entityManager.unwrap(Session.class);
-        SQLQuery sqlQuery = session.createSQLQuery(sql);
+        NativeQuery sqlQuery = session.createNativeQuery(sql);
 
         final int fetchSize = 100;
 
