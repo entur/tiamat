@@ -106,13 +106,13 @@ public class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResou
               }""".formatted(FIND_PATH_LINK,pathLink.getNetexId());
 
         executeGraphqQLQueryOnly(graphQlJsonQuery)
-                .root("data.pathLink[0]")
+                .rootPath("data.pathLink[0]")
                     .body("id", comparesEqualTo(pathLink.getNetexId()))
-                .root("data.pathLink[0].from")
+                .rootPath("data.pathLink[0].from")
                     .body("id", comparesEqualTo(pathLink.getFrom().getNetexId()))
                     .body("placeRef.ref", equalTo(firstQuay.getNetexId()))
                     .body("placeRef.version", equalTo(String.valueOf(firstQuay.getVersion())))
-                .root("data.pathLink[0].to")
+                .rootPath("data.pathLink[0].to")
                     .body("id", comparesEqualTo(pathLink.getTo().getNetexId()))
                     .body("placeRef.ref", equalTo(secondQuay.getNetexId()))
                     .body("placeRef.version", equalTo(String.valueOf(secondQuay.getVersion())));
@@ -160,13 +160,13 @@ public class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResou
 
 
         executeGraphqQLQueryOnly(graphQlJsonQuery)
-                .root("data.pathLink[0]")
+                .rootPath("data.pathLink[0]")
                    .body("id", comparesEqualTo(pathLink.getNetexId()))
-                .root("data.pathLink[0].from")
+                .rootPath("data.pathLink[0].from")
                     .body("id", comparesEqualTo(pathLink.getFrom().getNetexId()))
                     .body("placeRef.ref", equalTo(firstQuay.getNetexId()))
                     .body("placeRef.version", equalTo(String.valueOf(firstQuay.getVersion())))
-                .root("data.pathLink[0].to")
+                .rootPath("data.pathLink[0].to")
                     .body("id", comparesEqualTo(pathLink.getTo().getNetexId()))
                     .body("placeRef.ref", equalTo(secondQuay.getNetexId()))
                     .body("placeRef.version", equalTo(String.valueOf(secondQuay.getVersion())));
@@ -192,14 +192,14 @@ public class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResou
         ValidatableResponse rsp = executeGraphqQLQueryOnly(query.query);
 
         rsp
-                .root("data.pathLink[0]")
+                .rootPath("data.pathLink[0]")
                     .body("id", notNullValue())
                     .body("geometry", notNullValue())
-                .root("data.pathLink[0].from")
+                .rootPath("data.pathLink[0].from")
                     .body("id", notNullValue())
                     .body("placeRef.ref", equalTo(query.from.getNetexId()))
                     .body("placeRef.version", equalTo(String.valueOf(query.from.getVersion())))
-                .root("data.pathLink[0].to")
+                .rootPath("data.pathLink[0].to")
                     .body("id", notNullValue())
                     .body("placeRef.ref", equalTo(query.to.getNetexId()))
                     .body("placeRef.version", is(emptyOrNullString()));
@@ -289,7 +289,7 @@ public class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResou
                 }""".formatted(MUTATE_PATH_LINK,firstQuay.getNetexId(),firstQuay.getVersion(),secondQuay.getNetexId());
 
         String pathLinkId = executeGraphqQLQueryOnly(graphQlJsonQuery)
-                .root("data.pathLink[0]")
+                .rootPath("data.pathLink[0]")
                     .body("id", notNullValue())
                     .body("geometry", notNullValue())
                 .extract().path("data.pathLink[0].id");
@@ -327,7 +327,7 @@ public class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResou
 
         executeGraphqQLQueryOnly(secondGraphQlJsonQuery)
                 .body("errors", nullValue())
-                .root("data.pathLink[0]")
+                .rootPath("data.pathLink[0]")
                     .body("id", notNullValue())
                     .body("geometry", notNullValue())
                     .body("transferDuration", notNullValue())

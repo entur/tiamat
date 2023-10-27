@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.time.Instant;
@@ -222,7 +222,8 @@ public class StopPlaceVersionedSaverService {
     //This is to make sure entity is persisted before sending message
     @Transactional
     public void sendToJMS(StopPlace stopPlace) {
-        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter(){
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization(){
+            @Override
             public void afterCommit(){
                 logger.debug(String.format("send pubsub message on change: %s", stopPlace.toString()));
                 entityChangedListener.onChange(stopPlace);

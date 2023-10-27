@@ -55,7 +55,7 @@ public class GcsBlobStoreService implements BlobStoreService {
         String blobIdName = createBlobIdName(blobPath, fileName);
         try {
             logger.info("Uploading {} to path {} in bucket {}", fileName, blobPath, bucketName);
-            BlobStoreHelper.uploadBlobWithRetry(storage, bucketName, blobIdName, inputStream, false);
+            BlobStoreHelper.createOrReplace(storage, bucketName, blobIdName, inputStream, false);
         } catch (Exception e) {
             throw new RuntimeException("Error uploading file " + fileName + ", blobIdName " + blobIdName + " to bucket " + bucketName, e);
         }

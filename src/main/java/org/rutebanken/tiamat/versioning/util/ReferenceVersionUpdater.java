@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Set;
 
 import static java.util.stream.Collectors.toSet;
@@ -47,11 +48,11 @@ public class ReferenceVersionUpdater {
                     ref.setVersion(null);
                     DataManagedObjectStructure dataManagedObjectStructure = referenceResolver.resolve(ref);
                     try {
-                        T newRef = clazz.newInstance();
+                        T newRef = clazz.getDeclaredConstructor().newInstance();
                         newRef.setRef(dataManagedObjectStructure.getNetexId());
                         newRef.setVersion(String.valueOf(dataManagedObjectStructure.getVersion()));
                         return newRef;
-                    } catch (InstantiationException|IllegalAccessException e) {
+                    } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
                         throw new RuntimeException("Cannot create new instance", e);
                     }
                 })

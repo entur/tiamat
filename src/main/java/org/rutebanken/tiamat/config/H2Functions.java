@@ -18,7 +18,7 @@ package org.rutebanken.tiamat.config;
 import com.google.common.collect.ContiguousSet;
 import com.google.common.collect.DiscreteDomain;
 import com.google.common.collect.Range;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.similarity.LevenshteinDetailedDistance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -68,7 +68,7 @@ public class H2Functions implements InitializingBean {
             similarityToReturn = similarityOveridden;
             similarityOveridden = 1;
         } else {
-            int distance = StringUtils.getLevenshteinDistance(value1, value2);
+            int distance = new LevenshteinDetailedDistance().apply(value1, value2).getDistance();
             logger.info("Calculated levenshteinDistance {}", distance);
             similarityToReturn = 1 - ((double) distance) / (Math.max(value1.length(), value2.length()));
         }
