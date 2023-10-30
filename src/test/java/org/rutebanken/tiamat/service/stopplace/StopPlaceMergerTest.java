@@ -84,7 +84,7 @@ public class StopPlaceMergerTest extends TiamatIntegrationTest {
         fromStopPlace.getKeyValues().put(testKey, new Value(testValue));
 
         Quay fromQuay = new Quay();
-        fromQuay.setCompassBearing(new Float(90));
+        fromQuay.setCompassBearing(90F);
         fromQuay.setCentroid(geometryFactory.createPoint(new Coordinate(11.2, 60.2)));
         fromQuay.getOriginalIds().add("TEST:Quay:123401");
         fromQuay.getOriginalIds().add("TEST:Quay:567801");
@@ -110,7 +110,7 @@ public class StopPlaceMergerTest extends TiamatIntegrationTest {
         toStopPlace.setValidBetween(new ValidBetween(toStopPlaceOriginalFromDate));
 
         Quay toQuay = new Quay();
-        toQuay.setCompassBearing(new Float(90));
+        toQuay.setCompassBearing(90F);
         toQuay.setCentroid(geometryFactory.createPoint(new Coordinate(11.21, 60.21)));
         toQuay.getOriginalIds().add("TEST:Quay:432101");
         toQuay.getOriginalIds().add("TEST:Quay:876501");
