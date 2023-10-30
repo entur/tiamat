@@ -61,8 +61,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring-cloud-gcp.version>1.2.5.RELEASE</spring-cloud-gcp.version>
         <maven.compiler.plugin.version>3.8.1</maven.compiler.plugin.version>
-        <spring-boot-plugin.version>2.7.11</spring-boot-plugin.version>
-        <spring-boot.version>2.7.11</spring-boot.version>
+        <spring-boot-plugin.version>2.7.16</spring-boot-plugin.version>
+        <spring-boot.version>2.7.16</spring-boot.version>
         <spring.security.version>5.7.8</spring.security.version>
         <postgresql.version>42.6.0</postgresql.version>
         <geodb.version>0.9</geodb.version>
