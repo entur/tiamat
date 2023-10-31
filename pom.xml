@@ -575,7 +575,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${maven-surefire-plugin.version}</version>
                 <configuration>
-                    <argLine>@{argLine} -Xms500m -Xmx1000m -Xss256k</argLine>
+                    <argLine>@{argLine} -Xms500m -Xmx1000m -Xss256k --add-opens java.base/java.lang=ALL-UNNAMED</argLine>
                     <runOrder>alphabetical</runOrder>
                 </configuration>
             </plugin>
