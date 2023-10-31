@@ -50,7 +50,7 @@
 
     <properties>
         <java.version>17</java.version>
-        <spring-cloud-gcp.version>1.2.5.RELEASE</spring-cloud-gcp.version>
+        <spring-cloud-gcp.version>4.8.3</spring-cloud-gcp.version>
         <geodb.version>0.9</geodb.version>
         <geotools.version>27.2</geotools.version>
         <kubernetes-client.version>6.6.2</kubernetes-client.version>
@@ -74,7 +74,7 @@
     <dependencies>
 
         <dependency>
-            <groupId>org.springframework.cloud</groupId>
+            <groupId>com.google.cloud</groupId>
             <artifactId>spring-cloud-gcp-starter-pubsub</artifactId>
             <version>${spring-cloud-gcp.version}</version>
         </dependency>
@@ -478,6 +478,25 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>enforce</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules combine.children="append">
+                                <requireMavenVersion>
+                                    <version>3</version>
+                                </requireMavenVersion>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
