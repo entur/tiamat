@@ -17,7 +17,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
+    <parent>
+        <groupId>org.entur.ror</groupId>
+        <artifactId>superpom</artifactId>
+        <version>1.65</version>
+    </parent>
     <groupId>org.rutebanken</groupId>
     <artifactId>tiamat</artifactId>
     <version>0.0.2-SNAPSHOT</version>
@@ -34,22 +38,10 @@
         </license>
     </licenses>
 
-    <prerequisites>
-        <maven>3.2.3</maven>
-    </prerequisites>
-
     <organization>
         <name>Entur AS</name>
         <url>http://www.entur.org/</url>
     </organization>
-
-    <distributionManagement>
-        <snapshotRepository>
-            <id>snapshots</id>
-            <name>entur2-snapshots</name>
-            <url>https://entur2.jfrog.io/entur2/libs-snapshot-local</url>
-        </snapshotRepository>
-    </distributionManagement>
 
     <scm>
         <connection>scm:git:ssh://git@github.com:entur/tiamat.git</connection>
@@ -57,115 +49,34 @@
     </scm>
 
     <properties>
-        <hazelcast.version>4.2.4</hazelcast.version>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <java.version>17</java.version>
         <spring-cloud-gcp.version>1.2.5.RELEASE</spring-cloud-gcp.version>
-        <maven.compiler.plugin.version>3.8.1</maven.compiler.plugin.version>
-        <spring-boot-plugin.version>2.7.16</spring-boot-plugin.version>
-        <spring-boot.version>2.7.16</spring-boot.version>
-        <spring.security.version>5.7.8</spring.security.version>
-        <postgresql.version>42.6.0</postgresql.version>
         <geodb.version>0.9</geodb.version>
         <geotools.version>27.2</geotools.version>
-        <activemq-client.version>5.18.1</activemq-client.version>
-        <flyway-core.version>9.18.0</flyway-core.version>
-        <logstash-logback.version>7.3</logstash-logback.version>
         <kubernetes-client.version>6.6.2</kubernetes-client.version>
-        <assertj-core.version>3.24.2</assertj-core.version>
-        <rest-assured.version>5.3.0</rest-assured.version>
         <com.h2database.version>1.4.197</com.h2database.version>
-        <hikariCP.version>5.0.1</hikariCP.version>
-        <commons.lang3.version>3.12.0</commons.lang3.version>
         <orika-core.version>1.5.4</orika-core.version>
-        <guava.version>31.1-jre</guava.version>
+        <!-- downgrade since super pom  uses 18.5 -->
         <graphql-java.version>11.0</graphql-java.version>
         <hazelcast-hibernate53.version>2.1.1</hazelcast-hibernate53.version>
-        <hibernate.version>5.6.15.Final</hibernate.version>
-        <hibernate-spatial.version>5.6.15.Final</hibernate-spatial.version>
-        <hibernate-entitymanager.version>5.6.15.Final</hibernate-entitymanager.version>
         <jaxb-version>4.0.2</jaxb-version>
         <swagger-jersey2.version>1.6.2</swagger-jersey2.version>
-        <jackson-version>2.15.0</jackson-version>
-        <jacoco-maven-plugin.version>0.8.8</jacoco-maven-plugin.version>
-        <sonar-maven-plugin.version>3.9.1.2184</sonar-maven-plugin.version>
-
-        <!-- NB: Concious choice of using snapshot version. This is to keep in
-            sync, and fail fast if incompatibilities -->
         <netex-java-model.version>1.0.14</netex-java-model.version>
-        <hazelcast-helper.version>1.0.62</hazelcast-helper.version>
-        <rutebanken-gcp-storage.version>1.83</rutebanken-gcp-storage.version>
-        <rutebanken-organisation.version>1.0.61</rutebanken-organisation.version>
-        <entur.helpers.version>1.0.64</entur.helpers.version>
-
-        <javax-jms.version>2.0.1</javax-jms.version>
+        <entur.helpers.version>1.100</entur.helpers.version>
         <jts-core.version>1.19.0</jts-core.version>
-
-        <maven-surefire-plugin.version>3.0.0-M6</maven-surefire-plugin.version>
-        <argLine></argLine>
+        <argLine/>
 
         <geotools-gt-jts-wrapper.version>24.6</geotools-gt-jts-wrapper.version>
+        <xercesImpl.version>2.12.0.SP03-RB</xercesImpl.version>
+        <maven.compiler.args>--add-opens java.base/java.lang=ALL-UNNAMED</maven.compiler.args>
     </properties>
-
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-dependencies</artifactId>
-                <version>${spring-boot.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-
-            <dependency>
-                <groupId>org.entur.helpers</groupId>
-                <artifactId>hazelcast4-helper</artifactId>
-                <version>${hazelcast-helper.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.entur.helpers</groupId>
-                <artifactId>organisation</artifactId>
-                <version>${rutebanken-organisation.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.keycloak</groupId>
-                        <artifactId>keycloak-spring-security-adapter</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-
-            <dependency>
-                <groupId>com.hazelcast</groupId>
-                <artifactId>hazelcast</artifactId>
-                <version>${hazelcast.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.entur.ror.helpers</groupId>
-                <artifactId>gcp-storage</artifactId>
-                <version>${rutebanken-gcp-storage.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.entur.helpers</groupId>
-                <artifactId>oauth2</artifactId>
-                <version>${entur.helpers.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.springframework.cloud</groupId>
-                <artifactId>spring-cloud-gcp-dependencies</artifactId>
-                <version>${spring-cloud-gcp.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
 
     <dependencies>
 
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-gcp-starter-pubsub</artifactId>
+            <version>${spring-cloud-gcp.version}</version>
         </dependency>
 
         <dependency>
@@ -180,7 +91,6 @@
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
-            <version>${flyway-core.version}</version>
         </dependency>
 
         <dependency>
@@ -198,20 +108,17 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>${jackson-version}</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-annotations -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
-            <version>${jackson-version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
-            <version>${jackson-version}</version>
         </dependency>
 
 
@@ -233,7 +140,6 @@
         <dependency>
             <groupId>javax.jms</groupId>
             <artifactId>javax.jms-api</artifactId>
-            <version>${javax-jms.version}</version>
         </dependency>
         <dependency>
             <groupId>io.dropwizard.metrics</groupId>
@@ -249,17 +155,19 @@
             <artifactId>micrometer-registry-prometheus</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.entur.helpers</groupId>
+            <groupId>org.entur.ror.helpers</groupId>
             <artifactId>hazelcast4-helper</artifactId>
+            <version>${entur.helpers.version}</version>
         </dependency>
 
         <dependency>
-            <groupId>org.entur.helpers</groupId>
+            <groupId>org.entur.ror.helpers</groupId>
             <artifactId>organisation</artifactId>
+            <version>${entur.helpers.version}</version>
         </dependency>
 
         <dependency>
-            <groupId>org.entur.helpers</groupId>
+            <groupId>org.entur.ror.helpers</groupId>
             <artifactId>oauth2</artifactId>
             <version>${entur.helpers.version}</version>
         </dependency>
@@ -278,13 +186,11 @@
         <dependency>
             <groupId>com.graphql-java</groupId>
             <artifactId>graphql-java</artifactId>
-            <version>${graphql-java.version}</version>
         </dependency>
 
         <dependency>
             <groupId>net.logstash.logback</groupId>
             <artifactId>logstash-logback-encoder</artifactId>
-            <version>${logstash-logback.version}</version>
         </dependency>
         <dependency>
             <groupId>org.entur</groupId>
@@ -295,6 +201,7 @@
         <dependency>
             <groupId>org.entur.ror.helpers</groupId>
             <artifactId>gcp-storage</artifactId>
+            <version>${entur.helpers.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>javax.servlet</groupId>
@@ -357,13 +264,11 @@
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-config</artifactId>
-            <version>${spring.security.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-web</artifactId>
-            <version>${spring.security.version}</version>
         </dependency>
 
         <dependency>
@@ -380,7 +285,6 @@
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-spatial</artifactId>
-            <version>${hibernate-spatial.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.vividsolutions</groupId>
@@ -392,13 +296,11 @@
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-core</artifactId>
-            <version>${hibernate.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-entitymanager</artifactId>
-            <version>${hibernate-entitymanager.version}</version>
         </dependency>
 
         <dependency>
@@ -410,7 +312,6 @@
         <dependency>
             <groupId>com.zaxxer</groupId>
             <artifactId>HikariCP</artifactId>
-            <version>${hikariCP.version}</version>
         </dependency>
 
         <dependency>
@@ -437,7 +338,7 @@
                 https://github.com/jboss/xerces/pull/14
                 https://issues.apache.org/jira/browse/XERCESJ-1276
             -->
-            <version>2.12.0.SP03-RB</version>
+            <version>${xercesImpl.version}</version>
         </dependency>
 
 
@@ -486,7 +387,6 @@
         <dependency>
             <groupId>io.rest-assured</groupId>
             <artifactId>rest-assured</artifactId>
-            <version>${rest-assured.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.apache.groovy</groupId>
@@ -499,13 +399,11 @@
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
-            <version>${assertj-core.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>${commons.lang3.version}</version>
         </dependency>
 
         <dependency>
@@ -517,7 +415,6 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>${guava.version}</version>
         </dependency>
 
         <dependency>
@@ -529,7 +426,6 @@
         <dependency>
             <groupId>org.apache.activemq</groupId>
             <artifactId>activemq-client</artifactId>
-            <version>${activemq-client.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -555,25 +451,7 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>${maven.compiler.plugin.version}</version>
-                <configuration>
-                    <source>17</source>
-                    <target>17</target>
-                    <encoding>UTF-8</encoding>
-                    <compilerArgs>
-                        <!--arg>-Werror</arg-->
-                        <arg>-Xlint:all</arg>
-                    </compilerArgs>
-                </configuration>
-                <dependencies>
-                </dependencies>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>${maven-surefire-plugin.version}</version>
                 <configuration>
                     <argLine>@{argLine} -Xms500m -Xmx1000m -Xss256k --add-opens java.base/java.lang=ALL-UNNAMED</argLine>
                     <runOrder>alphabetical</runOrder>
@@ -582,7 +460,6 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>${spring-boot-plugin.version}</version>
                 <configuration>
                     <mainClass>org.rutebanken.tiamat.TiamatApplication</mainClass>
                 </configuration>
@@ -597,36 +474,10 @@
             <plugin>
                 <groupId>org.sonarsource.scanner.maven</groupId>
                 <artifactId>sonar-maven-plugin</artifactId>
-                <version>${sonar-maven-plugin.version}</version>
             </plugin>
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>${jacoco-maven-plugin.version}</version>
-                <executions>
-                    <execution>
-                        <id>default-prepare-agent</id>
-                        <goals>
-                            <goal>prepare-agent</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>default-report</id>
-                        <phase>prepare-package</phase>
-                        <goals>
-                            <goal>report</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>default-check</id>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                        <configuration>
-                            <rules />
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>
