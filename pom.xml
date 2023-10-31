@@ -59,7 +59,6 @@
         <!-- downgrade since super pom  uses 18.5 -->
         <graphql-java.version>11.0</graphql-java.version>
         <hazelcast-hibernate53.version>2.1.1</hazelcast-hibernate53.version>
-        <jaxb-version>4.0.2</jaxb-version>
         <swagger-jersey2.version>1.6.2</swagger-jersey2.version>
         <netex-java-model.version>1.0.14</netex-java-model.version>
         <entur.helpers.version>1.100</entur.helpers.version>
@@ -121,21 +120,18 @@
             <artifactId>jackson-core</artifactId>
         </dependency>
 
-
         <dependency>
-            <groupId>com.sun.xml.bind</groupId>
-            <artifactId>jaxb-impl</artifactId>
-            <version>${jaxb-version}</version>
+            <groupId>jakarta.xml.bind</groupId>
+            <artifactId>jakarta.xml.bind-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.sun.xml.bind</groupId>
-            <artifactId>jaxb-core</artifactId>
-            <version>${jaxb-version}</version>
+            <groupId>org.glassfish.jaxb</groupId>
+            <artifactId>jaxb-runtime</artifactId>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
-            <groupId>com.sun.xml.bind</groupId>
+            <groupId>org.glassfish.jaxb</groupId>
             <artifactId>jaxb-xjc</artifactId>
-            <version>${jaxb-version}</version>
         </dependency>
         <dependency>
             <groupId>javax.jms</groupId>
