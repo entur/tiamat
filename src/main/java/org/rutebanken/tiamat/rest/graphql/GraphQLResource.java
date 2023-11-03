@@ -18,7 +18,7 @@ package org.rutebanken.tiamat.rest.graphql;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.google.common.collect.Sets;
-import graphql.ErrorType;
+import graphql.ErrorClassification;
 import graphql.ExceptionWhileDataFetching;
 import graphql.ExecutionInput;
 import graphql.ExecutionResult;
@@ -57,6 +57,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static graphql.ErrorType.DataFetchingException;
+import static graphql.ErrorType.InvalidSyntax;
+import static graphql.ErrorType.ValidationError;
 import static java.util.stream.Collectors.toList;
 
 @Component
@@ -93,7 +96,6 @@ public class GraphQLResource {
         graphQL = GraphQL.newGraphQL(stopPlaceRegisterGraphQLSchema.stopPlaceRegisterSchema)
                 .instrumentation(new MaxQueryDepthInstrumentation(MAX_DEPTH))
                 .build();
-
 
     }
 
@@ -149,7 +151,11 @@ public class GraphQLResource {
         Response.ResponseBuilder res = Response.status(Response.Status.OK);
         HashMap<String, Object> content = new HashMap<>();
         try {
-            final ExecutionInput executionInput = ExecutionInput.newExecutionInput().query(query).variables(variables).build();
+            final ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+                    .query(query)
+                    .root(null)
+                    .variables(variables)
+                    .build();
             ExecutionResult executionResult = graphQL.execute(executionInput);
 
             if (!executionResult.getErrors().isEmpty()) {
@@ -157,25 +163,22 @@ public class GraphQLResource {
 
                 Response.Status status = Response.Status.INTERNAL_SERVER_ERROR;
                 for (GraphQLError error : errors) {
-                    switch (error.getErrorType()) {
-                        case InvalidSyntax:
-                        case ValidationError:
-                            status = Response.Status.BAD_REQUEST;
-                            break;
-                        case DataFetchingException:
-                            ExceptionWhileDataFetching exceptionWhileDataFetching = ((ExceptionWhileDataFetching) error);
-                            if (exceptionWhileDataFetching.getException() != null) {
-                                status = getStatusCodeFromThrowable(exceptionWhileDataFetching.getException());
-                                break;
-                            }
-                            status = Response.Status.OK;
-                            break;
+                    final ErrorClassification errorClassification = error.getErrorType();
+                    if (InvalidSyntax.equals(errorClassification) || ValidationError.equals(errorClassification)) {
+                        status = Response.Status.BAD_REQUEST;
+                    } else if (DataFetchingException.equals(errorClassification)) {
+                        ExceptionWhileDataFetching exceptionWhileDataFetching = ((ExceptionWhileDataFetching) error);
+                        if (exceptionWhileDataFetching.getException() != null) {
+                            status = getStatusCodeFromThrowable(exceptionWhileDataFetching.getException());
+                            continue;
+                        }
+                        status = Response.Status.OK;
                     }
                 }
 
                 res = Response.status(status);
 
-                if (errors.stream().anyMatch(error -> error.getErrorType().equals(ErrorType.DataFetchingException))) {
+                if (errors.stream().anyMatch(error -> error.getErrorType().equals(DataFetchingException))) {
                     logger.warn("Detected DataFetchingException from errors: {} Setting transaction to rollback only", errors);
                     transactionStatus.setRollbackOnly();
                 }

@@ -64,28 +64,31 @@ public class DateScalar {
     }
 
     private GraphQLScalarType createGraphQLDateScalar() {
-        return new GraphQLScalarType("DateTime", DATE_SCALAR_DESCRIPTION, new Coercing() {
-            @Override
-            public String serialize(Object input) {
-                if (input instanceof Instant) {
-                    return (((Instant) input)).atZone(exportTimeZone.getDefaultTimeZoneId()).format(FORMATTER);
-                }
-                return null;
-            }
+        return new GraphQLScalarType.Builder()
+                .name("DateTime")
+                .description(DATE_SCALAR_DESCRIPTION)
+                .coercing(new Coercing() {@Override
+                    public String serialize(Object input) {
+                        if (input instanceof Instant instant) {
+                            return instant.atZone(exportTimeZone.getDefaultTimeZoneId()).format(FORMATTER);
+                        }
+                        return null;
+                    }
 
-            @Override
-            public Instant parseValue(Object input) {
-                return Instant.from(PARSER.parse((CharSequence) input));
-            }
+                    @Override
+                    public Instant parseValue(Object input) {
+                        return Instant.from(PARSER.parse((CharSequence) input));
+                    }
 
-            @Override
-            public Object parseLiteral(Object input) {
-                if (input instanceof StringValue) {
-                    return parseValue(((StringValue) input).getValue());
-                }
-                return null;
-            }
-        });
+                    @Override
+                    public Object parseLiteral(Object input) {
+                        if (input instanceof StringValue stringValue) {
+                            return parseValue((stringValue).getValue());
+                        }
+                        return null;
+                    }
+                }).build();
+
     }
 
 }

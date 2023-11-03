@@ -75,10 +75,10 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import static graphql.Scalars.GraphQLBigInteger;
 import static graphql.Scalars.GraphQLBoolean;
 import static graphql.Scalars.GraphQLInt;
 import static graphql.Scalars.GraphQLString;
+import static graphql.scalars.ExtendedScalars.GraphQLBigInteger;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLInputObjectField.newInputObjectField;
 import static graphql.schema.GraphQLObjectType.newObject;
