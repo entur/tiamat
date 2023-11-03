@@ -45,11 +45,11 @@ public class CustomScalars {
                         return coordinateList;
                     }
                     return null;
-                }
+                }}).build();
 
-                @Override
-                public Coordinate[] parseValue(Object input) {
-                    List<List<Double>> coordinateList = (List<List<Double>>) input;
+        @Override
+        public Coordinate[] parseValue(Object input) {
+            List<List<Double>> coordinateList = (List<List<Double>>) input;
 
                     Coordinate[] coordinates = new Coordinate[coordinateList.size()];
 
@@ -73,10 +73,10 @@ public class CustomScalars {
                             FloatValue latitude = (FloatValue) v.get(1);
                             coordinates[i] = new Coordinate(longitude.getValue().doubleValue(), latitude.getValue().doubleValue());
 
-                        }
-                        return coordinates;
-                    }
-                    return null;
                 }
-            }).build();
+                return coordinates;
+            }
+            return null;
+        }
+    });
 }
