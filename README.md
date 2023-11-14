@@ -94,7 +94,7 @@ See also http://stackoverflow.com/a/26514779
 
 #### Run postgres/gis for tiamat in docker for development
 ```
-docker run -p 5435:5432 -e POSTGRES_USER=tiamat -e POSTGRES_PASSWORD=<insertpasswordhere>" -e POSTGRES_INITDB_ARGS="-d" mdillon/postgis:9.6
+docker run -it -d -p 5435:5432 --name postgress-13 -e POSTGRES_USER=tiamat -e POSTGRES_PASSWORD="tiamat" -e POSTGRES_INITDB_ARGS="-d" postgis/postgis:13-master
 ```
 
 ## ID Generation
