@@ -16,7 +16,9 @@
 package org.rutebanken.tiamat.rest.graphql;
 
 import graphql.schema.DataFetcher;
+import graphql.schema.FieldCoordinates;
 import graphql.schema.GraphQLArgument;
+import graphql.schema.GraphQLCodeRegistry;
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLInputObjectField;
 import graphql.schema.GraphQLInputObjectType;
@@ -25,6 +27,7 @@ import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLNonNull;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLSchema;
+import org.rutebanken.tiamat.model.DataManagedObjectStructure;
 import org.rutebanken.tiamat.model.FareZone;
 import org.rutebanken.tiamat.model.GroupOfStopPlaces;
 import org.rutebanken.tiamat.model.GroupOfTariffZones;
@@ -32,6 +35,7 @@ import org.rutebanken.tiamat.model.PurposeOfGrouping;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.TariffZone;
+import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
 import org.rutebanken.tiamat.rest.graphql.fetchers.AuthorizationCheckDataFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.FareZoneAuthoritiesFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.TagFetcher;
@@ -519,7 +523,52 @@ public class StopPlaceRegisterGraphQLSchema {
         stopPlaceRegisterSchema = GraphQLSchema.newSchema()
                 .query(stopPlaceRegisterQuery)
                 .mutation(stopPlaceRegisterMutation)
+                .codeRegistry(buildCodeRegistry())
                 .build();
+    }
+
+
+    public GraphQLCodeRegistry buildCodeRegistry() {
+        GraphQLCodeRegistry.Builder codeRegistryBuilder = GraphQLCodeRegistry.newCodeRegistry();
+        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_STOPPLACE, IMPORTED_ID, getOriginalIdsFetcher());
+        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_PARENT_STOPPLACE, IMPORTED_ID, getOriginalIdsFetcher());
+        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_STOPPLACE, ID, getNetexIdFetcher());
+        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_GROUP_OF_STOPPLACES,ID,getNetexIdFetcher());
+
+        return codeRegistryBuilder.build();
+    }
+
+
+    private static DataFetcher<Object> getNetexIdFetcher() {
+        return env -> {
+            if (env.getSource() instanceof IdentifiedEntity identifiedEntity) {
+                return identifiedEntity.getNetexId();
+            }
+            return null;
+        };
+    }
+
+    private static DataFetcher<Object> getTariffZoneNetexIdFetcher() {
+        return env -> {
+            if (env.getSource() instanceof TariffZone tariffZone) {
+                return tariffZone.getNetexId();
+            }
+            return null;
+        };
+    }
+
+    private static DataFetcher<Object> getOriginalIdsFetcher(){
+        return env -> {
+            if(env.getSource() instanceof DataManagedObjectStructure dataManagedObjectStructure){
+                return dataManagedObjectStructure.getOriginalIds();
+            }
+            return null;
+        };
+    }
+
+    private void registerDataFetcher(GraphQLCodeRegistry.Builder codeRegistryBuilder, String parentType, String fieldName, DataFetcher<?> dataFetcher) {
+        FieldCoordinates coordinates = FieldCoordinates.coordinates(parentType, fieldName);
+        codeRegistryBuilder.dataFetcher(coordinates, dataFetcher);
     }
 
     private GraphQLObjectType createAddressablePlaceObjectType(List<GraphQLFieldDefinition> commonFieldsList) {
