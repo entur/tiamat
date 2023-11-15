@@ -51,8 +51,68 @@ Tiamat also includes a diff tool. This is used to compare and show the differenc
 You need the directory `/deployments/data` with rights for the user who
 performs the build.
 
+
+
 Tiamat currently depends on snapshot dependencies. These are open source as well.
 You might have to build those first (or fallback to latest release in the pom.xml file)
+
+Using following maven setting.xml 
+`<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
+
+    <localRepository>${user.home}/.m2/repository</localRepository>
+    <mirrors>
+        <mirror>
+            <id>google-maven-central</id>
+            <name>GCS Maven Central mirror EU</name>
+            <url>https://maven-central-eu.storage-download.googleapis.com/maven2/</url>
+            <mirrorOf>central</mirrorOf>
+        </mirror>
+    </mirrors>
+    <profiles>
+        <profile>
+            <id>default</id>
+            <repositories>
+                <!-- Example Maven Central Repository -->
+                <repository>
+                    <id>central</id>
+                    <url>https://repo.maven.apache.org/maven2</url>
+                </repository>
+                 <repository>
+                    <id>boundless</id>
+                    <url>https://repo.boundlessgeo.com/main</url>
+                 </repository>
+                 <repository>
+                    <id>osgeo</id>
+                    <name>OSGeo Release Repository</name>
+                    <url>https://repo.osgeo.org/repository/release/</url>
+                    <snapshots><enabled>false</enabled></snapshots>
+                    <releases><enabled>true</enabled></releases>
+                </repository>
+                <repository>
+                    <id>osgeo-snapshot</id>
+                    <name>OSGeo Snapshot Repository</name>
+                    <url>https://repo.osgeo.org/repository/snapshot/</url>
+                    <snapshots><enabled>true</enabled></snapshots>
+                    <releases><enabled>false</enabled></releases>
+                </repository>
+            </repositories>
+            <pluginRepositories>
+                <!-- Example Maven Central Plugin Repository -->
+                <pluginRepository>
+                    <id>central</id>
+                    <url>https://repo.maven.apache.org/maven2</url>
+                </pluginRepository>
+            </pluginRepositories>
+        </profile>
+    </profiles>
+
+    <activeProfiles>
+        <activeProfile>default</activeProfile>
+    </activeProfiles>
+</settings>
+`
 
 ## Run with in-memory GeoDB (H2)
 ```
