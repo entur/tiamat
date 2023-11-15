@@ -57,7 +57,8 @@ Tiamat currently depends on snapshot dependencies. These are open source as well
 You might have to build those first (or fallback to latest release in the pom.xml file)
 
 Using following maven setting.xml 
-`<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+```
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
 
@@ -112,7 +113,7 @@ Using following maven setting.xml
         <activeProfile>default</activeProfile>
     </activeProfiles>
 </settings>
-`
+```
 
 ## Run with in-memory GeoDB (H2)
 ```
