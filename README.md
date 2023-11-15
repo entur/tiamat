@@ -187,7 +187,7 @@ spring.profiles.active=local-blobstore,activemq
 
 To start Tiamat with this configuration, specify **spring.config.location**:
 
-`mvn spring-boot:run -Dspring.config.location=/path/to/tiamat.properties`
+`java -jar -Dspring.config.location=/path/to/tiamat.properties --add-opens java.base/java.lang=ALL-UNNAMED -Denv=dev tiamat-0.0.2-SNAPSHOT.jar`
 
 ## Database
 
