@@ -64,7 +64,7 @@
         <argLine/>
 
         <geotools-gt-jts-wrapper.version>24.6</geotools-gt-jts-wrapper.version>
-        <xercesImpl.version>2.12.0.SP03-RB</xercesImpl.version>
+        <xercesImpl.version>2.12.2</xercesImpl.version>
         <maven.compiler.args>--add-opens java.base/java.lang=ALL-UNNAMED</maven.compiler.args>
     </properties>
 
@@ -324,11 +324,6 @@
         <dependency>
             <groupId>xerces</groupId>
             <artifactId>xercesImpl</artifactId>
-            <!--
-                https://rutebanken.atlassian.net/browse/NRP-907
-                https://github.com/jboss/xerces/pull/14
-                https://issues.apache.org/jira/browse/XERCESJ-1276
-            -->
             <version>${xercesImpl.version}</version>
         </dependency>
 
