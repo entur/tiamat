@@ -17,9 +17,7 @@ package org.rutebanken.tiamat.rest.graphql;
 
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
-import org.rutebanken.tiamat.model.AlternativeName;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
-import org.rutebanken.tiamat.model.NameTypeEnumeration;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 
@@ -41,16 +39,7 @@ public class GraphQLResourceStopPlaceMergerTest extends AbstractGraphQLResourceI
         fromStopPlace.getOriginalIds().add("TEST:StopPlace:1234");
         fromStopPlace.getOriginalIds().add("TEST:StopPlace:5678");
 
-        AlternativeName altName = new AlternativeName();
-        altName.setNameType(NameTypeEnumeration.ALIAS);
-        altName.setName(new EmbeddableMultilingualString("Navn", "no"));
 
-        AlternativeName altName2 = new AlternativeName();
-        altName2.setNameType(NameTypeEnumeration.ALIAS);
-        altName2.setName(new EmbeddableMultilingualString("Name", "en"));
-
-        fromStopPlace.getAlternativeNames().add(altName);
-        fromStopPlace.getAlternativeNames().add(altName2);
 
         Quay fromQuay = new Quay();
         fromQuay.setCompassBearing(90f);
@@ -67,16 +56,10 @@ public class GraphQLResourceStopPlaceMergerTest extends AbstractGraphQLResourceI
         toStopPlace.getOriginalIds().add("TEST:StopPlace:4321");
         toStopPlace.getOriginalIds().add("TEST:StopPlace:8765");
 
-        AlternativeName toAltName = new AlternativeName();
-        toAltName.setNameType(NameTypeEnumeration.ALIAS);
-        toAltName.setName(new EmbeddableMultilingualString("Navn2", "no"));
-
-        toStopPlace.getAlternativeNames().add(toAltName);
 
         Quay toQuay = new Quay();
         toQuay.setCompassBearing(90f);
         toQuay.setCentroid(geometryFactory.createPoint(new Coordinate(11.21, 60.21)));
-        toQuay.getAlternativeNames().add(toAltName);
         toQuay.getOriginalIds().add("TEST:Quay:432101");
         toQuay.getOriginalIds().add("TEST:Quay:876501");
 

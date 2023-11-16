@@ -16,7 +16,6 @@
 package org.rutebanken.tiamat.datasource;
 
 import com.zaxxer.hikari.HikariDataSource;
-import geodb.GeoDB;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -38,7 +37,7 @@ public class GeoDBInMemoryDataSourceFactory extends HikariDataSource {
     @Override
     public Connection getConnection() throws SQLException {
         Connection connection = super.getConnection();
-        GeoDB.InitGeoDB(connection);
+        //GeoDB.InitGeoDB(connection);
         return connection;
     }
 }

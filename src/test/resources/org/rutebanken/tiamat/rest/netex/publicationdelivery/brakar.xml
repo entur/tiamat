@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PublicationDelivery xmlns="http://www.netex.org.uk/netex">
+    <PublicationTimestamp>2017-04-18T12:57:27.796+02:00</PublicationTimestamp>
+    <ParticipantRef>NSB</ParticipantRef>
+    <Description>NSB Grails stasjoner til NeTex</Description>
+    <dataObjects>
+        <SiteFrame id="NSB:SiteFrame:1" version="1">
+            <codespaces>
+                <Codespace id="nsb">
+                    <Xmlns>NSB</Xmlns>
+                    <XmlnsUrl>http://www.rutebanken.org/ns/nsb</XmlnsUrl>
+                </Codespace>
+            </codespaces>
+            <FrameDefaults>
+                <DefaultLocale>
+                    <TimeZone>Europe/Oslo</TimeZone>
+                    <DefaultLanguage>no</DefaultLanguage>
+                </DefaultLocale>
+            </FrameDefaults>
+            <stopPlaces>
+                <StopPlace id="BRA:StopPlace:06021002" version="1">
+                    <keyList>
+                        <KeyValue>
+                            <Key>imported-id</Key>
+                            <Value>NRI:StopPlace:761023202</Value>
+                        </KeyValue>
+                    </keyList>
+                    <Name lang="nb">Bragernes torg</Name>
+                    <Centroid>
+                        <Location srsName="EPSG:4326">
+                            <Longitude>10.203912</Longitude>
+                            <Latitude>59.743416</Latitude>
+                        </Location>
+                    </Centroid>
+                    <StopPlaceType>busStation</StopPlaceType>
+                    <quays>
+                        <Quay id="BRA:Quay:0602100201" version="1">
+                            <keyList>
+                                <KeyValue>
+                                    <Key>imported-id</Key>
+                                    <Value>NRI:Quay:762023206</Value>
+                                </KeyValue>
+                            </keyList>
+                            <Centroid>
+                                <Location srsName="EPSG:4326">
+                                    <Longitude>10.203526</Longitude>
+                                    <Latitude>59.7432</Latitude>
+                                </Location>
+                            </Centroid>
+                            <RoadAddress id="BRA:RoadAddress:0602100201" version="1">
+                                <RoadName>v/Barista</RoadName>
+                            </RoadAddress>
+                            <AccessibilityAssessment id="BRA:AccessibilityAssessment:0602100201" version="1">
+                                <MobilityImpairedAccess>true</MobilityImpairedAccess>
+                                <limitations>
+                                    <AccessibilityLimitation>
+                                        <WheelchairAccess>true</WheelchairAccess>
+                                        <StepFreeAccess>true</StepFreeAccess>
+                                    </AccessibilityLimitation>
+                                </limitations>
+                            </AccessibilityAssessment>
+                            <Lighting>wellLit</Lighting>
+                            <placeEquipments>
+                                <ShelterEquipment id="BRA:ShelterEquipment:0602100201" version="1">
+                                    <Enclosed>true</Enclosed>
+                                </ShelterEquipment>
+                                <GeneralSign id="BRA:GeneralSign:0602100201" version="1">
+                                    <PrivateCode>512</PrivateCode>
+                                    <SignContentType>transportMode</SignContentType>
+                                </GeneralSign>
+                                <!--TODO markere som papiroppslag-->
+                                <GeneralSign id="BRA:HeadSign:0602100201" version="1">
+                                    <Content lang="nb">Timetable</Content>
+                                </GeneralSign>
+                            </placeEquipments>
+                            <PublicCode>A</PublicCode>
+                        </Quay>
+                        <Quay id="BRA:Quay:0602100202" version="1">
+                            <keyList>
+                                <KeyValue>
+                                    <Key>imported-id</Key>
+                                    <Value>NRI:Quay:762023204</Value>
+                                </KeyValue>
+                            </keyList>
+                            <Centroid>
+                                <Location srsName="EPSG:4326">
+                                    <Longitude>10.203558</Longitude>
+                                    <Latitude>59.74361</Latitude>
+                                </Location>
+                            </Centroid>
+                            <RoadAddress id="BRA:RoadAddress:0602100202" version="1">
+                                <RoadName>Øvre Storgate</RoadName>
+                            </RoadAddress>
+                            <AccessibilityAssessment id="BRA:AccessibilityAssessment:0602100202" version="1">
+                                <MobilityImpairedAccess>true</MobilityImpairedAccess>
+                                <limitations>
+                                    <AccessibilityLimitation>
+                                        <WheelchairAccess>true</WheelchairAccess>
+                                        <StepFreeAccess>true</StepFreeAccess>
+                                    </AccessibilityLimitation>
+                                </limitations>
+                            </AccessibilityAssessment>
+                            <Lighting>wellLit</Lighting>
+                            <placeEquipments>
+                                <GeneralSign id="BRA:GeneralSign:0602100202" version="1">
+                                    <PrivateCode>512</PrivateCode>
+                                    <SignContentType>transportMode</SignContentType>
+                                </GeneralSign>
+                                <!--TODO markere som digital skjerm-->
+                                <GeneralSign id="BRA:HeadSign:0602100202" version="1">
+                                    <Content lang="nb">RealtimeMonitor</Content>
+                                </GeneralSign>
+                            </placeEquipments>
+                            <PublicCode>B</PublicCode>
+                        </Quay>
+                        <Quay id="BRA:Quay:0602100203" version="1">
+                            <keyList>
+                                <KeyValue>
+                                    <Key>imported-id</Key>
+                                    <Value>NRI:Quay:762023205</Value>
+                                </KeyValue>
+                            </keyList>
+                            <Centroid>
+                                <Location srsName="EPSG:4326">
+                                    <Longitude>10.203966</Longitude>
+                                    <Latitude>59.74358</Latitude>
+                                </Location>
+                            </Centroid>
+                            <RoadAddress id="BRA:RoadAddress:0602100203" version="1">
+                                <RoadName>mot torget</RoadName>
+                            </RoadAddress>
+                            <AccessibilityAssessment id="BRA:AccessibilityAssessment:0602100203" version="1">
+                                <MobilityImpairedAccess>true</MobilityImpairedAccess>
+                                <limitations>
+                                    <AccessibilityLimitation>
+                                        <WheelchairAccess>true</WheelchairAccess>
+                                        <StepFreeAccess>true</StepFreeAccess>
+                                    </AccessibilityLimitation>
+                                </limitations>
+                            </AccessibilityAssessment>
+                            <Lighting>wellLit</Lighting>
+                            <placeEquipments>
+                                <ShelterEquipment id="BRA:ShelterEquipment:0602100203" version="1">
+                                    <Enclosed>true</Enclosed>
+                                </ShelterEquipment>
+                                <GeneralSign id="BRA:GeneralSign:0602100203" version="1">
+                                    <PrivateCode>512</PrivateCode>
+                                    <SignContentType>transportMode</SignContentType>
+                                </GeneralSign>
+                                <!--TODO markere som digital skjerm-->
+                                <GeneralSign id="BRA:HeadSign:0602100203" version="1">
+                                    <Content lang="nb">RealtimeMonitor</Content>
+                                </GeneralSign>
+                            </placeEquipments>
+                            <PublicCode>C</PublicCode>
+                        </Quay>
+                        <Quay id="BRA:Quay:0602100204" version="1">
+                            <keyList>
+                                <KeyValue>
+                                    <Key>imported-id</Key>
+                                    <Value>NRI:Quay:762023203</Value>
+                                </KeyValue>
+                            </keyList>
+                            <Centroid>
+                                <Location srsName="EPSG:4326">
+                                    <Longitude>10.204596</Longitude>
+                                    <Latitude>59.743267</Latitude>
+                                </Location>
+                            </Centroid>
+                            <RoadAddress id="BRA:RoadAddress:0602100204" version="1">
+                                <RoadName>v/Børsen</RoadName>
+                            </RoadAddress>
+                            <AccessibilityAssessment id="BRA:AccessibilityAssessment:0602100204" version="1">
+                                <MobilityImpairedAccess>true</MobilityImpairedAccess>
+                                <limitations>
+                                    <AccessibilityLimitation>
+                                        <WheelchairAccess>true</WheelchairAccess>
+                                        <StepFreeAccess>true</StepFreeAccess>
+                                    </AccessibilityLimitation>
+                                </limitations>
+                            </AccessibilityAssessment>
+                            <Lighting>wellLit</Lighting>
+                            <placeEquipments>
+                                <ShelterEquipment id="BRA:ShelterEquipment:0602100204" version="1">
+                                    <Enclosed>true</Enclosed>
+                                </ShelterEquipment>
+                                <GeneralSign id="BRA:GeneralSign:0602100204" version="1">
+                                    <PrivateCode>512</PrivateCode>
+                                    <SignContentType>transportMode</SignContentType>
+                                </GeneralSign>
+                                <GeneralSign id="BRA:HeadSign:0602100204" version="1">
+                                    <Content lang="nb">Timetable</Content>
+                                </GeneralSign>
+                                <TicketValidatorEquipment id="BRA:TicketValidatorEquipment:88" version="1">
+                                    <TicketValidatorType>contactLess</TicketValidatorType>
+                                </TicketValidatorEquipment>
+                            </placeEquipments>
+                            <PublicCode>D</PublicCode>
+                        </Quay>
+                    </quays>
+                </StopPlace>
+            </stopPlaces>
+        </SiteFrame>
+    </dataObjects>
+</PublicationDelivery>
