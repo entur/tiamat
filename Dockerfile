@@ -1,4 +1,4 @@
-FROM eclipse-temurin:17.0.1_12-jdk-alpine
+FROM eclipse-temurin:17.0.9_9-jdk-alpine
 WORKDIR /deployments
 COPY target/tiamat-*-SNAPSHOT.jar tiamat.jar
 RUN addgroup appuser && adduser --disabled-password appuser --ingroup appuser
