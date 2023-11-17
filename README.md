@@ -53,72 +53,11 @@ performs the build.
 
 
 
-Tiamat currently depends on snapshot dependencies. These are open source as well.
-You might have to build those first (or fallback to latest release in the pom.xml file)
 
-Using following maven setting.xml 
-```
-<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
-          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
+## Integration tests
+Tiamat uses testcontainers to run integration tests against a real database.  To run Testcontainers-based tests, you need a Docker-API compatible container runtime
+for more detail see https://www.testcontainers.org/supported_docker_environment/
 
-    <localRepository>${user.home}/.m2/repository</localRepository>
-    <mirrors>
-        <mirror>
-            <id>google-maven-central</id>
-            <name>GCS Maven Central mirror EU</name>
-            <url>https://maven-central-eu.storage-download.googleapis.com/maven2/</url>
-            <mirrorOf>central</mirrorOf>
-        </mirror>
-    </mirrors>
-    <profiles>
-        <profile>
-            <id>default</id>
-            <repositories>
-                <!-- Example Maven Central Repository -->
-                <repository>
-                    <id>central</id>
-                    <url>https://repo.maven.apache.org/maven2</url>
-                </repository>
-                 <repository>
-                    <id>boundless</id>
-                    <url>https://repo.boundlessgeo.com/main</url>
-                 </repository>
-                 <repository>
-                    <id>osgeo</id>
-                    <name>OSGeo Release Repository</name>
-                    <url>https://repo.osgeo.org/repository/release/</url>
-                    <snapshots><enabled>false</enabled></snapshots>
-                    <releases><enabled>true</enabled></releases>
-                </repository>
-                <repository>
-                    <id>osgeo-snapshot</id>
-                    <name>OSGeo Snapshot Repository</name>
-                    <url>https://repo.osgeo.org/repository/snapshot/</url>
-                    <snapshots><enabled>true</enabled></snapshots>
-                    <releases><enabled>false</enabled></releases>
-                </repository>
-            </repositories>
-            <pluginRepositories>
-                <!-- Example Maven Central Plugin Repository -->
-                <pluginRepository>
-                    <id>central</id>
-                    <url>https://repo.maven.apache.org/maven2</url>
-                </pluginRepository>
-            </pluginRepositories>
-        </profile>
-    </profiles>
-
-    <activeProfiles>
-        <activeProfile>default</activeProfile>
-    </activeProfiles>
-</settings>
-```
-
-## Run with in-memory GeoDB (H2)
-```
-mvn spring-boot:run -Dspring.config.location=src/test/resources/application.properties
-```
 (default profiles are set in application.properties)
 
 ## Run with external properties file and PostgreSQL
@@ -269,7 +208,7 @@ During the implementation of Tiamat was desirable to produce NeTEx IDs for stop 
 The reason for this implementation was legacy systems with restrictions of maximum number of digits.
 
 ### Configure ID generation
-It is possible to control wether IDs should be generated outside Tiamat or not. See the class ValidPrefixList.
+It is possible to control whether IDs should be generated outside Tiamat or not. See the class ValidPrefixList.
 Setting the property `netex.validPrefix` tells Tiamat to generate IDs for new entities.
 Please note that it is not possible to do an initial import (see ImportType) multiple times with the same IDs.
 
@@ -280,6 +219,7 @@ It's all initiated by an entity listener annotated with `PrePersist` on the clas
 
 ## Keycloak/Auth0
 Both Tiamat and Abzu are set up to be used with Keycloak or Auth0.
+
 ### Keycloak configuraiton
 - Create realm e.g. Entur
 - Create client for frontend e.g. abzu

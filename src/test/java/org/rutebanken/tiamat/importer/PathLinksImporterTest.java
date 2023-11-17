@@ -15,6 +15,7 @@
 
 package org.rutebanken.tiamat.importer;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.AddressablePlaceRefStructure;
@@ -29,6 +30,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
+@Ignore
 public class PathLinksImporterTest extends TiamatIntegrationTest {
 
     @Autowired

@@ -51,10 +51,8 @@
     <properties>
         <java.version>17</java.version>
         <spring-cloud-gcp.version>4.8.3</spring-cloud-gcp.version>
-        <geodb.version>0.9</geodb.version>
         <geotools.version>27.2</geotools.version>
         <kubernetes-client.version>6.6.2</kubernetes-client.version>
-        <com.h2database.version>1.4.197</com.h2database.version>
         <orika-core.version>1.5.4</orika-core.version>
         <!-- downgrade since super pom  uses 18.5 -->
         <graphql-java.version>11.0</graphql-java.version>
@@ -66,7 +64,7 @@
         <argLine/>
 
         <geotools-gt-jts-wrapper.version>24.6</geotools-gt-jts-wrapper.version>
-        <xercesImpl.version>2.12.0.SP03-RB</xercesImpl.version>
+        <xercesImpl.version>2.12.2</xercesImpl.version>
         <maven.compiler.args>--add-opens java.base/java.lang=ALL-UNNAMED</maven.compiler.args>
     </properties>
 
@@ -300,40 +298,32 @@
         </dependency>
 
         <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <version>${com.h2database.version}</version>
-        </dependency>
-
-        <dependency>
             <groupId>com.zaxxer</groupId>
             <artifactId>HikariCP</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>org.opengeo</groupId>
-            <artifactId>geodb</artifactId>
-            <version>${geodb.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>xerces</groupId>
-                    <artifactId>xercesImpl</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.vividsolutions</groupId>
-                    <artifactId>jts</artifactId>
-                </exclusion>
-            </exclusions>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers</artifactId>
+            <version>1.19.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>jdbc</artifactId>
+            <version>1.19.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>1.19.2</version>
+            <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>xerces</groupId>
             <artifactId>xercesImpl</artifactId>
-            <!--
-                https://rutebanken.atlassian.net/browse/NRP-907
-                https://github.com/jboss/xerces/pull/14
-                https://issues.apache.org/jira/browse/XERCESJ-1276
-            -->
             <version>${xercesImpl.version}</version>
         </dependency>
 
@@ -416,18 +406,17 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-jms</artifactId>
-            <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.apache.activemq</groupId>
             <artifactId>activemq-client</artifactId>
-            <scope>test</scope>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.activemq</groupId>
             <artifactId>activemq-kahadb-store</artifactId>
-            <scope>test</scope>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.vintage</groupId>
@@ -441,6 +430,18 @@
             </exclusions>
         </dependency>
     </dependencies>
+    <repositories>
+        <repository>
+            <id>central2</id>
+            <name>Check central first to avoid a lot of not found warnings</name>
+            <url>https://repo.maven.apache.org/maven2</url>
+        </repository>
+        <repository>
+            <id>osgeo</id>
+            <name>Open Source Geospatial Foundation Repository</name>
+            <url>https://repo.osgeo.org/repository/release/</url>
+        </repository>
+    </repositories>
 
 
     <build>

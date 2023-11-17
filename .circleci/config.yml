@@ -51,9 +51,9 @@ aliases:
 
 jobs:
   build:
-    resource_class: large
-    docker:
-      - image: cimg/openjdk:17.0.1
+    machine:
+      resource_class: large
+      image: ubuntu-2204:2023.10.1
     environment:
       MAVEN_OPTS: -Xmx5G
     steps:

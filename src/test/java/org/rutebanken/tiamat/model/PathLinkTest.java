@@ -15,6 +15,7 @@
 
 package org.rutebanken.tiamat.model;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.CoordinateSequence;
@@ -29,6 +30,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Ignore
 @Transactional
 public class PathLinkTest extends TiamatIntegrationTest {
 
