@@ -66,6 +66,8 @@
         <geotools-gt-jts-wrapper.version>24.6</geotools-gt-jts-wrapper.version>
         <xercesImpl.version>2.12.2</xercesImpl.version>
         <maven.compiler.args>--add-opens java.base/java.lang=ALL-UNNAMED</maven.compiler.args>
+        <!-- downgrade since superpom  uses 5.1.7 -->
+        <hazelcast.version>4.2.8</hazelcast.version>
     </properties>
 
     <dependencies>
@@ -152,7 +154,19 @@
             <groupId>org.entur.ror.helpers</groupId>
             <artifactId>hazelcast4-helper</artifactId>
             <version>${entur.helpers.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.hazelcast</groupId>
+                    <artifactId>hazelcast</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
+        <dependency>
+            <groupId>com.hazelcast</groupId>
+            <artifactId>hazelcast</artifactId>
+            <version>${hazelcast.version}</version>
+        </dependency>
+
 
         <dependency>
             <groupId>org.entur.ror.helpers</groupId>
