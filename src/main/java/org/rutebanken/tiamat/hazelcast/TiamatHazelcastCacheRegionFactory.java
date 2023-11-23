@@ -95,8 +95,7 @@ public class TiamatHazelcastCacheRegionFactory extends com.hazelcast.hibernate.H
      * spring.jpa.properties.hibernate.cache.region.factory_class=org.rutebanken.tiamat.hazelcast.TiamatHazelcastCacheRegionFactory
      */
     public TiamatHazelcastCacheRegionFactory() {
-        super();
-        this.instance = extendedHazelcastService.getHazelcastInstance();
+        super(extendedHazelcastService.getHazelcastInstance());
         logger.info("Created factory with: {}", getHazelcastInstance());
     }
 
