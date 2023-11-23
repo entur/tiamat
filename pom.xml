@@ -67,6 +67,7 @@
         <xercesImpl.version>2.12.2</xercesImpl.version>
         <maven.compiler.args>--add-opens java.base/java.lang=ALL-UNNAMED</maven.compiler.args>
         <testcontainers.version>1.19.2</testcontainers.version>
+        <hazelcast.version>5.3.6</hazelcast.version>
     </properties>
 
     <dependencies>
@@ -150,15 +151,9 @@
             <artifactId>micrometer-registry-prometheus</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.entur.ror.helpers</groupId>
-            <artifactId>hazelcast4-helper</artifactId>
-            <version>${entur.helpers.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.hazelcast</groupId>
-                    <artifactId>hazelcast-kubernetes</artifactId>
-                </exclusion>
-            </exclusions>
+            <groupId>com.hazelcast</groupId>
+            <artifactId>hazelcast-spring</artifactId>
+            <version>${hazelcast.version}</version>
         </dependency>
 
         <dependency>

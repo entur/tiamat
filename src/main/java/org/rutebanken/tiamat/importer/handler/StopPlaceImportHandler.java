@@ -207,11 +207,11 @@ public class StopPlaceImportHandler {
         stopPlaces.stream().forEach(stopPlace -> stopPlace.setTopographicPlaceRef(null));
     }
 
-    public List<Pair<String, Long>> findTopographicPlaceRefsFromStops(Collection<org.rutebanken.tiamat.model.StopPlace> stopPlaces) {
+    public List<Pair<String, Long>> findTopographicPlaceRefsFromStops(Collection<StopPlace> stopPlaces) {
         return stopPlaces
                 .stream()
                 .filter(stopPlace -> stopPlace.getTopographicPlace() != null)
-                .map(org.rutebanken.tiamat.model.StopPlace::getTopographicPlace)
+                .map(StopPlace::getTopographicPlace)
                 .map(topographicPlace -> Pair.of(topographicPlace.getNetexId(), topographicPlace.getVersion()))
                 .distinct()
                 .collect(Collectors.toList());

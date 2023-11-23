@@ -1,0 +1,15 @@
+hazelcast:
+  cluster-name: tiamat
+  network:
+    ssl:
+        enabled: false
+    port:
+      auto-increment: false
+    join:
+      multicast:
+        enabled: false
+      kubernetes:
+        enabled: true
+        namespace: default
+        service-name: tiamat
+        service-port: 5701
