@@ -28,25 +28,29 @@ import org.springframework.transaction.annotation.Transactional;
 @Profile("google-pubsub")
 public class EntityChangedEventPubSubPublisher extends EntityChangedEventPublisher implements EntityChangedListener {
 
-    @Autowired
-    private GooglePubSubConfig.PubsubOutboundGateway pubsubOutboundGateway;
+// TODO: Remove? Google pubsub is not used
+
+    //@Autowired
+    //private GooglePubSubConfig.PubsubOutboundGateway pubsubOutboundGateway;
 
     @Value("${changelog.gcp.publish.enabled:true}")
     private boolean pubSubPublish;
 
     @Override
     public void onChange(EntityInVersionStructure entity) {
+        /*
         if (pubSubPublish && isLoggedEntity(entity)) {
             pubsubOutboundGateway.sendToPubsub(toEntityChangedEvent(entity, false).toString());
         }
-
+        */
     }
 
     @Override
     public void onDelete(EntityInVersionStructure entity) {
-
+        /*
         if (pubSubPublish && isLoggedEntity(entity)) {
             pubsubOutboundGateway.sendToPubsub(toEntityChangedEvent(entity, true).toString());
         }
+        */
     }
 }
