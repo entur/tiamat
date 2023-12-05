@@ -61,7 +61,7 @@ public class JerseyConfig {
 
     public static final String SERVICES_ADMIN_PATH = SERVICES_PATH + "/admin";
 
-    public static final String SERVICES_STOP_PLACE_PATH = SERVICES_PATH + "/stop_places";
+    public static final String SERVICES_STOP_PLACE_PATH = SERVICES_PATH + "/stop-places";
 
     public static final String SERVICES_HEALTH_PATH = "/health";
 
