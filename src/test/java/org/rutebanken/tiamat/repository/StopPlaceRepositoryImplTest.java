@@ -370,6 +370,8 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         assertThat(actual.getName().getValue()).isEqualTo(stopPlace.getName().getValue());
     }
 
+    /*
+    * Test disabled due to not using H2 database for testing
     @Test
     public void findNearbyStopPlaceFuzzyMatch() throws Exception {
         StopPlace stopPlace = new StopPlace();
@@ -388,6 +390,7 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         assertThat(actual.getName().getValue()).isEqualTo(stopPlace.getName().getValue());
         H2Functions.setSimilarityOveridden(1);
     }
+    */
 
     @Test
     public void noNearbyStopPlace() throws Exception {
@@ -403,6 +406,8 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         assertThat(result).isNull();
     }
 
+    /*
+    * Test disabled due to not using H2 database for testing
     @Test
     public void noNearbyStopPlaceIfNameIsDifferent() throws Exception {
         StopPlace stopPlace = new StopPlace();
@@ -419,6 +424,7 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         assertThat(result).isNull();
         H2Functions.setSimilarityOveridden(1);
     }
+    */
 
     @Test
     public void multipleNearbyStopPlaces() throws Exception {
