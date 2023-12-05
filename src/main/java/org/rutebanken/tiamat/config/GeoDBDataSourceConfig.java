@@ -23,7 +23,7 @@ import org.springframework.context.annotation.Profile;
 import javax.sql.DataSource;
 
 @Configuration
-@Profile("geodb")
+@Profile("disabled") // Disabled for Jore4
 public class GeoDBDataSourceConfig {
 
     @Bean
