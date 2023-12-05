@@ -17,16 +17,19 @@ RUN mvn clean package spring-boot:repackage
 FROM amazoncorretto:11-al2-full
 
 # expose server port
-EXPOSE 8777
+EXPOSE 8080
 
 # download script for reading Docker secrets
 RUN curl -o /tmp/read-secrets.sh "https://raw.githubusercontent.com/HSLdevcom/jore4-tools/main/docker/read-secrets.sh"
+
+# copy over helper scripts
+COPY ./script/build-jdbc-urls.sh /tmp/
 
 # copy compiled jar from builder stage
 COPY --from=builder /build/target/*.jar /usr/src/jore4-tiamat/jore4-tiamat.jar
 
 # read Docker secrets into environment variables and run application
-CMD /bin/sh -c "source /tmp/read-secrets.sh && java -jar /usr/src/jore4-tiamat/jore4-tiamat.jar"
+CMD /bin/sh -c "source /tmp/read-secrets.sh && source /tmp/build-jdbc-urls.sh && java -jar /usr/src/jore4-tiamat/jore4-tiamat.jar"
 
 HEALTHCHECK --interval=1m --timeout=5s \
     CMD curl --fail http://localhost:8080/actuator/health

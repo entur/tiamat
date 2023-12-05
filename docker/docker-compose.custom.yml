@@ -8,11 +8,12 @@ services:
     # build and the docker image from the local repo
     build:
       context: ..
-    # Waiting for database to be ready to avoid startup delay due to initial crash
-    # Note: this should only be done in development setups as Kubernetes does not allow waiting for services to be ready
+    ports:
+      - "127.0.0.1:3019:8080"
+    networks:
+      - jore4
     depends_on:
       jore4-testdb:
         condition: service_healthy
-    # environment:
-      # enabling the hasura console locally to ease development
-      # HASURA_GRAPHQL_ENABLE_CONSOLE: 'true'
+    environment:
+      SECRET_STORE_BASE_PATH: "/mnt/secrets-store"
