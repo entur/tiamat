@@ -9,10 +9,33 @@ RUN mvn de.qaware.maven:go-offline-maven-plugin:resolve-dependencies
 
 # copy sources
 COPY ./src /build/src
-# package using "prod" profile
-# COPY ./profiles/prod /build/profiles/prod
-# RUN mvn -Pprod clean package spring-boot:repackage
-RUN mvn clean package spring-boot:repackage
+
+# manually install local dependency jar files
+RUN mvn install:install-file \
+-Dfile=src/main/resources/helper-jars/oauth2-1.89-SNAPSHOT.jar \
+-DgroupId=org.entur.helpers \
+-DartifactId=oauth2 \
+-Dversion=1.89-SNAPSHOT \
+-Dpackaging=jar \
+-DgeneratePom=true
+
+RUN mvn install:install-file \
+-Dfile=src/main/resources/helper-jars/organisation-1.89-SNAPSHOT.jar \
+-DgroupId=org.entur.helpers \
+-DartifactId=organisation \
+-Dversion=1.89-SNAPSHOT \
+-Dpackaging=jar \
+-DgeneratePom=true
+
+RUN mvn install:install-file \
+-Dfile=src/main/resources/helper-jars/hazelcast4-helper-1.89-SNAPSHOT.jar \
+-DgroupId=org.entur.helpers \
+-DartifactId=hazelcast4-helper \
+-Dversion=1.89-SNAPSHOT \
+-Dpackaging=jar \
+-DgeneratePom=true
+
+RUN mvn clean package spring-boot:repackage -DskipTests
 
 FROM amazoncorretto:11-al2-full
 

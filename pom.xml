@@ -100,7 +100,7 @@
         <hazelcast-helper.version>1.0.62</hazelcast-helper.version>
         <rutebanken-gcp-storage.version>1.83</rutebanken-gcp-storage.version>
         <rutebanken-organisation.version>1.0.61</rutebanken-organisation.version>
-        <entur.helpers.version>1.0.64</entur.helpers.version>
+        <entur.helpers.version>1.89-SNAPSHOT</entur.helpers.version>
 
         <javax-jms.version>2.0.1</javax-jms.version>
         <jts-core.version>1.16.0</jts-core.version>
@@ -177,8 +177,6 @@
                 <groupId>org.entur.helpers</groupId>
                 <artifactId>oauth2</artifactId>
                 <version>${entur.helpers.version}</version>
-                <scope>system</scope>
-                <systemPath>${project.basedir}/src/main/resources/helper-jars/oauth2-1.89-SNAPSHOT.jar</systemPath>
             </dependency>
 
             <dependency>
@@ -192,11 +190,6 @@
     </dependencyManagement>
 
     <dependencies>
-
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-gcp-starter-pubsub</artifactId>
-        </dependency>
 
         <dependency>
             <groupId>org.springframework.integration</groupId>
@@ -267,15 +260,13 @@
         <dependency>
             <groupId>org.entur.helpers</groupId>
             <artifactId>hazelcast4-helper</artifactId>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/helper-jars/hazelcast4-helper-1.89-SNAPSHOT.jar</systemPath>
+            <version>${entur.helpers.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.entur.helpers</groupId>
             <artifactId>organisation</artifactId>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/helper-jars/organisation-1.89-SNAPSHOT.jar</systemPath>
+            <version>${entur.helpers.version}</version>
         </dependency>
 
         <dependency>
@@ -602,6 +593,24 @@
 
 
     <build>
+        <resources>
+            <!-- Resolve @some.key@ placeholders. -->
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/*.properties</include>
+                </includes>
+            </resource>
+            <!-- Only copy other (non-filtered) resources. -->
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+                <excludes>
+                    <exclude>**/*.properties</exclude>
+                </excludes>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
