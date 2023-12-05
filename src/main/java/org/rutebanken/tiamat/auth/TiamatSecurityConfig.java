@@ -61,11 +61,10 @@ public class TiamatSecurityConfig extends WebSecurityConfigurerAdapter {
 		http.cors(withDefaults())
 				.csrf().disable()
 				.authorizeRequests()
-				.anyRequest().permitAll()
-				.and()
-				.oauth2ResourceServer().jwt().jwtAuthenticationConverter(new RorAuthenticationConverter());
-
+				.anyRequest().permitAll();
+				// TODO: Use correct Authentication
+				//.and()
+				//.oauth2ResourceServer().jwt().jwtAuthenticationConverter(new RorAuthenticationConverter());
 	}
-
 
 }
