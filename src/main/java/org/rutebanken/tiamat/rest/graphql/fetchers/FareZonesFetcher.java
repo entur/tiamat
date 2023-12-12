@@ -51,6 +51,7 @@ import org.rutebanken.tiamat.exporter.params.FareZoneSearch;
 import org.rutebanken.tiamat.model.FareZone;
 import org.rutebanken.tiamat.repository.FareZoneRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -76,20 +77,30 @@ public class FareZonesFetcher implements DataFetcher {
     @Override
     @Transactional
     public Object get(DataFetchingEnvironment environment) {
+        PageRequest pageable = PageRequest.of(environment.getArgument(PAGE), environment.getArgument(SIZE));
+        Page<FareZone> allFareZones;
         List<String> netexIds = environment.getArgument(IDS);
+        final String query = environment.getArgument(QUERY);
 
+        List<FareZone> fareZones;
         if (netexIds != null) {
-            return fareZoneRepository.findValidFareZones(netexIds);
+            fareZones = fareZoneRepository.findValidFareZones(netexIds);
+            allFareZones = new PageImpl<>(fareZones, pageable, fareZones.size());
+        } else if (query != null && !query.isEmpty()){
+            FareZoneSearch fareZoneSearch = FareZoneSearch.newFareZoneSearchBuilder()
+                    .query(environment.getArgument(QUERY))
+                    .authorityRef(environment.getArgument(FARE_ZONES_AUTHORITY_REF))
+                    .scopingMethod(environment.getArgument(FARE_ZONES_SCOPING_METHOD))
+                    .zoneTopology(environment.getArgument(FARE_ZONES_ZONE_TOPOLOGY))
+                    .build();
+
+            fareZones = fareZoneRepository.findFareZones(fareZoneSearch);
+            allFareZones = new PageImpl<>(fareZones, pageable, fareZones.size());
+        } else {
+            allFareZones = fareZoneRepository.findAll(pageable);
         }
 
-        FareZoneSearch fareZoneSearch = FareZoneSearch.newFareZoneSearchBuilder()
-                .query(environment.getArgument(QUERY))
-                .authorityRef(environment.getArgument(FARE_ZONES_AUTHORITY_REF))
-                .scopingMethod(environment.getArgument(FARE_ZONES_SCOPING_METHOD))
-                .zoneTopology(environment.getArgument(FARE_ZONES_ZONE_TOPOLOGY))
-                .build();
 
-        List<FareZone> fareZones = fareZoneRepository.findFareZones(fareZoneSearch);
-        return new PageImpl<>(fareZones, PageRequest.of(environment.getArgument(PAGE), environment.getArgument(SIZE)), fareZones.size());
+        return allFareZones;
     }
 }
