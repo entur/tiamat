@@ -75,18 +75,26 @@ public class TariffZonesFetcher implements DataFetcher<Page<TariffZone>> {
     @Transactional
     public Page<TariffZone> get(DataFetchingEnvironment environment) {
 
+        PageRequest pageable = PageRequest.of(environment.getArgument(PAGE), environment.getArgument(SIZE));
+        Page<TariffZone> allTariffZones;
         List<String> netexIds = environment.getArgument(IDS);
+        final String query = environment.getArgument(QUERY);
 
         List<TariffZone> tariffZones;
         if (netexIds != null) {
             tariffZones = tariffZoneRepository.findValidTariffZones(netexIds);
-        } else {
+            allTariffZones = new PageImpl<>(tariffZones, pageable, tariffZones.size());
+        } else if (query != null && !query.isEmpty()) {
             TariffZoneSearch tariffZoneSearch = TariffZoneSearch.newTariffZoneSearchBuilder()
-                    .query(environment.getArgument(QUERY))
+                    .query(query)
                     .build();
             tariffZones = tariffZoneRepository.findTariffZones(tariffZoneSearch);
+            allTariffZones = new PageImpl<>(tariffZones, pageable, tariffZones.size());
+        } else {
+            allTariffZones = tariffZoneRepository.findAll(pageable);
         }
 
-        return new PageImpl<>(tariffZones, PageRequest.of(environment.getArgument(PAGE), environment.getArgument(SIZE)), tariffZones.size());
+        return allTariffZones;
+
     }
 }
