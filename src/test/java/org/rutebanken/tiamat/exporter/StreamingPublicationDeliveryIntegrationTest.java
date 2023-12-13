@@ -23,6 +23,7 @@ import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.exporter.params.StopPlaceSearch;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.GroupOfStopPlaces;
+import org.rutebanken.tiamat.model.PurposeOfGrouping;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopPlaceReference;
 import org.rutebanken.tiamat.model.TariffZone;
@@ -37,6 +38,7 @@ import org.rutebanken.tiamat.netex.validation.NetexXmlReferenceValidator;
 import org.rutebanken.tiamat.rest.netex.publicationdelivery.PublicationDeliveryTestHelper;
 import org.rutebanken.tiamat.rest.netex.publicationdelivery.PublicationDeliveryUnmarshaller;
 import org.rutebanken.tiamat.versioning.save.GroupOfStopPlacesSaverService;
+import org.rutebanken.tiamat.versioning.save.PurposeOfGroupingSaverService;
 import org.rutebanken.tiamat.versioning.save.TariffZoneSaverService;
 import org.rutebanken.tiamat.versioning.save.TopographicPlaceVersionedSaverService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,6 +79,9 @@ public class StreamingPublicationDeliveryIntegrationTest extends TiamatIntegrati
 
     @Autowired
     private GroupOfStopPlacesSaverService groupOfStopPlacesSaverService;
+
+    @Autowired
+    private PurposeOfGroupingSaverService purposeOfGroupingSaverService;
 
     @Autowired
     private TopographicPlaceVersionedSaverService topographicPlaceVersionedSaverService;
@@ -196,7 +201,12 @@ public class StreamingPublicationDeliveryIntegrationTest extends TiamatIntegrati
 
         stopPlaceRepository.flush();
 
+        PurposeOfGrouping purposeOfGrouping = new PurposeOfGrouping();
+        purposeOfGrouping.setName(new EmbeddableMultilingualString("generalization"));
+        purposeOfGroupingSaverService.saveNewVersion(purposeOfGrouping);
+
         GroupOfStopPlaces groupOfStopPlaces = new GroupOfStopPlaces(new EmbeddableMultilingualString("group"));
+        groupOfStopPlaces.setPurposeOfGrouping(purposeOfGrouping);
         groupOfStopPlaces.getMembers().add(new StopPlaceReference(stopPlace.getNetexId()));
         groupOfStopPlacesSaverService.saveNewVersion(groupOfStopPlaces);
 
@@ -262,12 +272,18 @@ public class StreamingPublicationDeliveryIntegrationTest extends TiamatIntegrati
         stopPlace2 = stopPlaceVersionedSaverService.saveNewVersion(stopPlace2);
         final String stopPlace2NetexId = stopPlace2.getNetexId();
 
+        PurposeOfGrouping purposeOfGrouping = new PurposeOfGrouping();
+        purposeOfGrouping.setName(new EmbeddableMultilingualString("generalization"));
+        purposeOfGroupingSaverService.saveNewVersion(purposeOfGrouping);
+
         GroupOfStopPlaces groupOfStopPlaces1 = new GroupOfStopPlaces(new EmbeddableMultilingualString("group of stop places"));
+        groupOfStopPlaces1.setPurposeOfGrouping(purposeOfGrouping);
         groupOfStopPlaces1.getMembers().add(new StopPlaceReference(stopPlace1.getNetexId()));
 
         groupOfStopPlacesSaverService.saveNewVersion(groupOfStopPlaces1);
 
         GroupOfStopPlaces groupOfStopPlaces2 = new GroupOfStopPlaces(new EmbeddableMultilingualString("group of stop places number two"));
+        groupOfStopPlaces2.setPurposeOfGrouping(purposeOfGrouping);
         groupOfStopPlaces2.getMembers().add(new StopPlaceReference(stopPlace1.getNetexId()));
 
         groupOfStopPlacesSaverService.saveNewVersion(groupOfStopPlaces2);

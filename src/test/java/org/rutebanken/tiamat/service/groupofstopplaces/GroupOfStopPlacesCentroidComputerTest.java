@@ -19,7 +19,9 @@ import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Point;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
+import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.GroupOfStopPlaces;
+import org.rutebanken.tiamat.model.PurposeOfGrouping;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopPlaceReference;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +40,12 @@ public class GroupOfStopPlacesCentroidComputerTest extends TiamatIntegrationTest
     @Test
     public void compute() {
 
+        var purposeOfGrouping = new PurposeOfGrouping();
+        purposeOfGrouping.setNetexId("NSR:PurposeOfGrouping:1");
+        purposeOfGrouping.setVersion(1L);
+        purposeOfGrouping.setName(new EmbeddableMultilingualString("Purpose of grouping"));
+        purposeOfGroupingRepository.save(purposeOfGrouping);
+
         StopPlace stopPlace = new StopPlace();
         stopPlace.setCentroid(point(60.000, 10.78));
 
@@ -48,6 +56,8 @@ public class GroupOfStopPlacesCentroidComputerTest extends TiamatIntegrationTest
         stopPlaceRepository.save(stopPlace2);
 
         GroupOfStopPlaces groupOfStopPlaces = new GroupOfStopPlaces();
+
+        groupOfStopPlaces.setPurposeOfGrouping(purposeOfGrouping);
 
         groupOfStopPlaces.getMembers().add(new StopPlaceReference(stopPlace.getNetexId()));
         groupOfStopPlaces.getMembers().add(new StopPlaceReference(stopPlace2.getNetexId()));

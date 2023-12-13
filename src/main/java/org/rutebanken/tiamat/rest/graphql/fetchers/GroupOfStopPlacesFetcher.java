@@ -35,8 +35,6 @@ import graphql.schema.DataFetchingEnvironment;
 import org.rutebanken.tiamat.exporter.params.GroupOfStopPlacesSearch;
 import org.rutebanken.tiamat.model.GroupOfStopPlaces;
 import org.rutebanken.tiamat.repository.GroupOfStopPlacesRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -57,7 +55,6 @@ import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.SIZE;
 @Transactional
 public class GroupOfStopPlacesFetcher implements DataFetcher<Page<GroupOfStopPlaces>> {
 
-    private static final Logger logger = LoggerFactory.getLogger(GroupOfStopPlacesFetcher.class);
 
     @Autowired
     private GroupOfStopPlacesRepository groupOfStopPlacesRepository;

@@ -28,6 +28,7 @@ import org.rutebanken.tiamat.repository.GroupOfTariffZonesRepository;
 import org.rutebanken.tiamat.repository.ParkingRepository;
 import org.rutebanken.tiamat.repository.PathJunctionRepository;
 import org.rutebanken.tiamat.repository.PathLinkRepository;
+import org.rutebanken.tiamat.repository.PurposeOfGroupingRepository;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.repository.TagRepository;
@@ -38,6 +39,7 @@ import org.rutebanken.tiamat.service.TopographicPlaceLookupService;
 import org.rutebanken.tiamat.versioning.VersionCreator;
 import org.rutebanken.tiamat.versioning.save.GroupOfStopPlacesSaverService;
 import org.rutebanken.tiamat.versioning.save.ParkingVersionedSaverService;
+import org.rutebanken.tiamat.versioning.save.PurposeOfGroupingSaverService;
 import org.rutebanken.tiamat.versioning.save.StopPlaceVersionedSaverService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,11 +68,17 @@ public abstract class TiamatIntegrationTest {
     protected GroupOfStopPlacesRepository groupOfStopPlacesRepository;
 
     @Autowired
+    protected PurposeOfGroupingRepository purposeOfGroupingRepository;
+
+    @Autowired
 
     protected GroupOfTariffZonesRepository groupOfTariffZonesRepository;
 
     @Autowired
     protected GroupOfStopPlacesSaverService groupOfStopPlacesSaverService;
+
+    @Autowired
+    protected PurposeOfGroupingSaverService purposeOfGroupingSaverService;
 
     @Autowired
     protected StopPlaceRepository stopPlaceRepository;
@@ -136,6 +144,9 @@ public abstract class TiamatIntegrationTest {
 
         groupOfStopPlacesRepository.flush();
         groupOfStopPlacesRepository.deleteAll();
+
+        purposeOfGroupingRepository.flush();
+        purposeOfGroupingRepository.deleteAll();
 
         stopPlaceRepository.flush();
 
