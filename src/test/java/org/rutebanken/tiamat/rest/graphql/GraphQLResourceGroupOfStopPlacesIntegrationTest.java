@@ -17,6 +17,8 @@ package org.rutebanken.tiamat.rest.graphql;
 
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
+import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
+import org.rutebanken.tiamat.model.PurposeOfGrouping;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
 
@@ -28,6 +30,12 @@ public class GraphQLResourceGroupOfStopPlacesIntegrationTest extends AbstractGra
 
     @Test
     public void create_new_group_of_stop_places() {
+        var purposeOfGrouping = new PurposeOfGrouping();
+        purposeOfGrouping.setNetexId("NSR:PurposeOfGrouping:1");
+        purposeOfGrouping.setVersion(1L);
+        purposeOfGrouping.setName(new EmbeddableMultilingualString("Purpose of grouping"));
+        purposeOfGroupingRepository.save(purposeOfGrouping);
+
         var stopPlace1 = new StopPlace();
         stopPlace1.setCentroid(geometryFactory.createPoint(new Coordinate(12, 53)));
         stopPlace1.setStopPlaceType(StopTypeEnumeration.BUS_STATION);
@@ -45,6 +53,7 @@ public class GraphQLResourceGroupOfStopPlacesIntegrationTest extends AbstractGra
                                     mutation {
                                     group: %s(GroupOfStopPlaces: {
                                         name: {value: "%s"},
+                                        purposeOfGrouping: {ref: "%s"},
                                         versionComment: "%s",
                                         members: [
                                             {ref: "%s"},
@@ -71,6 +80,7 @@ public class GraphQLResourceGroupOfStopPlacesIntegrationTest extends AbstractGra
                                 """.formatted(
                                                 MUTATE_GROUP_OF_STOP_PLACES,
                                                 groupName,
+                                                purposeOfGrouping.getNetexId(),
                                                 versionComment,
                                                 stopPlace1.getNetexId(),
                                                 stopPlace2.getNetexId()

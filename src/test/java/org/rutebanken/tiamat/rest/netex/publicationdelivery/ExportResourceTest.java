@@ -35,6 +35,7 @@ import org.rutebanken.tiamat.dtoassembling.dto.ChangedStopPlaceSearchDto;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.exporter.params.StopPlaceSearch;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
+import org.rutebanken.tiamat.model.PurposeOfGrouping;
 import org.rutebanken.tiamat.model.StopPlaceReference;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -132,7 +133,12 @@ public class ExportResourceTest extends TiamatIntegrationTest {
         stopPlace2.setCentroid(point(61.000, 11.78));
         stopPlaceVersionedSaverService.saveNewVersion(stopPlace2);
 
+        PurposeOfGrouping purposeOfGrouping = new PurposeOfGrouping();
+        purposeOfGrouping.setName(new EmbeddableMultilingualString("generalization"));
+        purposeOfGroupingSaverService.saveNewVersion(purposeOfGrouping);
+
         org.rutebanken.tiamat.model.GroupOfStopPlaces groupOfStopPlaces = new org.rutebanken.tiamat.model.GroupOfStopPlaces();
+        groupOfStopPlaces.setPurposeOfGrouping(purposeOfGrouping);
         groupOfStopPlaces.getMembers().add(new StopPlaceReference(stopPlace.getNetexId()));
         groupOfStopPlaces.getMembers().add(new StopPlaceReference(stopPlace2.getNetexId()));
         groupOfStopPlaces.setChangedBy("mr. Solem");

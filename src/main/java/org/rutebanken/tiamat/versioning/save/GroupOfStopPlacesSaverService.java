@@ -21,8 +21,10 @@ import org.rutebanken.helper.organisation.AuthorizationConstants;
 import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
 import org.rutebanken.tiamat.auth.UsernameFetcher;
 import org.rutebanken.tiamat.model.GroupOfStopPlaces;
+import org.rutebanken.tiamat.model.PurposeOfGrouping;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.GroupOfStopPlacesRepository;
+import org.rutebanken.tiamat.repository.PurposeOfGroupingRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.service.groupofstopplaces.GroupOfStopPlacesCentroidComputer;
 import org.rutebanken.tiamat.service.metrics.PrometheusMetricsService;
@@ -70,12 +72,16 @@ public class GroupOfStopPlacesSaverService {
     @Autowired
     private ReflectionAuthorizationService authorizationService;
 
+    @Autowired
+    private PurposeOfGroupingRepository purposeOfGroupingRepository;
+
     public GroupOfStopPlaces saveNewVersion(GroupOfStopPlaces newVersion) {
 
         validateMembers(newVersion);
 
         GroupOfStopPlaces existing = groupOfStopPlacesRepository.findFirstByNetexIdOrderByVersionDesc(newVersion.getNetexId());
         String usernameForAuthenticatedUser = usernameFetcher.getUserNameForAuthenticatedUser();
+        final PurposeOfGrouping purposeOfGrouping = purposeOfGroupingRepository.findFirstByNetexIdOrderByVersionDesc(newVersion.getPurposeOfGrouping().getNetexId());
 
         GroupOfStopPlaces result;
         if(existing != null) {
@@ -83,6 +89,7 @@ public class GroupOfStopPlacesSaverService {
             existing.getMembers().clear();
             existing.getMembers().addAll(newVersion.getMembers());
             existing.setChanged(Instant.now());
+            existing.setPurposeOfGrouping(purposeOfGrouping);
             result = existing;
 
         } else {

@@ -44,15 +44,10 @@ public class GroupOfStopPlacesSaverServiceTest extends TiamatIntegrationTest {
         StopPlace stopPlace = new StopPlace();
         stopPlaceRepository.save(stopPlace);
 
-        PurposeOfGrouping purposeOfGrouping = new PurposeOfGrouping();
-        purposeOfGrouping.setName(new EmbeddableMultilingualString("generalization"));
-
-        purposeOfGroupingSaverService.saveNewVersion(purposeOfGrouping);
-
         GroupOfStopPlaces groupOfStopPlaces = new GroupOfStopPlaces();
         groupOfStopPlaces.setName(new EmbeddableMultilingualString("name"));
         groupOfStopPlaces.getMembers().add(new StopPlaceReference(stopPlace.getNetexId()));
-        groupOfStopPlaces.setPurposeOfGrouping(purposeOfGrouping);
+        groupOfStopPlaces.setPurposeOfGrouping(purposeOfGrouping());
 
         GroupOfStopPlaces saved = groupOfStopPlacesSaverService.saveNewVersion(groupOfStopPlaces);
         assertThat(saved.getVersion()).isOne();
@@ -112,6 +107,7 @@ public class GroupOfStopPlacesSaverServiceTest extends TiamatIntegrationTest {
         GroupOfStopPlaces groupOfStopPlaces = new GroupOfStopPlaces();
         groupOfStopPlaces.setName(new EmbeddableMultilingualString("name"));
         groupOfStopPlaces.getMembers().add(new StopPlaceReference(stopPlace.getNetexId()));
+        groupOfStopPlaces.setPurposeOfGrouping(purposeOfGrouping());
 
         GroupOfStopPlaces saved = groupOfStopPlacesSaverService.saveNewVersion(groupOfStopPlaces);
 
@@ -121,6 +117,7 @@ public class GroupOfStopPlacesSaverServiceTest extends TiamatIntegrationTest {
         GroupOfStopPlaces changed = new GroupOfStopPlaces();
         changed.setNetexId(saved.getNetexId());
         changed.setName(new EmbeddableMultilingualString("name"));
+        changed.setPurposeOfGrouping(saved.getPurposeOfGrouping());
         changed.getMembers().add(new StopPlaceReference(stopPlace.getNetexId()));
         changed.getMembers().add(new StopPlaceReference(stopPlace2.getNetexId()));
 
@@ -134,6 +131,13 @@ public class GroupOfStopPlacesSaverServiceTest extends TiamatIntegrationTest {
                 .hasSize(2)
                 .extracting(StopPlaceReference::getRef).contains(stopPlace.getNetexId(), stopPlace2.getNetexId());
 
+    }
+
+    private PurposeOfGrouping purposeOfGrouping() {
+        PurposeOfGrouping purposeOfGrouping = new PurposeOfGrouping();
+        purposeOfGrouping.setName(new EmbeddableMultilingualString("generalization"));
+        purposeOfGroupingSaverService.saveNewVersion(purposeOfGrouping);
+        return purposeOfGrouping;
     }
 
 
