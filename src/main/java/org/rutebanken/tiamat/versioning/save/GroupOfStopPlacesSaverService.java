@@ -81,7 +81,14 @@ public class GroupOfStopPlacesSaverService {
 
         GroupOfStopPlaces existing = groupOfStopPlacesRepository.findFirstByNetexIdOrderByVersionDesc(newVersion.getNetexId());
         String usernameForAuthenticatedUser = usernameFetcher.getUserNameForAuthenticatedUser();
-        final PurposeOfGrouping purposeOfGrouping = purposeOfGroupingRepository.findFirstByNetexIdOrderByVersionDesc(newVersion.getPurposeOfGrouping().getNetexId());
+        final PurposeOfGrouping purposeOfGrouping;
+        if(newVersion.getPurposeOfGrouping() == null) {
+            purposeOfGrouping = null;
+        } else {
+            Preconditions.checkArgument(newVersion.getPurposeOfGrouping().getNetexId() != null,
+                    "Purpose of grouping must have a netex id when saving group of stop places " + newVersion);
+            purposeOfGrouping = purposeOfGroupingRepository.findFirstByNetexIdOrderByVersionDesc(newVersion.getPurposeOfGrouping().getNetexId());
+        }
 
         GroupOfStopPlaces result;
         if(existing != null) {
@@ -89,7 +96,9 @@ public class GroupOfStopPlacesSaverService {
             existing.getMembers().clear();
             existing.getMembers().addAll(newVersion.getMembers());
             existing.setChanged(Instant.now());
-            existing.setPurposeOfGrouping(purposeOfGrouping);
+            if(purposeOfGrouping != null){
+                existing.setPurposeOfGrouping(purposeOfGrouping);
+            }
             result = existing;
 
         } else {
