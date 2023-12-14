@@ -47,6 +47,13 @@ data:
     spring.flyway.table =schema_version
 
 
+    # Hazelcast properties
+    tiamat.hazelcast.cluster.name=tiamat
+    tiamat.hazelcast.service-name=tiamat
+    tiamat.hazelcast.service-port=5701
+    tiamat.hazelcast.kubernetes.enabled=false
+
+
 
     # Security config with auth0
 

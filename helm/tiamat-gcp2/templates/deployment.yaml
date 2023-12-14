@@ -61,8 +61,8 @@ spec:
           env:
             - name: JAVA_OPTIONS
               value: -server -Xss{{ .Values.resources.xss }} -Xmx{{ .Values.resources.xmx }} -Dspring.config.location=/etc/application-config/application.properties
-                -Dfile.encoding=UTF-8 -Drutebanken.kubernetes.enabled=true -Drutebanken.hazelcast.management.url=http://tiamat-hzmgmt/mancenter/
-                -Drutebanken.kubernetes.namespace={{ .Release.Namespace }} -Dhazelcast.ignoreXxeProtectionFailures=true --add-opens java.base/java.lang=ALL-UNNAMED
+                -Dfile.encoding=UTF-8
+                -Dhazelcast.ignoreXxeProtectionFailures=true --add-opens java.base/java.lang=ALL-UNNAMED
             - name: TZ
               value: Europe/Oslo
             - name: SPRING_DATASOURCE_PASSWORD
