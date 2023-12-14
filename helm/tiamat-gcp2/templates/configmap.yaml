@@ -26,7 +26,7 @@ data:
     # Database properties
     spring.jpa.properties.javax.persistence.query.timeout=15000
     spring.jpa.properties.hibernate.dialect=org.hibernate.spatial.dialect.postgis.PostgisDialect
-    spring.jpa.properties.hibernate.cache.region.factory_class=org.rutebanken.tiamat.hazelcast.TiamatHazelcastCacheRegionFactory
+    spring.jpa.properties.hibernate.cache.region.factory_class=com.hazelcast.hibernate.HazelcastCacheRegionFactory
     spring.jpa.properties.hibernate.cache.use_second_level_cache=true
     spring.jpa.properties.hibernate.cache.use_minimal_puts=true
     spring.jpa.properties.hibernate.cache.use_query_cache=true
@@ -45,6 +45,13 @@ data:
 
     #flyway
     spring.flyway.table =schema_version
+
+
+    # Hazelcast properties
+    tiamat.hazelcast.cluster.name=tiamat
+    tiamat.hazelcast.service-name=tiamat
+    tiamat.hazelcast.service-port=5701
+    tiamat.hazelcast.kubernetes.enabled=false
 
 
 
