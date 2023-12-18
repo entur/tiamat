@@ -18,12 +18,6 @@ package org.rutebanken.tiamat.rest.graphql.types;
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLObjectType;
-import org.rutebanken.tiamat.rest.graphql.fetchers.KeyValuesDataFetcher;
-import org.rutebanken.tiamat.rest.graphql.fetchers.OriginalIdsDataFetcher;
-import org.rutebanken.tiamat.rest.graphql.fetchers.PolygonFetcher;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -47,18 +41,6 @@ import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.netexI
 
 @Component
 public class ZoneCommonFieldListCreator {
-
-    private static final Logger logger = LoggerFactory.getLogger(ZoneCommonFieldListCreator.class);
-
-    @Autowired
-    private OriginalIdsDataFetcher originalIdsDataFetcher;
-
-    @Autowired
-    private KeyValuesDataFetcher keyValuesDataFetcher;
-
-    @Autowired
-    private PolygonFetcher polygonFetcher;
-
     public List<GraphQLFieldDefinition> create(GraphQLObjectType validBetweenObjectType) {
 
         List<GraphQLFieldDefinition> zoneFieldList = new ArrayList<>();
@@ -74,19 +56,16 @@ public class ZoneCommonFieldListCreator {
                 .name(IMPORTED_ID)
                 .deprecate("Moved to keyValues")
                 .type(new GraphQLList(GraphQLString))
-                .dataFetcher(originalIdsDataFetcher)
                 .build());
 
         zoneFieldList.add(newFieldDefinition()
                 .name(KEY_VALUES)
                 .type(new GraphQLList(keyValuesObjectType))
-                .dataFetcher(keyValuesDataFetcher)
                 .build());
 
         zoneFieldList.add(newFieldDefinition()
                 .name(POLYGON)
                 .type(geoJsonObjectType)
-                .dataFetcher(polygonFetcher)
                 .build());
 
         return zoneFieldList;
