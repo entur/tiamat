@@ -174,13 +174,13 @@
         <dependency>
             <groupId>com.graphql-java</groupId>
             <artifactId>graphql-java</artifactId>
-            <version>${graphql-java.version}</version>
+            <version>${graphql.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.graphql-java</groupId>
             <artifactId>graphql-java-extended-scalars</artifactId>
-            <version>${graphql-java.version}</version>
+            <version>${graphql.version}</version>
         </dependency>
 
         <dependency>
