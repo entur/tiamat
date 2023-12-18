@@ -52,7 +52,6 @@
         <java.version>17</java.version>
         <spring-cloud-gcp.version>4.8.3</spring-cloud-gcp.version>
         <geotools.version>27.2</geotools.version>
-        <kubernetes-client.version>6.6.2</kubernetes-client.version>
         <orika-core.version>1.5.4</orika-core.version>
         <!-- downgrade since super pom  uses 18.5 -->
         <graphql.version>20.2</graphql.version>
@@ -171,12 +170,6 @@
             <groupId>com.hazelcast</groupId>
             <artifactId>hazelcast-hibernate53</artifactId>
             <version>${hazelcast-hibernate53.version}</version>
-        </dependency>
-        <!-- Due to maven artifact cache, this dependency needs to be explicit -->
-        <dependency>
-            <groupId>io.fabric8</groupId>
-            <artifactId>kubernetes-client</artifactId>
-            <version>${kubernetes-client.version}</version>
         </dependency>
         <dependency>
             <groupId>com.graphql-java</groupId>
