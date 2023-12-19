@@ -604,6 +604,7 @@ public class StopPlaceRegisterGraphQLSchema {
         //mutation
 
         registerDataFetcher(codeRegistryBuilder,"StopPlaceMutation",MUTATE_PARKING,parkingUpdater);
+        registerDataFetcher(codeRegistryBuilder,INPUT_TYPE_STOPPLACE,MUTATE_STOPPLACE,stopPlaceUpdater);
 
         return codeRegistryBuilder.build();
     }
@@ -629,15 +630,6 @@ public class StopPlaceRegisterGraphQLSchema {
         return env -> {
             if (env.getSource() instanceof IdentifiedEntity identifiedEntity) {
                 return identifiedEntity.getNetexId();
-            }
-            return null;
-        };
-    }
-
-    private static DataFetcher<Object> getTariffZoneNetexIdFetcher() {
-        return env -> {
-            if (env.getSource() instanceof TariffZone tariffZone) {
-                return tariffZone.getNetexId();
             }
             return null;
         };
