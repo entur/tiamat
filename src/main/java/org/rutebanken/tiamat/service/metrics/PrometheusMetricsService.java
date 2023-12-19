@@ -1,7 +1,6 @@
 package org.rutebanken.tiamat.service.metrics;
 
 import io.micrometer.core.instrument.ImmutableTag;
-import io.micrometer.core.instrument.Meter;
 import io.micrometer.core.instrument.Tag;
 import io.micrometer.prometheus.PrometheusConfig;
 import io.micrometer.prometheus.PrometheusMeterRegistry;
@@ -39,7 +38,7 @@ public class PrometheusMetricsService extends PrometheusMeterRegistry {
         List<Tag> counterTags = new ArrayList<>();
         counterTags.add(new ImmutableTag("clientName", clientName));
         counterTags.add(new ImmutableTag("clientId", clientId));
-        counter(CLIENT_COUNTER,   counterTags).increment(total);
+        counter(CLIENT_COUNTER,counterTags).increment(total);
     }
 
     public void registerRequestFromUser(String userName,long total) {
@@ -54,22 +53,4 @@ public class PrometheusMetricsService extends PrometheusMeterRegistry {
         counterTags.add(new ImmutableTag("IdentifiedEntity", entityClass.getSimpleName()));
         counter(ENTITY_COUNTER,counterTags).increment(total);
     }
-
-
-    @Override
-    public String scrape() {
-        update();
-        return super.scrape();
-    }
-
-    public void update() {
-
-        for (Meter meter : getMeters()) {
-            if (CLIENT_COUNTER.equals(meter.getId().getName())) {
-                this.remove(meter);
-            }
-        }
-    }
-
-
 }
