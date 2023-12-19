@@ -17,6 +17,7 @@ package org.rutebanken.tiamat.rest.graphql.scalars;
 
 import graphql.language.ArrayValue;
 import graphql.language.FloatValue;
+import graphql.language.Value;
 import graphql.schema.Coercing;
 import graphql.schema.GraphQLScalarType;
 import org.locationtech.jts.geom.Coordinate;
@@ -62,15 +63,15 @@ public class CustomScalars {
 
                 @Override
                 public Object parseLiteral(Object input) {
-                    if (input instanceof ArrayValue) {
-                        ArrayList<ArrayValue> coordinateList = (ArrayList) ((ArrayValue) input).getValues();
+                    if (input instanceof ArrayValue arrayValue) {
+                        List<Value> coordinateList = arrayValue.getValues();
                         Coordinate[] coordinates = new Coordinate[coordinateList.size()];
 
                         for (int i = 0; i < coordinateList.size(); i++) {
-                            ArrayValue v = coordinateList.get(i);
+                            List v = coordinateList.get(i).getChildren();
 
-                            FloatValue longitude = (FloatValue) v.getValues().get(0);
-                            FloatValue latitude = (FloatValue) v.getValues().get(1);
+                            FloatValue longitude = (FloatValue) v.get(0);
+                            FloatValue latitude = (FloatValue) v.get(1);
                             coordinates[i] = new Coordinate(longitude.getValue().doubleValue(), latitude.getValue().doubleValue());
 
                         }

@@ -517,9 +517,7 @@ public class StopPlaceRegisterGraphQLSchema {
                         .argument(GraphQLArgument.newArgument()
                                 .name(OUTPUT_TYPE_PARKING)
                                 .type(new GraphQLList(parkingInputObjectType)))
-                        .description("Create new or update existing " + OUTPUT_TYPE_PARKING)
-                        //.dataFetcher(parkingUpdater)
-                        )
+                        .description("Create new or update existing " + OUTPUT_TYPE_PARKING))
                 .field(newFieldDefinition()
                         .type(tariffZoneObjectType)
                         .name(TERMINATE_TARIFF_ZONE)
@@ -567,6 +565,10 @@ public class StopPlaceRegisterGraphQLSchema {
 
         dataFetcherGeometry(codeRegistryBuilder, OUTPUT_TYPE_PARENT_STOPPLACE);
 
+        dataFetcherGeometry(codeRegistryBuilder, OUTPUT_TYPE_QUAY);
+
+        dataFetcherGeometry(codeRegistryBuilder, OUTPUT_TYPE_PARKING);
+
 
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_STOPPLACE, STOP_PLACE_GROUPS, stopPlaceGroupsFetcher);
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_PARENT_STOPPLACE, STOP_PLACE_GROUPS, stopPlaceGroupsFetcher);
@@ -597,28 +599,22 @@ public class StopPlaceRegisterGraphQLSchema {
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_QUAY, POLYGON, polygonFetcher);
 
 
-
-
-
-
         //mutation
 
         registerDataFetcher(codeRegistryBuilder,"StopPlaceMutation",MUTATE_PARKING,parkingUpdater);
-        registerDataFetcher(codeRegistryBuilder,INPUT_TYPE_STOPPLACE,MUTATE_STOPPLACE,stopPlaceUpdater);
+
 
         return codeRegistryBuilder.build();
     }
 
     private void dataFetcherGeometry(GraphQLCodeRegistry.Builder codeRegistryBuilder, String parentType) {
         registerDataFetcher(codeRegistryBuilder, parentType, GEOMETRY, env -> {
-            if (env.getSource() instanceof Zone_VersionStructure) {
-                Zone_VersionStructure source = env.getSource();
+            if (env.getSource() instanceof Zone_VersionStructure source) {
                 if (source.getCentroid()!=null) {
                     return source.getCentroid();
                 }
                 return source.getPolygon();
-            } else if (env.getSource() instanceof Link) {
-                Link link = env.getSource();
+            } else if (env.getSource() instanceof Link link) {
                 return link.getLineString();
             }
             return null;
