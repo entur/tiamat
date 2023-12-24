@@ -417,6 +417,10 @@ public class GraphQLNames {
 
     public static final String FIND_STOPPLACE = "stopPlace";
 
+    public static final String STOPPLACES_REGISTER = "StopPlaceRegister";
+    public static final String STOPPLACES_MUTATION = "StopPlaceMutation";
+    public static final String DELETE_GROUP_OF_STOPPLACES="deleteGroupOfStopPlaces";
+
     /** Check if authorized to edit entity */
     public static final String CHECK_AUTHORIZED = "checkAuthorized";
     public static final String FIND_STOPPLACE_BY_BBOX = "stopPlaceBBox";

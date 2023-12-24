@@ -33,8 +33,7 @@ public class CustomScalars {
             .coercing(new Coercing() {
                 @Override
                 public List<List<Double>> serialize(Object input) {
-                    if (input instanceof Coordinate[]) {
-                        Coordinate[] coordinates = ((Coordinate[]) input);
+                    if (input instanceof Coordinate[] coordinates) {
                         List<List<Double>> coordinateList = new ArrayList<>();
                         for (Coordinate coordinate : coordinates) {
                             List<Double> coordinatePair = new ArrayList<>();
