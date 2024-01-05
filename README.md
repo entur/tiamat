@@ -44,15 +44,11 @@ Tiamat supports looking up and populating references to tariff zones and topogra
 Stop places and other entities are versioned. This means that you have full version history of stop places and what person that made those changes.
 Tiamat also includes a diff tool. This is used to compare and show the difference between two versions of a stop place (or other entity).
 
-
 ## Build
 `mvn clean install`
 
 You need the directory `/deployments/data` with rights for the user who
 performs the build.
-
-
-
 
 ## Integration tests
 Tiamat uses testcontainers to run integration tests against a real database.  To run Testcontainers-based tests, you need a Docker-API compatible container runtime
@@ -61,7 +57,7 @@ for more detail see https://www.testcontainers.org/supported_docker_environment/
 (default profiles are set in application.properties)
 
 ## Run with external properties file and PostgreSQL
-To run with PostgreSQL you ned an external application.properties.
+To run with PostgreSQL you need an external application.properties.
 Below is an example of application.properties:
 ```
 spring.jpa.database=POSTGRESQL
@@ -73,7 +69,6 @@ spring.jpa.hibernate.ddl-auto=none
 spring.http.gzip.enabled=true
 
 #spring.jpa.properties.hibernate.format_sql=true
-
 
 spring.jpa.properties.hibernate.order_updates=true
 spring.jpa.properties.hibernate.batch_versioned_data=true
@@ -104,8 +99,6 @@ spring.jpa.properties.hibernate.jdbc.batch_size=20
 spring.jpa.properties.hibernate.default_batch_fetch_size=16
 spring.jpa.properties.hibernate.generate_statistics=false
 
-
-
 changelog.publish.enabled=false
 
 
@@ -115,12 +108,9 @@ jettyMinThreads=1
 spring.datasource.hikari.maximumPoolSize=40
 spring.datasource.hikari.leakDetectionThreshold=30000
 
-
-
 tiamat.locals.language.default=eng
 
 tariffZoneLookupService.resetReferences=true
-
 
 debug=true 
 
@@ -142,14 +132,9 @@ spring.datasource.url=jdbc:postgresql://localhost:5436/tiamat
 spring.datasource.username=tiamat
 spring.datasource.password=tiamat
 
-
-
-
 aspect.enabled=true
 
 netex.id.valid.prefix.list={TopographicPlace:{'KVE','WOF','OSM','ENT','LAN'},TariffZone:{'*'},FareZone:{'*'},GroupOfTariffZones:{'*'}}
-
-
 
 server.port=1888
 
@@ -163,13 +148,16 @@ management.security.enabled=false
 authorization.enabled = true
 rutebanken.kubernetes.enabled=false
 
+#OAuth2 Resource Server
+tiamat.oauth2.resourceserver.auth0.ror.jwt.audience=notinuse
+tiamat.oauth2.resourceserver.auth0.ror.claim.namespace=notinuse
 
-
-
+#keycloak config
+spring.security.oauth2.resourceserver.jwt.issuer-uri=http://localhost:8080/auth/realms/entur
+spring.security.oauth2.resourceserver.jwt.jwk-set-uri=http://localhost:8080/realms/entur/protocol/openid-connect/certs
 
 
 async.export.path=/tmp
-
 
 publicationDeliveryUnmarshaller.validateAgainstSchema=false
 publicationDeliveryStreamingOutput.validateAgainstSchema=false
@@ -178,16 +166,31 @@ netex.profile.version=1.12:NO-NeTEx-stops:1.4
 blobstore.local.folder=/tmp/local-gcs-storage/tiamat/export
 spring.profiles.active=local-blobstore,activemq
 
-
-
-
-
-
 ```
 
-To start Tiamat with this configuration, specify **spring.config.location**:
+To start Tiamat with specific `application.properties` set the **spring.config.location** system property like:
 
-`java -jar -Dspring.config.location=/path/to/tiamat.properties --add-opens java.base/java.lang=ALL-UNNAMED -Denv=dev tiamat-0.0.2-SNAPSHOT.jar`
+`java -jar -Dspring.config.location=/path/to/application.properties --add-opens java.base/java.lang=ALL-UNNAMED -Denv=dev tiamat-0.0.2-SNAPSHOT.jar`
+
+*Note: For VSCode users you can set this as a launch config in .vscode/launch.json file (example below)*  
+```
+{
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Spring Boot-TiamatApplication<tiamat>",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "mainClass": "org.rutebanken.tiamat.TiamatApplication",
+      "projectName": "tiamat",
+      "args": "",
+      "envFile": "${workspaceFolder}/.env",
+      "vmArgs": "-Denv=dev -Dspring.config.location=/path/to/application.properties --add-opens java.base/java.lang=ALL-UNNAMED"
+    }
+  ]
+}
+
+```
 
 ## Database
 
@@ -220,13 +223,30 @@ It's all initiated by an entity listener annotated with `PrePersist` on the clas
 ## Keycloak/Auth0
 Both Tiamat and Abzu are set up to be used with Keycloak or Auth0.
 
+Run a docker container with Keycloak:
+```
+docker run -p 8080:8080 -e KEYCLOAK_ADMIN=admin -e KEYCLOAK_ADMIN_PASSWORD=admin quay.io/keycloak/keycloak:23.0.1 start-dev
+```
+
+
 ### Keycloak configuraiton
-- Create realm e.g. Entur
-- Create client for frontend e.g. abzu
-- Under client setting  configure Mapper e.g. entur-roles
-- Create Roles e.g. deleteStop, editStop, viewStop
-- Add User and assign roles
-- Add User attribute roles `{"r":"editStops","o":"NSB","e":{"StopPlaceType":["*"]}}##{"r":"editStops","o":"RB","e":{"EntityType":["*"]}}##{"r":"deleteStops","o":"RB","e":{"EntityType":["StopPlace"]}}##{"r":"deleteStops","o":"RB"}##{"r":"editRouteData","o":"RUT"}`
+- Go to http://localhost:8080/admin/master/console/
+- From top left create a new realm 
+    - Set the realm name to "entur"
+- Go to "Clients" 
+    - create a new client with id "entur-abzu"
+    - leave everything else as default/blank
+- Under client Roles:
+- Create the 3 roles with names:
+    -  "deleteStop", "editStop", "viewStop"
+- Go to "Users" 
+    - Crete new user called "abzu-user" (this will be used by the frontent app (abzu))
+    - Go to "Role mapping" and click "Assign role":
+        - From the filters select "Filter by clienst" 
+        - assign the 3 roles from the client "entur-abzu"
+        - click "Assign"
+    - Go to "Attributes" and add the following attribute:
+        - key: "roles" with value: `{"r":"editStops","o":"NSB","e":{"StopPlaceType":["*"]}}##{"r":"editStops","o":"RB","e":{"EntityType":["*"]}}##{"r":"deleteStops","o":"RB","e":{"EntityType":["StopPlace"]}}##{"r":"deleteStops","o":"RB"}##{"r":"editRouteData","o":"RUT"}`
 
 
 ## Validation for incoming and outgoing NeTEx publication delivery

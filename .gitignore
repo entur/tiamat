@@ -43,3 +43,7 @@ src/main/resources/stops/agency.txt
 
 local_config/
 node_modules
+
+.vscode/
+
+src/main/resources/application.properties

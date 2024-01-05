@@ -246,7 +246,7 @@ class StopPlaceFetcher implements DataFetcher {
                     ignoreStopPlaceId = environment.getArgument(IGNORE_STOPPLACE_ID);
                 }
 
-                if (environment.getArgument(INCLUDE_EXPIRED)) {
+                if (environment.getArgument(INCLUDE_EXPIRED) != null) {
                     pointInTime = null;
                 }
                 stopPlacesPage = stopPlaceRepository.findStopPlacesWithin(boundingBox.xMin, boundingBox.yMin, boundingBox.xMax,
