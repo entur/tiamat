@@ -142,6 +142,13 @@ spring.datasource.url=jdbc:postgresql://localhost:5436/tiamat
 spring.datasource.username=tiamat
 spring.datasource.password=tiamat
 
+#OAuth2 Resource Server
+spring.security.oauth2.resourceserver.jwt.issuer-uri=https://ror-entur-dev.eu.auth0.com/
+tiamat.oauth2.resourceserver.auth0.ror.jwt.audience=https://ror.api.dev.entur.io
+tiamat.oauth2.resourceserver.auth0.ror.claim.namespace=https://ror.entur.io/
+
+spring.cloud.gcp.pubsub.enabled=false
+
 
 
 
