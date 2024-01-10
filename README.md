@@ -4,8 +4,6 @@ Tiamat is the Stop Place Register.
 It is used nationally in Norway, and other places.
 Tiamat is created with technologies like Spring Boot, Hibernate, Postgis, Jersey and Jackson.
 
-[![CircleCI](https://circleci.com/gh/entur/tiamat.svg?style=svg)](https://circleci.com/gh/entur/tiamat)
-
 ## Core functionality
 ### NeTEx imports
 * Supports different pre steps and merging options for stop places, handling bad data quality.
@@ -46,6 +44,7 @@ Tiamat also includes a diff tool. This is used to compare and show the differenc
 
 
 ## Build
+
 `mvn clean install`
 
 You need the directory `/deployments/data` with rights for the user who
@@ -143,9 +142,9 @@ spring.datasource.username=tiamat
 spring.datasource.password=tiamat
 
 #OAuth2 Resource Server
-spring.security.oauth2.resourceserver.jwt.issuer-uri=https://ror-entur-dev.eu.auth0.com/
-tiamat.oauth2.resourceserver.auth0.ror.jwt.audience=https://ror.api.dev.entur.io
-tiamat.oauth2.resourceserver.auth0.ror.claim.namespace=https://ror.entur.io/
+spring.security.oauth2.resourceserver.jwt.issuer-uri=https:http://localhost:8082/realms/entur
+tiamat.oauth2.resourceserver.auth0.ror.jwt.audience=abzu
+tiamat.oauth2.resourceserver.auth0.ror.claim.namespace=role_assignments
 
 spring.cloud.gcp.pubsub.enabled=false
 
@@ -231,10 +230,41 @@ Both Tiamat and Abzu are set up to be used with Keycloak or Auth0.
 - Create realm e.g. Entur
 - Create client for frontend e.g. abzu
 - Under client setting  configure Mapper e.g. entur-roles
+  - client > abuz > Mappers > Create
+  - add mapper by configuration role_assignments
+    - mapper type: User Attribute
+    - name: role_assignments
+    - User Attribute: role_assignments
+    - Token Claim Name: role_assignments
+    - Claim JSON Type: String
+    - Add to ID token: on
+    - Add to access token: on
+    - Add to userinfo: on
+    - Multivalued: on
+  - add mapper by configuration role
+    - mapper type: User Attribute
+    - name: role
+    - User Attribute: role
+    - Token Claim Name: role
+    - Claim JSON Type: String
+    - Add to ID token: on
+    - Add to access token: on
+    - Add to userinfo: on
+    - Multivalued: on
+    
 - Create Roles e.g. deleteStop, editStop, viewStop
 - Add User and assign roles
-- Add User attribute roles `{"r":"editStops","o":"NSB","e":{"StopPlaceType":["*"]}}##{"r":"editStops","o":"RB","e":{"EntityType":["*"]}}##{"r":"deleteStops","o":"RB","e":{"EntityType":["StopPlace"]}}##{"r":"deleteStops","o":"RB"}##{"r":"editRouteData","o":"RUT"}`
+- Add User attribute roles 
 
+exmaple of roles:
+
+  | Key | Value 
+  | --- | --- 
+  | role_assignments | {"r":"deleteStops","o":"RB"} 
+  | role_assignments | {"r":"editStops","o":"RB","e":{"EntityType":["*"]}}
+  | role_assignments | {"r":"editStops","o":"NSB","e":{"StopPlaceType":["*"]}}
+  | role             | editStops
+  | role             | deleteStops
 
 ## Validation for incoming and outgoing NeTEx publication delivery
 
