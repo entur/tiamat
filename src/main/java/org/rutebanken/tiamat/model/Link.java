@@ -15,10 +15,10 @@
 
 package org.rutebanken.tiamat.model;
 
+import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.Transient;
 import org.locationtech.jts.geom.LineString;
 
-import javax.persistence.MappedSuperclass;
-import javax.persistence.Transient;
 import java.math.BigDecimal;
 
 @MappedSuperclass

@@ -46,10 +46,9 @@
 package org.rutebanken.tiamat.exporter.params;
 
 import com.google.common.base.MoreObjects;
+import jakarta.ws.rs.QueryParam;
 import org.rutebanken.tiamat.model.ScopingMethodEnumeration;
 import org.rutebanken.tiamat.model.ZoneTopologyEnumeration;
-
-import javax.ws.rs.QueryParam;
 
 public class FareZoneSearch implements SearchObject {
 

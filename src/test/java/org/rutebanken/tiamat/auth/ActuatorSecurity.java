@@ -18,7 +18,7 @@ public class ActuatorSecurity {
                 .cors(withDefaults())
                 .csrf().disable()
                 .authorizeRequests()
-                .antMatchers("health").permitAll();
+                .anyRequest().permitAll();
         return http.build();
     }
 }

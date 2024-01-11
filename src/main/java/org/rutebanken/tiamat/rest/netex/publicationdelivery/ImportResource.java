@@ -15,8 +15,17 @@
 
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.ws.rs.BeanParam;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.NotAuthorizedException;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.xml.bind.JAXBException;
 import org.rutebanken.helper.organisation.NotAuthenticatedException;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.tiamat.importer.ImportParams;
@@ -31,15 +40,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 import org.xml.sax.SAXException;
 
-import javax.ws.rs.BeanParam;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.NotAuthorizedException;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Set;
@@ -51,7 +51,7 @@ import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDI
  * Import publication deliveries
  */
 @Component
-@Api(tags = {"Import resource"}, produces = "application/xml")
+@Tag(name = "Import resource", description = "Import resource")
 @Produces(MediaType.APPLICATION_XML + "; charset=UTF-8")
 @Path("netex")
 @PreAuthorize("hasRole('"+ROLE_EDIT_STOPS+"')")
@@ -90,7 +90,7 @@ public class ImportResource {
     @POST
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.APPLICATION_XML + "; charset=UTF-8")
-    public Response importPublicationDelivery(@ApiParam(hidden = true) InputStream inputStream, @BeanParam ImportParams importParams) throws IOException, JAXBException, SAXException {
+    public Response importPublicationDelivery(@Parameter(hidden = true) InputStream inputStream, @BeanParam ImportParams importParams) throws IOException, JAXBException, SAXException {
         logger.info("Received Netex publication delivery, starting to parse...");
         boolean importOnlyTariffZones = importParams != null && importParams.importOnlyTariffZones;
 

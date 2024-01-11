@@ -15,10 +15,10 @@
 
 package org.rutebanken.tiamat.model;
 
+import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.Transient;
 import org.apache.commons.lang3.BooleanUtils;
 
-import javax.persistence.MappedSuperclass;
-import javax.persistence.Transient;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
