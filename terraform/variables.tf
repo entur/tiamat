@@ -63,7 +63,3 @@ variable "prevent_destroy" {
   type        = bool
   default     = false
 }
-
-variable ror-tiamat-db-password {
-  description = "Tiamat database password"
-}
