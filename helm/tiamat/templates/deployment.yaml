@@ -67,7 +67,7 @@ spec:
               value: Europe/Oslo
             - name: SPRING_DATASOURCE_PASSWORD
           envFrom:
-            - secretKeyRef:
+            - secretRef:
                 key: password
                 name: ror-{{ .Values.deployment.name }}-db-password
           resources:
