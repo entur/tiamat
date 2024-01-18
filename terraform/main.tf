@@ -38,15 +38,3 @@ resource "google_pubsub_topic" "changelog" {
   project = var.pubsub_project
   labels = var.labels
 }
-
-#
-resource "kubernetes_secret" "ror-tiamat-db-password" {
-  metadata {
-  name      = "${var.labels.team}-${var.labels.app}-db-password"
-  namespace = var.kube_namespace
-  }
-
-  data = {
-  "password"     = var.ror-tiamat-db-password
-  }
-}

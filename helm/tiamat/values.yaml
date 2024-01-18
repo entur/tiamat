@@ -8,7 +8,6 @@ rollingUpdate:
   maxUnavailable: 1
 
 resources:
-  cpuLimit: 7000m
   memLimit: 10000Mi
   cpuRequest: 1200m
   memRequest: 7500Mi
@@ -19,7 +18,7 @@ configMapMount:
    name: tiamat-config
 
 image:
-  identifier: ${artifact.metadata.image}
+  identifier: <+artifacts.primary.image>
   imagePullPolicy: Always
 
 service:
@@ -32,3 +31,8 @@ rbac:
   enabled: false
 ingress:
   name: stop-places-v1-gcp2
+
+
+secrets:
+  tiamat-psql-credentials:
+    - SPRING_DATASOURCE_PASSWORD
