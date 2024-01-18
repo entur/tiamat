@@ -65,7 +65,6 @@ spec:
                 -Dhazelcast.ignoreXxeProtectionFailures=true --add-opens java.base/java.lang=ALL-UNNAMED
             - name: TZ
               value: Europe/Oslo
-            - name: SPRING_DATASOURCE_PASSWORD
           envFrom:
             - secretRef:
                 name: tiamat-psql-credentials
