@@ -66,13 +66,12 @@ spec:
             - name: TZ
               value: Europe/Oslo
             - name: SPRING_DATASOURCE_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  key: password
-                  name: ror-{{ .Values.deployment.name }}-db-password
+          envFrom:
+            - secretKeyRef:
+                key: password
+                name: ror-{{ .Values.deployment.name }}-db-password
           resources:
             limits:
-              cpu: {{ .Values.resources.cpuLimit }}
               memory: {{ .Values.resources.memLimit }}
             requests:
               cpu: {{ .Values.resources.cpuRequest }}

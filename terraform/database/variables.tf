@@ -48,9 +48,6 @@ variable "db_instance_replica_name" {
 variable "ror-tiamat-db-username" {
   description = "Tiamat database username"
 }
-variable ror-tiamat-db-password {
-  description = "Tiamat database password"
-}
 variable "db_disk_size" {
   description = "Database disk size"
   default = "20"
