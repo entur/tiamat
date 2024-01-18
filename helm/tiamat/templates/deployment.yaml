@@ -68,8 +68,7 @@ spec:
             - name: SPRING_DATASOURCE_PASSWORD
           envFrom:
             - secretRef:
-                key: password
-                name: ror-{{ .Values.deployment.name }}-db-password
+                name: tiamat-psql-credentials
           resources:
             limits:
               memory: {{ .Values.resources.memLimit }}
