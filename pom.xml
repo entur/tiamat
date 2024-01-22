@@ -491,6 +491,7 @@
                 </executions>
             </plugin>
         </plugins>
+        <finalName>jore4-tiamat</finalName>
     </build>
 
 
