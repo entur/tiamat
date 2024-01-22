@@ -43,3 +43,6 @@ src/main/resources/stops/agency.txt
 
 local_config/
 node_modules
+
+docker/**
+!docker/docker-compose.custom.yml

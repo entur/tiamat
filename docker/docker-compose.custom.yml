@@ -1,0 +1,19 @@
+---
+version: '3.8'
+
+services:
+  jore4-tiamat:
+    mem_limit: 2048m
+    mem_reservation: 512M
+    # build and the Docker image from the local repo
+    build:
+      context: ..
+    ports:
+      - "127.0.0.1:3019:1888"
+    networks:
+      - jore4
+    depends_on:
+      jore4-testdb:
+        condition: service_healthy
+    environment:
+      SECRET_STORE_BASE_PATH: "/mnt/secrets-store"
