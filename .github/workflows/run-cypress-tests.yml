@@ -1,0 +1,29 @@
+name: Run cypress tests
+
+on:
+  # this workflow is only called by others, won't be executed on itself
+  # as it uses the pre-built docker image that is produced in the upstream job
+  workflow_call:
+
+jobs:
+  run_cypress_tests:
+    name: Run cypress e2e tests from Docker
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Extract metadata to env variables
+        uses: HSLdevcom/jore4-tools/github-actions/extract-metadata@extract-metadata-v1
+
+      - name: Start e2e env
+        uses: HSLdevcom/jore4-tools/github-actions/setup-e2e-environment@setup-e2e-environment-v1
+        with:
+          tiamat_version: "${{ env.IMAGE_NAME }}:${{ env.COMMIT_ID }}"
+
+      - name: Seed infrastructure links
+        uses: HSLdevcom/jore4-tools/github-actions/seed-infrastructure-links@seed-infrastructure-links-v1
+
+      - name: Run e2e tests from GitHub action
+        uses: HSLdevcom/jore4-tools/github-actions/run-cypress-tests@run-cypress-tests-v1

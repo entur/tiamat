@@ -1,0 +1,66 @@
+name: Push image to Docker hub and run e2e tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  push_to_registry:
+    name: Build & Push Docker image to Docker Hub
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Extract metadata to env variables
+        uses: HSLdevcom/jore4-tools/github-actions/extract-metadata@extract-metadata-v1
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: "arm64"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.JORE4_DOCKERHUB_USER }}
+          password: ${{ secrets.JORE4_DOCKERHUB_TOKEN }}
+
+      - name: Build and push dev builds to Docker Hub
+        run: |
+          docker buildx build \
+            --push \
+            --platform linux/amd64,linux/arm64 \
+            --cache-from type=registry,ref=$IMAGE_NAME:builder \
+            --cache-to type=registry,ref=$IMAGE_NAME:builder,mode=max \
+            --tag $IMAGE_NAME:builder \
+            .
+
+          docker buildx build \
+            --push \
+            --platform linux/amd64,linux/arm64 \
+            --cache-from type=registry,ref=$IMAGE_NAME:builder \
+            --tag $IMAGE_NAME:$COMMIT_ID \
+            .
+
+      - name: Build and push :latest tag to Docker Hub
+        if: ${{ github.ref == 'refs/heads/main' }}
+        run: |
+          docker buildx build \
+            --push \
+            --platform linux/amd64,linux/arm64 \
+            --cache-from type=registry,ref=$IMAGE_NAME:builder \
+            --tag $IMAGE_NAME:latest \
+            .
+
+  run_cypress_tests:
+    needs:
+      - push_to_registry
+    uses: ./.github/workflows/run-cypress-tests.yml
