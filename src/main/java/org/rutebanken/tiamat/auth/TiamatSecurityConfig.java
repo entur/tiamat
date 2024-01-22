@@ -60,9 +60,10 @@ public class TiamatSecurityConfig {
         http.cors(withDefaults())
                 .csrf().disable()
                 .authorizeHttpRequests()
-                .anyRequest().permitAll()
-                .and()
-                .oauth2ResourceServer().jwt().jwtAuthenticationConverter(new RorAuthenticationConverter());
+                .anyRequest().permitAll();
+                // TODO: Implement authentication for Jore4
+                // .and()
+                // .oauth2ResourceServer().jwt().jwtAuthenticationConverter(new RorAuthenticationConverter());
         return http.build();
     }
 
