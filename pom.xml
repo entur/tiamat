@@ -59,7 +59,7 @@
         <hazelcast.version>5.2.4</hazelcast.version>
         <swagger-jersey2.version>1.6.2</swagger-jersey2.version>
         <netex-java-model.version>1.0.14</netex-java-model.version>
-        <entur.helpers.version>1.100</entur.helpers.version>
+        <entur.helpers.version>1.101</entur.helpers.version>
         <jts-core.version>1.19.0</jts-core.version>
         <argLine/>
 
