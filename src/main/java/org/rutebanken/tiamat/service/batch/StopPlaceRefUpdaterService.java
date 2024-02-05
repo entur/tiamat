@@ -158,7 +158,6 @@ public class StopPlaceRefUpdaterService {
                 if (optionalStopPlace.isPresent()) {
                     stopsSaved.incrementAndGet();
                     StopPlace stopPlaceToSave = optionalStopPlace.get();
-                    if (stopPlaceToSave.getValidBetween().getToDate() == null || stopPlaceToSave.getValidBetween().getToDate().isAfter(Instant.now())) {
                         stopPlaceToSave.setChanged(Instant.now());
 
                         // Issues with topographic place not being updated.
@@ -180,9 +179,6 @@ public class StopPlaceRefUpdaterService {
                         } else {
                             sessionEntitiesEvictor.evictKnownEntitiesFromSession(stopPlaceToSave);
                         }
-                    } else {
-                        logger.info("Skipping stop place update, cause its not current {}", stopPlaceToSave);
-                    }
                 } else if (!stopPlaceIterator.hasNextParent()) {
                     session.flush();
                     session.clear();
