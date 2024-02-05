@@ -92,7 +92,7 @@ jobs:
     <<: *google-sdk-container-config
     steps:
       - setup_remote_docker:
-            version: 19.03.13
+            version: default
       - attach_workspace:
           at: ~/project
       - run: *read-image-version
