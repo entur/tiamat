@@ -93,6 +93,7 @@ public class StopPlaceRefUpdaterService {
             logger.warn("Background job stopped because of exception", e);
         }
     }
+
     /*
      * Updates stop place tariff zone ref faster
      * Note currently this method updates only tariff zone refs
@@ -119,7 +120,7 @@ public class StopPlaceRefUpdaterService {
 
         long startTime = System.currentTimeMillis();
 
-        Session session =  entityManager.unwrap(SessionImpl.class);
+        Session session = entityManager.unwrap(SessionImpl.class);
         logger.info("About to update all currently valid stop places (tariff zone and topographic place refs)");
 
         SessionEntitiesEvictor sessionEntitiesEvictor = new SessionEntitiesEvictor((SessionImpl) session);
@@ -157,35 +158,30 @@ public class StopPlaceRefUpdaterService {
                 if (optionalStopPlace.isPresent()) {
                     stopsSaved.incrementAndGet();
                     StopPlace stopPlaceToSave = optionalStopPlace.get();
-                    if(stopPlaceToSave.getValidBetween() !=null) {
-                        if (stopPlaceToSave.getValidBetween().getToDate() == null || stopPlaceToSave.getValidBetween().getToDate().isAfter(Instant.now())) {
-                            //TODO: should we update Changed time?
-                            stopPlaceToSave.setChanged(Instant.now());
+                    if (stopPlaceToSave.getValidBetween().getToDate() == null || stopPlaceToSave.getValidBetween().getToDate().isAfter(Instant.now())) {
+                        stopPlaceToSave.setChanged(Instant.now());
 
-                            // Issues with topographic place not being updated.
-                            // https://stackoverflow.com/a/2370276
-                            // https://stackoverflow.com/a/5709244
+                        // Issues with topographic place not being updated.
+                        // https://stackoverflow.com/a/2370276
+                        // https://stackoverflow.com/a/5709244
 
-                            if (session.contains(stopPlaceToSave)) {
-                                session.evict(stopPlaceToSave);
-                            }
+                        if (session.contains(stopPlaceToSave)) {
+                            session.evict(stopPlaceToSave);
+                        }
 
-                            session.update(stopPlaceToSave);
+                        session.update(stopPlaceToSave);
 
 
-                            logger.trace("Saved stop {}", stopPlaceToSave);
-                            session.flush();
-                    if (stopsIterated.get() % CLEAR_EACH == 0 && !stopPlaceIterator.hasNextParent()) {
-                                logger.trace("Flushing and clearing session at count {}", stopsIterated.get());
-                                session.clear();
-                            } else {
-                                sessionEntitiesEvictor.evictKnownEntitiesFromSession(stopPlaceToSave);
-                            }
+                        logger.trace("Saved stop {}", stopPlaceToSave);
+                        session.flush();
+                        if (stopsIterated.get() % CLEAR_EACH == 0 && !stopPlaceIterator.hasNextParent()) {
+                            logger.trace("Flushing and clearing session at count {}", stopsIterated.get());
+                            session.clear();
                         } else {
-                            logger.info("Skipping stop place update, cause its not current {}", stopPlaceToSave);
+                            sessionEntitiesEvictor.evictKnownEntitiesFromSession(stopPlaceToSave);
                         }
                     } else {
-                        logger.info("Skipping stop place update, cause getValidBetween is null {}", stopPlaceToSave);
+                        logger.info("Skipping stop place update, cause its not current {}", stopPlaceToSave);
                     }
                 } else if (!stopPlaceIterator.hasNextParent()) {
                     session.flush();
