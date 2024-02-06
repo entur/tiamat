@@ -26,7 +26,7 @@ import java.util.List;
 
 public class CustomScalars {
 
-    public static GraphQLScalarType GraphQLGeoJSONCoordinates = new GraphQLScalarType("Coordinates", null, new Coercing() {
+    public static GraphQLScalarType GraphQLGeoJSONCoordinates = GraphQLScalarType.newScalar().name("Coordinates").coercing(new Coercing() {
         @Override
         public List<List<Double>> serialize(Object input) {
             if (input instanceof Coordinate[]) {
@@ -75,5 +75,5 @@ public class CustomScalars {
             }
             return null;
         }
-    });
+    }).build();
 }

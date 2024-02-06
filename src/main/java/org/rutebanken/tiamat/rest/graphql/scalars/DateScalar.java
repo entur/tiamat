@@ -64,7 +64,7 @@ public class DateScalar {
     }
 
     private GraphQLScalarType createGraphQLDateScalar() {
-        return new GraphQLScalarType("DateTime", DATE_SCALAR_DESCRIPTION, new Coercing() {
+        return GraphQLScalarType.newScalar().name("DateTime").description(DATE_SCALAR_DESCRIPTION).coercing(new Coercing() {
             @Override
             public String serialize(Object input) {
                 if (input instanceof Instant) {
@@ -85,7 +85,7 @@ public class DateScalar {
                 }
                 return null;
             }
-        });
+        }).build();
     }
 
 }
