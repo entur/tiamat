@@ -133,7 +133,7 @@ spring.jpa.database-platform=org.hibernate.dialect.PostgreSQL9Dialect
 tariffzoneLookupService.resetReferences=true
 
 
-spring.jpa.properties.hibernate.dialect=org.hibernate.spatial.dialect.postgis.PostgisDialect
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
 
 
 spring.database.driverClassName=org.postgresql.Driver
