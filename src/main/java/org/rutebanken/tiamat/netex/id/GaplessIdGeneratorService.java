@@ -284,13 +284,12 @@ public class GaplessIdGeneratorService {
         Query sqlQuery = entityManager.createNativeQuery(sql);
 
         @SuppressWarnings("unchecked")
-        List<BigInteger> results = sqlQuery.getResultList();
+        List<Long> results = sqlQuery.getResultList();
 
         logger.trace("Got generated values: {}", results);
 
         return results.stream()
-                .map(bigInteger -> bigInteger.longValue())
-                .sorted((v1, v2) -> Long.compare(v1, v2))
+                .sorted(Long::compare)
                 .collect(toList());
     }
 
