@@ -51,7 +51,7 @@
     <properties>
         <java.version>17</java.version>
         <spring-cloud-gcp.version>4.8.3</spring-cloud-gcp.version>
-        <geotools.version>27.2</geotools.version>
+        <geotools.version>27.5</geotools.version>
         <orika-core.version>1.5.4</orika-core.version>
         <!-- downgrade since super pom  uses 18.5 -->
         <graphql-java.version>11.0</graphql-java.version>
