@@ -57,7 +57,7 @@
         <graphql-java.version>11.0</graphql-java.version>
         <hazelcast-hibernate53.version>5.1.0</hazelcast-hibernate53.version>
         <hazelcast.version>5.2.4</hazelcast.version>
-        <swagger-jersey2.version>1.6.2</swagger-jersey2.version>
+        <swagger-jersey2.version>1.6.14</swagger-jersey2.version>
         <netex-java-model.version>1.0.14</netex-java-model.version>
         <entur.helpers.version>1.100</entur.helpers.version>
         <jts-core.version>1.19.0</jts-core.version>
