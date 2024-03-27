@@ -463,4 +463,10 @@ public class GraphQLNames {
     public static final String CREATE_MULTI_MODAL_STOPPLACE = "createMultiModalStopPlace";
     public static final String ADD_TO_MULTIMODAL_STOPPLACE = "addToMultiModalStopPlace";
     public static final String REMOVE_FROM_MULTIMODAL_STOPPLACE = "removeFromMultiModalStopPlace";
+
+    public static final String NOTE = "note";
+    public static final String NUMBER_OF_FRAMES = "numberOfFrames";
+    public static final String LINE_SIGNAGE = "lineSignage";
+    public static final String MAIN_LINE_SIGN = "mainLineSign";
+    public static final String REPLACES_RAIL_SIGN = "replacesRailSign";
 }

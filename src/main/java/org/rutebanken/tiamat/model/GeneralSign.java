@@ -38,6 +38,14 @@ public class GeneralSign
     @Enumerated(value = EnumType.STRING)
     protected SignContentEnumeration signContentType;
 
+    protected Integer numberOfFrames;
+
+    protected Boolean lineSignage;
+
+    protected Boolean mainLineSign;
+
+    protected Boolean replacesRailSign;
+
     public EmbeddableMultilingualString getContent() {
         return content;
     }
@@ -54,4 +62,35 @@ public class GeneralSign
         this.signContentType = value;
     }
 
+    public Integer getNumberOfFrames() {
+        return numberOfFrames;
+    }
+
+    public void setNumberOfFrames(Integer numberOfFrames) {
+        this.numberOfFrames = numberOfFrames;
+    }
+
+    public Boolean isLineSignage() {
+        return lineSignage;
+    }
+
+    public void setLineSignage(Boolean lineSignage) {
+        this.lineSignage = lineSignage;
+    }
+
+    public Boolean isReplacesRailSign() {
+        return replacesRailSign;
+    }
+
+    public void setReplacesRailSign(Boolean replacesRailSign) {
+        this.replacesRailSign = replacesRailSign;
+    }
+
+    public Boolean isMainLineSign() {
+        return mainLineSign;
+    }
+
+    public void setMainLineSign(Boolean mainLineSign) {
+        this.mainLineSign = mainLineSign;
+    }
 }

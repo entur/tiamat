@@ -39,11 +39,16 @@ import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ENCLOSED;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.GENDER;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.GENERAL_SIGN;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.HEATED;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.LINE_SIGNAGE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.MAIN_LINE_SIGN;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.NOTE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.NUMBER_OF_FRAMES;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.NUMBER_OF_MACHINES;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.NUMBER_OF_SPACES;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.NUMBER_OF_TOILETS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PLACE_EQUIPMENTS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PRIVATE_CODE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.REPLACES_RAIL_SIGN;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.SANITARY_EQUIPMENT;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.SEATS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.SHELTER_EQUIPMENT;
@@ -140,6 +145,11 @@ public class PlaceEquipmentMapper {
                     skilt.setPrivateCode(getPrivateCodeStructure((Map) generalSignEquipment.get(PRIVATE_CODE)));
                     skilt.setContent(getEmbeddableString((Map) generalSignEquipment.get(CONTENT)));
                     skilt.setSignContentType((SignContentEnumeration) generalSignEquipment.get(SIGN_CONTENT_TYPE));
+                    skilt.setLineSignage((Boolean) generalSignEquipment.get(LINE_SIGNAGE));
+                    skilt.setReplacesRailSign((Boolean) generalSignEquipment.get(REPLACES_RAIL_SIGN));
+                    skilt.setMainLineSign((Boolean) generalSignEquipment.get(MAIN_LINE_SIGN));
+                    skilt.setNumberOfFrames((Integer) generalSignEquipment.get(NUMBER_OF_FRAMES));
+                    skilt.setNote(getEmbeddableString((Map) generalSignEquipment.get(NOTE)));
                     equipments.getInstalledEquipment().add(skilt);
                 }
             }
