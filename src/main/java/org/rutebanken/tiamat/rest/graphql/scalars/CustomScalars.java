@@ -45,7 +45,7 @@ public class CustomScalars {
                         return coordinateList;
                     }
                     return null;
-                }}).build();
+                }
 
         @Override
         public Coordinate[] parseValue(Object input) {
@@ -78,5 +78,5 @@ public class CustomScalars {
             }
             return null;
         }
-    });
+    }).build();
 }
