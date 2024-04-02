@@ -17,8 +17,6 @@ package org.rutebanken.tiamat.rest.graphql.operations;
 
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLNonNull;
-import org.rutebanken.tiamat.service.parking.ParkingDeleter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -34,9 +32,6 @@ import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PARKING_ID;
 @Component
 public class ParkingOperationsBuilder {
 
-    @Autowired
-    private ParkingDeleter parkingDeleter;
-
     public List<GraphQLFieldDefinition> getParkingOperations() {
         List<GraphQLFieldDefinition> operations = new ArrayList<>();
 
@@ -46,7 +41,6 @@ public class ParkingOperationsBuilder {
                 .name(DELETE_PARKING)
                 .description("!!! Deletes all versions of Parking from database - use with caution !!!")
                 .argument(newArgument().name(PARKING_ID).type(new GraphQLNonNull(GraphQLString)))
-                .dataFetcher(environment -> parkingDeleter.deleteParking(environment.getArgument(PARKING_ID)))
                 .build());
 
         return operations;

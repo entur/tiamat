@@ -530,7 +530,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         // Verify that pointInTime *before* validity-period returns null
         graphQlJsonQuery = """
                 {
-                stopPlace: stopPlace (query:"Gamleveien", pointInTime:"%s") { "
+                stopPlace: stopPlace (query:"Gamleveien", pointInTime:"%s") {
                     name {value}
                   }
                 }""".formatted(stopPlace.getValidBetween().getFromDate().minusSeconds(100).toString());

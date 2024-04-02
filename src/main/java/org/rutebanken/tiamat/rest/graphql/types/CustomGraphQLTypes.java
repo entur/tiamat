@@ -39,7 +39,6 @@ import org.rutebanken.tiamat.model.GeneralSign;
 import org.rutebanken.tiamat.model.InstalledEquipment_VersionStructure;
 import org.rutebanken.tiamat.model.InterchangeWeightingEnumeration;
 import org.rutebanken.tiamat.model.LimitationStatusEnumeration;
-import org.rutebanken.tiamat.model.Link;
 import org.rutebanken.tiamat.model.MetroSubmodeEnumeration;
 import org.rutebanken.tiamat.model.ModificationEnumeration;
 import org.rutebanken.tiamat.model.NameTypeEnumeration;
@@ -67,7 +66,6 @@ import org.rutebanken.tiamat.model.VehicleModeEnumeration;
 import org.rutebanken.tiamat.model.WaitingRoomEquipment;
 import org.rutebanken.tiamat.model.WaterSubmodeEnumeration;
 import org.rutebanken.tiamat.model.ZoneTopologyEnumeration;
-import org.rutebanken.tiamat.model.Zone_VersionStructure;
 import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
 import org.rutebanken.tiamat.rest.graphql.fetchers.PrivateCodeFetcher;
 
@@ -75,10 +73,10 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import static graphql.Scalars.GraphQLBigInteger;
 import static graphql.Scalars.GraphQLBoolean;
 import static graphql.Scalars.GraphQLInt;
 import static graphql.Scalars.GraphQLString;
+import static graphql.scalars.ExtendedScalars.GraphQLBigInteger;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLInputObjectField.newInputObjectField;
 import static graphql.schema.GraphQLObjectType.newObject;
@@ -199,19 +197,7 @@ public class CustomGraphQLTypes {
     public static GraphQLFieldDefinition geometryFieldDefinition = newFieldDefinition()
             .name(GEOMETRY)
             .type(geoJsonObjectType)
-            .dataFetcher(env -> {
-                if (env.getSource() instanceof Zone_VersionStructure) {
-                    Zone_VersionStructure source = env.getSource();
-                    if (source.getCentroid()!=null) {
-                        return source.getCentroid();
-                    }
-                    return source.getPolygon();
-                } else if (env.getSource() instanceof Link) {
-                    Link link = env.getSource();
-                    return link.getLineString();
-                }
-                return null;
-            }).build();
+            .build();
 
     public static GraphQLObjectType embeddableMultilingualStringObjectType = newObject()
             .name(OUTPUT_TYPE_EMBEDDABLE_MULTILINGUAL_STRING)

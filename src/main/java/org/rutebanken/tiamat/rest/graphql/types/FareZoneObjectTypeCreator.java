@@ -70,7 +70,7 @@ public class FareZoneObjectTypeCreator {
         fareZoneFieldList.add(newFieldDefinition()
                 .name(FARE_ZONES_AUTHORITY_REF)
                 .type(GraphQLString)
-                .dataFetcher(env -> env.getSource() instanceof FareZone ? ((FareZone) env.getSource()).getTransportOrganisationRef() : null)
+                .dataFetcher(env -> env.getSource() instanceof FareZone fareZone ? fareZone.getTransportOrganisationRef() : null)
                 .build());
         fareZoneFieldList.add(privateCodeFieldDefinition);
         fareZoneFieldList.add(newFieldDefinition().name(FARE_ZONES_ZONE_TOPOLOGY).type(zoneTopologyEnumType).build());
