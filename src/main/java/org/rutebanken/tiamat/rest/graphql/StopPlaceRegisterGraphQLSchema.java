@@ -52,6 +52,8 @@ import org.rutebanken.tiamat.model.Zone_VersionStructure;
 import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
 import org.rutebanken.tiamat.rest.graphql.fetchers.AuthorizationCheckDataFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.FareZoneAuthoritiesFetcher;
+import org.rutebanken.tiamat.rest.graphql.fetchers.GroupOfStopPlacesMembersFetcher;
+import org.rutebanken.tiamat.rest.graphql.fetchers.GroupOfStopPlacesPurposeOfGroupingFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.KeyValuesDataFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.PolygonFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.StopPlaceFareZoneFetcher;
@@ -291,6 +293,15 @@ public class StopPlaceRegisterGraphQLSchema {
 
     @Autowired
     private ParkingDeleter parkingDeleter;
+
+    @Autowired
+    private DataFetcher referenceFetcher;
+
+    @Autowired
+    private GroupOfStopPlacesMembersFetcher groupOfStopPlacesMembersFetcher;
+
+    @Autowired
+    private GroupOfStopPlacesPurposeOfGroupingFetcher groupOfStopPlacesPurposeOfGroupingFetcher;
 
 
     @PostConstruct
@@ -658,6 +669,18 @@ public class StopPlaceRegisterGraphQLSchema {
             }
             return null;
         });
+
+        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_ENTITY_REF,ADDRESSABLE_PLACE,referenceFetcher);
+
+        registerDataFetcher(codeRegistryBuilder,FARE_ZONES,FARE_ZONES_AUTHORITY_REF,env -> env.getSource() instanceof FareZone fareZone ? fareZone.getTransportOrganisationRef() : null);
+        registerDataFetcher(codeRegistryBuilder,FARE_ZONES,FARE_ZONES_NEIGHBOURS,env -> fareZoneObjectTypeCreator.fareZoneNeighboursType(env));
+        registerDataFetcher(codeRegistryBuilder,FARE_ZONES,FARE_ZONES_MEMBERS,env -> fareZoneObjectTypeCreator.fareZoneMemberType(env));
+
+        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_GROUP_OF_STOPPLACES,PURPOSE_OF_GROUPING,groupOfStopPlacesPurposeOfGroupingFetcher);
+        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_GROUP_OF_STOPPLACES,GROUP_OF_STOP_PLACES_MEMBERS,groupOfStopPlacesMembersFetcher);
+
+        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_GROUP_OF_TARIFF_ZONES,GROUP_OF_TARIFF_ZONES_MEMBERS,env -> groupOfTariffZonesObjectTypeCreator.groupOfTariffZoneMembersType(env));
+
 
 
 
