@@ -18,7 +18,7 @@ package org.rutebanken.tiamat.geo;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.jboss.logging.Logger;
-import org.opengis.referencing.operation.TransformException;
+import org.geotools.api.referencing.operation.TransformException;
 import org.rutebanken.tiamat.model.Zone_VersionStructure;
 import org.springframework.stereotype.Component;
 
