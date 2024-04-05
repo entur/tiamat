@@ -69,13 +69,13 @@ public class TagOperationsBuilder {
                         .type(tagObjectTypeCreator.create())
                         .name(REMOVE_TAG)
                         .description("Remove tag from referenced entity")
-                        .argument(createAndRemoveArguments)
+                        .arguments(createAndRemoveArguments)
                         .build(),
                 newFieldDefinition()
                         .type(tagObjectTypeCreator.create())
                         .name(CREATE_TAG)
                         .description("Create tag for referenced entity.")
-                        .argument(createAndRemoveArguments)
+                        .arguments(createAndRemoveArguments)
                         .build()
         );
     }

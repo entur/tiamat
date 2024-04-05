@@ -42,7 +42,7 @@ public class DateScalarTest extends TiamatIntegrationTest {
     public void serializeDateTimeInAnyTimeZoneAndReturnCorrectOffset() {
         Instant instant = ZonedDateTime.of(2004, 2, 3, 4, 5, 6, 50 * 1000000, ZoneId.of("Chile/EasterIsland")).toInstant();
 
-        String actual = (String) dateScalar.getGraphQLDateScalar().getCoercing().serialize(instant);
+        String actual = (String) dateScalar.getGraphQLDateScalar().getCoercing().serialize(instant, graphQLContext,local);
 
         System.out.println(actual);
         assertThat(actual)

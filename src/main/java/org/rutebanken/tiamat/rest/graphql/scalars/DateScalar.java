@@ -88,7 +88,7 @@ public class DateScalar {
                     @Override
                     public Object parseLiteral(Value input, CoercedVariables variables, GraphQLContext graphQLContext, Locale locale) {
                         if (input instanceof StringValue stringValue) {
-                            return parseValue((stringValue).getValue());
+                            return parseValue(stringValue.getValue(), graphQLContext, locale);
                         }
                         return null;
                     }
