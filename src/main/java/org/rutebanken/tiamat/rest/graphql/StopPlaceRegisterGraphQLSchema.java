@@ -86,6 +86,13 @@ import org.rutebanken.tiamat.rest.graphql.types.ZoneCommonFieldListCreator;
 import org.rutebanken.tiamat.service.TariffZoneTerminator;
 import org.rutebanken.tiamat.service.parking.ParkingDeleter;
 import org.rutebanken.tiamat.service.stopplace.MultiModalStopPlaceEditor;
+import org.rutebanken.tiamat.service.stopplace.StopPlaceDeleter;
+import org.rutebanken.tiamat.service.stopplace.StopPlaceMerger;
+import org.rutebanken.tiamat.service.stopplace.StopPlaceQuayDeleter;
+import org.rutebanken.tiamat.service.stopplace.StopPlaceQuayMerger;
+import org.rutebanken.tiamat.service.stopplace.StopPlaceQuayMover;
+import org.rutebanken.tiamat.service.stopplace.StopPlaceReopener;
+import org.rutebanken.tiamat.service.stopplace.StopPlaceTerminator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
@@ -302,6 +309,27 @@ public class StopPlaceRegisterGraphQLSchema {
 
     @Autowired
     private GroupOfStopPlacesPurposeOfGroupingFetcher groupOfStopPlacesPurposeOfGroupingFetcher;
+
+    @Autowired
+    private StopPlaceMerger stopPlaceMerger;
+
+    @Autowired
+    private StopPlaceQuayMover stopPlaceQuayMover;
+
+    @Autowired
+    private StopPlaceQuayMerger stopPlaceQuayMerger;
+
+    @Autowired
+    private StopPlaceQuayDeleter stopPlaceQuayDeleter;
+
+    @Autowired
+    private StopPlaceDeleter stopPlaceDeleter;
+
+    @Autowired
+    private StopPlaceTerminator stopPlaceTerminator;
+
+    @Autowired
+    private StopPlaceReopener stopPlaceReopener;
 
 
     @PostConstruct
@@ -692,10 +720,6 @@ public class StopPlaceRegisterGraphQLSchema {
 
 
 
-
-
-
-
         //mutation
 
         registerDataFetcher(codeRegistryBuilder,STOPPLACES_MUTATION,MUTATE_PARKING,parkingUpdater);
@@ -757,9 +781,16 @@ public class StopPlaceRegisterGraphQLSchema {
         );
 
 
-        registerDataFetcher(codeRegistryBuilder,STOPPLACES_MUTATION,DELETE_PARKING,
-                environment -> parkingDeleter.deleteParking(environment.getArgument(PARKING_ID))
-                 );
+        registerDataFetcher(codeRegistryBuilder,STOPPLACES_MUTATION,DELETE_PARKING, environment -> parkingDeleter.deleteParking(environment.getArgument(PARKING_ID)));
+
+
+        registerDataFetcher(codeRegistryBuilder,STOPPLACES_MUTATION,MERGE_STOP_PLACES,environment -> stopPlaceMerger.mergeStopPlaces(environment.getArgument(FROM_STOP_PLACE_ID), environment.getArgument(TO_STOP_PLACE_ID), environment.getArgument(FROM_VERSION_COMMENT), environment.getArgument(TO_VERSION_COMMENT), environment.getArgument(DRY_RUN)));
+        registerDataFetcher(codeRegistryBuilder,STOPPLACES_MUTATION,MERGE_QUAYS,environment -> stopPlaceQuayMerger.mergeQuays(environment.getArgument(STOP_PLACE_ID), environment.getArgument(FROM_QUAY_ID), environment.getArgument(TO_QUAY_ID), environment.getArgument(VERSION_COMMENT), environment.getArgument(DRY_RUN)));
+        registerDataFetcher(codeRegistryBuilder,STOPPLACES_MUTATION,MOVE_QUAYS_TO_STOP,environment -> stopPlaceQuayMover.moveQuays(environment.getArgument(QUAY_IDS), environment.getArgument(TO_STOP_PLACE_ID), environment.getArgument(FROM_VERSION_COMMENT), environment.getArgument(TO_VERSION_COMMENT)));
+        registerDataFetcher(codeRegistryBuilder,STOPPLACES_MUTATION,DELETE_STOP_PLACE,environment -> stopPlaceDeleter.deleteStopPlace(environment.getArgument(STOP_PLACE_ID)));
+        registerDataFetcher(codeRegistryBuilder,STOPPLACES_MUTATION,TERMINATE_STOP_PLACE,environment -> stopPlaceTerminator.terminateStopPlace(environment.getArgument(STOP_PLACE_ID), environment.getArgument(VALID_BETWEEN_TO_DATE), environment.getArgument(VERSION_COMMENT) , environment.getArgument(MODIFICATION_ENUMERATION)));
+        registerDataFetcher(codeRegistryBuilder,STOPPLACES_MUTATION,REOPEN_STOP_PLACE,environment -> stopPlaceReopener.reopenStopPlace(environment.getArgument(STOP_PLACE_ID), environment.getArgument(VERSION_COMMENT)));
+        registerDataFetcher(codeRegistryBuilder,STOPPLACES_MUTATION,DELETE_QUAY_FROM_STOP_PLACE,environment -> stopPlaceQuayDeleter.deleteQuay(environment.getArgument(STOP_PLACE_ID), environment.getArgument(QUAY_ID), environment.getArgument(VERSION_COMMENT)));
 
 
         return codeRegistryBuilder.build();
