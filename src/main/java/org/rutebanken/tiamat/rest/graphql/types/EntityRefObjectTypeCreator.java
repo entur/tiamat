@@ -15,9 +15,7 @@
 
 package org.rutebanken.tiamat.rest.graphql.types;
 
-import graphql.schema.DataFetcher;
 import graphql.schema.GraphQLObjectType;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static graphql.Scalars.GraphQLString;
@@ -34,9 +32,6 @@ import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.OUTPUT_TYPE_ENTITY
 @Component
 public class EntityRefObjectTypeCreator {
 
-    @Autowired
-    private DataFetcher referenceFetcher;
-
     public GraphQLObjectType create(GraphQLObjectType addressablePlaceObjectType) {
         return newObject()
                 .name(OUTPUT_TYPE_ENTITY_REF)
@@ -52,8 +47,7 @@ public class EntityRefObjectTypeCreator {
                 .field(newFieldDefinition()
                         .name(ADDRESSABLE_PLACE)
                         .type(addressablePlaceObjectType)
-                        .description("")
-                        .dataFetcher(referenceFetcher))
+                        .description(""))
                 .build();
     }
 }

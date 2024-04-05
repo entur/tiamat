@@ -98,14 +98,7 @@ public class AccessibilityAssessmentOptimizer {
         if (accessibilityAssessment == null) {
             return createDefaultAccessibilityAssessment();
         }
-        AccessibilityLimitation stopLimitation = accessibilityAssessment.getLimitations().get(0);
-
-        AccessibilityLimitation limitation = new AccessibilityLimitation();
-        limitation.setWheelchairAccess(stopLimitation.getWheelchairAccess());
-        limitation.setAudibleSignalsAvailable(stopLimitation.getAudibleSignalsAvailable());
-        limitation.setLiftFreeAccess(stopLimitation.getLiftFreeAccess());
-        limitation.setEscalatorFreeAccess(stopLimitation.getEscalatorFreeAccess());
-        limitation.setStepFreeAccess(stopLimitation.getStepFreeAccess());
+        final AccessibilityLimitation limitation = getAccessibilityLimitation(accessibilityAssessment);
 
         AccessibilityAssessment quayAssessment = new AccessibilityAssessment();
         quayAssessment.setMobilityImpairedAccess(accessibilityAssessment.getMobilityImpairedAccess());
@@ -115,6 +108,18 @@ public class AccessibilityAssessmentOptimizer {
 
         quayAssessment.setLimitations(limitations);
         return quayAssessment;
+    }
+
+    private static AccessibilityLimitation getAccessibilityLimitation(AccessibilityAssessment accessibilityAssessment) {
+        AccessibilityLimitation stopLimitation = accessibilityAssessment.getLimitations().get(0);
+
+        AccessibilityLimitation limitation = new AccessibilityLimitation();
+        limitation.setWheelchairAccess(stopLimitation.getWheelchairAccess());
+        limitation.setAudibleSignalsAvailable(stopLimitation.getAudibleSignalsAvailable());
+        limitation.setLiftFreeAccess(stopLimitation.getLiftFreeAccess());
+        limitation.setEscalatorFreeAccess(stopLimitation.getEscalatorFreeAccess());
+        limitation.setStepFreeAccess(stopLimitation.getStepFreeAccess());
+        return limitation;
     }
 
     private AccessibilityAssessment createDefaultAccessibilityAssessment() {

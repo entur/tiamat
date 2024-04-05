@@ -178,14 +178,6 @@ class ParkingUpdater implements DataFetcher {
 
             updatedParking.setParentSiteRef(parentSiteRef);
         }
-        /*
-        if (input.get(TOTAL_CAPACITY) != null) {
-            BigInteger totalCapacity = (BigInteger) input.get(TOTAL_CAPACITY);
-            isUpdated = isUpdated || (!totalCapacity.equals(updatedParking.getTotalCapacity()));
-
-            updatedParking.setTotalCapacity(totalCapacity);
-        }
-        */
         if (input.get(PRINCIPAL_CAPACITY) != null) {
             BigInteger principalCapacity = (BigInteger) input.get(PRINCIPAL_CAPACITY);
             isUpdated = isUpdated || (!principalCapacity.equals(updatedParking.getPrincipalCapacity()));

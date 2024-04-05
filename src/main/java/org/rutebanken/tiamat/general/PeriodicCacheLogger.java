@@ -39,7 +39,7 @@ public class PeriodicCacheLogger {
         scheduler.scheduleAtFixedRate(new CacheStatsLogger(cache, statsLogger), 1, 2, TimeUnit.MINUTES);
     }
 
-    public class CacheStatsLogger implements Runnable {
+    public static class CacheStatsLogger implements Runnable {
 
         private CacheStats lastStats = null;
 

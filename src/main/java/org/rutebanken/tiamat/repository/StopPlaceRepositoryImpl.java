@@ -177,19 +177,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
             }
         } else {
             // If no point in time is set, use max version to only get one version per stop place
-            String subQueryString = "SELECT s.netex_id,max(s.version) FROM stop_place s " +
-                    SQL_LEFT_JOIN_PARENT_STOP +
-                    "WHERE " +
-                    SQL_CHILD_OR_PARENT_WITHIN +
-                    "AND "
-                    + SQL_NOT_PARENT_STOP_PLACE;
-
-
-            if (ignoreStopPlaceId != null) {
-                subQueryString += "AND " + SQL_IGNORE_STOP_PLACE_ID + "group by s.netex_id";
-            } else {
-                subQueryString += "group by s.netex_id" ;
-            }
+            final String subQueryString = getSubQueryString(ignoreStopPlaceId);
 
             queryString = "SELECT s.* FROM stop_place s " +
                     "WHERE (netex_id,version) in (" + subQueryString + ")" ;
@@ -213,6 +201,23 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         query.setMaxResults(pageable.getPageSize());
         List<StopPlace> stopPlaces = query.getResultList();
         return new PageImpl<>(stopPlaces, pageable, stopPlaces.size());
+    }
+
+    private static String getSubQueryString(String ignoreStopPlaceId) {
+        String subQueryString = "SELECT s.netex_id,max(s.version) FROM stop_place s " +
+                SQL_LEFT_JOIN_PARENT_STOP +
+                "WHERE " +
+                SQL_CHILD_OR_PARENT_WITHIN +
+                "AND "
+                + SQL_NOT_PARENT_STOP_PLACE;
+
+
+        if (ignoreStopPlaceId != null) {
+            subQueryString += "AND " + SQL_IGNORE_STOP_PLACE_ID + "group by s.netex_id";
+        } else {
+            subQueryString += "group by s.netex_id" ;
+        }
+        return subQueryString;
     }
 
     /**

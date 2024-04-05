@@ -97,7 +97,7 @@ public class StopPlaceQuayMergerTest extends TiamatIntegrationTest {
         fromStopPlace.getOriginalIds().add("TEST:StopPlace:5678");
 
         Quay fromQuay = new Quay();
-        fromQuay.setCompassBearing(new Float(90));
+        fromQuay.setCompassBearing(Float.valueOf(90));
         fromQuay.setCentroid(geometryFactory.createPoint(new Coordinate(11.2, 60.2)));
         fromQuay.getOriginalIds().add("TEST:Quay:123401");
         fromQuay.getOriginalIds().add("TEST:Quay:567801");
@@ -121,7 +121,7 @@ public class StopPlaceQuayMergerTest extends TiamatIntegrationTest {
         toQuay.setPublicCode("");
 
         Quay quayToKeepUnaltered = new Quay();
-        quayToKeepUnaltered.setCompassBearing(new Float(180));
+        quayToKeepUnaltered.setCompassBearing(Float.valueOf(180));
         quayToKeepUnaltered.setCentroid(geometryFactory.createPoint(new Coordinate(11.211, 60.211)));
         quayToKeepUnaltered.getOriginalIds().add("TEST:Quay:432102");
 
@@ -192,7 +192,7 @@ public class StopPlaceQuayMergerTest extends TiamatIntegrationTest {
 
         Quay fromQuay = new Quay();
         fromQuay.setVersion(2L);
-        fromQuay.setCompassBearing(new Float(90));
+        fromQuay.setCompassBearing(Float.valueOf(90));
         fromQuay.setCentroid(geometryFactory.createPoint(new Coordinate(11.2, 60.2)));
         fromQuay.getOriginalIds().add("TEST:Quay:999");
         fromQuay.getOriginalIds().add("TEST:Quay:8888");
@@ -218,7 +218,7 @@ public class StopPlaceQuayMergerTest extends TiamatIntegrationTest {
 
         Quay quayToKeepUnaltered = new Quay();
         toQuay.setVersion(10L);
-        quayToKeepUnaltered.setCompassBearing(new Float(180));
+        quayToKeepUnaltered.setCompassBearing(Float.valueOf(180));
         quayToKeepUnaltered.setCentroid(geometryFactory.createPoint(new Coordinate(11.211, 60.211)));
         quayToKeepUnaltered.getOriginalIds().add("TEST:Quay:xxxx");
 

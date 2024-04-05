@@ -955,7 +955,30 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
 
         var versionComment = "VersionComment";
 
-        // Make sure dates are after privous version of parent stop place
+        // Make sure dates are after previous version of parent stop place
+        final var graphQlJsonQuery = getGraphQlJsonQuery(parent, newChild, versionComment);
+
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
+                .body("data.stopPlace.name.value", equalTo(parentStopPlaceName))
+                .body("data.stopPlace.stopPlaceType", nullValue())
+                .body("data.stopPlace.versionComment", equalTo(versionComment))
+                .body("data.stopPlace.version", equalTo("2"))
+
+                .rootPath("data.stopPlace.children.find { it.id == '%s'}".formatted(existingChild.getNetexId()))
+
+                    .body("name.value", nullValue())
+                    // version 3 expected. 1: created, 2: added to parent stop, 3: new child added to parent stop
+                    .body("version", equalTo("%s".formatted(existingChild.getVersion()+2)))
+                    .body("stopPlaceType", equalTo(existingChild.getStopPlaceType().value()))
+
+                .rootPath("data.stopPlace.children.find { it.id == '%s'}".formatted(newChild.getNetexId()))
+                    .body("name.value", equalTo(newChild.getName().getValue()))
+                    .body("version", equalTo("%s".formatted(newChild.getVersion()+1)))
+                    .body("stopPlaceType", equalTo(newChild.getStopPlaceType().value()));
+
+    }
+
+    private static String getGraphQlJsonQuery(StopPlace parent, StopPlace newChild, String versionComment) {
         var fromDate = parent.getValidBetween().getFromDate().plusSeconds(1000);
         var toDate = fromDate.plusSeconds(70000);
 
@@ -976,26 +999,8 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                           version
                           versionComment
                        }
-                  } """.formatted(parent.getNetexId(),newChild.getNetexId(),fromDate,toDate,versionComment);
-
-        executeGraphqQLQueryOnly(graphQlJsonQuery)
-                .body("data.stopPlace.name.value", equalTo(parentStopPlaceName))
-                .body("data.stopPlace.stopPlaceType", nullValue())
-                .body("data.stopPlace.versionComment", equalTo(versionComment))
-                .body("data.stopPlace.version", equalTo("2"))
-
-                .rootPath("data.stopPlace.children.find { it.id == '%s'}".formatted(existingChild.getNetexId()))
-
-                    .body("name.value", nullValue())
-                    // version 3 expected. 1: created, 2: added to parent stop, 3: new child added to parent stop
-                    .body("version", equalTo("%s".formatted(existingChild.getVersion()+2)))
-                    .body("stopPlaceType", equalTo(existingChild.getStopPlaceType().value()))
-
-                .rootPath("data.stopPlace.children.find { it.id == '%s'}".formatted(newChild.getNetexId()))
-                    .body("name.value", equalTo(newChild.getName().getValue()))
-                    .body("version", equalTo("%s".formatted(newChild.getVersion()+1)))
-                    .body("stopPlaceType", equalTo(newChild.getStopPlaceType().value()));
-
+                  } """.formatted(parent.getNetexId(), newChild.getNetexId(),fromDate,toDate, versionComment);
+        return graphQlJsonQuery;
     }
 
     @Test
@@ -1024,9 +1029,6 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         String updatedName = "Testing name";
         String updatedShortName = "Testing shortname";
         String updatedDescription = "Testing description";
-//        String fromDate = "2012-04-23T18:25:43.511+0200";
-//        String toDate = "2018-04-23T18:25:43.511+0200";
-
         Float updatedLon = Float.valueOf("10.11111");
         Float updatedLat = Float.valueOf("59.11111");
 

@@ -272,25 +272,7 @@ public class FareZoneRepositoryImpl implements FareZoneRepositoryCustom {
     }
 
     private String generateSqlQuery(boolean explicitStops) {
-        String subQuery;
-        if(explicitStops) {
-            subQuery = "       JOIN" +
-                    "                      FARE_ZONE_MEMBERS FZM " +
-                    "                                ON FZM.FARE_ZONE_ID = FZ.ID " +
-                    "                                JOIN" +
-                    "                                  STOP_PLACE SP " +
-                    "                                    ON SP.NETEX_ID = FZM.REF" +
-                    "                                    AND FZ.SCOPING_METHOD='EXPLICIT_STOPS'";
-        } else {
-            subQuery = "        JOIN" +
-                    "                     PERSISTABLE_POLYGON PP " +
-                    "                       ON PP.ID = FZ.POLYGON_ID " +
-                    "                        JOIN" +
-                    "                         STOP_PLACE SP " +
-                    "                           ON ST_CONTAINS(PP.POLYGON,SP.CENTROID) " +
-                    "                           AND FZ.SCOPING_METHOD='IMPLICIT_SPATIAL_PROJECTION' ";
-        }
-
+        final String subQuery = getSubQuery(explicitStops);
 
 
         String sql= "INSERT " +
@@ -341,6 +323,28 @@ public class FareZoneRepositoryImpl implements FareZoneRepositoryCustom {
 
         logger.debug(sql);
         return sql;
+    }
+
+    private static String getSubQuery(boolean explicitStops) {
+        String subQuery;
+        if(explicitStops) {
+            subQuery = "       JOIN" +
+                    "                      FARE_ZONE_MEMBERS FZM " +
+                    "                                ON FZM.FARE_ZONE_ID = FZ.ID " +
+                    "                                JOIN" +
+                    "                                  STOP_PLACE SP " +
+                    "                                    ON SP.NETEX_ID = FZM.REF" +
+                    "                                    AND FZ.SCOPING_METHOD='EXPLICIT_STOPS'";
+        } else {
+            subQuery = "        JOIN" +
+                    "                     PERSISTABLE_POLYGON PP " +
+                    "                       ON PP.ID = FZ.POLYGON_ID " +
+                    "                        JOIN" +
+                    "                         STOP_PLACE SP " +
+                    "                           ON ST_CONTAINS(PP.POLYGON,SP.CENTROID) " +
+                    "                           AND FZ.SCOPING_METHOD='IMPLICIT_SPATIAL_PROJECTION' ";
+        }
+        return subQuery;
     }
 
     public List<String> findAllFareZoneAuthorities() {

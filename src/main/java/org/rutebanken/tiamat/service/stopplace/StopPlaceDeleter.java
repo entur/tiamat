@@ -20,6 +20,7 @@ import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
 import org.rutebanken.tiamat.auth.UsernameFetcher;
 import org.rutebanken.tiamat.changelog.EntityChangedListener;
 import org.rutebanken.tiamat.lock.MutateLock;
+import org.rutebanken.tiamat.model.EntityInVersionStructure;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.slf4j.Logger;
@@ -27,11 +28,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_DELETE_STOPS;
@@ -96,10 +98,9 @@ public class StopPlaceDeleter {
     //This is to make sure entity is persisted before sending message
     @Transactional
     public void notifyDeleted(List<StopPlace> stopPlaces) {
-        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter(){
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization(){
             public void afterCommit(){
-                Collections.sort(stopPlaces,
-                        (o1, o2) -> Long.compare(o1.getVersion(), o2.getVersion()));
+                Collections.sort(stopPlaces, Comparator.comparingLong(EntityInVersionStructure::getVersion));
                 StopPlace newest = stopPlaces.get(stopPlaces.size() - 1);
                 entityChangedListener.onDelete(newest);
             }
