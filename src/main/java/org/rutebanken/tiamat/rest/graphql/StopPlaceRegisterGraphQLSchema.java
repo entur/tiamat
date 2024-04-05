@@ -83,6 +83,8 @@ import org.rutebanken.tiamat.rest.graphql.types.TagObjectTypeCreator;
 import org.rutebanken.tiamat.rest.graphql.types.TariffZoneObjectTypeCreator;
 import org.rutebanken.tiamat.rest.graphql.types.TopographicPlaceObjectTypeCreator;
 import org.rutebanken.tiamat.rest.graphql.types.ZoneCommonFieldListCreator;
+import org.rutebanken.tiamat.service.TagCreator;
+import org.rutebanken.tiamat.service.TagRemover;
 import org.rutebanken.tiamat.service.TariffZoneTerminator;
 import org.rutebanken.tiamat.service.parking.ParkingDeleter;
 import org.rutebanken.tiamat.service.stopplace.MultiModalStopPlaceEditor;
@@ -330,6 +332,12 @@ public class StopPlaceRegisterGraphQLSchema {
 
     @Autowired
     private StopPlaceReopener stopPlaceReopener;
+
+    @Autowired
+    private TagRemover tagRemover;
+
+    @Autowired
+    private TagCreator tagCreator;
 
 
     @PostConstruct
@@ -791,6 +799,9 @@ public class StopPlaceRegisterGraphQLSchema {
         registerDataFetcher(codeRegistryBuilder,STOPPLACES_MUTATION,TERMINATE_STOP_PLACE,environment -> stopPlaceTerminator.terminateStopPlace(environment.getArgument(STOP_PLACE_ID), environment.getArgument(VALID_BETWEEN_TO_DATE), environment.getArgument(VERSION_COMMENT) , environment.getArgument(MODIFICATION_ENUMERATION)));
         registerDataFetcher(codeRegistryBuilder,STOPPLACES_MUTATION,REOPEN_STOP_PLACE,environment -> stopPlaceReopener.reopenStopPlace(environment.getArgument(STOP_PLACE_ID), environment.getArgument(VERSION_COMMENT)));
         registerDataFetcher(codeRegistryBuilder,STOPPLACES_MUTATION,DELETE_QUAY_FROM_STOP_PLACE,environment -> stopPlaceQuayDeleter.deleteQuay(environment.getArgument(STOP_PLACE_ID), environment.getArgument(QUAY_ID), environment.getArgument(VERSION_COMMENT)));
+
+        registerDataFetcher(codeRegistryBuilder,STOPPLACES_MUTATION,REMOVE_TAG,environment -> tagRemover.removeTag(environment.getArgument(TAG_NAME), environment.getArgument(TAG_ID_REFERENCE), environment.getArgument(TAG_COMMENT)));
+        registerDataFetcher(codeRegistryBuilder,STOPPLACES_MUTATION,CREATE_TAG,environment -> tagCreator.createTag(environment.getArgument(TAG_NAME), environment.getArgument(TAG_ID_REFERENCE), environment.getArgument(TAG_COMMENT)));
 
 
         return codeRegistryBuilder.build();
