@@ -1024,9 +1024,6 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         String updatedName = "Testing name";
         String updatedShortName = "Testing shortname";
         String updatedDescription = "Testing description";
-//        String fromDate = "2012-04-23T18:25:43.511+0200";
-//        String toDate = "2018-04-23T18:25:43.511+0200";
-
         Float updatedLon = Float.valueOf("10.11111");
         Float updatedLat = Float.valueOf("59.11111");
 

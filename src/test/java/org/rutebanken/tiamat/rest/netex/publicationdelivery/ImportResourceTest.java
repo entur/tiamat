@@ -570,12 +570,6 @@ public class ImportResourceTest extends TiamatIntegrationTest {
             assertThat(matches)
                     .as("Expecting quay to contain two matching orignal IDs in key val")
                     .isEqualTo(2);
-
-//            assertThat(quays)
-//                    .extracting(Quay::getKeyList)
-//                    .extracting(KeyListStructure::getKeyValue)
-//                    .extracting(KeyValueStructure::getValue)
-//                    .contains("RUT:StopArea:0229012202");
         }
     }
 
