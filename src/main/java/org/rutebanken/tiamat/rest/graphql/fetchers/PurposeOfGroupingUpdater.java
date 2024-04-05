@@ -44,7 +44,7 @@ public class PurposeOfGroupingUpdater implements DataFetcher<PurposeOfGrouping> 
 
     @Override
     public PurposeOfGrouping get(DataFetchingEnvironment environment) {
-        final List<Field> fields = environment.getFields();
+        final List<Field> fields = environment.getMergedField().getFields();
         for (Field field : fields) {
             if(field.getName().equals(MUTATE_PURPOSE_OF_GROUPING)) {
                 return createOrUpdatePurposeOfGrouping(environment);

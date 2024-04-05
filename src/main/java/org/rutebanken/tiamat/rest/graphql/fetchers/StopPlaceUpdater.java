@@ -71,7 +71,7 @@ class StopPlaceUpdater implements DataFetcher {
 
     @Override
     public Object get(DataFetchingEnvironment environment) {
-        List<Field> fields = environment.getFields();
+        List<Field> fields = environment.getMergedField().getFields();
         CleanupHelper.trimValues(environment.getArguments());
         StopPlace stopPlace = null;
         for (Field field : fields) {

@@ -53,7 +53,7 @@ class PathLinkUpdater implements DataFetcher {
     @Override
     public Object get(DataFetchingEnvironment environment) {
         return mutateLock.executeInLock(() -> {
-            List<Field> fields = environment.getFields();
+            List<Field> fields = environment.getMergedField().getFields();
 
             logger.trace("Got fields {}", fields);
 
