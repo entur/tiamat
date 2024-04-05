@@ -340,7 +340,7 @@ public class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResou
     }
 
     // For reuse of test setup
-    private class PathLinkQuery {
+    private static class PathLinkQuery {
         Quay from;
         Quay to;
         String query;

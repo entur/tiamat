@@ -148,7 +148,7 @@ public class TopographicPlaceLookupService {
         };
     }
 
-    private class TopographicPlaceByAdminLevelComparator implements Comparator<TopographicPlace> {
+    private static class TopographicPlaceByAdminLevelComparator implements Comparator<TopographicPlace> {
         @Override
         public int compare(TopographicPlace tp1, TopographicPlace tp2) {
             return ADMIN_LEVEL_ORDER.indexOf(tp1.getTopographicPlaceType()) - ADMIN_LEVEL_ORDER.indexOf(tp2.getTopographicPlaceType());
