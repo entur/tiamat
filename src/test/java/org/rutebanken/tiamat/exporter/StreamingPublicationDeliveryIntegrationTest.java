@@ -62,11 +62,6 @@ import java.util.List;
 
 import static javax.xml.bind.JAXBContext.newInstance;
 import static org.assertj.core.api.Assertions.assertThat;
-
-/**
- * Test streaming publication delivery with h2 database
- * {@link StreamingPublicationDeliveryTest} is without database and spring context.
- */
 @Transactional
 public class StreamingPublicationDeliveryIntegrationTest extends TiamatIntegrationTest {
 

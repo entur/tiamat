@@ -15,6 +15,7 @@
 
 package org.rutebanken.tiamat.netex.mapping;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
@@ -465,18 +466,24 @@ public class NetexMapperTest extends TiamatIntegrationTest {
     protected org.rutebanken.netex.model.AccessibilityAssessment createNetexAccessibilityAssessment() {
         org.rutebanken.netex.model.AccessibilityAssessment accessibilityAssessment = new org.rutebanken.netex.model.AccessibilityAssessment();
 
-        org.rutebanken.netex.model.AccessibilityLimitation accessibilityLimitation = new org.rutebanken.netex.model.AccessibilityLimitation();
-        accessibilityLimitation.setWheelchairAccess(org.rutebanken.netex.model.LimitationStatusEnumeration.TRUE);
-        accessibilityLimitation.setLiftFreeAccess(org.rutebanken.netex.model.LimitationStatusEnumeration.TRUE);
-        accessibilityLimitation.setEscalatorFreeAccess(org.rutebanken.netex.model.LimitationStatusEnumeration.TRUE);
-        accessibilityLimitation.setAudibleSignalsAvailable(org.rutebanken.netex.model.LimitationStatusEnumeration.TRUE);
-        accessibilityLimitation.setStepFreeAccess(org.rutebanken.netex.model.LimitationStatusEnumeration.TRUE);
+        final org.rutebanken.netex.model.AccessibilityLimitation accessibilityLimitation = getAccessibilityLimitation();
         AccessibilityLimitations_RelStructure limitationsRelStructure = new AccessibilityLimitations_RelStructure();
 
 
         limitationsRelStructure.setAccessibilityLimitation(accessibilityLimitation);
         accessibilityAssessment.setLimitations(limitationsRelStructure);
         return accessibilityAssessment;
+    }
+
+    @NotNull
+    private static org.rutebanken.netex.model.AccessibilityLimitation getAccessibilityLimitation() {
+        org.rutebanken.netex.model.AccessibilityLimitation accessibilityLimitation = new org.rutebanken.netex.model.AccessibilityLimitation();
+        accessibilityLimitation.setWheelchairAccess(org.rutebanken.netex.model.LimitationStatusEnumeration.TRUE);
+        accessibilityLimitation.setLiftFreeAccess(org.rutebanken.netex.model.LimitationStatusEnumeration.TRUE);
+        accessibilityLimitation.setEscalatorFreeAccess(org.rutebanken.netex.model.LimitationStatusEnumeration.TRUE);
+        accessibilityLimitation.setAudibleSignalsAvailable(org.rutebanken.netex.model.LimitationStatusEnumeration.TRUE);
+        accessibilityLimitation.setStepFreeAccess(org.rutebanken.netex.model.LimitationStatusEnumeration.TRUE);
+        return accessibilityLimitation;
     }
 
     @Test
