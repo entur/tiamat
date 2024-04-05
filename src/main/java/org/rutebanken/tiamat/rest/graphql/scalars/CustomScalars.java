@@ -15,6 +15,8 @@
 
 package org.rutebanken.tiamat.rest.graphql.scalars;
 
+import graphql.GraphQLContext;
+import graphql.execution.CoercedVariables;
 import graphql.language.ArrayValue;
 import graphql.language.FloatValue;
 import graphql.language.Value;
@@ -24,6 +26,7 @@ import org.locationtech.jts.geom.Coordinate;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class CustomScalars {
 
@@ -32,7 +35,7 @@ public class CustomScalars {
             .description("GeoJSON Coordinates")
             .coercing(new Coercing() {
                 @Override
-                public List<List<Double>> serialize(Object input) {
+                public List<List<Double>> serialize(Object input, GraphQLContext graphQLContext, Locale locale) {
                     if (input instanceof Coordinate[] coordinates) {
                         List<List<Double>> coordinateList = new ArrayList<>();
                         for (Coordinate coordinate : coordinates) {
@@ -48,7 +51,7 @@ public class CustomScalars {
                 }
 
         @Override
-        public Coordinate[] parseValue(Object input) {
+        public Coordinate[] parseValue(Object input, GraphQLContext graphQLContext, Locale locale) {
             List<List<Double>> coordinateList = (List<List<Double>>) input;
 
                     Coordinate[] coordinates = new Coordinate[coordinateList.size()];
@@ -61,7 +64,7 @@ public class CustomScalars {
                 }
 
                 @Override
-                public Object parseLiteral(Object input) {
+                public Object parseLiteral(Value input, CoercedVariables variables, GraphQLContext graphQLContext, Locale locale) {
                     if (input instanceof ArrayValue arrayValue) {
                         List<Value> coordinateList = arrayValue.getValues();
                         Coordinate[] coordinates = new Coordinate[coordinateList.size()];
