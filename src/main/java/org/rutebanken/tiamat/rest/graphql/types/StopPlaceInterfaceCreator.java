@@ -21,7 +21,6 @@ import graphql.schema.GraphQLInterfaceType;
 import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLTypeReference;
-import graphql.schema.TypeResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -99,13 +98,11 @@ public class StopPlaceInterfaceCreator {
 
 
     public GraphQLInterfaceType createInterface(List<GraphQLFieldDefinition> stopPlaceInterfaceFields,
-                                                List<GraphQLFieldDefinition> commonFieldsList,
-                                                TypeResolver stopPlaceTypeResolver) {
+                                                List<GraphQLFieldDefinition> commonFieldsList) {
         return newInterface()
                 .name(OUTPUT_TYPE_STOPPLACE_INTERFACE)
                 .fields(commonFieldsList)
                 .fields(stopPlaceInterfaceFields)
-                .typeResolver(stopPlaceTypeResolver)
                 .build();
     }
 

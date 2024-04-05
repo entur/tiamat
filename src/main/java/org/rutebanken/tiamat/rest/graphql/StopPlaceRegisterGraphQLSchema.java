@@ -29,6 +29,7 @@ import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLNonNull;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLSchema;
+import graphql.schema.TypeResolver;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Point;
 import org.rutebanken.tiamat.model.CycleStorageEquipment;
@@ -393,7 +394,7 @@ public class StopPlaceRegisterGraphQLSchema {
         MutableTypeResolver stopPlaceTypeResolver = new MutableTypeResolver();
 
         List<GraphQLFieldDefinition> stopPlaceInterfaceFields = stopPlaceInterfaceCreator.createCommonInterfaceFields(tariffZoneObjectType,fareZoneObjectType, topographicPlaceObjectType, validBetweenObjectType);
-        GraphQLInterfaceType stopPlaceInterface = stopPlaceInterfaceCreator.createInterface(stopPlaceInterfaceFields, commonFieldsList, stopPlaceTypeResolver);
+        GraphQLInterfaceType stopPlaceInterface = stopPlaceInterfaceCreator.createInterface(stopPlaceInterfaceFields, commonFieldsList);
 
         GraphQLObjectType stopPlaceObjectType = stopPlaceObjectTypeCreator.create(stopPlaceInterface, stopPlaceInterfaceFields, commonFieldsList, quayObjectType);
         GraphQLObjectType parentStopPlaceObjectType = parentStopPlaceObjectTypeCreator.create(stopPlaceInterface, stopPlaceInterfaceFields, commonFieldsList, stopPlaceObjectType);
@@ -466,14 +467,12 @@ public class StopPlaceRegisterGraphQLSchema {
                 .field(newFieldDefinition()
                         .name(VALID_TRANSPORT_MODES)
                         .type(new GraphQLList(transportModeSubmodeObjectType))
-                        .description("List all valid Transportmode/Submode-combinations.")
-                        .staticValue(transportModeScalar.getConfiguredTransportModes().keySet()))
+                        .description("List all valid Transportmode/Submode-combinations."))
                 .field(newFieldDefinition()
                         .name(CHECK_AUTHORIZED)
                         .type(createAuthorizationCheckOutputType())
                         .description(AUTHORIZATION_CHECK_DESCRIPTION)
-                        .arguments(createAuthorizationCheckArguments())
-                        )
+                        .arguments(createAuthorizationCheckArguments()))
                 .field(newFieldDefinition()
                         .name(TAGS)
                         .type(new GraphQLList(tagObjectTypeCreator.create()))
@@ -493,8 +492,7 @@ public class StopPlaceRegisterGraphQLSchema {
                         .name(PURPOSE_OF_GROUPING)
                         .type(new GraphQLList(purposeOfGroupingType))
                         .description("List all purpose of grouping")
-                        .arguments(createFindPurposeOfGroupingArguments())
-                )
+                        .arguments(createFindPurposeOfGroupingArguments()))
 
                 .field(newFieldDefinition()
                         .name(GROUP_OF_TARIFF_ZONES)
@@ -615,12 +613,12 @@ public class StopPlaceRegisterGraphQLSchema {
         stopPlaceRegisterSchema = GraphQLSchema.newSchema()
                 .query(stopPlaceRegisterQuery)
                 .mutation(stopPlaceRegisterMutation)
-                .codeRegistry(buildCodeRegistry())
+                .codeRegistry(buildCodeRegistry(stopPlaceTypeResolver))
                 .build();
     }
 
 
-    public GraphQLCodeRegistry buildCodeRegistry() {
+    public GraphQLCodeRegistry buildCodeRegistry(TypeResolver stopPlaceTypeResolver) {
         GraphQLCodeRegistry.Builder codeRegistryBuilder = GraphQLCodeRegistry.newCodeRegistry();
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_STOPPLACE, IMPORTED_ID, getOriginalIdsFetcher());
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_PARENT_STOPPLACE, IMPORTED_ID, getOriginalIdsFetcher());
@@ -675,6 +673,7 @@ public class StopPlaceRegisterGraphQLSchema {
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_FARE_ZONE, POLYGON, polygonFetcher);
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_QUAY, POLYGON, polygonFetcher);
 
+        registerDataFetcher(codeRegistryBuilder, STOPPLACES_REGISTER, VALID_TRANSPORT_MODES, env -> transportModeScalar.getConfiguredTransportModes().keySet());
 
         registerDataFetcher(codeRegistryBuilder, STOPPLACES_REGISTER, FIND_STOPPLACE, stopPlaceFetcher);
         registerDataFetcher(codeRegistryBuilder, STOPPLACES_REGISTER, FIND_STOPPLACE_BY_BBOX, stopPlaceFetcher);
@@ -839,6 +838,7 @@ public class StopPlaceRegisterGraphQLSchema {
         registerDataFetcher(codeRegistryBuilder,STOPPLACES_MUTATION,REMOVE_TAG,environment -> tagRemover.removeTag(environment.getArgument(TAG_NAME), environment.getArgument(TAG_ID_REFERENCE), environment.getArgument(TAG_COMMENT)));
         registerDataFetcher(codeRegistryBuilder,STOPPLACES_MUTATION,CREATE_TAG,environment -> tagCreator.createTag(environment.getArgument(TAG_NAME), environment.getArgument(TAG_ID_REFERENCE), environment.getArgument(TAG_COMMENT)));
 
+        codeRegistryBuilder.typeResolver(OUTPUT_TYPE_STOPPLACE_INTERFACE, stopPlaceTypeResolver);
 
         return codeRegistryBuilder.build();
     }

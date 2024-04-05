@@ -391,12 +391,11 @@ public class StopPlaceTest extends TiamatIntegrationTest {
 
         StopPlace actualStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId());
 
-        assertThat(actualStopPlace).isEqualToComparingOnlyGivenFields(actualStopPlace,
-                "stopPlaceType", "transportMode", "airSubmode", "coachSubmode",
+        assertThat(actualStopPlace).usingRecursiveComparison().comparingOnlyFields("stopPlaceType", "transportMode", "airSubmode", "coachSubmode",
                 "funicularSubmode", "otherTransportModes",
                 "weighting", "busSubmode", "covered", "gated", "modification",
                 "railSubmode", "metroSubmode", "siteType", "status", "waterSubmode",
-                "tramSubmode", "telecabinSubmode");
+                "tramSubmode", "telecabinSubmode").isEqualTo(stopPlace);
     }
 
     @Test
