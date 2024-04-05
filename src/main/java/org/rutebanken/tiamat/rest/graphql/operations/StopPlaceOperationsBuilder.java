@@ -15,6 +15,7 @@
 
 package org.rutebanken.tiamat.rest.graphql.operations;
 
+import graphql.language.BooleanValue;
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLInterfaceType;
 import graphql.schema.GraphQLList;
@@ -68,7 +69,7 @@ public class StopPlaceOperationsBuilder {
                 .argument(newArgument().name(TO_STOP_PLACE_ID).type(new GraphQLNonNull(GraphQLString)))
                 .argument(newArgument().name(FROM_VERSION_COMMENT).type(GraphQLString))
                 .argument(newArgument().name(TO_VERSION_COMMENT).type(GraphQLString))
-                .argument(newArgument().name(DRY_RUN).type(GraphQLBoolean).defaultValue(Boolean.FALSE).description("If set to true - the merge is not saved"))
+                .argument(newArgument().name(DRY_RUN).type(GraphQLBoolean).defaultValueLiteral(BooleanValue.of(false)).description("If set to true - the merge is not saved"))
                 .build());
 
         //Merge two quays on a StopPlace
@@ -80,7 +81,7 @@ public class StopPlaceOperationsBuilder {
                 .argument(newArgument().name(FROM_QUAY_ID).type(new GraphQLNonNull(GraphQLString)))
                 .argument(newArgument().name(TO_QUAY_ID).type(new GraphQLNonNull(GraphQLString)))
                 .argument(newArgument().name(VERSION_COMMENT).type(GraphQLString))
-                .argument(newArgument().name(DRY_RUN).type(GraphQLBoolean).defaultValue(Boolean.FALSE).description("If set to true - the merge is not saved"))
+                .argument(newArgument().name(DRY_RUN).type(GraphQLBoolean).defaultValueLiteral(BooleanValue.of(false)).description("If set to true - the merge is not saved"))
                 .build());
 
         operations.add(newFieldDefinition()

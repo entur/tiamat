@@ -15,6 +15,8 @@
 
 package org.rutebanken.tiamat.rest.graphql;
 
+import graphql.language.BooleanValue;
+import graphql.language.IntValue;
 import graphql.schema.DataFetcher;
 import graphql.schema.FieldCoordinates;
 import graphql.schema.GraphQLArgument;
@@ -1104,37 +1106,37 @@ public class StopPlaceRegisterGraphQLSchema {
         arguments.add(GraphQLArgument.newArgument()
                 .name(WITHOUT_LOCATION_ONLY)
                 .type(GraphQLBoolean)
-                .defaultValue(Boolean.FALSE)
+                .defaultValueLiteral(BooleanValue.of(false))
                 .description(WITHOUT_LOCATION_ONLY_ARG_DESCRIPTION)
                 .build());
         arguments.add(GraphQLArgument.newArgument()
                 .name(WITHOUT_QUAYS_ONLY)
                 .type(GraphQLBoolean)
-                .defaultValue(Boolean.FALSE)
+                .defaultValueLiteral(BooleanValue.of(false))
                 .description(WITHOUT_QUAYS_ONLY_ARG_DESCRIPTION)
                 .build());
         arguments.add(GraphQLArgument.newArgument()
                 .name(WITH_DUPLICATED_QUAY_IMPORTED_IDS)
                 .type(GraphQLBoolean)
-                .defaultValue(Boolean.FALSE)
+                .defaultValueLiteral(BooleanValue.of(false))
                 .description(WITH_DUPLICATED_QUAY_IMPORTED_IDS_ARG_DESCRIPTION)
                 .build());
         arguments.add(GraphQLArgument.newArgument()
                 .name(WITH_NEARBY_SIMILAR_DUPLICATES)
                 .type(GraphQLBoolean)
-                .defaultValue(Boolean.FALSE)
+                .defaultValueLiteral(BooleanValue.of(false))
                 .description(WITH_NEARBY_SIMILAR_DUPLICATES_ARG_DESCRIPTION)
                 .build());
         arguments.add(GraphQLArgument.newArgument()
                 .name(HAS_PARKING)
                 .type(GraphQLBoolean)
-                .defaultValue(Boolean.FALSE)
+                .defaultValueLiteral(BooleanValue.of(false))
                 .description(HAS_PARKING)
                 .build());
         arguments.add(GraphQLArgument.newArgument()
                 .name(ONLY_MONOMODAL_STOPPLACES)
                 .type(GraphQLBoolean)
-                .defaultValue(Boolean.FALSE)
+                .defaultValueLiteral(BooleanValue.of(false))
                 .description(ONLY_MONOMODAL_STOPPLACES_DESCRIPTION)
                 .build());
         arguments.add(GraphQLArgument.newArgument()
@@ -1145,13 +1147,12 @@ public class StopPlaceRegisterGraphQLSchema {
         arguments.add(GraphQLArgument.newArgument()
                 .name(WITH_TAGS)
                 .type(GraphQLBoolean)
-                .defaultValue(Boolean.FALSE)
+                .defaultValueLiteral(BooleanValue.of(false))
                 .description(WITH_TAGS_ARG_DESCRIPTION)
                 .build());
         arguments.add(GraphQLArgument.newArgument()
                 .name(SEARCH_WITH_CODE_SPACE)
                 .type(GraphQLString)
-                .defaultValue(null)
                 .description(SEARCH_WITH_CODE_SPACE_ARG_DESCRIPTION)
                 .build());
         return arguments;
@@ -1188,7 +1189,7 @@ public class StopPlaceRegisterGraphQLSchema {
         arguments.add(GraphQLArgument.newArgument()
                 .name(INCLUDE_EXPIRED)
                 .type(GraphQLBoolean)
-                .defaultValue(Boolean.FALSE)
+                .defaultValueLiteral(BooleanValue.of(false))
                 .description("Set to true if expired StopPlaces should be returned, default is 'false'.")
                 .build());
         arguments.add(GraphQLArgument.newArgument()
@@ -1204,13 +1205,13 @@ public class StopPlaceRegisterGraphQLSchema {
         arguments.add(GraphQLArgument.newArgument()
                 .name(PAGE)
                 .type(GraphQLInt)
-                .defaultValue(DEFAULT_PAGE_VALUE)
+                .defaultValueLiteral(IntValue.of(DEFAULT_PAGE_VALUE))
                 .description(PAGE_ARG_DESCRIPTION)
                 .build());
         arguments.add(GraphQLArgument.newArgument()
                 .name(SIZE)
                 .type(GraphQLInt)
-                .defaultValue(DEFAULT_SIZE_VALUE)
+                .defaultValueLiteral(IntValue.of(DEFAULT_SIZE_VALUE))
                 .description(SIZE_ARG_DESCRIPTION)
                 .build());
         return arguments;
