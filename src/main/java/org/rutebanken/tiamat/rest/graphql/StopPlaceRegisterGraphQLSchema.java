@@ -748,6 +748,15 @@ public class StopPlaceRegisterGraphQLSchema {
         });
         registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_TOPOGRAPHIC_PLACE,POLYGON,polygonFetcher);
 
+        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_STOPPLACE,SUBMODE,env -> transportModeScalar.resolveSubmode(env));
+        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_STOPPLACE,PARENT_SITE_REF,env -> {
+            SiteRefStructure parentSiteRef = ((StopPlace) env.getSource()).getParentSiteRef();
+            if (parentSiteRef != null) {
+                return parentSiteRef.getRef();
+            }
+            return null;
+        });
+
 
 
 
