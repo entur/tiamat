@@ -46,10 +46,12 @@ import org.rutebanken.tiamat.model.SiteRefStructure;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.TariffZone;
 import org.rutebanken.tiamat.model.TicketingEquipment;
+import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.model.ValidBetween;
 import org.rutebanken.tiamat.model.WaitingRoomEquipment;
 import org.rutebanken.tiamat.model.Zone_VersionStructure;
 import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
+import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.rutebanken.tiamat.rest.graphql.fetchers.AuthorizationCheckDataFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.FareZoneAuthoritiesFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.GroupOfStopPlacesMembersFetcher;
@@ -338,6 +340,9 @@ public class StopPlaceRegisterGraphQLSchema {
 
     @Autowired
     private TagCreator tagCreator;
+
+    @Autowired
+    private TopographicPlaceRepository topographicPlaceRepository;
 
 
     @PostConstruct
@@ -722,6 +727,26 @@ public class StopPlaceRegisterGraphQLSchema {
         registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_TRANSFER_DURATION,FREQUENT_TRAVELLER_DURATION,pathLinkObjectTypeCreator.durationSecondsFetcher());
         registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_TRANSFER_DURATION,OCCASIONAL_TRAVELLER_DURATION,pathLinkObjectTypeCreator.durationSecondsFetcher());
         registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_TRANSFER_DURATION,MOBILITY_RESTRICTED_TRAVELLER_DURATION,pathLinkObjectTypeCreator.durationSecondsFetcher());
+
+        // topographic place data fetchers
+        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_TOPOGRAPHIC_PLACE,ID,env -> {
+            TopographicPlace topographicPlace = (TopographicPlace) env.getSource();
+            if (topographicPlace != null) {
+                return topographicPlace.getNetexId();
+            } else {
+                return null;
+            }
+        });
+        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_TOPOGRAPHIC_PLACE,PARENT_TOPOGRAPHIC_PLACE,env -> {
+            if(env.getSource() instanceof  TopographicPlace) {
+                TopographicPlace child = (TopographicPlace) env.getSource();
+                if(child.getParentTopographicPlaceRef() != null) {
+                    return topographicPlaceRepository.findFirstByNetexIdAndVersion(child.getParentTopographicPlaceRef().getRef(), Long.parseLong(child.getParentTopographicPlaceRef().getVersion()));
+                }
+            }
+            return null;
+        });
+        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_TOPOGRAPHIC_PLACE,POLYGON,polygonFetcher);
 
 
 
