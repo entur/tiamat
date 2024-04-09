@@ -1,0 +1,18 @@
+CREATE SEQUENCE value_seq
+    START WITH 1
+    INCREMENT BY 10
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER TABLE value_seq OWNER TO tiamat;
+
+
+CREATE SEQUENCE export_job_seq
+    START WITH 1
+    INCREMENT BY 10
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER TABLE export_job_seq OWNER TO tiamat;
