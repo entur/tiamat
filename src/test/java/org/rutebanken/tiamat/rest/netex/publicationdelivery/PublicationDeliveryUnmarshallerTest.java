@@ -15,11 +15,11 @@
 
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.UnmarshalException;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.UnmarshalException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;

@@ -15,8 +15,9 @@
 
 package org.rutebanken.tiamat.model;
 
-import javax.persistence.Column;
-import javax.persistence.MappedSuperclass;
+import jakarta.persistence.Column;
+import jakarta.persistence.MappedSuperclass;
+
 import java.io.Serializable;
 import java.util.Objects;
 

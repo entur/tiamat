@@ -15,10 +15,10 @@
 
 package org.rutebanken.tiamat.model;
 
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.Transient;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.Transient;
 
 
 @MappedSuperclass

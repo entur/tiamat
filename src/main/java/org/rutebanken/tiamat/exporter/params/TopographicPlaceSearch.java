@@ -16,16 +16,15 @@
 package org.rutebanken.tiamat.exporter.params;
 
 import com.google.common.base.MoreObjects;
-import io.swagger.annotations.ApiParam;
-
-import javax.ws.rs.QueryParam;
+import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.ws.rs.QueryParam;
 
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.VERSION_VALIDITY_ARG_DESCRIPTION;
 
 public class TopographicPlaceSearch implements SearchObject {
 
     @QueryParam(value = "versionValidity")
-    @ApiParam(value = VERSION_VALIDITY_ARG_DESCRIPTION)
+    @Parameter(description = VERSION_VALIDITY_ARG_DESCRIPTION)
     private ExportParams.VersionValidity versionValidity;
 
 

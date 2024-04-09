@@ -27,7 +27,14 @@ import graphql.GraphQLError;
 import graphql.GraphQLException;
 import graphql.analysis.MaxQueryDepthInstrumentation;
 import graphql.execution.AbortExecutionException;
-import io.swagger.annotations.Api;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.NotAuthorizedException;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import org.rutebanken.helper.organisation.NotAuthenticatedException;
 import org.rutebanken.tiamat.rest.exception.ErrorResponseEntity;
 import org.slf4j.Logger;
@@ -43,13 +50,6 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.PostConstruct;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.NotAuthorizedException;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -63,7 +63,7 @@ import static graphql.ErrorType.ValidationError;
 import static java.util.stream.Collectors.toList;
 
 @Component
-@Api(tags = {"GraphQL Resource"}, produces = "application/json")
+@Tag(name = "GraphQL Resource", description = "GraphQL Resource")
 @Path("graphql")
 public class GraphQLResource {
 

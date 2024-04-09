@@ -15,14 +15,14 @@
 
 package org.rutebanken.tiamat.model;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Transient;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 
-import javax.persistence.CascadeType;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.OneToMany;
-import javax.persistence.Transient;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;

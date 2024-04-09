@@ -16,6 +16,13 @@
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
 
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.StreamingOutput;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Marshaller;
+import jakarta.xml.bind.Unmarshaller;
 import org.rutebanken.netex.model.Common_VersionFrameStructure;
 import org.rutebanken.netex.model.CompositeFrame;
 import org.rutebanken.netex.model.DataManagedObjectStructure;
@@ -40,13 +47,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.xml.sax.SAXException;
 
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -60,8 +60,8 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static jakarta.xml.bind.JAXBContext.newInstance;
 import static java.util.stream.Collectors.toList;
-import static javax.xml.bind.JAXBContext.newInstance;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
 
@@ -267,7 +267,7 @@ public class PublicationDeliveryTestHelper {
 
     public PublicationDeliveryStructure fromString(String xml) throws IOException, JAXBException {
         Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-        unmarshaller.setEventHandler(new javax.xml.bind.helpers.DefaultValidationEventHandler());
+        unmarshaller.setEventHandler(new jakarta.xml.bind.helpers.DefaultValidationEventHandler());
 
         logger.info("Printing received response publication delivery \n--------------\n{}\n--------------", xml);
 

@@ -45,6 +45,7 @@
 
 package org.rutebanken.tiamat.importer.handler;
 
+import jakarta.xml.bind.JAXBElement;
 import org.rutebanken.netex.model.FareZone;
 import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.SiteFrame;
@@ -61,7 +62,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import javax.xml.bind.JAXBElement;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;

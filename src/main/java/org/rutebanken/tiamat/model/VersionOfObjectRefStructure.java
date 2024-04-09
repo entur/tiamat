@@ -16,8 +16,8 @@
 package org.rutebanken.tiamat.model;
 
 import com.google.common.base.MoreObjects;
+import jakarta.persistence.MappedSuperclass;
 
-import javax.persistence.MappedSuperclass;
 import java.io.Serializable;
 import java.util.Objects;
 

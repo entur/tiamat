@@ -19,11 +19,10 @@ package org.rutebanken.tiamat.rest.graphql;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.ValidatableResponse;
+import jakarta.transaction.Transactional;
 import org.junit.Before;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.StopPlace;
-
-import javax.transaction.Transactional;
 
 import static io.restassured.RestAssured.given;
 import static org.rutebanken.tiamat.config.JerseyConfig.SERVICES_STOP_PLACE_PATH;

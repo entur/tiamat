@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.service.batch;
 
+import jakarta.persistence.EntityManager;
 import org.hibernate.Session;
 import org.hibernate.internal.SessionImpl;
 import org.rutebanken.tiamat.exporter.async.ParentStopFetchingIterator;
@@ -21,7 +22,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
