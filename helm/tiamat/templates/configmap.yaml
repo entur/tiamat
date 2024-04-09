@@ -24,7 +24,7 @@ data:
     blobstore.gcs.project.id={{.Values.configMap.blobstoreProjectId}}
 
     # Database properties
-    spring.jpa.properties.javax.persistence.query.timeout=15000
+    spring.jpa.properties.javax.persistence.query.timeout=30000
     spring.jpa.properties.hibernate.dialect=org.hibernate.spatial.dialect.postgis.PostgisDialect
     spring.jpa.properties.hibernate.cache.region.factory_class=com.hazelcast.hibernate.HazelcastCacheRegionFactory
     spring.jpa.properties.hibernate.cache.use_second_level_cache=true
