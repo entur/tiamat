@@ -22,6 +22,8 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Point;
 import org.rutebanken.tiamat.changelog.EntityChangedEvent;
 import org.rutebanken.tiamat.changelog.EntityChangedJMSListener;
+import org.rutebanken.tiamat.model.AccessibilityAssessment;
+import org.rutebanken.tiamat.model.AccessibilityLimitation;
 import org.rutebanken.tiamat.model.AlternativeName;
 import org.rutebanken.tiamat.model.BusSubmodeEnumeration;
 import org.rutebanken.tiamat.model.CycleStorageEnumeration;
@@ -29,6 +31,7 @@ import org.rutebanken.tiamat.model.CycleStorageEquipment;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.GeneralSign;
 import org.rutebanken.tiamat.model.InterchangeWeightingEnumeration;
+import org.rutebanken.tiamat.model.LimitationStatusEnumeration;
 import org.rutebanken.tiamat.model.NameTypeEnumeration;
 import org.rutebanken.tiamat.model.PlaceEquipment;
 import org.rutebanken.tiamat.model.PrivateCodeStructure;
@@ -59,6 +62,7 @@ import java.math.BigInteger;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
@@ -127,6 +131,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                     }""".formatted(stopPlace.getNetexId());
 
         executeGraphqQLQueryOnly(graphQlJsonQuery)
+                .body("data.stopPlace[0].id", equalTo(stopPlace.getNetexId()))
                 .body("data.stopPlace[0].name.value", equalTo(stopPlaceName))
                 .body("data.stopPlace[0].quays.name.value", hasItems(firstQuayName, secondQuayName))
                 .body("data.stopPlace[0].quays.id", hasItems(quay.getNetexId(), secondQuay.getNetexId()));
@@ -1165,6 +1170,57 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                     .body("id", equalTo(stopPlace.getNetexId()))
                     .body("keyValues[0].key", equalTo("jbvId"))
                     .body("keyValues[0].values[0]", equalTo("1234"));
+    }
+
+    @Test
+    public void testSimpleStopPlaceWithAccessibilityAssesment() throws Exception {
+        String stopPlaceName = "StopPlace";
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(stopPlaceName));
+
+        AccessibilityLimitation limitation = new AccessibilityLimitation();
+        limitation.setWheelchairAccess(LimitationStatusEnumeration.FALSE);
+
+        List<AccessibilityLimitation> limitations = new ArrayList<>();
+        limitations.add(limitation);
+
+
+        AccessibilityAssessment accessibilityAssessment = new AccessibilityAssessment();
+        accessibilityAssessment.setMobilityImpairedAccess(LimitationStatusEnumeration.TRUE);
+        accessibilityAssessment.setLimitations(limitations);
+
+        stopPlace.setAccessibilityAssessment(accessibilityAssessment);
+
+        stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(5, 60)));
+        stopPlaceRepository.save(stopPlace);
+
+        stopPlace.getNetexId();
+
+        String graphQlJsonQuery = """
+                  {
+                  stopPlace:  stopPlace (query:"%s", allVersions:true) {
+                            id
+                            name { value }
+                            accessibilityAssessment {
+                                id
+                                mobilityImpairedAccess
+                                limitations {
+                                    id
+                                    wheelchairAccess
+                                }
+                            }
+                            
+                        }
+                    }""".formatted(stopPlace.getNetexId());
+
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
+                .body("data.stopPlace[0].id", equalTo(stopPlace.getNetexId()))
+                .body("data.stopPlace[0].name.value", equalTo(stopPlaceName))
+                .body("data.stopPlace[0].accessibilityAssessment.mobilityImpairedAccess", equalTo(LimitationStatusEnumeration.TRUE.name()))
+                .body("data.stopPlace[0].accessibilityAssessment.id", equalTo(stopPlace.getAccessibilityAssessment().getNetexId()))
+                .body("data.stopPlace[0].accessibilityAssessment.limitations.id", equalTo(stopPlace.getAccessibilityAssessment().getLimitations().get(0).getNetexId()))
+                .body("data.stopPlace[0].accessibilityAssessment.limitations.wheelchairAccess", equalTo(LimitationStatusEnumeration.FALSE.name()));
+
+
     }
 
     @Test

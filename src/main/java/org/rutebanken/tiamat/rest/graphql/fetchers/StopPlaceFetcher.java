@@ -261,7 +261,7 @@ class StopPlaceFetcher implements DataFetcher {
         if (environment.getArgument(ONLY_MONOMODAL_STOPPLACES) != null) {
             onlyMonomodalStopplaces = environment.getArgument(ONLY_MONOMODAL_STOPPLACES);
         }
-        //By default stop should resolve parent stops
+        //By default, stop should resolve parent stops
         if (onlyMonomodalStopplaces) {
             return getStopPlaces(environment, stopPlaces, stopPlaces.size());
         } else {

@@ -19,8 +19,6 @@ import org.rutebanken.tiamat.model.AccessibilityAssessment;
 import org.rutebanken.tiamat.model.AccessibilityLimitation;
 import org.rutebanken.tiamat.model.LimitationStatusEnumeration;
 import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.versioning.VersionCreator;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -30,15 +28,6 @@ import static org.rutebanken.tiamat.versioning.util.MobilityImpairedAccessCalcul
 
 @Service
 public class AccessibilityAssessmentOptimizer {
-
-    private final VersionCreator versionCreator;
-
-    @Autowired
-    public AccessibilityAssessmentOptimizer(VersionCreator versionCreator) {
-        this.versionCreator = versionCreator;
-    }
-
-
     public void optimizeAccessibilityAssessments(StopPlace stopPlace) {
 
         List<AccessibilityAssessment> allQuayAccessibilityAssessments = new ArrayList<>();
@@ -70,7 +59,6 @@ public class AccessibilityAssessmentOptimizer {
                     AccessibilityAssessment nextVersion = stopPlace.getAccessibilityAssessment();
                     nextVersion.setLimitations(firstAccessibilityAssessment.getLimitations());
                     firstAccessibilityAssessment = nextVersion;
-//                    firstAccessibilityAssessment = versionCreator.createCopy(nextVersion, AccessibilityAssessment.class);
                 }
 
                 stopPlace.setAccessibilityAssessment(firstAccessibilityAssessment);
