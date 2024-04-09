@@ -15,9 +15,8 @@
 
 package org.rutebanken.tiamat.config;
 
-import io.swagger.jaxrs.config.BeanConfig;
-import io.swagger.jaxrs.listing.ApiListingResource;
-import io.swagger.jaxrs.listing.SwaggerSerializers;
+
+import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
 import org.rutebanken.tiamat.filter.LoggingFilter;
@@ -91,22 +90,12 @@ public class JerseyConfig {
         publicResources.add(GeneralExceptionMapper.class);
         publicResources.add(ErrorResponseEntityMessageBodyWriter.class);
 
-        publicResources.add(ApiListingResource.class);
-        publicResources.add(SwaggerSerializers.class);
+        publicResources.add(OpenApiResource.class);
 
         ResourceConfig resourceConfig = new ResourceConfig(publicResources);
         resourceConfig.register(JerseyJava8TimeConverterProvider.class);
         ServletRegistrationBean publicServicesJersey = new ServletRegistrationBean(new ServletContainer(resourceConfig));
 
-        BeanConfig config = new BeanConfig();
-        config.setConfigId(PUBLIC_SWAGGER_CONFIG_ID);
-        config.setTitle("Tiamat Public API");
-        config.setVersion("v1");
-        config.setSchemes(new String[]{"http", "https"});
-        config.setBasePath(SERVICES_STOP_PLACE_PATH);
-        config.setResourcePackage("org.rutebanken.tiamat");
-        config.setPrettyPrint(true);
-        config.setScan(true);
 
         publicServicesJersey.addUrlMappings(SERVICES_STOP_PLACE_PATH + "/*");
         publicServicesJersey.setName("PublicJersey");
@@ -124,8 +113,8 @@ public class JerseyConfig {
 
         resources.add(HealthResource.class);
 
-        resources.add(ApiListingResource.class);
-        resources.add(SwaggerSerializers.class);
+        resources.add(OpenApiResource.class);
+
 
         resources.add(GeneralExceptionMapper.class);
         resources.add(ErrorResponseEntityMessageBodyWriter.class);
@@ -133,15 +122,7 @@ public class JerseyConfig {
         ResourceConfig resourceConfig = new ResourceConfig(resources);
         ServletRegistrationBean healthServicesJersey = new ServletRegistrationBean(new ServletContainer(resourceConfig));
 
-        BeanConfig config = new BeanConfig();
-        config.setConfigId(HEALTH_SWAGGER_CONFIG_ID);
-        config.setTitle("Tiamat Health API");
-        config.setVersion("v1");
-        config.setSchemes(new String[]{"http", "https"});
-        config.setBasePath(SERVICES_HEALTH_PATH);
-        config.setResourcePackage("org.rutebanken.tiamat");
-        config.setPrettyPrint(true);
-        config.setScan(true);
+
 
         healthServicesJersey.addUrlMappings(SERVICES_HEALTH_PATH + "/*");
         healthServicesJersey.setName("HealthJersey");
@@ -159,8 +140,8 @@ public class JerseyConfig {
 
         resources.add(PrometheusResource.class);
 
-        resources.add(ApiListingResource.class);
-        resources.add(SwaggerSerializers.class);
+        resources.add(OpenApiResource.class);
+
 
         resources.add(GeneralExceptionMapper.class);
         resources.add(ErrorResponseEntityMessageBodyWriter.class);
@@ -168,15 +149,7 @@ public class JerseyConfig {
         ResourceConfig resourceConfig = new ResourceConfig(resources);
         ServletRegistrationBean prometheusServicesJersey = new ServletRegistrationBean(new ServletContainer(resourceConfig));
 
-        BeanConfig config = new BeanConfig();
-        config.setConfigId(PROMETHEUS_SWAGGER_CONFIG_ID);
-        config.setTitle("Tiamat Prometheus API");
-        config.setVersion("v1");
-        config.setSchemes(new String[]{"http", "https"});
-        config.setBasePath(SERVICES_HEALTH_PATH);
-        config.setResourcePackage("org.rutebanken.tiamat");
-        config.setPrettyPrint(true);
-        config.setScan(true);
+
 
         prometheusServicesJersey.addUrlMappings(SERVICES_HEALTH_PATH + "/scrape/*");
         prometheusServicesJersey.setName("PrometheusJersey");
@@ -195,23 +168,15 @@ public class JerseyConfig {
         adminResources.add(DtoJbvCodeMappingResource.class);
         adminResources.add(GeneralExceptionMapper.class);
 
-        adminResources.add(ApiListingResource.class);
-        adminResources.add(SwaggerSerializers.class);
+        adminResources.add(OpenApiResource.class);
+
+
         adminResources.add(ErrorResponseEntityMessageBodyWriter.class);
 
         ResourceConfig resourceConfig = new ResourceConfig(adminResources);
 
         ServletRegistrationBean adminServicesJersey = new ServletRegistrationBean(new ServletContainer(resourceConfig));
 
-        BeanConfig config = new BeanConfig();
-        config.setConfigId(ADMIN_SWAGGER_CONFIG_ID);
-        config.setTitle("Tiamat Admin API");
-        config.setVersion("v1");
-        config.setSchemes(new String[]{"http", "https"});
-        config.setBasePath(SERVICES_ADMIN_PATH);
-        config.setResourcePackage("org.rutebanken.tiamat");
-        config.setPrettyPrint(true);
-        config.setScan(true);
 
         adminServicesJersey.addUrlMappings(SERVICES_ADMIN_PATH + "/*");
         adminServicesJersey.setName("AdminJersey");

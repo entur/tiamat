@@ -15,9 +15,9 @@
 
 package org.rutebanken.tiamat.model;
 
+import jakarta.persistence.MappedSuperclass;
 import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
 
-import javax.persistence.MappedSuperclass;
 import java.io.Serializable;
 
 

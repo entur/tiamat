@@ -16,6 +16,9 @@
 package org.rutebanken.tiamat.repository;
 
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.ScrollMode;
@@ -36,9 +39,6 @@ import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;

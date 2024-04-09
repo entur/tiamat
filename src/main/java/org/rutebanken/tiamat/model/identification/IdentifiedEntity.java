@@ -16,12 +16,11 @@
 package org.rutebanken.tiamat.model.identification;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.EntityListeners;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.MappedSuperclass;
 import org.rutebanken.tiamat.repository.listener.IdentifiedEntityListener;
-
-import javax.persistence.EntityListeners;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.MappedSuperclass;
 
 @MappedSuperclass
 @EntityListeners(IdentifiedEntityListener.class)

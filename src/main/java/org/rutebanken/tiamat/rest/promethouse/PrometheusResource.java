@@ -15,20 +15,18 @@
 
 package org.rutebanken.tiamat.rest.promethouse;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.Response;
 import org.rutebanken.tiamat.service.metrics.PrometheusMetricsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Response;
-
-@Api(tags = {"prometheus resource"}, produces = "text/plain")
+@Tag(name = "Prometheus resource", description = "Prometheus resource")
 @Produces("application/json")
 @Path("/")
 @Transactional
@@ -39,9 +37,8 @@ public class PrometheusResource {
 
     @GET
     @Path("/")
-    @ApiOperation(value = "Returns OK and scrape")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "scrape")
+    @Operation(summary = "Returns OK and scrape", responses = {
+            @ApiResponse(responseCode = "200", description = "scrape")
     })
     public Response scrap() {
         final String scrape = prometheusMetricsService.scrape();

@@ -15,6 +15,7 @@
 
 package org.rutebanken.tiamat.service.stopplace;
 
+import jakarta.transaction.Transactional;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
@@ -36,7 +37,6 @@ import org.rutebanken.tiamat.model.Value;
 import org.rutebanken.tiamat.model.VehicleModeEnumeration;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.transaction.Transactional;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;

@@ -16,13 +16,13 @@
 package org.rutebanken.tiamat.model.tag;
 
 import com.google.common.base.MoreObjects;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.IdClass;
 import java.io.Serializable;
 import java.time.Instant;
 

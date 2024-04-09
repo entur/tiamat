@@ -15,6 +15,7 @@
 
 package org.rutebanken.tiamat.exporter;
 
+import jakarta.xml.bind.JAXBException;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
@@ -28,7 +29,6 @@ import org.rutebanken.tiamat.repository.ExportJobRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.xml.sax.SAXException;
 
-import javax.xml.bind.JAXBException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.transform.TransformerException;

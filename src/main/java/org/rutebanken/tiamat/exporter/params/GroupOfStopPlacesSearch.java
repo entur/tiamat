@@ -31,8 +31,8 @@
 package org.rutebanken.tiamat.exporter.params;
 
 import com.google.common.base.MoreObjects;
+import jakarta.ws.rs.QueryParam;
 
-import javax.ws.rs.QueryParam;
 import java.util.List;
 
 public class GroupOfStopPlacesSearch implements SearchObject {

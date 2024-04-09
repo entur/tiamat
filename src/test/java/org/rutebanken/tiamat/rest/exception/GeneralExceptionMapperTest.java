@@ -15,14 +15,14 @@
 
 package org.rutebanken.tiamat.rest.exception;
 
+import jakarta.validation.ValidationException;
+import jakarta.ws.rs.NotAuthorizedException;
+import jakarta.ws.rs.core.Response;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.transaction.TransactionSystemException;
 
-import javax.validation.ValidationException;
-import javax.ws.rs.NotAuthorizedException;
-import javax.ws.rs.core.Response;
 import java.io.FileNotFoundException;
 
 

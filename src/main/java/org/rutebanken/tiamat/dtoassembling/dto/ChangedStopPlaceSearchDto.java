@@ -15,7 +15,7 @@
 
 package org.rutebanken.tiamat.dtoassembling.dto;
 
-import javax.ws.rs.QueryParam;
+import jakarta.ws.rs.QueryParam;
 
 /**
  * DTO for search for stop places with effective change in period.

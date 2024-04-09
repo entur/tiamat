@@ -15,6 +15,10 @@
 
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
+import jakarta.ws.rs.core.Link;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
+import jakarta.xml.bind.JAXBException;
 import org.glassfish.jersey.uri.internal.JerseyUriBuilder;
 import org.junit.Assert;
 import org.junit.Test;
@@ -41,10 +45,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.xml.sax.SAXException;
 
-import javax.ws.rs.core.Link;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
-import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.Instant;

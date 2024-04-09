@@ -15,12 +15,11 @@
 
 package org.rutebanken.tiamat.config;
 
+import jakarta.persistence.EntityManagerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.orm.jpa.JpaTransactionManager;
-
-import javax.persistence.EntityManagerFactory;
 
 /**
  * Configure a chained transaction manager for best effort multi resource transactions (db + jms).

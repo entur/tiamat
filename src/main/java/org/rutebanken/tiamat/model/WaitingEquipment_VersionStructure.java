@@ -15,7 +15,8 @@
 
 package org.rutebanken.tiamat.model;
 
-import javax.persistence.MappedSuperclass;
+import jakarta.persistence.MappedSuperclass;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 

@@ -16,6 +16,7 @@
 package org.rutebanken.tiamat.service.stopplace;
 
 import com.google.common.base.Strings;
+import jakarta.persistence.EntityManager;
 import org.hibernate.Session;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -23,7 +24,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import javax.persistence.EntityManager;
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;

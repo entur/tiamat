@@ -17,6 +17,10 @@ package org.rutebanken.tiamat.repository;
 
 
 import com.google.common.base.Strings;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 import org.apache.commons.lang3.NotImplementedException;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
@@ -32,10 +36,6 @@ import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
