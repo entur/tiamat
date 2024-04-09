@@ -34,7 +34,7 @@ import static org.rutebanken.tiamat.rest.netex.publicationdelivery.AsyncExportRe
 public class ExportJob {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(generator = "sequence_per_table_generator")
     @Schema(description = "Unique id for the entity")
     private Long id;
 

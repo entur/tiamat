@@ -49,7 +49,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.util.Pair;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.ZonedDateTime;
@@ -636,11 +635,9 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
             query.setMaxResults(exportParams.getStopPlaceSearch().getPageable().getPageSize());
         }
         searchHelper.addParams(query, pair.getSecond());
-
         Set<Long> result = new HashSet<>();
         for(Object object : query.list()) {
-            BigInteger bigInteger = (BigInteger) object;
-            result.add(bigInteger.longValue());
+            result.add((Long) object);
 
         }
 
