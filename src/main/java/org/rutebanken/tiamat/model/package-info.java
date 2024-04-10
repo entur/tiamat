@@ -14,8 +14,9 @@
  * limitations under the Licence.
  */
 
-@GenericGenerator(name = "sequence_per_table_generator",
-        strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator",
+@GenericGenerator(
+        name = "sequence_per_table_generator",
+        type = org.hibernate.id.enhanced.SequenceStyleGenerator.class,
         parameters = {
                 @Parameter(name = SequenceStyleGenerator.CONFIG_SEQUENCE_PER_ENTITY_SUFFIX, value = "_seq"),
                 @Parameter(name = OptimizableGenerator.INCREMENT_PARAM, value = "10")

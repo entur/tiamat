@@ -58,7 +58,7 @@ public class GroupOfStopPlacesRepositoryImpl implements GroupOfStopPlacesReposit
 
         Pair<String, Map<String, Object>> pair = groupOfStopPlacesQueryFromSearchBuilder.buildQueryFromSearch(search);
         Session session = entityManager.unwrap(SessionImpl.class);
-        NativeQuery query = session.createNativeQuery(pair.getFirst());
+        NativeQuery query = session.createNativeQuery(pair.getFirst(), GroupOfStopPlaces.class);
         query.addEntity(GroupOfStopPlaces.class);
 
         searchHelper.addParams(query, pair.getSecond());
@@ -99,7 +99,7 @@ public class GroupOfStopPlacesRepositoryImpl implements GroupOfStopPlacesReposit
 
     private Iterator<GroupOfStopPlaces> scrollGroupOfStopPlaces(String sql) {
         Session session = entityManager.unwrap(Session.class);
-        NativeQuery sqlQuery = session.createNativeQuery(sql);
+        NativeQuery sqlQuery = session.createNativeQuery(sql, GroupOfStopPlaces.class);
 
         final int fetchSize = 100;
 

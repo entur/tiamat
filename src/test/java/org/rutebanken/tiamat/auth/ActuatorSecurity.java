@@ -19,7 +19,7 @@ public class ActuatorSecurity {
         http
                 .cors(withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
-                .authorizeRequests( authz -> authz.requestMatchers(AntPathRequestMatcher.antMatcher("health")).permitAll());
+                .authorizeHttpRequests(authz -> authz.requestMatchers(AntPathRequestMatcher.antMatcher("health")).permitAll());
 
         return http.build();
     }

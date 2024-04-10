@@ -56,7 +56,7 @@ public class GroupOfTariffZonesRepositoryImpl implements GroupOfTariffZonesRepos
 
         Pair<String, Map<String, Object>> pair = groupOfTariffZonesQueryFromSearchBuilder.buildQueryFromSearch(search);
         Session session = entityManager.unwrap(SessionImpl.class);
-        NativeQuery query = session.createNativeQuery(pair.getFirst());
+        NativeQuery query = session.createNativeQuery(pair.getFirst(), GroupOfTariffZones.class);
         query.addEntity(GroupOfTariffZones.class);
 
         searchHelper.addParams(query, pair.getSecond());
@@ -120,7 +120,7 @@ public class GroupOfTariffZonesRepositoryImpl implements GroupOfTariffZonesRepos
 
     private Iterator<GroupOfTariffZones> scrollGroupOfTariffZones(String sql) {
         Session session = entityManager.unwrap(Session.class);
-        NativeQuery sqlQuery = session.createNativeQuery(sql);
+        NativeQuery sqlQuery = session.createNativeQuery(sql, GroupOfTariffZones.class);
 
         final int fetchSize = 100;
 

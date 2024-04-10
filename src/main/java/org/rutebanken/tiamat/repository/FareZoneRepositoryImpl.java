@@ -39,7 +39,6 @@ import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigInteger;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -69,7 +68,7 @@ public class FareZoneRepositoryImpl implements FareZoneRepositoryCustom {
     public List<FareZone> findFareZones(FareZoneSearch search) {
         Pair<String, Map<String, Object>> pair = fareZoneQueryFromSearchBuilder.buildQueryFromSearch(search);
         Session session = entityManager.unwrap(SessionImpl.class);
-        NativeQuery nativeQuery = session.createNativeQuery(pair.getFirst());
+        NativeQuery nativeQuery = session.createNativeQuery(pair.getFirst(),FareZone.class);
         nativeQuery.addEntity(FareZone.class);
 
         searchHelper.addParams(nativeQuery, pair.getSecond());
@@ -164,7 +163,7 @@ public class FareZoneRepositoryImpl implements FareZoneRepositoryCustom {
 
     public Iterator<FareZone> scrollFareZones(String sql) {
         Session session = entityManager.unwrap(Session.class);
-        NativeQuery sqlQuery = session.createNativeQuery(sql);
+        NativeQuery sqlQuery = session.createNativeQuery(sql,FareZone.class);
 
         sqlQuery.addEntity(FareZone.class);
         sqlQuery.setReadOnly(true);
@@ -259,8 +258,8 @@ public class FareZoneRepositoryImpl implements FareZoneRepositoryCustom {
         logger.info(sql);
 
         Session session = entityManager.unwrap(Session.class);
-        NativeQuery query = session.createNativeQuery(sql);
-        return ((BigInteger) query.uniqueResult()).intValue();
+        NativeQuery query = session.createNativeQuery(sql,Long.class);
+        return ((Long) query.uniqueResult()).intValue();
     }
 
     public void updateStopPlaceTariffZoneRef() {
@@ -353,7 +352,7 @@ public class FareZoneRepositoryImpl implements FareZoneRepositoryCustom {
         logger.info(sql);
 
         Session session = entityManager.unwrap(Session.class);
-        NativeQuery query = session.createNativeQuery(sql);
+        NativeQuery query = session.createNativeQuery(sql,String.class);
         return  query.getResultList();
     }
 }
