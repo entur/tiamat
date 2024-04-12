@@ -39,7 +39,7 @@ public class Value implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence_per_table_generator")
-    @SequenceGenerator(name = "sequence_per_table_generator", sequenceName = "value_seq", allocationSize = 1)
+    @SequenceGenerator(name = "sequence_per_table_generator", sequenceName = "value_seq", allocationSize = 10)
     private long id;
 
     @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
