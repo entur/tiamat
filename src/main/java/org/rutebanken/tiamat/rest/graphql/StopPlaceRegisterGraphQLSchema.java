@@ -739,9 +739,9 @@ public class StopPlaceRegisterGraphQLSchema {
 
         registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_ENTITY_REF,ADDRESSABLE_PLACE,referenceFetcher);
 
-        registerDataFetcher(codeRegistryBuilder,FARE_ZONES,FARE_ZONES_AUTHORITY_REF,env -> env.getSource() instanceof FareZone fareZone ? fareZone.getTransportOrganisationRef() : null);
-        registerDataFetcher(codeRegistryBuilder,FARE_ZONES,FARE_ZONES_NEIGHBOURS,env -> fareZoneObjectTypeCreator.fareZoneNeighboursType(env));
-        registerDataFetcher(codeRegistryBuilder,FARE_ZONES,FARE_ZONES_MEMBERS,env -> fareZoneObjectTypeCreator.fareZoneMemberType(env));
+        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_FARE_ZONE,FARE_ZONES_AUTHORITY_REF,env -> env.getSource() instanceof FareZone fareZone ? fareZone.getTransportOrganisationRef() : null);
+        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_FARE_ZONE,FARE_ZONES_NEIGHBOURS,env -> fareZoneObjectTypeCreator.fareZoneNeighboursType(env));
+        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_FARE_ZONE,FARE_ZONES_MEMBERS,env -> fareZoneObjectTypeCreator.fareZoneMemberType(env));
 
         registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_GROUP_OF_STOPPLACES,PURPOSE_OF_GROUPING,groupOfStopPlacesPurposeOfGroupingFetcher);
         registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_GROUP_OF_STOPPLACES,GROUP_OF_STOP_PLACES_MEMBERS,groupOfStopPlacesMembersFetcher);
