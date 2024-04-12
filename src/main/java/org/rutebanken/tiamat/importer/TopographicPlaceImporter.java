@@ -74,7 +74,7 @@ public class TopographicPlaceImporter {
             if(incomingTopographicPlace.getParentTopographicPlaceRef() != null) {
 
                 boolean parentExist = false;
-                for(TopographicPlace parentTopographicPlace : parentTopographicPlaces) {
+                for(TopographicPlace parentTopographicPlace : topographicPlaces) {
                     if(parentTopographicPlace.getNetexId().equals(incomingTopographicPlace.getParentTopographicPlaceRef().getRef())) {
                         parentExist = true;
                         break;
