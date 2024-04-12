@@ -33,7 +33,7 @@ import java.lang.reflect.Type;
 import java.util.Optional;
 
 @Provider
-@Produces("text/plain")
+@Produces("application/xml;charset=UTF-8")
 public class ErrorResponseEntityMessageBodyWriter implements MessageBodyWriter<ErrorResponseEntity> {
 
     private static final Logger logger = LoggerFactory.getLogger(ErrorResponseEntityMessageBodyWriter.class);
@@ -56,8 +56,10 @@ public class ErrorResponseEntityMessageBodyWriter implements MessageBodyWriter<E
         Optional.ofNullable(errorResponseEntity.errors)
                 .ifPresent(errors -> errors.forEach(error -> {
                     try {
-                        writer.write(error.message);
-                        writer.write("\n");
+                        if (error.message != null) {
+                            writer.write(error.message);
+                            writer.write("\n");
+                        }
                     } catch (IOException e) {
                         logger.error("Cannot write error message when serializing error response entity", e);
                     }
