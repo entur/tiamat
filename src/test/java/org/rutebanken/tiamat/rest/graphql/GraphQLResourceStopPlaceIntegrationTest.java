@@ -29,6 +29,7 @@ import org.rutebanken.tiamat.model.BusSubmodeEnumeration;
 import org.rutebanken.tiamat.model.CycleStorageEnumeration;
 import org.rutebanken.tiamat.model.CycleStorageEquipment;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
+import org.rutebanken.tiamat.model.GenderLimitationEnumeration;
 import org.rutebanken.tiamat.model.GeneralSign;
 import org.rutebanken.tiamat.model.InterchangeWeightingEnumeration;
 import org.rutebanken.tiamat.model.LimitationStatusEnumeration;
@@ -135,6 +136,146 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                 .body("data.stopPlace[0].name.value", equalTo(stopPlaceName))
                 .body("data.stopPlace[0].quays.name.value", hasItems(firstQuayName, secondQuayName))
                 .body("data.stopPlace[0].quays.id", hasItems(quay.getNetexId(), secondQuay.getNetexId()));
+    }
+
+    @Test
+    public void retrieveStopPlaceWithPlaceEquipment() throws Exception {
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("StopPlace"));
+        stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(5, 60)));
+
+        PlaceEquipment placeEquipment = new PlaceEquipment();
+        List installedEquipments = new ArrayList<>();
+
+        SanitaryEquipment toalett = new SanitaryEquipment();
+        toalett.setNumberOfToilets(BigInteger.valueOf(2));
+        toalett.setGender(GenderLimitationEnumeration.BOTH);
+
+        installedEquipments.add(toalett);
+
+        ShelterEquipment shelterEquipment = new ShelterEquipment();
+        shelterEquipment.setSeats(BigInteger.valueOf(3));
+        shelterEquipment.setEnclosed(true);
+        shelterEquipment.setStepFree(true);
+
+        installedEquipments.add(shelterEquipment);
+
+        CycleStorageEquipment cycleStorageEquipment = new CycleStorageEquipment();
+        cycleStorageEquipment.setNumberOfSpaces(BigInteger.valueOf(4));
+        cycleStorageEquipment.setCycleStorageType(CycleStorageEnumeration.BARS);
+        cycleStorageEquipment.setCovered(true);
+
+        installedEquipments.add(cycleStorageEquipment);
+
+        WaitingRoomEquipment waitingRoomEquipment = new WaitingRoomEquipment();
+        waitingRoomEquipment.setSeats(BigInteger.valueOf(5));
+        waitingRoomEquipment.setHeated(true);
+        waitingRoomEquipment.setStepFree(true);
+
+        installedEquipments.add(waitingRoomEquipment);
+
+        TicketingEquipment ticketingEquipment = new TicketingEquipment();
+        ticketingEquipment.setTicketMachines(true);
+        ticketingEquipment.setTicketOffice(true);
+        ticketingEquipment.setNumberOfMachines(BigInteger.valueOf(6));
+
+        installedEquipments.add(ticketingEquipment);
+
+        GeneralSign generalSign = new GeneralSign();
+        generalSign.setContent(new EmbeddableMultilingualString("General sign"));
+        generalSign.setPrivateCode(new PrivateCodeStructure("1234","type"));
+
+        installedEquipments.add(generalSign);
+
+
+
+
+
+
+        placeEquipment.getInstalledEquipment().addAll(installedEquipments);
+
+        stopPlace.setPlaceEquipments(placeEquipment);
+
+
+        stopPlaceRepository.save(stopPlace);
+
+        String graphQlJsonQuery = """
+                  {
+                  stopPlace:  stopPlace (query:"StopPlace", allVersions:true) {
+                            id
+                            name { value }
+                            placeEquipments {
+                                id
+                                shelterEquipment {
+                                    id
+                                    seats
+                                    enclosed
+                                    stepFree
+                                }
+                                sanitaryEquipment {
+                                    id
+                                    numberOfToilets
+                                }
+                                cycleStorageEquipment {
+                                    id
+                                    numberOfSpaces
+                                    cycleStorageType
+                                }
+                                waitingRoomEquipment {
+                                    id
+                                    seats
+                                    heated
+                                    stepFree
+                                }
+                                ticketingEquipment {
+                                    id
+                                    ticketMachines
+                                    ticketOffice
+                                    numberOfMachines
+                                }
+                                generalSign {
+                                    id
+                                    content { value }
+                                    privateCode {
+                                        value
+                                        type
+                                    }
+                                }
+                            }
+                        }
+                    }""";
+
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
+                .rootPath("data.stopPlace[0]")
+                .body("id", equalTo(stopPlace.getNetexId()))
+                .body("name.value", equalTo("StopPlace"))
+                .body("placeEquipments.id", equalTo(placeEquipment.getNetexId()))
+
+                //generalSign
+                .body("placeEquipments.generalSign[0].id", equalTo(generalSign.getNetexId()))
+                .body("placeEquipments.generalSign[0].content.value", equalTo(generalSign.getContent().getValue()))
+                .body("placeEquipments.generalSign[0].privateCode.value", equalTo(generalSign.getPrivateCode().getValue()))
+                //ticketingEquipment
+                .body("placeEquipments.ticketingEquipment[0].id", equalTo(ticketingEquipment.getNetexId()))
+                .body("placeEquipments.ticketingEquipment[0].ticketMachines", equalTo(ticketingEquipment.isTicketMachines()))
+                .body("placeEquipments.ticketingEquipment[0].ticketOffice", equalTo(ticketingEquipment.isTicketOffice()))
+                .body("placeEquipments.ticketingEquipment[0].numberOfMachines", equalTo(ticketingEquipment.getNumberOfMachines().intValue()))
+                //waitingRoomEquipment
+                .body("placeEquipments.waitingRoomEquipment[0].id", equalTo(waitingRoomEquipment.getNetexId()))
+                .body("placeEquipments.waitingRoomEquipment[0].seats", equalTo(waitingRoomEquipment.getSeats().intValue()))
+                .body("placeEquipments.waitingRoomEquipment[0].heated", equalTo(waitingRoomEquipment.isHeated()))
+                .body("placeEquipments.waitingRoomEquipment[0].stepFree", equalTo(waitingRoomEquipment.isStepFree()))
+                //shelterEquipment
+                .body("placeEquipments.shelterEquipment[0].id", equalTo(shelterEquipment.getNetexId()))
+                .body("placeEquipments.shelterEquipment[0].seats", equalTo(shelterEquipment.getSeats().intValue()))
+                .body("placeEquipments.shelterEquipment[0].enclosed", equalTo(shelterEquipment.isEnclosed()))
+                .body("placeEquipments.shelterEquipment[0].stepFree", equalTo(shelterEquipment.isStepFree()))
+                //sanitaryEquipment
+                .body("placeEquipments.sanitaryEquipment[0].numberOfToilets", equalTo(toalett.getNumberOfToilets().intValue()))
+                .body("placeEquipments.sanitaryEquipment[0].id", equalTo(toalett.getNetexId()))
+                //cycleStorageEquipment
+                .body("placeEquipments.cycleStorageEquipment[0].id", equalTo(cycleStorageEquipment.getNetexId()))
+                .body("placeEquipments.cycleStorageEquipment[0].numberOfSpaces", equalTo(cycleStorageEquipment.getNumberOfSpaces().intValue()));
+
     }
 
     @Test
@@ -292,7 +433,6 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
      */
     @Test
     public void searchForStopPlaceByQuayOriginalIdQuery() throws Exception {
-//        String stopPlaceName = "Hesteløpsbanen";
         String stopPlaceName = "Travbanen";
         StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(stopPlaceName));
 

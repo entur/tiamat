@@ -713,6 +713,7 @@ public class StopPlaceRegisterGraphQLSchema {
             return null;
         });
 
+        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_PLACE_EQUIPMENTS,ID,getNetexIdFetcher());
         registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_PLACE_EQUIPMENTS,WAITING_ROOM_EQUIPMENT,env -> getEquipmentOfType(WaitingRoomEquipment.class, env));
         registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_PLACE_EQUIPMENTS,SANITARY_EQUIPMENT,env -> getEquipmentOfType(SanitaryEquipment.class, env));
         registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_PLACE_EQUIPMENTS,TICKETING_EQUIPMENT,env -> getEquipmentOfType(TicketingEquipment.class, env));
@@ -728,6 +729,13 @@ public class StopPlaceRegisterGraphQLSchema {
             }
             return null;
         });
+
+        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_SHELTER_EQUIPMENT,ID,getNetexIdFetcher());
+        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_SANITARY_EQUIPMENT,ID,getNetexIdFetcher());
+        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_CYCLE_STORAGE_EQUIPMENT,ID,getNetexIdFetcher());
+        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_GENERAL_SIGN_EQUIPMENT,ID,getNetexIdFetcher());
+        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_TICKETING_EQUIPMENT,ID,getNetexIdFetcher());
+        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_WAITING_ROOM_EQUIPMENT,ID,getNetexIdFetcher());
 
         registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_ENTITY_REF,ADDRESSABLE_PLACE,referenceFetcher);
 
@@ -756,10 +764,9 @@ public class StopPlaceRegisterGraphQLSchema {
             }
         });
         registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_TOPOGRAPHIC_PLACE,PARENT_TOPOGRAPHIC_PLACE,env -> {
-            if(env.getSource() instanceof  TopographicPlace) {
-                TopographicPlace child = (TopographicPlace) env.getSource();
-                if(child.getParentTopographicPlaceRef() != null) {
-                    return topographicPlaceRepository.findFirstByNetexIdAndVersion(child.getParentTopographicPlaceRef().getRef(), Long.parseLong(child.getParentTopographicPlaceRef().getVersion()));
+            if(env.getSource() instanceof  TopographicPlace topographicPlace) {
+                if(topographicPlace.getParentTopographicPlaceRef() != null) {
+                    return topographicPlaceRepository.findFirstByNetexIdAndVersion(topographicPlace.getParentTopographicPlaceRef().getRef(), Long.parseLong(topographicPlace.getParentTopographicPlaceRef().getVersion()));
                 }
             }
             return null;
