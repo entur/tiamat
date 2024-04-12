@@ -54,7 +54,8 @@ import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDI
 @Api(tags = {"Import resource"}, produces = "application/xml")
 @Produces(MediaType.APPLICATION_XML + "; charset=UTF-8")
 @Path("netex")
-@PreAuthorize("hasRole('"+ROLE_EDIT_STOPS+"')")
+// Disabled until a proper authorization has been implemented
+//@PreAuthorize("hasRole('"+ROLE_EDIT_STOPS+"')")
 public class ImportResource {
 
     private static final Logger logger = LoggerFactory.getLogger(ImportResource.class);
