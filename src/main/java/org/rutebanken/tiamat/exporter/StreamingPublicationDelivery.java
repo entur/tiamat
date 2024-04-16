@@ -15,6 +15,12 @@
 
 package org.rutebanken.tiamat.exporter;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Marshaller;
 import org.hibernate.internal.SessionImpl;
 import org.rutebanken.netex.model.DataManagedObjectStructure;
 import org.rutebanken.netex.model.FareZone;
@@ -77,12 +83,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.xml.sax.SAXException;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -97,7 +97,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static javax.xml.bind.JAXBContext.newInstance;
+import static jakarta.xml.bind.JAXBContext.newInstance;
 
 /**
  * Stream data objects inside already serialized publication delivery.

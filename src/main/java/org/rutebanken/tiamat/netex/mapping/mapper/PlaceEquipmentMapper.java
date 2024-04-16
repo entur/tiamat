@@ -15,6 +15,7 @@
 
 package org.rutebanken.tiamat.netex.mapping.mapper;
 
+import jakarta.xml.bind.JAXBElement;
 import ma.glasnost.orika.CustomMapper;
 import ma.glasnost.orika.MappingContext;
 import org.rutebanken.netex.model.CycleStorageEquipment;
@@ -29,7 +30,6 @@ import org.rutebanken.netex.model.WaitingRoomEquipment;
 import org.rutebanken.tiamat.model.PlaceEquipment;
 import org.springframework.stereotype.Component;
 
-import javax.xml.bind.JAXBElement;
 import java.util.List;
 import java.util.stream.Collectors;
 

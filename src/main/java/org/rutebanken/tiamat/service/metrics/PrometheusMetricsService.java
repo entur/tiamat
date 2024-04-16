@@ -4,12 +4,12 @@ import io.micrometer.core.instrument.ImmutableTag;
 import io.micrometer.core.instrument.Tag;
 import io.micrometer.prometheus.PrometheusConfig;
 import io.micrometer.prometheus.PrometheusMeterRegistry;
+import jakarta.annotation.PreDestroy;
 import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PreDestroy;
 import java.util.ArrayList;
 import java.util.List;
 

@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.netex.mapping.mapper;
 
+import jakarta.xml.bind.JAXBElement;
 import ma.glasnost.orika.CustomMapper;
 import ma.glasnost.orika.MappingContext;
 import org.apache.commons.lang3.StringUtils;
@@ -15,7 +16,6 @@ import org.rutebanken.netex.model.ScopingMethodEnumeration;
 import org.rutebanken.tiamat.model.StopPlaceReference;
 import org.rutebanken.tiamat.model.TariffZoneRef;
 
-import javax.xml.bind.JAXBElement;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;

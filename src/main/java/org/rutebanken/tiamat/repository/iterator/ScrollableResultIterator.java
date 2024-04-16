@@ -78,8 +78,14 @@ public class ScrollableResultIterator<T> implements Iterator<T> {
 
     @SuppressWarnings("unchecked")
     private Optional<T> getNext() {
-        if (scrollableResults.next() && scrollableResults.get() != null && scrollableResults.get().length > 0) {
-            return Optional.of((T) scrollableResults.get()[0]);
+        if (scrollableResults.next() && scrollableResults.get() != null) {
+            if(scrollableResults.get().getClass().isArray()){
+                // Cast needed for Hibernate 6 compatibility
+                Object[] row = (Object[]) scrollableResults.get();
+                return Optional.of((T) row[0]);
+            } else {
+                return Optional.of((T) scrollableResults.get());
+            }
         } else {
             return Optional.empty();
         }

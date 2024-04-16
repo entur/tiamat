@@ -15,6 +15,7 @@
 
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
+import jakarta.xml.bind.JAXBElement;
 import org.junit.Test;
 import org.rutebanken.netex.model.FareZone;
 import org.rutebanken.netex.model.LocationStructure;
@@ -36,7 +37,6 @@ import org.rutebanken.tiamat.importer.ImportParams;
 import org.rutebanken.tiamat.importer.ImportType;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.xml.bind.JAXBElement;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;

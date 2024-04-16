@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.entur.ror</groupId>
         <artifactId>superpom</artifactId>
-        <version>1.68</version>
+        <version>2.10</version>
     </parent>
     <groupId>org.rutebanken</groupId>
     <artifactId>tiamat</artifactId>
@@ -49,17 +49,19 @@
     </scm>
 
     <properties>
-        <java.version>17</java.version>
-        <spring-cloud-gcp.version>4.8.3</spring-cloud-gcp.version>
+        <java.version>21</java.version>
+        <spring-cloud-gcp.version>5.1.0</spring-cloud-gcp.version>
         <geotools.version>30.2</geotools.version>
         <orika-core.version>1.5.4</orika-core.version>
         <graphql-java.version>20.2</graphql-java.version>
         <hazelcast-hibernate53.version>5.1.0</hazelcast-hibernate53.version>
         <hazelcast.version>5.2.4</hazelcast.version>
-        <swagger-jersey2.version>1.6.2</swagger-jersey2.version>
-        <netex-java-model.version>1.0.14</netex-java-model.version>
-        <entur.helpers.version>1.100</entur.helpers.version>
+        <swagger-jersey2.version>2.2.20</swagger-jersey2.version>
+        <netex-java-model.version>2.0.14</netex-java-model.version>
+        <entur.helpers.version>2.11</entur.helpers.version>
         <jts-core.version>1.19.0</jts-core.version>
+        <groovy-all.version>4.0.17</groovy-all.version>
+        <rest-assured.version>5.4.0</rest-assured.version>
         <argLine/>
 
         <xercesImpl.version>2.12.2</xercesImpl.version>
@@ -90,15 +92,9 @@
         </dependency>
 
         <dependency>
-            <groupId>io.swagger</groupId>
-            <artifactId>swagger-jersey2-jaxrs</artifactId>
+            <groupId>io.swagger.core.v3</groupId>
+            <artifactId>swagger-jaxrs2-jakarta</artifactId>
             <version>${swagger-jersey2.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.fasterxml.jackson.core</groupId>
-                    <artifactId>jackson-databind</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
         <dependency>
@@ -131,8 +127,8 @@
             <artifactId>jaxb-xjc</artifactId>
         </dependency>
         <dependency>
-            <groupId>javax.jms</groupId>
-            <artifactId>javax.jms-api</artifactId>
+            <groupId>jakarta.jms</groupId>
+            <artifactId>jakarta.jms-api</artifactId>
         </dependency>
         <dependency>
             <groupId>io.dropwizard.metrics</groupId>
@@ -255,6 +251,11 @@
         </dependency>
 
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-activemq</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-config</artifactId>
         </dependency>
@@ -276,18 +277,13 @@
         </dependency>
 
         <dependency>
-            <groupId>org.hibernate</groupId>
+            <groupId>org.hibernate.orm</groupId>
             <artifactId>hibernate-spatial</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>org.hibernate</groupId>
+            <groupId>org.hibernate.orm</groupId>
             <artifactId>hibernate-core</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-entitymanager</artifactId>
         </dependency>
 
         <dependency>
@@ -358,6 +354,14 @@
         </dependency>
 
         <dependency>
+            <groupId>org.apache.groovy</groupId>
+            <artifactId>groovy-all</artifactId>
+            <version>${groovy-all.version}</version>
+            <type>pom</type>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
             <groupId>io.rest-assured</groupId>
             <artifactId>rest-assured</artifactId>
             <exclusions>
@@ -367,6 +371,7 @@
                 </exclusion>
             </exclusions>
             <scope>test</scope>
+            <version>${rest-assured.version}</version>
         </dependency>
 
         <dependency>
@@ -388,22 +393,6 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-jms</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.activemq</groupId>
-            <artifactId>activemq-client</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.activemq</groupId>
-            <artifactId>activemq-kahadb-store</artifactId>
-            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.vintage</groupId>

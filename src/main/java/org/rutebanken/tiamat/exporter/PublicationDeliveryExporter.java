@@ -15,6 +15,7 @@
 
 package org.rutebanken.tiamat.exporter;
 
+import jakarta.xml.bind.JAXBElement;
 import org.rutebanken.netex.model.DataManagedObjectStructure;
 import org.rutebanken.netex.model.MultilingualString;
 import org.rutebanken.netex.model.ObjectFactory;
@@ -37,7 +38,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.xml.bind.JAXBElement;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;

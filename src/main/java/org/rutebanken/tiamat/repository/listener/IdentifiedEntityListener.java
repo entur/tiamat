@@ -14,10 +14,9 @@ package org.rutebanken.tiamat.repository.listener;
  * limitations under the Licence.
  */
 
+import jakarta.persistence.PrePersist;
 import org.rutebanken.tiamat.config.ApplicationContextProvider;
 import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
-
-import javax.persistence.PrePersist;
 
 public class IdentifiedEntityListener {
 

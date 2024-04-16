@@ -15,6 +15,7 @@
 
 package org.rutebanken.tiamat.service.stopplace;
 
+import jakarta.persistence.EntityManager;
 import org.hibernate.Session;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,7 +26,6 @@ import org.rutebanken.tiamat.model.SiteRefStructure;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 
-import javax.persistence.EntityManager;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;

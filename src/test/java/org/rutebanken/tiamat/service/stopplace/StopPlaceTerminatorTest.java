@@ -15,6 +15,7 @@
 
 package org.rutebanken.tiamat.service.stopplace;
 
+import jakarta.transaction.Transactional;
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
@@ -24,7 +25,6 @@ import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.ValidBetween;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.transaction.Transactional;
 import java.time.Instant;
 
 import static org.assertj.core.api.Assertions.assertThat;

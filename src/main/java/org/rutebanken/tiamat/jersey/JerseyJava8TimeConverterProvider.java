@@ -1,13 +1,13 @@
 package org.rutebanken.tiamat.jersey;
 
 
+import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.ext.ParamConverter;
+import jakarta.ws.rs.ext.ParamConverterProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.NotFoundException;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.ext.ParamConverter;
-import javax.ws.rs.ext.ParamConverterProvider;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.time.DateTimeException;

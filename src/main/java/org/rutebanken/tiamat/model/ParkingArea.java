@@ -15,10 +15,11 @@
 
 package org.rutebanken.tiamat.model;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.OneToOne;
-import javax.persistence.Transient;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Transient;
+
 import java.math.BigInteger;
 
 

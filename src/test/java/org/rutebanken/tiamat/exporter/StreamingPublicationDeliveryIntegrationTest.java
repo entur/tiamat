@@ -15,6 +15,9 @@
 
 package org.rutebanken.tiamat.exporter;
 
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Unmarshaller;
 import org.junit.Test;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.netex.validation.NeTExValidator;
@@ -46,9 +49,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.transaction.annotation.Transactional;
 import org.xml.sax.SAXException;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
 import javax.xml.stream.XMLStreamException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -60,7 +60,7 @@ import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
-import static javax.xml.bind.JAXBContext.newInstance;
+import static jakarta.xml.bind.JAXBContext.newInstance;
 import static org.assertj.core.api.Assertions.assertThat;
 @Transactional
 public class StreamingPublicationDeliveryIntegrationTest extends TiamatIntegrationTest {

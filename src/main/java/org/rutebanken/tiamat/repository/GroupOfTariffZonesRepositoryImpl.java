@@ -15,6 +15,8 @@
 
 package org.rutebanken.tiamat.repository;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
@@ -31,8 +33,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -56,7 +56,7 @@ public class GroupOfTariffZonesRepositoryImpl implements GroupOfTariffZonesRepos
 
         Pair<String, Map<String, Object>> pair = groupOfTariffZonesQueryFromSearchBuilder.buildQueryFromSearch(search);
         Session session = entityManager.unwrap(SessionImpl.class);
-        NativeQuery query = session.createNativeQuery(pair.getFirst());
+        NativeQuery query = session.createNativeQuery(pair.getFirst(), GroupOfTariffZones.class);
         query.addEntity(GroupOfTariffZones.class);
 
         searchHelper.addParams(query, pair.getSecond());
@@ -120,7 +120,7 @@ public class GroupOfTariffZonesRepositoryImpl implements GroupOfTariffZonesRepos
 
     private Iterator<GroupOfTariffZones> scrollGroupOfTariffZones(String sql) {
         Session session = entityManager.unwrap(Session.class);
-        NativeQuery sqlQuery = session.createNativeQuery(sql);
+        NativeQuery sqlQuery = session.createNativeQuery(sql, GroupOfTariffZones.class);
 
         final int fetchSize = 100;
 

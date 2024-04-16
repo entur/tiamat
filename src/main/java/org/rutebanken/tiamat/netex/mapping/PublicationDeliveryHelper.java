@@ -15,6 +15,7 @@
 
 package org.rutebanken.tiamat.netex.mapping;
 
+import jakarta.xml.bind.JAXBElement;
 import org.rutebanken.netex.model.Common_VersionFrameStructure;
 import org.rutebanken.netex.model.CompositeFrame;
 import org.rutebanken.netex.model.DataManagedObjectStructure;
@@ -23,7 +24,6 @@ import org.rutebanken.netex.model.SiteFrame;
 import org.rutebanken.netex.model.TopographicPlace;
 import org.springframework.stereotype.Component;
 
-import javax.xml.bind.JAXBElement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
