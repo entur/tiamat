@@ -33,7 +33,7 @@ public class OAuth2Config {
             String enturPartnerAuth0Issuer,
             @Value("${tiamat.oauth2.resourceserver.auth0.ror.jwt.audience:}")
             String rorAuth0Audience,
-            @Value("${timat.oauth2.resourceserver.auth0.ror.jwt.issuer-uri:}")
+            @Value("${tiamat.oauth2.resourceserver.auth0.ror.jwt.issuer-uri:}")
             String rorAuth0Issuer,
             @Value("${tiamat.oauth2.resourceserver.auth0.ror.claim.namespace:}")
             String rorAuth0ClaimNamespace) {
