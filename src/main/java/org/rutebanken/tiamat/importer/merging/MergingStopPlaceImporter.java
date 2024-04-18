@@ -229,7 +229,7 @@ public class MergingStopPlaceImporter {
         // Find existing nearby stop place based on type
         final List<StopPlace> nearbyStopsWithSameType = nearbyStopsWithSameTypeFinder.find(newStopPlace);
         if (!nearbyStopsWithSameType.isEmpty()) {
-            StopPlace nearbyStopWithSameType = nearbyStopsWithSameType.get(0);
+            StopPlace nearbyStopWithSameType = nearbyStopsWithSameType.getFirst();
             logger.debug("Found nearby stop place with same type: {}", nearbyStopWithSameType);
             return nearbyStopWithSameType;
         }

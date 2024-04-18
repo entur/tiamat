@@ -44,7 +44,7 @@ public class PathLinksImporterTest extends TiamatIntegrationTest {
         List<org.rutebanken.netex.model.PathLink> netexPathLinks =  pathLinksImporter.importPathLinks(Arrays.asList(pathLink), pathLinkCounter);
         assertThat(netexPathLinks).isNotEmpty();
         assertThat(netexPathLinks).hasSize(1);
-        org.rutebanken.netex.model.PathLink actualNetexPathLink = netexPathLinks.get(0);
+        org.rutebanken.netex.model.PathLink actualNetexPathLink = netexPathLinks.getFirst();
         assertThat(actualNetexPathLink.getId()).isNotEmpty();
         assertThat(actualNetexPathLink.getFrom().getPlaceRef()).isNotNull();
         assertThat(actualNetexPathLink.getTo().getPlaceRef()).isNotNull();
@@ -63,7 +63,7 @@ public class PathLinksImporterTest extends TiamatIntegrationTest {
 
         assertThat(firsts).hasSize(1);
         assertThat(seconds).hasSize(1);
-        assertThat(firsts.get(0).getId()).isEqualTo(seconds.get(0).getId());
+        assertThat(firsts.getFirst().getId()).isEqualTo(seconds.getFirst().getId());
     }
 
     @Test
@@ -91,7 +91,7 @@ public class PathLinksImporterTest extends TiamatIntegrationTest {
 
         List<org.rutebanken.netex.model.PathLink> result = pathLinksImporter.importPathLinks(Arrays.asList(pathLink), pathLinkCounter);
 
-        org.rutebanken.netex.model.PathLink actual = result.get(0);
+        org.rutebanken.netex.model.PathLink actual = result.getFirst();
         assertThat(actual.getFrom().getPlaceRef().getRef()).contains("NSR:Quay:");
         assertThat(actual.getTo().getPlaceRef().getRef()).contains("NSR:Quay:");
 

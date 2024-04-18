@@ -171,7 +171,7 @@ public class ExportResourceTest extends TiamatIntegrationTest {
         List<StopPlace> stopPlaces = publicationDeliveryTestHelper.extractStopPlaces(siteFrame);
         Assert.assertEquals(2, stopPlaces.size());
 
-        GroupOfStopPlaces netexGroupOfStopPlaces = publicationDeliveryTestHelper.extractGroupOfStopPlaces(siteFrame).get(0);
+        GroupOfStopPlaces netexGroupOfStopPlaces = publicationDeliveryTestHelper.extractGroupOfStopPlaces(siteFrame).getFirst();
 
         assertThat(netexGroupOfStopPlaces).isNotNull();
 
@@ -236,7 +236,7 @@ public class ExportResourceTest extends TiamatIntegrationTest {
         Response response = exportResource.exportStopPlacesWithEffectiveChangedInPeriod(search, newExportParamsBuilder().build(), uriInfoMock);
         List<StopPlace> changedStopPlaces = publicationDeliveryTestHelper.extractStopPlaces(response);
         Assert.assertEquals(1, changedStopPlaces.size());
-        Assert.assertEquals(stopPlace1.getName().getValue(), changedStopPlaces.get(0).getName().getValue());
+        Assert.assertEquals(stopPlace1.getName().getValue(), changedStopPlaces.getFirst().getName().getValue());
 
         Link link = response.getLink("next");
         Assert.assertNotNull(link);

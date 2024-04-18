@@ -89,7 +89,7 @@ public class TopographicPlaceImportTest extends TiamatIntegrationTest {
 
         List<TopographicPlace> result = publicationDeliveryTestHelper.extractTopographicPlace(response);
         assertThat(result).as("Expecting topographic place in return").hasSize(1);
-        TopographicPlace actualTopographicPlace = result.get(0);
+        TopographicPlace actualTopographicPlace = result.getFirst();
 
         assertThat(actualTopographicPlace.getPolygon())
                 .as("polygon must not be null")
@@ -190,13 +190,13 @@ public class TopographicPlaceImportTest extends TiamatIntegrationTest {
 
         List<TopographicPlace> result = publicationDeliveryTestHelper.extractTopographicPlace(response);
         assertThat(result).as("Expecting topographic place in return").hasSize(1);
-        assertThat(result.get(0).getVersion()).isEqualTo("1");
+        assertThat(result.getFirst().getVersion()).isEqualTo("1");
 
         response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery);
         result = publicationDeliveryTestHelper.extractTopographicPlace(response);
 
         assertThat(result).as("Expecting topographic place in return").hasSize(1);
-        assertThat(result.get(0).getVersion()).isEqualTo("2");
+        assertThat(result.getFirst().getVersion()).isEqualTo("2");
     }
 
     @Test(expected = Exception.class)

@@ -149,8 +149,8 @@ public class StopPlaceMergerTest extends TiamatIntegrationTest {
         List<InstalledEquipment_VersionStructure> equipment = placeEquipment.getInstalledEquipment();
         assertThat(equipment).hasSize(1);
         assertThat(equipment).doesNotContain(generalSign); // Result from merge does not contain same object
-        assertThat(equipment.get(0)).isInstanceOf(GeneralSign.class);
-        assertThat(((GeneralSign) equipment.get(0)).getSignContentType()).isEqualTo(SignContentEnumeration.TRANSPORT_MODE);
+        assertThat(equipment.getFirst()).isInstanceOf(GeneralSign.class);
+        assertThat(((GeneralSign) equipment.getFirst()).getSignContentType()).isEqualTo(SignContentEnumeration.TRANSPORT_MODE);
 
         // assertQuays
         assertThat(mergedStopPlace.getQuays()).hasSize(2);

@@ -139,8 +139,8 @@ public class ImportResourceTest extends TiamatIntegrationTest {
         List<StopPlace> result = publicationDeliveryTestHelper.extractStopPlaces(response);
 
         assertThat(result).as("Expecting one stop place in return, as stops imported has onstreet bus and bus station as type").hasSize(1);
-        publicationDeliveryTestHelper.hasOriginalId("RUT:StopPlace:123123", result.get(0));
-        publicationDeliveryTestHelper.hasOriginalId("RUT:StopPlace:987654321", result.get(0));
+        publicationDeliveryTestHelper.hasOriginalId("RUT:StopPlace:123123", result.getFirst());
+        publicationDeliveryTestHelper.hasOriginalId("RUT:StopPlace:987654321", result.getFirst());
     }
 
     @Test
@@ -181,7 +181,7 @@ public class ImportResourceTest extends TiamatIntegrationTest {
         List<StopPlace> result = publicationDeliveryTestHelper.extractStopPlaces(response);
 
         assertThat(result).hasSize(1);
-        assertThat(result.get(0).getStopPlaceType()).isEqualTo(StopTypeEnumeration.METRO_STATION);
+        assertThat(result.getFirst().getStopPlaceType()).isEqualTo(StopTypeEnumeration.METRO_STATION);
     }
 
     @Test
@@ -198,7 +198,7 @@ public class ImportResourceTest extends TiamatIntegrationTest {
         List<StopPlace> result = publicationDeliveryTestHelper.extractStopPlaces(response);
 
         assertThat(result).hasSize(1);
-        assertThat(result.get(0).getStopPlaceType()).isEqualTo(StopTypeEnumeration.BUS_STATION);
+        assertThat(result.getFirst().getStopPlaceType()).isEqualTo(StopTypeEnumeration.BUS_STATION);
     }
 
     @Test
@@ -237,8 +237,8 @@ public class ImportResourceTest extends TiamatIntegrationTest {
         List<StopPlace> result = publicationDeliveryTestHelper.extractStopPlaces(response);
 
         assertThat(result).as("Expecting one stop place in return, as stops imported has onstreet bus and bus station as type").hasSize(1);
-        publicationDeliveryTestHelper.hasOriginalId(stopPlaceToBeMatched.getId(), result.get(0));
-        publicationDeliveryTestHelper.hasOriginalId(incomingStopPlace.getId(), result.get(0));
+        publicationDeliveryTestHelper.hasOriginalId(stopPlaceToBeMatched.getId(), result.getFirst());
+        publicationDeliveryTestHelper.hasOriginalId(incomingStopPlace.getId(), result.getFirst());
     }
 
     /**
@@ -295,7 +295,7 @@ public class ImportResourceTest extends TiamatIntegrationTest {
         assertThat(result).as("Expecting one stop place in return, as there is no need to return duplicates").hasSize(1);
         assertThat(result2).as("Expecting one stop place in return, as there is no need to return duplicates").hasSize(1);
         assertThat(result3).as("Expecting one stop place in return, as there is no need to return duplicates").hasSize(1);
-        assertThat(result3.get(0).getVersion()).isEqualTo("3");
+        assertThat(result3.getFirst().getVersion()).isEqualTo("3");
     }
 
 
@@ -356,7 +356,7 @@ public class ImportResourceTest extends TiamatIntegrationTest {
         List<StopPlace> result = publicationDeliveryTestHelper.extractStopPlaces(response);
 
         assertThat(result).as("Expecting one stop place in return, as there is no need to return the same matching stop place twice").hasSize(1);
-        String importedIds = result.get(0).getKeyList().getKeyValue()
+        String importedIds = result.getFirst().getKeyList().getKeyValue()
                 .stream()
                 .filter(kv -> "imported-id".equals(kv.getKey()))
                 .map(KeyValueStructure::getValue)
@@ -364,7 +364,7 @@ public class ImportResourceTest extends TiamatIntegrationTest {
                 .get();
         assertThat(importedIds).contains(stopPlace.getId());
         assertThat(importedIds).contains(stopPlace2.getId());
-        assertThat(result.get(0).getQuays().getQuayRefOrQuay()).hasSize(2);
+        assertThat(result.getFirst().getQuays().getQuayRefOrQuay()).hasSize(2);
     }
 
     @Test
@@ -635,7 +635,7 @@ public class ImportResourceTest extends TiamatIntegrationTest {
 
         List<Quay> actualQuays = publicationDeliveryTestHelper.extractQuays(actualStopPlace);
 
-        assertThat(actualQuays.get(0).getCreated()).as("The imported quay's created date must not be null").isNotNull();
+        assertThat(actualQuays.getFirst().getCreated()).as("The imported quay's created date must not be null").isNotNull();
     }
 
     @Test
@@ -660,7 +660,7 @@ public class ImportResourceTest extends TiamatIntegrationTest {
                 .isNotEmpty()
                 .hasSize(1);
 
-        ValidBetween validBetween = actualValidBetween.get(0);
+        ValidBetween validBetween = actualValidBetween.getFirst();
         assertThat(validBetween.getFromDate())
                 .as("From date should be set")
                 .isNotNull();
@@ -1044,7 +1044,7 @@ public class ImportResourceTest extends TiamatIntegrationTest {
 
         List<StopPlace> changedStopPlaces = publicationDeliveryTestHelper.extractStopPlaces(response);
         Assert.assertEquals(1, changedStopPlaces.size());
-        StopPlace stopPlace = changedStopPlaces.get(0);
+        StopPlace stopPlace = changedStopPlaces.getFirst();
 
         List<ValidBetween> actualValidBetween = stopPlace.getValidBetween();
 
@@ -1054,7 +1054,7 @@ public class ImportResourceTest extends TiamatIntegrationTest {
                 .isNotEmpty()
                 .hasSize(1);
 
-        assertThat(actualValidBetween.get(0).getFromDate()).isEqualTo(firstValidFrom);
+        assertThat(actualValidBetween.getFirst().getFromDate()).isEqualTo(firstValidFrom);
     }
 
     /**

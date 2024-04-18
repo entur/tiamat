@@ -101,7 +101,7 @@ public class PathLinkImportTest extends TiamatIntegrationTest {
 
         List<PathLink> result = publicationDeliveryTestHelper.extractPathLinks(response);
         assertThat(result).as("Expecting path link in return").hasSize(1);
-        PathLink importedPathLink = result.get(0);
+        PathLink importedPathLink = result.getFirst();
         assertThat(importedPathLink.getAllowedUse()).isEqualTo(netexPathLink.getAllowedUse());
         assertThat(importedPathLink.getFrom().getPlaceRef().getRef()).contains(fromStopPlace.getClass().getSimpleName());
         assertThat(importedPathLink.getTo().getPlaceRef().getRef()).contains(toStopPlace.getClass().getSimpleName());

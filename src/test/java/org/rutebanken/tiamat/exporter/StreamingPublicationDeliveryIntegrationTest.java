@@ -333,7 +333,7 @@ public class StreamingPublicationDeliveryIntegrationTest extends TiamatIntegrati
                 .as("actual stop place 1 tariff zones")
                 .isNotNull();
 
-        org.rutebanken.netex.model.TariffZoneRef actualTariffZoneRefStopPlace1 = actualStopPlace1.getTariffZones().getTariffZoneRef().get(0);
+        org.rutebanken.netex.model.TariffZoneRef actualTariffZoneRefStopPlace1 = actualStopPlace1.getTariffZones().getTariffZoneRef().getFirst();
 
         // Stop place 1 refers to tariff zone v2 implicity beacuse the reference does not contain version value.
         assertThat(actualTariffZoneRefStopPlace1.getRef())
@@ -343,7 +343,7 @@ public class StreamingPublicationDeliveryIntegrationTest extends TiamatIntegrati
         // Check stop place 2
 
         org.rutebanken.netex.model.StopPlace actualStopPlace2 = stops.stream().filter(sp -> sp.getId().equals(stopPlace2NetexId)).findFirst().get();
-        org.rutebanken.netex.model.TariffZoneRef actualTariffZoneRefStopPlace2 = actualStopPlace2.getTariffZones().getTariffZoneRef().get(0);
+        org.rutebanken.netex.model.TariffZoneRef actualTariffZoneRefStopPlace2 = actualStopPlace2.getTariffZones().getTariffZoneRef().getFirst();
 
         assertThat(actualTariffZoneRefStopPlace2.getRef())
                 .as("actual stop place 2 tariff zone ref")
