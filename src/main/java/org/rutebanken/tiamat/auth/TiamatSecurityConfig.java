@@ -16,7 +16,7 @@
 package org.rutebanken.tiamat.auth;
 
 
-import org.entur.oauth2.RorAuthenticationConverter;
+import org.entur.oauth2.multiissuer.MultiIssuerAuthenticationManagerResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -56,14 +56,13 @@ public class TiamatSecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http,
+                                           MultiIssuerAuthenticationManagerResolver multiIssuerAuthenticationManagerResolver) throws Exception {
         logger.info("Configuring HttpSecurity");
         http.cors(withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests()
-                .anyRequest().permitAll()
-                .and()
-                .oauth2ResourceServer().jwt().jwtAuthenticationConverter(new RorAuthenticationConverter());
+                .authorizeHttpRequests(request -> request.anyRequest().permitAll())
+                .oauth2ResourceServer(configurer -> configurer.authenticationManagerResolver(multiIssuerAuthenticationManagerResolver));
         return http.build();
     }
 

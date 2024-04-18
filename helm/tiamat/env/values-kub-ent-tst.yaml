@@ -14,6 +14,11 @@ auth0:
   ror:
     url: https://ror-entur-staging.eu.auth0.com
     audience: https://ror.api.staging.entur.io
+  entur:
+    internal:
+      url: https://internal.staging.entur.org/
+    partner:
+      url: https://partner.staging.entur.org/
 
 rbac:
   enabled: true
