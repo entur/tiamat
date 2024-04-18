@@ -12,7 +12,7 @@ configMap:
 
 auth0:
   ror:
-    url: https://ror-entur-dev.eu.auth0.com
+    url: https://ror-entur-dev.eu.auth0.com/
     audience: https://ror.api.dev.entur.io
   entur:
     internal:
