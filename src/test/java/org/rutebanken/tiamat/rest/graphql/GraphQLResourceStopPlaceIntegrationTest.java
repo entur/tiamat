@@ -1985,6 +1985,107 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                 .body("generalSign[0].note.value", comparesEqualTo(value));
     }
 
+    @Test
+    public void testCreateStopWithTopographicPlaceHSL() {
+        TopographicPlace topographicPlace = new TopographicPlace(new EmbeddableMultilingualString("countyforinstance", "fin"));
+        topographicPlace.setTopographicPlaceType(TopographicPlaceTypeEnumeration.MUNICIPALITY);
+        topographicPlaceRepository.save(topographicPlace);
+
+        String stopName = "Stop one";
+
+        String graphQlJsonQuery = """
+            mutation {
+            stopPlace: mutateStopPlace(StopPlace: {
+                        name: { value: "%s" }
+                        topographicPlace: {
+                          id: "%s"
+                        }
+                }) {
+                    id
+                    name { value }
+                    topographicPlace { id topographicPlaceType name { lang value } }
+                }
+            }""".formatted(stopName,
+                topographicPlace.getNetexId()
+        );
+
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
+                .rootPath("data.stopPlace[0]")
+                .body("name.value", equalTo(stopName))
+                .body("topographicPlace.id", equalTo(topographicPlace.getNetexId()))
+                .body("topographicPlace.topographicPlaceType", equalTo(TopographicPlaceTypeEnumeration.MUNICIPALITY.value()))
+                .body("topographicPlace.name", notNullValue())
+                .body("topographicPlace.name.lang", equalTo(topographicPlace.getName().getLang()))
+                .body("topographicPlace.name.value", equalTo(topographicPlace.getName().getValue()));
+    }
+
+    @Test
+    public void testCreateStopWithoutTopographicPlaceHSL() {
+        TopographicPlace topographicPlace = new TopographicPlace(new EmbeddableMultilingualString("countyforinstance", "fin"));
+        topographicPlace.setTopographicPlaceType(TopographicPlaceTypeEnumeration.MUNICIPALITY);
+        topographicPlaceRepository.save(topographicPlace);
+
+        String stopName = "Stop one";
+
+        String graphQlJsonQuery = """
+            mutation {
+            stopPlace: mutateStopPlace(StopPlace: {
+                        name: { value: "%s" }
+                }) {
+                    id
+                    name { value }
+                    topographicPlace { id topographicPlaceType name { lang value } }
+                }
+            }""".formatted(stopName
+        );
+
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
+                .rootPath("data.stopPlace[0]")
+                .body("name.value", equalTo(stopName))
+                .body("topographicPlace", nullValue());
+    }
+
+    @Test
+    public void testMutateStopChangeTopographicPlaceHSL() {
+        TopographicPlace topographicPlaceOrigin = new TopographicPlace(new EmbeddableMultilingualString("original location", "fin"));
+        topographicPlaceOrigin.setTopographicPlaceType(TopographicPlaceTypeEnumeration.MUNICIPALITY);
+        topographicPlaceRepository.save(topographicPlaceOrigin);
+
+        TopographicPlace topographicPlaceTarget = new TopographicPlace(new EmbeddableMultilingualString("target location", "swe"));
+        topographicPlaceTarget.setTopographicPlaceType(TopographicPlaceTypeEnumeration.MUNICIPALITY);
+        topographicPlaceRepository.save(topographicPlaceTarget);
+
+        StopPlace stopPlace = createStopPlace("Espa");
+        stopPlace.setTopographicPlace(topographicPlaceOrigin);
+        stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+
+        String graphQlJsonQuery = """
+            mutation {
+            stopPlace: mutateStopPlace(StopPlace: {
+                        id: "%s"
+                        topographicPlace: {
+                          id: "%s"
+                        }
+                }) {
+                    id
+                    name { value }
+                    topographicPlace { id topographicPlaceType name { lang value } }
+                }
+            }""".formatted(stopPlace.getNetexId(),
+                topographicPlaceTarget.getNetexId()
+        );
+
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
+                .rootPath("data.stopPlace[0]")
+                .body("id", equalTo(stopPlace.getNetexId()))
+                .body("name.value", equalTo(stopPlace.getName().getValue()))
+                .body("topographicPlace.id", equalTo(topographicPlaceTarget.getNetexId()))
+                .body("topographicPlace.topographicPlaceType", equalTo(TopographicPlaceTypeEnumeration.MUNICIPALITY.value()))
+                .body("topographicPlace.name", notNullValue())
+                .body("topographicPlace.name.lang", equalTo(topographicPlaceTarget.getName().getLang()))
+                .body("topographicPlace.name.value", equalTo(topographicPlaceTarget.getName().getValue()));
+    }
+
     private StopPlace createStopPlaceWithMunicipalityRef(String name, TopographicPlace municipality, StopTypeEnumeration type) {
         StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(name));
         stopPlace.setStopPlaceType(type);
