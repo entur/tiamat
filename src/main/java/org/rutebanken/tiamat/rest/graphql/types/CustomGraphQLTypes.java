@@ -873,7 +873,9 @@ public class CustomGraphQLTypes {
                 .field(newInputObjectField()
                         .name(PARENT_SITE_REF)
                         .type(GraphQLString))
+                //todo: it should be removed.
                 .field(newInputObjectField()
+                        .deprecate("totalCapacity is not updated directly, use ParkingProperties>Spaces>noOfSpaces")
                         .name(TOTAL_CAPACITY)
                         .type(GraphQLBigInteger))
                 .field(newInputObjectField()
