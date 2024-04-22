@@ -82,7 +82,7 @@ public class AlternativeNameUpdaterTest {
         boolean isUpdated = alternativeNameUpdater.updateAlternativeNames(stopPlace, Arrays.asList(incomingAlias));
         assertThat(isUpdated).isFalse();
         assertThat(stopPlace.getAlternativeNames()).hasSize(1);
-        assertThat(stopPlace.getAlternativeNames().get(0).getNetexId()).isNotNull();
+        assertThat(stopPlace.getAlternativeNames().getFirst().getNetexId()).isNotNull();
 
     }
 

@@ -27,7 +27,7 @@ public class MobilityImpairedAccessCalculator {
 
         List<AccessibilityLimitation> limitations = assessment.getLimitations();
         if (limitations.size() > 0) {
-            AccessibilityLimitation limitation = limitations.get(0);
+            AccessibilityLimitation limitation = limitations.getFirst();
 
             // Partial is default unless criteria below are matched
             LimitationStatusEnumeration mobilityImpairedStatus = LimitationStatusEnumeration.PARTIAL;

@@ -63,7 +63,7 @@ public class GroupOfStopPlacesSaverServiceTest extends TiamatIntegrationTest {
 
         List<GroupOfStopPlaces> all = groupOfStopPlacesRepository.findAll();
         assertThat(all).hasSize(1);
-        GroupOfStopPlaces actual = all.get(0);
+        GroupOfStopPlaces actual = all.getFirst();
         assertThat(actual.getVersion()).isEqualTo(2L);
         assertThat(actual.getName().getValue()).isEqualTo("name changed");
         assertThat(actual.getMembers()).hasSize(1);
@@ -126,7 +126,7 @@ public class GroupOfStopPlacesSaverServiceTest extends TiamatIntegrationTest {
 
         List<GroupOfStopPlaces> all = groupOfStopPlacesRepository.findAll();
         assertThat(all).hasSize(1);
-        GroupOfStopPlaces actual = all.get(0);
+        GroupOfStopPlaces actual = all.getFirst();
         assertThat(actual.getMembers())
                 .hasSize(2)
                 .extracting(StopPlaceReference::getRef).contains(stopPlace.getNetexId(), stopPlace2.getNetexId());

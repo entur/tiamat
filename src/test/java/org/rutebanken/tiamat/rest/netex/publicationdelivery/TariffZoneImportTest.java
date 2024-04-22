@@ -72,7 +72,7 @@ public class TariffZoneImportTest extends TiamatIntegrationTest {
                 .getTariffZones().getTariffZone();
 
         assertThat(actualZones).isNotEmpty();
-        assertThat(actualZones.get(0).getValue().getName().getValue()).isEqualTo(tariffZone.getName().getValue());
+        assertThat(actualZones.getFirst().getValue().getName().getValue()).isEqualTo(tariffZone.getName().getValue());
     }
 
     @Test
@@ -115,9 +115,9 @@ public class TariffZoneImportTest extends TiamatIntegrationTest {
 
         assertThat(actualZones).isNotEmpty();
 
-        assertThat(actualZones.get(0).getValue().getName().getValue()).isEqualTo(tariffZone.getName().getValue());
+        assertThat(actualZones.getFirst().getValue().getName().getValue()).isEqualTo(tariffZone.getName().getValue());
         // Versions for tariff zones are incremented.
-        assertThat(actualZones.get(0).getValue().getVersion()).isEqualTo("2");
+        assertThat(actualZones.getFirst().getValue().getVersion()).isEqualTo("2");
 
     }
 
@@ -271,7 +271,7 @@ public class TariffZoneImportTest extends TiamatIntegrationTest {
 
         List<StopPlace> actualIdMatchedStopPlaces = publicationDeliveryTestHelper.extractStopPlaces(matchReponse);
         assertThat(actualIdMatchedStopPlaces).hasSize(1);
-        assertThat(actualIdMatchedStopPlaces.get(0).getTariffZones().getTariffZoneRef()).as("number of tariff zone refs").hasSize(2);
+        assertThat(actualIdMatchedStopPlaces.getFirst().getTariffZones().getTariffZoneRef()).as("number of tariff zone refs").hasSize(2);
 
         importParams.importType = ImportType.ID_MATCH;
 
@@ -284,7 +284,7 @@ public class TariffZoneImportTest extends TiamatIntegrationTest {
 
         actualIdMatchedStopPlaces = publicationDeliveryTestHelper.extractStopPlaces(matchReponse);
         assertThat(actualIdMatchedStopPlaces).hasSize(1);
-        assertThat(actualIdMatchedStopPlaces.get(0).getTariffZones().getTariffZoneRef()).as("number of tariff zone refs").hasSize(2);
+        assertThat(actualIdMatchedStopPlaces.getFirst().getTariffZones().getTariffZoneRef()).as("number of tariff zone refs").hasSize(2);
 
     }
 }

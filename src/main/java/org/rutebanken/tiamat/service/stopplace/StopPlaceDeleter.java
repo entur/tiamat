@@ -101,7 +101,7 @@ public class StopPlaceDeleter {
         TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization(){
             public void afterCommit(){
                 Collections.sort(stopPlaces, Comparator.comparingLong(EntityInVersionStructure::getVersion));
-                StopPlace newest = stopPlaces.get(stopPlaces.size() - 1);
+                StopPlace newest = stopPlaces.getLast();
                 entityChangedListener.onDelete(newest);
             }
         });

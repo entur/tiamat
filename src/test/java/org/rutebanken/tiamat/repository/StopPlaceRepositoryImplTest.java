@@ -243,7 +243,7 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
 
         Page<StopPlace> result = stopPlaceRepository.findStopPlacesWithin(southEastLongitude, southEastLatitude, northWestLongitude, northWestLatitude, null, pageable);
         assertThat(result).hasSize(1);
-        assertThat(result.getContent().get(0).getVersion()).isEqualTo(version2.getVersion());
+        assertThat(result.getContent().getFirst().getVersion()).isEqualTo(version2.getVersion());
 
     }
 
@@ -340,7 +340,7 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         Page<StopPlace> result = stopPlaceRepository.findStopPlacesWithin(xMin, yMin, xMax, yMax, null, pageable);
         assertThat(result).hasSize(1);
         // Default behaviour should omit expired StopPlaces - i.e. only return openEndedStopPlace
-        assertThat(result.getContent().get(0).getNetexId())
+        assertThat(result.getContent().getFirst().getNetexId())
                 .isEqualTo(openEndedStopPlace.getNetexId());
 
 
@@ -348,7 +348,7 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         Page<StopPlace> expirySearchResult = stopPlaceRepository.findStopPlacesWithin(xMin, yMin, xMax, yMax, null, pointInTime, pageable);
         assertThat(expirySearchResult).hasSize(1); // timestamp set to *before* openEndedStopPlace
 
-        assertThat(expirySearchResult.getContent().get(0).getNetexId())
+        assertThat(expirySearchResult.getContent().getFirst().getNetexId())
                 .isEqualTo(expiredStopPlace.getNetexId());
     }
 
@@ -477,7 +477,7 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
                 .build();
         Page<StopPlace> result = stopPlaceRepository.findStopPlace(exportParams);
         assertThat(result).isNotEmpty();
-        System.out.println(result.getContent().get(0));
+        System.out.println(result.getContent().getFirst());
     }
 
     @Test
@@ -544,7 +544,7 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
                 .build();
         Page<StopPlace> result = stopPlaceRepository.findStopPlace(exportParams);
         assertThat(result).isNotEmpty();
-        System.out.println(result.getContent().get(0));
+        System.out.println(result.getContent().getFirst());
     }
 
     @Test
@@ -568,7 +568,7 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         Page<StopPlace> result = stopPlaceRepository.findStopPlace(exportParams);
 
         assertThat(result).isNotEmpty();
-        System.out.println(result.getContent().get(0));
+        System.out.println(result.getContent().getFirst());
     }
 
     @Test
@@ -635,7 +635,7 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
 
         assertThat(content).isNotEmpty();
         assertThat(content).hasSize(1);
-        assertThat(content.get(0).getVersion()).isEqualTo(2L);
+        assertThat(content.getFirst().getVersion()).isEqualTo(2L);
     }
 
     @Test
@@ -680,7 +680,7 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
                 .build();
         Page<StopPlace> result = stopPlaceRepository.findStopPlace(exportParams);
         assertThat(result).isNotEmpty();
-        System.out.println(result.getContent().get(0));
+        System.out.println(result.getContent().getFirst());
     }
 
     /**
@@ -903,7 +903,7 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         multiModalStopPlaceEditor.createMultiModalParentStopPlace(Arrays.asList(child.getNetexId()), new EmbeddableMultilingualString(parentStopPlaceName));
 
         Page<StopPlace> actual = stopPlaceRepository.findStopPlace(ExportParams.newExportParamsBuilder().setStopPlaceSearch(StopPlaceSearch.newStopPlaceSearchBuilder().setQuery(parentStopPlaceName).build()).build());
-        assertThat(actual.getContent().get(0).getNetexId()).as("The child is expected to be returned").isEqualTo(child.getNetexId());
+        assertThat(actual.getContent().getFirst().getNetexId()).as("The child is expected to be returned").isEqualTo(child.getNetexId());
     }
 
     @Test
@@ -923,7 +923,7 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
                                         .setNetexIdList(Arrays.asList(parent.getNetexId()))
                                         .build())
                         .build());
-        assertThat(actual.getContent().get(0).getNetexId()).as("The child is expected to be returned when searching for netex_id").isEqualTo(child.getNetexId());
+        assertThat(actual.getContent().getFirst().getNetexId()).as("The child is expected to be returned when searching for netex_id").isEqualTo(child.getNetexId());
     }
 
     @Test
@@ -949,7 +949,7 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
                                         .build())
                         .build());
         assertThat(actual.getContent()).isNotEmpty();
-        assertThat(actual.getContent().get(0).getNetexId())
+        assertThat(actual.getContent().getFirst().getNetexId())
                 .as("The child is expected to be returned when searching for parent " + MERGED_ID_KEY)
                 .isEqualTo(child.getNetexId());
     }
@@ -973,7 +973,7 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
                                 .build())
                         .build());
         assertThat(actual.getTotalElements()).isEqualTo(1L);
-        assertThat(actual.getContent().get(0).getNetexId()).isEqualTo(child.getNetexId());
+        assertThat(actual.getContent().getFirst().getNetexId()).isEqualTo(child.getNetexId());
     }
 
     @Test
@@ -1458,7 +1458,7 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
                 .build();
         Page<StopPlace> result = stopPlaceRepository.findStopPlace(exportParams);
         assertThat(result).isNotEmpty();
-        System.out.println(result.getContent().get(0));
+        System.out.println(result.getContent().getFirst());
     }
 
 
@@ -1476,18 +1476,18 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
 
         List<IdMappingDto> currentMapping = stopPlaceRepository.findKeyValueMappingsForStop(now, now, 0, 2000);
         Assert.assertEquals(1, currentMapping.size());
-        Assert.assertEquals(orgId, currentMapping.get(0).originalId);
-        Assert.assertEquals(currentMatchingStop.getNetexId(), currentMapping.get(0).netexId);
-        Assert.assertEquals(currentMatchingStop.getValidBetween().getFromDate(), currentMapping.get(0).validFrom);
-        Assert.assertEquals(currentMatchingStop.getValidBetween().getToDate(), currentMapping.get(0).validTo);
+        Assert.assertEquals(orgId, currentMapping.getFirst().originalId);
+        Assert.assertEquals(currentMatchingStop.getNetexId(), currentMapping.getFirst().netexId);
+        Assert.assertEquals(currentMatchingStop.getValidBetween().getFromDate(), currentMapping.getFirst().validFrom);
+        Assert.assertEquals(currentMatchingStop.getValidBetween().getToDate(), currentMapping.getFirst().validTo);
 
         Instant hundredSecondsAgo = now.minusSeconds(100);
         List<IdMappingDto> historicMapping = stopPlaceRepository.findKeyValueMappingsForStop(hundredSecondsAgo, hundredSecondsAgo, 0, 2000);
         Assert.assertEquals(1, historicMapping.size());
-        Assert.assertEquals(orgId, historicMapping.get(0).originalId);
-        Assert.assertEquals(historicMatchingStopV1.getNetexId(), historicMapping.get(0).netexId);
-        Assert.assertEquals(historicMatchingStopV1.getValidBetween().getFromDate(), historicMapping.get(0).validFrom);
-        Assert.assertEquals(historicMatchingStopV1.getValidBetween().getToDate(), historicMapping.get(0).validTo);
+        Assert.assertEquals(orgId, historicMapping.getFirst().originalId);
+        Assert.assertEquals(historicMatchingStopV1.getNetexId(), historicMapping.getFirst().netexId);
+        Assert.assertEquals(historicMatchingStopV1.getValidBetween().getFromDate(), historicMapping.getFirst().validFrom);
+        Assert.assertEquals(historicMatchingStopV1.getValidBetween().getToDate(), historicMapping.getFirst().validTo);
 
         // No imported-ids or merged-ids are valid for point in time 300 seconds ago
         Instant threeHundredSecondsAgo = now.minusSeconds(300);

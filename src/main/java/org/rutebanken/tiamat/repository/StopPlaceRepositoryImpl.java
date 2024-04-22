@@ -770,7 +770,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     private <T> T getOneOrNull(TypedQuery<T> query) {
         try {
             List<T> resultList = query.getResultList();
-            return resultList.isEmpty() ? null : resultList.get(0);
+            return resultList.isEmpty() ? null : resultList.getFirst();
         } catch (NoResultException e) {
             return null;
         }
@@ -783,7 +783,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
             if (results.isEmpty()) {
                 return null;
             } else {
-                return results.get(0);
+                return results.getFirst();
             }
         } catch (NoResultException noResultException) {
             return null;

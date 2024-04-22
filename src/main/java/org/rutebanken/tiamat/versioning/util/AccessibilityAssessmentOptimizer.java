@@ -52,7 +52,7 @@ public class AccessibilityAssessmentOptimizer {
                 //All quays are equal
                 //Set Assessment on StopPlace
 
-                AccessibilityAssessment firstAccessibilityAssessment = deepCopyAccessibilityAssessment(allQuayAccessibilityAssessments.get(0));
+                AccessibilityAssessment firstAccessibilityAssessment = deepCopyAccessibilityAssessment(allQuayAccessibilityAssessments.getFirst());
 
                 if (stopPlace.getAccessibilityAssessment() != null) {
                     // Use existing Assessment instead, but update limitations
@@ -99,7 +99,7 @@ public class AccessibilityAssessmentOptimizer {
     }
 
     private static AccessibilityLimitation getAccessibilityLimitation(AccessibilityAssessment accessibilityAssessment) {
-        AccessibilityLimitation stopLimitation = accessibilityAssessment.getLimitations().get(0);
+        AccessibilityLimitation stopLimitation = accessibilityAssessment.getLimitations().getFirst();
 
         AccessibilityLimitation limitation = new AccessibilityLimitation();
         limitation.setWheelchairAccess(stopLimitation.getWheelchairAccess());
@@ -132,10 +132,10 @@ public class AccessibilityAssessmentOptimizer {
             return true;
         }
 
-        AccessibilityAssessment first = quayAccessibilityAssessments.get(0);
+        AccessibilityAssessment first = quayAccessibilityAssessments.getFirst();
         List<AccessibilityLimitation> limitations = first.getLimitations();
         if (limitations != null && !limitations.isEmpty()) {
-            AccessibilityLimitation limitation = limitations.get(0);
+            AccessibilityLimitation limitation = limitations.getFirst();
 
             LimitationStatusEnumeration wheelchairAccess = limitation.getWheelchairAccess();
             LimitationStatusEnumeration audibleSignalsAvailable = limitation.getAudibleSignalsAvailable();

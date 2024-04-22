@@ -147,18 +147,18 @@ public class QuayRepositoryImplTest extends TiamatIntegrationTest {
 
         List<IdMappingDto> currentMapping = quayRepository.findKeyValueMappingsForQuay(now, now, 0, 2000);
         Assert.assertEquals(1, currentMapping.size());
-        Assert.assertEquals(orgId, currentMapping.get(0).originalId);
-        Assert.assertEquals(currentMatchingQuay.getNetexId(), currentMapping.get(0).netexId);
-        Assert.assertEquals(currentMatchingStop.getValidBetween().getFromDate(), currentMapping.get(0).validFrom);
-        Assert.assertEquals(currentMatchingStop.getValidBetween().getToDate(), currentMapping.get(0).validTo);
+        Assert.assertEquals(orgId, currentMapping.getFirst().originalId);
+        Assert.assertEquals(currentMatchingQuay.getNetexId(), currentMapping.getFirst().netexId);
+        Assert.assertEquals(currentMatchingStop.getValidBetween().getFromDate(), currentMapping.getFirst().validFrom);
+        Assert.assertEquals(currentMatchingStop.getValidBetween().getToDate(), currentMapping.getFirst().validTo);
 
         Instant hundredSecondsAgo = now.minusSeconds(100);
         List<IdMappingDto> historicMapping = quayRepository.findKeyValueMappingsForQuay(hundredSecondsAgo, hundredSecondsAgo, 0, 2000);
         Assert.assertEquals(1, historicMapping.size());
-        Assert.assertEquals(orgId, historicMapping.get(0).originalId);
-        Assert.assertEquals(historicMatchingQuay.getNetexId(), historicMapping.get(0).netexId);
-        Assert.assertEquals(historicMatchingStopV1.getValidBetween().getFromDate(), historicMapping.get(0).validFrom);
-        Assert.assertEquals(historicMatchingStopV1.getValidBetween().getToDate(), historicMapping.get(0).validTo);
+        Assert.assertEquals(orgId, historicMapping.getFirst().originalId);
+        Assert.assertEquals(historicMatchingQuay.getNetexId(), historicMapping.getFirst().netexId);
+        Assert.assertEquals(historicMatchingStopV1.getValidBetween().getFromDate(), historicMapping.getFirst().validFrom);
+        Assert.assertEquals(historicMatchingStopV1.getValidBetween().getToDate(), historicMapping.getFirst().validTo);
 
 
         // No imported-ids or merged-ids are valid for point in time 300 seconds ago

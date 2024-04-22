@@ -150,7 +150,7 @@ public class StopPlaceQuayMergerTest extends TiamatIntegrationTest {
                 assertThat(quay.getPlaceEquipments()).isNotNull();
                 assertThat(quay.getPlaceEquipments().getInstalledEquipment()).isNotNull();
                 assertThat(quay.getPlaceEquipments().getInstalledEquipment()).hasSize(1);
-                assertThat(quay.getPlaceEquipments().getInstalledEquipment().get(0)).isInstanceOf(ShelterEquipment.class);
+                assertThat(quay.getPlaceEquipments().getInstalledEquipment().getFirst()).isInstanceOf(ShelterEquipment.class);
 
                 assertThat(!quay.equals(toQuay)).isTrue();
                 assertThat(!quay.equals(fromQuay)).isTrue();
@@ -261,7 +261,7 @@ public class StopPlaceQuayMergerTest extends TiamatIntegrationTest {
                 assertThat(quay.getPlaceEquipments()).isNotNull();
                 assertThat(quay.getPlaceEquipments().getInstalledEquipment()).isNotNull();
                 assertThat(quay.getPlaceEquipments().getInstalledEquipment()).hasSize(1);
-                assertThat(quay.getPlaceEquipments().getInstalledEquipment().get(0)).isInstanceOf(ShelterEquipment.class);
+                assertThat(quay.getPlaceEquipments().getInstalledEquipment().getFirst()).isInstanceOf(ShelterEquipment.class);
 
                 assertThat(!quay.equals(toQuay));
                 assertThat(!quay.equals(fromQuay));

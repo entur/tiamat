@@ -73,7 +73,7 @@ public class QuayRepositoryImpl implements QuayRepositoryCustom {
             if (results.isEmpty()) {
                 return null;
             } else {
-                return results.get(0);
+                return results.getFirst();
             }
         } catch (NoResultException noResultException) {
             return null;

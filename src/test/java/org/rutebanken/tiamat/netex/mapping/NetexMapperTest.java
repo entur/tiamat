@@ -101,7 +101,7 @@ public class NetexMapperTest extends TiamatIntegrationTest {
         org.rutebanken.netex.model.SiteFrame netexSiteFrame = netexMapper.mapToNetexModel(sourceSiteFrame);
 
         assertThat(netexSiteFrame).isNotNull();
-        assertThat(netexSiteFrame.getStopPlaces().getStopPlace().get(0).getName().getValue()).isEqualTo(stopPlace.getName().getValue());
+        assertThat(netexSiteFrame.getStopPlaces().getStopPlace().getFirst().getName().getValue()).isEqualTo(stopPlace.getName().getValue());
     }
 
     @Test
@@ -124,7 +124,7 @@ public class NetexMapperTest extends TiamatIntegrationTest {
         org.rutebanken.tiamat.model.SiteFrame actualSiteFrame = netexMapper.mapToTiamatModel(netexSiteFrame);
 
         assertThat(actualSiteFrame).isNotNull();
-        assertThat(actualSiteFrame.getStopPlaces().getStopPlace().get(0).getName().getValue()).isEqualTo(stopPlace.getName().getValue());
+        assertThat(actualSiteFrame.getStopPlaces().getStopPlace().getFirst().getName().getValue()).isEqualTo(stopPlace.getName().getValue());
     }
 
     @Test
@@ -350,7 +350,7 @@ public class NetexMapperTest extends TiamatIntegrationTest {
         assertThat(netexSiteFrame).isNotNull();
         assertThat(netexSiteFrame.getTopographicPlaces().getTopographicPlace()).isNotEmpty();
 
-        org.rutebanken.netex.model.TopographicPlace netexTopographicPlace = netexSiteFrame.getTopographicPlaces().getTopographicPlace().get(0);
+        org.rutebanken.netex.model.TopographicPlace netexTopographicPlace = netexSiteFrame.getTopographicPlaces().getTopographicPlace().getFirst();
         assertThat(netexTopographicPlace.getCountryRef()).as("Reference to country shall not be null").isNotNull();
         assertThat(netexTopographicPlace.getCountryRef().getRef()).isEqualTo(org.rutebanken.netex.model.IanaCountryTldEnumeration.ZM);
 
@@ -388,7 +388,7 @@ public class NetexMapperTest extends TiamatIntegrationTest {
         assertThat(netexSiteFrame).isNotNull();
         assertThat(netexSiteFrame.getTopographicPlaces().getTopographicPlace()).isNotEmpty();
 
-        org.rutebanken.netex.model.TopographicPlace netexMunicipality = netexSiteFrame.getTopographicPlaces().getTopographicPlace().get(0);
+        org.rutebanken.netex.model.TopographicPlace netexMunicipality = netexSiteFrame.getTopographicPlaces().getTopographicPlace().getFirst();
         assertThat(netexMunicipality).isNotNull();
         assertThat(netexMunicipality.getParentTopographicPlaceRef()).describedAs("The municipality should have a reference to the parent topographic place").isNotNull();
         assertThat(netexMunicipality.getParentTopographicPlaceRef().getRef()).isEqualTo(county.getNetexId());
@@ -440,7 +440,7 @@ public class NetexMapperTest extends TiamatIntegrationTest {
         assertThat(netexSiteFrame).isNotNull();
         assertThat(netexSiteFrame.getTopographicPlaces().getTopographicPlace()).isNotEmpty();
 
-        TopographicPlace actualTiamatMunicipality = tiamatSiteFrame.getTopographicPlaces().getTopographicPlace().get(0);
+        TopographicPlace actualTiamatMunicipality = tiamatSiteFrame.getTopographicPlaces().getTopographicPlace().getFirst();
         assertThat(actualTiamatMunicipality).isNotNull();
         assertThat(actualTiamatMunicipality.getParentTopographicPlaceRef())
                 .describedAs("The municipality should have a parent topographic place").isNotNull();
@@ -591,7 +591,7 @@ public class NetexMapperTest extends TiamatIntegrationTest {
 
         org.rutebanken.netex.model.SiteRefStructure firstSiteRef = siteRefs_relStructure.
                 getSiteRef().
-                get(0)
+                getFirst()
                 .getValue();
 
         assertThat(firstSiteRef)

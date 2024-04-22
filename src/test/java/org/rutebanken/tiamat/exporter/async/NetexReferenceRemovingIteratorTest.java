@@ -60,7 +60,7 @@ public class NetexReferenceRemovingIteratorTest {
 
         StopPlace actual = netexReferenceRemovingIterator.next();
 
-        assertThat(actual.getTariffZones().getTariffZoneRef().get(0).getVersion()).as("TariffZoneref version").isNull();
+        assertThat(actual.getTariffZones().getTariffZoneRef().getFirst().getVersion()).as("TariffZoneref version").isNull();
         assertThat(actual.getTopographicPlaceRef().getVersion()).as("topographic place ref version").isNull();
     }
 
@@ -93,7 +93,7 @@ public class NetexReferenceRemovingIteratorTest {
 
         StopPlace actual = netexReferenceRemovingIterator.next();
 
-        assertThat(actual.getTariffZones().getTariffZoneRef().get(0).getVersion()).as("TariffZoneref version").isEqualTo("version");
+        assertThat(actual.getTariffZones().getTariffZoneRef().getFirst().getVersion()).as("TariffZoneref version").isEqualTo("version");
         assertThat(actual.getTopographicPlaceRef().getVersion()).as("topographic place ref version").isEqualTo("version");
     }
 

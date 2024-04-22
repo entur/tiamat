@@ -88,7 +88,7 @@ public class GaplessIdGeneratorServiceTest extends TiamatIntegrationTest {
 
         List list = query.getResultList();
         assertThat(list).hasSize(1);
-        return  (Long) list.get(0);
+        return  (Long) list.getFirst();
     }
 
     private Quay insertQuay(long wantedId, Quay quay) {

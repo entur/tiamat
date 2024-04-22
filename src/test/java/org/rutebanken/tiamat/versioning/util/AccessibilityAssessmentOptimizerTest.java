@@ -90,7 +90,7 @@ public class AccessibilityAssessmentOptimizerTest extends TiamatIntegrationTest 
             assertThat(quay.getAccessibilityAssessment()).isNull();
         }
 
-        AccessibilityLimitation actualAccessibilityLimitation = actualStopPlace.getAccessibilityAssessment().getLimitations().get(0);
+        AccessibilityLimitation actualAccessibilityLimitation = actualStopPlace.getAccessibilityAssessment().getLimitations().getFirst();
 
         assertThat(actualAccessibilityLimitation).isNotNull();
         assertThat(actualAccessibilityLimitation.getWheelchairAccess()).isEqualTo(TRUE);
@@ -133,7 +133,7 @@ public class AccessibilityAssessmentOptimizerTest extends TiamatIntegrationTest 
             assertThat(quay.getAccessibilityAssessment()).isNull();
         }
 
-        AccessibilityLimitation actualAccessibilityLimitation = actualStopPlace.getAccessibilityAssessment().getLimitations().get(0);
+        AccessibilityLimitation actualAccessibilityLimitation = actualStopPlace.getAccessibilityAssessment().getLimitations().getFirst();
 
         assertThat(actualAccessibilityLimitation).isNotNull();
         assertThat(actualAccessibilityLimitation.getWheelchairAccess()).isEqualTo(TRUE);
@@ -167,7 +167,7 @@ public class AccessibilityAssessmentOptimizerTest extends TiamatIntegrationTest 
         StopPlace stopPlace = new StopPlace();
 
         AccessibilityAssessment accessibilityAssessment = createAccessibilityAssessment(TRUE, TRUE, TRUE, TRUE, TRUE);
-        AccessibilityLimitation limitation = accessibilityAssessment.getLimitations().get(0);
+        AccessibilityLimitation limitation = accessibilityAssessment.getLimitations().getFirst();
 
         stopPlace.setAccessibilityAssessment(createAccessibilityAssessment(TRUE, TRUE, TRUE, TRUE, TRUE));
 
@@ -181,7 +181,7 @@ public class AccessibilityAssessmentOptimizerTest extends TiamatIntegrationTest 
         assertThat(actualStopPlace.getAccessibilityAssessment()).isNotNull();
         assertThat(actualStopPlace.getAccessibilityAssessment().getLimitations()).isNotNull();
         assertThat(actualStopPlace.getAccessibilityAssessment().getLimitations()).isNotEmpty();
-        assertThat(actualStopPlace.getAccessibilityAssessment().getLimitations().get(0).getWheelchairAccess()).isEqualTo(limitation.getWheelchairAccess());
+        assertThat(actualStopPlace.getAccessibilityAssessment().getLimitations().getFirst().getWheelchairAccess()).isEqualTo(limitation.getWheelchairAccess());
 
         Quay quay3 = new Quay();
         quay3.setName(createEmbeddableString("quay3"));
@@ -199,7 +199,7 @@ public class AccessibilityAssessmentOptimizerTest extends TiamatIntegrationTest 
         actualStopPlace2.getQuays()
                 .stream()
                 .forEach(quay -> {
-                    AccessibilityLimitation actualAccessibilityLimitation = quay.getAccessibilityAssessment().getLimitations().get(0);
+                    AccessibilityLimitation actualAccessibilityLimitation = quay.getAccessibilityAssessment().getLimitations().getFirst();
 
                     assertThat(actualAccessibilityLimitation).isNotNull();
 
@@ -266,7 +266,7 @@ public class AccessibilityAssessmentOptimizerTest extends TiamatIntegrationTest 
         actualStopPlace2.getQuays()
                 .stream()
                 .forEach(quay -> {
-                    AccessibilityLimitation actualAccessibilityLimitation = quay.getAccessibilityAssessment().getLimitations().get(0);
+                    AccessibilityLimitation actualAccessibilityLimitation = quay.getAccessibilityAssessment().getLimitations().getFirst();
 
                     assertThat(actualAccessibilityLimitation).isNotNull();
 
@@ -321,7 +321,7 @@ public class AccessibilityAssessmentOptimizerTest extends TiamatIntegrationTest 
         StopPlace actualStopPlace = versionCreator.createCopy(stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId()), StopPlace.class);
 
         assertThat(actualStopPlace.getAccessibilityAssessment()).isNotNull();
-        AccessibilityLimitation limitation = actualStopPlace.getAccessibilityAssessment().getLimitations().get(0);
+        AccessibilityLimitation limitation = actualStopPlace.getAccessibilityAssessment().getLimitations().getFirst();
         assertThat(limitation.getWheelchairAccess()).isEqualTo(UNKNOWN);
         assertThat(limitation.getLiftFreeAccess()).isEqualTo(UNKNOWN);
         assertThat(limitation.getEscalatorFreeAccess()).isEqualTo(UNKNOWN);
@@ -347,7 +347,7 @@ public class AccessibilityAssessmentOptimizerTest extends TiamatIntegrationTest 
         actualStopPlace2.getQuays()
                 .stream()
                 .forEach(quay -> {
-                    AccessibilityLimitation actualAccessibilityLimitation = quay.getAccessibilityAssessment().getLimitations().get(0);
+                    AccessibilityLimitation actualAccessibilityLimitation = quay.getAccessibilityAssessment().getLimitations().getFirst();
 
                     assertThat(actualAccessibilityLimitation).isNotNull();
 
@@ -406,7 +406,7 @@ public class AccessibilityAssessmentOptimizerTest extends TiamatIntegrationTest 
         actualStopPlace.getQuays()
                 .stream()
                 .forEach(quay -> {
-                    AccessibilityLimitation actualAccessibilityLimitation = quay.getAccessibilityAssessment().getLimitations().get(0);
+                    AccessibilityLimitation actualAccessibilityLimitation = quay.getAccessibilityAssessment().getLimitations().getFirst();
 
                     assertThat(actualAccessibilityLimitation).isNotNull();
 
@@ -463,7 +463,7 @@ public class AccessibilityAssessmentOptimizerTest extends TiamatIntegrationTest 
         actualStopPlace.getQuays()
                 .stream()
                 .forEach(quay -> {
-                    AccessibilityLimitation actualAccessibilityLimitation = quay.getAccessibilityAssessment().getLimitations().get(0);
+                    AccessibilityLimitation actualAccessibilityLimitation = quay.getAccessibilityAssessment().getLimitations().getFirst();
 
                     assertThat(actualAccessibilityLimitation).isNotNull();
 
@@ -521,7 +521,7 @@ public class AccessibilityAssessmentOptimizerTest extends TiamatIntegrationTest 
         actualStopPlace.getQuays()
                 .stream()
                 .forEach(quay -> {
-                    AccessibilityLimitation actualAccessibilityLimitation = quay.getAccessibilityAssessment().getLimitations().get(0);
+                    AccessibilityLimitation actualAccessibilityLimitation = quay.getAccessibilityAssessment().getLimitations().getFirst();
 
                     assertThat(actualAccessibilityLimitation).isNotNull();
 

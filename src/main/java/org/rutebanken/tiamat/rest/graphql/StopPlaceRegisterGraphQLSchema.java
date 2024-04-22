@@ -635,7 +635,7 @@ public class StopPlaceRegisterGraphQLSchema {
                 env -> {
                     List<AccessibilityLimitation> limitations = ((AccessibilityAssessment) env.getSource()).getLimitations();
                     if (limitations != null && !limitations.isEmpty()) {
-                        return limitations.get(0);
+                        return limitations.getFirst();
                     }
                     return null;
                 }

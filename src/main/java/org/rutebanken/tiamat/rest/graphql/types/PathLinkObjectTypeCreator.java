@@ -100,7 +100,7 @@ public class PathLinkObjectTypeCreator {
             if (env.getSource() != null) {
                 TransferDuration transferDuration = (TransferDuration) env.getSource();
 
-                return switch (env.getMergedField().getFields().get(0).getName()) {
+                return switch (env.getMergedField().getFields().getFirst().getName()) {
                     case DEFAULT_DURATION -> getSeconds(transferDuration.getDefaultDuration());
                     case OCCASIONAL_TRAVELLER_DURATION -> getSeconds(transferDuration.getOccasionalTravellerDuration());
                     case MOBILITY_RESTRICTED_TRAVELLER_DURATION -> getSeconds(transferDuration.getMobilityRestrictedTravellerDuration());
