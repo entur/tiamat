@@ -161,7 +161,7 @@ public class PolygonConverterTest {
         List<Double> actualDoublevalues = polygonConverter.extractValues(actual.getExterior());
         assertThat(actualDoublevalues).hasSize(coordinates.length * 2);
 
-        List<Double> actualHoleDoubleValues = polygonConverter.extractValues(actual.getInterior().get(0));
+        List<Double> actualHoleDoubleValues = polygonConverter.extractValues(actual.getInterior().getFirst());
         assertThat(actualHoleDoubleValues).hasSize(coordinates.length * 2);
 
     }
@@ -176,7 +176,7 @@ public class PolygonConverterTest {
 
     private void assertInteriorRingsMatch(Polygon actual, List<List<Double>> expectedInteriorValues) {
         for (int interiorIndex = 0; interiorIndex < actual.getNumInteriorRing(); interiorIndex++) {
-            assertCoordinatesMatch(actual.getInteriorRingN(interiorIndex), expectedInteriorValues.get(0), "interior ring number " + interiorIndex);
+            assertCoordinatesMatch(actual.getInteriorRingN(interiorIndex), expectedInteriorValues.getFirst(), "interior ring number " + interiorIndex);
         }
     }
 

@@ -17,7 +17,7 @@ package org.rutebanken.tiamat.importer;
 
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.netex.model.SiteFrame;
-import org.rutebanken.tiamat.exporter.PublicationDeliveryExporter;
+import org.rutebanken.tiamat.exporter.PublicationDeliveryCreator;
 import org.rutebanken.tiamat.importer.handler.GroupOfTariffZonesImportHandler;
 import org.rutebanken.tiamat.importer.handler.ParkingsImportHandler;
 import org.rutebanken.tiamat.importer.handler.PathLinkImportHandler;
@@ -49,7 +49,7 @@ public class PublicationDeliveryImporter {
 
 
     private final PublicationDeliveryHelper publicationDeliveryHelper;
-    private final PublicationDeliveryExporter publicationDeliveryExporter;
+    private final PublicationDeliveryCreator publicationDeliveryCreator;
     private final PathLinkImportHandler pathLinkImportHandler;
     private final TariffZoneImportHandler tariffZoneImportHandler;
     private final GroupOfTariffZonesImportHandler groupOfTariffZonesImportHandler;
@@ -60,7 +60,7 @@ public class PublicationDeliveryImporter {
 
     @Autowired
     public PublicationDeliveryImporter(PublicationDeliveryHelper publicationDeliveryHelper, NetexMapper netexMapper,
-                                       PublicationDeliveryExporter publicationDeliveryExporter,
+                                       PublicationDeliveryCreator publicationDeliveryCreator,
                                        PathLinkImportHandler pathLinkImportHandler,
                                        TopographicPlaceImportHandler topographicPlaceImportHandler,
                                        TariffZoneImportHandler tariffZoneImportHandler,
@@ -70,7 +70,7 @@ public class PublicationDeliveryImporter {
                                        BackgroundJobs backgroundJobs) {
         this.publicationDeliveryHelper = publicationDeliveryHelper;
         this.parkingsImportHandler = parkingsImportHandler;
-        this.publicationDeliveryExporter = publicationDeliveryExporter;
+        this.publicationDeliveryCreator = publicationDeliveryCreator;
         this.pathLinkImportHandler = pathLinkImportHandler;
         this.topographicPlaceImportHandler = topographicPlaceImportHandler;
         this.tariffZoneImportHandler = tariffZoneImportHandler;
@@ -136,7 +136,7 @@ public class PublicationDeliveryImporter {
             if(responseSiteFrame.getTariffZones() != null || responseSiteFrame.getTopographicPlaces() != null) {
                 backgroundJobs.triggerStopPlaceUpdate();
             }
-            return publicationDeliveryExporter.createPublicationDelivery(responseSiteFrame);
+            return publicationDeliveryCreator.createPublicationDelivery(responseSiteFrame);
         } finally {
             MDC.remove(IMPORT_CORRELATION_ID);
             loggerTimer.cancel();

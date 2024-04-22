@@ -93,7 +93,7 @@ public class StopPlaceByQuayOriginalIdFinder {
                 if(stopPlaceNetexIds.size() > 1) {
                     logger.warn("Found more than one stop place from quay imported ID: {} - {}", quayOriginalId, stopPlaceNetexIds);
                 }
-                return Optional.of(stopPlaceNetexIds.get(0));
+                return Optional.of(stopPlaceNetexIds.getFirst());
             });
         } catch (ExecutionException e) {
             logger.warn("Caught exception when looking for stop place from quay imported ID {}", quayOriginalId);

@@ -35,6 +35,7 @@ public class PublicationDeliveryStructurePage {
         this.hasNext = hasNext;
     }
 
+
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)

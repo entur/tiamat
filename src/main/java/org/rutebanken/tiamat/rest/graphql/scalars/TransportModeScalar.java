@@ -152,8 +152,7 @@ public class TransportModeScalar {
 
     public Object resolveSubmode(DataFetchingEnvironment env) {
         Object o = env.getSource();
-        if (o instanceof StopPlace) {
-            StopPlace stopPlace = (StopPlace) o;
+        if (o instanceof StopPlace stopPlace) {
             VehicleModeEnumeration mode = stopPlace.getTransportMode();
             if (mode != null) {
                 switch (mode) {

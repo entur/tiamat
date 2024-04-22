@@ -54,7 +54,7 @@ public class PathLinkRepositoryImpl implements PathLinkRepositoryCustom {
             if (results.isEmpty()) {
                 return null;
             } else {
-                return results.get(0).longValue();
+                return results.getFirst().longValue();
             }
         } catch (NoResultException noResultException) {
             return null;

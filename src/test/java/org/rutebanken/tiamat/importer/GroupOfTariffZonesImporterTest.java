@@ -42,7 +42,7 @@ public class GroupOfTariffZonesImporterTest extends TiamatIntegrationTest {
                 .as("Imported group of tariff zones")
                 .hasSize(1);
 
-        assertThat(result.get(0).getMembers().size()).isEqualTo(2);
+        assertThat(result.getFirst().getMembers().size()).isEqualTo(2);
 
 
     }

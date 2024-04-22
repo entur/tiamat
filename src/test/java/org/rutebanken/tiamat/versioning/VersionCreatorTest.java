@@ -240,7 +240,7 @@ public class VersionCreatorTest extends TiamatIntegrationTest {
         assertThat(placeEquipment.getInstalledEquipment())
                 .isNotNull()
                 .hasSize(1);
-        InstalledEquipment_VersionStructure copiedInstalledEquipment = placeEquipment.getInstalledEquipment().get(0);
+        InstalledEquipment_VersionStructure copiedInstalledEquipment = placeEquipment.getInstalledEquipment().getFirst();
 
         assertThat(copiedInstalledEquipment.getNetexId()).isNull();
         assertThat(copiedInstalledEquipment.getVersion()).isZero();

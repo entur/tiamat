@@ -31,10 +31,7 @@ public class TiamatOriganisationChecker implements OrganisationChecker {
     @Override
     public boolean entityMatchesOrganisationRef(RoleAssignment roleAssignment, Object entity) {
 
-        if (entity instanceof Site_VersionStructure) {
-
-            Site_VersionStructure site = (Site_VersionStructure) entity;
-
+        if (entity instanceof Site_VersionStructure site) {
             if (site.getOrganisationRef() != null) {
                 String orgRef = site.getOrganisationRef().getRef();
                 if (orgRef != null) {

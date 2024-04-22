@@ -1358,7 +1358,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                 .body("data.stopPlace[0].name.value", equalTo(stopPlaceName))
                 .body("data.stopPlace[0].accessibilityAssessment.mobilityImpairedAccess", equalTo(LimitationStatusEnumeration.TRUE.name()))
                 .body("data.stopPlace[0].accessibilityAssessment.id", equalTo(stopPlace.getAccessibilityAssessment().getNetexId()))
-                .body("data.stopPlace[0].accessibilityAssessment.limitations.id", equalTo(stopPlace.getAccessibilityAssessment().getLimitations().get(0).getNetexId()))
+                .body("data.stopPlace[0].accessibilityAssessment.limitations.id", equalTo(stopPlace.getAccessibilityAssessment().getLimitations().getFirst().getNetexId()))
                 .body("data.stopPlace[0].accessibilityAssessment.limitations.wheelchairAccess", equalTo(LimitationStatusEnumeration.FALSE.name()));
 
 
