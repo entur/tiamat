@@ -125,16 +125,12 @@ public class NetexIdHelper {
 
     public static String determineIdType(IdentifiedEntity identifiedEntity) {
 
-        if(identifiedEntity instanceof StopPlace) {
-            return "StopPlace";
-        } else if (identifiedEntity instanceof Quay){
-            return "Quay";
-        } else if (identifiedEntity instanceof SiteFrame) {
-            return "SiteFrame";
-        } else if (identifiedEntity instanceof PathLinkEnd) {
-            return "PathLinkEnd";
-        } else {
-            return identifiedEntity.getClass().getSimpleName();
-        }
+        return switch (identifiedEntity) {
+            case StopPlace stopPlace -> "StopPlace";
+            case Quay quay -> "Quay";
+            case SiteFrame siteFrame -> "SiteFrame";
+            case PathLinkEnd pathLinkEnd -> "PathLinkEnd";
+            case null, default -> identifiedEntity.getClass().getSimpleName();
+        };
     }
 }

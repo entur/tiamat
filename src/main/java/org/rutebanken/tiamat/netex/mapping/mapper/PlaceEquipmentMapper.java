@@ -80,20 +80,15 @@ public class PlaceEquipmentMapper extends CustomMapper<PlaceEquipments_RelStruct
                         equipment instanceof ShelterEquipment |
                         equipment instanceof GeneralSign))
                 .map(equipment -> {
-                    if (equipment instanceof SanitaryEquipment) {
-                        return objectFactory.createSanitaryEquipment((SanitaryEquipment) equipment);
-                    } else if (equipment instanceof TicketingEquipment) {
-                        return objectFactory.createTicketingEquipment((TicketingEquipment) equipment);
-                    } else if (equipment instanceof WaitingRoomEquipment) {
-                        return objectFactory.createWaitingRoomEquipment((WaitingRoomEquipment) equipment);
-                    } else if (equipment instanceof CycleStorageEquipment) {
-                        return objectFactory.createCycleStorageEquipment((CycleStorageEquipment) equipment);
-                    } else if (equipment instanceof ShelterEquipment) {
-                        return objectFactory.createShelterEquipment((ShelterEquipment) equipment);
-                    } else if (equipment instanceof GeneralSign) {
-                        return objectFactory.createGeneralSign((GeneralSign) equipment);
-                    }
-                    return null;
+                    return switch (equipment) {
+                        case SanitaryEquipment sanitaryEquipment -> objectFactory.createSanitaryEquipment(sanitaryEquipment);
+                        case TicketingEquipment ticketingEquipment -> objectFactory.createTicketingEquipment(ticketingEquipment);
+                        case WaitingRoomEquipment waitingRoomEquipment -> objectFactory.createWaitingRoomEquipment(waitingRoomEquipment);
+                        case CycleStorageEquipment cycleStorageEquipment -> objectFactory.createCycleStorageEquipment(cycleStorageEquipment);
+                        case ShelterEquipment shelterEquipment -> objectFactory.createShelterEquipment(shelterEquipment);
+                        case GeneralSign generalSign -> objectFactory.createGeneralSign(generalSign);
+                        default -> null;
+                    };
                 })
                 .collect(Collectors.toList());
 
