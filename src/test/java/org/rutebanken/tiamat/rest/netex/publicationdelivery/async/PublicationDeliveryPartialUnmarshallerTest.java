@@ -42,87 +42,89 @@ public class PublicationDeliveryPartialUnmarshallerTest {
     @Test
     public void partiallyPublicationDeliveryImport() throws Exception {
 
-        String notValidPublicationDeliveryXml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n" +
-                "<PublicationDelivery xmlns=\"http://www.netex.org.uk/netex\" xmlns:ns2=\"http://www.opengis.net/gml/3.2\" xmlns:ns3=\"http://www.siri.org.uk/siri\" version=\"any\">\n" +
-                "    <PublicationTimestamp>2017-01-07T15:28:33.38+01:00</PublicationTimestamp>\n" +
-                "    <ParticipantRef>NSR</ParticipantRef>\n" +
-                "    <dataObjects>\n" +
-                "        <SiteFrame created=\"2017-01-07T15:28:29.376+01:00\" modification=\"new\" version=\"any\" id=\"NSR:SiteFrame:1\">\n" +
-                "           <FrameDefaults>\n" +
-                "                <DefaultLocale>\n" +
-                "                    <TimeZone>Europe/Paris</TimeZone>\n" +
-                "                </DefaultLocale>\n" +
-                "            </FrameDefaults>\n" +
-                "            <topographicPlaces modificationSet=\"all\">\n" +
-                "                <TopographicPlace modification=\"new\" version=\"any\" id=\"NSR:TopographicPlace:1\">\n" +
-                "                    <Name lang=\"no\">Oslo</Name>\n" +
-                "                    <Descriptor>\n" +
-                "                        <Name>Oslo</Name>\n" +
-                "                    </Descriptor>\n" +
-                "                    <TopographicPlaceType>county</TopographicPlaceType>\n" +
-                "                    <CountryRef ref=\"no\"/>\n" +
-                "                </TopographicPlace>\n" +
-                "              </topographicPlaces>\n" +
-                "           <stopPlaces>\n" +
-                "<StopPlace created=\"2016-12-21T11:44:00.79+01:00\" changed=\"2016-12-21T11:44:00.79+01:00\" modification=\"new\" version=\"21\" id=\"NSR:StopPlace:14\" xsi:schemaLocation=\"\" xmlns=\"http://www.netex.org.uk/netex\" xmlns:ns=\"http://www.opengis.net/gml/3.2\" xmlns:ns3=\"http://www.siri.org.uk/siri\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n" +
-                "    <keyList>\n" +
-                "        <KeyValue>\n" +
-                "            <Key>imported-id</Key>\n" +
-                "            <Value>RUT:StopArea:02360520</Value>\n" +
-                "        </KeyValue>\n" +
-                "    </keyList>\n" +
-                "    <Name lang=\"no\">Rønold</Name>\n" +
-                "    <Centroid>\n" +
-                "        <Location>\n" +
-                "            <Longitude>11.500336</Longitude>\n" +
-                "            <Latitude>60.219095</Latitude>\n" +
-                "        </Location>\n" +
-                "    </Centroid>\n" +
-                "    <AccessModes></AccessModes>\n" +
-                "    <TopographicPlaceRef ref=\"9\"/>\n" +
-                "    <OtherTransportModes></OtherTransportModes>\n" +
-                "    <StopPlaceType>onstreetBus</StopPlaceType>\n" +
-                "    <quays>\n" +
-                "        <Quay created=\"2016-12-21T11:44:00.788+01:00\" changed=\"2016-12-21T11:44:00.788+01:00\" modification=\"new\" version=\"1\" id=\"NSR:Quay:26\">\n" +
-                "            <keyList>\n" +
-                "                <KeyValue>\n" +
-                "                    <Key>imported-id</Key>\n" +
-                "                    <Value>RUT:StopArea:0236052001</Value>\n" +
-                "                </KeyValue>\n" +
-                "            </keyList>\n" +
-                "            <Centroid>\n" +
-                "                <Location>\n" +
-                "                    <Longitude>11.500217</Longitude>\n" +
-                "                    <Latitude>60.219074</Latitude>\n" +
-                "                </Location>\n" +
-                "            </Centroid>\n" +
-                "            <AccessModes></AccessModes>\n" +
-                "            <OtherTransportModes></OtherTransportModes>\n" +
-                "            <CompassBearing>205.0</CompassBearing>\n" +
-                "        </Quay>\n" +
-                "        <Quay created=\"2016-12-21T11:44:00.789+01:00\" changed=\"2016-12-21T11:44:00.789+01:00\" modification=\"new\" version=\"1\" id=\"NSR:Quay:27\">\n" +
-                "            <keyList>\n" +
-                "                <KeyValue>\n" +
-                "                    <Key>imported-id</Key>\n" +
-                "                    <Value>RUT:StopArea:0236052002</Value>\n" +
-                "                </KeyValue>\n" +
-                "            </keyList>\n" +
-                "            <Centroid>\n" +
-                "                <Location>\n" +
-                "                    <Longitude>11.500455</Longitude>\n" +
-                "                    <Latitude>60.219115</Latitude>\n" +
-                "                </Location>\n" +
-                "            </Centroid>\n" +
-                "            <AccessModes></AccessModes>\n" +
-                "            <OtherTransportModes></OtherTransportModes>\n" +
-                "            <CompassBearing>25.0</CompassBearing>\n" +
-                "        </Quay>\n" +
-                "    </quays>\n" +
-                "</StopPlace>\n" +
-                "</stopPlaces>\n" +
-                "</SiteFrame>\n" +
-                "</dataObjects>\n" +
-                "</PublicationDelivery>\n";
+        String notValidPublicationDeliveryXml = """
+                <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+                <PublicationDelivery xmlns="http://www.netex.org.uk/netex" xmlns:ns2="http://www.opengis.net/gml/3.2" xmlns:ns3="http://www.siri.org.uk/siri" version="any">
+                    <PublicationTimestamp>2017-01-07T15:28:33.38+01:00</PublicationTimestamp>
+                    <ParticipantRef>NSR</ParticipantRef>
+                    <dataObjects>
+                        <SiteFrame created="2017-01-07T15:28:29.376+01:00" modification="new" version="any" id="NSR:SiteFrame:1">
+                           <FrameDefaults>
+                                <DefaultLocale>
+                                    <TimeZone>Europe/Paris</TimeZone>
+                                </DefaultLocale>
+                            </FrameDefaults>
+                            <topographicPlaces modificationSet="all">
+                                <TopographicPlace modification="new" version="any" id="NSR:TopographicPlace:1">
+                                    <Name lang="no">Oslo</Name>
+                                    <Descriptor>
+                                        <Name>Oslo</Name>
+                                    </Descriptor>
+                                    <TopographicPlaceType>county</TopographicPlaceType>
+                                    <CountryRef ref="no"/>
+                                </TopographicPlace>
+                              </topographicPlaces>
+                           <stopPlaces>
+                <StopPlace created="2016-12-21T11:44:00.79+01:00" changed="2016-12-21T11:44:00.79+01:00" modification="new" version="21" id="NSR:StopPlace:14" xsi:schemaLocation="" xmlns="http://www.netex.org.uk/netex" xmlns:ns="http://www.opengis.net/gml/3.2" xmlns:ns3="http://www.siri.org.uk/siri" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                    <keyList>
+                        <KeyValue>
+                            <Key>imported-id</Key>
+                            <Value>RUT:StopArea:02360520</Value>
+                        </KeyValue>
+                    </keyList>
+                    <Name lang="no">Rønold</Name>
+                    <Centroid>
+                        <Location>
+                            <Longitude>11.500336</Longitude>
+                            <Latitude>60.219095</Latitude>
+                        </Location>
+                    </Centroid>
+                    <AccessModes></AccessModes>
+                    <TopographicPlaceRef ref="9"/>
+                    <OtherTransportModes></OtherTransportModes>
+                    <StopPlaceType>onstreetBus</StopPlaceType>
+                    <quays>
+                        <Quay created="2016-12-21T11:44:00.788+01:00" changed="2016-12-21T11:44:00.788+01:00" modification="new" version="1" id="NSR:Quay:26">
+                            <keyList>
+                                <KeyValue>
+                                    <Key>imported-id</Key>
+                                    <Value>RUT:StopArea:0236052001</Value>
+                                </KeyValue>
+                            </keyList>
+                            <Centroid>
+                                <Location>
+                                    <Longitude>11.500217</Longitude>
+                                    <Latitude>60.219074</Latitude>
+                                </Location>
+                            </Centroid>
+                            <AccessModes></AccessModes>
+                            <OtherTransportModes></OtherTransportModes>
+                            <CompassBearing>205.0</CompassBearing>
+                        </Quay>
+                        <Quay created="2016-12-21T11:44:00.789+01:00" changed="2016-12-21T11:44:00.789+01:00" modification="new" version="1" id="NSR:Quay:27">
+                            <keyList>
+                                <KeyValue>
+                                    <Key>imported-id</Key>
+                                    <Value>RUT:StopArea:0236052002</Value>
+                                </KeyValue>
+                            </keyList>
+                            <Centroid>
+                                <Location>
+                                    <Longitude>11.500455</Longitude>
+                                    <Latitude>60.219115</Latitude>
+                                </Location>
+                            </Centroid>
+                            <AccessModes></AccessModes>
+                            <OtherTransportModes></OtherTransportModes>
+                            <CompassBearing>25.0</CompassBearing>
+                        </Quay>
+                    </quays>
+                </StopPlace>
+                </stopPlaces>
+                </SiteFrame>
+                </dataObjects>
+                </PublicationDelivery>
+                """;
 
         InputStream inputStream = new ByteArrayInputStream(notValidPublicationDeliveryXml.getBytes());
 

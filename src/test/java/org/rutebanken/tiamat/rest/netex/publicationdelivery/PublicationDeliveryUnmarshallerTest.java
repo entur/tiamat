@@ -32,9 +32,10 @@ public class PublicationDeliveryUnmarshallerTest {
     @Test
     public void expectUnmarshalExceptionWhenIncorrectPublicationDeliveryXml() throws IOException, SAXException, JAXBException {
 
-        String notValidPublicationDeliveryXml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n" +
-                "<PublicationDelivery xmlns=\"http://www.netex.org.uk/netex\" xmlns:ns2=\"http://www.opengis.net/gml/3.2\" xmlns:ns3=\"http://www.siri.org.uk/siri\">\n" +
-                "</PublicationDeliivery>";
+        String notValidPublicationDeliveryXml = """
+                <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+                <PublicationDelivery xmlns="http://www.netex.org.uk/netex" xmlns:ns2="http://www.opengis.net/gml/3.2" xmlns:ns3="http://www.siri.org.uk/siri">
+                </PublicationDeliivery>""";
 
         InputStream inputStream = new ByteArrayInputStream(notValidPublicationDeliveryXml.getBytes());
 
