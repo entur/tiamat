@@ -238,8 +238,7 @@ public class GraphQLResource {
     private Throwable getRootCause(Throwable e) {
         Throwable rootCause = e;
 
-        if (e instanceof NestedRuntimeException) {
-            NestedRuntimeException nestedRuntimeException = ((NestedRuntimeException) e);
+        if (e instanceof NestedRuntimeException nestedRuntimeException) {
             if (nestedRuntimeException.getRootCause() != null) {
                 rootCause = nestedRuntimeException.getRootCause();
             }
