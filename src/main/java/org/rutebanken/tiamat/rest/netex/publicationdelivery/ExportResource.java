@@ -29,7 +29,6 @@ import jakarta.ws.rs.core.UriInfo;
 import jakarta.xml.bind.JAXBException;
 import org.rutebanken.tiamat.dtoassembling.disassembler.ChangedStopPlaceSearchDisassembler;
 import org.rutebanken.tiamat.dtoassembling.dto.ChangedStopPlaceSearchDto;
-import org.rutebanken.tiamat.exporter.PublicationDeliveryExporter;
 import org.rutebanken.tiamat.exporter.PublicationDeliveryStructurePage;
 import org.rutebanken.tiamat.exporter.StreamingPublicationDelivery;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
@@ -54,9 +53,9 @@ public class ExportResource {
 
     private final PublicationDeliveryStreamingOutput publicationDeliveryStreamingOutput;
 
-    private final PublicationDeliveryExporter publicationDeliveryExporter;
-
     private final ChangedStopPlaceSearchDisassembler changedStopPlaceSearchDisassembler;
+
+    private final ExportStopPlacesWithEffectiveChangeInPeriod exportStopPlacesWithEffectiveChangeInPeriod;
 
     @Qualifier("syncStreamingPublicationDelivery")
     @Autowired
@@ -64,12 +63,12 @@ public class ExportResource {
 
     @Autowired
     public ExportResource(PublicationDeliveryStreamingOutput publicationDeliveryStreamingOutput,
-                          PublicationDeliveryExporter publicationDeliveryExporter,
+                          ExportStopPlacesWithEffectiveChangeInPeriod exportStopPlacesWithEffectiveChangeInPeriod,
                           ChangedStopPlaceSearchDisassembler changedStopPlaceSearchDisassembler) {
 
         this.publicationDeliveryStreamingOutput = publicationDeliveryStreamingOutput;
-        this.publicationDeliveryExporter = publicationDeliveryExporter;
         this.changedStopPlaceSearchDisassembler = changedStopPlaceSearchDisassembler;
+        this.exportStopPlacesWithEffectiveChangeInPeriod = exportStopPlacesWithEffectiveChangeInPeriod;
     }
 
     @GET
@@ -100,8 +99,7 @@ public class ExportResource {
 
         ChangedStopPlaceSearch search = changedStopPlaceSearchDisassembler.disassemble(searchDTO);
         logger.info("Exporting stop places. Search: {}, topographic export mode: {}", search, exportParams.getTopographicPlaceExportMode());
-        PublicationDeliveryStructurePage resultPage =
-                publicationDeliveryExporter.exportStopPlacesWithEffectiveChangeInPeriod(search, exportParams);
+        PublicationDeliveryStructurePage resultPage = exportStopPlacesWithEffectiveChangeInPeriod.export(search, exportParams);
 
         if (resultPage.totalElements == 0) {
             logger.debug("Returning no content. No stops changed in period.");

@@ -114,7 +114,7 @@ public class StreamingPublicationDelivery {
 
     private final StopPlaceRepository stopPlaceRepository;
     private final ParkingRepository parkingRepository;
-    private final PublicationDeliveryExporter publicationDeliveryExporter;
+    private final PublicationDeliveryCreator publicationDeliveryCreator;
     private final TiamatSiteFrameExporter tiamatSiteFrameExporter;
     private final TiamatServiceFrameExporter tiamatServiceFrameExporter;
     private final TiamatFareFrameExporter tiamatFareFrameExporter;
@@ -141,7 +141,7 @@ public class StreamingPublicationDelivery {
     @Autowired
     public StreamingPublicationDelivery(StopPlaceRepository stopPlaceRepository,
                                         ParkingRepository parkingRepository,
-                                        PublicationDeliveryExporter publicationDeliveryExporter,
+                                        PublicationDeliveryCreator publicationDeliveryCreator,
                                         TiamatSiteFrameExporter tiamatSiteFrameExporter,
                                         TiamatServiceFrameExporter tiamatServiceFrameExporter,
                                         TiamatFareFrameExporter tiamatFareFrameExporter,
@@ -157,7 +157,7 @@ public class StreamingPublicationDelivery {
                                         PurposeOfGroupingRepository purposeOfGroupingRepository) throws IOException, SAXException {
         this.stopPlaceRepository = stopPlaceRepository;
         this.parkingRepository = parkingRepository;
-        this.publicationDeliveryExporter = publicationDeliveryExporter;
+        this.publicationDeliveryCreator = publicationDeliveryCreator;
         this.tiamatSiteFrameExporter = tiamatSiteFrameExporter;
         this.tiamatServiceFrameExporter = tiamatServiceFrameExporter;
         this.tiamatFareFrameExporter = tiamatFareFrameExporter;
@@ -247,9 +247,9 @@ public class StreamingPublicationDelivery {
         if (exportParams.getServiceFrameExportMode() == ExportParams.ExportMode.ALL) {
             prepareFareZones(exportParams,stopPlacePrimaryIds,mappedFareZonesCount,mappedGroupOfTariffZonesCount,netexSiteFrame,netexFareFrame,entitiesEvictor);
             prepareScheduledStopPoints(stopPlacePrimaryIds, netexServiceFrame);
-            publicationDeliveryStructure = publicationDeliveryExporter.createPublicationDelivery(netexSiteFrame, netexServiceFrame,netexFareFrame,netexResourceFrame);
+            publicationDeliveryStructure = publicationDeliveryCreator.createPublicationDelivery(netexSiteFrame, netexServiceFrame,netexFareFrame,netexResourceFrame);
         } else {
-            publicationDeliveryStructure = publicationDeliveryExporter.createPublicationDelivery(netexSiteFrame,netexResourceFrame);
+            publicationDeliveryStructure = publicationDeliveryCreator.createPublicationDelivery(netexSiteFrame,netexResourceFrame);
         }
 
         Marshaller marshaller = createMarshaller();
