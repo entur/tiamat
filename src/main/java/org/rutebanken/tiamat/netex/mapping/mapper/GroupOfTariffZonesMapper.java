@@ -5,7 +5,6 @@ import ma.glasnost.orika.MappingContext;
 import org.rutebanken.netex.model.GroupOfTariffZones;
 import org.rutebanken.tiamat.model.TariffZoneRef;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
