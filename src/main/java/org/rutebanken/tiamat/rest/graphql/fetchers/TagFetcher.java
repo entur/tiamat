@@ -41,10 +41,9 @@ public class TagFetcher implements DataFetcher<Set<Tag>> {
 
     @Override
     public Set<Tag> get(DataFetchingEnvironment dataFetchingEnvironment) {
-        if(dataFetchingEnvironment.getSource() instanceof IdentifiedEntity) {
-            IdentifiedEntity source = (IdentifiedEntity) dataFetchingEnvironment.getSource();
-            if (source != null) {
-                return tagRepository.findByIdReference(source.getNetexId())
+        if(dataFetchingEnvironment.getSource() instanceof IdentifiedEntity identifiedEntity) {
+            if (identifiedEntity != null) {
+                return tagRepository.findByIdReference(identifiedEntity.getNetexId())
                         .stream()
                         .filter(tag -> tag.getRemoved() == null)
                         .collect(toSet());

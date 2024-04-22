@@ -54,9 +54,8 @@ public class LoggingFilter implements Filter {
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
 
-        if (servletRequest instanceof HttpServletRequest) {
+        if (servletRequest instanceof HttpServletRequest httpServletRequest) {
 
-            HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
             String requestUri = httpServletRequest.getRequestURI();
 
             if(!requestUri.startsWith("/health")) {

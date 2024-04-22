@@ -111,11 +111,8 @@ public class GraphQLResource {
         if (query.get("variables") instanceof Map) {
             variables = (Map) query.get("variables");
 
-        } else if (query.get("variables") instanceof String && !((String) query.get("variables")).isEmpty()) {
-            String s = (String) query.get("variables");
-
+        } else if (query.get("variables") instanceof String s && !s.isEmpty()) {
             ObjectMapper mapper = new ObjectMapper();
-
             // convert JSON string to Map
             try {
                 variables = mapper.readValue(s, TypeFactory.defaultInstance().constructMapType(HashMap.class, String.class, Object.class));

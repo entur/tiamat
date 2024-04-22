@@ -83,10 +83,8 @@ public class GroupOfEntitiesMapper {
             isUpdated = true;
         }
 
-        if(entity instanceof SiteElement) {
-            SiteElement siteElement = (SiteElement) entity;
+        if(entity instanceof SiteElement siteElement) {
             isUpdated = isUpdated | siteElementMapper.populate(input, siteElement);
-
         }
         return isUpdated;
     }

@@ -44,8 +44,7 @@ public class TiamatEntityResolver implements EntityResolver {
             return stopPlace;
         }
 
-        if(entity instanceof Parking) {
-            Parking parking = (Parking) entity;
+        if(entity instanceof Parking parking) {
             if (parking.getParentSiteRef() != null && parking.getParentSiteRef().getRef() != null) {
                 StopPlace stopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(parking.getParentSiteRef().getRef());
 
