@@ -649,12 +649,11 @@ public class StopPlaceRegisterGraphQLSchema {
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_PARENT_STOPPLACE, TAGS, tagFetcher);
 
         dataFetcherGeometry(codeRegistryBuilder, OUTPUT_TYPE_STOPPLACE);
-
         dataFetcherGeometry(codeRegistryBuilder, OUTPUT_TYPE_PARENT_STOPPLACE);
-
         dataFetcherGeometry(codeRegistryBuilder, OUTPUT_TYPE_QUAY);
-
         dataFetcherGeometry(codeRegistryBuilder, OUTPUT_TYPE_PARKING);
+        dataFetcherGeometry(codeRegistryBuilder, OUTPUT_TYPE_TARIFF_ZONE);
+        dataFetcherGeometry(codeRegistryBuilder, OUTPUT_TYPE_FARE_ZONE);
 
 
         dataFetcherPlaceEquipments(codeRegistryBuilder, OUTPUT_TYPE_STOPPLACE);
