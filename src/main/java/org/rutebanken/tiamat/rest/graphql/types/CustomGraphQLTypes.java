@@ -69,6 +69,8 @@ import static graphql.schema.GraphQLInputObjectField.newInputObjectField;
 import static graphql.schema.GraphQLObjectType.newObject;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 import static org.rutebanken.tiamat.rest.graphql.scalars.CustomScalars.GraphQLGeoJSONCoordinates;
+import static org.rutebanken.tiamat.rest.graphql.scalars.CustomScalars.GraphQLGeoJSONStandardCoordinates;
+
 
 public class CustomGraphQLTypes {
 
@@ -151,26 +153,40 @@ public class CustomGraphQLTypes {
 
     public static GraphQLObjectType geoJsonObjectType = newObject()
             .name(OUTPUT_TYPE_GEO_JSON)
-            .description("Geometry-object as specified in the GeoJSON-standard (http://geojson.org/geojson-spec.html).")
+            .description("Geometry-object as specified in the GeoJSON-standard (https://geojson.org/geojson-spec.html).")
             .field(newFieldDefinition()
                     .name(TYPE)
                     .type(geometryTypeEnum))
             .field(newFieldDefinition()
                     .name(COORDINATES)
+                    .description("non standard coordinates")
+                    .deprecate("no standard coordinates, should be removed in future versions")
                     .type(GraphQLGeoJSONCoordinates))
+
+            .field(newFieldDefinition()
+                    .name(STANDARD_COORDINATES)
+                    .description("GeoJSON-standard coordinates")
+                    .type(GraphQLGeoJSONStandardCoordinates))
+
+
             .build();
 
     public static GraphQLInputObjectType geoJsonInputType = GraphQLInputObjectType.newInputObject()
             .name(INPUT_TYPE_GEO_JSON)
-            .description("Geometry-object as specified in the GeoJSON-standard (http://geojson.org/geojson-spec.html).")
+            .description("Geometry-object as specified in the GeoJSON-standard (https://geojson.org/geojson-spec.html).")
             .field(newInputObjectField()
                     .name(TYPE)
                     .type(new GraphQLNonNull(geometryTypeEnum))
                     .build())
             .field(newInputObjectField()
                     .name(COORDINATES)
+                    .deprecate("non standard coordinates, will be removed in future versions")
                     .type(new GraphQLNonNull(GraphQLGeoJSONCoordinates))
                     .build())
+            .field(newInputObjectField()
+                    .name(STANDARD_COORDINATES)
+                    .description("GeoJSON-standard coordinates")
+                    .type(GraphQLGeoJSONStandardCoordinates))
             .build();
 
 

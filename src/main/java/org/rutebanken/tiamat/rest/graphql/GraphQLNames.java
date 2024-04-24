@@ -352,6 +352,7 @@ public class GraphQLNames {
     public static final String GEOMETRY = "geometry";
     public static final String TYPE = "type";
     public static final String COORDINATES = "coordinates";
+    public static final String STANDARD_COORDINATES = "standardCoordinates";
     public static final String IGNORE_STOPPLACE_ID = "ignoreStopPlaceId";
     public static final String QUAYS = "quays";
     public static final String COMPASS_BEARING = "compassBearing";
