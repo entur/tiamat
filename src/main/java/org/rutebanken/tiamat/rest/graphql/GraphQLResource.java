@@ -27,6 +27,8 @@ import graphql.GraphQLError;
 import graphql.GraphQLException;
 import graphql.analysis.MaxQueryDepthInstrumentation;
 import graphql.execution.AbortExecutionException;
+import graphql.execution.instrumentation.ChainedInstrumentation;
+import graphql.execution.instrumentation.Instrumentation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.PostConstruct;
 import jakarta.ws.rs.Consumes;
@@ -51,6 +53,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -82,6 +85,10 @@ public class GraphQLResource {
     private StopPlaceRegisterGraphQLSchema stopPlaceRegisterGraphQLSchema;
 
 
+    @Autowired
+    private RequestLoggingInstrumentation requestLoggingInstrumentation;
+
+
     private final TransactionTemplate transactionTemplate;
 
 
@@ -92,9 +99,16 @@ public class GraphQLResource {
 
     @PostConstruct
     public void init() {
+        List<Instrumentation> chainedList = new ArrayList<>();
+        chainedList.add(new MaxQueryDepthInstrumentation(MAX_DEPTH));
+        chainedList.add(requestLoggingInstrumentation);
+
+        final ChainedInstrumentation chainedInstrumentation = new ChainedInstrumentation(chainedList);
+
+
         logger.info(String.format("max query depth is: %d", MAX_DEPTH));
         graphQL = GraphQL.newGraphQL(stopPlaceRegisterGraphQLSchema.stopPlaceRegisterSchema)
-                .instrumentation(new MaxQueryDepthInstrumentation(MAX_DEPTH))
+                .instrumentation(chainedInstrumentation)
                 .build();
 
     }
