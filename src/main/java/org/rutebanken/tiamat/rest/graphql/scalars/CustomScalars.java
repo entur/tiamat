@@ -33,9 +33,9 @@ import java.util.Locale;
 
 public class CustomScalars {
 
-    public static GraphQLScalarType GraphQLGeoJSONCoordinates = new GraphQLScalarType.Builder()
-            .name("Coordinates")
-            .description("GeoJSON Coordinates")
+    public static GraphQLScalarType GraphQLLegacyGeoJSONCoordinates = new GraphQLScalarType.Builder()
+            .name("legacyCoordinates")
+            .description("Legacy GeoJSON Coordinates")
             .coercing(new Coercing() {
                 @Override
                 public List<List<Double>> serialize(Object input, GraphQLContext graphQLContext, Locale locale) {

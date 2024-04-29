@@ -52,11 +52,11 @@ public class GraphQLResourceTariffZoneIntegrationTest extends AbstractGraphQLRes
                                 version
                                     geometry {
                                         type
-                                        coordinates
+                                        legacyCoordinates
                                     }
                                     polygon {
                                         type
-                                        coordinates
+                                        legacyCoordinates
                                     }
                           }
                         }""";

@@ -866,6 +866,7 @@ public class StopPlaceRegisterGraphQLSchema {
         registerDataFetcher(codeRegistryBuilder,STOPPLACES_MUTATION,CREATE_TAG,environment -> tagCreator.createTag(environment.getArgument(TAG_NAME), environment.getArgument(TAG_ID_REFERENCE), environment.getArgument(TAG_COMMENT)));
 
         registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_GEO_JSON, STANDARD_COORDINATES,getStandardCoordinates());
+        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_GEO_JSON, LEGACY_COORDINATES,getStandardCoordinates());
 
         codeRegistryBuilder.typeResolver(OUTPUT_TYPE_STOPPLACE_INTERFACE, stopPlaceTypeResolver);
 
