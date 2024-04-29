@@ -136,13 +136,15 @@ public class CustomScalars {
 
                 @Override
                 public Object parseLiteral(Value input, CoercedVariables variables, GraphQLContext graphQLContext, Locale locale) {
+                    if (input instanceof ArrayValue arrayValue) {
+                        List<Value> coordinatePair = arrayValue.getValues();
+                        Coordinate[] coordinates = new Coordinate[coordinatePair.size()];
+                        var longitude = (FloatValue) coordinatePair.getFirst();
+                        var latitude = (FloatValue) coordinatePair.getLast();
+                        coordinates[0] = new Coordinate(longitude.getValue().doubleValue(), latitude.getValue().doubleValue());
+                        return coordinates;
+                    }
                     if (input instanceof List list) {
-                        if (list.size() == 2) {
-                            List<Double> coordinateList = (List<Double>) list;
-                            Coordinate[] coordinates = new Coordinate[1];
-                            coordinates[0] = new Coordinate(coordinateList.get(0), coordinateList.get(1));
-                            return coordinates;
-                        }
                         final ArrayValue arrayValue = (ArrayValue) list.getFirst();
                         List<Value> coordinateList = arrayValue.getValues();
                         Coordinate[] coordinates = new Coordinate[coordinateList.size()];

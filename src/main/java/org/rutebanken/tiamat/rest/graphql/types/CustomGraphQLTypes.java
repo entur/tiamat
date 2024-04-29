@@ -180,7 +180,7 @@ public class CustomGraphQLTypes {
                     .build())
             .field(newInputObjectField()
                     .name(COORDINATES)
-                    .deprecate("non standard coordinates, will be removed in future versions")
+                    .deprecate("non-standard coordinates, will be removed in future versions")
                     .type(new GraphQLNonNull(GraphQLGeoJSONCoordinates))
                     .build())
             .field(newInputObjectField()
