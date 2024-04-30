@@ -20,6 +20,7 @@ import org.rutebanken.tiamat.model.AccessibilityLimitation;
 import org.rutebanken.tiamat.model.AlternativeName;
 import org.rutebanken.tiamat.model.BoardingPosition;
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
+import org.rutebanken.tiamat.model.hsl.HslAccessibilityProperties;
 import org.rutebanken.tiamat.model.PlaceEquipment;
 import org.rutebanken.tiamat.model.SiteElement;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -64,6 +65,11 @@ public class VersionIncrementor {
             if (accessibilityAssessment.getLimitations() != null && !accessibilityAssessment.getLimitations().isEmpty()) {
                 AccessibilityLimitation limitation = accessibilityAssessment.getLimitations().get(0);
                 initiateOrIncrement(limitation);
+            }
+
+            HslAccessibilityProperties hslAccessibilityProperties = accessibilityAssessment.getHslAccessibilityProperties();
+            if (hslAccessibilityProperties != null) {
+                initiateOrIncrement(hslAccessibilityProperties);
             }
         }
     }

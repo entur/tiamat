@@ -20,6 +20,7 @@ import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.AccessibilityAssessment;
 import org.rutebanken.tiamat.model.AccessibilityLimitation;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
+import org.rutebanken.tiamat.model.hsl.HslAccessibilityProperties;
 import org.rutebanken.tiamat.model.LimitationStatusEnumeration;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -182,7 +183,51 @@ public class AccessibilityAssessmentVersioningTest extends TiamatIntegrationTest
 
     }
 
+    @Test
+    public void testAccessibilityVersioningWithHslAccessibilityProperties() {
+        /**
+         * Create StopPlace with a single quay with HslAccessibilityProperties.
+         */
+        HslAccessibilityProperties hslAccessibilityProperties = new HslAccessibilityProperties();
+        hslAccessibilityProperties.setStopAreaSideSlope(5.3);
+        hslAccessibilityProperties.setStopAreaLengthwiseSlope(1.8);
+        hslAccessibilityProperties.setEndRampSlope(5.);
+        hslAccessibilityProperties.setShelterLaneDistance(123.);
+        hslAccessibilityProperties.setCurbBackOfRailDistance(145.);
+        hslAccessibilityProperties.setCurbDriveSideOfRailDistance(5.);
+        hslAccessibilityProperties.setStructureLaneDistance(15.);
+        hslAccessibilityProperties.setStopElevationFromRailTop(10.);
+        hslAccessibilityProperties.setStopElevationFromSidewalk(7.);
+        hslAccessibilityProperties.setLowerCleatHeight(5.);
+        hslAccessibilityProperties.setServiceAreaWidth(460.);
+        hslAccessibilityProperties.setServiceAreaLength(552.);
+        hslAccessibilityProperties.setPlatformEdgeWarningArea(true);
+        hslAccessibilityProperties.setGuidanceTiles(true);
+        hslAccessibilityProperties.setGuidanceStripe(false);
+        hslAccessibilityProperties.setServiceAreaStripes(false);
+        hslAccessibilityProperties.setSidewalkAccessibleConnection(true);
+        hslAccessibilityProperties.setStopAreaSurroundingsAccessible(false);
+        hslAccessibilityProperties.setCurvedStop(true);
 
+        AccessibilityAssessment accessibilityAssessment = createAccessibilityAssessment(TRUE);
+        accessibilityAssessment.setHslAccessibilityProperties(hslAccessibilityProperties);
+        Quay quay1 = new Quay();
+        quay1.setName(new EmbeddableMultilingualString("quay1"));
+        quay1.setAccessibilityAssessment(accessibilityAssessment);
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.getQuays().add(quay1);
+
+        StopPlace stopPlace_v1 = stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+
+        assertThat(stopPlace_v1.getQuays()).isNotNull();
+        assertThat(stopPlace_v1.getAccessibilityAssessment()).isNotNull();
+        assertThat(stopPlace_v1.getAccessibilityAssessment().getVersion()).isEqualTo(1);
+
+        HslAccessibilityProperties actualHslAccessibilityProperties = stopPlace_v1.getAccessibilityAssessment().getHslAccessibilityProperties();
+        assertThat(actualHslAccessibilityProperties).isNotNull();
+        assertThat(actualHslAccessibilityProperties.getVersion()).isEqualTo(1);
+     }
 
 
     protected AccessibilityAssessment createAccessibilityAssessment(LimitationStatusEnumeration limitation) {

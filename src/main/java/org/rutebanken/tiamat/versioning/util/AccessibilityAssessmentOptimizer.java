@@ -17,6 +17,7 @@ package org.rutebanken.tiamat.versioning.util;
 
 import org.rutebanken.tiamat.model.AccessibilityAssessment;
 import org.rutebanken.tiamat.model.AccessibilityLimitation;
+import org.rutebanken.tiamat.model.hsl.HslAccessibilityProperties;
 import org.rutebanken.tiamat.model.LimitationStatusEnumeration;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.versioning.VersionCreator;
@@ -69,6 +70,7 @@ public class AccessibilityAssessmentOptimizer {
                     // Use existing Assessment instead, but update limitations
                     AccessibilityAssessment nextVersion = stopPlace.getAccessibilityAssessment();
                     nextVersion.setLimitations(firstAccessibilityAssessment.getLimitations());
+                    nextVersion.setHslAccessibilityProperties(firstAccessibilityAssessment.getHslAccessibilityProperties()); // Note: this does not increment version but creates a new row, similarly to limitations.
                     firstAccessibilityAssessment = nextVersion;
 //                    firstAccessibilityAssessment = versionCreator.createCopy(nextVersion, AccessibilityAssessment.class);
                 }
@@ -114,6 +116,12 @@ public class AccessibilityAssessmentOptimizer {
         limitations.add(limitation);
 
         quayAssessment.setLimitations(limitations);
+
+        if (accessibilityAssessment.getHslAccessibilityProperties() != null) {
+            HslAccessibilityProperties hslAccessibilityProperties = accessibilityAssessment.getHslAccessibilityProperties().copy();
+            quayAssessment.setHslAccessibilityProperties(hslAccessibilityProperties);
+        }
+
         return quayAssessment;
     }
 

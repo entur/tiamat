@@ -18,6 +18,7 @@ package org.rutebanken.tiamat.rest.graphql.mappers;
 import org.rutebanken.tiamat.model.AccessibilityAssessment;
 import org.rutebanken.tiamat.model.AccessibilityLimitation;
 import org.rutebanken.tiamat.model.AlternativeName;
+import org.rutebanken.tiamat.model.hsl.HslAccessibilityProperties;
 import org.rutebanken.tiamat.model.LimitationStatusEnumeration;
 import org.rutebanken.tiamat.model.PlaceEquipment;
 import org.rutebanken.tiamat.model.SiteComponent_VersionStructure;
@@ -57,6 +58,9 @@ public class SiteElementMapper {
 
     @Autowired
     private GeometryMapper geometryMapper;
+
+    @Autowired
+    private HslAccessibilityPropertiesMapper hslAccessibilityPropertiesMapper;
 
     public boolean populate(Map input, SiteElement siteElement) {
 
@@ -118,6 +122,21 @@ public class SiteElementMapper {
                 siteElement.setAccessibilityAssessment(accessibilityAssessment);
 
                 isUpdated = true;
+            }
+
+            Object hslAccessibilityPropertiesInput = accessibilityAssessmentInput.get("hslAccessibilityProperties");
+            if (hslAccessibilityPropertiesInput != null) {
+                HslAccessibilityProperties existingHslAccessibilityProperties = accessibilityAssessment.getHslAccessibilityProperties();
+                HslAccessibilityProperties hslAccessibilityPropertiesFromInput = hslAccessibilityPropertiesMapper.mapHslAccessibilityProperties((Map) hslAccessibilityPropertiesInput);
+                if (existingHslAccessibilityProperties == null || !existingHslAccessibilityProperties.equals(hslAccessibilityPropertiesFromInput)) {
+                    if (existingHslAccessibilityProperties == null) {
+                        existingHslAccessibilityProperties = new HslAccessibilityProperties();
+                    }
+                    existingHslAccessibilityProperties.copyPropertiesFrom(hslAccessibilityPropertiesFromInput);
+                    accessibilityAssessment.setHslAccessibilityProperties(existingHslAccessibilityProperties);
+                    isUpdated = true;
+                }
+
             }
         }
 

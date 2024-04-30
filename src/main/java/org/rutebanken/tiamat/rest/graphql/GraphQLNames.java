@@ -34,6 +34,9 @@ public class GraphQLNames {
     public static final String OUTPUT_TYPE_ACCESSIBILITY_LIMITATIONS = "AccessibilityLimitations";
     public static final String INPUT_TYPE_ACCESSIBILITY_LIMITATIONS = OUTPUT_TYPE_ACCESSIBILITY_LIMITATIONS + INPUT_TYPE_POSTFIX;
 
+    public static final String OUTPUT_TYPE_HSL_ACCESSIBILITY_PROPERTIES = "HslAccessibilityProperties";
+    public static final String INPUT_TYPE_HSL_ACCESSIBILITY_PROPERTIES = OUTPUT_TYPE_HSL_ACCESSIBILITY_PROPERTIES + INPUT_TYPE_POSTFIX;
+
     public static final String OUTPUT_TYPE_ACCESSIBILITY_ASSESSMENT = "AccessibilityAssessment";
     public static final String INPUT_TYPE_ACCESSIBILITY_ASSESSMENT = OUTPUT_TYPE_ACCESSIBILITY_ASSESSMENT + INPUT_TYPE_POSTFIX;
 
@@ -241,6 +244,7 @@ public class GraphQLNames {
     public static final String ACCESSIBILITY_ASSESSMENT = "accessibilityAssessment";
     public static final String LIMITATIONS = "limitations";
     public static final String MOBILITY_IMPAIRED_ACCESS = "mobilityImpairedAccess";
+    public static final String HSL_ACCESSIBILITY_PROPERTIES = "hslAccessibilityProperties";
 
     public static final String CHILDREN = "children";
 
@@ -249,6 +253,27 @@ public class GraphQLNames {
     public static final String ESCALATOR_FREE_ACCESS = "escalatorFreeAccess";
     public static final String LIFT_FREE_ACCESS = "liftFreeAccess";
     public static final String AUDIBLE_SIGNALS_AVAILABLE = "audibleSignalsAvailable";
+
+    // HslAccessibilityProperties
+    public static final String STOP_AREA_SIDE_SLOPE = "stopAreaSideSlope";
+    public static final String STOP_AREA_LENGTHWISE_SLOPE = "stopAreaLengthwiseSlope";
+    public static final String END_RAMP_SLOPE = "endRampSlope";
+    public static final String SHELTER_LANE_DISTANCE = "shelterLaneDistance";
+    public static final String CURB_BACK_OF_RAIL_DISTANCE = "curbBackOfRailDistance";
+    public static final String CURB_DRIVE_SIDE_OF_RAIL_DISTANCE = "curbDriveSideOfRailDistance";
+    public static final String STRUCTURE_LANE_DISTANCE = "structureLaneDistance";
+    public static final String STOP_ELEVATION_FROM_RAIL_TOP = "stopElevationFromRailTop";
+    public static final String STOP_ELEVATION_FROM_SIDEWALK = "stopElevationFromSidewalk";
+    public static final String LOWER_CLEAT_HEIGHT = "lowerCleatHeight";
+    public static final String SERVICE_AREA_WIDTH = "serviceAreaWidth";
+    public static final String SERVICE_AREA_LENGTH = "serviceAreaLength";
+    public static final String PLATFORM_EDGE_WARNING_AREA = "platformEdgeWarningArea";
+    public static final String GUIDANCE_TILES = "guidanceTiles";
+    public static final String GUIDANCE_STRIPE = "guidanceStripe";
+    public static final String SERVICE_AREA_STRIPES = "serviceAreaStripes";
+    public static final String SIDEWALK_ACCESSIBLE_CONNECTION = "sidewalkAccessibleConnection";
+    public static final String STOP_AREA_SURROUNDINGS_ACCESSIBLE = "stopAreaSurroundingsAccessible";
+    public static final String CURVED_STOP = "curvedStop";
 
     public static final String PLACE_EQUIPMENTS = "placeEquipments";
     public static final String TICKETING_EQUIPMENT = "ticketingEquipment";

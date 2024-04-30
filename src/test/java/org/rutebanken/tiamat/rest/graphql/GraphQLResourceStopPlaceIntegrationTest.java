@@ -22,13 +22,17 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Point;
 import org.rutebanken.tiamat.changelog.EntityChangedEvent;
 import org.rutebanken.tiamat.changelog.EntityChangedJMSListener;
+import org.rutebanken.tiamat.model.AccessibilityAssessment;
+import org.rutebanken.tiamat.model.AccessibilityLimitation;
 import org.rutebanken.tiamat.model.AlternativeName;
 import org.rutebanken.tiamat.model.BusSubmodeEnumeration;
 import org.rutebanken.tiamat.model.CycleStorageEnumeration;
 import org.rutebanken.tiamat.model.CycleStorageEquipment;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.GeneralSign;
+import org.rutebanken.tiamat.model.hsl.HslAccessibilityProperties;
 import org.rutebanken.tiamat.model.InterchangeWeightingEnumeration;
+import org.rutebanken.tiamat.model.LimitationStatusEnumeration;
 import org.rutebanken.tiamat.model.NameTypeEnumeration;
 import org.rutebanken.tiamat.model.PlaceEquipment;
 import org.rutebanken.tiamat.model.PrivateCodeStructure;
@@ -61,6 +65,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.HashSet;
 import java.util.List;
+import java.util.ArrayList;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.comparesEqualTo;
@@ -2086,6 +2091,410 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                 .body("topographicPlace.name.value", equalTo(topographicPlaceTarget.getName().getValue()));
     }
 
+    @Test
+    public void testQueryHslAccessibilityPropertiesOfStop() {
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setName(new EmbeddableMultilingualString("Name"));
+        Quay quay = new Quay();
+        quay.setName(new EmbeddableMultilingualString("quay"));
+        stopPlace.getQuays().add(quay);
+        AccessibilityAssessment accessibilityAssessment = createAccessibilityAssessment();
+        HslAccessibilityProperties hslAccessibilityProperties = createHslAccessibilityProperties();
+        accessibilityAssessment.setHslAccessibilityProperties(hslAccessibilityProperties);
+        stopPlace.setAccessibilityAssessment(accessibilityAssessment);
+
+        stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+
+        String graphQlJsonQuery = """
+            {
+              stopPlace:  stopPlace (query:"%s", allVersions:true) {
+                id
+                accessibilityAssessment {
+                  id
+                  hslAccessibilityProperties {
+                    id
+                    version
+                    stopAreaSideSlope
+                    stopAreaLengthwiseSlope
+                    endRampSlope
+                    shelterLaneDistance
+                    curbBackOfRailDistance
+                    curbDriveSideOfRailDistance
+                    structureLaneDistance
+                    stopElevationFromRailTop
+                    stopElevationFromSidewalk
+                    lowerCleatHeight
+                    serviceAreaWidth
+                    serviceAreaLength
+                    platformEdgeWarningArea
+                    guidanceTiles
+                    guidanceStripe
+                    serviceAreaStripes
+                    sidewalkAccessibleConnection
+                    stopAreaSurroundingsAccessible
+                    curvedStop
+                  }
+                }
+              }
+            }""".formatted(stopPlace.getNetexId());
+
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
+            .body("data.stopPlace[0].id", equalTo(stopPlace.getNetexId()))
+            .rootPath("data.stopPlace[0].accessibilityAssessment.hslAccessibilityProperties")
+            .body(notNullValue())
+            .body("id", equalTo(stopPlace.getAccessibilityAssessment().getHslAccessibilityProperties().getNetexId()))
+            .body("version", equalTo("1"))
+            // Note: RestAssured parses numbers as Float by default, even if they should be doubles here. Does not matter though since float range is sufficient.
+            .body("stopAreaSideSlope", equalTo(hslAccessibilityProperties.getStopAreaSideSlope().floatValue()))
+            .body("stopAreaLengthwiseSlope", equalTo(hslAccessibilityProperties.getStopAreaLengthwiseSlope().floatValue()))
+            .body("endRampSlope", equalTo(hslAccessibilityProperties.getEndRampSlope().floatValue()))
+            .body("shelterLaneDistance", equalTo(hslAccessibilityProperties.getShelterLaneDistance().floatValue()))
+            .body("curbBackOfRailDistance", equalTo(hslAccessibilityProperties.getCurbBackOfRailDistance().floatValue()))
+            .body("curbDriveSideOfRailDistance", equalTo(hslAccessibilityProperties.getCurbDriveSideOfRailDistance().floatValue()))
+            .body("structureLaneDistance", equalTo(hslAccessibilityProperties.getStructureLaneDistance().floatValue()))
+            .body("stopElevationFromRailTop", equalTo(hslAccessibilityProperties.getStopElevationFromRailTop().floatValue()))
+            .body("stopElevationFromSidewalk", equalTo(hslAccessibilityProperties.getStopElevationFromSidewalk().floatValue()))
+            .body("lowerCleatHeight", equalTo(hslAccessibilityProperties.getLowerCleatHeight().floatValue()))
+            .body("serviceAreaWidth", equalTo(hslAccessibilityProperties.getServiceAreaWidth().floatValue()))
+            .body("serviceAreaLength", equalTo(hslAccessibilityProperties.getServiceAreaLength().floatValue()))
+            .body("platformEdgeWarningArea", equalTo(hslAccessibilityProperties.isPlatformEdgeWarningArea()))
+            .body("guidanceTiles", equalTo(hslAccessibilityProperties.isGuidanceTiles()))
+            .body("guidanceStripe", equalTo(hslAccessibilityProperties.isGuidanceStripe()))
+            .body("serviceAreaStripes", equalTo(hslAccessibilityProperties.isServiceAreaStripes()))
+            .body("sidewalkAccessibleConnection", equalTo(hslAccessibilityProperties.isSidewalkAccessibleConnection()))
+            .body("stopAreaSurroundingsAccessible", equalTo(hslAccessibilityProperties.isStopAreaSurroundingsAccessible()))
+            .body("curvedStop", equalTo(hslAccessibilityProperties.isCurvedStop()));
+    }
+
+    @Test
+    public void testInsertHslAccessibilityPropertiesForStop() {
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setName(new EmbeddableMultilingualString("Name"));
+        Quay quay = new Quay();
+        quay.setName(new EmbeddableMultilingualString("quay"));
+        stopPlace.getQuays().add(quay);
+
+        stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+
+        var graphqlQuery = """
+            mutation {
+              stopPlace: mutateStopPlace(StopPlace: {
+                id: "%s",
+                # Could insert under quays, but because there's only 1 it gets optimized and moved under stopPlace.
+                accessibilityAssessment: {
+                  id: "%s"
+                  # Required, but irrelevant for this test.
+                  limitations: { wheelchairAccess: FALSE, stepFreeAccess: FALSE, escalatorFreeAccess: FALSE, liftFreeAccess: FALSE, audibleSignalsAvailable: FALSE }
+                  hslAccessibilityProperties: {
+                    stopAreaSideSlope: 1
+                    stopAreaLengthwiseSlope: -2
+                    endRampSlope: 333.33
+                    shelterLaneDistance: 44
+                    curbBackOfRailDistance: 55555.55
+                    curbDriveSideOfRailDistance: 1.5
+                    structureLaneDistance: 2.25
+                    stopElevationFromRailTop: 33.55
+                    stopElevationFromSidewalk: 4.5
+                    lowerCleatHeight: 5.5
+                    serviceAreaWidth: 6.5
+                    serviceAreaLength: 7.5
+                    platformEdgeWarningArea: true
+                    guidanceTiles: true
+                    guidanceStripe: true
+                    serviceAreaStripes: true
+                    sidewalkAccessibleConnection: true
+                    stopAreaSurroundingsAccessible: true
+                    curvedStop: true
+                  }
+                }
+              }) {
+                id
+                accessibilityAssessment {
+                  id
+                  hslAccessibilityProperties {
+                    id
+                    version
+                    stopAreaSideSlope
+                    stopAreaLengthwiseSlope
+                    endRampSlope
+                    shelterLaneDistance
+                    curbBackOfRailDistance
+                    curbDriveSideOfRailDistance
+                    structureLaneDistance
+                    stopElevationFromRailTop
+                    stopElevationFromSidewalk
+                    lowerCleatHeight
+                    serviceAreaWidth
+                    serviceAreaLength
+                    platformEdgeWarningArea
+                    guidanceTiles
+                    guidanceStripe
+                    serviceAreaStripes
+                    sidewalkAccessibleConnection
+                    stopAreaSurroundingsAccessible
+                    curvedStop
+                  }
+                }
+              }
+            }
+            """.formatted(
+                stopPlace.getNetexId(),
+                stopPlace.getAccessibilityAssessment().getNetexId()
+            );
+
+        executeGraphqQLQueryOnly(graphqlQuery)
+            .body("data.stopPlace[0].id", equalTo(stopPlace.getNetexId()))
+            .rootPath("data.stopPlace[0].accessibilityAssessment.hslAccessibilityProperties")
+            .body(notNullValue())
+            .body("id", notNullValue())
+            .body("version", equalTo("1"))
+            // Note: RestAssured parses numbers as Float by default, even if they should be doubles here. Does not matter though since float range is sufficient.
+            .body("stopAreaSideSlope", equalTo(1.f))
+            .body("stopAreaLengthwiseSlope", equalTo(-2.f))
+            .body("endRampSlope", equalTo(333.33f))
+            .body("shelterLaneDistance", equalTo(44.f))
+            .body("curbBackOfRailDistance", equalTo(55555.55f))
+            .body("curbDriveSideOfRailDistance", equalTo(1.5f))
+            .body("structureLaneDistance", equalTo(2.25f))
+            .body("stopElevationFromRailTop", equalTo(33.55f))
+            .body("stopElevationFromSidewalk", equalTo(4.5f))
+            .body("lowerCleatHeight", equalTo(5.5f))
+            .body("serviceAreaWidth", equalTo(6.5f))
+            .body("serviceAreaLength", equalTo(7.5f))
+            .body("platformEdgeWarningArea", equalTo(true))
+            .body("guidanceTiles", equalTo(true))
+            .body("guidanceStripe", equalTo(true))
+            .body("serviceAreaStripes", equalTo(true))
+            .body("sidewalkAccessibleConnection", equalTo(true))
+            .body("stopAreaSurroundingsAccessible", equalTo(true))
+            .body("curvedStop", equalTo(true));
+    }
+
+    @Test
+    public void testMutateHslAccessibilityPropertiesOfStop() {
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setName(new EmbeddableMultilingualString("Name"));
+        Quay quay = new Quay();
+        quay.setName(new EmbeddableMultilingualString("quay"));
+        stopPlace.getQuays().add(quay);
+        AccessibilityAssessment accessibilityAssessment = createAccessibilityAssessment();
+        HslAccessibilityProperties hslAccessibilityProperties = createHslAccessibilityProperties();
+        accessibilityAssessment.setHslAccessibilityProperties(hslAccessibilityProperties);
+        stopPlace.setAccessibilityAssessment(accessibilityAssessment);
+
+        stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+
+        var graphqlQuery = """
+            mutation {
+              stopPlace: mutateStopPlace(StopPlace: {
+                id: "%s",
+                accessibilityAssessment: {
+                  id: "%s"
+                  # Required, but irrelevant for this test.
+                  limitations: { wheelchairAccess: FALSE, stepFreeAccess: FALSE, escalatorFreeAccess: FALSE, liftFreeAccess: FALSE, audibleSignalsAvailable: FALSE }
+                  hslAccessibilityProperties: {
+                    id: "%s"
+                    stopAreaSideSlope: 1
+                    stopAreaLengthwiseSlope: -2
+                    endRampSlope: 333.33
+                    shelterLaneDistance: 44
+                    curbBackOfRailDistance: 55555.55
+                    curbDriveSideOfRailDistance: 1.5
+                    structureLaneDistance: 2.25
+                    stopElevationFromRailTop: 33.55
+                    stopElevationFromSidewalk: 4.5
+                    lowerCleatHeight: 5.5
+                    serviceAreaWidth: 6.5
+                    serviceAreaLength: 7.5
+                    platformEdgeWarningArea: true
+                    guidanceTiles: true
+                    guidanceStripe: true
+                    serviceAreaStripes: true
+                    sidewalkAccessibleConnection: true
+                    stopAreaSurroundingsAccessible: true
+                    curvedStop: true
+                  }
+                }
+              }) {
+                id
+                accessibilityAssessment {
+                  id
+                  hslAccessibilityProperties {
+                    id
+                    version
+                    stopAreaSideSlope
+                    stopAreaLengthwiseSlope
+                    endRampSlope
+                    shelterLaneDistance
+                    curbBackOfRailDistance
+                    curbDriveSideOfRailDistance
+                    structureLaneDistance
+                    stopElevationFromRailTop
+                    stopElevationFromSidewalk
+                    lowerCleatHeight
+                    serviceAreaWidth
+                    serviceAreaLength
+                    platformEdgeWarningArea
+                    guidanceTiles
+                    guidanceStripe
+                    serviceAreaStripes
+                    sidewalkAccessibleConnection
+                    stopAreaSurroundingsAccessible
+                    curvedStop
+                  }
+                }
+              }
+            }
+            """.formatted(
+                stopPlace.getNetexId(),
+                stopPlace.getAccessibilityAssessment().getNetexId(),
+                stopPlace.getAccessibilityAssessment().getHslAccessibilityProperties().getNetexId()
+            );
+
+        executeGraphqQLQueryOnly(graphqlQuery)
+            .body("data.stopPlace[0].id", equalTo(stopPlace.getNetexId()))
+            .rootPath("data.stopPlace[0].accessibilityAssessment.hslAccessibilityProperties")
+            .body(notNullValue())
+            .body("id", notNullValue())
+            // Note: versioning is kind of broken.
+            // When mutating an existing entity, version is not incremented but a new row is created instead.
+            // This behavior is similar to accessibilityLimitations however, so keeping it like this for now.
+            .body("id", not(equalTo(stopPlace.getAccessibilityAssessment().getHslAccessibilityProperties().getNetexId())))
+            .body("version", equalTo("1"))
+            // Note: RestAssured parses numbers as Float by default, even if they should be doubles here. Does not matter though since float range is sufficient.
+            .body("stopAreaSideSlope", equalTo(1.f))
+            .body("stopAreaLengthwiseSlope", equalTo(-2.f))
+            .body("endRampSlope", equalTo(333.33f))
+            .body("shelterLaneDistance", equalTo(44.f))
+            .body("curbBackOfRailDistance", equalTo(55555.55f))
+            .body("curbDriveSideOfRailDistance", equalTo(1.5f))
+            .body("structureLaneDistance", equalTo(2.25f))
+            .body("stopElevationFromRailTop", equalTo(33.55f))
+            .body("stopElevationFromSidewalk", equalTo(4.5f))
+            .body("lowerCleatHeight", equalTo(5.5f))
+            .body("serviceAreaWidth", equalTo(6.5f))
+            .body("serviceAreaLength", equalTo(7.5f))
+            .body("platformEdgeWarningArea", equalTo(true))
+            .body("guidanceTiles", equalTo(true))
+            .body("guidanceStripe", equalTo(true))
+            .body("serviceAreaStripes", equalTo(true))
+            .body("sidewalkAccessibleConnection", equalTo(true))
+            .body("stopAreaSurroundingsAccessible", equalTo(true))
+            .body("curvedStop", equalTo(true));
+    }
+
+    @Test
+    public void testMutateHslAccessibilityPropertiesOfStopClearFields() {
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setName(new EmbeddableMultilingualString("Name"));
+        Quay quay = new Quay();
+        quay.setName(new EmbeddableMultilingualString("quay"));
+        stopPlace.getQuays().add(quay);
+        AccessibilityAssessment accessibilityAssessment = createAccessibilityAssessment();
+        HslAccessibilityProperties hslAccessibilityProperties = createHslAccessibilityProperties();
+        accessibilityAssessment.setHslAccessibilityProperties(hslAccessibilityProperties);
+        stopPlace.setAccessibilityAssessment(accessibilityAssessment);
+
+        stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+
+        var graphqlQuery = """
+            mutation {
+              stopPlace: mutateStopPlace(StopPlace: {
+                id: "%s",
+                accessibilityAssessment: {
+                  id: "%s"
+                  # Required, but irrelevant for this test.
+                  limitations: { wheelchairAccess: FALSE, stepFreeAccess: FALSE, escalatorFreeAccess: FALSE, liftFreeAccess: FALSE, audibleSignalsAvailable: FALSE }
+                  hslAccessibilityProperties: {
+                    id: "%s"
+                    stopAreaSideSlope: null
+                    stopAreaLengthwiseSlope: null
+                    endRampSlope: null
+                    shelterLaneDistance: null
+                    curbBackOfRailDistance: null
+                    curbDriveSideOfRailDistance: null
+                    structureLaneDistance: null
+                    stopElevationFromRailTop: null
+                    stopElevationFromSidewalk: null
+                    lowerCleatHeight: null
+                    serviceAreaWidth: null
+                    serviceAreaLength: null
+                    platformEdgeWarningArea: null
+                    guidanceTiles: null
+                    guidanceStripe: null
+                    serviceAreaStripes: null
+                    sidewalkAccessibleConnection: null
+                    stopAreaSurroundingsAccessible: null
+                    curvedStop: null
+                  }
+                }
+              }) {
+                id
+                accessibilityAssessment {
+                  id
+                  hslAccessibilityProperties {
+                    id
+                    version
+                    stopAreaSideSlope
+                    stopAreaLengthwiseSlope
+                    endRampSlope
+                    shelterLaneDistance
+                    curbBackOfRailDistance
+                    curbDriveSideOfRailDistance
+                    structureLaneDistance
+                    stopElevationFromRailTop
+                    stopElevationFromSidewalk
+                    lowerCleatHeight
+                    serviceAreaWidth
+                    serviceAreaLength
+                    platformEdgeWarningArea
+                    guidanceTiles
+                    guidanceStripe
+                    serviceAreaStripes
+                    sidewalkAccessibleConnection
+                    stopAreaSurroundingsAccessible
+                    curvedStop
+                  }
+                }
+              }
+            }
+            """.formatted(
+                stopPlace.getNetexId(),
+                stopPlace.getAccessibilityAssessment().getNetexId(),
+                stopPlace.getAccessibilityAssessment().getHslAccessibilityProperties().getNetexId()
+            );
+
+        executeGraphqQLQueryOnly(graphqlQuery)
+            .body("data.stopPlace[0].id", equalTo(stopPlace.getNetexId()))
+            .rootPath("data.stopPlace[0].accessibilityAssessment.hslAccessibilityProperties")
+            .body(notNullValue())
+            .body("id", notNullValue())
+            // Note: versioning is kind of broken.
+            // When mutating an existing entity, version is not incremented but a new row is created instead.
+            // This behavior is similar to accessibilityLimitations however, so keeping it like this for now.
+            .body("id", not(equalTo(stopPlace.getAccessibilityAssessment().getHslAccessibilityProperties().getNetexId())))
+            .body("version", equalTo("1"))
+            .body("stopAreaSideSlope", equalTo(null))
+            .body("stopAreaLengthwiseSlope", equalTo(null))
+            .body("endRampSlope", equalTo(null))
+            .body("shelterLaneDistance", equalTo(null))
+            .body("curbBackOfRailDistance", equalTo(null))
+            .body("curbDriveSideOfRailDistance", equalTo(null))
+            .body("structureLaneDistance", equalTo(null))
+            .body("stopElevationFromRailTop", equalTo(null))
+            .body("stopElevationFromSidewalk", equalTo(null))
+            .body("lowerCleatHeight", equalTo(null))
+            .body("serviceAreaWidth", equalTo(null))
+            .body("serviceAreaLength", equalTo(null))
+            .body("platformEdgeWarningArea", equalTo(null))
+            .body("guidanceTiles", equalTo(null))
+            .body("guidanceStripe", equalTo(null))
+            .body("serviceAreaStripes", equalTo(null))
+            .body("sidewalkAccessibleConnection", equalTo(null))
+            .body("stopAreaSurroundingsAccessible", equalTo(null))
+            .body("curvedStop", equalTo(null));
+    }
+
     private StopPlace createStopPlaceWithMunicipalityRef(String name, TopographicPlace municipality, StopTypeEnumeration type) {
         StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(name));
         stopPlace.setStopPlaceType(type);
@@ -2151,4 +2560,43 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         return equipments;
     }
 
+    private AccessibilityAssessment createAccessibilityAssessment() {
+        AccessibilityLimitation accessibilityLimitation = new AccessibilityLimitation();
+        accessibilityLimitation.setWheelchairAccess(LimitationStatusEnumeration.FALSE);
+        accessibilityLimitation.setLiftFreeAccess(LimitationStatusEnumeration.FALSE);
+        accessibilityLimitation.setEscalatorFreeAccess(LimitationStatusEnumeration.FALSE);
+        accessibilityLimitation.setAudibleSignalsAvailable(LimitationStatusEnumeration.FALSE);
+        accessibilityLimitation.setStepFreeAccess(LimitationStatusEnumeration.FALSE);
+        List<AccessibilityLimitation> limitations = new ArrayList<>();
+        limitations.add(accessibilityLimitation);
+
+        AccessibilityAssessment accessibilityAssessment = new AccessibilityAssessment();
+        accessibilityAssessment.setLimitations(limitations);
+
+        return accessibilityAssessment;
+    }
+
+    private HslAccessibilityProperties createHslAccessibilityProperties() {
+        HslAccessibilityProperties hslAccessibilityProperties = new HslAccessibilityProperties();
+        hslAccessibilityProperties.setStopAreaSideSlope(5.3);
+        hslAccessibilityProperties.setStopAreaLengthwiseSlope(1.8);
+        hslAccessibilityProperties.setEndRampSlope(5.);
+        hslAccessibilityProperties.setShelterLaneDistance(123.);
+        hslAccessibilityProperties.setCurbBackOfRailDistance(145.);
+        hslAccessibilityProperties.setCurbDriveSideOfRailDistance(5.);
+        hslAccessibilityProperties.setStructureLaneDistance(15.);
+        hslAccessibilityProperties.setStopElevationFromRailTop(10.);
+        hslAccessibilityProperties.setStopElevationFromSidewalk(7.);
+        hslAccessibilityProperties.setLowerCleatHeight(5.);
+        hslAccessibilityProperties.setServiceAreaWidth(460.);
+        hslAccessibilityProperties.setServiceAreaLength(552.);
+        hslAccessibilityProperties.setPlatformEdgeWarningArea(true);
+        hslAccessibilityProperties.setGuidanceTiles(true);
+        hslAccessibilityProperties.setGuidanceStripe(false);
+        hslAccessibilityProperties.setServiceAreaStripes(false);
+        hslAccessibilityProperties.setSidewalkAccessibleConnection(true);
+        hslAccessibilityProperties.setStopAreaSurroundingsAccessible(false);
+        hslAccessibilityProperties.setCurvedStop(true);
+        return hslAccessibilityProperties;
+    }
 }

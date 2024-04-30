@@ -17,12 +17,15 @@ package org.rutebanken.tiamat.model;
 
 import com.google.common.base.MoreObjects;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.rutebanken.tiamat.model.hsl.HslAccessibilityProperties;
 
 import javax.persistence.CascadeType;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 import java.util.List;
 
@@ -45,6 +48,10 @@ public class AccessibilityAssessment_VersionedChildStructure
     @OneToMany(cascade = CascadeType.ALL)
     protected List<AccessibilityLimitation> limitations;
 
+    @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    protected HslAccessibilityProperties hslAccessibilityProperties;
+
     @Transient
     protected MultilingualStringEntity comment;
 
@@ -64,6 +71,14 @@ public class AccessibilityAssessment_VersionedChildStructure
         this.limitations = value;
     }
 
+    public HslAccessibilityProperties getHslAccessibilityProperties() {
+        return hslAccessibilityProperties;
+    }
+
+    public void setHslAccessibilityProperties(HslAccessibilityProperties hslAccessibilityProperties) {
+        this.hslAccessibilityProperties = hslAccessibilityProperties;
+    }
+
     public MultilingualStringEntity getComment() {
         return comment;
     }
@@ -71,7 +86,6 @@ public class AccessibilityAssessment_VersionedChildStructure
     public void setComment(MultilingualStringEntity value) {
         this.comment = value;
     }
-
 
     @Override
     public String toString() {
