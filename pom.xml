@@ -471,6 +471,42 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>com.google.cloud.tools</groupId>
+                <artifactId>jib-maven-plugin</artifactId>
+                <version>3.4.2</version>
+                <dependencies>
+                    <!-- Include jib-spring-boot-extension-maven to prevent spring-boot-devtools from being packaged.-->
+                    <dependency>
+                        <groupId>com.google.cloud.tools</groupId>
+                        <artifactId>jib-spring-boot-extension-maven</artifactId>
+                        <version>0.1.0</version>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                    <from>
+                        <image>eclipse-temurin:21.0.1_12-jdk-alpine</image>
+                    </from>
+                    <to>
+                        <image>${env.CONTAINER_REPO}</image>
+                        <auth>
+                            <username>${env.CONTAINER_REGISTRY_USER}</username>
+                            <password>${env.CONTAINER_REGISTRY_PASSWORD}</password>
+                        </auth>
+                    </to>
+                    <container>
+                        <!-- Same as EXPOSE, doesn't actually publish the ports but acts as documentation -->
+                        <ports>
+                            <port>8777</port>
+                        </ports>
+                    </container>
+                    <pluginExtensions>
+                        <pluginExtension>
+                            <implementation>com.google.cloud.tools.jib.maven.extension.springboot.JibSpringBootExtension</implementation>
+                        </pluginExtension>
+                    </pluginExtensions>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
