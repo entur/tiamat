@@ -505,7 +505,7 @@
                             <jvmFlag>-XX:NewSize=64m</jvmFlag>
                             <jvmFlag>-XX:MaxNewSize=128m</jvmFlag>
                             <jvmFlag>-Dfile.encoding=UTF-8</jvmFlag>
-                            <jvmFlag>-add-modules java.se</jvmFlag>
+                            <jvmFlag>--add-modules java.se</jvmFlag>
                             <jvmFlag>--add-exports java.base/jdk.internal.ref=ALL-UNNAMED</jvmFlag>
                             <jvmFlag>--add-opens java.base/java.lang=ALL-UNNAMED</jvmFlag>
                             <jvmFlag>--add-opens java.base/sun.nio.ch=ALL-UNNAMED</jvmFlag>
