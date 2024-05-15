@@ -111,6 +111,17 @@ public class HslAccessibilityProperties extends VersionedChildStructure {
                 && Objects.equals(this.pedestrianCrossingRampType, other.pedestrianCrossingRampType);
     }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(
+            stopAreaSideSlope, stopAreaLengthwiseSlope, endRampSlope, shelterLaneDistance, curbBackOfRailDistance,
+            curbDriveSideOfRailDistance, structureLaneDistance, stopElevationFromRailTop, stopElevationFromSidewalk,
+            lowerCleatHeight, serviceAreaWidth, serviceAreaLength, platformEdgeWarningArea,
+            guidanceTiles, guidanceStripe, serviceAreaStripes, sidewalkAccessibleConnection,  stopAreaSurroundingsAccessible,
+            curvedStop, stopType, shelterType, guidanceType, mapType, pedestrianCrossingRampType
+        );
+    }
+
     public Double getStopAreaSideSlope() {
         return stopAreaSideSlope;
     }
