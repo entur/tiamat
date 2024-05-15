@@ -30,7 +30,12 @@ CREATE TABLE hsl_accessibility_properties
     service_area_stripes              boolean,
     sidewalk_accessible_connection    boolean,
     stop_area_surroundings_accessible boolean,
-    curved_stop                       boolean
+    curved_stop                       boolean,
+    stop_type                         character varying(255),
+    shelter_type                      character varying(255),
+    guidance_type                     character varying(255),
+    map_type                          character varying(255),
+    pedestrian_crossing_ramp_type     character varying(255)
 );
 
 ALTER TABLE ONLY hsl_accessibility_properties

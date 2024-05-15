@@ -36,7 +36,12 @@ import org.rutebanken.tiamat.model.CycleStorageEquipment;
 import org.rutebanken.tiamat.model.FunicularSubmodeEnumeration;
 import org.rutebanken.tiamat.model.GenderLimitationEnumeration;
 import org.rutebanken.tiamat.model.GeneralSign;
+import org.rutebanken.tiamat.model.hsl.GuidanceTypeEnumeration;
 import org.rutebanken.tiamat.model.hsl.HslAccessibilityProperties;
+import org.rutebanken.tiamat.model.hsl.HslStopTypeEnumeration;
+import org.rutebanken.tiamat.model.hsl.MapTypeEnumeration;
+import org.rutebanken.tiamat.model.hsl.PedestrianCrossingRampTypeEnumeration;
+import org.rutebanken.tiamat.model.hsl.ShelterTypeEnumeration;
 import org.rutebanken.tiamat.model.InstalledEquipment_VersionStructure;
 import org.rutebanken.tiamat.model.InterchangeWeightingEnumeration;
 import org.rutebanken.tiamat.model.LimitationStatusEnumeration;
@@ -137,6 +142,11 @@ public class CustomGraphQLTypes {
     public static GraphQLEnumType modificationEnumerationType = createCustomEnumType("ModificationEnumerationType", ModificationEnumeration.class);
     public static GraphQLEnumType scopingMethodEnumType = createCustomEnumType("ScopingMethodEnumerationType", ScopingMethodEnumeration.class);
     public static GraphQLEnumType zoneTopologyEnumType = createCustomEnumType("ZoneTopologyEnumerationType", ZoneTopologyEnumeration.class);
+    public static GraphQLEnumType hslStopTypeEnum = createCustomEnumType(STOP_TYPE, HslStopTypeEnumeration.class);
+    public static GraphQLEnumType shelterTypeEnum = createCustomEnumType(SHELTER_TYPE, ShelterTypeEnumeration.class);
+    public static GraphQLEnumType guidanceTypeEnum = createCustomEnumType(GUIDANCE_TYPE, GuidanceTypeEnumeration.class);
+    public static GraphQLEnumType mapTypeEnum = createCustomEnumType(MAP_TYPE, MapTypeEnumeration.class);
+    public static GraphQLEnumType pedestrianCrossingRampTypeEnum = createCustomEnumType(PEDESTRIAN_CROSSING_RAMP_TYPE, PedestrianCrossingRampTypeEnumeration.class);
 
 
     public static GraphQLEnumType createCustomEnumType(String name, Class c) {
@@ -651,6 +661,21 @@ public class CustomGraphQLTypes {
             .field(newFieldDefinition()
                     .name(CURVED_STOP)
                     .type(GraphQLBoolean))
+            .field(newFieldDefinition()
+                    .name(STOP_TYPE)
+                    .type(hslStopTypeEnum))
+            .field(newFieldDefinition()
+                    .name(SHELTER_TYPE)
+                    .type(shelterTypeEnum))
+            .field(newFieldDefinition()
+                    .name(GUIDANCE_TYPE)
+                    .type(guidanceTypeEnum))
+            .field(newFieldDefinition()
+                    .name(MAP_TYPE)
+                    .type(mapTypeEnum))
+            .field(newFieldDefinition()
+                    .name(PEDESTRIAN_CROSSING_RAMP_TYPE)
+                    .type(pedestrianCrossingRampTypeEnum))
             .build();
 
 
@@ -768,6 +793,21 @@ public class CustomGraphQLTypes {
             .field(newInputObjectField()
                     .name(CURVED_STOP)
                     .type(GraphQLBoolean))
+            .field(newInputObjectField()
+                    .name(STOP_TYPE)
+                    .type(hslStopTypeEnum))
+            .field(newInputObjectField()
+                    .name(SHELTER_TYPE)
+                    .type(shelterTypeEnum))
+            .field(newInputObjectField()
+                    .name(GUIDANCE_TYPE)
+                    .type(guidanceTypeEnum))
+            .field(newInputObjectField()
+                    .name(MAP_TYPE)
+                    .type(mapTypeEnum))
+            .field(newInputObjectField()
+                    .name(PEDESTRIAN_CROSSING_RAMP_TYPE)
+                    .type(pedestrianCrossingRampTypeEnum))
             .build();
 
     public static GraphQLInputObjectType accessibilityAssessmentInputObjectType = GraphQLInputObjectType.newInputObject()

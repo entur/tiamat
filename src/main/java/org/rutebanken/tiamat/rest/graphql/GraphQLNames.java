@@ -274,6 +274,11 @@ public class GraphQLNames {
     public static final String SIDEWALK_ACCESSIBLE_CONNECTION = "sidewalkAccessibleConnection";
     public static final String STOP_AREA_SURROUNDINGS_ACCESSIBLE = "stopAreaSurroundingsAccessible";
     public static final String CURVED_STOP = "curvedStop";
+    public static final String STOP_TYPE = "stopType";
+    public static final String SHELTER_TYPE = "shelterType";
+    public static final String GUIDANCE_TYPE = "guidanceType";
+    public static final String MAP_TYPE = "mapType";
+    public static final String PEDESTRIAN_CROSSING_RAMP_TYPE = "pedestrianCrossingRampType";
 
     public static final String PLACE_EQUIPMENTS = "placeEquipments";
     public static final String TICKETING_EQUIPMENT = "ticketingEquipment";

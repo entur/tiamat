@@ -30,7 +30,12 @@ import org.rutebanken.tiamat.model.CycleStorageEnumeration;
 import org.rutebanken.tiamat.model.CycleStorageEquipment;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.GeneralSign;
+import org.rutebanken.tiamat.model.hsl.GuidanceTypeEnumeration;
 import org.rutebanken.tiamat.model.hsl.HslAccessibilityProperties;
+import org.rutebanken.tiamat.model.hsl.HslStopTypeEnumeration;
+import org.rutebanken.tiamat.model.hsl.MapTypeEnumeration;
+import org.rutebanken.tiamat.model.hsl.PedestrianCrossingRampTypeEnumeration;
+import org.rutebanken.tiamat.model.hsl.ShelterTypeEnumeration;
 import org.rutebanken.tiamat.model.InterchangeWeightingEnumeration;
 import org.rutebanken.tiamat.model.LimitationStatusEnumeration;
 import org.rutebanken.tiamat.model.NameTypeEnumeration;
@@ -2133,6 +2138,11 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                     sidewalkAccessibleConnection
                     stopAreaSurroundingsAccessible
                     curvedStop
+                    stopType
+                    shelterType
+                    guidanceType
+                    mapType
+                    pedestrianCrossingRampType
                   }
                 }
               }
@@ -2163,7 +2173,12 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
             .body("serviceAreaStripes", equalTo(hslAccessibilityProperties.isServiceAreaStripes()))
             .body("sidewalkAccessibleConnection", equalTo(hslAccessibilityProperties.isSidewalkAccessibleConnection()))
             .body("stopAreaSurroundingsAccessible", equalTo(hslAccessibilityProperties.isStopAreaSurroundingsAccessible()))
-            .body("curvedStop", equalTo(hslAccessibilityProperties.isCurvedStop()));
+            .body("curvedStop", equalTo(hslAccessibilityProperties.isCurvedStop()))
+            .body("stopType", equalTo(hslAccessibilityProperties.getStopType().value()))
+            .body("shelterType", equalTo(hslAccessibilityProperties.getShelterType().value()))
+            .body("guidanceType", equalTo(hslAccessibilityProperties.getGuidanceType().value()))
+            .body("mapType", equalTo(hslAccessibilityProperties.getMapType().value()))
+            .body("pedestrianCrossingRampType", equalTo(hslAccessibilityProperties.getPedestrianCrossingRampType().value()));
     }
 
     @Test
@@ -2205,6 +2220,11 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                     sidewalkAccessibleConnection: true
                     stopAreaSurroundingsAccessible: true
                     curvedStop: true
+                    stopType: pullOut
+                    shelterType: wide
+                    guidanceType: braille
+                    mapType: tactile
+                    pedestrianCrossingRampType: RK4_LR
                   }
                 }
               }) {
@@ -2233,6 +2253,11 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                     sidewalkAccessibleConnection
                     stopAreaSurroundingsAccessible
                     curvedStop
+                    stopType
+                    shelterType
+                    guidanceType
+                    mapType
+                    pedestrianCrossingRampType
                   }
                 }
               }
@@ -2267,7 +2292,12 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
             .body("serviceAreaStripes", equalTo(true))
             .body("sidewalkAccessibleConnection", equalTo(true))
             .body("stopAreaSurroundingsAccessible", equalTo(true))
-            .body("curvedStop", equalTo(true));
+            .body("curvedStop", equalTo(true))
+            .body("stopType", equalTo(HslStopTypeEnumeration.PULL_OUT.value()))
+            .body("shelterType", equalTo(ShelterTypeEnumeration.WIDE.value()))
+            .body("guidanceType", equalTo(GuidanceTypeEnumeration.BRAILLE.value()))
+            .body("mapType", equalTo(MapTypeEnumeration.TACTILE.value()))
+            .body("pedestrianCrossingRampType", equalTo(PedestrianCrossingRampTypeEnumeration.RK4_LR.value()));
     }
 
     @Test
@@ -2313,6 +2343,11 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                     sidewalkAccessibleConnection: true
                     stopAreaSurroundingsAccessible: true
                     curvedStop: true
+                    stopType: busBulb
+                    shelterType: narrow
+                    guidanceType: none
+                    mapType: other
+                    pedestrianCrossingRampType: LR
                   }
                 }
               }) {
@@ -2341,6 +2376,11 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                     sidewalkAccessibleConnection
                     stopAreaSurroundingsAccessible
                     curvedStop
+                    stopType
+                    shelterType
+                    guidanceType
+                    mapType
+                    pedestrianCrossingRampType
                   }
                 }
               }
@@ -2380,7 +2420,12 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
             .body("serviceAreaStripes", equalTo(true))
             .body("sidewalkAccessibleConnection", equalTo(true))
             .body("stopAreaSurroundingsAccessible", equalTo(true))
-            .body("curvedStop", equalTo(true));
+            .body("curvedStop", equalTo(true))
+            .body("stopType", equalTo(HslStopTypeEnumeration.BUS_BULB.value()))
+            .body("shelterType", equalTo(ShelterTypeEnumeration.NARROW.value()))
+            .body("guidanceType", equalTo(GuidanceTypeEnumeration.NONE.value()))
+            .body("mapType", equalTo(MapTypeEnumeration.OTHER.value()))
+            .body("pedestrianCrossingRampType", equalTo(PedestrianCrossingRampTypeEnumeration.LR.value()));
     }
 
     @Test
@@ -2426,6 +2471,11 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                     sidewalkAccessibleConnection: null
                     stopAreaSurroundingsAccessible: null
                     curvedStop: null
+                    stopType: null
+                    shelterType: null
+                    guidanceType: null
+                    mapType: null
+                    pedestrianCrossingRampType: null
                   }
                 }
               }) {
@@ -2454,6 +2504,11 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                     sidewalkAccessibleConnection
                     stopAreaSurroundingsAccessible
                     curvedStop
+                    stopType
+                    shelterType
+                    guidanceType
+                    mapType
+                    pedestrianCrossingRampType
                   }
                 }
               }
@@ -2492,7 +2547,12 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
             .body("serviceAreaStripes", equalTo(null))
             .body("sidewalkAccessibleConnection", equalTo(null))
             .body("stopAreaSurroundingsAccessible", equalTo(null))
-            .body("curvedStop", equalTo(null));
+            .body("curvedStop", equalTo(null))
+            .body("stopType", equalTo(null))
+            .body("shelterType", equalTo(null))
+            .body("guidanceType", equalTo(null))
+            .body("mapType", equalTo(null))
+            .body("pedestrianCrossingRampType", equalTo(null));
     }
 
     private StopPlace createStopPlaceWithMunicipalityRef(String name, TopographicPlace municipality, StopTypeEnumeration type) {
@@ -2597,6 +2657,12 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         hslAccessibilityProperties.setSidewalkAccessibleConnection(true);
         hslAccessibilityProperties.setStopAreaSurroundingsAccessible(false);
         hslAccessibilityProperties.setCurvedStop(true);
+        hslAccessibilityProperties.setStopType(HslStopTypeEnumeration.PULL_OUT);
+        hslAccessibilityProperties.setShelterType(ShelterTypeEnumeration.WIDE);
+        hslAccessibilityProperties.setGuidanceType(GuidanceTypeEnumeration.BRAILLE);
+        hslAccessibilityProperties.setMapType(MapTypeEnumeration.TACTILE);
+        hslAccessibilityProperties.setPedestrianCrossingRampType(PedestrianCrossingRampTypeEnumeration.LR);
+
         return hslAccessibilityProperties;
     }
 }

@@ -5,6 +5,8 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.rutebanken.tiamat.model.VersionedChildStructure;
 
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import java.util.Objects;
 
 @Entity
@@ -29,6 +31,16 @@ public class HslAccessibilityProperties extends VersionedChildStructure {
     protected Boolean sidewalkAccessibleConnection;
     protected Boolean stopAreaSurroundingsAccessible;
     protected Boolean curvedStop;
+    @Enumerated(EnumType.STRING)
+    protected HslStopTypeEnumeration stopType;
+    @Enumerated(EnumType.STRING)
+    protected ShelterTypeEnumeration shelterType;
+    @Enumerated(EnumType.STRING)
+    protected GuidanceTypeEnumeration guidanceType;
+    @Enumerated(EnumType.STRING)
+    protected MapTypeEnumeration mapType;
+    @Enumerated(EnumType.STRING)
+    protected PedestrianCrossingRampTypeEnumeration pedestrianCrossingRampType;
 
     public void copyPropertiesFrom(HslAccessibilityProperties base) {
         this.stopAreaSideSlope = base.stopAreaSideSlope;
@@ -50,6 +62,11 @@ public class HslAccessibilityProperties extends VersionedChildStructure {
         this.sidewalkAccessibleConnection = base.sidewalkAccessibleConnection;
         this.stopAreaSurroundingsAccessible = base.stopAreaSurroundingsAccessible;
         this.curvedStop = base.curvedStop;
+        this.stopType = base.stopType;
+        this.shelterType = base.shelterType;
+        this.guidanceType = base.guidanceType;
+        this.mapType = base.mapType;
+        this.pedestrianCrossingRampType = base.pedestrianCrossingRampType;
     }
 
     public HslAccessibilityProperties copy() {
@@ -86,7 +103,12 @@ public class HslAccessibilityProperties extends VersionedChildStructure {
                 && Objects.equals(this.serviceAreaStripes, other.serviceAreaStripes)
                 && Objects.equals(this.sidewalkAccessibleConnection, other.sidewalkAccessibleConnection)
                 && Objects.equals(this.stopAreaSurroundingsAccessible, other.stopAreaSurroundingsAccessible)
-                && Objects.equals(this.curvedStop, other.curvedStop);
+                && Objects.equals(this.curvedStop, other.curvedStop)
+                && Objects.equals(this.stopType, other.stopType)
+                && Objects.equals(this.shelterType, other.shelterType)
+                && Objects.equals(this.guidanceType, other.guidanceType)
+                && Objects.equals(this.mapType, other.mapType)
+                && Objects.equals(this.pedestrianCrossingRampType, other.pedestrianCrossingRampType);
     }
 
     public Double getStopAreaSideSlope() {
@@ -239,5 +261,45 @@ public class HslAccessibilityProperties extends VersionedChildStructure {
 
     public void setCurvedStop(Boolean curvedStop) {
         this.curvedStop = curvedStop;
+    }
+
+    public HslStopTypeEnumeration getStopType() {
+        return stopType;
+    }
+
+    public void setStopType(HslStopTypeEnumeration stopType) {
+        this.stopType = stopType;
+    }
+
+    public ShelterTypeEnumeration getShelterType() {
+        return shelterType;
+    }
+
+    public void setShelterType(ShelterTypeEnumeration shelterType) {
+        this.shelterType = shelterType;
+    }
+
+    public GuidanceTypeEnumeration getGuidanceType() {
+        return guidanceType;
+    }
+
+    public void setGuidanceType(GuidanceTypeEnumeration guidanceType) {
+        this.guidanceType = guidanceType;
+    }
+
+    public MapTypeEnumeration getMapType() {
+        return mapType;
+    }
+
+    public void setMapType(MapTypeEnumeration mapType) {
+        this.mapType = mapType;
+    }
+
+    public PedestrianCrossingRampTypeEnumeration getPedestrianCrossingRampType() {
+        return pedestrianCrossingRampType;
+    }
+
+    public void setPedestrianCrossingRampType(PedestrianCrossingRampTypeEnumeration pedestrianCrossingRampType) {
+        this.pedestrianCrossingRampType = pedestrianCrossingRampType;
     }
 }
