@@ -22,8 +22,8 @@ CREATE TABLE hsl_accessibility_properties
     stop_elevation_from_rail_top      numeric(7, 2), -- (cm)
     stop_elevation_from_sidewalk      numeric(7, 2), -- (cm)
     lower_cleat_height                numeric(7, 2), -- (cm)
-    service_area_width                numeric(7, 2), -- (cm)
-    service_area_length               numeric(7, 2), -- (cm)
+    service_area_width                numeric(7, 2), -- (m)
+    service_area_length               numeric(7, 2), -- (m)
     platform_edge_warning_area        boolean,
     guidance_tiles                    boolean,
     guidance_stripe                   boolean,

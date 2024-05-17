@@ -2648,8 +2648,8 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         hslAccessibilityProperties.setStopElevationFromRailTop(10.);
         hslAccessibilityProperties.setStopElevationFromSidewalk(7.);
         hslAccessibilityProperties.setLowerCleatHeight(5.);
-        hslAccessibilityProperties.setServiceAreaWidth(460.);
-        hslAccessibilityProperties.setServiceAreaLength(552.);
+        hslAccessibilityProperties.setServiceAreaWidth(4.60);
+        hslAccessibilityProperties.setServiceAreaLength(5.52);
         hslAccessibilityProperties.setPlatformEdgeWarningArea(true);
         hslAccessibilityProperties.setGuidanceTiles(true);
         hslAccessibilityProperties.setGuidanceStripe(false);
