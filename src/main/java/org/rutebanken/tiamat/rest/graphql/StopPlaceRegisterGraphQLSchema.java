@@ -654,6 +654,7 @@ public class StopPlaceRegisterGraphQLSchema {
         dataFetcherGeometry(codeRegistryBuilder, OUTPUT_TYPE_PARKING);
         dataFetcherGeometry(codeRegistryBuilder, OUTPUT_TYPE_TARIFF_ZONE);
         dataFetcherGeometry(codeRegistryBuilder, OUTPUT_TYPE_FARE_ZONE);
+        dataFetcherGeometry(codeRegistryBuilder, OUTPUT_TYPE_BOARDING_POSITION);
 
 
         dataFetcherPlaceEquipments(codeRegistryBuilder, OUTPUT_TYPE_STOPPLACE);
@@ -735,6 +736,7 @@ public class StopPlaceRegisterGraphQLSchema {
         registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_GENERAL_SIGN_EQUIPMENT,ID,getNetexIdFetcher());
         registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_TICKETING_EQUIPMENT,ID,getNetexIdFetcher());
         registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_WAITING_ROOM_EQUIPMENT,ID,getNetexIdFetcher());
+        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_BOARDING_POSITION,ID,getNetexIdFetcher());
 
         registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_ENTITY_REF,ADDRESSABLE_PLACE,referenceFetcher);
 
