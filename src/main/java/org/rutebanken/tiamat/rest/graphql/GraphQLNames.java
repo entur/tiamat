@@ -300,6 +300,17 @@ public class GraphQLNames {
     // ShelterEquipment
     public static final String ENCLOSED = "enclosed";
 
+    public static final String SHELTER_TYPE_ENUM = "shelterTypeEnum";
+    public static final String SHELTER_ELECTRICITY = "shelterElectricity";
+    public static final String SHELTER_LIGHTING = "shelterLighting";
+    public static final String SHELTER_CONDITION = "shelterCondition";
+    public static final String TIMETABLE_CABINETS = "timetableCabinets";
+    public static final String TRASH_CAN = "trashCan";
+    public static final String SHELTER_HAS_DISPLAY = "shelterHasDisplay";
+    public static final String BICYCLE_PARKING = "bicycleParking";
+    public static final String LEANING_RAIL = "leaningRail";
+    public static final String OUTSIDE_BENCH = "outsideBench";
+    public static final String SHELTER_FASCIA_BOARD_TAPING = "shelterFasciaBoardTaping";
 
     // TicketingEquipment
     public static final String TICKET_MACHINES = "ticketMachines";

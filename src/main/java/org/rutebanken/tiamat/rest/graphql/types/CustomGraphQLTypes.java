@@ -36,11 +36,14 @@ import org.rutebanken.tiamat.model.CycleStorageEquipment;
 import org.rutebanken.tiamat.model.FunicularSubmodeEnumeration;
 import org.rutebanken.tiamat.model.GenderLimitationEnumeration;
 import org.rutebanken.tiamat.model.GeneralSign;
+import org.rutebanken.tiamat.model.hsl.ElectricityTypeEnumeration;
 import org.rutebanken.tiamat.model.hsl.GuidanceTypeEnumeration;
 import org.rutebanken.tiamat.model.hsl.HslAccessibilityProperties;
+import org.rutebanken.tiamat.model.hsl.HslShelterTypeEnumeration;
 import org.rutebanken.tiamat.model.hsl.HslStopTypeEnumeration;
 import org.rutebanken.tiamat.model.hsl.MapTypeEnumeration;
 import org.rutebanken.tiamat.model.hsl.PedestrianCrossingRampTypeEnumeration;
+import org.rutebanken.tiamat.model.hsl.ShelterConditionEnumeration;
 import org.rutebanken.tiamat.model.hsl.ShelterTypeEnumeration;
 import org.rutebanken.tiamat.model.InstalledEquipment_VersionStructure;
 import org.rutebanken.tiamat.model.InterchangeWeightingEnumeration;
@@ -147,6 +150,9 @@ public class CustomGraphQLTypes {
     public static GraphQLEnumType guidanceTypeEnum = createCustomEnumType(GUIDANCE_TYPE, GuidanceTypeEnumeration.class);
     public static GraphQLEnumType mapTypeEnum = createCustomEnumType(MAP_TYPE, MapTypeEnumeration.class);
     public static GraphQLEnumType pedestrianCrossingRampTypeEnum = createCustomEnumType(PEDESTRIAN_CROSSING_RAMP_TYPE, PedestrianCrossingRampTypeEnumeration.class);
+    public static GraphQLEnumType shelterType = createCustomEnumType(SHELTER_TYPE_ENUM, HslShelterTypeEnumeration.class);
+    public static GraphQLEnumType electricityTypeEnum = createCustomEnumType(SHELTER_ELECTRICITY, ElectricityTypeEnumeration.class);
+    public static GraphQLEnumType shelterConditionTypeEnum = createCustomEnumType(SHELTER_CONDITION, ShelterConditionEnumeration.class);
 
 
     public static GraphQLEnumType createCustomEnumType(String name, Class c) {
@@ -291,6 +297,50 @@ public class CustomGraphQLTypes {
             .field(newFieldDefinition()
                     .name(ENCLOSED)
                     .type(GraphQLBoolean))
+            .field(newFieldDefinition()
+                    .name(SHELTER_TYPE)
+                    .description("Katoksen tyyppi: Lasikatos (glass) / Teräskatos (steel) / Tolppa (post) / Virtuaali (virtual) / Jää pois (leaveOff)")
+                    .type(shelterType))
+            .field(newFieldDefinition()
+                    .name(SHELTER_ELECTRICITY)
+                    .description("Katoksen sähköt: Jatkuva sähkö (continuous) / Valosähkö (light) / Jatkuva rakenteilla (continuousUnderConstruction) / Jatkuva suunniteltu (continuousPlanned) / Tilapäisesti pois (temporarilyOff) / Ei sähköä (none)")
+                    .type(electricityTypeEnum))
+            .field(newFieldDefinition()
+                    .name(SHELTER_LIGHTING)
+                    .description("Katoksessa valot")
+                    .type(GraphQLBoolean))
+            .field(newFieldDefinition()
+                    .name(SHELTER_CONDITION)
+                    .description("Katoksen kunto: Hyvä (good), Välttävä (mediocre), Huono (bad)")
+                    .type(shelterConditionTypeEnum))
+            .field(newFieldDefinition()
+                    .name(TIMETABLE_CABINETS)
+                    .description("Aikataulukaappien lukumäärä")
+                    .type(GraphQLInt))
+            .field(newFieldDefinition()
+                    .name(TRASH_CAN)
+                    .description("Katoksessa roska-astia")
+                    .type(GraphQLBoolean))
+            .field(newFieldDefinition()
+                    .name(SHELTER_HAS_DISPLAY)
+                    .description("Katoksesssa näyttö")
+                    .type(GraphQLBoolean))
+            .field(newFieldDefinition()
+                    .name(BICYCLE_PARKING)
+                    .description("Pyöräpysäköinti")
+                    .type(GraphQLBoolean))
+            .field(newFieldDefinition()
+                    .name(LEANING_RAIL)
+                    .description("Nojailutanko")
+                    .type(GraphQLBoolean))
+            .field(newFieldDefinition()
+                    .name(OUTSIDE_BENCH)
+                    .description("Ulkopenkki")
+                    .type(GraphQLBoolean))
+            .field(newFieldDefinition()
+                    .name(SHELTER_FASCIA_BOARD_TAPING)
+                    .description("Pysäkkikatoksen otsalaudan teippaus")
+                    .type(GraphQLBoolean))
             .build();
 
     public static GraphQLInputObjectType shelterEquipmentInputType = GraphQLInputObjectType.newInputObject()
@@ -303,6 +353,50 @@ public class CustomGraphQLTypes {
                     .type(GraphQLBoolean))
             .field(newInputObjectField()
                     .name(ENCLOSED)
+                    .type(GraphQLBoolean))
+            .field(newInputObjectField()
+                    .name(SHELTER_TYPE)
+                    .description("Katoksen tyyppi: Lasikatos (glass) / Teräskatos (steel) / Tolppa (post) / Virtuaali (virtual) / Jää pois (leaveOff)")
+                    .type(shelterType))
+            .field(newInputObjectField()
+                    .name(SHELTER_ELECTRICITY)
+                    .description("Katoksen sähköt: Jatkuva sähkö (continuous) / Valosähkö (light) / Jatkuva rakenteilla (continuousUnderConstruction) / Jatkuva suunniteltu (continuousPlanned) / Tilapäisesti pois (temporarilyOff) / Ei sähköä (none)")
+                    .type(electricityTypeEnum))
+            .field(newInputObjectField()
+                    .name(SHELTER_LIGHTING)
+                    .description("Katoksessa valot")
+                    .type(GraphQLBoolean))
+            .field(newInputObjectField()
+                    .name(SHELTER_CONDITION)
+                    .description("Katoksen kunto: Hyvä (good), Välttävä (mediocre), Huono (bad)")
+                    .type(shelterConditionTypeEnum))
+            .field(newInputObjectField()
+                    .name(TIMETABLE_CABINETS)
+                    .description("Aikataulukaappien lukumäärä")
+                    .type(GraphQLInt))
+            .field(newInputObjectField()
+                    .name(TRASH_CAN)
+                    .description("Katoksessa roska-astia")
+                    .type(GraphQLBoolean))
+            .field(newInputObjectField()
+                    .name(SHELTER_HAS_DISPLAY)
+                    .description("Katoksesssa näyttö")
+                    .type(GraphQLBoolean))
+            .field(newInputObjectField()
+                    .name(BICYCLE_PARKING)
+                    .description("Pyöräpysäköinti")
+                    .type(GraphQLBoolean))
+            .field(newInputObjectField()
+                    .name(LEANING_RAIL)
+                    .description("Nojailutanko")
+                    .type(GraphQLBoolean))
+            .field(newInputObjectField()
+                    .name(OUTSIDE_BENCH)
+                    .description("Ulkopenkki")
+                    .type(GraphQLBoolean))
+            .field(newInputObjectField()
+                    .name(SHELTER_FASCIA_BOARD_TAPING)
+                    .description("Pysäkkikatoksen otsalaudan teippaus")
                     .type(GraphQLBoolean))
             .build();
 
