@@ -30,11 +30,14 @@ import org.rutebanken.tiamat.model.CycleStorageEnumeration;
 import org.rutebanken.tiamat.model.CycleStorageEquipment;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.GeneralSign;
+import org.rutebanken.tiamat.model.hsl.ElectricityTypeEnumeration;
 import org.rutebanken.tiamat.model.hsl.GuidanceTypeEnumeration;
 import org.rutebanken.tiamat.model.hsl.HslAccessibilityProperties;
+import org.rutebanken.tiamat.model.hsl.HslShelterTypeEnumeration;
 import org.rutebanken.tiamat.model.hsl.HslStopTypeEnumeration;
 import org.rutebanken.tiamat.model.hsl.MapTypeEnumeration;
 import org.rutebanken.tiamat.model.hsl.PedestrianCrossingRampTypeEnumeration;
+import org.rutebanken.tiamat.model.hsl.ShelterConditionEnumeration;
 import org.rutebanken.tiamat.model.hsl.ShelterTypeEnumeration;
 import org.rutebanken.tiamat.model.InterchangeWeightingEnumeration;
 import org.rutebanken.tiamat.model.LimitationStatusEnumeration;
@@ -2555,6 +2558,298 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
             .body("pedestrianCrossingRampType", equalTo(null));
     }
 
+    @Test
+    public void testQueryStopPlaceEquipmentShelterHSL() {
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setName(new EmbeddableMultilingualString("Name"));
+        PlaceEquipment placeEquipment = new PlaceEquipment();
+        ShelterEquipment shelterEquipment = createShelterEquipmentHSl();
+        placeEquipment.getInstalledEquipment().add(shelterEquipment);
+        stopPlace.setPlaceEquipments(placeEquipment);
+        stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+
+        String graphQlJsonQuery = """
+            {
+              stopPlace: stopPlace (query:"%s", allVersions:true) {
+                id
+                placeEquipments {
+                  shelterEquipment {
+                    enclosed
+                    shelterType
+                    shelterElectricity
+                    shelterLighting
+                    shelterCondition
+                    timetableCabinets
+                    trashCan
+                    shelterHasDisplay
+                    bicycleParking
+                    leaningRail
+                    outsideBench
+                    shelterFasciaBoardTaping
+                  }
+                }
+              }
+            }""".formatted(stopPlace.getNetexId());
+
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
+                .body("data.stopPlace[0].id", equalTo(stopPlace.getNetexId()))
+                .rootPath("data.stopPlace[0].placeEquipments.shelterEquipment[0]")
+                .body(notNullValue())
+                .body("enclosed", equalTo(shelterEquipment.isEnclosed()))
+                .body("shelterType", equalTo(shelterEquipment.getShelterType().value()))
+                .body("shelterElectricity", equalTo(shelterEquipment.getShelterElectricity().value()))
+                .body("shelterLighting", equalTo(shelterEquipment.isShelterLighting()))
+                .body("shelterCondition", equalTo(shelterEquipment.getShelterCondition().value()))
+                .body("timetableCabinets", equalTo(shelterEquipment.getTimetableCabinets()))
+                .body("trashCan", equalTo(shelterEquipment.isTrashCan()))
+                .body("shelterHasDisplay", equalTo(shelterEquipment.isShelterHasDisplay()))
+                .body("bicycleParking", equalTo(shelterEquipment.isBicycleParking()))
+                .body("leaningRail", equalTo(shelterEquipment.isLeaningRail()))
+                .body("outsideBench", equalTo(shelterEquipment.isOutsideBench()))
+                .body("shelterFasciaBoardTaping", equalTo(shelterEquipment.isShelterFasciaBoardTaping()));
+    }
+
+    @Test
+    public void testInsertStopPlaceEquipmentShelterHSL() {
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setName(new EmbeddableMultilingualString("Name"));
+
+        stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+
+        var graphqlQuery = """
+            mutation {
+              stopPlace: mutateStopPlace(StopPlace: {
+                id: "%s"
+                placeEquipments: {
+                  shelterEquipment: [{
+                    enclosed: true
+                    shelterType: steel
+                    shelterElectricity: continuous
+                    shelterLighting: true
+                    shelterCondition: mediocre
+                    timetableCabinets: 2
+                    trashCan: true
+                    shelterHasDisplay: false
+                    bicycleParking: true
+                    leaningRail: false
+                    outsideBench: true
+                    shelterFasciaBoardTaping: true
+                  },
+                  {
+                    enclosed: false
+                    shelterType: glass
+                    shelterElectricity: light
+                    shelterLighting: false
+                    shelterCondition: bad
+                    timetableCabinets: 1
+                    trashCan: false
+                    shelterHasDisplay: true
+                    bicycleParking: false
+                    leaningRail: true
+                    outsideBench: false
+                    shelterFasciaBoardTaping: false
+                  }]
+                }
+              }) {
+                id
+                placeEquipments {
+                  shelterEquipment {
+                    enclosed
+                    shelterType
+                    shelterElectricity
+                    shelterLighting
+                    shelterCondition
+                    timetableCabinets
+                    trashCan
+                    shelterHasDisplay
+                    bicycleParking
+                    leaningRail
+                    outsideBench
+                    shelterFasciaBoardTaping
+                  }
+                }
+              }
+            }
+            """.formatted(
+                stopPlace.getNetexId()
+        );
+
+        executeGraphqQLQueryOnly(graphqlQuery)
+                .body("data.stopPlace[0].id", equalTo(stopPlace.getNetexId()))
+                .rootPath("data.stopPlace[0].placeEquipments.shelterEquipment[0]")
+                .body(notNullValue())
+                .body("enclosed", equalTo(true))
+                .body("shelterType", equalTo(HslShelterTypeEnumeration.STEEL.value()))
+                .body("shelterElectricity", equalTo(ElectricityTypeEnumeration.CONTINUOUS.value()))
+                .body("shelterLighting", equalTo(true))
+                .body("shelterCondition", equalTo(ShelterConditionEnumeration.MEDIOCRE.value()))
+                .body("timetableCabinets", equalTo(2))
+                .body("trashCan", equalTo(true))
+                .body("shelterHasDisplay", equalTo(false))
+                .body("bicycleParking", equalTo(true))
+                .body("leaningRail", equalTo(false))
+                .body("outsideBench", equalTo(true))
+                .body("shelterFasciaBoardTaping", equalTo(true))
+                .rootPath("data.stopPlace[0].placeEquipments.shelterEquipment[1]")
+                .body(notNullValue())
+                .body("enclosed", equalTo(false))
+                .body("shelterType", equalTo(HslShelterTypeEnumeration.GLASS.value()))
+                .body("shelterElectricity", equalTo(ElectricityTypeEnumeration.LIGHT.value()))
+                .body("shelterLighting", equalTo(false))
+                .body("shelterCondition", equalTo(ShelterConditionEnumeration.BAD.value()))
+                .body("timetableCabinets", equalTo(1))
+                .body("trashCan", equalTo(false))
+                .body("shelterHasDisplay", equalTo(true))
+                .body("bicycleParking", equalTo(false))
+                .body("leaningRail", equalTo(true))
+                .body("outsideBench", equalTo(false))
+                .body("shelterFasciaBoardTaping", equalTo(false));
+    }
+
+    @Test
+    public void testMutateStopPlaceEquipmentShelterHSL() {
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setName(new EmbeddableMultilingualString("Name"));
+        PlaceEquipment placeEquipment = new PlaceEquipment();
+        ShelterEquipment shelterEquipment = createShelterEquipmentHSl();
+        placeEquipment.getInstalledEquipment().add(shelterEquipment);
+        stopPlace.setPlaceEquipments(placeEquipment);
+        stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+
+        var graphqlQuery = """
+            mutation {
+              stopPlace: mutateStopPlace(StopPlace: {
+                id: "%s"
+                placeEquipments: {
+                  shelterEquipment: [{
+                    enclosed: true
+                    shelterType: steel
+                    shelterElectricity: continuous
+                    shelterLighting: true
+                    shelterCondition: mediocre
+                    timetableCabinets: 2
+                    trashCan: true
+                    shelterHasDisplay: false
+                    bicycleParking: true
+                    leaningRail: false
+                    outsideBench: true
+                    shelterFasciaBoardTaping: true
+                  }]
+                }
+              }) {
+                id
+                placeEquipments {
+                  shelterEquipment {
+                    enclosed
+                    shelterType
+                    shelterElectricity
+                    shelterLighting
+                    shelterCondition
+                    timetableCabinets
+                    trashCan
+                    shelterHasDisplay
+                    bicycleParking
+                    leaningRail
+                    outsideBench
+                    shelterFasciaBoardTaping
+                  }
+                }
+              }
+            }
+            """.formatted(
+                stopPlace.getNetexId()
+        );
+
+        executeGraphqQLQueryOnly(graphqlQuery)
+                .body("data.stopPlace[0].id", equalTo(stopPlace.getNetexId()))
+                .rootPath("data.stopPlace[0].placeEquipments.shelterEquipment[0]")
+                .body(notNullValue())
+                .body("enclosed", equalTo(true))
+                .body("shelterType", equalTo(HslShelterTypeEnumeration.STEEL.value()))
+                .body("shelterElectricity", equalTo(ElectricityTypeEnumeration.CONTINUOUS.value()))
+                .body("shelterLighting", equalTo(true))
+                .body("shelterCondition", equalTo(ShelterConditionEnumeration.MEDIOCRE.value()))
+                .body("timetableCabinets", equalTo(2))
+                .body("trashCan", equalTo(true))
+                .body("shelterHasDisplay", equalTo(false))
+                .body("bicycleParking", equalTo(true))
+                .body("leaningRail", equalTo(false))
+                .body("outsideBench", equalTo(true))
+                .body("shelterFasciaBoardTaping", equalTo(true));
+    }
+
+    @Test
+    public void testNullExistingStopPlaceEquipmentShelterHSL() {
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setName(new EmbeddableMultilingualString("Name"));
+        PlaceEquipment placeEquipment = new PlaceEquipment();
+        ShelterEquipment shelterEquipment = createShelterEquipmentHSl();
+        placeEquipment.getInstalledEquipment().add(shelterEquipment);
+        stopPlace.setPlaceEquipments(placeEquipment);
+        stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+
+        var graphqlQuery = """
+            mutation {
+              stopPlace: mutateStopPlace(StopPlace: {
+                id: "%s"
+                placeEquipments: {
+                  shelterEquipment: [{
+                    enclosed: null
+                    shelterType: null
+                    shelterElectricity: null
+                    shelterLighting: null
+                    shelterCondition: null
+                    timetableCabinets: null
+                    trashCan: null
+                    shelterHasDisplay: null
+                    bicycleParking: null
+                    leaningRail: null
+                    outsideBench: null
+                    shelterFasciaBoardTaping: null
+                  }]
+                }
+              }) {
+                id
+                placeEquipments {
+                  shelterEquipment {
+                    enclosed
+                    shelterType
+                    shelterElectricity
+                    shelterLighting
+                    shelterCondition
+                    timetableCabinets
+                    trashCan
+                    shelterHasDisplay
+                    bicycleParking
+                    leaningRail
+                    outsideBench
+                    shelterFasciaBoardTaping
+                  }
+                }
+              }
+            }
+            """.formatted(
+                stopPlace.getNetexId()
+        );
+
+        executeGraphqQLQueryOnly(graphqlQuery)
+                .body("data.stopPlace[0].id", equalTo(stopPlace.getNetexId()))
+                .rootPath("data.stopPlace[0].placeEquipments.shelterEquipment[0]")
+                .body(notNullValue())
+                .body("enclosed", equalTo(null))
+                .body("shelterType", equalTo(null))
+                .body("shelterElectricity", equalTo(null))
+                .body("shelterLighting", equalTo(null))
+                .body("shelterCondition", equalTo(null))
+                .body("timetableCabinets", equalTo(null))
+                .body("trashCan", equalTo(null))
+                .body("shelterHasDisplay", equalTo(null))
+                .body("bicycleParking", equalTo(null))
+                .body("leaningRail", equalTo(null))
+                .body("outsideBench", equalTo(null))
+                .body("shelterFasciaBoardTaping", equalTo(null));
+    }
+
     private StopPlace createStopPlaceWithMunicipalityRef(String name, TopographicPlace municipality, StopTypeEnumeration type) {
         StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(name));
         stopPlace.setStopPlaceType(type);
@@ -2664,5 +2959,22 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         hslAccessibilityProperties.setPedestrianCrossingRampType(PedestrianCrossingRampTypeEnumeration.LR);
 
         return hslAccessibilityProperties;
+    }
+
+    private ShelterEquipment createShelterEquipmentHSl() {
+        ShelterEquipment shelterEquipment = new ShelterEquipment();
+        shelterEquipment.setEnclosed(true);
+        shelterEquipment.setShelterType(HslShelterTypeEnumeration.GLASS);
+        shelterEquipment.setShelterElectricity(ElectricityTypeEnumeration.LIGHT);
+        shelterEquipment.setShelterLighting(true);
+        shelterEquipment.setShelterCondition(ShelterConditionEnumeration.GOOD);
+        shelterEquipment.setTimetableCabinets(2);
+        shelterEquipment.setTrashCan(true);
+        shelterEquipment.setShelterHasDisplay(false);
+        shelterEquipment.setBicycleParking(true);
+        shelterEquipment.setLeaningRail(false);
+        shelterEquipment.setOutsideBench(true);
+        shelterEquipment.setShelterFasciaBoardTaping(false);
+        return shelterEquipment;
     }
 }
