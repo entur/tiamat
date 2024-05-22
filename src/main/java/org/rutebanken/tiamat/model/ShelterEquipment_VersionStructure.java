@@ -15,9 +15,14 @@
 
 package org.rutebanken.tiamat.model;
 
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Transient;
 import java.math.BigDecimal;
+import org.rutebanken.tiamat.model.hsl.ElectricityTypeEnumeration;
+import org.rutebanken.tiamat.model.hsl.HslShelterTypeEnumeration;
+import org.rutebanken.tiamat.model.hsl.ShelterConditionEnumeration;
 
 @MappedSuperclass
 public class ShelterEquipment_VersionStructure
@@ -26,6 +31,31 @@ public class ShelterEquipment_VersionStructure
     protected Boolean enclosed;
     @Transient
     protected BigDecimal distanceFromNearestKerb;
+
+    @Enumerated(EnumType.STRING)
+    protected HslShelterTypeEnumeration shelterType;
+
+    @Enumerated(EnumType.STRING)
+    protected ElectricityTypeEnumeration shelterElectricity;
+
+    protected Boolean shelterLighting;
+
+    @Enumerated(EnumType.STRING)
+    protected ShelterConditionEnumeration shelterCondition;
+
+    protected Integer timetableCabinets;
+
+    protected Boolean trashCan;
+
+    protected Boolean shelterHasDisplay;
+
+    protected Boolean bicycleParking;
+
+    protected Boolean leaningRail;
+
+    protected Boolean outsideBench;
+
+    protected Boolean shelterFasciaBoardTaping;
 
     public Boolean isEnclosed() {
         return enclosed;
@@ -43,4 +73,91 @@ public class ShelterEquipment_VersionStructure
         this.distanceFromNearestKerb = value;
     }
 
+    public HslShelterTypeEnumeration getShelterType() {
+        return shelterType;
+    }
+
+    public void setShelterType(HslShelterTypeEnumeration shelterType) {
+        this.shelterType = shelterType;
+    }
+
+    public ElectricityTypeEnumeration getShelterElectricity() {
+        return shelterElectricity;
+    }
+
+    public void setShelterElectricity(ElectricityTypeEnumeration shelterElectricity) {
+        this.shelterElectricity = shelterElectricity;
+    }
+
+    public Boolean isShelterLighting() {
+        return shelterLighting;
+    }
+
+    public void setShelterLighting(Boolean shelterLighting) {
+        this.shelterLighting = shelterLighting;
+    }
+
+    public ShelterConditionEnumeration getShelterCondition() {
+        return shelterCondition;
+    }
+
+    public void setShelterCondition(ShelterConditionEnumeration shelterCondition) {
+        this.shelterCondition = shelterCondition;
+    }
+
+    public Integer getTimetableCabinets() {
+        return timetableCabinets;
+    }
+
+    public void setTimetableCabinets(Integer timetableCabinets) {
+        this.timetableCabinets = timetableCabinets;
+    }
+
+    public Boolean isTrashCan() {
+        return trashCan;
+    }
+
+    public void setTrashCan(Boolean trashCan) {
+        this.trashCan = trashCan;
+    }
+
+    public Boolean isShelterHasDisplay() {
+        return shelterHasDisplay;
+    }
+
+    public void setShelterHasDisplay(Boolean shelterHasDisplay) {
+        this.shelterHasDisplay = shelterHasDisplay;
+    }
+
+    public Boolean isBicycleParking() {
+        return bicycleParking;
+    }
+
+    public void setBicycleParking(Boolean bicycleParking) {
+        this.bicycleParking = bicycleParking;
+    }
+
+    public Boolean isLeaningRail() {
+        return leaningRail;
+    }
+
+    public void setLeaningRail(Boolean leaningRail) {
+        this.leaningRail = leaningRail;
+    }
+
+    public Boolean isOutsideBench() {
+        return outsideBench;
+    }
+
+    public void setOutsideBench(Boolean outsideBench) {
+        this.outsideBench = outsideBench;
+    }
+
+    public Boolean isShelterFasciaBoardTaping() {
+        return shelterFasciaBoardTaping;
+    }
+
+    public void setShelterFasciaBoardTaping(Boolean shelterFasciaBoardTaping) {
+        this.shelterFasciaBoardTaping = shelterFasciaBoardTaping;
+    }
 }
