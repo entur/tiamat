@@ -12,7 +12,7 @@ ALTER TABLE installed_equipment_version_structure ADD COLUMN leaning_rail boolea
 ALTER TABLE installed_equipment_version_structure ADD COLUMN outside_bench boolean;
 ALTER TABLE installed_equipment_version_structure ADD COLUMN shelter_fascia_board_taping boolean;
 
-COMMENT ON COLUMN installed_equipment_version_structure.shelter_type IS 'Katoksen tyyppi: Lasikatos (glass) / Teräskatos (steel) / Tolppa (post) / Virtuaali (virtual) / Jää pois (leaveOff)';
+COMMENT ON COLUMN installed_equipment_version_structure.shelter_type IS 'Katoksen tyyppi: Lasikatos (glass) / Teräskatos (steel) / Tolppa (post) / Urbaanikatos (urban) / Betonikatos (concrete) / Puukatos (wooden) / Virtuaali (virtual)';
 COMMENT ON COLUMN installed_equipment_version_structure.shelter_electricity IS 'Katoksen sähköt: Jatkuva sähkö (continuous) / Valosähkö (light) / Jatkuva rakenteilla (continuousUnderConstruction) / Jatkuva suunniteltu (continuousPlanned) / Tilapäisesti pois (temporarilyOff) / Ei sähköä (none)';
 COMMENT ON COLUMN installed_equipment_version_structure.shelter_lighting IS 'Katoksessa valot';
 COMMENT ON COLUMN installed_equipment_version_structure.shelter_condition IS 'Katoksen kunto: Hyvä (good), Välttävä (mediocre), Huono (bad)';

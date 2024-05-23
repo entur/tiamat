@@ -4,8 +4,10 @@ public enum ShelterTypeEnumeration {
     GLASS("glass"),
     STEEL("steel"),
     POST("post"),
-    VIRTUAL("virtual"),
-    LEAVE_OFF("leaveOff");
+    URBAN("urban"),
+    CONCRETE("concrete"),
+    WOODEN("wooden"),
+    VIRTUAL("virtual");
 
     private final String value;
 
