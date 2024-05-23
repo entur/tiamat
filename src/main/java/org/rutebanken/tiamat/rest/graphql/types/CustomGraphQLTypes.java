@@ -39,12 +39,12 @@ import org.rutebanken.tiamat.model.GeneralSign;
 import org.rutebanken.tiamat.model.hsl.ElectricityTypeEnumeration;
 import org.rutebanken.tiamat.model.hsl.GuidanceTypeEnumeration;
 import org.rutebanken.tiamat.model.hsl.HslAccessibilityProperties;
-import org.rutebanken.tiamat.model.hsl.HslShelterTypeEnumeration;
+import org.rutebanken.tiamat.model.hsl.ShelterTypeEnumeration;
 import org.rutebanken.tiamat.model.hsl.HslStopTypeEnumeration;
 import org.rutebanken.tiamat.model.hsl.MapTypeEnumeration;
 import org.rutebanken.tiamat.model.hsl.PedestrianCrossingRampTypeEnumeration;
 import org.rutebanken.tiamat.model.hsl.ShelterConditionEnumeration;
-import org.rutebanken.tiamat.model.hsl.ShelterTypeEnumeration;
+import org.rutebanken.tiamat.model.hsl.ShelterWidthTypeEnumeration;
 import org.rutebanken.tiamat.model.InstalledEquipment_VersionStructure;
 import org.rutebanken.tiamat.model.InterchangeWeightingEnumeration;
 import org.rutebanken.tiamat.model.LimitationStatusEnumeration;
@@ -146,11 +146,11 @@ public class CustomGraphQLTypes {
     public static GraphQLEnumType scopingMethodEnumType = createCustomEnumType("ScopingMethodEnumerationType", ScopingMethodEnumeration.class);
     public static GraphQLEnumType zoneTopologyEnumType = createCustomEnumType("ZoneTopologyEnumerationType", ZoneTopologyEnumeration.class);
     public static GraphQLEnumType hslStopTypeEnum = createCustomEnumType(STOP_TYPE, HslStopTypeEnumeration.class);
-    public static GraphQLEnumType shelterTypeEnum = createCustomEnumType(SHELTER_TYPE, ShelterTypeEnumeration.class);
+    public static GraphQLEnumType shelterWidthTypeEnum = createCustomEnumType(SHELTER_WIDTH_TYPE, ShelterWidthTypeEnumeration.class);
     public static GraphQLEnumType guidanceTypeEnum = createCustomEnumType(GUIDANCE_TYPE, GuidanceTypeEnumeration.class);
     public static GraphQLEnumType mapTypeEnum = createCustomEnumType(MAP_TYPE, MapTypeEnumeration.class);
     public static GraphQLEnumType pedestrianCrossingRampTypeEnum = createCustomEnumType(PEDESTRIAN_CROSSING_RAMP_TYPE, PedestrianCrossingRampTypeEnumeration.class);
-    public static GraphQLEnumType shelterType = createCustomEnumType(SHELTER_TYPE_ENUM, HslShelterTypeEnumeration.class);
+    public static GraphQLEnumType shelterTypeEnum = createCustomEnumType(SHELTER_TYPE, ShelterTypeEnumeration.class);
     public static GraphQLEnumType electricityTypeEnum = createCustomEnumType(SHELTER_ELECTRICITY, ElectricityTypeEnumeration.class);
     public static GraphQLEnumType shelterConditionTypeEnum = createCustomEnumType(SHELTER_CONDITION, ShelterConditionEnumeration.class);
 
@@ -300,7 +300,7 @@ public class CustomGraphQLTypes {
             .field(newFieldDefinition()
                     .name(SHELTER_TYPE)
                     .description("Katoksen tyyppi: Lasikatos (glass) / Teräskatos (steel) / Tolppa (post) / Virtuaali (virtual) / Jää pois (leaveOff)")
-                    .type(shelterType))
+                    .type(shelterTypeEnum))
             .field(newFieldDefinition()
                     .name(SHELTER_ELECTRICITY)
                     .description("Katoksen sähköt: Jatkuva sähkö (continuous) / Valosähkö (light) / Jatkuva rakenteilla (continuousUnderConstruction) / Jatkuva suunniteltu (continuousPlanned) / Tilapäisesti pois (temporarilyOff) / Ei sähköä (none)")
@@ -357,7 +357,7 @@ public class CustomGraphQLTypes {
             .field(newInputObjectField()
                     .name(SHELTER_TYPE)
                     .description("Katoksen tyyppi: Lasikatos (glass) / Teräskatos (steel) / Tolppa (post) / Virtuaali (virtual) / Jää pois (leaveOff)")
-                    .type(shelterType))
+                    .type(shelterTypeEnum))
             .field(newInputObjectField()
                     .name(SHELTER_ELECTRICITY)
                     .description("Katoksen sähköt: Jatkuva sähkö (continuous) / Valosähkö (light) / Jatkuva rakenteilla (continuousUnderConstruction) / Jatkuva suunniteltu (continuousPlanned) / Tilapäisesti pois (temporarilyOff) / Ei sähköä (none)")
@@ -781,7 +781,7 @@ public class CustomGraphQLTypes {
             .field(newFieldDefinition()
                     .name(SHELTER_TYPE)
                     .description("Katoksen tyyppi: Leveä (wide) / Kapea (narrow) / Muu (other)")
-                    .type(shelterTypeEnum))
+                    .type(shelterWidthTypeEnum))
             .field(newFieldDefinition()
                     .name(GUIDANCE_TYPE)
                     .description("Opasteiden tyyppi: Pisteopaste (braille) / Ei opastetta (none) / Muu opastus (other)")
@@ -916,7 +916,7 @@ public class CustomGraphQLTypes {
                     .type(hslStopTypeEnum))
             .field(newInputObjectField()
                     .name(SHELTER_TYPE)
-                    .type(shelterTypeEnum))
+                    .type(shelterWidthTypeEnum))
             .field(newInputObjectField()
                     .name(GUIDANCE_TYPE)
                     .type(guidanceTypeEnum))

@@ -34,7 +34,7 @@ public class HslAccessibilityProperties extends VersionedChildStructure {
     @Enumerated(EnumType.STRING)
     protected HslStopTypeEnumeration stopType;
     @Enumerated(EnumType.STRING)
-    protected ShelterTypeEnumeration shelterType;
+    protected ShelterWidthTypeEnumeration shelterType;
     @Enumerated(EnumType.STRING)
     protected GuidanceTypeEnumeration guidanceType;
     @Enumerated(EnumType.STRING)
@@ -282,11 +282,11 @@ public class HslAccessibilityProperties extends VersionedChildStructure {
         this.stopType = stopType;
     }
 
-    public ShelterTypeEnumeration getShelterType() {
+    public ShelterWidthTypeEnumeration getShelterType() {
         return shelterType;
     }
 
-    public void setShelterType(ShelterTypeEnumeration shelterType) {
+    public void setShelterType(ShelterWidthTypeEnumeration shelterType) {
         this.shelterType = shelterType;
     }
 

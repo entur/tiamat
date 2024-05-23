@@ -5,7 +5,7 @@ import org.rutebanken.tiamat.model.hsl.HslAccessibilityProperties;
 import org.rutebanken.tiamat.model.hsl.HslStopTypeEnumeration;
 import org.rutebanken.tiamat.model.hsl.MapTypeEnumeration;
 import org.rutebanken.tiamat.model.hsl.PedestrianCrossingRampTypeEnumeration;
-import org.rutebanken.tiamat.model.hsl.ShelterTypeEnumeration;
+import org.rutebanken.tiamat.model.hsl.ShelterWidthTypeEnumeration;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -101,7 +101,7 @@ public class HslAccessibilityPropertiesMapper {
             hslAccessibilityProperties.setStopType((HslStopTypeEnumeration) inputMap.get(STOP_TYPE));
         }
         if (inputMap.containsKey(SHELTER_TYPE)) {
-            hslAccessibilityProperties.setShelterType((ShelterTypeEnumeration) inputMap.get(SHELTER_TYPE));
+            hslAccessibilityProperties.setShelterType((ShelterWidthTypeEnumeration) inputMap.get(SHELTER_TYPE));
         }
         if (inputMap.containsKey(GUIDANCE_TYPE)) {
             hslAccessibilityProperties.setGuidanceType((GuidanceTypeEnumeration) inputMap.get(GUIDANCE_TYPE));

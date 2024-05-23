@@ -1,9 +1,12 @@
 package org.rutebanken.tiamat.model.hsl;
 
 public enum ShelterTypeEnumeration {
-    WIDE("wide"),
-    NARROW("narrow"),
-    OTHER("other");
+    GLASS("glass"),
+    STEEL("steel"),
+    POST("post"),
+    VIRTUAL("virtual"),
+    LEAVE_OFF("leaveOff");
+
     private final String value;
 
     ShelterTypeEnumeration(String v) {
@@ -22,5 +25,4 @@ public enum ShelterTypeEnumeration {
     public String value() {
         return value;
     }
-
 }

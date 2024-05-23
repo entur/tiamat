@@ -275,7 +275,7 @@ public class GraphQLNames {
     public static final String STOP_AREA_SURROUNDINGS_ACCESSIBLE = "stopAreaSurroundingsAccessible";
     public static final String CURVED_STOP = "curvedStop";
     public static final String STOP_TYPE = "stopType";
-    public static final String SHELTER_TYPE = "shelterType";
+    public static final String SHELTER_WIDTH_TYPE = "shelterWidthType";
     public static final String GUIDANCE_TYPE = "guidanceType";
     public static final String MAP_TYPE = "mapType";
     public static final String PEDESTRIAN_CROSSING_RAMP_TYPE = "pedestrianCrossingRampType";
@@ -300,7 +300,7 @@ public class GraphQLNames {
     // ShelterEquipment
     public static final String ENCLOSED = "enclosed";
 
-    public static final String SHELTER_TYPE_ENUM = "shelterTypeEnum";
+    public static final String SHELTER_TYPE = "shelterType";
     public static final String SHELTER_ELECTRICITY = "shelterElectricity";
     public static final String SHELTER_LIGHTING = "shelterLighting";
     public static final String SHELTER_CONDITION = "shelterCondition";

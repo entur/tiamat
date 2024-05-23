@@ -28,7 +28,7 @@ import org.rutebanken.tiamat.model.hsl.GuidanceTypeEnumeration;
 import org.rutebanken.tiamat.model.hsl.HslStopTypeEnumeration;
 import org.rutebanken.tiamat.model.hsl.MapTypeEnumeration;
 import org.rutebanken.tiamat.model.hsl.PedestrianCrossingRampTypeEnumeration;
-import org.rutebanken.tiamat.model.hsl.ShelterTypeEnumeration;
+import org.rutebanken.tiamat.model.hsl.ShelterWidthTypeEnumeration;
 import org.rutebanken.tiamat.versioning.save.StopPlaceVersionedSaverService;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -214,7 +214,7 @@ public class AccessibilityAssessmentVersioningTest extends TiamatIntegrationTest
         hslAccessibilityProperties.setStopAreaSurroundingsAccessible(false);
         hslAccessibilityProperties.setCurvedStop(true);
         hslAccessibilityProperties.setStopType(HslStopTypeEnumeration.PULL_OUT);
-        hslAccessibilityProperties.setShelterType(ShelterTypeEnumeration.WIDE);
+        hslAccessibilityProperties.setShelterType(ShelterWidthTypeEnumeration.WIDE);
         hslAccessibilityProperties.setGuidanceType(GuidanceTypeEnumeration.BRAILLE);
         hslAccessibilityProperties.setMapType(MapTypeEnumeration.TACTILE);
         hslAccessibilityProperties.setPedestrianCrossingRampType(PedestrianCrossingRampTypeEnumeration.LR);

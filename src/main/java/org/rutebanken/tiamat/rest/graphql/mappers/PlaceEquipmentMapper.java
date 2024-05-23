@@ -26,7 +26,7 @@ import org.rutebanken.tiamat.model.SignContentEnumeration;
 import org.rutebanken.tiamat.model.TicketingEquipment;
 import org.rutebanken.tiamat.model.WaitingRoomEquipment;
 import org.rutebanken.tiamat.model.hsl.ElectricityTypeEnumeration;
-import org.rutebanken.tiamat.model.hsl.HslShelterTypeEnumeration;
+import org.rutebanken.tiamat.model.hsl.ShelterTypeEnumeration;
 import org.rutebanken.tiamat.model.hsl.ShelterConditionEnumeration;
 import org.springframework.stereotype.Component;
 
@@ -106,7 +106,7 @@ public class PlaceEquipmentMapper {
                     leskur.setEnclosed((Boolean) shelterEquipment.get(ENCLOSED));
                     leskur.setSeats((BigInteger) shelterEquipment.get(SEATS));
                     leskur.setStepFree((Boolean) shelterEquipment.get(STEP_FREE));
-                    leskur.setShelterType((HslShelterTypeEnumeration) shelterEquipment.get(SHELTER_TYPE));
+                    leskur.setShelterType((ShelterTypeEnumeration) shelterEquipment.get(SHELTER_TYPE));
                     leskur.setShelterElectricity((ElectricityTypeEnumeration) shelterEquipment.get(SHELTER_ELECTRICITY));
                     leskur.setShelterLighting((Boolean) shelterEquipment.get(SHELTER_LIGHTING));
                     leskur.setShelterCondition((ShelterConditionEnumeration) shelterEquipment.get(SHELTER_CONDITION));
