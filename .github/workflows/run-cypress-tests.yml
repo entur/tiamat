@@ -11,19 +11,10 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
       - name: Extract metadata to env variables
         uses: HSLdevcom/jore4-tools/github-actions/extract-metadata@extract-metadata-v1
 
-      - name: Start e2e env
-        uses: HSLdevcom/jore4-tools/github-actions/setup-e2e-environment@setup-e2e-environment-v4
+      - name: Setup environment and run e2e tests from GitHub action
+        uses: HSLdevcom/jore4-tools/github-actions/run-ci@main
         with:
           tiamat_version: "${{ env.IMAGE_NAME }}:${{ env.COMMIT_ID }}"
-
-      - name: Seed infrastructure links
-        uses: HSLdevcom/jore4-tools/github-actions/seed-infrastructure-links@seed-infrastructure-links-v2
-
-      - name: Run e2e tests from GitHub action
-        uses: HSLdevcom/jore4-tools/github-actions/run-cypress-tests@run-cypress-tests-v1
