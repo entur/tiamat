@@ -10,21 +10,6 @@ aliases:
     name: Write artifactory settings to file
     command: |
       echo "$ARTIFACTORY_SETTINGS" | base64 --decode > .circleci/settings.xml
-  - &install-jdk21
-    name: Install jdk21
-    command: |
-      wget https://download.oracle.com/java/21/latest/jdk-21_linux-x64_bin.tar.gz
-      tar -xvf jdk-21_linux-x64_bin.tar.gz
-      cd jdk-21.0.3
-      sudo mkdir -p /usr/local/jdk-21
-      sudo mv * /usr/local/jdk-21
-      export JAVA_HOME=/usr/local/jdk-21
-      export PATH=$JAVA_HOME/bin:$PATH
-      echo 'export JAVA_HOME=/usr/local/jdk-21' >> ~/.bashrc
-      echo 'export PATH=$JAVA_HOME/bin:$PATH' >> ~/.bashrc
-      source ~/.bashrc
-      java --version
-      echo $JAVA_HOME
   - &tag-git-version
     name: Tag git commit with build version and push to github
     command: |
@@ -68,12 +53,11 @@ jobs:
   build:
     machine:
       resource_class: large
-      image: ubuntu-2204:2023.10.1
+      image: ubuntu-2204:2024.04.4
     environment:
       MAVEN_OPTS: -Xmx5G
     steps:
       - checkout
-      - run: *install-jdk21
       - restore_cache:
           key: dep-cache-{{ checksum "pom.xml" }}
       - run: *jfrog-settings
