@@ -44,9 +44,9 @@ public class GeometryMapper {
         if(map == null) {
             return null;
         }
-        if (map.get("type") != null && map.get("coordinates") != null) {
+        if (map.get("type") != null && map.get("legacyCoordinates") != null) {
             if ("Point".equals(map.get("type"))) {
-                Coordinate[] coordinates = (Coordinate[]) map.get("coordinates");
+                Coordinate[] coordinates = (Coordinate[]) map.get("legacyCoordinates");
                 return geometryFactory.createPoint(coordinates[0]);
             }
         }
