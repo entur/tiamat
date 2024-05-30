@@ -1,14 +1,16 @@
 name: Push image to Docker hub and run e2e tests
 
 on:
-  push:
-    branches:
-      - main
   pull_request:
   workflow_dispatch:
 
 jobs:
+  run_java_tests:
+    name: Run Java tests
+    uses: ./.github/workflows/run-java-tests.yml
+
   push_to_registry:
+    needs: run_java_tests
     name: Build & Push Docker image to Docker Hub
     runs-on: ubuntu-22.04
 
@@ -62,5 +64,6 @@ jobs:
 
   run_cypress_tests:
     needs:
+      - run_java_tests
       - push_to_registry
     uses: ./.github/workflows/run-cypress-tests.yml

@@ -1,9 +1,8 @@
 name: Run java tests
 
 on:
-  push:
-  pull_request:
-    branches: [main]
+  # this workflow is only called by others, won't be executed on itself
+  workflow_call:
 
 env:
   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
