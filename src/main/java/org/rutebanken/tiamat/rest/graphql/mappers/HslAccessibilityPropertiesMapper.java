@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.rest.graphql.mappers;
 
+import org.rutebanken.tiamat.model.hsl.AccessibilityLevelEnumeration;
 import org.rutebanken.tiamat.model.hsl.GuidanceTypeEnumeration;
 import org.rutebanken.tiamat.model.hsl.HslAccessibilityProperties;
 import org.rutebanken.tiamat.model.hsl.HslStopTypeEnumeration;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ACCESSIBILITY_LEVEL;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.CURB_BACK_OF_RAIL_DISTANCE;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.CURB_DRIVE_SIDE_OF_RAIL_DISTANCE;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.CURVED_STOP;
@@ -111,6 +113,9 @@ public class HslAccessibilityPropertiesMapper {
         }
         if (inputMap.containsKey(PEDESTRIAN_CROSSING_RAMP_TYPE)) {
             hslAccessibilityProperties.setPedestrianCrossingRampType((PedestrianCrossingRampTypeEnumeration) inputMap.get(PEDESTRIAN_CROSSING_RAMP_TYPE));
+        }
+        if (inputMap.containsKey(ACCESSIBILITY_LEVEL)) {
+            hslAccessibilityProperties.setAccessibilityLevel((AccessibilityLevelEnumeration) inputMap.get(ACCESSIBILITY_LEVEL));
         }
 
         return hslAccessibilityProperties;

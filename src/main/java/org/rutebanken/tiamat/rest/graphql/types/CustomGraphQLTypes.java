@@ -36,6 +36,7 @@ import org.rutebanken.tiamat.model.CycleStorageEquipment;
 import org.rutebanken.tiamat.model.FunicularSubmodeEnumeration;
 import org.rutebanken.tiamat.model.GenderLimitationEnumeration;
 import org.rutebanken.tiamat.model.GeneralSign;
+import org.rutebanken.tiamat.model.hsl.AccessibilityLevelEnumeration;
 import org.rutebanken.tiamat.model.hsl.ElectricityTypeEnumeration;
 import org.rutebanken.tiamat.model.hsl.GuidanceTypeEnumeration;
 import org.rutebanken.tiamat.model.hsl.HslAccessibilityProperties;
@@ -150,6 +151,7 @@ public class CustomGraphQLTypes {
     public static GraphQLEnumType guidanceTypeEnum = createCustomEnumType(GUIDANCE_TYPE, GuidanceTypeEnumeration.class);
     public static GraphQLEnumType mapTypeEnum = createCustomEnumType(MAP_TYPE, MapTypeEnumeration.class);
     public static GraphQLEnumType pedestrianCrossingRampTypeEnum = createCustomEnumType(PEDESTRIAN_CROSSING_RAMP_TYPE, PedestrianCrossingRampTypeEnumeration.class);
+    public static GraphQLEnumType accessibilityLevelEnum = createCustomEnumType(ACCESSIBILITY_LEVEL, AccessibilityLevelEnumeration.class);
     public static GraphQLEnumType shelterTypeEnum = createCustomEnumType(SHELTER_TYPE, ShelterTypeEnumeration.class);
     public static GraphQLEnumType electricityTypeEnum = createCustomEnumType(SHELTER_ELECTRICITY, ElectricityTypeEnumeration.class);
     public static GraphQLEnumType shelterConditionTypeEnum = createCustomEnumType(SHELTER_CONDITION, ShelterConditionEnumeration.class);
@@ -794,6 +796,10 @@ public class CustomGraphQLTypes {
                     .name(PEDESTRIAN_CROSSING_RAMP_TYPE)
                     .description("Suojatien luiskaus")
                     .type(pedestrianCrossingRampTypeEnum))
+            .field(newFieldDefinition()
+                    .name(ACCESSIBILITY_LEVEL)
+                    .description("Esteettömyystaso: Täysin esteetön (fullyAccessible) / Vähäisiä esteitä (mostlyAccessible) / Osittain esteellinen (partiallyInaccessible) / Esteellinen (inaccessible) / Esteettömyystietoja puuttuu (unknown)")
+                    .type(accessibilityLevelEnum))
             .build();
 
 
@@ -926,6 +932,9 @@ public class CustomGraphQLTypes {
             .field(newInputObjectField()
                     .name(PEDESTRIAN_CROSSING_RAMP_TYPE)
                     .type(pedestrianCrossingRampTypeEnum))
+            .field(newInputObjectField()
+                    .name(ACCESSIBILITY_LEVEL)
+                    .type(accessibilityLevelEnum))
             .build();
 
     public static GraphQLInputObjectType accessibilityAssessmentInputObjectType = GraphQLInputObjectType.newInputObject()

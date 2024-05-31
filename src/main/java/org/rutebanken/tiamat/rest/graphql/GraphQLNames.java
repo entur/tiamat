@@ -279,6 +279,7 @@ public class GraphQLNames {
     public static final String GUIDANCE_TYPE = "guidanceType";
     public static final String MAP_TYPE = "mapType";
     public static final String PEDESTRIAN_CROSSING_RAMP_TYPE = "pedestrianCrossingRampType";
+    public static final String ACCESSIBILITY_LEVEL = "accessibilityLevel";
 
     public static final String PLACE_EQUIPMENTS = "placeEquipments";
     public static final String TICKETING_EQUIPMENT = "ticketingEquipment";

@@ -30,6 +30,7 @@ import org.rutebanken.tiamat.model.CycleStorageEnumeration;
 import org.rutebanken.tiamat.model.CycleStorageEquipment;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.GeneralSign;
+import org.rutebanken.tiamat.model.hsl.AccessibilityLevelEnumeration;
 import org.rutebanken.tiamat.model.hsl.ElectricityTypeEnumeration;
 import org.rutebanken.tiamat.model.hsl.GuidanceTypeEnumeration;
 import org.rutebanken.tiamat.model.hsl.HslAccessibilityProperties;
@@ -2146,6 +2147,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                     guidanceType
                     mapType
                     pedestrianCrossingRampType
+                    accessibilityLevel
                   }
                 }
               }
@@ -2181,7 +2183,8 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
             .body("shelterType", equalTo(hslAccessibilityProperties.getShelterType().value()))
             .body("guidanceType", equalTo(hslAccessibilityProperties.getGuidanceType().value()))
             .body("mapType", equalTo(hslAccessibilityProperties.getMapType().value()))
-            .body("pedestrianCrossingRampType", equalTo(hslAccessibilityProperties.getPedestrianCrossingRampType().value()));
+            .body("pedestrianCrossingRampType", equalTo(hslAccessibilityProperties.getPedestrianCrossingRampType().value()))
+            .body("accessibilityLevel", equalTo(hslAccessibilityProperties.getAccessibilityLevel().value()));
     }
 
     @Test
@@ -2228,6 +2231,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                     guidanceType: braille
                     mapType: tactile
                     pedestrianCrossingRampType: RK4_LR
+                    accessibilityLevel: partiallyInaccessible
                   }
                 }
               }) {
@@ -2261,6 +2265,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                     guidanceType
                     mapType
                     pedestrianCrossingRampType
+                    accessibilityLevel
                   }
                 }
               }
@@ -2300,7 +2305,8 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
             .body("shelterType", equalTo(ShelterWidthTypeEnumeration.WIDE.value()))
             .body("guidanceType", equalTo(GuidanceTypeEnumeration.BRAILLE.value()))
             .body("mapType", equalTo(MapTypeEnumeration.TACTILE.value()))
-            .body("pedestrianCrossingRampType", equalTo(PedestrianCrossingRampTypeEnumeration.RK4_LR.value()));
+            .body("pedestrianCrossingRampType", equalTo(PedestrianCrossingRampTypeEnumeration.RK4_LR.value()))
+            .body("accessibilityLevel", equalTo(AccessibilityLevelEnumeration.PARTIALLY_INACCESSIBLE.value()));
     }
 
     @Test
@@ -2351,6 +2357,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                     guidanceType: none
                     mapType: other
                     pedestrianCrossingRampType: LR
+                    accessibilityLevel: fullyAccessible
                   }
                 }
               }) {
@@ -2384,6 +2391,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                     guidanceType
                     mapType
                     pedestrianCrossingRampType
+                    accessibilityLevel
                   }
                 }
               }
@@ -2428,7 +2436,8 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
             .body("shelterType", equalTo(ShelterWidthTypeEnumeration.NARROW.value()))
             .body("guidanceType", equalTo(GuidanceTypeEnumeration.NONE.value()))
             .body("mapType", equalTo(MapTypeEnumeration.OTHER.value()))
-            .body("pedestrianCrossingRampType", equalTo(PedestrianCrossingRampTypeEnumeration.LR.value()));
+            .body("pedestrianCrossingRampType", equalTo(PedestrianCrossingRampTypeEnumeration.LR.value()))
+            .body("accessibilityLevel", equalTo(AccessibilityLevelEnumeration.FULLY_ACCESSIBLE.value()));
     }
 
     @Test
@@ -2479,6 +2488,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                     guidanceType: null
                     mapType: null
                     pedestrianCrossingRampType: null
+                    accessibilityLevel: unknown
                   }
                 }
               }) {
@@ -2512,6 +2522,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                     guidanceType
                     mapType
                     pedestrianCrossingRampType
+                    accessibilityLevel
                   }
                 }
               }
@@ -2555,7 +2566,8 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
             .body("shelterType", equalTo(null))
             .body("guidanceType", equalTo(null))
             .body("mapType", equalTo(null))
-            .body("pedestrianCrossingRampType", equalTo(null));
+            .body("pedestrianCrossingRampType", equalTo(null))
+            .body("accessibilityLevel", equalTo(AccessibilityLevelEnumeration.UNKNOWN.value())); // Not nullable
     }
 
     @Test
@@ -2957,6 +2969,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         hslAccessibilityProperties.setGuidanceType(GuidanceTypeEnumeration.BRAILLE);
         hslAccessibilityProperties.setMapType(MapTypeEnumeration.TACTILE);
         hslAccessibilityProperties.setPedestrianCrossingRampType(PedestrianCrossingRampTypeEnumeration.LR);
+        hslAccessibilityProperties.setAccessibilityLevel(AccessibilityLevelEnumeration.MOSTLY_ACCESSIBLE);
 
         return hslAccessibilityProperties;
     }

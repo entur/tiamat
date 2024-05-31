@@ -41,6 +41,8 @@ public class HslAccessibilityProperties extends VersionedChildStructure {
     protected MapTypeEnumeration mapType;
     @Enumerated(EnumType.STRING)
     protected PedestrianCrossingRampTypeEnumeration pedestrianCrossingRampType;
+    @Enumerated(EnumType.STRING)
+    protected AccessibilityLevelEnumeration accessibilityLevel = AccessibilityLevelEnumeration.UNKNOWN;
 
     public void copyPropertiesFrom(HslAccessibilityProperties base) {
         this.stopAreaSideSlope = base.stopAreaSideSlope;
@@ -67,6 +69,7 @@ public class HslAccessibilityProperties extends VersionedChildStructure {
         this.guidanceType = base.guidanceType;
         this.mapType = base.mapType;
         this.pedestrianCrossingRampType = base.pedestrianCrossingRampType;
+        this.accessibilityLevel = base.accessibilityLevel;
     }
 
     public HslAccessibilityProperties copy() {
@@ -108,7 +111,8 @@ public class HslAccessibilityProperties extends VersionedChildStructure {
                 && Objects.equals(this.shelterType, other.shelterType)
                 && Objects.equals(this.guidanceType, other.guidanceType)
                 && Objects.equals(this.mapType, other.mapType)
-                && Objects.equals(this.pedestrianCrossingRampType, other.pedestrianCrossingRampType);
+                && Objects.equals(this.pedestrianCrossingRampType, other.pedestrianCrossingRampType)
+                && Objects.equals(this.accessibilityLevel, other.accessibilityLevel);
     }
 
     @Override
@@ -118,7 +122,7 @@ public class HslAccessibilityProperties extends VersionedChildStructure {
             curbDriveSideOfRailDistance, structureLaneDistance, stopElevationFromRailTop, stopElevationFromSidewalk,
             lowerCleatHeight, serviceAreaWidth, serviceAreaLength, platformEdgeWarningArea,
             guidanceTiles, guidanceStripe, serviceAreaStripes, sidewalkAccessibleConnection,  stopAreaSurroundingsAccessible,
-            curvedStop, stopType, shelterType, guidanceType, mapType, pedestrianCrossingRampType
+            curvedStop, stopType, shelterType, guidanceType, mapType, pedestrianCrossingRampType, accessibilityLevel
         );
     }
 
@@ -312,5 +316,13 @@ public class HslAccessibilityProperties extends VersionedChildStructure {
 
     public void setPedestrianCrossingRampType(PedestrianCrossingRampTypeEnumeration pedestrianCrossingRampType) {
         this.pedestrianCrossingRampType = pedestrianCrossingRampType;
+    }
+
+    public AccessibilityLevelEnumeration getAccessibilityLevel() {
+        return accessibilityLevel;
+    }
+
+    public void setAccessibilityLevel(AccessibilityLevelEnumeration accessibilityLevel) {
+        this.accessibilityLevel = accessibilityLevel;
     }
 }

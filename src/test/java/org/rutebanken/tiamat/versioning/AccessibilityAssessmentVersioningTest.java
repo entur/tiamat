@@ -20,6 +20,7 @@ import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.AccessibilityAssessment;
 import org.rutebanken.tiamat.model.AccessibilityLimitation;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
+import org.rutebanken.tiamat.model.hsl.AccessibilityLevelEnumeration;
 import org.rutebanken.tiamat.model.hsl.HslAccessibilityProperties;
 import org.rutebanken.tiamat.model.LimitationStatusEnumeration;
 import org.rutebanken.tiamat.model.Quay;
@@ -218,6 +219,7 @@ public class AccessibilityAssessmentVersioningTest extends TiamatIntegrationTest
         hslAccessibilityProperties.setGuidanceType(GuidanceTypeEnumeration.BRAILLE);
         hslAccessibilityProperties.setMapType(MapTypeEnumeration.TACTILE);
         hslAccessibilityProperties.setPedestrianCrossingRampType(PedestrianCrossingRampTypeEnumeration.LR);
+        hslAccessibilityProperties.setAccessibilityLevel(AccessibilityLevelEnumeration.MOSTLY_ACCESSIBLE);
 
         AccessibilityAssessment accessibilityAssessment = createAccessibilityAssessment(TRUE);
         accessibilityAssessment.setHslAccessibilityProperties(hslAccessibilityProperties);
