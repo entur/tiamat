@@ -17,7 +17,7 @@ package org.rutebanken.tiamat.rest.graphql.fetchers;
 
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
-import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
+import org.rutebanken.tiamat.auth.AuthorizationService;
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
 import org.rutebanken.tiamat.model.authorization.AuthorizationResponse;
 import org.rutebanken.tiamat.netex.id.TypeFromIdResolver;
@@ -43,7 +43,7 @@ public class AuthorizationCheckDataFetcher implements DataFetcher {
     private TypeFromIdResolver typeFromIdResolver;
 
     @Autowired
-    private ReflectionAuthorizationService authorizationService;
+    private AuthorizationService authorizationService;
 
     @Override
     public Object get(DataFetchingEnvironment dataFetchingEnvironment) {

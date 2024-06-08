@@ -31,7 +31,7 @@
 
 package org.rutebanken.tiamat.service.parking;
 
-import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
+import org.rutebanken.tiamat.auth.AuthorizationService;
 import org.rutebanken.tiamat.auth.UsernameFetcher;
 import org.rutebanken.tiamat.changelog.EntityChangedListener;
 import org.rutebanken.tiamat.model.DataManagedObjectStructure;
@@ -52,8 +52,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
-
 @Service
 public class ParkingDeleter {
 
@@ -61,7 +59,7 @@ public class ParkingDeleter {
 
     private final EntityChangedListener entityChangedListener;
 
-    private final ReflectionAuthorizationService authorizationService;
+    private final AuthorizationService authorizationService;
 
     private final UsernameFetcher usernameFetcher;
 
@@ -72,7 +70,7 @@ public class ParkingDeleter {
     @Autowired
     public ParkingDeleter(ParkingRepository parkingRepository,
                           EntityChangedListener entityChangedListener,
-                          ReflectionAuthorizationService authorizationService,
+                          AuthorizationService authorizationService,
                           UsernameFetcher usernameFetcher, ReferenceResolver referenceResolver) {
         this.parkingRepository = parkingRepository;
         this.entityChangedListener = entityChangedListener;
@@ -97,7 +95,7 @@ public class ParkingDeleter {
             if(parking.getParentSiteRef() != null) {
                 DataManagedObjectStructure resolved = referenceResolver.resolve(parking.getParentSiteRef());
                 if(resolved instanceof StopPlace) {
-                    authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(resolved));
+                    authorizationService.verifyCanEditEntities( Arrays.asList(resolved));
                 } else {
                     throw new IllegalArgumentException("Parking does not have a parent site ref that points to a stop place. " + parking);
                 }

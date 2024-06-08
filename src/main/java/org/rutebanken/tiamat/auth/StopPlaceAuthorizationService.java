@@ -15,7 +15,6 @@
 
 package org.rutebanken.tiamat.auth;
 
-import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
 import org.rutebanken.tiamat.diff.TiamatObjectDiffer;
 import org.rutebanken.tiamat.diff.generic.Difference;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -32,23 +31,21 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
-
 /**
  * This authorization service is implemented mainly for handling multi modal stops.
- * Generic authorization logic should be implemented in and handled by {@link ReflectionAuthorizationService}.
+ * Generic authorization logic should be implemented in and handled by {@link AuthorizationService}.
  */
 @Service
 public class StopPlaceAuthorizationService {
 
     private static final Logger logger = LoggerFactory.getLogger(StopPlaceAuthorizationService.class);
 
-    private final ReflectionAuthorizationService authorizationService;
+    private final AuthorizationService authorizationService;
 
     private final TiamatObjectDiffer tiamatObjectDiffer;
 
     @Autowired
-    public StopPlaceAuthorizationService(ReflectionAuthorizationService authorizationService, TiamatObjectDiffer tiamatObjectDiffer) {
+    public StopPlaceAuthorizationService(AuthorizationService authorizationService, TiamatObjectDiffer tiamatObjectDiffer) {
         this.authorizationService = authorizationService;
         this.tiamatObjectDiffer = tiamatObjectDiffer;
     }
@@ -65,7 +62,7 @@ public class StopPlaceAuthorizationService {
      * In this situation, the newVersion of the stop must only be populated with the children that are relevant to edit.
      * If the newVersion of the stop place contains all current children, and the user does not have authorization to edit those stop places, authorization is not granted.
      * <p>
-     * If the stop place is a normal mono modal stop place, the {@link ReflectionAuthorizationService} will be called directly.
+     * If the stop place is a normal mono modal stop place, the {@link AuthorizationService} will be called directly.
      *  @param existingVersion the current version of the stop place, persisted
      * @param newVersion      the new version of the same stop place, containing the changed state. If type is parent stop place, only child stops that the user would be authorized to change and edit, should be present.
      * @param childStopsUpdated
@@ -76,7 +73,7 @@ public class StopPlaceAuthorizationService {
             // Only child stops that the user has access to should be provided with the new version
             // If the stop place already contains children the user does not have access to, the user does not have access to terminate the stop place.
 
-            boolean accessToAllChildren = authorizationService.isAuthorized(ROLE_EDIT_STOPS, existingVersion.getChildren());
+            boolean accessToAllChildren = authorizationService.canEditEntities(existingVersion.getChildren());
             if (!accessToAllChildren) {
                 // This user does not have access to all children.
                 // Could the user still be allowed to edit a child?
@@ -91,7 +88,7 @@ public class StopPlaceAuthorizationService {
                 }
 
                 logger.debug("Must be authorized to edit these children: {}", mustBeAuthorizedToEditTheseChildren.stream().map(child -> child.getNetexId()).collect(Collectors.toList()));
-                authorizationService.assertAuthorized(ROLE_EDIT_STOPS, mustBeAuthorizedToEditTheseChildren);
+                authorizationService.verifyCanEditEntities( mustBeAuthorizedToEditTheseChildren);
 
                 Set<String> existingChildrenIds = existingVersion.getChildren().stream().map(s -> s.getNetexId()).collect(Collectors.toSet());
 
@@ -103,7 +100,7 @@ public class StopPlaceAuthorizationService {
                         existingChildrenIds, newVersion.getNetexId(), mustBeAuthorizedToEditTheseChildren);
             }
         } else {
-            authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(newVersion));
+            authorizationService.verifyCanEditEntities( Arrays.asList(newVersion));
         }
 
     }

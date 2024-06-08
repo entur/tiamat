@@ -60,8 +60,7 @@
 
 package org.rutebanken.tiamat.service.groupofstopplaces;
 
-import org.rutebanken.helper.organisation.AuthorizationConstants;
-import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
+import org.rutebanken.tiamat.auth.AuthorizationService;
 import org.rutebanken.tiamat.auth.UsernameFetcher;
 import org.rutebanken.tiamat.model.GroupOfStopPlaces;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -85,7 +84,7 @@ public class GroupOfStopPlacesDeleter {
     private UsernameFetcher usernameFetcher;
 
     @Autowired
-    private ReflectionAuthorizationService reflectionAuthorizationService;
+    private AuthorizationService authorizationService;
 
     @Autowired
     private GroupOfStopPlacesMembersResolver groupOfStopPlacesMembersResolver;
@@ -100,7 +99,7 @@ public class GroupOfStopPlacesDeleter {
         // Should only be one group as long as we do not support version history for group of stop places.
         groupOfStopPlacesToDelete.forEach(group -> {
             List<StopPlace> members = groupOfStopPlacesMembersResolver.resolve(group);
-            reflectionAuthorizationService.assertAuthorized(AuthorizationConstants.ROLE_EDIT_STOPS, members);
+            authorizationService.verifyCanEditEntities(members);
         });
 
         String username = usernameFetcher.getUserNameForAuthenticatedUser();

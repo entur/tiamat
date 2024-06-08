@@ -17,7 +17,7 @@ package org.rutebanken.tiamat.service;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
-import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
+import org.rutebanken.tiamat.auth.AuthorizationService;
 import org.rutebanken.tiamat.auth.UsernameFetcher;
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -33,8 +33,6 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.util.List;
 import java.util.regex.Pattern;
-
-import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
 
 @Service
 public class TagCreator {
@@ -55,7 +53,7 @@ public class TagCreator {
     private ReferenceResolver referenceResolver;
 
     @Autowired
-    private ReflectionAuthorizationService authorizationService;
+    private AuthorizationService authorizationService;
 
     public Tag createTag(String tagName, String idReference, String comment) {
 
@@ -80,7 +78,7 @@ public class TagCreator {
                 throw new IllegalArgumentException("The type " + entityInVersionStructure.getClass().getSimpleName() + " is not taggable. Supported types: " + SUPPORTED_TAGGABLE_TYPES);
             }
 
-            authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Sets.newHashSet(entityInVersionStructure));
+            authorizationService.verifyCanEditEntities( Sets.newHashSet(entityInVersionStructure));
 
 
             logger.info("Found entity from reference: {}", entityInVersionStructure);
