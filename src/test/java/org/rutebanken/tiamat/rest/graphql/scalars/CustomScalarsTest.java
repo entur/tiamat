@@ -39,7 +39,7 @@ public class CustomScalarsTest {
         CustomScalars customScalars = new CustomScalars();
         Coordinate[] coordinates = Arrays.asList(new Coordinate(0, 0), new Coordinate(1, 0), new Coordinate(1, 1), new Coordinate(0, 0)).toArray(new Coordinate[4]);
 
-        Object result = customScalars.GraphQLGeoJSONStandardCoordinates.getCoercing().serialize(coordinates, GraphQLContext.getDefault(), Locale.getDefault());
+        Object result = customScalars.GraphQLGeoJSONCoordinates.getCoercing().serialize(coordinates, GraphQLContext.getDefault(), Locale.getDefault());
         assertNotNull(result);
         assertTrue(result instanceof Iterable);
         ((Iterable) result).forEach(o -> {
@@ -67,7 +67,7 @@ public class CustomScalarsTest {
         final Point point = geometryFactory.createPoint(coordinates);
 
 
-        Object result = customScalars.GraphQLGeoJSONStandardCoordinates.getCoercing().serialize(point.getCoordinates(), GraphQLContext.getDefault(), Locale.getDefault());
+        Object result = customScalars.GraphQLGeoJSONCoordinates.getCoercing().serialize(point.getCoordinates(), GraphQLContext.getDefault(), Locale.getDefault());
         assertNotNull(result);
 
     }
@@ -90,7 +90,7 @@ public class CustomScalarsTest {
         final List<List<Double>> subList = getLists();
         coordinateList.add(subList);
 
-        Object result = customScalars.GraphQLGeoJSONStandardCoordinates.getCoercing().parseValue(coordinateList, GraphQLContext.getDefault(), Locale.getDefault());
+        Object result = customScalars.GraphQLGeoJSONCoordinates.getCoercing().parseValue(coordinateList, GraphQLContext.getDefault(), Locale.getDefault());
         assertNotNull(result);
         assertTrue(result instanceof Coordinate[]);
         assertEquals(3, ((Coordinate[]) result).length);
@@ -115,7 +115,7 @@ public class CustomScalarsTest {
         final List<Double> point = getLists().getFirst();
 
 
-        Object result = customScalars.GraphQLGeoJSONStandardCoordinates.getCoercing().parseValue(point, GraphQLContext.getDefault(), Locale.getDefault());
+        Object result = customScalars.GraphQLGeoJSONCoordinates.getCoercing().parseValue(point, GraphQLContext.getDefault(), Locale.getDefault());
         assertNotNull(result);
         assertTrue(result instanceof Coordinate[]);
         assertEquals(1, ((Coordinate[]) result).length);

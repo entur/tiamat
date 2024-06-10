@@ -869,8 +869,7 @@ public class StopPlaceRegisterGraphQLSchema {
         registerDataFetcher(codeRegistryBuilder,STOPPLACES_MUTATION,REMOVE_TAG,environment -> tagRemover.removeTag(environment.getArgument(TAG_NAME), environment.getArgument(TAG_ID_REFERENCE), environment.getArgument(TAG_COMMENT)));
         registerDataFetcher(codeRegistryBuilder,STOPPLACES_MUTATION,CREATE_TAG,environment -> tagCreator.createTag(environment.getArgument(TAG_NAME), environment.getArgument(TAG_ID_REFERENCE), environment.getArgument(TAG_COMMENT)));
 
-        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_GEO_JSON, STANDARD_COORDINATES,getStandardCoordinates());
-        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_GEO_JSON, LEGACY_COORDINATES,getStandardCoordinates());
+        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_GEO_JSON, LEGACY_COORDINATES,getLegacyCoordinates());
 
         codeRegistryBuilder.typeResolver(OUTPUT_TYPE_STOPPLACE_INTERFACE, stopPlaceTypeResolver);
 
@@ -912,7 +911,7 @@ public class StopPlaceRegisterGraphQLSchema {
         };
     }
 
-    private static DataFetcher<Object> getStandardCoordinates() {
+    private static DataFetcher<Object> getLegacyCoordinates() {
         return env -> {
             if(env.getSource() instanceof Polygon polygon) {
                 return polygon.getCoordinates();

@@ -68,7 +68,7 @@ import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLInputObjectField.newInputObjectField;
 import static graphql.schema.GraphQLObjectType.newObject;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
-import static org.rutebanken.tiamat.rest.graphql.scalars.CustomScalars.GraphQLGeoJSONStandardCoordinates;
+import static org.rutebanken.tiamat.rest.graphql.scalars.CustomScalars.GraphQLGeoJSONCoordinates;
 import static org.rutebanken.tiamat.rest.graphql.scalars.CustomScalars.GraphQLLegacyGeoJSONCoordinates;
 
 
@@ -164,9 +164,9 @@ public class CustomGraphQLTypes {
                     .type(GraphQLLegacyGeoJSONCoordinates))
 
             .field(newFieldDefinition()
-                    .name(STANDARD_COORDINATES)
+                    .name(COORDINATES)
                     .description("GeoJSON-standard coordinates")
-                    .type(GraphQLGeoJSONStandardCoordinates))
+                    .type(GraphQLGeoJSONCoordinates))
 
 
             .build();
@@ -184,9 +184,9 @@ public class CustomGraphQLTypes {
                     .type(GraphQLLegacyGeoJSONCoordinates)
                     .build())
             .field(newInputObjectField()
-                    .name(STANDARD_COORDINATES)
+                    .name(COORDINATES)
                     .description("GeoJSON-standard coordinates")
-                    .type(GraphQLGeoJSONStandardCoordinates))
+                    .type(GraphQLGeoJSONCoordinates))
             .build();
 
 

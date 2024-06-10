@@ -87,9 +87,9 @@ public class CustomScalars {
     }).build();
 
 
-    public static GraphQLScalarType GraphQLGeoJSONStandardCoordinates = new GraphQLScalarType.Builder()
-            .name("StandardCoordinates")
-            .description("Standard GeoJSON Coordinates")
+    public static GraphQLScalarType GraphQLGeoJSONCoordinates = new GraphQLScalarType.Builder()
+            .name("Coordinates")
+            .description("GeoJSON Coordinates")
             .coercing(new Coercing() {
                 @Override
                 public Object serialize(Object input, GraphQLContext graphQLContext, Locale locale) {
