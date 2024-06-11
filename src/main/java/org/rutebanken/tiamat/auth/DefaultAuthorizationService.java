@@ -9,6 +9,7 @@ import org.rutebanken.tiamat.model.EntityStructure;
 import org.springframework.security.access.AccessDeniedException;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 import static org.rutebanken.helper.organisation.AuthorizationConstants.*;
@@ -24,7 +25,11 @@ public class DefaultAuthorizationService implements AuthorizationService {
 
     @Override
     public void verifyCanEditAllEntities() {
-        if (roleAssignmentExtractor.getRoleAssignmentsForUser()
+        verifyCanEditAllEntities(roleAssignmentExtractor.getRoleAssignmentsForUser());
+    }
+
+    void verifyCanEditAllEntities(List<RoleAssignment> roleAssignments) {
+        if (roleAssignments
                 .stream()
                 .noneMatch(roleAssignment -> ROLE_EDIT_STOPS.equals(roleAssignment.getRole())
                         && roleAssignment.getEntityClassifications() != null
