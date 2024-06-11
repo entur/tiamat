@@ -13,6 +13,12 @@ import java.util.Set;
 public interface AuthorizationService {
 
     /**
+     * Verify that the current user have right to edit any entity?
+     */
+    void verifyCanEditAllEntities();
+
+
+    /**
      * Does the current user have edit right on all the given entities?
      */
     boolean canEditEntities(Collection<? extends EntityStructure> entities);

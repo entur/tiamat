@@ -122,8 +122,7 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
                 tiamatOriganisationChecker,
                 topographicPlaceChecker,
                 tiamatEntityResolver);
-        this.authorizationService = authorizationServiceConfig.authorizationService(dataScopedAuthorizationService
-        );
+        this.authorizationService = authorizationServiceConfig.authorizationService(dataScopedAuthorizationService, roleAssignmentExtractor);
 
 
 

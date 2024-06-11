@@ -39,8 +39,8 @@ public class AuthorizationServiceConfig {
 
 
     @Bean
-    public AuthorizationService authorizationService(DataScopedAuthorizationService dataScopedAuthorizationService) {
-        return new DefaultAuthorizationService(dataScopedAuthorizationService);
+    public AuthorizationService authorizationService(DataScopedAuthorizationService dataScopedAuthorizationService, RoleAssignmentExtractor roleAssignmentExtractor) {
+        return new DefaultAuthorizationService(dataScopedAuthorizationService, roleAssignmentExtractor);
     }
 
     @Bean

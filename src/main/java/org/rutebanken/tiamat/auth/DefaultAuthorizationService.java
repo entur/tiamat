@@ -1,20 +1,39 @@
 package org.rutebanken.tiamat.auth;
 
+import org.apache.commons.lang3.StringUtils;
+import org.rutebanken.helper.organisation.AuthorizationConstants;
 import org.rutebanken.helper.organisation.DataScopedAuthorizationService;
 import org.rutebanken.helper.organisation.RoleAssignment;
+import org.rutebanken.helper.organisation.RoleAssignmentExtractor;
 import org.rutebanken.tiamat.model.EntityStructure;
+import org.springframework.security.access.AccessDeniedException;
 
 import java.util.Collection;
 import java.util.Set;
 
-import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_DELETE_STOPS;
-import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
+import static org.rutebanken.helper.organisation.AuthorizationConstants.*;
 
 public class DefaultAuthorizationService implements AuthorizationService {
     private final DataScopedAuthorizationService dataScopedAuthorizationService;
+    private final RoleAssignmentExtractor roleAssignmentExtractor;
 
-    public DefaultAuthorizationService(DataScopedAuthorizationService dataScopedAuthorizationService) {
+    public DefaultAuthorizationService(DataScopedAuthorizationService dataScopedAuthorizationService, RoleAssignmentExtractor roleAssignmentExtractor) {
         this.dataScopedAuthorizationService = dataScopedAuthorizationService;
+        this.roleAssignmentExtractor = roleAssignmentExtractor;
+        }
+
+    @Override
+    public void verifyCanEditAllEntities() {
+        if (roleAssignmentExtractor.getRoleAssignmentsForUser()
+                .stream()
+                .noneMatch(roleAssignment -> ROLE_EDIT_STOPS.equals(roleAssignment.getRole())
+                        && roleAssignment.getEntityClassifications() != null
+                        && roleAssignment.getEntityClassifications().get(AuthorizationConstants.ENTITY_TYPE) != null
+                        && roleAssignment.getEntityClassifications().get(AuthorizationConstants.ENTITY_TYPE).contains(ENTITY_CLASSIFIER_ALL_ATTRIBUTES)
+                        && StringUtils.isEmpty(roleAssignment.getAdministrativeZone())
+                )) {
+            throw new AccessDeniedException("Insufficient privileges for operation");
+        }
     }
 
     @Override
