@@ -974,7 +974,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                                                stopPlaceType:%s
                                                geometry: {
                                                  type: Point
-                                                 legacyCoordinates: [[%s,%s]]
+                                                 coordinates: [%s,%s]
                                                }
                                        }) {
                                   id
@@ -983,7 +983,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                                   shortName { value }
                                   description { value }
                                   stopPlaceType
-                                  geometry { type legacyCoordinates }
+                                  geometry { type coordinates }
                                  }
                                 }
                 """.formatted(GraphQLNames.MUTATE_STOPPLACE,name, shortName, description,StopTypeEnumeration.TRAM_STATION.value(), lon, lat);
@@ -996,8 +996,8 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                     .body("description.value", equalTo(description))
                     .body("stopPlaceType", equalTo(StopTypeEnumeration.TRAM_STATION.value()))
                     .body("geometry.type", equalTo("Point"))
-                    .body("geometry.legacyCoordinates[0][0]", comparesEqualTo(lon))
-                    .body("geometry.legacyCoordinates[0][1]", comparesEqualTo(lat))
+                    .body("geometry.coordinates[0]", comparesEqualTo(lon))
+                    .body("geometry.coordinates[1]", comparesEqualTo(lat))
                     .body("weighting", comparesEqualTo(InterchangeWeightingEnumeration.INTERCHANGE_ALLOWED.value()));
 
         // for unit test we don't have a real JMS listener, so we need to check the event manually

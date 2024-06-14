@@ -185,7 +185,7 @@ public class CustomGraphQLTypes {
                     .build())
             .field(newInputObjectField()
                     .name(COORDINATES)
-                    .description("GeoJSON-standard coordinates")
+                    .description("GeoJSON coordinates")
                     .type(GraphQLGeoJSONCoordinates))
             .build();
 
