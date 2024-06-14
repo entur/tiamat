@@ -83,7 +83,7 @@ public class GraphQLResourceStopPlaceMergerTest extends AbstractGraphQLResourceI
                           name { value }
                           quays {
                             id
-                            geometry { type legacyCoordinates }
+                            geometry { type coordinates }
                             compassBearing
                           }
                       }

@@ -378,6 +378,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
     /**
      * Use query parameter for original ID search
      */
+    // todo: remove test when legacy coordinates are removed
     @Test
     public void searchForStopPlaceWithoutLegacyCoordinates() throws Exception {
         String basename = "koordinaten";
@@ -1249,7 +1250,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                         versionComment: "%s"
                         geometry: {
                           type: Point
-                          legacyCoordinates: [[%s,%s]]
+                          coordinates: [%s,%s]
                         }
                         weighting: %s
                 }) {
@@ -1262,7 +1263,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                     versionComment
                     topographicPlace { id topographicPlaceType parentTopographicPlace { id topographicPlaceType }}
                     weighting
-                    geometry { type legacyCoordinates }
+                    geometry { type coordinates }
                     validBetween { fromDate toDate }
                 }
             }""".formatted(stopPlace.getNetexId(),
@@ -1286,8 +1287,8 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                     .body("stopPlaceType", equalTo(StopTypeEnumeration.TRAM_STATION.value()))
                     .body("versionComment", equalTo(versionComment))
                     .body("geometry.type", equalTo("Point"))
-                    .body("geometry.legacyCoordinates[0][0]", comparesEqualTo(updatedLon))
-                    .body("geometry.legacyCoordinates[0][1]", comparesEqualTo(updatedLat))
+                    .body("geometry.coordinates[0]", comparesEqualTo(updatedLon))
+                    .body("geometry.coordinates[1]", comparesEqualTo(updatedLat))
                     .body("weighting", equalTo(weighting.value()))
                     .body("topographicPlace.id", notNullValue())
                     .body("topographicPlace.topographicPlaceType", equalTo(TopographicPlaceTypeEnumeration.MUNICIPALITY.value()))
@@ -1513,7 +1514,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                             privateCode: { value: "%s", type: "%s" }
                             geometry: {
                               type: Point
-                              legacyCoordinates: [[%s,%s]]
+                              coordinates: [%s,%s]
                             }
                           }]
                       }) {
@@ -1526,7 +1527,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                             description { value }
                             publicCode
                             privateCode { value type }
-                            geometry { type legacyCoordinates }
+                            geometry { type coordinates }
                           }
                       }
                   }""".formatted(stopPlace.getNetexId(), name, shortName, description, publicCode, privateCodeValue, privateCodeType, lon, lat);
@@ -1544,8 +1545,8 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                     .body("privateCode.value", equalTo(privateCodeValue))
                     .body("privateCode.type", equalTo(privateCodeType))
                     .body("geometry.type", equalTo("Point"))
-                    .body("geometry.legacyCoordinates[0][0]", comparesEqualTo(lon))
-                    .body("geometry.legacyCoordinates[0][1]", comparesEqualTo(lat));
+                    .body("geometry.coordinates[0]", comparesEqualTo(lon))
+                    .body("geometry.coordinates[1]", comparesEqualTo(lat));
     }
 
     @Test
@@ -1582,7 +1583,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                             description: { value: "%s" }
                             geometry: {
                               type: Point
-                              legacyCoordinates: [[%s,%s]]
+                              coordinates: [%s,%s]
                             }
                             compassBearing: %s
                           }]
@@ -1594,7 +1595,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                             name { value }
                             shortName { value }
                             description { value }
-                            geometry { type legacyCoordinates }
+                            geometry { type coordinates }
                             compassBearing
                           }
                       }
@@ -1609,8 +1610,8 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                     .body("shortName.value", equalTo(shortName))
                     .body("description.value", equalTo(description))
                     .body("geometry.type", equalTo("Point"))
-                    .body("geometry.legacyCoordinates[0][0]", comparesEqualTo(lon))
-                    .body("geometry.legacyCoordinates[0][1]", comparesEqualTo(lat))
+                    .body("geometry.coordinates[0]", comparesEqualTo(lon))
+                    .body("geometry.coordinates[1]", comparesEqualTo(lat))
                     .body("compassBearing", comparesEqualTo(compassBearing));
     }
 
@@ -1684,7 +1685,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                             description: { value: "%s" }
                             geometry: {
                               type: Point
-                              legacyCoordinates: [[%s,%s]]
+                              coordinates: [%s,%s]
                             }
                             compassBearing: %s
                           }]
@@ -1696,7 +1697,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                             name { value }
                             shortName { value }
                             description { value }
-                            geometry { type legacyCoordinates }
+                            geometry { type coordinates }
                             compassBearing
                           }
                       }
@@ -1716,8 +1717,8 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                     .body("shortName", nullValue())
                     .body("description", nullValue())
                     .body("geometry.type", equalTo(point.getGeometryType()))
-                    .body("geometry.legacyCoordinates[0][0]", comparesEqualTo(Float.valueOf(String.valueOf(point.getX()))))
-                    .body("geometry.legacyCoordinates[0][1]", comparesEqualTo(Float.valueOf(String.valueOf(point.getY()))))
+                    .body("geometry.coordinates[0]", comparesEqualTo(Float.valueOf(String.valueOf(point.getX()))))
+                    .body("geometry.coordinates[1]", comparesEqualTo(Float.valueOf(String.valueOf(point.getY()))))
                     .body("compassBearing", comparesEqualTo(quay.getCompassBearing()))
                         // Second Quay - added using GraphQL
                 .rootPath("data.stopPlace[0].quays.find { it.id != '" + manuallyAddedQuayId + "'}")
@@ -1725,8 +1726,8 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                     .body("shortName.value", equalTo(shortName))
                     .body("description.value", equalTo(description))
                     .body("geometry.type", equalTo("Point"))
-                    .body("geometry.legacyCoordinates[0][0]", comparesEqualTo(lon))
-                    .body("geometry.legacyCoordinates[0][1]", comparesEqualTo(lat))
+                    .body("geometry.coordinates[0]", comparesEqualTo(lon))
+                    .body("geometry.coordinates[1]", comparesEqualTo(lat))
                     .body("compassBearing", comparesEqualTo(compassBearing));
         // for unit test we do not have JMS listener
         assertThat(entityChangedJMSListener.hasReceivedEvent(stopPlace.getNetexId(), stopPlace.getVersion() + 1, EntityChangedEvent.CrudAction.UPDATE, null)).isFalse();
@@ -1775,7 +1776,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                             description: { value: "%s" }
                             geometry: {
                               type: Point
-                              legacyCoordinates: [[%s,%s]]
+                              coordinates: [%s,%s]
                             }
                             compassBearing: %s
                           }, {
@@ -1792,7 +1793,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                             name { value }
                             shortName { value }
                             description { value }
-                            geometry { type legacyCoordinates }
+                            geometry { type coordinates }
                             compassBearing
                           }
                       }
@@ -1812,8 +1813,8 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                     .body("shortName.value", equalTo(updatedShortName))
                     .body("description.value", equalTo(updatedDescription))
                     .body("geometry.type", equalTo(point.getGeometryType()))
-                    .body("geometry.legacyCoordinates[0][0]", comparesEqualTo( Float.valueOf(String.valueOf(point.getX()))))
-                    .body("geometry.legacyCoordinates[0][1]", comparesEqualTo( Float.valueOf(String.valueOf(point.getY()))))
+                    .body("geometry.coordinates[0]", comparesEqualTo( Float.valueOf(String.valueOf(point.getX()))))
+                    .body("geometry.coordinates[1]", comparesEqualTo( Float.valueOf(String.valueOf(point.getY()))))
                     .body("compassBearing", comparesEqualTo(quay.getCompassBearing()))
 
                         // Second Quay - added using GraphQL
@@ -1823,8 +1824,8 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                     .body("shortName.value", equalTo(newQuayShortName))
                     .body("description.value", equalTo(newQuayDescription))
                     .body("geometry.type", equalTo(point.getGeometryType()))
-                    .body("geometry.legacyCoordinates[0][0]", comparesEqualTo(lon))
-                    .body("geometry.legacyCoordinates[0][1]", comparesEqualTo(lat))
+                    .body("geometry.coordinates[0]", comparesEqualTo(lon))
+                    .body("geometry.coordinates[1]", comparesEqualTo(lat))
                     .body("compassBearing", comparesEqualTo(compassBearing));
         // for unit test we do not have JMS listener
         assertThat(entityChangedJMSListener.hasReceivedEvent(stopPlace.getNetexId(), stopPlace.getVersion() + 1, EntityChangedEvent.CrudAction.UPDATE, null)).isFalse();

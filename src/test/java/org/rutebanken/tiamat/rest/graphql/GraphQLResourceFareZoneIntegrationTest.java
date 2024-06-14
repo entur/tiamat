@@ -59,11 +59,11 @@ public class GraphQLResourceFareZoneIntegrationTest extends AbstractGraphQLResou
                                 version
                                     geometry {
                                         type
-                                        legacyCoordinates
+                                        coordinates
                                     }
                                     polygon {
                                         type
-                                        legacyCoordinates
+                                        coordinates
                                     }
                           }
                         }""";
