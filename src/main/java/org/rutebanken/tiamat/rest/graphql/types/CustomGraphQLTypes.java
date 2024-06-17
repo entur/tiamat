@@ -37,6 +37,7 @@ import org.rutebanken.tiamat.model.FunicularSubmodeEnumeration;
 import org.rutebanken.tiamat.model.GenderLimitationEnumeration;
 import org.rutebanken.tiamat.model.GeneralSign;
 import org.rutebanken.tiamat.model.hsl.AccessibilityLevelEnumeration;
+import org.rutebanken.tiamat.model.GroupOfStopPlaces;
 import org.rutebanken.tiamat.model.hsl.ElectricityTypeEnumeration;
 import org.rutebanken.tiamat.model.hsl.GuidanceTypeEnumeration;
 import org.rutebanken.tiamat.model.hsl.HslAccessibilityProperties;
@@ -229,6 +230,11 @@ public class CustomGraphQLTypes {
                 } else if (env.getSource() instanceof Link) {
                     Link link = env.getSource();
                     return link.getLineString();
+                } else if (env.getSource() instanceof GroupOfStopPlaces) {
+                    GroupOfStopPlaces source = env.getSource();
+                    if (source.getCentroid() != null) {
+                        return source.getCentroid();
+                    }
                 }
                 return null;
             }).build();

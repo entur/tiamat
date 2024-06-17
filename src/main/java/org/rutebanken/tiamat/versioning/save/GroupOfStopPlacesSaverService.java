@@ -105,12 +105,13 @@ public class GroupOfStopPlacesSaverService {
             newVersion.setCreated(Instant.now());
             result = newVersion;
         }
-        result.setValidBetween(null);
         result.setChangedBy(usernameForAuthenticatedUser);
-        Optional<Point> point = groupOfStopPlacesCentroidComputer.compute(result);
-        if(point.isPresent()) {
-            logger.info("Setting centroid for group of stop place {} to {}", result.getNetexId(), point.get());
-            result.setCentroid(point.get());
+        if (newVersion.getCentroid() == null) {
+            Optional<Point> point = groupOfStopPlacesCentroidComputer.compute(result);
+            if (point.isPresent()) {
+                logger.info("Setting centroid for group of stop place {} to {}", result.getNetexId(), point.get());
+                result.setCentroid(point.get());
+            }
         }
 
         versionIncrementor.incrementVersion(result);

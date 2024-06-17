@@ -15,6 +15,7 @@
 
 package org.rutebanken.tiamat.rest.graphql.mappers;
 
+import org.locationtech.jts.geom.Point;
 import org.rutebanken.tiamat.model.GroupOfStopPlaces;
 import org.rutebanken.tiamat.model.PurposeOfGrouping;
 import org.rutebanken.tiamat.model.StopPlaceReference;
@@ -26,8 +27,10 @@ import java.util.List;
 import java.util.Map;
 
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ENTITY_REF_REF;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.GEOMETRY;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.GROUP_OF_STOP_PLACES_MEMBERS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PURPOSE_OF_GROUPING;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.VALID_BETWEEN;
 
 @Component
 public class GroupOfStopPlacesMapper {
@@ -35,6 +38,12 @@ public class GroupOfStopPlacesMapper {
     private final GroupOfEntitiesMapper groupOfEntitiesMapper;
 
     private final PurposeOfGroupingRepository purposeOfGroupingRepository;
+
+    @Autowired
+    private ValidBetweenMapper validBetweenMapper;
+
+    @Autowired
+    private GeometryMapper geometryMapper;
 
     @Autowired
     public GroupOfStopPlacesMapper(GroupOfEntitiesMapper groupOfEntitiesMapper,
@@ -64,6 +73,18 @@ public class GroupOfStopPlacesMapper {
                 entity.getMembers().add(new StopPlaceReference(ref));
                 isUpdated = true;
             }
+        }
+
+        if(input.get(VALID_BETWEEN) != null) {
+            final Map validBetween = (Map) input.get(VALID_BETWEEN);
+            entity.setValidBetween(validBetweenMapper.map(validBetween));
+            isUpdated = true;
+        }
+
+        if (input.get(GEOMETRY) != null) {
+            Point geoJsonPoint = geometryMapper.createGeoJsonPoint((Map) input.get(GEOMETRY));
+            isUpdated = isUpdated || (!geoJsonPoint.equals(entity.getCentroid()));
+            entity.setCentroid(geoJsonPoint);
         }
 
         return isUpdated;

@@ -15,6 +15,11 @@
 
 package org.rutebanken.tiamat.rest.graphql;
 
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
+import java.util.Locale;
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
@@ -23,6 +28,7 @@ import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
 
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.MUTATE_GROUP_OF_STOP_PLACES;
 
@@ -49,21 +55,44 @@ public class GraphQLResourceGroupOfStopPlacesIntegrationTest extends AbstractGra
         var groupName = "Group name";
         var versionComment = "VersionComment";
 
+        Double lon =  Double.valueOf("10.111");
+        Double lat = Double.valueOf("59.111");
+
+        Instant startDate = Instant.now();
+        Instant endDate = startDate.plus(20, ChronoUnit.DAYS);
+
         String graphQlJsonQuery = """
                                     mutation {
                                     group: %s(GroupOfStopPlaces: {
                                         name: {value: "%s"},
                                         purposeOfGrouping: {ref: "%s"},
                                         versionComment: "%s",
+                                        validBetween: {
+                                            fromDate: "%s",
+                                            toDate: "%s",
+                                        },
+                                        geometry: {
+                                            type: Point,
+                                            coordinates: [[ %f, %f ]]
+                                        },
                                         members: [
                                             {ref: "%s"},
-                                            {ref: "%s"}],
-                                        }) {
+                                            {ref: "%s"}
+                                        ]
+                                    }) {
                                     id
                                     version
                                     versionComment
                                     name {
                                       value
+                                    }
+                                    validBetween {
+                                      fromDate
+                                      toDate
+                                    }
+                                    geometry {
+                                      type
+                                      coordinates
                                     }
                                     members {
                                       id
@@ -82,13 +111,27 @@ public class GraphQLResourceGroupOfStopPlacesIntegrationTest extends AbstractGra
                                                 groupName,
                                                 purposeOfGrouping.getNetexId(),
                                                 versionComment,
+                                                startDate.toString(),
+                                                endDate.toString(),
+                                                lon,
+                                                lat,
                                                 stopPlace1.getNetexId(),
                                                 stopPlace2.getNetexId()
                                               );
 
+        final var timeFormatter = DateTimeFormatter.ofPattern("uuuu-MM-dd'T'HH:mm:ss.SSSZ")
+                .withLocale(Locale.getDefault())
+                .withZone(ZoneId.of("Europe/Oslo"));
+
         executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .body("data.group.name.value", equalTo(groupName))
                 .body("data.group.versionComment", equalTo(versionComment))
+                .rootPath("data.group.validBetween")
+                    .body("fromDate", equalTo(timeFormatter.format(startDate)))
+                    .body("toDate", equalTo(timeFormatter.format(endDate)))
+                .rootPath("data.group.geometry")
+                    .body("type", equalTo("Point"))
+                    .body("coordinates", notNullValue())
                 .rootPath("data.group.members.find { it.id == '" + stopPlace2.getNetexId() + "'}")
                     .body("version", equalTo(String.valueOf(stopPlace2.getVersion())))
                     .body("stopPlaceType", equalTo(StopTypeEnumeration.TRAM_STATION.value()))

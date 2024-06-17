@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.model;
 
+import java.time.Instant;
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 
@@ -20,12 +21,16 @@ public class GroupOfStopPlacesTest extends TiamatIntegrationTest {
         stopPlace2.setVersion(1L);
         stopPlace2 = stopPlaceRepository.save(stopPlace2);
 
+        Instant validityStart = Instant.now();
+        Instant validityEnd = validityStart.plusSeconds(60*60*24*7); // Week of seconds
 
         String groupName = "group of stop places";
         GroupOfStopPlaces groupOfStopPlaces = new GroupOfStopPlaces(new EmbeddableMultilingualString(groupName));
 
         groupOfStopPlaces.getMembers().add(new StopPlaceReference(stopPlace.getNetexId()));
         groupOfStopPlaces.getMembers().add(new StopPlaceReference(stopPlace2.getNetexId()));
+
+        groupOfStopPlaces.setValidBetween(new ValidBetween(validityStart, validityEnd));
 
         groupOfStopPlaces = groupOfStopPlacesRepository.save(groupOfStopPlaces);
 
@@ -35,6 +40,7 @@ public class GroupOfStopPlacesTest extends TiamatIntegrationTest {
                 .extracting(StopPlaceReference::getRef)
                 .contains(stopPlace.getNetexId(), stopPlace2.getNetexId());
 
+        assertThat(groupOfStopPlaces.getValidBetween()).isEqualTo(new ValidBetween(validityStart, validityEnd));
     }
 
     @Test

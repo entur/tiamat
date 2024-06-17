@@ -47,9 +47,11 @@ import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.NAME;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.OUTPUT_TYPE_GROUP_OF_STOPPLACES;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PURPOSE_OF_GROUPING;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.SHORT_NAME;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.VALID_BETWEEN;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.VERSION;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.VERSION_COMMENT;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.embeddableMultilingualStringObjectType;
+import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.geometryFieldDefinition;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.netexIdFieldDefinition;
 
 @Component
@@ -61,7 +63,9 @@ public class GroupOfStopPlacesObjectTypeCreator {
     @Autowired
     private GroupOfStopPlacesPurposeOfGroupingFetcher groupOfStopPlacesPurposeOfGroupingFetcher;
 
-    public GraphQLObjectType create(GraphQLInterfaceType stopPlaceInterface, GraphQLObjectType purposeOfGroupingType) {
+    public GraphQLObjectType create(GraphQLInterfaceType stopPlaceInterface,
+                                    GraphQLObjectType purposeOfGroupingType,
+                                    GraphQLObjectType validBetweenObjectType) {
 
         return newObject()
                 .name(OUTPUT_TYPE_GROUP_OF_STOPPLACES)
@@ -85,6 +89,10 @@ public class GroupOfStopPlacesObjectTypeCreator {
                         .name(PURPOSE_OF_GROUPING)
                         .type(purposeOfGroupingType)
                         .dataFetcher(groupOfStopPlacesPurposeOfGroupingFetcher))
+                .field(newFieldDefinition()
+                        .name(VALID_BETWEEN)
+                        .type(validBetweenObjectType))
+                .field(geometryFieldDefinition)
                 .field(newFieldDefinition()
                         .name(GROUP_OF_STOP_PLACES_MEMBERS)
                         .type(new GraphQLList(stopPlaceInterface))
