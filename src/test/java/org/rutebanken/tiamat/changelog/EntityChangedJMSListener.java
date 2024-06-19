@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Profile;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
 
@@ -31,6 +32,7 @@ import java.util.Set;
  * Receive entity changed messages sent from tiamat for verifying tests.
  */
 @Component
+@Profile("test")
 public class EntityChangedJMSListener {
 
     private static Set<EntityChangedEvent> events = new HashSet<>();
