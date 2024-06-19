@@ -80,7 +80,7 @@ public class GraphQLResourceQuayMergerTest extends AbstractGraphQLResourceIntegr
                             ...on StopPlace {
                                 quays {
                                     id
-                                    geometry { type legacyCoordinates }
+                                    geometry { type coordinates }
                                     compassBearing
                                     importedId
                                 }

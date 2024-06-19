@@ -378,8 +378,9 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
     /**
      * Use query parameter for original ID search
      */
+    // todo: remove test when legacy coordinates are removed
     @Test
-    public void searchForStopPlaceWithoutCoordinates() throws Exception {
+    public void searchForStopPlaceWithoutLegacyCoordinates() throws Exception {
         String basename = "koordinaten";
         String nameWithLocation = basename + " nr 1";
         StopPlace stopPlaceWithCoordinates = new StopPlace(new EmbeddableMultilingualString(nameWithLocation));
@@ -417,6 +418,57 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                             id
                             name { value }
                             geometry {legacyCoordinates }
+                        }
+                    }""";
+
+        // Filtering on withoutLocationsOnly stopPlace should only return one
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
+                .body("data.stopPlace", hasSize(1))
+                .body("data.stopPlace[0].name.value", equalTo(nameWithoutLocation))
+                .body("data.stopPlace[0].geometry", nullValue());
+
+    }
+
+    @Test
+    public void searchForStopPlaceWithoutCoordinates() throws Exception {
+        String basename = "koordinaten";
+        String nameWithLocation = basename + " nr 1";
+        StopPlace stopPlaceWithCoordinates = new StopPlace(new EmbeddableMultilingualString(nameWithLocation));
+        stopPlaceWithCoordinates.setCentroid(geometryFactory.createPoint(new Coordinate(10.533212, 59.678080)));
+
+        String nameWithoutLocation = basename + " nr 2";
+        StopPlace stopPlaceWithoutCoordinates = new StopPlace(new EmbeddableMultilingualString(nameWithoutLocation));
+        stopPlaceWithoutCoordinates.setCentroid(null);
+
+        stopPlaceRepository.save(stopPlaceWithCoordinates);
+        stopPlaceRepository.save(stopPlaceWithoutCoordinates);
+
+        String graphQlJsonQuery = """
+                  {
+                  stopPlace:  stopPlace (query:"koordinaten", allVersions:true) {
+                            id
+                            name { value }
+                            geometry { coordinates }
+                        }
+                    }""";
+
+
+        // Search for stopPlace should return both StopPlaces above
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
+                .rootPath("data.stopPlace.find { it.id == '" + stopPlaceWithCoordinates.getNetexId() + "'}")
+                .body("name.value", equalTo(nameWithLocation))
+                .body("geometry", notNullValue())
+                .body("geometry.coordinates", notNullValue())
+                .rootPath("data.stopPlace.find { it.id == '" + stopPlaceWithoutCoordinates.getNetexId() + "'}")
+                .body("name.value", equalTo(nameWithoutLocation))
+                .body("geometry", nullValue());
+
+        graphQlJsonQuery = """
+                  {
+                  stopPlace:  stopPlace (query:"koordinaten", allVersions:true, withoutLocationOnly:true) {
+                            id
+                            name { value }
+                            geometry { coordinates }
                         }
                     }""";
 
@@ -491,17 +543,17 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         assertThat(stopPlace.getVersion()).isEqualTo(1);
         assertThat(copy.getVersion()).isEqualTo(2);
 
-        String graphQlJsonQuery = "{" +
-                "\"query\":\"{stopPlace: " + GraphQLNames.FIND_STOPPLACE +
-                " (" + GraphQLNames.ID + ":\\\"" + stopPlace.getNetexId() + "\\\" allVersions:true)" +
-                " { " +
-                "  id " +
-                "  version " +
-                " }" +
-                "}\",\"variables\":\"\"}";
+        String graphQlJsonQuery = """
+                  {
+                   stopPlace(id:"%s", allVersions:true) {
+                            id
+                            name {value}
+                            version
+                        }
+                   }""".formatted(stopPlace.getNetexId());
 
 
-        executeGraphQL(graphQlJsonQuery)
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .body("data.stopPlace", hasSize(2))
                 .body("data.stopPlace[0].id", equalTo(stopPlace.getNetexId()))
                 .body("data.stopPlace[1].id", equalTo(stopPlace.getNetexId()));
@@ -621,15 +673,14 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         stopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_TRAM);
         stopPlaceRepository.save(stopPlace);
 
-        String graphQlJsonQuery = "{" +
-                "\"query\":\"{" +
-                "  stopPlace: " + GraphQLNames.FIND_STOPPLACE +  " (stopPlaceType:" + StopTypeEnumeration.FERRY_STOP.value() + ") { " +
-                "    name {value} " +
-                "  } " +
-                "}\"," +
-                "\"variables\":\"\"}";
+        String graphQlJsonQuery = """
+                  {
+                  stopPlace (stopPlaceType:%s) {
+                            name {value}
+                        }
+                    }""".formatted(StopTypeEnumeration.FERRY_STOP.value());
 
-        executeGraphQL(graphQlJsonQuery)
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .body("data.stopPlace", Matchers.hasSize(0));
     }
 
@@ -755,16 +806,15 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         TopographicPlace asker = new TopographicPlace(new EmbeddableMultilingualString("Asker"));
         topographicPlaceRepository.save(asker);
 
-        String graphQlJsonQuery = "{" +
-                "\"query\":\"{" +
-                "  stopPlace:" + GraphQLNames.FIND_STOPPLACE +
-                " (municipalityReference:\\\"" + asker.getNetexId() +"\\\") { " +
-                "    name {value} " +
-                "  } " +
-                "}\"," +
-                "\"variables\":\"\"}";
+        String graphQlJsonQuery = """
+                  {
+                   stopPlace (municipalityReference:"%s") {
+                            name {value}
+                        }
+                    }""".formatted(asker.getNetexId());
 
-        executeGraphQL(graphQlJsonQuery)
+
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .body("data.stopPlace", hasSize(0));
     }
 
@@ -916,29 +966,30 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         Float lon =  Float.valueOf("10.11111");
         Float lat = Float.valueOf("59.11111");
 
-        String graphQlJsonQuery = "{" +
-                "\"query\":\"mutation { " +
-                "  stopPlace: " + GraphQLNames.MUTATE_STOPPLACE + " (StopPlace: {" +
-                "          name: { value:\\\"" + name + "\\\" } " +
-                "          shortName:{ value:\\\"" + shortName + "\\\" } " +
-                "          description:{ value:\\\"" + description + "\\\" }" +
-                "          stopPlaceType:" + StopTypeEnumeration.TRAM_STATION.value() +
-                "          geometry: {" +
-                "            type: Point" +
-                "            legacyCoordinates: [[" + lon + "," + lat + "]] " +
-                "          }" +
-                "       }) { " +
-                "  id " +
-                "  weighting " +
-                "  name { value } " +
-                "  shortName { value } " +
-                "  description { value } " +
-                "  stopPlaceType " +
-                "  geometry { type legacyCoordinates } " +
-                "  } " +
-                "}\",\"variables\":\"\"}";
+        String graphQlJsonQuery = """
+                                     mutation {
+                                     stopPlace: %s(StopPlace: {
+                                               name: { value:"%s" }
+                                               shortName:{ value:"%s" }
+                                               description:{ value:"%s" }
+                                               stopPlaceType:%s
+                                               geometry: {
+                                                 type: Point
+                                                 coordinates: [%s,%s]
+                                               }
+                                       }) {
+                                  id
+                                  weighting
+                                  name { value }
+                                  shortName { value }
+                                  description { value }
+                                  stopPlaceType
+                                  geometry { type coordinates }
+                                 }
+                                }
+                """.formatted(GraphQLNames.MUTATE_STOPPLACE,name, shortName, description,StopTypeEnumeration.TRAM_STATION.value(), lon, lat);
 
-        executeGraphQL(graphQlJsonQuery)
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .rootPath("data.stopPlace[0]")
                     .body("id", notNullValue())
                     .body("name.value", equalTo(name))
@@ -946,8 +997,8 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                     .body("description.value", equalTo(description))
                     .body("stopPlaceType", equalTo(StopTypeEnumeration.TRAM_STATION.value()))
                     .body("geometry.type", equalTo("Point"))
-                    .body("geometry.legacyCoordinates[0][0]", comparesEqualTo(lon))
-                    .body("geometry.legacyCoordinates[0][1]", comparesEqualTo(lat))
+                    .body("geometry.coordinates[0]", comparesEqualTo(lon))
+                    .body("geometry.coordinates[1]", comparesEqualTo(lat))
                     .body("weighting", comparesEqualTo(InterchangeWeightingEnumeration.INTERCHANGE_ALLOWED.value()));
 
         // for unit test we don't have a real JMS listener, so we need to check the event manually
@@ -996,21 +1047,26 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         String shortName = "          ";
         String originalId = "   TEST:1234    ";
 
-        String graphQlJsonQuery = "{" +
-                "\"query\":\"mutation { " +
-                "  stopPlace: " + GraphQLNames.MUTATE_STOPPLACE + " (StopPlace: {" +
-                "          name: { value:\\\"" + name + "\\\" } " +
-                "          shortName: { value:\\\"" + shortName + jsonFriendlyNewLineStr + "\\\" } " +
-                "          keyValues:{ key:\\\"" + GraphQLNames.IMPORTED_ID +"\\\" values:\\\"" + originalId + jsonFriendlyNewLineStr + "\\\" }" +
-                "       }) { " +
-                "  id " +
-                "  name { value } " +
-                "  shortName { value } " +
-                "  keyValues { key values } " +
-                "  } " +
-                "}\",\"variables\":\"\"}";
+        String graphQlJsonQuery = """
+                mutation {
+                stopPlace: %s(StopPlace: {
+                          name: { value:"%s" }
+                          shortName:{ value:"%s" }
+                          keyValues:{ key:"%s" values:"%s" }
+                  }) { 
+                        id
+                         name { value }
+                         shortName { value }
+                         keyValues { key values }
+                    }
+                }
+                """.formatted(GraphQLNames.MUTATE_STOPPLACE,
+                              name,
+                              shortName + jsonFriendlyNewLineStr,
+                              GraphQLNames.IMPORTED_ID,
+                              originalId + jsonFriendlyNewLineStr);
 
-        executeGraphQL(graphQlJsonQuery)
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .rootPath("data.stopPlace[0]")
                 .body("id", notNullValue())
                 .body("name.value", equalTo(name))
@@ -1194,7 +1250,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                         versionComment: "%s"
                         geometry: {
                           type: Point
-                          legacyCoordinates: [[%s,%s]]
+                          coordinates: [%s,%s]
                         }
                         weighting: %s
                 }) {
@@ -1207,7 +1263,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                     versionComment
                     topographicPlace { id topographicPlaceType parentTopographicPlace { id topographicPlaceType }}
                     weighting
-                    geometry { type legacyCoordinates }
+                    geometry { type coordinates }
                     validBetween { fromDate toDate }
                 }
             }""".formatted(stopPlace.getNetexId(),
@@ -1231,8 +1287,8 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                     .body("stopPlaceType", equalTo(StopTypeEnumeration.TRAM_STATION.value()))
                     .body("versionComment", equalTo(versionComment))
                     .body("geometry.type", equalTo("Point"))
-                    .body("geometry.legacyCoordinates[0][0]", comparesEqualTo(updatedLon))
-                    .body("geometry.legacyCoordinates[0][1]", comparesEqualTo(updatedLat))
+                    .body("geometry.coordinates[0]", comparesEqualTo(updatedLon))
+                    .body("geometry.coordinates[1]", comparesEqualTo(updatedLat))
                     .body("weighting", equalTo(weighting.value()))
                     .body("topographicPlace.id", notNullValue())
                     .body("topographicPlace.topographicPlaceType", equalTo(TopographicPlaceTypeEnumeration.MUNICIPALITY.value()))
@@ -1258,19 +1314,22 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         // The new version should be terminated in the future.
         String toDate = dateTimeFormatter.format(now.plusSeconds(2000).atZone(exportTimeZone.getDefaultTimeZoneId()));
 
-        String graphQlJsonQuery = "{" +
-                "\"query\":\"mutation { " +
-                "  stopPlace: " + GraphQLNames.MUTATE_STOPPLACE + " (StopPlace: {" +
-                "          id:\\\"" + stopPlace.getNetexId() + "\\\"" +
-                "          versionComment: \\\""+ versionComment + "\\\"" +
-                "          validBetween: {fromDate: \\\"" + fromDate + "\\\", toDate: \\\"" + toDate + "\\\"}" +
-                "       }) { " +
-                "  validBetween { fromDate toDate } " +
-                "  versionComment " +
-                "  } " +
-                "}\",\"variables\":\"\"}";
+        String graphQlJsonQuery = """
+            mutation {
+              stopPlace: mutateStopPlace(StopPlace: {
+                id: "%s"
+                versionComment: "%s"
+                validBetween: { fromDate: "%s", toDate: "%s" }
+              }) {
+                id
+                versionComment
+                validBetween { fromDate toDate }
+              }
+            }
+            """.formatted(stopPlace.getNetexId(), versionComment, fromDate, toDate);
 
-        executeGraphQL(graphQlJsonQuery)
+
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .body("data.stopPlace[0]", notNullValue())
                 .rootPath("data.stopPlace[0]")
                     .body("versionComment", equalTo(versionComment))
@@ -1292,21 +1351,18 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
 
         stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
 
-        String graphQlJsonQuery = "{" +
-                "\"query\":\"mutation { " +
-                "  stopPlace: " + GraphQLNames.MUTATE_STOPPLACE + " (StopPlace: {" +
-                "          id:\\\"" + stopPlace.getNetexId() + "\\\"" +
-                "          keyValues: [{" +
-                "            key: \\\"jbvId\\\"" +
-                "            values: [\\\"1234\\\", ]" +
-                "          }]" +
-                "       }) { " +
-                "  id " +
-                "  keyValues { key values } " +
-                "  } " +
-                "}\",\"variables\":\"\"}";
+        String graphQlJsonQuery = """
+                 mutation {
+                  stopPlace: mutateStopPlace (StopPlace: {
+                          id: "%s"
+                          keyValues: [{ key: "jbvId", values: ["1234"] }]
+                      }) {
+                          id
+                          keyValues { key values }
+                      }
+                  }""".formatted(stopPlace.getNetexId());
 
-        executeGraphQL(graphQlJsonQuery)
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .rootPath("data.stopPlace[0]")
                     .body("id", equalTo(stopPlace.getNetexId()))
                     .body("keyValues[0].key", equalTo("jbvId"))
@@ -1377,20 +1433,20 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
 
         String newTransportMode = VehicleModeEnumeration.TRAM.value();
         String newSubmode = TramSubmodeEnumeration.LOCAL_TRAM.value();
-        String graphQlJsonQuery = "{" +
-                "\"query\":\"mutation { " +
-                "  stopPlace: " + GraphQLNames.MUTATE_STOPPLACE + " (StopPlace: {" +
-                "          id:\\\"" + stopPlace.getNetexId() + "\\\"" +
-                "          transportMode: " + newTransportMode +
-                "          submode: " + newSubmode +
-                "       }) { " +
-                "  id " +
-                "  transportMode" +
-                "  submode " +
-                "  } " +
-                "}\",\"variables\":\"\"}";
+        String graphQlJsonQuery = """
+                 mutation {
+                  stopPlace: mutateStopPlace (StopPlace: {
+                          id: "%s"
+                          transportMode: %s
+                          submode: %s
+                      }) {
+                          id
+                          transportMode
+                          submode
+                      }
+                  }""".formatted(stopPlace.getNetexId(), newTransportMode, newSubmode);
 
-        executeGraphQL(graphQlJsonQuery)
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .rootPath("data.stopPlace[0]")
                 .body("id", equalTo(stopPlace.getNetexId()))
                 .body("transportMode", equalTo(newTransportMode))
@@ -1411,15 +1467,17 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
     @Test
     public void testGetValidTransportModes() throws Exception {
 
-        String graphQlJsonQuery = "{" +
-                "\"query\":\"{" +
-                "  validTransportModes {" +
-                "    transportMode" +
-                "    submode" +
-                "  }" +
-                "}\",\"variables\":\"\"}";
+        String graphQlJsonQuery = """
+                { 
+                  validTransportModes {
+                    transportMode
+                    submode
+                  }
+                }
+                """;
 
-        executeGraphQL(graphQlJsonQuery)
+
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .body("data.validTransportModes", notNullValue())
                 .body("data.validTransportModes[0].transportMode", notNullValue())
                 .body("data.validTransportModes[0].submode", notNullValue());
@@ -1444,38 +1502,38 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         Float lon =  Float.valueOf("10.11111");
         Float lat =  Float.valueOf("59.11111");
 
+        String graphQlJsonQuery = """
+                mutation {
+                 stopPlace:mutateStopPlace(StopPlace: {
+                          id: "%s"
+                          quays: [{ 
+                            name: { value: "%s" }
+                            shortName: { value: "%s" }
+                            description: { value: "%s" }
+                            publicCode: "%s"
+                            privateCode: { value: "%s", type: "%s" }
+                            geometry: {
+                              type: Point
+                              coordinates: [%s,%s]
+                            }
+                          }]
+                      }) {
+                          id
+                          name { value }
+                          quays {
+                            id
+                            name { value }
+                            shortName { value }
+                            description { value }
+                            publicCode
+                            privateCode { value type }
+                            geometry { type coordinates }
+                          }
+                      }
+                  }""".formatted(stopPlace.getNetexId(), name, shortName, description, publicCode, privateCodeValue, privateCodeType, lon, lat);
 
-        String graphQlJsonQuery = "{" +
-                "\"query\":\"mutation { " +
-                "  stopPlace: " + GraphQLNames.MUTATE_STOPPLACE + " (StopPlace: {" +
-                "          id:\\\"" + stopPlace.getNetexId() + "\\\"" +
-                "          quays: [{ " +
-                "            name: { value:\\\"" + name + "\\\" } " +
-                "            shortName:{ value:\\\"" + shortName + "\\\" } " +
-                "            description:{ value:\\\"" + description + "\\\" }" +
-                "            publicCode:\\\"" + publicCode + "\\\"" +
-                "            privateCode:{ value:\\\"" + privateCodeValue + "\\\", type:\\\"" + privateCodeType + "\\\" }" +
-                "            geometry: {" +
-                "              type: Point" +
-                "              legacyCoordinates: [[" + lon + "," + lat + "]] " +
-                "            }" +
-                "            }] " +
-                "       }) { " +
-                "  id " +
-                "  name { value } " +
-                "  quays {" +
-                "    id " +
-                "    publicCode " +
-                "    privateCode { value type }" +
-                "    name { value } " +
-                "    shortName { value } " +
-                "    description { value } " +
-                "    geometry { type legacyCoordinates } " +
-                "  } " +
-                "  } " +
-                "}\",\"variables\":\"\"}";
 
-        executeGraphQL(graphQlJsonQuery)
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .body("data.stopPlace[0].id", notNullValue())
                 .body("data.stopPlace[0].name.value", equalTo(stopPlace.getName().getValue()))
                 .rootPath("data.stopPlace[0].quays[0]")
@@ -1487,8 +1545,8 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                     .body("privateCode.value", equalTo(privateCodeValue))
                     .body("privateCode.type", equalTo(privateCodeType))
                     .body("geometry.type", equalTo("Point"))
-                    .body("geometry.legacyCoordinates[0][0]", comparesEqualTo(lon))
-                    .body("geometry.legacyCoordinates[0][1]", comparesEqualTo(lat));
+                    .body("geometry.coordinates[0]", comparesEqualTo(lon))
+                    .body("geometry.coordinates[1]", comparesEqualTo(lat));
     }
 
     @Test
@@ -1514,36 +1572,36 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
 
         Float compassBearing =  Float.valueOf("180");
 
-        String graphQlJsonQuery = "{" +
-                "\"query\":\"mutation { " +
-                "  stopPlace: " + GraphQLNames.MUTATE_STOPPLACE + " (StopPlace: {" +
-                "          id:\\\"" + stopPlace.getNetexId() + "\\\"" +
-                "          quays: [{ " +
-                "            id:\\\"" + quay.getNetexId() + "\\\" " +
-                "            name: { value:\\\"" + name + "\\\" } " +
-                "            shortName:{ value:\\\"" + shortName + "\\\" } " +
-                "            description:{ value:\\\"" + description + "\\\" }" +
-                "          geometry: {" +
-                "            type: Point" +
-                "            legacyCoordinates: [[" + lon + "," + lat + "]] " +
-                "          }" +
-                "            compassBearing:" + compassBearing +
-                "          }] " +
-                "       }) { " +
-                "  id " +
-                "  name { value } " +
-                "  quays {" +
-                "    id " +
-                "    name { value } " +
-                "    shortName { value } " +
-                "    description { value } " +
-                "    geometry { type legacyCoordinates } " +
-                "    compassBearing " +
-                "  } " +
-                "  } " +
-                "}\",\"variables\":\"\"}";
+        String graphQlJsonQuery = """
+                mutation {
+                 stopPlace:mutateStopPlace(StopPlace: {
+                          id: "%s"
+                          quays: [{ 
+                            id: "%s"
+                            name: { value: "%s" }
+                            shortName: { value: "%s" }
+                            description: { value: "%s" }
+                            geometry: {
+                              type: Point
+                              coordinates: [%s,%s]
+                            }
+                            compassBearing: %s
+                          }]
+                      }) {
+                          id
+                          name { value }
+                          quays {
+                            id
+                            name { value }
+                            shortName { value }
+                            description { value }
+                            geometry { type coordinates }
+                            compassBearing
+                          }
+                      }
+                  }""".formatted(stopPlace.getNetexId(), quay.getNetexId(), name, shortName, description, lon, lat, compassBearing);
 
-        executeGraphQL(graphQlJsonQuery)
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .body("data.stopPlace[0].id", comparesEqualTo(stopPlace.getNetexId()))
                 .body("data.stopPlace[0].name.value", equalTo(stopPlace.getName().getValue()))
                 .rootPath("data.stopPlace[0].quays[0]")
@@ -1552,8 +1610,8 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                     .body("shortName.value", equalTo(shortName))
                     .body("description.value", equalTo(description))
                     .body("geometry.type", equalTo("Point"))
-                    .body("geometry.legacyCoordinates[0][0]", comparesEqualTo(lon))
-                    .body("geometry.legacyCoordinates[0][1]", comparesEqualTo(lat))
+                    .body("geometry.coordinates[0]", comparesEqualTo(lon))
+                    .body("geometry.coordinates[1]", comparesEqualTo(lat))
                     .body("compassBearing", comparesEqualTo(compassBearing));
     }
 
@@ -1617,38 +1675,39 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
 
         Float compassBearing =  Float.valueOf("180");
 
-        String graphQlJsonQuery = "{" +
-                "\"query\":\"mutation { " +
-                "  stopPlace: " + GraphQLNames.MUTATE_STOPPLACE + " (StopPlace: {" +
-                "          id:\\\"" + stopPlace.getNetexId() + "\\\"" +
-                "          quays: [{ " +
-                "            name: { value:\\\"" + name + "\\\" } " +
-                "            shortName:{ value:\\\"" + shortName + "\\\" } " +
-                "            description:{ value:\\\"" + description + "\\\" }" +
-                "            geometry: {" +
-                "              type: Point" +
-                "              legacyCoordinates: [[" + lon + "," + lat + "]] " +
-                "            }" +
-                "            compassBearing:" + compassBearing +
-                "          }] " +
-                "       }) { " +
-                "  id " +
-                "  name { value } " +
-                "  quays {" +
-                "    id " +
-                "    name { value } " +
-                "    shortName { value } " +
-                "    description { value } " +
-                "    geometry { type legacyCoordinates } " +
-                "    compassBearing " +
-                "  } " +
-                "  } " +
-                "}\",\"variables\":\"\"}";
+        String graphQlJsonQuery = """
+                mutation {
+                 stopPlace:mutateStopPlace(StopPlace: {
+                          id: "%s"
+                          quays: [{ 
+                            name: { value: "%s" }
+                            shortName: { value: "%s" }
+                            description: { value: "%s" }
+                            geometry: {
+                              type: Point
+                              coordinates: [%s,%s]
+                            }
+                            compassBearing: %s
+                          }]
+                      }) {
+                          id
+                          name { value }
+                          quays {
+                            id
+                            name { value }
+                            shortName { value }
+                            description { value }
+                            geometry { type coordinates }
+                            compassBearing
+                          }
+                      }
+                  }""".formatted(stopPlace.getNetexId(), name, shortName, description, lon, lat, compassBearing);
+
 
         String manuallyAddedQuayId = quay.getNetexId();
 
 
-        executeGraphQL(graphQlJsonQuery)
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .body("data.stopPlace[0].id", comparesEqualTo(stopPlace.getNetexId()))
                 .body("data.stopPlace[0].name.value", equalTo(stopPlace.getName().getValue()))
                 .body("data.stopPlace[0].quays", hasSize(2))
@@ -1658,8 +1717,8 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                     .body("shortName", nullValue())
                     .body("description", nullValue())
                     .body("geometry.type", equalTo(point.getGeometryType()))
-                    .body("geometry.legacyCoordinates[0][0]", comparesEqualTo(Float.valueOf(String.valueOf(point.getX()))))
-                    .body("geometry.legacyCoordinates[0][1]", comparesEqualTo(Float.valueOf(String.valueOf(point.getY()))))
+                    .body("geometry.coordinates[0]", comparesEqualTo(Float.valueOf(String.valueOf(point.getX()))))
+                    .body("geometry.coordinates[1]", comparesEqualTo(Float.valueOf(String.valueOf(point.getY()))))
                     .body("compassBearing", comparesEqualTo(quay.getCompassBearing()))
                         // Second Quay - added using GraphQL
                 .rootPath("data.stopPlace[0].quays.find { it.id != '" + manuallyAddedQuayId + "'}")
@@ -1667,8 +1726,8 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                     .body("shortName.value", equalTo(shortName))
                     .body("description.value", equalTo(description))
                     .body("geometry.type", equalTo("Point"))
-                    .body("geometry.legacyCoordinates[0][0]", comparesEqualTo(lon))
-                    .body("geometry.legacyCoordinates[0][1]", comparesEqualTo(lat))
+                    .body("geometry.coordinates[0]", comparesEqualTo(lon))
+                    .body("geometry.coordinates[1]", comparesEqualTo(lat))
                     .body("compassBearing", comparesEqualTo(compassBearing));
         // for unit test we do not have JMS listener
         assertThat(entityChangedJMSListener.hasReceivedEvent(stopPlace.getNetexId(), stopPlace.getVersion() + 1, EntityChangedEvent.CrudAction.UPDATE, null)).isFalse();
@@ -1693,7 +1752,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         stopPlaceRepository.save(stopPlace);
 
         String newStopName = "Shell - E6";
-        String newQuaydName = "Testing name 1";
+        String newQuayName = "Testing name 1";
         String newQuayShortName = "Testing shortname 1";
         String newQuayDescription = "Testing description 1";
 
@@ -1706,44 +1765,45 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
 
         Float compassBearing =  Float.valueOf("180");
 
-        String graphQlJsonQuery = "{" +
-                "\"query\":\"mutation { " +
-                "  stopPlace: " + GraphQLNames.MUTATE_STOPPLACE + " (StopPlace: {" +
-                "          id:\\\"" + stopPlace.getNetexId() + "\\\"" +
-                "          name: { value:\\\"" + newStopName + "\\\" } " +
-                "          quays: [{ " +
-                "            name: { value:\\\"" + newQuaydName + "\\\" } " +
-                "            shortName:{ value:\\\"" + newQuayShortName + "\\\" } " +
-                "            description:{ value:\\\"" + newQuayDescription + "\\\" }" +
-                "            geometry: {" +
-                "              type: Point" +
-                "              legacyCoordinates: [[" + lon + ","+ lat + "]]" +
-                "             }" +
-                "            compassBearing:" + compassBearing +
-                "          } , {" +
-                "            id:\\\"" + quay.getNetexId() + "\\\" " +
-                "            name: { value:\\\"" + updatedName + "\\\" } " +
-                "            shortName:{ value:\\\"" + updatedShortName + "\\\" } " +
-                "            description:{ value:\\\"" + updatedDescription + "\\\" }" +
-                "          }] " +
-                "       }) { " +
-                "  id " +
-                "  name { value } " +
-                "  quays {" +
-                "    id " +
-                "    name { value } " +
-                "    shortName { value } " +
-                "    description { value } " +
-                "    geometry { type legacyCoordinates } " +
-                "    compassBearing " +
-                "  } " +
-                "  } " +
-                "}\",\"variables\":\"\"}";
+        String graphQlJsonQuery = """
+                mutation {
+                 stopPlace:mutateStopPlace(StopPlace: {
+                          id: "%s"
+                          name: { value: "%s" }
+                          quays: [{ 
+                            name: { value: "%s" }
+                            shortName: { value: "%s" }
+                            description: { value: "%s" }
+                            geometry: {
+                              type: Point
+                              coordinates: [%s,%s]
+                            }
+                            compassBearing: %s
+                          }, {
+                            id: "%s" 
+                            name: { value: "%s" }
+                            shortName: { value: "%s" }
+                            description: { value: "%s" } 
+                          }]
+                      }) {
+                          id
+                          name { value }
+                          quays {
+                            id
+                            name { value }
+                            shortName { value }
+                            description { value }
+                            geometry { type coordinates }
+                            compassBearing
+                          }
+                      }
+                  }""".formatted(stopPlace.getNetexId(), newStopName, newQuayName, newQuayShortName, newQuayDescription, lon, lat, compassBearing,quay.getNetexId(),updatedName,updatedShortName,updatedDescription);
+
 
         String manuallyAddedQuayId = quay.getNetexId();
 
 
-        executeGraphQL(graphQlJsonQuery)
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .body("data.stopPlace[0].id", comparesEqualTo(stopPlace.getNetexId()))
                 .body("data.stopPlace[0].name.value", equalTo(newStopName))
                 .body("data.stopPlace[0].quays", hasSize(2))
@@ -1753,19 +1813,19 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                     .body("shortName.value", equalTo(updatedShortName))
                     .body("description.value", equalTo(updatedDescription))
                     .body("geometry.type", equalTo(point.getGeometryType()))
-                    .body("geometry.legacyCoordinates[0][0]", comparesEqualTo( Float.valueOf(String.valueOf(point.getX()))))
-                    .body("geometry.legacyCoordinates[0][1]", comparesEqualTo( Float.valueOf(String.valueOf(point.getY()))))
+                    .body("geometry.coordinates[0]", comparesEqualTo( Float.valueOf(String.valueOf(point.getX()))))
+                    .body("geometry.coordinates[1]", comparesEqualTo( Float.valueOf(String.valueOf(point.getY()))))
                     .body("compassBearing", comparesEqualTo(quay.getCompassBearing()))
 
                         // Second Quay - added using GraphQL
                 .rootPath("data.stopPlace[0].quays.find { it.id != '" + manuallyAddedQuayId + "'}")
                     .body("id", not(stopPlace.getNetexId()))
-                    .body("name.value", equalTo(newQuaydName))
+                    .body("name.value", equalTo(newQuayName))
                     .body("shortName.value", equalTo(newQuayShortName))
                     .body("description.value", equalTo(newQuayDescription))
                     .body("geometry.type", equalTo(point.getGeometryType()))
-                    .body("geometry.legacyCoordinates[0][0]", comparesEqualTo(lon))
-                    .body("geometry.legacyCoordinates[0][1]", comparesEqualTo(lat))
+                    .body("geometry.coordinates[0]", comparesEqualTo(lon))
+                    .body("geometry.coordinates[1]", comparesEqualTo(lat))
                     .body("compassBearing", comparesEqualTo(compassBearing));
         // for unit test we do not have JMS listener
         assertThat(entityChangedJMSListener.hasReceivedEvent(stopPlace.getNetexId(), stopPlace.getVersion() + 1, EntityChangedEvent.CrudAction.UPDATE, null)).isFalse();
@@ -1833,35 +1893,37 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         String name = "Testing name";
         String netexId = stopPlace.getNetexId();
 
-        //Verify that placeEquipments have been set
-        String graphQlStopPlaceQuery = "{" +
-                "\"query\":\"{stopPlace:" + GraphQLNames.FIND_STOPPLACE + " (id:\\\"" + netexId + "\\\") { " +
-                "    id" +
-                "      placeEquipments {" +
-                "        waitingRoomEquipment { id }" +
-                "        sanitaryEquipment { id }" +
-                "        ticketingEquipment { id }" +
-                "        cycleStorageEquipment { id }" +
-                "        shelterEquipment { id }" +
-                "        generalSign { id }" +
-                "      }" +
-                "    ... on StopPlace {" +
-                "       quays {" +
-                "       id" +
-                "        placeEquipments {" +
-                "         waitingRoomEquipment { id }" +
-                "         sanitaryEquipment { id }" +
-                "         ticketingEquipment { id }" +
-                "         cycleStorageEquipment { id }" +
-                "         shelterEquipment { id }" +
-                "         generalSign { id }" +
-                "        }" +
-                "       }" +
-                "   }" +
-                "  }" +
-                "}\",\"variables\":\"\"}";
+        String graphQlStopPlaceQuery = """
+                {
+                stopPlace(id: "%s") {
+                    id
+                    placeEquipments {
+                        waitingRoomEquipment { id }
+                        sanitaryEquipment { id }
+                        ticketingEquipment { id }
+                        cycleStorageEquipment { id }
+                        shelterEquipment { id }
+                        generalSign { id }
+                    }
+                    ... on StopPlace {
+                    quays {
+                        id
+                        placeEquipments {
+                            waitingRoomEquipment { id }
+                            sanitaryEquipment { id }
+                            ticketingEquipment { id }
+                            cycleStorageEquipment { id }
+                            shelterEquipment { id }
+                            generalSign { id }
+                        }
+                      }
+                    }
+                   }
+                }
+                """.formatted(netexId);
 
-        executeGraphQL(graphQlStopPlaceQuery)
+
+        executeGraphqQLQueryOnly(graphQlStopPlaceQuery)
                 .rootPath("data.stopPlace[0]")
                     .body("id", comparesEqualTo(netexId))
                     .body("placeEquipments", notNullValue())
@@ -1882,37 +1944,40 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                     .body("placeEquipments.generalSign[0]", notNullValue());
 
         //Update StopPlace name
-        String graphQlJsonQuery = "{" +
-                "\"query\":\"mutation { " +
-                "  stopPlace: " + GraphQLNames.MUTATE_STOPPLACE + " (StopPlace: {" +
-                "          id:\\\"" + stopPlace.getNetexId() + "\\\"" +
-                "          name: { value:\\\"" + name + "\\\" } " +
-                "       }) { " +
-                "    id " +
-                "    name { value } " +
-                "      placeEquipments {" +
-                "        waitingRoomEquipment { id }" +
-                "        sanitaryEquipment { id }" +
-                "        ticketingEquipment { id }" +
-                "        cycleStorageEquipment { id }" +
-                "        shelterEquipment { id }" +
-                "        generalSign { id }" +
-                "      }" +
-                "    quays {" +
-                "      id" +
-                "      placeEquipments {" +
-                "        waitingRoomEquipment { id }" +
-                "        sanitaryEquipment { id }" +
-                "        ticketingEquipment { id }" +
-                "        cycleStorageEquipment { id }" +
-                "        shelterEquipment { id }" +
-                "        generalSign { id }" +
-                "      }" +
-                "    }" +
-                "  }" +
-                "}\",\"variables\":\"\"}";
+        String graphQlJsonQuery= """
+                mutation {
+                stopPlace: mutateStopPlace (StopPlace: {
+                        id: "%s"
+                        name: { value: "%s" }
+                    }) {
+                        id
+                        name { value }
+                        placeEquipments {
+                            waitingRoomEquipment { id }
+                            sanitaryEquipment { id }
+                            ticketingEquipment { id }
+                            cycleStorageEquipment { id }
+                            shelterEquipment { id }
+                            generalSign { id }
+                        }
+                        ... on StopPlace {
+                        quays {
+                            id
+                            placeEquipments {
+                                waitingRoomEquipment { id }
+                                sanitaryEquipment { id }
+                                ticketingEquipment { id }
+                                cycleStorageEquipment { id }
+                                shelterEquipment { id }
+                                generalSign { id }
+                            }
+                        }
+                       }
+                    }
+                }
+                """.formatted(netexId, name);
 
-        executeGraphQL(graphQlJsonQuery)
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .rootPath("data.stopPlace[0]")
                     .body("id", comparesEqualTo(netexId))
                     .body("name.value", comparesEqualTo(name))
@@ -1968,32 +2033,34 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         String netexId = stopPlace.getNetexId();
 
         //Verify that placeEquipments have been set
-        String graphQlStopPlaceQuery = "{" +
-                "\"query\":\"{stopPlace:" + GraphQLNames.FIND_STOPPLACE + " (id:\\\"" + netexId + "\\\") { " +
-                "    id" +
-                "      alternativeNames {" +
-                "        nameType" +
-                "        name {" +
-                "          value" +
-                "          lang" +
-                "        }" +
-                "      }" +
-                "  ... on StopPlace {" +
-                "    quays {" +
-                "      id" +
-                "      alternativeNames {" +
-                "        nameType" +
-                "        name {" +
-                "          value" +
-                "          lang" +
-                "        }" +
-                "      }" +
-                "    }" +
-                "   }" +
-                "  }" +
-                "}\",\"variables\":\"\"}";
+        String graphQlStopPlaceQuery = """
+                {
+                stopPlace(id: "%s") {
+                    id
+                    alternativeNames {
+                        nameType
+                        name {
+                            value
+                            lang
+                        }
+                    }
+                    ... on StopPlace {
+                        quays {
+                            id
+                            alternativeNames {
+                                nameType
+                                name {
+                                    value
+                                    lang
+                                } 
+                              }
+                            }
+                          }
+                        }
+                    }
+                """.formatted(netexId);
 
-        executeGraphQL(graphQlStopPlaceQuery)
+        executeGraphqQLQueryOnly(graphQlStopPlaceQuery)
                 .rootPath("data.stopPlace[0]")
                     .body("id", comparesEqualTo(netexId))
                     .body("alternativeNames", notNullValue())
@@ -2034,34 +2101,33 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         String updatedAlternativeNameValue = "UPDATED ALIAS";
         String updatedAlternativeNameLang = "no";
 
-        String graphQlStopPlaceQuery = "{" +
-                "\"query\":\"mutation { " +
-                "  stopPlace: " + GraphQLNames.MUTATE_STOPPLACE + " (StopPlace: {" +
-                "      id:\\\"" + netexId + "\\\"" +
-                "      alternativeNames: [" +
-                "        {" +
-                "          nameType: " + altName.getNameType().value() +
-                "          name: {" +
-                "            value: \\\"" + updatedAlternativeNameValue + "\\\"" +
-                "            lang:\\\""+ updatedAlternativeNameLang +"\\\"" +
-                "          }" +
-                "        } " +
-                "      ]" +
-                "    }) " +
-                "    {" +
-                "      id" +
-                "      alternativeNames {" +
-                "        nameType" +
-                "        name {" +
-                "          value" +
-                "          lang" +
-                "        }" +
-                "      }" +
-                "    }" +
-                "  }" +
-                "\",\"variables\":\"\"}";
+        String graphQlStopPlaceQuery = """
+                mutation {
+                stopPlace: mutateStopPlace (StopPlace: {
+                        id: "%s"
+                        alternativeNames: [
+                            {
+                                nameType: %s
+                                name: {
+                                    value: "%s"
+                                    lang: "%s"
+                                }
+                            }
+                        ]
+                    }) {
+                        id
+                        alternativeNames {
+                            nameType
+                            name {
+                                value
+                                lang
+                            }
+                        }
+                    }
+                }
+                """.formatted(netexId,altName.getNameType().value(), updatedAlternativeNameValue, updatedAlternativeNameLang);
 
-        executeGraphQL(graphQlStopPlaceQuery)
+        executeGraphqQLQueryOnly(graphQlStopPlaceQuery)
                 .body("data.stopPlace[0].id", comparesEqualTo(netexId))
                 .body("data.stopPlace[0].alternativeNames", notNullValue())
                 .rootPath("data.stopPlace[0].alternativeNames[0]")
@@ -2085,33 +2151,34 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
 
         String type = "StopPoint";
         String value = "512";
-        String graphQlStopPlaceQuery = "{" +
-                "\"query\":\"mutation { " +
-                "  stopPlace: " + GraphQLNames.MUTATE_STOPPLACE + " (StopPlace: {" +
-                "      id:\\\"" + netexId + "\\\"" +
-                "      placeEquipments: {" +
-                "        generalSign:  [{" +
-                "          signContentType: TransportModePoint" +
-                "          privateCode: {" +
-                "            value: \\\"" + value + "\\\"" +
-                "            type:\\\"" + type + "\\\"" +
-                "          }" +
-                "        }]" +
-                "      }" +
-                "    }) " +
-                "    {" +
-                "      id" +
-                "      placeEquipments {" +
-                "        generalSign {" +
-                "          privateCode { value, type } " +
-                "          signContentType " +
-                "        }" +
-                "      }" +
-                "    }" +
-                "  }" +
-                "\",\"variables\":\"\"}";
+        String graphQlStopPlaceQuery = """
+                mutation {
+                stopPlace: mutateStopPlace (StopPlace: {
+                        id: "%s"
+                        placeEquipments: {
+                            generalSign:  [{
+                                signContentType: TransportModePoint
+                                privateCode: {
+                                    value: "%s"
+                                    type: "%s"
+                                }
+                            }]
+                        }
+                    }) {
+                        id
+                        placeEquipments {
+                            generalSign {
+                                privateCode {
+                                    value
+                                    type
+                                }
+                            }
+                        }
+                    }
+                }
+                """.formatted(netexId, value, type);
 
-        executeGraphQL(graphQlStopPlaceQuery)
+        executeGraphqQLQueryOnly(graphQlStopPlaceQuery)
                 .body("data.stopPlace[0].id", comparesEqualTo(netexId))
                 .body("data.stopPlace[0].placeEquipments", notNullValue())
                 .rootPath("data.stopPlace[0].placeEquipments")
