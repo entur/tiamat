@@ -17,6 +17,7 @@ package org.rutebanken.tiamat.importer;
 
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.netex.model.SiteFrame;
+import org.rutebanken.tiamat.auth.AuthorizationService;
 import org.rutebanken.tiamat.exporter.PublicationDeliveryCreator;
 import org.rutebanken.tiamat.importer.handler.GroupOfTariffZonesImportHandler;
 import org.rutebanken.tiamat.importer.handler.ParkingsImportHandler;
@@ -57,6 +58,7 @@ public class PublicationDeliveryImporter {
     private final ParkingsImportHandler parkingsImportHandler;
     private final TopographicPlaceImportHandler topographicPlaceImportHandler;
     private final BackgroundJobs backgroundJobs;
+    private final AuthorizationService authorizationService;
 
     @Autowired
     public PublicationDeliveryImporter(PublicationDeliveryHelper publicationDeliveryHelper, NetexMapper netexMapper,
@@ -67,7 +69,7 @@ public class PublicationDeliveryImporter {
                                        GroupOfTariffZonesImportHandler groupOfTariffZonesImportHandler,
                                        StopPlaceImportHandler stopPlaceImportHandler,
                                        ParkingsImportHandler parkingsImportHandler,
-                                       BackgroundJobs backgroundJobs) {
+                                       BackgroundJobs backgroundJobs, AuthorizationService authorizationService) {
         this.publicationDeliveryHelper = publicationDeliveryHelper;
         this.parkingsImportHandler = parkingsImportHandler;
         this.publicationDeliveryCreator = publicationDeliveryCreator;
@@ -77,6 +79,7 @@ public class PublicationDeliveryImporter {
         this.groupOfTariffZonesImportHandler = groupOfTariffZonesImportHandler;
         this.stopPlaceImportHandler = stopPlaceImportHandler;
         this.backgroundJobs = backgroundJobs;
+        this.authorizationService = authorizationService;
     }
 
 
@@ -86,6 +89,8 @@ public class PublicationDeliveryImporter {
 
     @SuppressWarnings("unchecked")
     public PublicationDeliveryStructure importPublicationDelivery(PublicationDeliveryStructure incomingPublicationDelivery, ImportParams importParams) {
+
+        authorizationService.verifyCanEditAllEntities();
 
         if (incomingPublicationDelivery.getDataObjects() == null) {
             String responseMessage = "Received publication delivery but it does not contain any data objects.";

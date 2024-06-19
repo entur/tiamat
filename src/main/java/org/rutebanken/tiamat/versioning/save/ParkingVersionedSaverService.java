@@ -17,7 +17,7 @@ package org.rutebanken.tiamat.versioning.save;
 
 
 import com.google.api.client.util.Preconditions;
-import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
+import org.rutebanken.tiamat.auth.AuthorizationService;
 import org.rutebanken.tiamat.auth.UsernameFetcher;
 import org.rutebanken.tiamat.model.DataManagedObjectStructure;
 import org.rutebanken.tiamat.model.Parking;
@@ -34,8 +34,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.Arrays;
-
-import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
 
 @Transactional
 @Service
@@ -59,7 +57,7 @@ public class ParkingVersionedSaverService {
     private PrometheusMetricsService prometheusMetricsService;
 
     @Autowired
-    private ReflectionAuthorizationService reflectionAuthorizationService;
+    private AuthorizationService authorizationService;
 
     public Parking saveNewVersion(Parking newVersion) {
 
@@ -111,6 +109,6 @@ public class ParkingVersionedSaverService {
         if (!(parentSite instanceof StopPlace)) {
             throw new IllegalArgumentException("Parking must have a parentSiteRef pointing to stop place. Parking: " + parking.toString() + " Parent site: " + parentSite);
         }
-        reflectionAuthorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(parentSite));
+        authorizationService.verifyCanEditEntities( Arrays.asList(parentSite));
     }
 }

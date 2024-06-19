@@ -1,7 +1,7 @@
 package org.rutebanken.tiamat.versioning.save;
 
 import com.google.common.collect.Sets;
-import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
+import org.rutebanken.tiamat.auth.AuthorizationService;
 import org.rutebanken.tiamat.auth.UsernameFetcher;
 import org.rutebanken.tiamat.model.PurposeOfGrouping;
 import org.rutebanken.tiamat.repository.PurposeOfGroupingRepository;
@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static java.time.Instant.now;
-import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
 
 @Service
 @Transactional
@@ -24,7 +23,7 @@ public class PurposeOfGroupingSaverService {
     PurposeOfGroupingRepository purposeOfGroupingRepository;
 
     @Autowired
-    private ReflectionAuthorizationService authorizationService;
+    private AuthorizationService authorizationService;
 
     @Autowired
     private UsernameFetcher usernameFetcher;
@@ -39,7 +38,7 @@ public class PurposeOfGroupingSaverService {
             logger.trace("existing: {}", existing);
             logger.trace("new: {}", newVersion);
 
-            authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Sets.newHashSet(existing));
+            authorizationService.verifyCanEditEntities( Sets.newHashSet(existing));
 
             newVersion.setCreated(existing.getCreated());
             newVersion.setChanged(now());

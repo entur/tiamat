@@ -16,8 +16,7 @@
 package org.rutebanken.tiamat.service.stopplace;
 
 import graphql.GraphQLException;
-import org.rutebanken.helper.organisation.AuthorizationConstants;
-import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
+import org.rutebanken.tiamat.auth.AuthorizationService;
 import org.rutebanken.tiamat.lock.MutateLock;
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
 import org.rutebanken.tiamat.model.EntityStructure;
@@ -53,7 +52,7 @@ public class PathLinkUpdaterService {
     private ReferenceResolver referenceResolver;
 
     @Autowired
-    private ReflectionAuthorizationService authorizationService;
+    private AuthorizationService authorizationService;
 
     @Autowired
     private MutateLock mutateLock;
@@ -91,7 +90,7 @@ public class PathLinkUpdaterService {
                 entitiesRequiringAuthorization.add(to);
             }
 
-            authorizationService.assertAuthorized(AuthorizationConstants.ROLE_EDIT_STOPS, entitiesRequiringAuthorization);
+            authorizationService.verifyCanEditEntities(entitiesRequiringAuthorization);
             pathLinkRepository.save(resultPathLink);
 
             logger.info("{} {}", updatedExisting ? "Updated" : "Created", resultPathLink);

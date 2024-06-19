@@ -16,7 +16,7 @@
 package org.rutebanken.tiamat.service.stopplace;
 
 import org.locationtech.jts.geom.Point;
-import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
+import org.rutebanken.tiamat.auth.AuthorizationService;
 import org.rutebanken.tiamat.lock.MutateLock;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -37,7 +37,6 @@ import java.util.Set;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
-import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
 import static org.rutebanken.tiamat.versioning.save.DefaultVersionedSaverService.MILLIS_BETWEEN_VERSIONS;
 
 @Transactional
@@ -53,7 +52,7 @@ public class MultiModalStopPlaceEditor {
     private StopPlaceRepository stopPlaceRepository;
 
     @Autowired
-    private ReflectionAuthorizationService authorizationService;
+    private AuthorizationService authorizationService;
 
     @Autowired
     private MutateLock mutateLock;
@@ -78,7 +77,7 @@ public class MultiModalStopPlaceEditor {
             // Fetch max versions of future child stop places
             List<StopPlace> futureChildStopPlaces = childStopPlaceIds.stream().map(id -> stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(id)).collect(toList());
 
-            authorizationService.assertAuthorized(ROLE_EDIT_STOPS, futureChildStopPlaces);
+            authorizationService.verifyCanEditEntities( futureChildStopPlaces);
 
             logger.info("Creating first version of parent stop place {}", name);
             final StopPlace parentStopPlace = new StopPlace(name);
@@ -119,7 +118,7 @@ public class MultiModalStopPlaceEditor {
                 throw new IllegalArgumentException("Cannot fetch parent stop place from ID: " + parentStopPlaceId);
             }
 
-            authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(parentStopPlace));
+            authorizationService.verifyCanEditEntities( Arrays.asList(parentStopPlace));
 
             List<String> alreadyAdded = childStopPlaceIds
                     .stream()
@@ -138,7 +137,7 @@ public class MultiModalStopPlaceEditor {
             parentStopPlaceCopy.setVersionComment(versionComment);
 
             List<StopPlace> futureChildStopPlaces = childStopPlaceIds.stream().map(id -> stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(id)).collect(toList());
-            authorizationService.assertAuthorized(ROLE_EDIT_STOPS, futureChildStopPlaces);
+            authorizationService.verifyCanEditEntities( futureChildStopPlaces);
 
             Set<StopPlace> childCopies = validateAndCopyPotentionalChildren(futureChildStopPlaces, parentStopPlace, fromDate);
             Instant terminationDate = fromDate.minusMillis(MILLIS_BETWEEN_VERSIONS);
@@ -157,13 +156,13 @@ public class MultiModalStopPlaceEditor {
             logger.info("Remove childs: {} from parent stop place {}", childStopPlaceIds, parentStopPlaceId);
 
             StopPlace parentStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(parentStopPlaceId);
-            authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(parentStopPlace));
+            authorizationService.verifyCanEditEntities( Arrays.asList(parentStopPlace));
 
             if (parentStopPlace.getChildren().stream().noneMatch(stopPlace -> childStopPlaceIds.contains(stopPlace.getNetexId()))) {
                 throw new IllegalArgumentException("The specified list of IDs does not match the list of parent stop place's children" + parentStopPlaceId + ". Incoming child IDs: " + childStopPlaceIds);
             }
 
-            authorizationService.assertAuthorized(ROLE_EDIT_STOPS, parentStopPlace.getChildren());
+            authorizationService.verifyCanEditEntities( parentStopPlace.getChildren());
 
             Instant now = Instant.now();
 

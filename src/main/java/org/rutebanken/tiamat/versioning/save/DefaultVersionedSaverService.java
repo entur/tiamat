@@ -15,7 +15,7 @@
 
 package org.rutebanken.tiamat.versioning.save;
 
-import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
+import org.rutebanken.tiamat.auth.AuthorizationService;
 import org.rutebanken.tiamat.auth.UsernameFetcher;
 import org.rutebanken.tiamat.diff.TiamatObjectDiffer;
 import org.rutebanken.tiamat.model.DataManagedObjectStructure;
@@ -32,8 +32,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.Arrays;
-
-import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
 
 @Service
 public class DefaultVersionedSaverService {
@@ -58,7 +56,7 @@ public class DefaultVersionedSaverService {
     private PrometheusMetricsService prometheusMetricsService;
 
     @Autowired
-    private ReflectionAuthorizationService authorizationService;
+    private AuthorizationService authorizationService;
 
     @Autowired
     private VersionValidator versionValidator;
@@ -118,7 +116,7 @@ public class DefaultVersionedSaverService {
     }
 
     private <T extends EntityInVersionStructure> void authorizeNewVersion(T existingVersion, T newVersion) {
-        authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(existingVersion, newVersion));
+        authorizationService.verifyCanEditEntities( Arrays.asList(existingVersion, newVersion));
     }
 
 

@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.entur.ror</groupId>
         <artifactId>superpom</artifactId>
-        <version>2.10</version>
+        <version>2.13</version>
     </parent>
     <groupId>org.rutebanken</groupId>
     <artifactId>tiamat</artifactId>
@@ -58,7 +58,7 @@
         <hazelcast.version>5.2.4</hazelcast.version>
         <swagger-jersey2.version>2.2.20</swagger-jersey2.version>
         <netex-java-model.version>2.0.14</netex-java-model.version>
-        <entur.helpers.version>2.11</entur.helpers.version>
+        <entur.helpers.version>2.26</entur.helpers.version>
         <jts-core.version>1.19.0</jts-core.version>
         <groovy-all.version>4.0.17</groovy-all.version>
         <rest-assured.version>5.4.0</rest-assured.version>

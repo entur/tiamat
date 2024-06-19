@@ -15,11 +15,14 @@
 
 package org.rutebanken.tiamat.config;
 
+import org.rutebanken.helper.organisation.DataScopedAuthorizationService;
 import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
 import org.rutebanken.helper.organisation.RoleAssignmentExtractor;
 import org.rutebanken.tiamat.auth.TiamatEntityResolver;
 import org.rutebanken.tiamat.auth.check.TiamatOriganisationChecker;
 import org.rutebanken.tiamat.auth.check.TopographicPlaceChecker;
+import org.rutebanken.tiamat.auth.AuthorizationService;
+import org.rutebanken.tiamat.auth.DefaultAuthorizationService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -36,11 +39,16 @@ public class AuthorizationServiceConfig {
 
 
     @Bean
-    public ReflectionAuthorizationService getAuthorizationService(RoleAssignmentExtractor roleAssignmentExtractor,
-                                                                  @Value("${authorization.enabled:true}") boolean authorizationEnabled,
-                                                                  TiamatOriganisationChecker tiamatOriganisationChecker,
-                                                                  TopographicPlaceChecker topographicPlaceChecker,
-                                                                  TiamatEntityResolver tiamatEntityResolver) {
+    public AuthorizationService authorizationService(DataScopedAuthorizationService dataScopedAuthorizationService, RoleAssignmentExtractor roleAssignmentExtractor) {
+        return new DefaultAuthorizationService(dataScopedAuthorizationService, roleAssignmentExtractor);
+    }
+
+    @Bean
+    public DataScopedAuthorizationService dataScopedAuthorizationService(RoleAssignmentExtractor roleAssignmentExtractor,
+                                                                         @Value("${authorization.enabled:true}") boolean authorizationEnabled,
+                                                                         TiamatOriganisationChecker tiamatOriganisationChecker,
+                                                                         TopographicPlaceChecker topographicPlaceChecker,
+                                                                         TiamatEntityResolver tiamatEntityResolver) {
 
         // Should be made configurable
         Map<String, List<String>> fieldMappings = new HashMap<>();
@@ -49,5 +57,4 @@ public class AuthorizationServiceConfig {
 
         return new ReflectionAuthorizationService(roleAssignmentExtractor, authorizationEnabled, tiamatOriganisationChecker, topographicPlaceChecker, tiamatEntityResolver, fieldMappings);
     }
-
 }
