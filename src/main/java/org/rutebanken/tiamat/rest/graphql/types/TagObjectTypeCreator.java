@@ -23,7 +23,6 @@ import org.springframework.stereotype.Component;
 import static graphql.Scalars.GraphQLString;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLObjectType.newObject;
-import static org.rutebanken.tiamat.netex.mapping.mapper.TagKeyValuesMapper.CREATED_BY;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.NAME;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.OUTPUT_TYPE_TAG;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.TAG_COMMENT;
@@ -61,7 +60,7 @@ public class TagObjectTypeCreator {
                             .description("When this tag was added to the referenced entity")
                             .type(dateScalar.getGraphQLDateScalar()))
                     .field(newFieldDefinition()
-                            .name(CREATED_BY)
+                            .name("createdBy")
                             .description("Who created this tag for the referenced entity")
                             .type(GraphQLString))
                     .field(newFieldDefinition()

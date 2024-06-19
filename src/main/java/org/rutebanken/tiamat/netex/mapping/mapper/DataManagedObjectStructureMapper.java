@@ -22,37 +22,22 @@ import ma.glasnost.orika.MappingContext;
 import org.rutebanken.netex.model.DataManagedObjectStructure;
 import org.rutebanken.netex.model.KeyListStructure;
 import org.rutebanken.netex.model.KeyValueStructure;
-import org.rutebanken.tiamat.model.tag.Tag;
 import org.rutebanken.tiamat.netex.mapping.NetexMappingException;
-import org.rutebanken.tiamat.repository.TagRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
-import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
-
-import static org.rutebanken.tiamat.netex.mapping.mapper.TagKeyValuesMapper.TAG_PREFIX;
 
 @Component
 public class DataManagedObjectStructureMapper extends CustomMapper<DataManagedObjectStructure, org.rutebanken.tiamat.model.DataManagedObjectStructure> {
 
-    private static final Logger logger = LoggerFactory.getLogger(DataManagedObjectStructureMapper.class);
 
     public static final String CHANGED_BY = "CHANGED_BY";
     public static final String VERSION_COMMENT = "VERSION_COMMENT";
 
     private final NetexIdMapper netexIdMapper;
-
-    private final TagKeyValuesMapper tagKeyValuesMapper;
-
-    /**
-     * A mapper should ideally not communicate with databases. Compromised solution.
-     */
-    private final TagRepository tagRepository;
 
     /**
      * Setters for internal tiamat model when mapping from netex.
@@ -71,10 +56,8 @@ public class DataManagedObjectStructureMapper extends CustomMapper<DataManagedOb
             .build();
 
     @Autowired
-    public DataManagedObjectStructureMapper(TagRepository tagRepository, NetexIdMapper netexIdMapper, TagKeyValuesMapper tagKeyValuesMapper) {
-        this.tagRepository = tagRepository;
+    public DataManagedObjectStructureMapper(NetexIdMapper netexIdMapper) {
         this.netexIdMapper = netexIdMapper;
-        this.tagKeyValuesMapper = tagKeyValuesMapper;
     }
 
     @Override
@@ -105,18 +88,6 @@ public class DataManagedObjectStructureMapper extends CustomMapper<DataManagedOb
                     tiamatEntity.getKeyValues().remove(keyValueStructure.getValue());
                 }
             });
-            Set<Tag> tags = tagKeyValuesMapper.mapPropertiesToTag(netexEntity.getKeyList());
-
-            tags.forEach(tag -> {
-                Tag existing = tagRepository.findByNameAndIdReference(tag.getName(), tag.getIdReference());
-                if(existing == null) {
-                    // Should have been done in an importer class, not in mapper.
-                    tagRepository.save(tag);
-                }
-            });
-
-            tiamatEntity.getKeyValues().keySet().removeIf(key -> key.startsWith(TAG_PREFIX));
-            logger.debug("Remaining keyvals: {}", tiamatEntity.getKeyValues());
         }
     }
 
@@ -129,7 +100,6 @@ public class DataManagedObjectStructureMapper extends CustomMapper<DataManagedOb
             netexEntity.withKeyList(new KeyListStructure());
         }
         tiamatEntityGetFunctions.forEach((property, function) -> setKey(netexEntity, property, function.apply(tiamatEntity)));
-        tagKeyValuesMapper.mapTagsToProperties(tiamatEntity, netexEntity);
 
         if (netexEntity.getKeyList().getKeyValue() == null || netexEntity.getKeyList().getKeyValue().isEmpty()) {
             // Do not allow empty key list

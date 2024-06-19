@@ -23,25 +23,20 @@ import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.id.NetexIdHelper;
 import org.rutebanken.tiamat.netex.id.ValidPrefixList;
 import org.rutebanken.tiamat.netex.mapping.PublicationDeliveryHelper;
-import org.rutebanken.tiamat.repository.TagRepository;
 
 import java.util.HashMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
 import static org.rutebanken.tiamat.netex.mapping.mapper.DataManagedObjectStructureMapper.CHANGED_BY;
 import static org.rutebanken.tiamat.netex.mapping.mapper.DataManagedObjectStructureMapper.VERSION_COMMENT;
 
 
 public class DataManagedObjectStructureMapperTest {
 
-    private TagRepository tagRepository = mock(TagRepository.class);
-    private TagKeyValuesMapper tagKeyValuesMapper = new TagKeyValuesMapper(tagRepository);
-
     private ValidPrefixList validPrefixList = new ValidPrefixList("NSR", new HashMap<>());
     private NetexIdHelper netexIdHelper = new NetexIdHelper(validPrefixList);
 
-    private DataManagedObjectStructureMapper dataManagedObjectStructureMapper = new DataManagedObjectStructureMapper(tagRepository, new NetexIdMapper(validPrefixList, netexIdHelper), tagKeyValuesMapper);
+    private DataManagedObjectStructureMapper dataManagedObjectStructureMapper = new DataManagedObjectStructureMapper(new NetexIdMapper(validPrefixList, netexIdHelper));
 
     private PublicationDeliveryHelper publicationDeliveryHelper = new PublicationDeliveryHelper();
 
