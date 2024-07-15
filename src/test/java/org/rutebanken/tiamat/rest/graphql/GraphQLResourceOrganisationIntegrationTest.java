@@ -264,10 +264,38 @@ public class GraphQLResourceOrganisationIntegrationTest extends AbstractGraphQLR
                 .body("data.organisation[0].privateContactDetails.furtherDetails", equalTo(null));
     }
 
-// TODO
-//    @Test
-//    public void testDeleteOrganisation() {
-//    }
+    @Test
+    public void testDeleteOrganisation() {
+        Organisation fillerOrganisation1 = createTestOrganisation();
+        fillerOrganisation1.setName("Filler organisation 1");
+        Organisation fillerOrganisation2 = createTestOrganisation();
+        fillerOrganisation2.setName("Filler organisation 2");
+        Organisation organisation = createTestOrganisation();
+        organisationRepository.save(fillerOrganisation1);
+        organisationRepository.save(organisation);
+        organisationRepository.save(fillerOrganisation2);
+
+        String graphQlJsonQuery = """
+            mutation {
+              organisation: deleteOrganisation (
+                organisationId: "%s"
+              )
+            }""".formatted(organisation.getNetexId());
+
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
+                .body("data.organisation", equalTo(true));
+
+        // Check that other organisations are still present
+        executeGraphqQLQueryOnly("""
+            {
+              organisation {
+                id
+              }
+            }""")
+                .body("data.organisation", hasSize(2))
+                .body("data.organisation[0].id", equalTo(fillerOrganisation1.getNetexId()))
+                .body("data.organisation[1].id", equalTo(fillerOrganisation2.getNetexId()));
+    }
 
     protected Organisation createTestOrganisation() {
         Organisation organisation = new Organisation();

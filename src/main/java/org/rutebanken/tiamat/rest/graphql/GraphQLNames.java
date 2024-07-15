@@ -520,6 +520,7 @@ public class GraphQLNames {
     public static final String OUTPUT_TYPE_CONTACT = "Contact";
     public static final String INPUT_TYPE_CONTACT = OUTPUT_TYPE_CONTACT + INPUT_TYPE_POSTFIX;
 
+    public static final String ORGANISATION_ID = "organisationId";
     public static final String COMPANY_NUMBER = "companyNumber";
     public static final String ORGANISATION_TYPE = "organisationType";
     public static final String LEGAL_NAME = "legalName";

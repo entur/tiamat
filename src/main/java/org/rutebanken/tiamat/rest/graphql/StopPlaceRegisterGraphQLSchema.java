@@ -36,6 +36,7 @@ import org.rutebanken.tiamat.rest.graphql.fetchers.AuthorizationCheckDataFetcher
 import org.rutebanken.tiamat.rest.graphql.fetchers.FareZoneAuthoritiesFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.TagFetcher;
 import org.rutebanken.tiamat.rest.graphql.operations.MultiModalityOperationsBuilder;
+import org.rutebanken.tiamat.rest.graphql.operations.OrganisationOperationsBuilder;
 import org.rutebanken.tiamat.rest.graphql.operations.ParkingOperationsBuilder;
 import org.rutebanken.tiamat.rest.graphql.operations.StopPlaceOperationsBuilder;
 import org.rutebanken.tiamat.rest.graphql.operations.TagOperationsBuilder;
@@ -134,6 +135,9 @@ public class StopPlaceRegisterGraphQLSchema {
 
     @Autowired
     private ParkingOperationsBuilder parkingOperationsBuilder;
+
+    @Autowired
+    private OrganisationOperationsBuilder organisationOperationsBuilder;
 
     @Autowired
     private ZoneCommonFieldListCreator zoneCommonFieldListCreator;
@@ -533,6 +537,7 @@ public class StopPlaceRegisterGraphQLSchema {
                 .fields(tagOperationsBuilder.getTagOperations())
                 .fields(stopPlaceOperationsBuilder.getStopPlaceOperations(stopPlaceInterface))
                 .fields(parkingOperationsBuilder.getParkingOperations())
+                .fields(organisationOperationsBuilder.getOrganisationOperations())
                 .fields(multiModalityOperationsBuilder.getMultiModalityOperations(parentStopPlaceObjectType, validBetweenInputObjectType))
                 .field(newFieldDefinition()
                         .type(GraphQLBoolean)
