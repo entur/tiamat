@@ -517,6 +517,8 @@ public class GraphQLNames {
     public static final String FIND_ORGANISATION = "organisation";
     public static final String MUTATE_ORGANISATION = "mutateOrganisation";
     public static final String DELETE_ORGANISATION = "deleteOrganisation";
+    public static final String OUTPUT_TYPE_CONTACT = "Contact";
+    public static final String INPUT_TYPE_CONTACT = OUTPUT_TYPE_CONTACT + INPUT_TYPE_POSTFIX;
 
     public static final String COMPANY_NUMBER = "companyNumber";
     public static final String ORGANISATION_TYPE = "organisationType";

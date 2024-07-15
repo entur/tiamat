@@ -1337,6 +1337,29 @@ public class CustomGraphQLTypes {
     }
 
     public static GraphQLObjectType createOrganisationObjectType(GraphQLObjectType validBetweenObjectType) {
+        GraphQLObjectType contactObjectType = newObject()
+                .name(OUTPUT_TYPE_CONTACT)
+                .field(netexIdFieldDefinition)
+                .field(newFieldDefinition()
+                        .name(CONTACT_PERSON)
+                        .type(GraphQLString))
+                .field(newFieldDefinition()
+                        .name(EMAIL)
+                        .type(GraphQLString))
+                .field(newFieldDefinition()
+                        .name(PHONE)
+                        .type(GraphQLString))
+                .field(newFieldDefinition()
+                        .name(FAX)
+                        .type(GraphQLString))
+                .field(newFieldDefinition()
+                        .name(URL)
+                        .type(GraphQLString))
+                .field(newFieldDefinition()
+                        .name(FURTHER_DETAILS)
+                        .type(GraphQLString))
+                .build();
+
         return newObject()
                 .name(OUTPUT_TYPE_ORGANISATION)
                 .field(netexIdFieldDefinition)
@@ -1361,12 +1384,41 @@ public class CustomGraphQLTypes {
                 .field(newFieldDefinition()
                         .name(LEGAL_NAME)
                         .type(embeddableMultilingualStringObjectType))
-                // TODO: CONTACT_DETAILS
-                // TODO: PRIVATE_CONTACT_DETAILS
+                .field(newFieldDefinition()
+                        .name(CONTACT_DETAILS)
+                        .type(contactObjectType))
+                .field(newFieldDefinition()
+                        .name(PRIVATE_CONTACT_DETAILS)
+                        .type(contactObjectType))
                 .build();
     }
 
     public static GraphQLInputObjectType createOrganisationInputObjectType(GraphQLInputObjectType validBetweenInputObjectType) {
+        GraphQLInputObjectType contactInputObjectType = GraphQLInputObjectType.newInputObject()
+                .name(INPUT_TYPE_CONTACT)
+                .field(newInputObjectField()
+                        .name(ID)
+                        .type(GraphQLString))
+                .field(newInputObjectField()
+                        .name(CONTACT_PERSON)
+                        .type(GraphQLString))
+                .field(newInputObjectField()
+                        .name(EMAIL)
+                        .type(GraphQLString))
+                .field(newInputObjectField()
+                        .name(PHONE)
+                        .type(GraphQLString))
+                .field(newInputObjectField()
+                        .name(FAX)
+                        .type(GraphQLString))
+                .field(newInputObjectField()
+                        .name(URL)
+                        .type(GraphQLString))
+                .field(newInputObjectField()
+                        .name(FURTHER_DETAILS)
+                        .type(GraphQLString))
+                .build();
+
         return GraphQLInputObjectType.newInputObject()
                 .name(INPUT_TYPE_ORGANISATION)
                 .field(newInputObjectField()
@@ -1390,8 +1442,12 @@ public class CustomGraphQLTypes {
                 .field(newInputObjectField()
                         .name(LEGAL_NAME)
                         .type(embeddableMultiLingualStringInputObjectType))
-                // TODO: CONTACT_DETAILS
-                // TODO: PRIVATE_CONTACT_DETAILS
+                .field(newInputObjectField()
+                        .name(CONTACT_DETAILS)
+                        .type(contactInputObjectType))
+                .field(newInputObjectField()
+                        .name(PRIVATE_CONTACT_DETAILS)
+                        .type(contactInputObjectType))
                 .build();
     }
 }

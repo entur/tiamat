@@ -30,10 +30,27 @@ public class GraphQLResourceOrganisationIntegrationTest extends AbstractGraphQLR
                   value
                   lang
                 }
+                contactDetails {
+                  contactPerson
+                  email
+                  phone
+                  fax
+                  url
+                  furtherDetails
+                }
+                privateContactDetails {
+                  contactPerson
+                  email
+                  phone
+                  fax
+                  url
+                  furtherDetails
+                }
               }
             }""".formatted(organisation.getNetexId());
-            // TODO: contactDetails
-            // TODO: privateContactDetails
+
+        Contact contactDetails = organisation.getContactDetails();
+        Contact privateContactDetails = organisation.getPrivateContactDetails();
 
         executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .body("data.organisation", hasSize(1))
@@ -44,7 +61,18 @@ public class GraphQLResourceOrganisationIntegrationTest extends AbstractGraphQLR
                 .body("data.organisation[0].organisationType", equalTo(organisation.getOrganisationType().value()))
                 .body("data.organisation[0].legalName.value", equalTo(organisation.getLegalName().getValue()))
                 .body("data.organisation[0].legalName.lang", equalTo(organisation.getLegalName().getLang()))
-                ;
+                .body("data.organisation[0].contactDetails.contactPerson", equalTo(contactDetails.getContactPerson()))
+                .body("data.organisation[0].contactDetails.email", equalTo(contactDetails.getEmail()))
+                .body("data.organisation[0].contactDetails.phone", equalTo(contactDetails.getPhone()))
+                .body("data.organisation[0].contactDetails.fax", equalTo(contactDetails.getFax()))
+                .body("data.organisation[0].contactDetails.url", equalTo(contactDetails.getUrl()))
+                .body("data.organisation[0].contactDetails.furtherDetails", equalTo(contactDetails.getFurtherDetails()))
+                .body("data.organisation[0].privateContactDetails.contactPerson", equalTo(privateContactDetails.getContactPerson()))
+                .body("data.organisation[0].privateContactDetails.email", equalTo(privateContactDetails.getEmail()))
+                .body("data.organisation[0].privateContactDetails.phone", equalTo(privateContactDetails.getPhone()))
+                .body("data.organisation[0].privateContactDetails.fax", equalTo(privateContactDetails.getFax()))
+                .body("data.organisation[0].privateContactDetails.url", equalTo(privateContactDetails.getUrl()))
+                .body("data.organisation[0].privateContactDetails.furtherDetails", equalTo(privateContactDetails.getFurtherDetails()));
     }
 
     @Test
@@ -79,6 +107,19 @@ public class GraphQLResourceOrganisationIntegrationTest extends AbstractGraphQLR
                   legalName: {
                     value: "Test Organisation Oy",
                     lang: "fi"
+                  },
+                  contactDetails: {
+                    contactPerson: "Person Tester",
+                    email: "noreply@example.com",
+                    phone: "+358502345678",
+                    fax: "+358509876543",
+                    url: "www.another-example.com",
+                    furtherDetails: "new details"
+                  },
+                  privateContactDetails: {
+                    contactPerson: "John Doe",
+                    email: null,
+                    phone: "+358501122333"
                   }
                 }
             ) {
@@ -92,10 +133,24 @@ public class GraphQLResourceOrganisationIntegrationTest extends AbstractGraphQLR
                   value
                   lang
                 }
+                contactDetails {
+                  contactPerson
+                  email
+                  phone
+                  fax
+                  url
+                  furtherDetails
+                }
+                privateContactDetails {
+                  contactPerson
+                  email
+                  phone
+                  fax
+                  url
+                  furtherDetails
+                }
               }
             }""";
-            // TODO: contactDetails
-            // TODO: privateContactDetails
 
         executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .body("data.organisation", hasSize(1))
@@ -107,6 +162,18 @@ public class GraphQLResourceOrganisationIntegrationTest extends AbstractGraphQLR
                 .body("data.organisation[0].organisationType", equalTo(OrganisationTypeEnumeration.OTHER.value()))
                 .body("data.organisation[0].legalName.value", equalTo("Test Organisation Oy"))
                 .body("data.organisation[0].legalName.lang", equalTo("fi"))
+                .body("data.organisation[0].contactDetails.contactPerson", equalTo("Person Tester"))
+                .body("data.organisation[0].contactDetails.email", equalTo("noreply@example.com"))
+                .body("data.organisation[0].contactDetails.phone", equalTo("+358502345678"))
+                .body("data.organisation[0].contactDetails.fax", equalTo("+358509876543"))
+                .body("data.organisation[0].contactDetails.url", equalTo("www.another-example.com"))
+                .body("data.organisation[0].contactDetails.furtherDetails", equalTo("new details"))
+                .body("data.organisation[0].privateContactDetails.contactPerson", equalTo("John Doe"))
+                .body("data.organisation[0].privateContactDetails.email", equalTo(null))
+                .body("data.organisation[0].privateContactDetails.phone", equalTo("+358501122333"))
+                .body("data.organisation[0].privateContactDetails.fax", equalTo(null))
+                .body("data.organisation[0].privateContactDetails.url", equalTo(null))
+                .body("data.organisation[0].privateContactDetails.furtherDetails", equalTo(null));
                 ;
     }
 
@@ -128,6 +195,19 @@ public class GraphQLResourceOrganisationIntegrationTest extends AbstractGraphQLR
                   legalName: {
                     value: "New Organisation Oy",
                     lang: "fi"
+                  },
+                  contactDetails: {
+                    contactPerson: "Person Tester",
+                    email: "noreply@example.com",
+                    phone: "+358502345678",
+                    fax: "+358509876543",
+                    url: "www.another-example.com",
+                    furtherDetails: "new details"
+                  },
+                  privateContactDetails: {
+                    contactPerson: "John Doe",
+                    email: null,
+                    phone: "+358501122333"
                   }
                 }
             ) {
@@ -141,10 +221,24 @@ public class GraphQLResourceOrganisationIntegrationTest extends AbstractGraphQLR
                   value
                   lang
                 }
+                contactDetails {
+                  contactPerson
+                  email
+                  phone
+                  fax
+                  url
+                  furtherDetails
+                }
+                privateContactDetails {
+                  contactPerson
+                  email
+                  phone
+                  fax
+                  url
+                  furtherDetails
+                }
               }
             }""".formatted(organisation.getNetexId());
-            // TODO: contactDetails
-            // TODO: privateContactDetails
 
         executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .body("data.organisation", hasSize(1))
@@ -156,7 +250,18 @@ public class GraphQLResourceOrganisationIntegrationTest extends AbstractGraphQLR
                 .body("data.organisation[0].organisationType", equalTo(OrganisationTypeEnumeration.SERVICED_ORGANISATION.value()))
                 .body("data.organisation[0].legalName.value", equalTo("New Organisation Oy"))
                 .body("data.organisation[0].legalName.lang", equalTo("fi"))
-                ;
+                .body("data.organisation[0].contactDetails.contactPerson", equalTo("Person Tester"))
+                .body("data.organisation[0].contactDetails.email", equalTo("noreply@example.com"))
+                .body("data.organisation[0].contactDetails.phone", equalTo("+358502345678"))
+                .body("data.organisation[0].contactDetails.fax", equalTo("+358509876543"))
+                .body("data.organisation[0].contactDetails.url", equalTo("www.another-example.com"))
+                .body("data.organisation[0].contactDetails.furtherDetails", equalTo("new details"))
+                .body("data.organisation[0].privateContactDetails.contactPerson", equalTo("John Doe"))
+                .body("data.organisation[0].privateContactDetails.email", equalTo(null))
+                .body("data.organisation[0].privateContactDetails.phone", equalTo("+358501122333"))
+                .body("data.organisation[0].privateContactDetails.fax", equalTo(null))
+                .body("data.organisation[0].privateContactDetails.url", equalTo(null))
+                .body("data.organisation[0].privateContactDetails.furtherDetails", equalTo(null));
     }
 
 // TODO
@@ -172,7 +277,6 @@ public class GraphQLResourceOrganisationIntegrationTest extends AbstractGraphQLR
         organisation.setOrganisationType(OrganisationTypeEnumeration.OTHER);
         organisation.setLegalName(new EmbeddableMultilingualString("Test Organisation Oy", "fi"));
 
-    /*
         Contact contactDetails = new Contact();
         contactDetails.setContactPerson("Test Person");
         contactDetails.setEmail("null@example.com");
@@ -186,7 +290,6 @@ public class GraphQLResourceOrganisationIntegrationTest extends AbstractGraphQLR
 
         organisation.setContactDetails(contactDetails);
         organisation.setPrivateContactDetails(privateContactDetails);
-    */
 
         return organisation;
     }
