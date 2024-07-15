@@ -36,6 +36,7 @@ import org.rutebanken.tiamat.model.CycleStorageEquipment;
 import org.rutebanken.tiamat.model.FunicularSubmodeEnumeration;
 import org.rutebanken.tiamat.model.GenderLimitationEnumeration;
 import org.rutebanken.tiamat.model.GeneralSign;
+import org.rutebanken.tiamat.model.OrganisationTypeEnumeration;
 import org.rutebanken.tiamat.model.hsl.AccessibilityLevelEnumeration;
 import org.rutebanken.tiamat.model.GroupOfStopPlaces;
 import org.rutebanken.tiamat.model.hsl.ElectricityTypeEnumeration;
@@ -156,6 +157,7 @@ public class CustomGraphQLTypes {
     public static GraphQLEnumType shelterTypeEnum = createCustomEnumType(SHELTER_TYPE, ShelterTypeEnumeration.class);
     public static GraphQLEnumType electricityTypeEnum = createCustomEnumType(SHELTER_ELECTRICITY, ElectricityTypeEnumeration.class);
     public static GraphQLEnumType shelterConditionTypeEnum = createCustomEnumType(SHELTER_CONDITION, ShelterConditionEnumeration.class);
+    public static GraphQLEnumType organisationTypeEnum = createCustomEnumType(ORGANISATION_TYPE, OrganisationTypeEnumeration.class);
 
 
     public static GraphQLEnumType createCustomEnumType(String name, Class c) {
@@ -1331,6 +1333,65 @@ public class CustomGraphQLTypes {
                 .field(newInputObjectField()
                         .name(VALID_BETWEEN)
                         .type(validBetweenInputObjectType))
+                .build();
+    }
+
+    public static GraphQLObjectType createOrganisationObjectType(GraphQLObjectType validBetweenObjectType) {
+        return newObject()
+                .name(OUTPUT_TYPE_ORGANISATION)
+                .field(netexIdFieldDefinition)
+                .field(newFieldDefinition()
+                        .name(VERSION)
+                        .type(GraphQLString))
+                .field(newFieldDefinition()
+                        .name(VALID_BETWEEN)
+                        .type(validBetweenObjectType))
+                .field(newFieldDefinition()
+                        .name(PRIVATE_CODE)
+                        .type(GraphQLString))
+                .field(newFieldDefinition()
+                        .name(COMPANY_NUMBER)
+                        .type(GraphQLString))
+                .field(newFieldDefinition()
+                        .name(NAME)
+                        .type(GraphQLString))
+                .field(newFieldDefinition()
+                        .name(ORGANISATION_TYPE)
+                        .type(organisationTypeEnum))
+                .field(newFieldDefinition()
+                        .name(LEGAL_NAME)
+                        .type(embeddableMultilingualStringObjectType))
+                // TODO: CONTACT_DETAILS
+                // TODO: PRIVATE_CONTACT_DETAILS
+                .build();
+    }
+
+    public static GraphQLInputObjectType createOrganisationInputObjectType(GraphQLInputObjectType validBetweenInputObjectType) {
+        return GraphQLInputObjectType.newInputObject()
+                .name(INPUT_TYPE_ORGANISATION)
+                .field(newInputObjectField()
+                        .name(ID)
+                        .type(GraphQLString))
+                .field(newInputObjectField()
+                        .name(VALID_BETWEEN)
+                        .type(validBetweenInputObjectType))
+                .field(newInputObjectField()
+                        .name(PRIVATE_CODE)
+                        .type(GraphQLString))
+                .field(newInputObjectField()
+                        .name(COMPANY_NUMBER)
+                        .type(GraphQLString))
+                .field(newInputObjectField()
+                        .name(NAME)
+                        .type(GraphQLString))
+                .field(newInputObjectField()
+                        .name(ORGANISATION_TYPE)
+                        .type(organisationTypeEnum))
+                .field(newInputObjectField()
+                        .name(LEGAL_NAME)
+                        .type(embeddableMultiLingualStringInputObjectType))
+                // TODO: CONTACT_DETAILS
+                // TODO: PRIVATE_CONTACT_DETAILS
                 .build();
     }
 }

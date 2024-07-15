@@ -511,4 +511,23 @@ public class GraphQLNames {
     public static final String LINE_SIGNAGE = "lineSignage";
     public static final String MAIN_LINE_SIGN = "mainLineSign";
     public static final String REPLACES_RAIL_SIGN = "replacesRailSign";
+
+    public static final String OUTPUT_TYPE_ORGANISATION = "Organisation";
+    public static final String INPUT_TYPE_ORGANISATION = OUTPUT_TYPE_ORGANISATION + INPUT_TYPE_POSTFIX;
+    public static final String FIND_ORGANISATION = "organisation";
+    public static final String MUTATE_ORGANISATION = "mutateOrganisation";
+    public static final String DELETE_ORGANISATION = "deleteOrganisation";
+
+    public static final String COMPANY_NUMBER = "companyNumber";
+    public static final String ORGANISATION_TYPE = "organisationType";
+    public static final String LEGAL_NAME = "legalName";
+    public static final String CONTACT_DETAILS = "contactDetails";
+    public static final String PRIVATE_CONTACT_DETAILS = "privateContactDetails";
+
+    public static final String CONTACT_PERSON = "contactPerson";
+    public static final String EMAIL = "email";
+    public static final String PHONE = "phone";
+    public static final String FAX = "fax";
+    public static final String URL = "url";
+    public static final String FURTHER_DETAILS = "furtherDetails";
 }

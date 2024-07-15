@@ -84,6 +84,8 @@ import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.altern
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.alternativeNameObjectType;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.boardingPositionsInputObjectType;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.boardingPositionsObjectType;
+import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.createOrganisationInputObjectType;
+import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.createOrganisationObjectType;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.createParkingInputObjectType;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.createParkingObjectType;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.embeddableMultiLingualStringInputObjectType;
@@ -226,6 +228,12 @@ public class StopPlaceRegisterGraphQLSchema {
     DataFetcher parkingUpdater;
 
     @Autowired
+    DataFetcher organisationFetcher;
+
+    @Autowired
+    DataFetcher organisationUpdater;
+
+    @Autowired
     DateScalar dateScalar;
 
     @Autowired
@@ -319,6 +327,8 @@ public class StopPlaceRegisterGraphQLSchema {
 
         GraphQLObjectType parkingObjectType = createParkingObjectType(validBetweenObjectType);
 
+        GraphQLObjectType organisationObjectType = createOrganisationObjectType(validBetweenObjectType);
+
         GraphQLArgument allVersionsArgument = GraphQLArgument.newArgument()
                 .name(ALL_VERSIONS)
                 .type(GraphQLBoolean)
@@ -359,6 +369,12 @@ public class StopPlaceRegisterGraphQLSchema {
                         .description("Find parking")
                         .argument(createFindParkingArguments(allVersionsArgument))
                         .dataFetcher(parkingFetcher))
+                .field(newFieldDefinition()
+                        .name(FIND_ORGANISATION)
+                        .type(new GraphQLList(organisationObjectType))
+                        .description("Find organisation")
+                        .argument(createFindOrganisationArguments(allVersionsArgument))
+                        .dataFetcher(organisationFetcher))
                 .field(newFieldDefinition()
                         .name(VALID_TRANSPORT_MODES)
                         .type(new GraphQLList(transportModeSubmodeObjectType))
@@ -438,6 +454,8 @@ public class StopPlaceRegisterGraphQLSchema {
 
         GraphQLInputObjectType parkingInputObjectType = createParkingInputObjectType(validBetweenInputObjectType);
 
+        GraphQLInputObjectType organisationInputObjectType = createOrganisationInputObjectType(validBetweenInputObjectType);
+
         GraphQLInputObjectType groupOfStopPlacesInputObjectType = createGroupOfStopPlacesInputObjectType(validBetweenInputObjectType);
 
         GraphQLInputObjectType purposeOfGroupingInputObjectType =createPurposeOfGroupingInputObjectType();
@@ -494,6 +512,16 @@ public class StopPlaceRegisterGraphQLSchema {
                                 .type(new GraphQLList(parkingInputObjectType)))
                         .description("Create new or update existing " + OUTPUT_TYPE_PARKING)
                         .dataFetcher(parkingUpdater))
+
+                .field(newFieldDefinition()
+                        .type(new GraphQLList(organisationObjectType))
+                        .name(MUTATE_ORGANISATION)
+                        .argument(GraphQLArgument.newArgument()
+                                .name(OUTPUT_TYPE_ORGANISATION)
+                                .type(new GraphQLList(organisationInputObjectType)))
+                        .description("Create new or update existing " + OUTPUT_TYPE_ORGANISATION)
+                        .dataFetcher(organisationUpdater))
+
                 .field(newFieldDefinition()
                         .type(tariffZoneObjectType)
                         .name(TERMINATE_TARIFF_ZONE)
@@ -556,6 +584,20 @@ public class StopPlaceRegisterGraphQLSchema {
         arguments.add(GraphQLArgument.newArgument()
                 .name(FIND_BY_STOP_PLACE_ID)
                 .type(GraphQLString)
+                .build());
+        arguments.add(allVersionsArgument);
+        return arguments;
+    }
+
+    private List<GraphQLArgument> createFindOrganisationArguments(GraphQLArgument allVersionsArgument) {
+        List<GraphQLArgument> arguments = createPageAndSizeArguments();
+        arguments.add(GraphQLArgument.newArgument()
+                .name(ID)
+                .type(GraphQLString)
+                .build());
+        arguments.add(GraphQLArgument.newArgument()
+                .name(VERSION)
+                .type(GraphQLInt)
                 .build());
         arguments.add(allVersionsArgument);
         return arguments;
