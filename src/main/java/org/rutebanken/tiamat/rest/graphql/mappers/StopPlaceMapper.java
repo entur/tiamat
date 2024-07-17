@@ -25,6 +25,8 @@ import org.rutebanken.tiamat.model.PrivateCodeStructure;
 import org.rutebanken.tiamat.model.RailSubmodeEnumeration;
 import org.rutebanken.tiamat.model.SiteRefStructure;
 import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.StopPlaceOrganisationRef;
+import org.rutebanken.tiamat.model.StopPlaceOrganisationRelationshipEnumeration;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.rutebanken.tiamat.model.TelecabinSubmodeEnumeration;
 import org.rutebanken.tiamat.model.TopographicPlace;
@@ -44,10 +46,13 @@ import java.util.Map;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ADJACENT_SITES;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ENTITY_REF_REF;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ID;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ORGANISATIONS;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ORGANISATION_REF;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PARENT_SITE_REF;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PRIVATE_CODE;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PUBLIC_CODE;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.QUAYS;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.RELATIONSHIP_TYPE;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.STOP_PLACE_TYPE;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.SUBMODE;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.TOPOGRAPHIC_PLACE;
@@ -114,6 +119,20 @@ public class StopPlaceMapper {
                 SiteRefStructure siteRefStructure = new SiteRefStructure((String) adjacentMap.get(ENTITY_REF_REF));
                 logger.trace("Adding siteRefStructure {} for stop place {}", siteRefStructure, stopPlace);
                 stopPlace.getAdjacentSites().add(siteRefStructure);
+            }
+            isUpdated = true;
+        }
+        if (input.get(ORGANISATIONS) != null) {
+            stopPlace.getOrganisations().clear();
+            List organisations = (List) input.get(ORGANISATIONS);
+            for(Object organisationObject : organisations) {
+                Map organisationMap = (Map) organisationObject;
+                StopPlaceOrganisationRef organisationRef = new StopPlaceOrganisationRef(
+                        (String) organisationMap.get(ORGANISATION_REF),
+                        (StopPlaceOrganisationRelationshipEnumeration) organisationMap.get(RELATIONSHIP_TYPE)
+                );
+                logger.trace("Adding organisation {} for stop place {}", organisationRef, stopPlace);
+                stopPlace.getOrganisations().add(organisationRef);
             }
             isUpdated = true;
         }

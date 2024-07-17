@@ -3,6 +3,7 @@ package org.rutebanken.tiamat.rest.graphql.fetchers;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import org.rutebanken.tiamat.model.Organisation;
+import org.rutebanken.tiamat.model.StopPlaceOrganisationRef;
 import org.rutebanken.tiamat.repository.OrganisationRepository;
 import org.rutebanken.tiamat.rest.graphql.GraphQLNames;
 import org.slf4j.Logger;
@@ -58,5 +59,17 @@ public class OrganisationFetcher implements DataFetcher {
         }
 
         return allOrganisations;
+    }
+
+    public Object getForStopPlace(DataFetchingEnvironment environment) {
+        logger.trace("Fetching organisation from source {}", (Object) environment.getSource());
+
+        Organisation organisation = null;
+        if(environment.getSource() instanceof StopPlaceOrganisationRef) {
+            String organisationId = ((StopPlaceOrganisationRef) environment.getSource()).getOrganisationRef();
+            organisation = organisationRepository.findFirstByNetexIdOrderByVersionDesc(organisationId);
+        }
+
+        return organisation;
     }
 }

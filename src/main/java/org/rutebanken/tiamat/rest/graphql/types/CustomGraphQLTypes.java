@@ -37,6 +37,7 @@ import org.rutebanken.tiamat.model.FunicularSubmodeEnumeration;
 import org.rutebanken.tiamat.model.GenderLimitationEnumeration;
 import org.rutebanken.tiamat.model.GeneralSign;
 import org.rutebanken.tiamat.model.OrganisationTypeEnumeration;
+import org.rutebanken.tiamat.model.StopPlaceOrganisationRelationshipEnumeration;
 import org.rutebanken.tiamat.model.hsl.AccessibilityLevelEnumeration;
 import org.rutebanken.tiamat.model.GroupOfStopPlaces;
 import org.rutebanken.tiamat.model.hsl.ElectricityTypeEnumeration;
@@ -81,6 +82,7 @@ import org.rutebanken.tiamat.model.WaterSubmodeEnumeration;
 import org.rutebanken.tiamat.model.ZoneTopologyEnumeration;
 import org.rutebanken.tiamat.model.Zone_VersionStructure;
 import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
+import org.rutebanken.tiamat.rest.graphql.fetchers.OrganisationFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.PrivateCodeFetcher;
 
 import java.lang.reflect.Method;
@@ -158,6 +160,7 @@ public class CustomGraphQLTypes {
     public static GraphQLEnumType electricityTypeEnum = createCustomEnumType(SHELTER_ELECTRICITY, ElectricityTypeEnumeration.class);
     public static GraphQLEnumType shelterConditionTypeEnum = createCustomEnumType(SHELTER_CONDITION, ShelterConditionEnumeration.class);
     public static GraphQLEnumType organisationTypeEnum = createCustomEnumType(ORGANISATION_TYPE, OrganisationTypeEnumeration.class);
+    public static GraphQLEnumType stopPlaceOrganisationRelationshipTypeEnum = createCustomEnumType(STOP_PLACE_ORGANISATION_REF, StopPlaceOrganisationRelationshipEnumeration.class);
 
 
     public static GraphQLEnumType createCustomEnumType(String name, Class c) {
@@ -464,6 +467,8 @@ public class CustomGraphQLTypes {
      * Not using DI here because everything here is made evil static
      */
     private static PrivateCodeFetcher privateCodeFetcher = new PrivateCodeFetcher();
+
+    private static OrganisationFetcher organisationFetcher = new OrganisationFetcher();
 
     public static GraphQLObjectType privateCodeObjectType = newObject()
             .name(OUTPUT_TYPE_PRIVATE_CODE)
@@ -1062,6 +1067,17 @@ public class CustomGraphQLTypes {
                     .name(ENTITY_REF_REF)
                     .type(new GraphQLNonNull(GraphQLString))
                     .description(ENTITY_REF_REF_DESCRIPTION))
+            .build();
+
+    public static GraphQLInputObjectType stopPlaceOrganisationRefInputObjectType = GraphQLInputObjectType.newInputObject()
+            .name(INPUT_TYPE_STOP_PLACE_ORGANISATION_REF)
+            .field(newInputObjectField()
+                    .name(ORGANISATION_REF)
+                    .type(new GraphQLNonNull(GraphQLString))
+                    .description("Id of the referenced organisation"))
+            .field(newInputObjectField()
+                    .name(RELATIONSHIP_TYPE)
+                    .type(stopPlaceOrganisationRelationshipTypeEnum))
             .build();
 
     public static GraphQLInputType pathLinkEndInputObjectType = GraphQLInputObjectType.newInputObject()

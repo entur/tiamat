@@ -26,10 +26,15 @@ import org.rutebanken.tiamat.model.AccessibilityAssessment;
 import org.rutebanken.tiamat.model.AccessibilityLimitation;
 import org.rutebanken.tiamat.model.AlternativeName;
 import org.rutebanken.tiamat.model.BusSubmodeEnumeration;
+import org.rutebanken.tiamat.model.Contact;
 import org.rutebanken.tiamat.model.CycleStorageEnumeration;
 import org.rutebanken.tiamat.model.CycleStorageEquipment;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.GeneralSign;
+import org.rutebanken.tiamat.model.Organisation;
+import org.rutebanken.tiamat.model.OrganisationTypeEnumeration;
+import org.rutebanken.tiamat.model.StopPlaceOrganisationRef;
+import org.rutebanken.tiamat.model.StopPlaceOrganisationRelationshipEnumeration;
 import org.rutebanken.tiamat.model.hsl.AccessibilityLevelEnumeration;
 import org.rutebanken.tiamat.model.hsl.ElectricityTypeEnumeration;
 import org.rutebanken.tiamat.model.hsl.GuidanceTypeEnumeration;
@@ -2860,6 +2865,87 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                 .body("leaningRail", equalTo(null))
                 .body("outsideBench", equalTo(null))
                 .body("shelterFasciaBoardTaping", equalTo(null));
+    }
+
+    @Test
+    public void testMutateStopPlaceOrganisation() {
+        Organisation organisation1 = new Organisation();
+        organisation1.setCompanyNumber("112233");
+        organisation1.setName("Test Organisation");
+        organisation1.setOrganisationType(OrganisationTypeEnumeration.OTHER);
+        Contact privateContactDetails1 = new Contact();
+        privateContactDetails1.setEmail("private@example.com");
+        organisation1.setPrivateContactDetails(privateContactDetails1);
+        organisationRepository.save(organisation1);
+
+        Organisation organisation2 = new Organisation();
+        organisation2.setCompanyNumber("56789");
+        organisation2.setName("Another Organisation");
+        organisation2.setOrganisationType(OrganisationTypeEnumeration.OTHER);
+        Contact privateContactDetails2 = new Contact();
+        privateContactDetails2.setEmail("nulle@example.com");
+        organisation2.setPrivateContactDetails(privateContactDetails2);
+        organisationRepository.save(organisation2);
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setName(new EmbeddableMultilingualString("Name"));
+        // Set one existing organisation for the stop place.
+        stopPlace.getOrganisations().add(new StopPlaceOrganisationRef(
+                organisation1,
+                StopPlaceOrganisationRelationshipEnumeration.MAINTENANCE
+        ));
+
+        stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+
+        // Change relationship type of an existing organisation, and add a new one.
+        var graphqlQuery = """
+            mutation {
+              stopPlace: mutateStopPlace(StopPlace: {
+                id: "%s"
+                organisations: [
+                  {
+                      organisationRef: "%s",
+                      relationshipType: infoUpkeep
+                  },
+                  {
+                      organisationRef: "%s",
+                      relationshipType: winterMaintenance
+                  }
+                ]
+              }) {
+                id
+                organisations {
+                  organisationRef
+                  relationshipType
+                  organisation {
+                    id
+                    name
+                    privateContactDetails {
+                      email
+                    }
+                  }
+                }
+              }
+            }
+            """.formatted(
+                stopPlace.getNetexId(),
+                organisation1.getNetexId(),
+                organisation2.getNetexId()
+        );
+
+        executeGraphqQLQueryOnly(graphqlQuery)
+                .body("data.stopPlace[0].id", equalTo(stopPlace.getNetexId()))
+                .rootPath("data.stopPlace[0].organisations")
+                .body(notNullValue())
+                .body("", hasSize(2))
+                .body("[0].relationshipType", equalTo(StopPlaceOrganisationRelationshipEnumeration.INFO_UPKEEP.value()))
+                .body("[0].organisation.id", equalTo(organisation1.getNetexId()))
+                .body("[0].organisation.name", equalTo(organisation1.getName()))
+                .body("[0].organisation.privateContactDetails.email", equalTo(organisation1.getPrivateContactDetails().getEmail()))
+                .body("[1].relationshipType", equalTo(StopPlaceOrganisationRelationshipEnumeration.WINTER_MAINTENANCE.value()))
+                .body("[1].organisation.id", equalTo(organisation2.getNetexId()))
+                .body("[1].organisation.name", equalTo(organisation2.getName()))
+                .body("[1].organisation.privateContactDetails.email", equalTo(organisation2.getPrivateContactDetails().getEmail()));
     }
 
     private StopPlace createStopPlaceWithMunicipalityRef(String name, TopographicPlace municipality, StopTypeEnumeration type) {

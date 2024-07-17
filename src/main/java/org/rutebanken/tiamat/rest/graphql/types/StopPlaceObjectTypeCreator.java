@@ -32,6 +32,7 @@ import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLObjectType.newObject;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ADJACENT_SITES;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ADJACENT_SITES_DESCRIPTION;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ORGANISATIONS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.OUTPUT_TYPE_STOPPLACE;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PARENT_SITE_REF;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.QUAYS;
@@ -47,7 +48,13 @@ public class StopPlaceObjectTypeCreator {
     @Autowired
     private TransportModeScalar transportModeScalar;
 
-    public GraphQLObjectType create(GraphQLInterfaceType stopPlaceInterface, List<GraphQLFieldDefinition> stopPlaceInterfaceFields, List<GraphQLFieldDefinition> commonFieldsList, GraphQLObjectType quayObjectType) {
+    public GraphQLObjectType create(
+            GraphQLInterfaceType stopPlaceInterface,
+            List<GraphQLFieldDefinition> stopPlaceInterfaceFields,
+            List<GraphQLFieldDefinition> commonFieldsList,
+            GraphQLObjectType quayObjectType,
+            GraphQLObjectType stopPlaceOrganisationRefObjectType
+    ) {
         return newObject()
                 .name(OUTPUT_TYPE_STOPPLACE)
                 .withInterface(stopPlaceInterface)
@@ -74,6 +81,9 @@ public class StopPlaceObjectTypeCreator {
                         .name(ADJACENT_SITES)
                         .type(new GraphQLList(versionLessEntityRef))
                         .description(ADJACENT_SITES_DESCRIPTION))
+                .field(newFieldDefinition()
+                        .name(ORGANISATIONS)
+                        .type(new GraphQLList(stopPlaceOrganisationRefObjectType)))
                 .field(newFieldDefinition()
                         .name(QUAYS)
                         .type(new GraphQLList(quayObjectType)))

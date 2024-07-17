@@ -59,3 +59,13 @@ CREATE TABLE organisation_key_values (
     FOREIGN KEY (organisation_id) REFERENCES organisation(id) ON DELETE CASCADE
 );
 ALTER TABLE organisation_key_values OWNER TO tiamat;
+
+-- HSL specific organisation relationships.
+CREATE TABLE stop_place_organisations (
+    stop_place_id bigint NOT NULL,
+    organisation_ref character varying(255) NOT NULL,
+    relationship_type character varying(255) NOT NULL,
+    PRIMARY KEY (stop_place_id, organisation_ref, relationship_type),
+    FOREIGN KEY (stop_place_id) REFERENCES stop_place(id) ON DELETE CASCADE
+);
+ALTER TABLE stop_place_organisations OWNER TO tiamat;
