@@ -55,7 +55,7 @@
         <orika-core.version>1.5.4</orika-core.version>
         <graphql-java.version>20.2</graphql-java.version>
         <hazelcast-hibernate53.version>5.1.0</hazelcast-hibernate53.version>
-        <hazelcast.version>5.2.4</hazelcast.version>
+        <hazelcast.version>5.5.0</hazelcast.version>
         <swagger-jersey2.version>2.2.20</swagger-jersey2.version>
         <netex-java-model.version>2.0.14</netex-java-model.version>
         <entur.helpers.version>2.26</entur.helpers.version>
