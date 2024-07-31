@@ -2,6 +2,7 @@ package org.rutebanken.tiamat.rest.graphql.fetchers;
 
 import com.google.api.client.util.Preconditions;
 import graphql.schema.DataFetchingEnvironment;
+import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
 import org.rutebanken.tiamat.model.Contact;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.Organisation;
@@ -17,10 +18,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import graphql.schema.DataFetcher;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_ORGANISATION_EDIT;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.COMPANY_NUMBER;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.CONTACT_DETAILS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.CONTACT_PERSON;
@@ -48,6 +51,9 @@ public class OrganisationUpdater implements DataFetcher {
 
     @Autowired
     private OrganisationVersionedSaverService organisationVersionedSaverService;
+
+    @Autowired
+    private ReflectionAuthorizationService authorizationService;
 
     @Autowired
     private VersionCreator versionCreator;
@@ -81,6 +87,8 @@ public class OrganisationUpdater implements DataFetcher {
         boolean isUpdated = populateOrganisation(input, updatedOrganisation);
 
         if (isUpdated) {
+            authorizationService.assertAuthorized(ROLE_ORGANISATION_EDIT, Arrays.asList(existingVersion, updatedOrganisation));
+
             logger.info("Saving new version of organisation {}", updatedOrganisation);
             updatedOrganisation = organisationVersionedSaverService.saveNewVersion(updatedOrganisation);
 

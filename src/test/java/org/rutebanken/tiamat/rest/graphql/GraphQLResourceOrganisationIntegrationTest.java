@@ -1,16 +1,41 @@
 package org.rutebanken.tiamat.rest.graphql;
 
+import org.junit.Before;
 import org.junit.Test;
+import org.rutebanken.helper.organisation.AuthorizationConstants;
+import org.rutebanken.tiamat.auth.MockedRoleAssignmentExtractor;
+import org.rutebanken.tiamat.auth.RoleAssignmentListBuilder;
 import org.rutebanken.tiamat.model.Contact;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.Organisation;
 import org.rutebanken.tiamat.model.OrganisationTypeEnumeration;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
 
 public class GraphQLResourceOrganisationIntegrationTest extends AbstractGraphQLResourceIntegrationTest {
+
+    @Autowired
+    private MockedRoleAssignmentExtractor mockedRoleAssignmentExtractor;
+
+    @Before
+    public void setAuthWithOrganisationROle() {
+        mockedRoleAssignmentExtractor.setNextReturnedRoleAssignment(
+            RoleAssignmentListBuilder.builder()
+                    .withAccessAllTypesForRole(AuthorizationConstants.ROLE_ORGANISATION_EDIT)
+                    .build()
+        );
+    }
+
+    private void setAuthWithoutOrganisationRole() {
+        mockedRoleAssignmentExtractor.setNextReturnedRoleAssignment(
+            RoleAssignmentListBuilder.builder()
+                    .withAccessAllTypesForRole(AuthorizationConstants.ROLE_EDIT_STOPS)
+                    .build()
+        );
+    }
 
     @Test
     public void testQueryOrganisationById() {
@@ -295,6 +320,45 @@ public class GraphQLResourceOrganisationIntegrationTest extends AbstractGraphQLR
                 .body("data.organisation", hasSize(2))
                 .body("data.organisation[0].id", equalTo(fillerOrganisation1.getNetexId()))
                 .body("data.organisation[1].id", equalTo(fillerOrganisation2.getNetexId()));
+    }
+
+    @Test
+    public void testDeleteOrganisationWithoutAuthorization() {
+        setAuthWithoutOrganisationRole();
+
+        Organisation organisation = createTestOrganisation();
+        organisationRepository.save(organisation);
+
+        String graphQlJsonQuery = """
+            mutation {
+              organisation: deleteOrganisation (
+                organisationId: "%s"
+              )
+            }""".formatted(organisation.getNetexId());
+
+        executeGraphqQLQueryOnly(graphQlJsonQuery,403);
+    }
+
+    @Test
+    public void testMutateOrganisationWithoutAuthorization() {
+        setAuthWithoutOrganisationRole();
+
+        Organisation organisation = createTestOrganisation();
+        organisationRepository.save(organisation);
+
+        String graphQlJsonQuery = """
+            mutation {
+              organisation: mutateOrganisation (
+                Organisation: {
+                  id: "%s",
+                  name: "New Name"
+                }
+            ) {
+                id
+              }
+            }""".formatted(organisation.getNetexId());
+
+        executeGraphqQLQueryOnly(graphQlJsonQuery,403);
     }
 
     protected Organisation createTestOrganisation() {

@@ -40,6 +40,9 @@ public class RoleAssignmentListBuilder {
                 .withRole(AuthorizationConstants.ROLE_DELETE_STOPS, AuthorizationConstants.ENTITY_CLASSIFIER_ALL_TYPES);
     }
 
+    public RoleAssignmentListBuilder withAccessAllTypesForRole(String role) {
+        return withRole(role, AuthorizationConstants.ENTITY_CLASSIFIER_ALL_TYPES);
+    }
 
     public RoleAssignmentListBuilder withStopPlaceOfType(StopTypeEnumeration type) {
         return withStopPlaceOfType(type.value());
