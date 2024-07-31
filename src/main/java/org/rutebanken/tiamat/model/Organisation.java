@@ -3,9 +3,9 @@ package org.rutebanken.tiamat.model;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @Entity
