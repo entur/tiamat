@@ -171,7 +171,7 @@ public class FareZoneRepositoryImplTest extends TiamatIntegrationTest {
         List<FareZone> fareZones = fareZoneRepository.getFareZonesFromStopPlaceIds(Sets.newHashSet(stopPlace.getId()));
 
         assertThat(fareZones).hasSize(1);
-        assertThat(fareZones.get(0).getVersion()).isEqualTo(v2.getVersion());
+        assertThat(fareZones.getFirst().getVersion()).isEqualTo(v2.getVersion());
     }
 
 }

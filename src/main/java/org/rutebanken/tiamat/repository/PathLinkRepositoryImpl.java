@@ -16,13 +16,13 @@
 package org.rutebanken.tiamat.repository;
 
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 import org.apache.commons.lang3.StringUtils;
 import org.rutebanken.tiamat.model.PathLink;
 
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -54,7 +54,7 @@ public class PathLinkRepositoryImpl implements PathLinkRepositoryCustom {
             if (results.isEmpty()) {
                 return null;
             } else {
-                return results.get(0).longValue();
+                return results.getFirst().longValue();
             }
         } catch (NoResultException noResultException) {
             return null;

@@ -15,7 +15,8 @@
 
 package org.rutebanken.tiamat.exporter.async;
 
-import com.google.api.client.util.IOUtils;
+import com.google.common.io.ByteStreams;
+import jakarta.xml.bind.JAXBException;
 import org.rutebanken.tiamat.exporter.StreamingPublicationDelivery;
 import org.rutebanken.tiamat.model.job.ExportJob;
 import org.rutebanken.tiamat.model.job.JobStatus;
@@ -26,7 +27,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
-import javax.xml.bind.JAXBException;
 import javax.xml.stream.XMLStreamException;
 import java.io.File;
 import java.io.FileInputStream;
@@ -130,7 +130,7 @@ public class ExportJobWorker implements Runnable {
             zipOutputStream.putNextEntry(new ZipEntry(fileNameWithoutExtension + ".xml"));
 
             InputStream fileInputStream = new FileInputStream(localExportZipFile);
-            IOUtils.copy(fileInputStream, zipOutputStream);
+            ByteStreams.copy(fileInputStream, zipOutputStream);
             zipOutputStream.closeEntry();
             logger.info("Written to disk {}", localZipFile);
         } finally {

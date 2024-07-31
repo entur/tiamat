@@ -69,12 +69,11 @@ public class QuayMapper extends CustomMapper<Quay, org.rutebanken.tiamat.model.Q
             final List<Object> netexBoardingPositions = quay.getBoardingPositions().getBoardingPositionRefOrBoardingPosition();
             List<BoardingPosition> tiamatBoardingPositions = new ArrayList<>();
             for (Object netexBoardingPosition : netexBoardingPositions) {
-                if (netexBoardingPosition instanceof org.rutebanken.netex.model.BoardingPosition) {
-                    final org.rutebanken.netex.model.BoardingPosition netexBoardingPosition1 = (org.rutebanken.netex.model.BoardingPosition) netexBoardingPosition;
-                    if (netexBoardingPosition1.getPublicCode() != null
-                            && !netexBoardingPosition1.getPublicCode().isEmpty()) {
+                if (netexBoardingPosition instanceof org.rutebanken.netex.model.BoardingPosition boardingPosition) {
+                     if (boardingPosition.getPublicCode() != null
+                            && !boardingPosition.getPublicCode().isEmpty()) {
                         final BoardingPosition tiamatBoardingPosition = new BoardingPosition();
-                        mapperFacade.map(netexBoardingPosition1,tiamatBoardingPosition);
+                        mapperFacade.map(boardingPosition,tiamatBoardingPosition);
                         tiamatBoardingPositions.add(tiamatBoardingPosition);
                     }
                 }

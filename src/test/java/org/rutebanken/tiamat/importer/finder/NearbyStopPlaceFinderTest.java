@@ -76,14 +76,14 @@ public class NearbyStopPlaceFinderTest {
         stopPlace.setStopPlaceType(StopTypeEnumeration.BUS_STATION);
         stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(9, 40)));
 
-        org.locationtech.jts.geom.Geometry envelope = (org.locationtech.jts.geom.Geometry) stopPlace.getCentroid().getEnvelope().clone();
+        org.locationtech.jts.geom.Geometry envelope = stopPlace.getCentroid().getEnvelope().copy();
 
 
         when(stopPlaceRepository.findNearbyStopPlace(isA(Envelope.class),isA(String.class),isA(StopTypeEnumeration.class))).thenReturn(stopPlaceId);
         when(stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlaceId)).thenReturn(stopPlace);
 
         StopPlace actual = nearbyStopPlaceFinder.find(stopPlace);
-        org.locationtech.jts.geom.Geometry actualEnvelope = (org.locationtech.jts.geom.Geometry) actual.getCentroid().getEnvelope().clone();
+        org.locationtech.jts.geom.Geometry actualEnvelope = actual.getCentroid().getEnvelope().copy();
 
         assertThat(actualEnvelope).isEqualTo(envelope);
     }

@@ -18,7 +18,7 @@ package org.rutebanken.tiamat.rest.graphql;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.google.common.collect.Sets;
-import graphql.ErrorType;
+import graphql.ErrorClassification;
 import graphql.ExceptionWhileDataFetching;
 import graphql.ExecutionInput;
 import graphql.ExecutionResult;
@@ -27,7 +27,17 @@ import graphql.GraphQLError;
 import graphql.GraphQLException;
 import graphql.analysis.MaxQueryDepthInstrumentation;
 import graphql.execution.AbortExecutionException;
-import io.swagger.annotations.Api;
+import graphql.execution.instrumentation.ChainedInstrumentation;
+import graphql.execution.instrumentation.Instrumentation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.PostConstruct;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.NotAuthorizedException;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import org.rutebanken.helper.organisation.NotAuthenticatedException;
 import org.rutebanken.tiamat.rest.exception.ErrorResponseEntity;
 import org.slf4j.Logger;
@@ -42,25 +52,21 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.annotation.PostConstruct;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.NotAuthorizedException;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static graphql.ErrorType.DataFetchingException;
+import static graphql.ErrorType.InvalidSyntax;
+import static graphql.ErrorType.ValidationError;
 import static java.util.stream.Collectors.toList;
 
 @Component
-@Api(tags = {"GraphQL Resource"}, produces = "application/json")
+@Tag(name = "GraphQL Resource", description = "GraphQL Resource")
 @Path("graphql")
 public class GraphQLResource {
 
@@ -79,6 +85,10 @@ public class GraphQLResource {
     private StopPlaceRegisterGraphQLSchema stopPlaceRegisterGraphQLSchema;
 
 
+    @Autowired
+    private RequestLoggingInstrumentation requestLoggingInstrumentation;
+
+
     private final TransactionTemplate transactionTemplate;
 
 
@@ -89,11 +99,17 @@ public class GraphQLResource {
 
     @PostConstruct
     public void init() {
+        List<Instrumentation> chainedList = new ArrayList<>();
+        chainedList.add(new MaxQueryDepthInstrumentation(MAX_DEPTH));
+        chainedList.add(requestLoggingInstrumentation);
+
+        final ChainedInstrumentation chainedInstrumentation = new ChainedInstrumentation(chainedList);
+
+
         logger.info(String.format("max query depth is: %d", MAX_DEPTH));
         graphQL = GraphQL.newGraphQL(stopPlaceRegisterGraphQLSchema.stopPlaceRegisterSchema)
-                .instrumentation(new MaxQueryDepthInstrumentation(MAX_DEPTH))
+                .instrumentation(chainedInstrumentation)
                 .build();
-
 
     }
 
@@ -109,11 +125,8 @@ public class GraphQLResource {
         if (query.get("variables") instanceof Map) {
             variables = (Map) query.get("variables");
 
-        } else if (query.get("variables") instanceof String && !((String) query.get("variables")).isEmpty()) {
-            String s = (String) query.get("variables");
-
+        } else if (query.get("variables") instanceof String s && !s.isEmpty()) {
             ObjectMapper mapper = new ObjectMapper();
-
             // convert JSON string to Map
             try {
                 variables = mapper.readValue(s, TypeFactory.defaultInstance().constructMapType(HashMap.class, String.class, Object.class));
@@ -149,7 +162,11 @@ public class GraphQLResource {
         Response.ResponseBuilder res = Response.status(Response.Status.OK);
         HashMap<String, Object> content = new HashMap<>();
         try {
-            final ExecutionInput executionInput = ExecutionInput.newExecutionInput().query(query).variables(variables).build();
+            final ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+                    .query(query)
+                    .root(null)
+                    .variables(variables)
+                    .build();
             ExecutionResult executionResult = graphQL.execute(executionInput);
 
             if (!executionResult.getErrors().isEmpty()) {
@@ -157,25 +174,22 @@ public class GraphQLResource {
 
                 Response.Status status = Response.Status.INTERNAL_SERVER_ERROR;
                 for (GraphQLError error : errors) {
-                    switch (error.getErrorType()) {
-                        case InvalidSyntax:
-                        case ValidationError:
-                            status = Response.Status.BAD_REQUEST;
-                            break;
-                        case DataFetchingException:
-                            ExceptionWhileDataFetching exceptionWhileDataFetching = ((ExceptionWhileDataFetching) error);
-                            if (exceptionWhileDataFetching.getException() != null) {
-                                status = getStatusCodeFromThrowable(exceptionWhileDataFetching.getException());
-                                break;
-                            }
-                            status = Response.Status.OK;
-                            break;
+                    final ErrorClassification errorClassification = error.getErrorType();
+                    if (InvalidSyntax.equals(errorClassification) || ValidationError.equals(errorClassification)) {
+                        status = Response.Status.BAD_REQUEST;
+                    } else if (DataFetchingException.equals(errorClassification)) {
+                        ExceptionWhileDataFetching exceptionWhileDataFetching = ((ExceptionWhileDataFetching) error);
+                        if (exceptionWhileDataFetching.getException() != null) {
+                            status = getStatusCodeFromThrowable(exceptionWhileDataFetching.getException());
+                            continue;
+                        }
+                        status = Response.Status.OK;
                     }
                 }
 
                 res = Response.status(status);
 
-                if (errors.stream().anyMatch(error -> error.getErrorType().equals(ErrorType.DataFetchingException))) {
+                if (errors.stream().anyMatch(error -> error.getErrorType().equals(DataFetchingException))) {
                     logger.warn("Detected DataFetchingException from errors: {} Setting transaction to rollback only", errors);
                     transactionStatus.setRollbackOnly();
                 }
@@ -238,8 +252,7 @@ public class GraphQLResource {
     private Throwable getRootCause(Throwable e) {
         Throwable rootCause = e;
 
-        if (e instanceof NestedRuntimeException) {
-            NestedRuntimeException nestedRuntimeException = ((NestedRuntimeException) e);
+        if (e instanceof NestedRuntimeException nestedRuntimeException) {
             if (nestedRuntimeException.getRootCause() != null) {
                 rootCause = nestedRuntimeException.getRootCause();
             }

@@ -15,11 +15,11 @@
 
 package org.rutebanken.tiamat.model;
 
-import javax.persistence.CascadeType;
-import javax.persistence.FetchType;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.OneToOne;
-import javax.persistence.Transient;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Transient;
 
 
 @MappedSuperclass

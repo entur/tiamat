@@ -79,29 +79,29 @@ public class StopPlaceVersionedSaverServiceTest extends TiamatIntegrationTest {
         assertThat(actualStopPlace).isNotNull();
 
         assertThat(actualStopPlace.getPlaceEquipments().getInstalledEquipment()).hasSize(1);
-        assertThat(actualStopPlace.getPlaceEquipments().getInstalledEquipment().get(0).getNetexId())
+        assertThat(actualStopPlace.getPlaceEquipments().getInstalledEquipment().getFirst().getNetexId())
                 .isNotNull();
 
-        assertThat(actualStopPlace.getPlaceEquipments().getInstalledEquipment().get(0).getVersion())
+        assertThat(actualStopPlace.getPlaceEquipments().getInstalledEquipment().getFirst().getVersion())
                 .isEqualTo(1L);
 
         Quay actualQuay = actualStopPlace.getQuays().iterator().next();
         assertThat(actualQuay.getVersion()).isEqualTo(1);
 
         assertThat(actualQuay.getPlaceEquipments().getInstalledEquipment()).hasSize(1);
-        assertThat(actualQuay.getPlaceEquipments().getInstalledEquipment().get(0).getNetexId())
+        assertThat(actualQuay.getPlaceEquipments().getInstalledEquipment().getFirst().getNetexId())
                 .isNotNull();
 
-        assertThat(actualQuay.getPlaceEquipments().getInstalledEquipment().get(0).getVersion())
+        assertThat(actualQuay.getPlaceEquipments().getInstalledEquipment().getFirst().getVersion())
                 .isEqualTo(1L);
 
         stopPlace = stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
         actualStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId());
-        assertThat(actualStopPlace.getPlaceEquipments().getInstalledEquipment().get(0).getVersion())
+        assertThat(actualStopPlace.getPlaceEquipments().getInstalledEquipment().getFirst().getVersion())
                 .isEqualTo(2L);
 
         actualQuay = actualStopPlace.getQuays().iterator().next();
-        assertThat(actualQuay.getPlaceEquipments().getInstalledEquipment().get(0).getVersion())
+        assertThat(actualQuay.getPlaceEquipments().getInstalledEquipment().getFirst().getVersion())
                 .isEqualTo(2L);
 
 

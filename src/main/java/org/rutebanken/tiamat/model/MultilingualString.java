@@ -15,8 +15,9 @@
 
 package org.rutebanken.tiamat.model;
 
-import javax.persistence.Column;
-import javax.persistence.MappedSuperclass;
+import jakarta.persistence.Column;
+import jakarta.persistence.MappedSuperclass;
+
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -48,10 +49,7 @@ public abstract class MultilingualString implements Serializable {
     public boolean equals(Object object) {
         if (this == object) return true;
         if (object == null) return false;
-        if (!(object instanceof MultilingualString)) return false;
-
-        MultilingualString other = (MultilingualString) object;
-
+        if (!(object instanceof MultilingualString other)) return false;
         return Objects.equals(this.value, other.value)
                 && Objects.equals(this.lang, other.lang);
     }

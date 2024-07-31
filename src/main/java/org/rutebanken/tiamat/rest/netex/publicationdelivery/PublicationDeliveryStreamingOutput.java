@@ -15,6 +15,11 @@
 
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
+import jakarta.ws.rs.core.StreamingOutput;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Marshaller;
 import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.netex.validation.NeTExValidator;
@@ -24,15 +29,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.xml.sax.SAXException;
 
-import javax.ws.rs.core.StreamingOutput;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-import static javax.xml.bind.JAXBContext.newInstance;
+import static jakarta.xml.bind.JAXBContext.newInstance;
 
 @Component
 public class PublicationDeliveryStreamingOutput {

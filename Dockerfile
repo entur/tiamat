@@ -1,4 +1,4 @@
-FROM maven:3-openjdk-17-slim AS builder
+FROM maven:3-eclipse-temurin-21-alpine AS builder
 
 # set up workdir
 WORKDIR /build
@@ -12,7 +12,7 @@ COPY ./src /build/src
 # package
 RUN mvn clean package -DskipTests
 
-FROM eclipse-temurin:17.0.9_9-jre
+FROM eclipse-temurin:21.0.2_13-jre
 
 # expose server port
 EXPOSE 1888

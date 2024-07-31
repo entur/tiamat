@@ -19,7 +19,7 @@ import com.google.common.base.Preconditions;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import org.locationtech.jts.geom.Point;
-import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
+import org.rutebanken.tiamat.auth.AuthorizationService;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.Parking;
 import org.rutebanken.tiamat.model.ParkingArea;
@@ -53,7 +53,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.BOOKING_URL;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.FREE_PARKING_OUT_OF_HOURS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.GEOMETRY;
@@ -100,7 +99,7 @@ class ParkingUpdater implements DataFetcher {
     private GeometryMapper geometryMapper;
 
     @Autowired
-    private ReflectionAuthorizationService authorizationService;
+    private AuthorizationService authorizationService;
 
     @Autowired
     private ValidBetweenMapper validBetweenMapper;
@@ -139,7 +138,7 @@ class ParkingUpdater implements DataFetcher {
         boolean isUpdated = populateParking(input, updatedParking);
 
         if (isUpdated) {
-            authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(existingVersion, updatedParking));
+            authorizationService.verifyCanEditEntities( Arrays.asList(existingVersion, updatedParking));
 
             logger.info("Saving new version of parking {}", updatedParking);
             updatedParking = parkingVersionedSaverService.saveNewVersion(updatedParking);
@@ -178,14 +177,6 @@ class ParkingUpdater implements DataFetcher {
 
             updatedParking.setParentSiteRef(parentSiteRef);
         }
-        /*
-        if (input.get(TOTAL_CAPACITY) != null) {
-            BigInteger totalCapacity = (BigInteger) input.get(TOTAL_CAPACITY);
-            isUpdated = isUpdated || (!totalCapacity.equals(updatedParking.getTotalCapacity()));
-
-            updatedParking.setTotalCapacity(totalCapacity);
-        }
-        */
         if (input.get(PRINCIPAL_CAPACITY) != null) {
             BigInteger principalCapacity = (BigInteger) input.get(PRINCIPAL_CAPACITY);
             isUpdated = isUpdated || (!principalCapacity.equals(updatedParking.getPrincipalCapacity()));

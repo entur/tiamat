@@ -16,16 +16,16 @@
 package org.rutebanken.tiamat.model;
 
 import com.google.common.base.MoreObjects;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
-import javax.persistence.CollectionTable;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Index;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashSet;
@@ -37,7 +37,7 @@ import java.util.Set;
 public class Value implements Serializable {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence_per_table_generator")
     private long id;
 
     @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)

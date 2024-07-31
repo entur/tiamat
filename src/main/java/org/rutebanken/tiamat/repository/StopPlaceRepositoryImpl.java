@@ -17,6 +17,11 @@ package org.rutebanken.tiamat.repository;
 
 
 import com.google.common.collect.Sets;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
+import jakarta.persistence.TypedQuery;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
@@ -44,12 +49,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.util.Pair;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
-import javax.persistence.TypedQuery;
-import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.ZonedDateTime;
@@ -177,19 +176,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
             }
         } else {
             // If no point in time is set, use max version to only get one version per stop place
-            String subQueryString = "SELECT s.netex_id,max(s.version) FROM stop_place s " +
-                    SQL_LEFT_JOIN_PARENT_STOP +
-                    "WHERE " +
-                    SQL_CHILD_OR_PARENT_WITHIN +
-                    "AND "
-                    + SQL_NOT_PARENT_STOP_PLACE;
-
-
-            if (ignoreStopPlaceId != null) {
-                subQueryString += "AND " + SQL_IGNORE_STOP_PLACE_ID + "group by s.netex_id";
-            } else {
-                subQueryString += "group by s.netex_id" ;
-            }
+            final String subQueryString = getSubQueryString(ignoreStopPlaceId);
 
             queryString = "SELECT s.* FROM stop_place s " +
                     "WHERE (netex_id,version) in (" + subQueryString + ")" ;
@@ -213,6 +200,23 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         query.setMaxResults(pageable.getPageSize());
         List<StopPlace> stopPlaces = query.getResultList();
         return new PageImpl<>(stopPlaces, pageable, stopPlaces.size());
+    }
+
+    private static String getSubQueryString(String ignoreStopPlaceId) {
+        String subQueryString = "SELECT s.netex_id,max(s.version) FROM stop_place s " +
+                SQL_LEFT_JOIN_PARENT_STOP +
+                "WHERE " +
+                SQL_CHILD_OR_PARENT_WITHIN +
+                "AND "
+                + SQL_NOT_PARENT_STOP_PLACE;
+
+
+        if (ignoreStopPlaceId != null) {
+            subQueryString += "AND " + SQL_IGNORE_STOP_PLACE_ID + "group by s.netex_id";
+        } else {
+            subQueryString += "group by s.netex_id" ;
+        }
+        return subQueryString;
     }
 
     /**
@@ -631,11 +635,9 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
             query.setMaxResults(exportParams.getStopPlaceSearch().getPageable().getPageSize());
         }
         searchHelper.addParams(query, pair.getSecond());
-
         Set<Long> result = new HashSet<>();
         for(Object object : query.list()) {
-            BigInteger bigInteger = (BigInteger) object;
-            result.add(bigInteger.longValue());
+            result.add((Long) object);
 
         }
 
@@ -768,7 +770,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     private <T> T getOneOrNull(TypedQuery<T> query) {
         try {
             List<T> resultList = query.getResultList();
-            return resultList.isEmpty() ? null : resultList.get(0);
+            return resultList.isEmpty() ? null : resultList.getFirst();
         } catch (NoResultException e) {
             return null;
         }
@@ -781,7 +783,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
             if (results.isEmpty()) {
                 return null;
             } else {
-                return results.get(0);
+                return results.getFirst();
             }
         } catch (NoResultException noResultException) {
             return null;

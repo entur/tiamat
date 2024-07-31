@@ -16,7 +16,7 @@
 package org.rutebanken.tiamat.service.stopplace;
 
 import com.google.api.client.util.Preconditions;
-import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
+import org.rutebanken.tiamat.auth.AuthorizationService;
 import org.rutebanken.tiamat.auth.UsernameFetcher;
 import org.rutebanken.tiamat.lock.MutateLock;
 import org.rutebanken.tiamat.model.Quay;
@@ -39,7 +39,6 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.Optional;
 
-import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.MERGED_ID_KEY;
 import static org.rutebanken.tiamat.service.stopplace.StopPlaceMerger.IGNORE_PROPERTIES_ON_MERGE;
 
@@ -56,7 +55,7 @@ public class StopPlaceQuayMerger {
     private StopPlaceRepository stopPlaceRepository;
 
     @Autowired
-    private ReflectionAuthorizationService authorizationService;
+    private AuthorizationService authorizationService;
 
     @Autowired
     private KeyValuesMerger keyValuesMerger;
@@ -84,7 +83,7 @@ public class StopPlaceQuayMerger {
             final StopPlace stopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlaceId);
             Preconditions.checkArgument(stopPlace != null, "Attempting to quays from StopPlace [id = %s], but StopPlace does not exist.", stopPlaceId);
 
-            authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(stopPlace));
+            authorizationService.verifyCanEditEntities( Arrays.asList(stopPlace));
 
             Preconditions.checkArgument(!stopPlace.isParentStopPlace(), "Cannot merge quays of parent StopPlace [id = %s].", stopPlaceId);
 

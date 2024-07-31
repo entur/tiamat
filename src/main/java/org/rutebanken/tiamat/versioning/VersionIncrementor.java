@@ -63,7 +63,7 @@ public class VersionIncrementor {
             initiateOrIncrement(accessibilityAssessment);
 
             if (accessibilityAssessment.getLimitations() != null && !accessibilityAssessment.getLimitations().isEmpty()) {
-                AccessibilityLimitation limitation = accessibilityAssessment.getLimitations().get(0);
+                AccessibilityLimitation limitation = accessibilityAssessment.getLimitations().getFirst();
                 initiateOrIncrement(limitation);
             }
 

@@ -65,11 +65,6 @@ public class NearbyParkingFinder implements ParkingFinder {
         if(!parking.hasCoordinates()) {
             return null;
         }
-//
-//        if(parking.getParkingType() == null) {
-//            logger.warn("Parking does not have type. Cannot check for similar parkings. {}", parking);
-//            return null;
-//        }
 
         try {
             Optional<String> parkingNetexId = nearbyParkingCache.get(createKey(parking), () -> {

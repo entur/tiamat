@@ -16,6 +16,9 @@
 package org.rutebanken.tiamat.repository;
 
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.ScrollMode;
@@ -36,10 +39,6 @@ import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
-import java.math.BigInteger;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -69,7 +68,7 @@ public class FareZoneRepositoryImpl implements FareZoneRepositoryCustom {
     public List<FareZone> findFareZones(FareZoneSearch search) {
         Pair<String, Map<String, Object>> pair = fareZoneQueryFromSearchBuilder.buildQueryFromSearch(search);
         Session session = entityManager.unwrap(SessionImpl.class);
-        NativeQuery nativeQuery = session.createNativeQuery(pair.getFirst());
+        NativeQuery nativeQuery = session.createNativeQuery(pair.getFirst(),FareZone.class);
         nativeQuery.addEntity(FareZone.class);
 
         searchHelper.addParams(nativeQuery, pair.getSecond());
@@ -164,7 +163,7 @@ public class FareZoneRepositoryImpl implements FareZoneRepositoryCustom {
 
     public Iterator<FareZone> scrollFareZones(String sql) {
         Session session = entityManager.unwrap(Session.class);
-        NativeQuery sqlQuery = session.createNativeQuery(sql);
+        NativeQuery sqlQuery = session.createNativeQuery(sql,FareZone.class);
 
         sqlQuery.addEntity(FareZone.class);
         sqlQuery.setReadOnly(true);
@@ -259,8 +258,8 @@ public class FareZoneRepositoryImpl implements FareZoneRepositoryCustom {
         logger.info(sql);
 
         Session session = entityManager.unwrap(Session.class);
-        NativeQuery query = session.createNativeQuery(sql);
-        return ((BigInteger) query.uniqueResult()).intValue();
+        NativeQuery query = session.createNativeQuery(sql,Long.class);
+        return ((Long) query.uniqueResult()).intValue();
     }
 
     public void updateStopPlaceTariffZoneRef() {
@@ -272,25 +271,7 @@ public class FareZoneRepositoryImpl implements FareZoneRepositoryCustom {
     }
 
     private String generateSqlQuery(boolean explicitStops) {
-        String subQuery;
-        if(explicitStops) {
-            subQuery = "       JOIN" +
-                    "                      FARE_ZONE_MEMBERS FZM " +
-                    "                                ON FZM.FARE_ZONE_ID = FZ.ID " +
-                    "                                JOIN" +
-                    "                                  STOP_PLACE SP " +
-                    "                                    ON SP.NETEX_ID = FZM.REF" +
-                    "                                    AND FZ.SCOPING_METHOD='EXPLICIT_STOPS'";
-        } else {
-            subQuery = "        JOIN" +
-                    "                     PERSISTABLE_POLYGON PP " +
-                    "                       ON PP.ID = FZ.POLYGON_ID " +
-                    "                        JOIN" +
-                    "                         STOP_PLACE SP " +
-                    "                           ON ST_CONTAINS(PP.POLYGON,SP.CENTROID) " +
-                    "                           AND FZ.SCOPING_METHOD='IMPLICIT_SPATIAL_PROJECTION' ";
-        }
-
+        final String subQuery = getSubQuery(explicitStops);
 
 
         String sql= "INSERT " +
@@ -343,13 +324,35 @@ public class FareZoneRepositoryImpl implements FareZoneRepositoryCustom {
         return sql;
     }
 
+    private static String getSubQuery(boolean explicitStops) {
+        String subQuery;
+        if(explicitStops) {
+            subQuery = "       JOIN" +
+                    "                      FARE_ZONE_MEMBERS FZM " +
+                    "                                ON FZM.FARE_ZONE_ID = FZ.ID " +
+                    "                                JOIN" +
+                    "                                  STOP_PLACE SP " +
+                    "                                    ON SP.NETEX_ID = FZM.REF" +
+                    "                                    AND FZ.SCOPING_METHOD='EXPLICIT_STOPS'";
+        } else {
+            subQuery = "        JOIN" +
+                    "                     PERSISTABLE_POLYGON PP " +
+                    "                       ON PP.ID = FZ.POLYGON_ID " +
+                    "                        JOIN" +
+                    "                         STOP_PLACE SP " +
+                    "                           ON ST_CONTAINS(PP.POLYGON,SP.CENTROID) " +
+                    "                           AND FZ.SCOPING_METHOD='IMPLICIT_SPATIAL_PROJECTION' ";
+        }
+        return subQuery;
+    }
+
     public List<String> findAllFareZoneAuthorities() {
 
         String sql = "SELECT DISTINCT transport_organisation_ref FROM fare_zone";
         logger.info(sql);
 
         Session session = entityManager.unwrap(Session.class);
-        NativeQuery query = session.createNativeQuery(sql);
+        NativeQuery query = session.createNativeQuery(sql,String.class);
         return  query.getResultList();
     }
 }

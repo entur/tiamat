@@ -58,11 +58,6 @@ public class SessionEntitiesEvictor implements EntitiesEvictor {
                 if (evictionClasses.contains(entityKey.getEntityName())) {
                     evictEntities.add(value);
                 }
-//                else if(entity instanceof StopPlace && entityKey.getEntityName().equals(TariffZone.class.getName()) ) {
-//                    // Stop Places can have references to tariff zones that should be evicted
-//                    // When the entity itself is of type tariff zone, it cannot be evicted.
-//                    evictEntities.add(value);
-//                }
             });
 
             evictEntities.forEach(this::evictNonNull);

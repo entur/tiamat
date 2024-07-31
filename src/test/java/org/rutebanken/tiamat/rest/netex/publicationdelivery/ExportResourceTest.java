@@ -15,6 +15,10 @@
 
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
+import jakarta.ws.rs.core.Link;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
+import jakarta.xml.bind.JAXBException;
 import org.glassfish.jersey.uri.internal.JerseyUriBuilder;
 import org.junit.Assert;
 import org.junit.Test;
@@ -41,10 +45,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.xml.sax.SAXException;
 
-import javax.ws.rs.core.Link;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
-import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -171,7 +171,7 @@ public class ExportResourceTest extends TiamatIntegrationTest {
         List<StopPlace> stopPlaces = publicationDeliveryTestHelper.extractStopPlaces(siteFrame);
         Assert.assertEquals(2, stopPlaces.size());
 
-        GroupOfStopPlaces netexGroupOfStopPlaces = publicationDeliveryTestHelper.extractGroupOfStopPlaces(siteFrame).get(0);
+        GroupOfStopPlaces netexGroupOfStopPlaces = publicationDeliveryTestHelper.extractGroupOfStopPlaces(siteFrame).getFirst();
 
         assertThat(netexGroupOfStopPlaces).isNotNull();
 
@@ -236,7 +236,7 @@ public class ExportResourceTest extends TiamatIntegrationTest {
         Response response = exportResource.exportStopPlacesWithEffectiveChangedInPeriod(search, newExportParamsBuilder().build(), uriInfoMock);
         List<StopPlace> changedStopPlaces = publicationDeliveryTestHelper.extractStopPlaces(response);
         Assert.assertEquals(1, changedStopPlaces.size());
-        Assert.assertEquals(stopPlace1.getName().getValue(), changedStopPlaces.get(0).getName().getValue());
+        Assert.assertEquals(stopPlace1.getName().getValue(), changedStopPlaces.getFirst().getName().getValue());
 
         Link link = response.getLink("next");
         Assert.assertNotNull(link);

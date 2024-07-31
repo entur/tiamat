@@ -1,0 +1,44 @@
+services:
+  app:
+    image: 'entur/tiamat:latest'
+    build:
+      context: ..
+    container_name: tiamat
+    networks:
+      - tiamat-net
+    depends_on:
+      - db
+    environment:
+      - SPRING_CONFIG_LOCATION=/etc/application-config/application.properties
+      - env=dev
+      - JDK_JAVA_OPTIONS=-server -Xss128m -Xmx8000m
+        -Dfile.encoding=UTF-8
+        -Dhazelcast.ignoreXxeProtectionFailures=true
+        --add-modules java.se
+        --add-exports java.base/jdk.internal.ref=ALL-UNNAMED
+        --add-opens java.base/java.lang=ALL-UNNAMED
+        --add-opens java.base/sun.nio.ch=ALL-UNNAMED
+        --add-opens java.management/sun.management=ALL-UNNAMED
+        --add-opens jdk.management/com.sun.management.internal=ALL-UNNAMED
+    volumes:
+      - ./spring:/etc/application-config
+    ports:
+      - "8777:8777"
+
+  db:
+    image: 'postgis/postgis:13-master'
+    container_name: db
+    hostname: postgres
+    networks:
+      - tiamat-net
+    environment:
+      - POSTGRES_USER=tiamat
+      - POSTGRES_PASSWORD=tiamat
+      - POSTGRES_HOST=postgres
+    volumes:
+      - ./postgres/data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+networks:
+  tiamat-net:
+    name: tiamat-postgres-db-shared-net

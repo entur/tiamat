@@ -16,16 +16,16 @@
 package org.rutebanken.tiamat.model;
 
 import com.google.common.base.MoreObjects;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.locationtech.jts.geom.Point;
 
-import javax.persistence.CascadeType;
-import javax.persistence.CollectionTable;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;

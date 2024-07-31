@@ -15,6 +15,9 @@
 
 package org.rutebanken.tiamat.exporter;
 
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Unmarshaller;
 import org.junit.Test;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.netex.validation.NeTExValidator;
@@ -46,9 +49,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.transaction.annotation.Transactional;
 import org.xml.sax.SAXException;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
 import javax.xml.stream.XMLStreamException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -60,13 +60,8 @@ import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
-import static javax.xml.bind.JAXBContext.newInstance;
+import static jakarta.xml.bind.JAXBContext.newInstance;
 import static org.assertj.core.api.Assertions.assertThat;
-
-/**
- * Test streaming publication delivery with h2 database
- * {@link StreamingPublicationDeliveryTest} is without database and spring context.
- */
 @Transactional
 public class StreamingPublicationDeliveryIntegrationTest extends TiamatIntegrationTest {
 
@@ -338,7 +333,7 @@ public class StreamingPublicationDeliveryIntegrationTest extends TiamatIntegrati
                 .as("actual stop place 1 tariff zones")
                 .isNotNull();
 
-        org.rutebanken.netex.model.TariffZoneRef actualTariffZoneRefStopPlace1 = actualStopPlace1.getTariffZones().getTariffZoneRef().get(0);
+        org.rutebanken.netex.model.TariffZoneRef actualTariffZoneRefStopPlace1 = actualStopPlace1.getTariffZones().getTariffZoneRef().getFirst();
 
         // Stop place 1 refers to tariff zone v2 implicity beacuse the reference does not contain version value.
         assertThat(actualTariffZoneRefStopPlace1.getRef())
@@ -348,7 +343,7 @@ public class StreamingPublicationDeliveryIntegrationTest extends TiamatIntegrati
         // Check stop place 2
 
         org.rutebanken.netex.model.StopPlace actualStopPlace2 = stops.stream().filter(sp -> sp.getId().equals(stopPlace2NetexId)).findFirst().get();
-        org.rutebanken.netex.model.TariffZoneRef actualTariffZoneRefStopPlace2 = actualStopPlace2.getTariffZones().getTariffZoneRef().get(0);
+        org.rutebanken.netex.model.TariffZoneRef actualTariffZoneRefStopPlace2 = actualStopPlace2.getTariffZones().getTariffZoneRef().getFirst();
 
         assertThat(actualTariffZoneRefStopPlace2.getRef())
                 .as("actual stop place 2 tariff zone ref")

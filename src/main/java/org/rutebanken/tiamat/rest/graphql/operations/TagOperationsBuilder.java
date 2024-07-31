@@ -19,8 +19,6 @@ import graphql.schema.GraphQLArgument;
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLNonNull;
 import org.rutebanken.tiamat.rest.graphql.types.TagObjectTypeCreator;
-import org.rutebanken.tiamat.service.TagCreator;
-import org.rutebanken.tiamat.service.TagRemover;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -44,12 +42,6 @@ public class TagOperationsBuilder {
 
     @Autowired
     private TagObjectTypeCreator tagObjectTypeCreator;
-
-    @Autowired
-    private TagRemover tagRemover;
-
-    @Autowired
-    private TagCreator tagCreator;
 
     public List<GraphQLFieldDefinition> getTagOperations() {
 
@@ -77,23 +69,13 @@ public class TagOperationsBuilder {
                         .type(tagObjectTypeCreator.create())
                         .name(REMOVE_TAG)
                         .description("Remove tag from referenced entity")
-                        .argument(createAndRemoveArguments)
-                        .dataFetcher(environment ->
-                                tagRemover.removeTag(
-                                        environment.getArgument(TAG_NAME),
-                                        environment.getArgument(TAG_ID_REFERENCE),
-                                        environment.getArgument(TAG_COMMENT)))
+                        .arguments(createAndRemoveArguments)
                         .build(),
                 newFieldDefinition()
                         .type(tagObjectTypeCreator.create())
                         .name(CREATE_TAG)
                         .description("Create tag for referenced entity.")
-                        .argument(createAndRemoveArguments)
-                        .dataFetcher(environment ->
-                                tagCreator.createTag(
-                                        environment.getArgument(TAG_NAME),
-                                        environment.getArgument(TAG_ID_REFERENCE),
-                                        environment.getArgument(TAG_COMMENT)))
+                        .arguments(createAndRemoveArguments)
                         .build()
         );
     }

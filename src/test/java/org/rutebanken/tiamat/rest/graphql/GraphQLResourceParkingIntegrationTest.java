@@ -124,7 +124,7 @@ public class GraphQLResourceParkingIntegrationTest extends AbstractGraphQLResour
                 "    }" +
                 "    geometry: { " +
                 "      type:Point " +
-                "      coordinates:[[59.0, 10.5]] " +
+                "      coordinates:[59.0, 10.5] " +
                 "    }" +
                 "    totalCapacity:1234, " +
                 "    parkingType:parkAndRide, " +
@@ -252,9 +252,10 @@ public class GraphQLResourceParkingIntegrationTest extends AbstractGraphQLResour
                 "    parentSiteRef:\\\"%s\\\"".formatted(stopPlace.getNetexId()) +
                 "    geometry: { " +
                 "      type:Point " +
-                "      coordinates:[[59.0, 10.5]] " +
+                "      coordinates:[59.0, 10.5] " +
                 "    }" +
-                "    totalCapacity:1234, " +
+                // totalCapacity is calculated automatically totalCapacity = Sum of all ParkingProperties>Spaces>noOfSpaces
+                //"    totalCapacity:1234, " +
                 "    parkingType:parkAndRide, " +
                 "    parkingVehicleTypes: [car, pedalCycle]" +
                 "    parkingLayout:covered " +
@@ -272,6 +273,11 @@ public class GraphQLResourceParkingIntegrationTest extends AbstractGraphQLResour
                 "        parkingVehicleType:car," +
                 "        parkingStayType:unlimited," +
                 "        numberOfSpaces:123" +
+                "      }," +
+                "      {" +
+                "        parkingVehicleType:pedalCycle," +
+                "        parkingStayType:unlimited," +
+                "        numberOfSpaces:100" +
                 "      }]" +
                 "    }" +
                 "    parkingAreas: [{" +
@@ -354,10 +360,11 @@ public class GraphQLResourceParkingIntegrationTest extends AbstractGraphQLResour
                     .body("parkingReservation", notNullValue())
                     .body("bookingUrl", notNullValue())
                     .body("parkingProperties.parkingUserTypes", notNullValue())
-                    .body("parkingProperties.spaces", notNullValue())
+                    .body("parkingProperties[0].spaces[0].numberOfSpaces", equalTo(123))
+                    .body("parkingProperties[0].spaces[0].parkingVehicleType", equalTo("car"))
                     .body("parkingAreas", notNullValue())
                     .body("parkingAreas.label.value", notNullValue())
-                    .body("parkingAreas.totalCapacity", notNullValue())
+                    .body("totalCapacity", equalTo(223))
                     .body("parkingAreas.parkingProperties", notNullValue());
 
     }
@@ -378,7 +385,7 @@ public class GraphQLResourceParkingIntegrationTest extends AbstractGraphQLResour
                 "    parentSiteRef:\\\"%s\\\"".formatted(stopPlace.getNetexId()) +
                 "    geometry: { " +
                 "      type:Point " +
-                "      coordinates:[[59.0, 10.5]] " +
+                "      coordinates:[59.0, 10.5] " +
                 "    }" +
                 "  }, {" +
                 "     name: {" +
@@ -388,7 +395,7 @@ public class GraphQLResourceParkingIntegrationTest extends AbstractGraphQLResour
                 "    parentSiteRef:\\\"%s\\\"".formatted(stopPlace.getNetexId()) +
                 "    geometry: { " +
                 "      type:Point " +
-                "      coordinates:[[59.0, 10.5]] " +
+                "      coordinates:[59.0, 10.5] " +
                 "    }" +
                 "  }] ) {" +
                 "    id, " +

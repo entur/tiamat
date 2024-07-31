@@ -1,12 +1,12 @@
 package org.rutebanken.tiamat.service.batch;
 
+import jakarta.annotation.PostConstruct;
 import org.rutebanken.tiamat.netex.id.GaplessIdGeneratorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;

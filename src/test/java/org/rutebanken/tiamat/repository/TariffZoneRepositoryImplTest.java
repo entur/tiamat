@@ -198,7 +198,7 @@ public class TariffZoneRepositoryImplTest extends TiamatIntegrationTest {
         List<TariffZone> tariffZones = tariffZoneRepository.getTariffZonesFromStopPlaceIds(Sets.newHashSet(stopPlace.getId()));
 
         assertThat(tariffZones).hasSize(1);
-        assertThat(tariffZones.get(0).getVersion()).isEqualTo(v2.getVersion());
+        assertThat(tariffZones.getFirst().getVersion()).isEqualTo(v2.getVersion());
     }
 
 }

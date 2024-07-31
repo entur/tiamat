@@ -15,7 +15,14 @@
 
 package org.rutebanken.tiamat.rest.dto;
 
-import io.swagger.annotations.Api;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.ws.rs.DefaultValue;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.StreamingOutput;
 import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
 import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDtoCsvMapper;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -25,15 +32,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
 import java.io.BufferedWriter;
-    import java.io.OutputStream;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
@@ -43,7 +43,7 @@ import java.util.Map;
 import java.util.Set;
 
 @Component
-@Api(tags = {"Stop place resource"}, produces = "text/plain")
+@Tag(name = "Stop place resource", description = "Stop place resource")
 @Produces("application/json")
 @Path("/")
 @Transactional

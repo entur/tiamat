@@ -17,7 +17,7 @@ package org.rutebanken.tiamat.importer;
 
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.netex.model.SiteFrame;
-import org.rutebanken.tiamat.exporter.PublicationDeliveryExporter;
+import org.rutebanken.tiamat.exporter.PublicationDeliveryCreator;
 import org.rutebanken.tiamat.importer.handler.GroupOfTariffZonesImportHandler;
 import org.rutebanken.tiamat.importer.handler.TariffZoneImportHandler;
 import org.rutebanken.tiamat.netex.mapping.PublicationDeliveryHelper;
@@ -41,19 +41,19 @@ public class PublicationDeliveryTariffZoneImporter {
 
 
     private final PublicationDeliveryHelper publicationDeliveryHelper;
-    private final PublicationDeliveryExporter publicationDeliveryExporter;
+    private final PublicationDeliveryCreator publicationDeliveryCreator;
     private final TariffZoneImportHandler tariffZoneImportHandler;
     private final GroupOfTariffZonesImportHandler groupOfTariffZonesImportHandler;
     private final BackgroundJobs backgroundJobs;
 
     @Autowired
     public PublicationDeliveryTariffZoneImporter(PublicationDeliveryHelper publicationDeliveryHelper,
-                                                 PublicationDeliveryExporter publicationDeliveryExporter,
+                                                 PublicationDeliveryCreator publicationDeliveryCreator,
                                                  TariffZoneImportHandler tariffZoneImportHandler,
                                                  GroupOfTariffZonesImportHandler groupOfTariffZonesImportHandler,
                                                  BackgroundJobs backgroundJobs) {
         this.publicationDeliveryHelper = publicationDeliveryHelper;
-        this.publicationDeliveryExporter = publicationDeliveryExporter;
+        this.publicationDeliveryCreator = publicationDeliveryCreator;
         this.tariffZoneImportHandler = tariffZoneImportHandler;
         this.groupOfTariffZonesImportHandler = groupOfTariffZonesImportHandler;
         this.backgroundJobs = backgroundJobs;
@@ -106,7 +106,7 @@ public class PublicationDeliveryTariffZoneImporter {
             if(responseSiteFrame.getTariffZones() != null || responseSiteFrame.getTopographicPlaces() != null) {
                 backgroundJobs.triggerStopPlaceUpdate();
             }
-            return publicationDeliveryExporter.createPublicationDelivery(responseSiteFrame);
+            return publicationDeliveryCreator.createPublicationDelivery(responseSiteFrame);
         } finally {
             MDC.remove(IMPORT_CORRELATION_ID);
         }

@@ -15,16 +15,17 @@
 
 package org.rutebanken.tiamat.model;
 
-import javax.persistence.AttributeOverride;
-import javax.persistence.AttributeOverrides;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Embedded;
-import javax.persistence.FetchType;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.OneToOne;
-import javax.persistence.Transient;
-import javax.xml.bind.JAXBElement;
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.AttributeOverrides;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Transient;
+import jakarta.xml.bind.JAXBElement;
+
 import java.math.BigDecimal;
 
 

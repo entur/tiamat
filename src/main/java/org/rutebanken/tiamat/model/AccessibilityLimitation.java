@@ -16,10 +16,9 @@
 package org.rutebanken.tiamat.model;
 
 import com.google.common.base.MoreObjects;
+import jakarta.persistence.Entity;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-
-import javax.persistence.Entity;
 
 
 @Entity

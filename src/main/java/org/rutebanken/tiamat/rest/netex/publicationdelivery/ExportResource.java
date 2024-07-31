@@ -15,10 +15,20 @@
 
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
-import io.swagger.annotations.Api;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.ws.rs.BeanParam;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.StreamingOutput;
+import jakarta.ws.rs.core.UriBuilder;
+import jakarta.ws.rs.core.UriInfo;
+import jakarta.xml.bind.JAXBException;
 import org.rutebanken.tiamat.dtoassembling.disassembler.ChangedStopPlaceSearchDisassembler;
 import org.rutebanken.tiamat.dtoassembling.dto.ChangedStopPlaceSearchDto;
-import org.rutebanken.tiamat.exporter.PublicationDeliveryExporter;
 import org.rutebanken.tiamat.exporter.PublicationDeliveryStructurePage;
 import org.rutebanken.tiamat.exporter.StreamingPublicationDelivery;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
@@ -30,22 +40,11 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.xml.sax.SAXException;
 
-import javax.ws.rs.BeanParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
-import javax.ws.rs.core.UriBuilder;
-import javax.ws.rs.core.UriInfo;
-import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.net.URI;
 
 @Component
-@Api(tags = {"Sync export resource"}, produces = "application/xml")
+@Tag(name = "Sync export resource", description = "Sync export resource")
 @Produces("application/xml")
 @Path("netex")
 public class ExportResource {
@@ -54,9 +53,9 @@ public class ExportResource {
 
     private final PublicationDeliveryStreamingOutput publicationDeliveryStreamingOutput;
 
-    private final PublicationDeliveryExporter publicationDeliveryExporter;
-
     private final ChangedStopPlaceSearchDisassembler changedStopPlaceSearchDisassembler;
+
+    private final ExportStopPlacesWithEffectiveChangeInPeriod exportStopPlacesWithEffectiveChangeInPeriod;
 
     @Qualifier("syncStreamingPublicationDelivery")
     @Autowired
@@ -64,12 +63,12 @@ public class ExportResource {
 
     @Autowired
     public ExportResource(PublicationDeliveryStreamingOutput publicationDeliveryStreamingOutput,
-                          PublicationDeliveryExporter publicationDeliveryExporter,
+                          ExportStopPlacesWithEffectiveChangeInPeriod exportStopPlacesWithEffectiveChangeInPeriod,
                           ChangedStopPlaceSearchDisassembler changedStopPlaceSearchDisassembler) {
 
         this.publicationDeliveryStreamingOutput = publicationDeliveryStreamingOutput;
-        this.publicationDeliveryExporter = publicationDeliveryExporter;
         this.changedStopPlaceSearchDisassembler = changedStopPlaceSearchDisassembler;
+        this.exportStopPlacesWithEffectiveChangeInPeriod = exportStopPlacesWithEffectiveChangeInPeriod;
     }
 
     @GET
@@ -100,8 +99,7 @@ public class ExportResource {
 
         ChangedStopPlaceSearch search = changedStopPlaceSearchDisassembler.disassemble(searchDTO);
         logger.info("Exporting stop places. Search: {}, topographic export mode: {}", search, exportParams.getTopographicPlaceExportMode());
-        PublicationDeliveryStructurePage resultPage =
-                publicationDeliveryExporter.exportStopPlacesWithEffectiveChangeInPeriod(search, exportParams);
+        PublicationDeliveryStructurePage resultPage = exportStopPlacesWithEffectiveChangeInPeriod.export(search, exportParams);
 
         if (resultPage.totalElements == 0) {
             logger.debug("Returning no content. No stops changed in period.");

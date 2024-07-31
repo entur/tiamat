@@ -23,23 +23,17 @@ import graphql.schema.GraphQLInputType;
 import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLNonNull;
 import graphql.schema.GraphQLObjectType;
-import org.locationtech.jts.geom.Geometry;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.model.AccessibilityAssessment;
-import org.rutebanken.tiamat.model.AccessibilityLimitation;
 import org.rutebanken.tiamat.model.AirSubmodeEnumeration;
-import org.rutebanken.tiamat.model.BoardingPosition;
 import org.rutebanken.tiamat.model.BoardingPositionTypeEnumeration;
 import org.rutebanken.tiamat.model.BusSubmodeEnumeration;
 import org.rutebanken.tiamat.model.CycleStorageEnumeration;
-import org.rutebanken.tiamat.model.CycleStorageEquipment;
 import org.rutebanken.tiamat.model.FunicularSubmodeEnumeration;
 import org.rutebanken.tiamat.model.GenderLimitationEnumeration;
-import org.rutebanken.tiamat.model.GeneralSign;
 import org.rutebanken.tiamat.model.OrganisationTypeEnumeration;
 import org.rutebanken.tiamat.model.StopPlaceOrganisationRelationshipEnumeration;
 import org.rutebanken.tiamat.model.hsl.AccessibilityLevelEnumeration;
-import org.rutebanken.tiamat.model.GroupOfStopPlaces;
 import org.rutebanken.tiamat.model.hsl.ElectricityTypeEnumeration;
 import org.rutebanken.tiamat.model.hsl.GuidanceTypeEnumeration;
 import org.rutebanken.tiamat.model.hsl.HslAccessibilityProperties;
@@ -52,11 +46,9 @@ import org.rutebanken.tiamat.model.hsl.ShelterWidthTypeEnumeration;
 import org.rutebanken.tiamat.model.InstalledEquipment_VersionStructure;
 import org.rutebanken.tiamat.model.InterchangeWeightingEnumeration;
 import org.rutebanken.tiamat.model.LimitationStatusEnumeration;
-import org.rutebanken.tiamat.model.Link;
 import org.rutebanken.tiamat.model.MetroSubmodeEnumeration;
 import org.rutebanken.tiamat.model.ModificationEnumeration;
 import org.rutebanken.tiamat.model.NameTypeEnumeration;
-import org.rutebanken.tiamat.model.Parking;
 import org.rutebanken.tiamat.model.ParkingLayoutEnumeration;
 import org.rutebanken.tiamat.model.ParkingPaymentProcessEnumeration;
 import org.rutebanken.tiamat.model.ParkingReservationEnumeration;
@@ -66,22 +58,15 @@ import org.rutebanken.tiamat.model.ParkingUserEnumeration;
 import org.rutebanken.tiamat.model.ParkingVehicleEnumeration;
 import org.rutebanken.tiamat.model.PlaceEquipment;
 import org.rutebanken.tiamat.model.RailSubmodeEnumeration;
-import org.rutebanken.tiamat.model.SanitaryEquipment;
 import org.rutebanken.tiamat.model.ScopingMethodEnumeration;
-import org.rutebanken.tiamat.model.ShelterEquipment;
 import org.rutebanken.tiamat.model.SignContentEnumeration;
-import org.rutebanken.tiamat.model.SiteRefStructure;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.rutebanken.tiamat.model.TelecabinSubmodeEnumeration;
-import org.rutebanken.tiamat.model.TicketingEquipment;
 import org.rutebanken.tiamat.model.TopographicPlaceTypeEnumeration;
 import org.rutebanken.tiamat.model.TramSubmodeEnumeration;
 import org.rutebanken.tiamat.model.VehicleModeEnumeration;
-import org.rutebanken.tiamat.model.WaitingRoomEquipment;
 import org.rutebanken.tiamat.model.WaterSubmodeEnumeration;
 import org.rutebanken.tiamat.model.ZoneTopologyEnumeration;
-import org.rutebanken.tiamat.model.Zone_VersionStructure;
-import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
 import org.rutebanken.tiamat.rest.graphql.fetchers.OrganisationFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.PrivateCodeFetcher;
 
@@ -89,17 +74,18 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import static graphql.Scalars.GraphQLBigInteger;
 import static graphql.Scalars.GraphQLBoolean;
 import static graphql.Scalars.GraphQLFloat;
 import static graphql.Scalars.GraphQLInt;
 import static graphql.Scalars.GraphQLString;
+import static graphql.scalars.ExtendedScalars.GraphQLBigInteger;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLInputObjectField.newInputObjectField;
 import static graphql.schema.GraphQLObjectType.newObject;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 import static org.rutebanken.tiamat.rest.graphql.scalars.CustomScalars.GraphQLGeoJSONCoordinates;
-import static org.rutebanken.tiamat.rest.graphql.scalars.TransportModeScalar.getValidSubmodes;
+import static org.rutebanken.tiamat.rest.graphql.scalars.CustomScalars.GraphQLLegacyGeoJSONCoordinates;
+
 
 public class CustomGraphQLTypes {
 
@@ -193,56 +179,47 @@ public class CustomGraphQLTypes {
 
     public static GraphQLObjectType geoJsonObjectType = newObject()
             .name(OUTPUT_TYPE_GEO_JSON)
-            .description("Geometry-object as specified in the GeoJSON-standard (http://geojson.org/geojson-spec.html).")
+            .description("Geometry-object as specified in the GeoJSON-standard (https://geojson.org/geojson-spec.html).")
             .field(newFieldDefinition()
                     .name(TYPE)
-                    .type(geometryTypeEnum)
-                    .dataFetcher(env -> {
-                        if (env.getSource() instanceof Geometry) {
-                            return env.getSource().getClass().getSimpleName();
-                        }
-                        return null;
-                    }))
+                    .type(geometryTypeEnum))
+            .field(newFieldDefinition()
+                    .name(LEGACY_COORDINATES)
+                    .description("non standard coordinates")
+                    .deprecate("no standard coordinates, should be removed in future versions")
+                    .type(GraphQLLegacyGeoJSONCoordinates))
+
             .field(newFieldDefinition()
                     .name(COORDINATES)
+                    .description("GeoJSON-standard coordinates")
                     .type(GraphQLGeoJSONCoordinates))
+
+
             .build();
 
     public static GraphQLInputObjectType geoJsonInputType = GraphQLInputObjectType.newInputObject()
             .name(INPUT_TYPE_GEO_JSON)
-            .description("Geometry-object as specified in the GeoJSON-standard (http://geojson.org/geojson-spec.html).")
+            .description("Geometry-object as specified in the GeoJSON-standard (https://geojson.org/geojson-spec.html).")
             .field(newInputObjectField()
                     .name(TYPE)
                     .type(new GraphQLNonNull(geometryTypeEnum))
                     .build())
             .field(newInputObjectField()
-                    .name(COORDINATES)
-                    .type(new GraphQLNonNull(GraphQLGeoJSONCoordinates))
+                    .name(LEGACY_COORDINATES)
+                    .description("non-standard coordinates")
+                    .type(GraphQLLegacyGeoJSONCoordinates)
                     .build())
+            .field(newInputObjectField()
+                    .name(COORDINATES)
+                    .description("GeoJSON coordinates")
+                    .type(GraphQLGeoJSONCoordinates))
             .build();
 
 
     public static GraphQLFieldDefinition geometryFieldDefinition = newFieldDefinition()
             .name(GEOMETRY)
             .type(geoJsonObjectType)
-            .dataFetcher(env -> {
-                if (env.getSource() instanceof Zone_VersionStructure) {
-                    Zone_VersionStructure source = env.getSource();
-                    if (source.getCentroid()!=null) {
-                        return source.getCentroid();
-                    }
-                    return source.getPolygon();
-                } else if (env.getSource() instanceof Link) {
-                    Link link = env.getSource();
-                    return link.getLineString();
-                } else if (env.getSource() instanceof GroupOfStopPlaces) {
-                    GroupOfStopPlaces source = env.getSource();
-                    if (source.getCentroid() != null) {
-                        return source.getCentroid();
-                    }
-                }
-                return null;
-            }).build();
+            .build();
 
     public static GraphQLObjectType embeddableMultilingualStringObjectType = newObject()
             .name(OUTPUT_TYPE_EMBEDDABLE_MULTILINGUAL_STRING)
@@ -289,12 +266,6 @@ public class CustomGraphQLTypes {
     public static GraphQLFieldDefinition netexIdFieldDefinition = newFieldDefinition()
             .name(ID)
             .type(GraphQLString)
-            .dataFetcher(env -> {
-                if (env.getSource() instanceof IdentifiedEntity) {
-                    return ((IdentifiedEntity) env.getSource()).getNetexId();
-                }
-                return null;
-            })
             .build();
 
 
@@ -483,7 +454,6 @@ public class CustomGraphQLTypes {
     public static GraphQLFieldDefinition privateCodeFieldDefinition = newFieldDefinition()
             .name(PRIVATE_CODE)
             .type(privateCodeObjectType)
-            .dataFetcher(privateCodeFetcher)
             .build();
 
     public static GraphQLInputObjectType privateCodeInputType = GraphQLInputObjectType.newInputObject()
@@ -611,35 +581,30 @@ public class CustomGraphQLTypes {
             .field(newFieldDefinition()
                     .name(WAITING_ROOM_EQUIPMENT)
                     .type(new GraphQLList(waitingRoomEquipmentType))
-                    .dataFetcher(env -> getEquipmentOfType(WaitingRoomEquipment.class, env))
             )
             .field(newFieldDefinition()
                     .name(SANITARY_EQUIPMENT)
                     .type(new GraphQLList(sanitaryEquipmentType))
-                    .dataFetcher(env -> getEquipmentOfType(SanitaryEquipment.class, env))
             )
             .field(newFieldDefinition()
                     .name(TICKETING_EQUIPMENT)
                     .type(new GraphQLList(ticketingEquipmentType))
-                    .dataFetcher(env -> getEquipmentOfType(TicketingEquipment.class, env))
             )
             .field(newFieldDefinition()
                     .name(SHELTER_EQUIPMENT)
                     .type(new GraphQLList(shelterEquipmentType))
-                    .dataFetcher(env -> getEquipmentOfType(ShelterEquipment.class, env))
             )
             .field(newFieldDefinition()
                     .name(CYCLE_STORAGE_EQUIPMENT)
                     .type(new GraphQLList(cycleStorageEquipmentType))
-                    .dataFetcher(env -> getEquipmentOfType(CycleStorageEquipment.class, env))
             )
             .field(newFieldDefinition()
                     .name(GENERAL_SIGN)
                     .type(new GraphQLList(generalSignEquipmentType))
-                    .dataFetcher(env -> getEquipmentOfType(GeneralSign.class, env)))
+            )
             .build();
 
-    private static List getEquipmentOfType(Class clazz, DataFetchingEnvironment env) {
+    public static List getEquipmentOfType(Class clazz, DataFetchingEnvironment env) {
         List<InstalledEquipment_VersionStructure> installedEquipment = ((PlaceEquipment) env.getSource()).getInstalledEquipment();
         List equipments = new ArrayList<>();
         for (InstalledEquipment_VersionStructure ie : installedEquipment) {
@@ -681,7 +646,6 @@ public class CustomGraphQLTypes {
             .field(newFieldDefinition()
                     .name(ID)
                     .type(GraphQLString)
-                    .dataFetcher(env -> ((AccessibilityLimitation) env.getSource()).getNetexId())
             )
             .field(newFieldDefinition()
                     .name(VERSION)
@@ -821,7 +785,6 @@ public class CustomGraphQLTypes {
             .field(newFieldDefinition()
                     .name(ID)
                     .type(GraphQLString)
-                    .dataFetcher(env -> ((AccessibilityAssessment) env.getSource()).getNetexId())
             )
             .field(newFieldDefinition()
                     .name(VERSION)
@@ -829,13 +792,7 @@ public class CustomGraphQLTypes {
             .field(newFieldDefinition()
                     .name(LIMITATIONS)
                     .type(accessibilityLimitationsObjectType)
-                    .dataFetcher(env -> {
-                        List<AccessibilityLimitation> limitations = ((AccessibilityAssessment) env.getSource()).getLimitations();
-                        if (limitations != null && !limitations.isEmpty()) {
-                            return limitations.get(0);
-                        }
-                        return null;
-                    }))
+            )
             .field(newFieldDefinition()
                     .name(MOBILITY_IMPAIRED_ACCESS)
                     .type(limitationStatusEnum))
@@ -989,7 +946,6 @@ public class CustomGraphQLTypes {
             .field(newFieldDefinition()
                 .name(ID)
                 .type(GraphQLString)
-                    .dataFetcher(env -> ((BoardingPosition)env.getSource()).getNetexId())
             )
             .field(newFieldDefinition()
                 .name(PUBLIC_CODE)
@@ -1204,12 +1160,10 @@ public class CustomGraphQLTypes {
             .field(newFieldDefinition()
                     .name("transportMode")
                     .type(GraphQLString)
-                    .dataFetcher(env -> env.getSource())
             )
             .field(newFieldDefinition()
                     .name("submode")
                     .type(new GraphQLList(GraphQLString))
-                    .dataFetcher(env -> getValidSubmodes((String) env.getSource()))
             )
             .build();
 
@@ -1229,13 +1183,6 @@ public class CustomGraphQLTypes {
                 .field(newFieldDefinition()
                         .name(PARENT_SITE_REF)
                         .type(GraphQLString)
-                        .dataFetcher(env -> {
-                            SiteRefStructure parentSiteRef = ((Parking) env.getSource()).getParentSiteRef();
-                            if (parentSiteRef != null) {
-                                return parentSiteRef.getRef();
-                            }
-                            return null;
-                        })
                 )
                 .field(newFieldDefinition()
                         .name(TOTAL_CAPACITY)
@@ -1298,7 +1245,9 @@ public class CustomGraphQLTypes {
                 .field(newInputObjectField()
                         .name(PARENT_SITE_REF)
                         .type(GraphQLString))
+                //todo: it should be removed.
                 .field(newInputObjectField()
+                        .deprecate("totalCapacity is not updated directly, use ParkingProperties>Spaces>noOfSpaces")
                         .name(TOTAL_CAPACITY)
                         .type(GraphQLBigInteger))
                 .field(newInputObjectField()

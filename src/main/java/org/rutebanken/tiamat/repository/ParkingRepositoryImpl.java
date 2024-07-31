@@ -15,6 +15,12 @@
 
 package org.rutebanken.tiamat.repository;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
+import jakarta.persistence.TypedQuery;
+import jakarta.transaction.Transactional;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
@@ -33,13 +39,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Repository;
 
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
-import javax.persistence.TypedQuery;
-import javax.transaction.Transactional;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -97,7 +96,7 @@ public class ParkingRepositoryImpl implements ParkingRepositoryCustom {
             if (results.isEmpty()) {
                 return null;
             } else {
-                return results.get(0);
+                return results.getFirst();
             }
         } catch (NoResultException noResultException) {
             return null;
@@ -131,7 +130,7 @@ public class ParkingRepositoryImpl implements ParkingRepositoryCustom {
         Session session = entityManager.unwrap(Session.class);
         NativeQuery query = session.createNativeQuery("SELECT COUNT(*) from (" + sqlWithParams.getFirst() + ") as numberOfParkings");
         searchHelper.addParams(query, sqlWithParams.getSecond());
-        return ((BigInteger) query.uniqueResult()).intValue();
+        return ((Long) query.uniqueResult()).intValue();
     }
 
     private Iterator<Parking> scrollParkings(Pair<String, Map<String, Object>> sqlWithParams) {
@@ -224,7 +223,7 @@ public class ParkingRepositoryImpl implements ParkingRepositoryCustom {
     private <T> T getOneOrNull(TypedQuery<T> query) {
         try {
             List<T> resultList = query.getResultList();
-            return resultList.isEmpty() ? null : resultList.get(0);
+            return resultList.isEmpty() ? null : resultList.getFirst();
         } catch (NoResultException e) {
             return null;
         }

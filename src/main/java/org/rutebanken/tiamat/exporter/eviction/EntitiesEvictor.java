@@ -15,17 +15,6 @@
 
 package org.rutebanken.tiamat.exporter.eviction;
 
-import com.google.common.collect.Sets;
-import org.hibernate.engine.spi.EntityKey;
-import org.hibernate.internal.SessionImpl;
-import org.rutebanken.tiamat.model.*;
-import org.rutebanken.tiamat.model.tag.Tag;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Evict entities from session during scrolling results from databases

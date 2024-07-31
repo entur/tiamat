@@ -15,9 +15,9 @@
 
 package org.rutebanken.tiamat.model;
 
-import javax.persistence.MappedSuperclass;
-import javax.persistence.Transient;
-import javax.xml.bind.JAXBElement;
+import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.Transient;
+import jakarta.xml.bind.JAXBElement;
 
 
 @MappedSuperclass

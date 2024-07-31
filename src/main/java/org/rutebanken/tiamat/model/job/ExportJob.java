@@ -16,34 +16,33 @@
 package org.rutebanken.tiamat.model.job;
 
 import com.google.common.base.MoreObjects;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.Transient;
+import jakarta.xml.bind.annotation.XmlRootElement;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Transient;
-import javax.xml.bind.annotation.XmlRootElement;
 import java.time.Instant;
 
 import static org.rutebanken.tiamat.rest.netex.publicationdelivery.AsyncExportResource.ASYNC_JOB_PATH;
 
 @Entity
 @XmlRootElement
-@ApiModel(description = "Export job model")
+@Schema(description = "Export job model")
 public class ExportJob {
 
     @Id
-    @GeneratedValue
-    @ApiModelProperty("Unique id for the entity")
+    @GeneratedValue(generator = "sequence_per_table_generator")
+    @Schema(description = "Unique id for the entity")
     private Long id;
 
     @Deprecated
-    @ApiModelProperty("JobUrl property  is deprecated")
+    @Schema(description = "JobUrl property  is deprecated")
     private String jobUrl;
 
-    @ApiModelProperty("File name of exported file")
+    @Schema(description = "File name of exported file")
     private String fileName;
 
     private String subFolder;
@@ -54,7 +53,7 @@ public class ExportJob {
 
     private Instant finished;
 
-    @ApiModelProperty("Job status")
+    @Schema(description = "Job status")
     private JobStatus status;
 
     @Transient

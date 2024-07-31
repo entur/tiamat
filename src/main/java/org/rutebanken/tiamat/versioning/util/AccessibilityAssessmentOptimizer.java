@@ -20,8 +20,6 @@ import org.rutebanken.tiamat.model.AccessibilityLimitation;
 import org.rutebanken.tiamat.model.hsl.HslAccessibilityProperties;
 import org.rutebanken.tiamat.model.LimitationStatusEnumeration;
 import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.versioning.VersionCreator;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -31,15 +29,6 @@ import static org.rutebanken.tiamat.versioning.util.MobilityImpairedAccessCalcul
 
 @Service
 public class AccessibilityAssessmentOptimizer {
-
-    private final VersionCreator versionCreator;
-
-    @Autowired
-    public AccessibilityAssessmentOptimizer(VersionCreator versionCreator) {
-        this.versionCreator = versionCreator;
-    }
-
-
     public void optimizeAccessibilityAssessments(StopPlace stopPlace) {
 
         List<AccessibilityAssessment> allQuayAccessibilityAssessments = new ArrayList<>();
@@ -64,7 +53,7 @@ public class AccessibilityAssessmentOptimizer {
                 //All quays are equal
                 //Set Assessment on StopPlace
 
-                AccessibilityAssessment firstAccessibilityAssessment = deepCopyAccessibilityAssessment(allQuayAccessibilityAssessments.get(0));
+                AccessibilityAssessment firstAccessibilityAssessment = deepCopyAccessibilityAssessment(allQuayAccessibilityAssessments.getFirst());
 
                 if (stopPlace.getAccessibilityAssessment() != null) {
                     // Use existing Assessment instead, but update limitations
@@ -72,7 +61,6 @@ public class AccessibilityAssessmentOptimizer {
                     nextVersion.setLimitations(firstAccessibilityAssessment.getLimitations());
                     nextVersion.setHslAccessibilityProperties(firstAccessibilityAssessment.getHslAccessibilityProperties()); // Note: this does not increment version but creates a new row, similarly to limitations.
                     firstAccessibilityAssessment = nextVersion;
-//                    firstAccessibilityAssessment = versionCreator.createCopy(nextVersion, AccessibilityAssessment.class);
                 }
 
                 stopPlace.setAccessibilityAssessment(firstAccessibilityAssessment);
@@ -100,14 +88,7 @@ public class AccessibilityAssessmentOptimizer {
         if (accessibilityAssessment == null) {
             return createDefaultAccessibilityAssessment();
         }
-        AccessibilityLimitation stopLimitation = accessibilityAssessment.getLimitations().get(0);
-
-        AccessibilityLimitation limitation = new AccessibilityLimitation();
-        limitation.setWheelchairAccess(stopLimitation.getWheelchairAccess());
-        limitation.setAudibleSignalsAvailable(stopLimitation.getAudibleSignalsAvailable());
-        limitation.setLiftFreeAccess(stopLimitation.getLiftFreeAccess());
-        limitation.setEscalatorFreeAccess(stopLimitation.getEscalatorFreeAccess());
-        limitation.setStepFreeAccess(stopLimitation.getStepFreeAccess());
+        final AccessibilityLimitation limitation = getAccessibilityLimitation(accessibilityAssessment);
 
         AccessibilityAssessment quayAssessment = new AccessibilityAssessment();
         quayAssessment.setMobilityImpairedAccess(accessibilityAssessment.getMobilityImpairedAccess());
@@ -123,6 +104,18 @@ public class AccessibilityAssessmentOptimizer {
         }
 
         return quayAssessment;
+    }
+
+    private static AccessibilityLimitation getAccessibilityLimitation(AccessibilityAssessment accessibilityAssessment) {
+        AccessibilityLimitation stopLimitation = accessibilityAssessment.getLimitations().getFirst();
+
+        AccessibilityLimitation limitation = new AccessibilityLimitation();
+        limitation.setWheelchairAccess(stopLimitation.getWheelchairAccess());
+        limitation.setAudibleSignalsAvailable(stopLimitation.getAudibleSignalsAvailable());
+        limitation.setLiftFreeAccess(stopLimitation.getLiftFreeAccess());
+        limitation.setEscalatorFreeAccess(stopLimitation.getEscalatorFreeAccess());
+        limitation.setStepFreeAccess(stopLimitation.getStepFreeAccess());
+        return limitation;
     }
 
     private AccessibilityAssessment createDefaultAccessibilityAssessment() {
@@ -147,10 +140,10 @@ public class AccessibilityAssessmentOptimizer {
             return true;
         }
 
-        AccessibilityAssessment first = quayAccessibilityAssessments.get(0);
+        AccessibilityAssessment first = quayAccessibilityAssessments.getFirst();
         List<AccessibilityLimitation> limitations = first.getLimitations();
         if (limitations != null && !limitations.isEmpty()) {
-            AccessibilityLimitation limitation = limitations.get(0);
+            AccessibilityLimitation limitation = limitations.getFirst();
 
             LimitationStatusEnumeration wheelchairAccess = limitation.getWheelchairAccess();
             LimitationStatusEnumeration audibleSignalsAvailable = limitation.getAudibleSignalsAvailable();

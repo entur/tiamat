@@ -402,6 +402,7 @@ public class GraphQLNames {
     public static final String GEOMETRY = "geometry";
     public static final String TYPE = "type";
     public static final String COORDINATES = "coordinates";
+    public static final String LEGACY_COORDINATES = "legacyCoordinates";
     public static final String IGNORE_STOPPLACE_ID = "ignoreStopPlaceId";
     public static final String QUAYS = "quays";
     public static final String COMPASS_BEARING = "compassBearing";
@@ -466,6 +467,10 @@ public class GraphQLNames {
     public static final String SUBMODE_TYPE = "SubmodeType";
 
     public static final String FIND_STOPPLACE = "stopPlace";
+
+    public static final String STOPPLACES_REGISTER = "StopPlaceRegister";
+    public static final String STOPPLACES_MUTATION = "StopPlaceMutation";
+    public static final String DELETE_GROUP_OF_STOPPLACES="deleteGroupOfStopPlaces";
 
     /** Check if authorized to edit entity */
     public static final String CHECK_AUTHORIZED = "checkAuthorized";

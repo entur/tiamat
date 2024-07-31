@@ -77,7 +77,7 @@ class GroupOfStopPlacesUpdater implements DataFetcher<GroupOfStopPlaces> {
 
     @Override
     public GroupOfStopPlaces get(DataFetchingEnvironment environment) {
-        List<Field> fields = environment.getFields();
+        List<Field> fields = environment.getMergedField().getFields();
         CleanupHelper.trimValues(environment.getArguments());
         for (Field field : fields) {
             if (field.getName().equals(MUTATE_GROUP_OF_STOP_PLACES)) {

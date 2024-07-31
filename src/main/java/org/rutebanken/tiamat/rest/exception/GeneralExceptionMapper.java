@@ -16,20 +16,20 @@
 package org.rutebanken.tiamat.rest.exception;
 
 import com.google.common.collect.Sets;
+import jakarta.persistence.EntityExistsException;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.OptimisticLockException;
+import jakarta.validation.ValidationException;
+import jakarta.ws.rs.NotAuthorizedException;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.ext.ExceptionMapper;
+import jakarta.ws.rs.ext.Provider;
 import org.rutebanken.helper.organisation.NotAuthenticatedException;
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.AccessDeniedException;
 
-import javax.persistence.EntityExistsException;
-import javax.persistence.EntityNotFoundException;
-import javax.persistence.OptimisticLockException;
-import javax.validation.ValidationException;
-import javax.ws.rs.NotAuthorizedException;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.ExceptionMapper;
-import javax.ws.rs.ext.Provider;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -76,8 +76,7 @@ public class GeneralExceptionMapper implements ExceptionMapper<Exception> {
     private Throwable getRootCause(Throwable e) {
         Throwable rootCause = e;
 
-        if (e instanceof NestedRuntimeException) {
-            NestedRuntimeException nestedRuntimeException = ((NestedRuntimeException) e);
+        if (e instanceof NestedRuntimeException nestedRuntimeException) {
             if (nestedRuntimeException.getRootCause() != null) {
                 rootCause = nestedRuntimeException.getRootCause();
             }

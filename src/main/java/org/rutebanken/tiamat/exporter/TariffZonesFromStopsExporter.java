@@ -15,6 +15,7 @@
 
 package org.rutebanken.tiamat.exporter;
 
+import jakarta.xml.bind.JAXBElement;
 import org.rutebanken.netex.model.FareZone;
 import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.SiteFrame;
@@ -31,7 +32,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.xml.bind.JAXBElement;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;

@@ -89,12 +89,12 @@ public class GroupOfTariffZonesObjectTypeCreator {
                 .field(newFieldDefinition()
                         .name(GROUP_OF_TARIFF_ZONES_MEMBERS)
                         .type(new GraphQLList(GraphQLTypeReference.typeRef(OUTPUT_TYPE_FARE_ZONE)))
-                        .dataFetcher(this::groupOfTariffZoneMembersType))
+                        )
                         .build();
 
     }
 
-    private List<FareZone> groupOfTariffZoneMembersType(DataFetchingEnvironment env) {
+    public List<FareZone> groupOfTariffZoneMembersType(DataFetchingEnvironment env) {
         final Set<TariffZoneRef> members = ((GroupOfTariffZones) env.getSource()).getMembers();
         if (!members.isEmpty()) {
             return members.stream()

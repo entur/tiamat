@@ -15,6 +15,12 @@
 
 package org.rutebanken.tiamat.exporter;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Marshaller;
 import org.hibernate.internal.SessionImpl;
 import org.rutebanken.netex.model.DataManagedObjectStructure;
 import org.rutebanken.netex.model.FareZone;
@@ -77,12 +83,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.xml.sax.SAXException;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -97,7 +97,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static javax.xml.bind.JAXBContext.newInstance;
+import static jakarta.xml.bind.JAXBContext.newInstance;
 
 /**
  * Stream data objects inside already serialized publication delivery.
@@ -114,7 +114,7 @@ public class StreamingPublicationDelivery {
 
     private final StopPlaceRepository stopPlaceRepository;
     private final ParkingRepository parkingRepository;
-    private final PublicationDeliveryExporter publicationDeliveryExporter;
+    private final PublicationDeliveryCreator publicationDeliveryCreator;
     private final TiamatSiteFrameExporter tiamatSiteFrameExporter;
     private final TiamatServiceFrameExporter tiamatServiceFrameExporter;
     private final TiamatFareFrameExporter tiamatFareFrameExporter;
@@ -141,7 +141,7 @@ public class StreamingPublicationDelivery {
     @Autowired
     public StreamingPublicationDelivery(StopPlaceRepository stopPlaceRepository,
                                         ParkingRepository parkingRepository,
-                                        PublicationDeliveryExporter publicationDeliveryExporter,
+                                        PublicationDeliveryCreator publicationDeliveryCreator,
                                         TiamatSiteFrameExporter tiamatSiteFrameExporter,
                                         TiamatServiceFrameExporter tiamatServiceFrameExporter,
                                         TiamatFareFrameExporter tiamatFareFrameExporter,
@@ -157,7 +157,7 @@ public class StreamingPublicationDelivery {
                                         PurposeOfGroupingRepository purposeOfGroupingRepository) throws IOException, SAXException {
         this.stopPlaceRepository = stopPlaceRepository;
         this.parkingRepository = parkingRepository;
-        this.publicationDeliveryExporter = publicationDeliveryExporter;
+        this.publicationDeliveryCreator = publicationDeliveryCreator;
         this.tiamatSiteFrameExporter = tiamatSiteFrameExporter;
         this.tiamatServiceFrameExporter = tiamatServiceFrameExporter;
         this.tiamatFareFrameExporter = tiamatFareFrameExporter;
@@ -247,9 +247,9 @@ public class StreamingPublicationDelivery {
         if (exportParams.getServiceFrameExportMode() == ExportParams.ExportMode.ALL) {
             prepareFareZones(exportParams,stopPlacePrimaryIds,mappedFareZonesCount,mappedGroupOfTariffZonesCount,netexSiteFrame,netexFareFrame,entitiesEvictor);
             prepareScheduledStopPoints(stopPlacePrimaryIds, netexServiceFrame);
-            publicationDeliveryStructure = publicationDeliveryExporter.createPublicationDelivery(netexSiteFrame, netexServiceFrame,netexFareFrame,netexResourceFrame);
+            publicationDeliveryStructure = publicationDeliveryCreator.createPublicationDelivery(netexSiteFrame, netexServiceFrame,netexFareFrame,netexResourceFrame);
         } else {
-            publicationDeliveryStructure = publicationDeliveryExporter.createPublicationDelivery(netexSiteFrame,netexResourceFrame);
+            publicationDeliveryStructure = publicationDeliveryCreator.createPublicationDelivery(netexSiteFrame,netexResourceFrame);
         }
 
         Marshaller marshaller = createMarshaller();

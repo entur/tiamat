@@ -49,9 +49,7 @@ public class TopographicPlaceChecker implements AdministrativeZoneChecker {
             }
             Polygon polygon = topographicPlace.getPolygon();
 
-            if (entity instanceof Zone_VersionStructure) {
-                Zone_VersionStructure zone = (Zone_VersionStructure) entity;
-
+            if (entity instanceof Zone_VersionStructure zone) {
                 if (zone.getCentroid() == null) {
                     logger.warn("Centroid is null for entity, cannot match polygon for topographic place {}-{}, Returning true for entity: {}", topographicPlace.getNetexId(), topographicPlace.getVersion(), zone);
                     return true;

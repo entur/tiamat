@@ -15,11 +15,11 @@
 
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
+import jakarta.ws.rs.core.StreamingOutput;
 import org.junit.Test;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.xml.sax.SAXParseException;
 
-import javax.ws.rs.core.StreamingOutput;
 import java.io.ByteArrayOutputStream;
 import java.time.LocalDateTime;
 

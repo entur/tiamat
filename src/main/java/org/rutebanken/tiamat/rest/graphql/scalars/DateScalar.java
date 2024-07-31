@@ -15,7 +15,10 @@
 
 package org.rutebanken.tiamat.rest.graphql.scalars;
 
+import graphql.GraphQLContext;
+import graphql.execution.CoercedVariables;
 import graphql.language.StringValue;
+import graphql.language.Value;
 import graphql.schema.Coercing;
 import graphql.schema.GraphQLScalarType;
 import org.rutebanken.tiamat.time.ExportTimeZone;
@@ -25,6 +28,7 @@ import org.springframework.stereotype.Component;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
+import java.util.Locale;
 
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.DATE_SCALAR_DESCRIPTION;
 
@@ -64,28 +68,32 @@ public class DateScalar {
     }
 
     private GraphQLScalarType createGraphQLDateScalar() {
-        return new GraphQLScalarType("DateTime", DATE_SCALAR_DESCRIPTION, new Coercing() {
-            @Override
-            public String serialize(Object input) {
-                if (input instanceof Instant) {
-                    return (((Instant) input)).atZone(exportTimeZone.getDefaultTimeZoneId()).format(FORMATTER);
-                }
-                return null;
-            }
+        return new GraphQLScalarType.Builder()
+                .name("DateTime")
+                .description(DATE_SCALAR_DESCRIPTION)
+                .coercing(new Coercing() {
+                    @Override
+                    public String serialize(Object input, GraphQLContext graphQLContext, Locale locale) {
+                        if (input instanceof Instant instant) {
+                            return instant.atZone(exportTimeZone.getDefaultTimeZoneId()).format(FORMATTER);
+                        }
+                        return null;
+                    }
 
-            @Override
-            public Instant parseValue(Object input) {
-                return Instant.from(PARSER.parse((CharSequence) input));
-            }
+                    @Override
+                    public Instant parseValue(Object input, GraphQLContext graphQLContext, Locale locale) {
+                        return Instant.from(PARSER.parse((CharSequence) input));
+                    }
 
-            @Override
-            public Object parseLiteral(Object input) {
-                if (input instanceof StringValue) {
-                    return parseValue(((StringValue) input).getValue());
-                }
-                return null;
-            }
-        });
+                    @Override
+                    public Object parseLiteral(Value input, CoercedVariables variables, GraphQLContext graphQLContext, Locale locale) {
+                        if (input instanceof StringValue stringValue) {
+                            return parseValue(stringValue.getValue(), graphQLContext, locale);
+                        }
+                        return null;
+                    }
+                }).build();
+
     }
 
 }

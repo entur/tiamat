@@ -204,30 +204,41 @@ public class StopPlaceMapper {
 
                 String errorMessage = "Submode " + submode + " is invalid for TransportMode " + stopPlaceTransportMode;
 
-                if (submode instanceof BusSubmodeEnumeration) {
-                    Preconditions.checkArgument(validSubmodes.contains(((BusSubmodeEnumeration) submode).value()), errorMessage);
-                    stopPlace.setBusSubmode((BusSubmodeEnumeration) submode);
-                } else if (submode instanceof TramSubmodeEnumeration) {
-                    Preconditions.checkArgument(validSubmodes.contains(((TramSubmodeEnumeration) submode).value()), errorMessage);
-                    stopPlace.setTramSubmode((TramSubmodeEnumeration) submode);
-                } else if (submode instanceof RailSubmodeEnumeration) {
-                    Preconditions.checkArgument(validSubmodes.contains(((RailSubmodeEnumeration) submode).value()), errorMessage);
-                    stopPlace.setRailSubmode((RailSubmodeEnumeration) submode);
-                } else if (submode instanceof MetroSubmodeEnumeration) {
-                    Preconditions.checkArgument(validSubmodes.contains(((MetroSubmodeEnumeration) submode).value()), errorMessage);
-                    stopPlace.setMetroSubmode((MetroSubmodeEnumeration) submode);
-                } else if (submode instanceof AirSubmodeEnumeration) {
-                    Preconditions.checkArgument(validSubmodes.contains(((AirSubmodeEnumeration) submode).value()), errorMessage);
-                    stopPlace.setAirSubmode((AirSubmodeEnumeration) submode);
-                } else if (submode instanceof WaterSubmodeEnumeration) {
-                    Preconditions.checkArgument(validSubmodes.contains(((WaterSubmodeEnumeration) submode).value()), errorMessage);
-                    stopPlace.setWaterSubmode((WaterSubmodeEnumeration) submode);
-                } else if (submode instanceof TelecabinSubmodeEnumeration) {
-                    Preconditions.checkArgument(validSubmodes.contains(((TelecabinSubmodeEnumeration) submode).value()),errorMessage);
-                    stopPlace.setTelecabinSubmode((TelecabinSubmodeEnumeration) submode);
-                } else if (submode instanceof FunicularSubmodeEnumeration) {
-                    Preconditions.checkArgument(validSubmodes.contains(((FunicularSubmodeEnumeration) submode).value()),errorMessage);
-                    stopPlace.setFunicularSubmode((FunicularSubmodeEnumeration) submode);
+                switch (submode) {
+                    case BusSubmodeEnumeration busSubmodeEnumeration -> {
+                        Preconditions.checkArgument(validSubmodes.contains(busSubmodeEnumeration.value()), errorMessage);
+                        stopPlace.setBusSubmode(busSubmodeEnumeration);
+                    }
+                    case TramSubmodeEnumeration tramSubmodeEnumeration -> {
+                        Preconditions.checkArgument(validSubmodes.contains(tramSubmodeEnumeration.value()), errorMessage);
+                        stopPlace.setTramSubmode(tramSubmodeEnumeration);
+                    }
+                    case RailSubmodeEnumeration railSubmodeEnumeration -> {
+                        Preconditions.checkArgument(validSubmodes.contains(railSubmodeEnumeration.value()), errorMessage);
+                        stopPlace.setRailSubmode(railSubmodeEnumeration);
+                    }
+                    case MetroSubmodeEnumeration metroSubmodeEnumeration -> {
+                        Preconditions.checkArgument(validSubmodes.contains(metroSubmodeEnumeration.value()), errorMessage);
+                        stopPlace.setMetroSubmode(metroSubmodeEnumeration);
+                    }
+                    case AirSubmodeEnumeration airSubmodeEnumeration -> {
+                        Preconditions.checkArgument(validSubmodes.contains(airSubmodeEnumeration.value()), errorMessage);
+                        stopPlace.setAirSubmode(airSubmodeEnumeration);
+                    }
+                    case WaterSubmodeEnumeration waterSubmodeEnumeration -> {
+                        Preconditions.checkArgument(validSubmodes.contains(waterSubmodeEnumeration.value()), errorMessage);
+                        stopPlace.setWaterSubmode(waterSubmodeEnumeration);
+                    }
+                    case TelecabinSubmodeEnumeration telecabinSubmodeEnumeration -> {
+                        Preconditions.checkArgument(validSubmodes.contains(telecabinSubmodeEnumeration.value()), errorMessage);
+                        stopPlace.setTelecabinSubmode(telecabinSubmodeEnumeration);
+                    }
+                    case FunicularSubmodeEnumeration funicularSubmodeEnumeration -> {
+                        Preconditions.checkArgument(validSubmodes.contains(funicularSubmodeEnumeration.value()), errorMessage);
+                        stopPlace.setFunicularSubmode(funicularSubmodeEnumeration);
+                    }
+                    default -> {
+                    }
                 }
             }
             return true;

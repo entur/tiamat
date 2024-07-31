@@ -15,7 +15,7 @@
 
 package org.rutebanken.tiamat.model;
 
-import javax.persistence.Embeddable;
+import jakarta.persistence.Embeddable;
 
 @Embeddable
 public class TariffZoneRef extends ZoneRefStructure {

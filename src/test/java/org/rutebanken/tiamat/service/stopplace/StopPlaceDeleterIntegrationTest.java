@@ -15,6 +15,7 @@
 
 package org.rutebanken.tiamat.service.stopplace;
 
+import jakarta.transaction.Transactional;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
@@ -23,8 +24,6 @@ import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import javax.transaction.Transactional;
 
 public class StopPlaceDeleterIntegrationTest extends TiamatIntegrationTest {
 

@@ -12,8 +12,13 @@ configMap:
 
 auth0:
   ror:
-    url: https://auth2.entur.org
+    url: https://auth2.entur.org/
     audience: https://ror.api.entur.io
+  entur:
+    internal:
+      url: https://internal.entur.org/
+    partner:
+      url: https://partner.entur.org/
 
 rbac:
   enabled: true

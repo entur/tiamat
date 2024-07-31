@@ -33,9 +33,6 @@ package org.rutebanken.tiamat.rest.graphql.types;
 import graphql.schema.GraphQLInterfaceType;
 import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLObjectType;
-import org.rutebanken.tiamat.rest.graphql.fetchers.GroupOfStopPlacesMembersFetcher;
-import org.rutebanken.tiamat.rest.graphql.fetchers.GroupOfStopPlacesPurposeOfGroupingFetcher;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static graphql.Scalars.GraphQLString;
@@ -57,16 +54,9 @@ import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.netexI
 @Component
 public class GroupOfStopPlacesObjectTypeCreator {
 
-    @Autowired
-    private GroupOfStopPlacesMembersFetcher groupOfStopPlacesMembersFetcher;
-
-    @Autowired
-    private GroupOfStopPlacesPurposeOfGroupingFetcher groupOfStopPlacesPurposeOfGroupingFetcher;
-
     public GraphQLObjectType create(GraphQLInterfaceType stopPlaceInterface,
                                     GraphQLObjectType purposeOfGroupingType,
                                     GraphQLObjectType validBetweenObjectType) {
-
         return newObject()
                 .name(OUTPUT_TYPE_GROUP_OF_STOPPLACES)
                 .field(netexIdFieldDefinition)
@@ -87,16 +77,14 @@ public class GroupOfStopPlacesObjectTypeCreator {
                         .type(GraphQLString))
                 .field(newFieldDefinition()
                         .name(PURPOSE_OF_GROUPING)
-                        .type(purposeOfGroupingType)
-                        .dataFetcher(groupOfStopPlacesPurposeOfGroupingFetcher))
+                        .type(purposeOfGroupingType))
                 .field(newFieldDefinition()
                         .name(VALID_BETWEEN)
                         .type(validBetweenObjectType))
                 .field(geometryFieldDefinition)
                 .field(newFieldDefinition()
                         .name(GROUP_OF_STOP_PLACES_MEMBERS)
-                        .type(new GraphQLList(stopPlaceInterface))
-                        .dataFetcher(groupOfStopPlacesMembersFetcher))
+                        .type(new GraphQLList(stopPlaceInterface)))
                         .build();
     }
 }

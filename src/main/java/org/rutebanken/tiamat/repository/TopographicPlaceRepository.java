@@ -15,6 +15,7 @@
 
 package org.rutebanken.tiamat.repository;
 
+import jakarta.persistence.QueryHint;
 import org.locationtech.jts.geom.Point;
 import org.rutebanken.tiamat.exporter.params.TopographicPlaceSearch;
 import org.rutebanken.tiamat.model.IanaCountryTldEnumeration;
@@ -24,7 +25,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.QueryHints;
 import org.springframework.data.repository.query.Param;
 
-import javax.persistence.QueryHint;
 import java.util.List;
 
 public interface TopographicPlaceRepository extends EntityInVersionRepository<TopographicPlace>, TopographicPlaceRepositoryCustom {

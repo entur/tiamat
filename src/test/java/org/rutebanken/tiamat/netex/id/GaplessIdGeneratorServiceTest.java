@@ -16,6 +16,9 @@
 package org.rutebanken.tiamat.netex.id;
 
 import com.hazelcast.collection.IQueue;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
@@ -23,10 +26,6 @@ import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
-import java.math.BigInteger;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -89,8 +88,7 @@ public class GaplessIdGeneratorServiceTest extends TiamatIntegrationTest {
 
         List list = query.getResultList();
         assertThat(list).hasSize(1);
-        BigInteger actual = (BigInteger) list.get(0);
-        return actual.longValue();
+        return  (Long) list.getFirst();
     }
 
     private Quay insertQuay(long wantedId, Quay quay) {

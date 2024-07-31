@@ -17,7 +17,8 @@ package org.rutebanken.tiamat.importer;
 
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.netex.model.SiteFrame;
-import org.rutebanken.tiamat.exporter.PublicationDeliveryExporter;
+import org.rutebanken.tiamat.auth.AuthorizationService;
+import org.rutebanken.tiamat.exporter.PublicationDeliveryCreator;
 import org.rutebanken.tiamat.importer.handler.GroupOfTariffZonesImportHandler;
 import org.rutebanken.tiamat.importer.handler.ParkingsImportHandler;
 import org.rutebanken.tiamat.importer.handler.PathLinkImportHandler;
@@ -49,7 +50,7 @@ public class PublicationDeliveryImporter {
 
 
     private final PublicationDeliveryHelper publicationDeliveryHelper;
-    private final PublicationDeliveryExporter publicationDeliveryExporter;
+    private final PublicationDeliveryCreator publicationDeliveryCreator;
     private final PathLinkImportHandler pathLinkImportHandler;
     private final TariffZoneImportHandler tariffZoneImportHandler;
     private final GroupOfTariffZonesImportHandler groupOfTariffZonesImportHandler;
@@ -57,26 +58,28 @@ public class PublicationDeliveryImporter {
     private final ParkingsImportHandler parkingsImportHandler;
     private final TopographicPlaceImportHandler topographicPlaceImportHandler;
     private final BackgroundJobs backgroundJobs;
+    private final AuthorizationService authorizationService;
 
     @Autowired
     public PublicationDeliveryImporter(PublicationDeliveryHelper publicationDeliveryHelper, NetexMapper netexMapper,
-                                       PublicationDeliveryExporter publicationDeliveryExporter,
+                                       PublicationDeliveryCreator publicationDeliveryCreator,
                                        PathLinkImportHandler pathLinkImportHandler,
                                        TopographicPlaceImportHandler topographicPlaceImportHandler,
                                        TariffZoneImportHandler tariffZoneImportHandler,
                                        GroupOfTariffZonesImportHandler groupOfTariffZonesImportHandler,
                                        StopPlaceImportHandler stopPlaceImportHandler,
                                        ParkingsImportHandler parkingsImportHandler,
-                                       BackgroundJobs backgroundJobs) {
+                                       BackgroundJobs backgroundJobs, AuthorizationService authorizationService) {
         this.publicationDeliveryHelper = publicationDeliveryHelper;
         this.parkingsImportHandler = parkingsImportHandler;
-        this.publicationDeliveryExporter = publicationDeliveryExporter;
+        this.publicationDeliveryCreator = publicationDeliveryCreator;
         this.pathLinkImportHandler = pathLinkImportHandler;
         this.topographicPlaceImportHandler = topographicPlaceImportHandler;
         this.tariffZoneImportHandler = tariffZoneImportHandler;
         this.groupOfTariffZonesImportHandler = groupOfTariffZonesImportHandler;
         this.stopPlaceImportHandler = stopPlaceImportHandler;
         this.backgroundJobs = backgroundJobs;
+        this.authorizationService = authorizationService;
     }
 
 
@@ -86,6 +89,8 @@ public class PublicationDeliveryImporter {
 
     @SuppressWarnings("unchecked")
     public PublicationDeliveryStructure importPublicationDelivery(PublicationDeliveryStructure incomingPublicationDelivery, ImportParams importParams) {
+
+        authorizationService.verifyCanEditAllEntities();
 
         if (incomingPublicationDelivery.getDataObjects() == null) {
             String responseMessage = "Received publication delivery but it does not contain any data objects.";
@@ -136,7 +141,7 @@ public class PublicationDeliveryImporter {
             if(responseSiteFrame.getTariffZones() != null || responseSiteFrame.getTopographicPlaces() != null) {
                 backgroundJobs.triggerStopPlaceUpdate();
             }
-            return publicationDeliveryExporter.createPublicationDelivery(responseSiteFrame);
+            return publicationDeliveryCreator.createPublicationDelivery(responseSiteFrame);
         } finally {
             MDC.remove(IMPORT_CORRELATION_ID);
             loggerTimer.cancel();

@@ -79,7 +79,7 @@ public class AccessibilityAssessmentVersioningTest extends TiamatIntegrationTest
                     assertThat(quay.getAccessibilityAssessment()).isNotNull();
                     assertThat(quay.getAccessibilityAssessment().getVersion()).isEqualTo(1);
 
-                    AccessibilityLimitation actualAccessibilityLimitation = quay.getAccessibilityAssessment().getLimitations().get(0);
+                    AccessibilityLimitation actualAccessibilityLimitation = quay.getAccessibilityAssessment().getLimitations().getFirst();
                     assertThat(actualAccessibilityLimitation).isNotNull();
                     assertThat(actualAccessibilityLimitation.getVersion()).isEqualTo(1);
                 });
@@ -91,7 +91,7 @@ public class AccessibilityAssessmentVersioningTest extends TiamatIntegrationTest
 
         stopPlace.getQuays().forEach(quay -> {
             if (quay.getName().getValue().equals(quay1.getName().getValue())) {
-                AccessibilityLimitation limitation = quay.getAccessibilityAssessment().getLimitations().get(0);
+                AccessibilityLimitation limitation = quay.getAccessibilityAssessment().getLimitations().getFirst();
                 limitation.setWheelchairAccess(PARTIAL);
             }
         });
@@ -109,7 +109,7 @@ public class AccessibilityAssessmentVersioningTest extends TiamatIntegrationTest
                     assertThat(quay.getAccessibilityAssessment()).isNotNull();
                     assertThat(quay.getAccessibilityAssessment().getVersion()).isEqualTo((long) 2);
 
-                    AccessibilityLimitation actualAccessibilityLimitation = quay.getAccessibilityAssessment().getLimitations().get(0);
+                    AccessibilityLimitation actualAccessibilityLimitation = quay.getAccessibilityAssessment().getLimitations().getFirst();
                     assertThat(actualAccessibilityLimitation).isNotNull();
                     assertThat(actualAccessibilityLimitation.getVersion()).isEqualTo((long) 2);
                 });
@@ -123,7 +123,7 @@ public class AccessibilityAssessmentVersioningTest extends TiamatIntegrationTest
         stopPlace = versionCreator.createCopy(stopPlace_v2, StopPlace.class);
 
         stopPlace.getQuays().forEach(quay -> {
-            AccessibilityLimitation limitation = quay.getAccessibilityAssessment().getLimitations().get(0);
+            AccessibilityLimitation limitation = quay.getAccessibilityAssessment().getLimitations().getFirst();
             limitation.setWheelchairAccess(UNKNOWN);
         });
         Quay quay3 = new Quay();
@@ -149,7 +149,7 @@ public class AccessibilityAssessmentVersioningTest extends TiamatIntegrationTest
                     assertThat(quay.getAccessibilityAssessment()).isNotNull();
                     assertThat(quay.getAccessibilityAssessment().getVersion()).isEqualTo(version);
 
-                    AccessibilityLimitation actualAccessibilityLimitation = quay.getAccessibilityAssessment().getLimitations().get(0);
+                    AccessibilityLimitation actualAccessibilityLimitation = quay.getAccessibilityAssessment().getLimitations().getFirst();
                     assertThat(actualAccessibilityLimitation).isNotNull();
                     assertThat(actualAccessibilityLimitation.getVersion()).isEqualTo(version);
                 });
@@ -160,7 +160,7 @@ public class AccessibilityAssessmentVersioningTest extends TiamatIntegrationTest
         stopPlace = versionCreator.createCopy(stopPlace_v3, StopPlace.class);
 
         stopPlace.getQuays().forEach(quay -> {
-            AccessibilityLimitation limitation = quay.getAccessibilityAssessment().getLimitations().get(0);
+            AccessibilityLimitation limitation = quay.getAccessibilityAssessment().getLimitations().getFirst();
             limitation.setWheelchairAccess(UNKNOWN);
             limitation.setLiftFreeAccess(UNKNOWN);
             limitation.setEscalatorFreeAccess(UNKNOWN);

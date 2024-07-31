@@ -18,7 +18,7 @@ package org.rutebanken.tiamat.auth;
 import com.google.common.collect.Sets;
 import org.junit.Before;
 import org.junit.Test;
-import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
+import org.rutebanken.helper.organisation.DataScopedAuthorizationService;
 import org.rutebanken.helper.organisation.RoleAssignment;
 import org.rutebanken.helper.organisation.RoleAssignmentExtractor;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
@@ -75,7 +75,7 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
     /**
      * The reflection authorization service is the generic authorization service used by {@link StopPlaceAuthorizationService}
      */
-    private ReflectionAuthorizationService reflectionAuthorizationService;
+    private AuthorizationService authorizationService;
 
     /**
      * Class being tested
@@ -115,15 +115,18 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
     public void StopPlaceAuthorizationServiceTest() {
         roleAssignmentExtractor = mock(RoleAssignmentExtractor.class);
 
-        this.reflectionAuthorizationService = new AuthorizationServiceConfig().getAuthorizationService(
+        AuthorizationServiceConfig authorizationServiceConfig = new AuthorizationServiceConfig();
+        DataScopedAuthorizationService dataScopedAuthorizationService = authorizationServiceConfig.dataScopedAuthorizationService(
                 roleAssignmentExtractor,
                 true,
                 tiamatOriganisationChecker,
                 topographicPlaceChecker,
                 tiamatEntityResolver);
+        this.authorizationService = authorizationServiceConfig.authorizationService(dataScopedAuthorizationService, roleAssignmentExtractor);
 
 
-        stopPlaceAuthorizationService = new StopPlaceAuthorizationService(reflectionAuthorizationService, tiamatObjectDiffer);
+
+        stopPlaceAuthorizationService = new StopPlaceAuthorizationService(authorizationService, tiamatObjectDiffer);
     }
 
     @Test

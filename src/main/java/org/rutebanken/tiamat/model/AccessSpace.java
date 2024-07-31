@@ -15,8 +15,8 @@
 
 package org.rutebanken.tiamat.model;
 
-import javax.persistence.Entity;
-import javax.persistence.Transient;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Transient;
 
 
 @Entity

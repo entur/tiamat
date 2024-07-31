@@ -59,6 +59,15 @@ for more detail see https://www.testcontainers.org/supported_docker_environment/
 
 (default profiles are set in application.properties)
 
+## Run tiamat with Docker compose
+To run Tiamat with Docker compose, you need to have a docker-compose.yml file. In docker-compose folder you will find a compose.yml file.:
+```
+docker compose up
+```
+This will start Tiamat with PostgreSQL and Hazelcast. and you can access Tiamat on http://localhost:1888 and the database on http://localhost:5433 
+and graphiql on http://localhost:8777/services/stop_places/graphql , At start up tiamat copy empty schema to the database. Spring properties are set in application.properties.
+Security is disabled in this setup.
+
 ## Run with external properties file and PostgreSQL
 To run with PostgreSQL you ned an external application.properties.
 Below is an example of application.properties:

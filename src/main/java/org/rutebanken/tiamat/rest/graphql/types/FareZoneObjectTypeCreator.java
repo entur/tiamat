@@ -70,7 +70,6 @@ public class FareZoneObjectTypeCreator {
         fareZoneFieldList.add(newFieldDefinition()
                 .name(FARE_ZONES_AUTHORITY_REF)
                 .type(GraphQLString)
-                .dataFetcher(env -> env.getSource() instanceof FareZone ? ((FareZone) env.getSource()).getTransportOrganisationRef() : null)
                 .build());
         fareZoneFieldList.add(privateCodeFieldDefinition);
         fareZoneFieldList.add(newFieldDefinition().name(FARE_ZONES_ZONE_TOPOLOGY).type(zoneTopologyEnumType).build());
@@ -79,7 +78,6 @@ public class FareZoneObjectTypeCreator {
         fareZoneFieldList.add(newFieldDefinition()
                 .name(FARE_ZONES_NEIGHBOURS)
                 .type(new GraphQLList(GraphQLTypeReference.typeRef(OUTPUT_TYPE_FARE_ZONE)))
-                .dataFetcher(this::fareZoneNeighboursType)
                 .build());
 
 
@@ -87,7 +85,6 @@ public class FareZoneObjectTypeCreator {
         fareZoneFieldList.add(newFieldDefinition()
                 .name(FARE_ZONES_MEMBERS)
                 .type(new GraphQLList(GraphQLTypeReference.typeRef(OUTPUT_TYPE_STOPPLACE)))
-                .dataFetcher(this::fareZoneMemberType)
                 .build());
 
         return newObject()
@@ -96,7 +93,7 @@ public class FareZoneObjectTypeCreator {
                 .build();
     }
 
-    private List<FareZone> fareZoneNeighboursType(DataFetchingEnvironment env) {
+    public List<FareZone> fareZoneNeighboursType(DataFetchingEnvironment env) {
         final Set<TariffZoneRef> neighbours = ((FareZone) env.getSource()).getNeighbours();
         if (!neighbours.isEmpty()) {
             return neighbours.stream()
@@ -107,7 +104,7 @@ public class FareZoneObjectTypeCreator {
 
     }
 
-    private List<StopPlace> fareZoneMemberType(DataFetchingEnvironment env) {
+    public List<StopPlace> fareZoneMemberType(DataFetchingEnvironment env) {
         final Set<StopPlaceReference> fareZoneMembers = ((FareZone) env.getSource()).getFareZoneMembers();
         if (!fareZoneMembers.isEmpty()) {
             return fareZoneMembers.stream()

@@ -16,7 +16,7 @@
 package org.rutebanken.tiamat.service;
 
 import com.google.common.collect.Sets;
-import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
+import org.rutebanken.tiamat.auth.AuthorizationService;
 import org.rutebanken.tiamat.auth.UsernameFetcher;
 import org.rutebanken.tiamat.model.DataManagedObjectStructure;
 import org.rutebanken.tiamat.model.VersionOfObjectRefStructure;
@@ -30,8 +30,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-
-import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
 
 @Service
 @Transactional
@@ -49,7 +47,7 @@ public class TagRemover {
     private ReferenceResolver referenceResolver;
 
     @Autowired
-    private ReflectionAuthorizationService authorizationService;
+    private AuthorizationService authorizationService;
 
     public Tag removeTag(String tagName, String idReference, String comment) {
         tagName = tagName.toLowerCase().trim();
@@ -60,7 +58,7 @@ public class TagRemover {
         }
 
         DataManagedObjectStructure dataManagedObjectStructure = referenceResolver.resolve(new VersionOfObjectRefStructure(idReference));
-        authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Sets.newHashSet(dataManagedObjectStructure));
+        authorizationService.verifyCanEditEntities( Sets.newHashSet(dataManagedObjectStructure));
 
         tag.setComment(comment);
         tag.setRemoved(Instant.now());

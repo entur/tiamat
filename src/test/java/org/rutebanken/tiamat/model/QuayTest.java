@@ -146,7 +146,7 @@ public class QuayTest extends TiamatIntegrationTest {
         List<AccessibilityLimitation> actualAccessibilityLimitations = actualQuay.getAccessibilityAssessment().getLimitations();
 
         assertThat(actualAccessibilityLimitations).isNotEmpty();
-        AccessibilityLimitation actualAccessibilityLimitation = actualAccessibilityLimitations.get(0);
+        AccessibilityLimitation actualAccessibilityLimitation = actualAccessibilityLimitations.getFirst();
         assertThat(actualAccessibilityLimitation.getWheelchairAccess()).isEqualTo(accessibilityLimitation.getWheelchairAccess());
     }
 
@@ -221,11 +221,11 @@ public class QuayTest extends TiamatIntegrationTest {
         List<EquipmentPlace> actualEquipmentPlaces = actualQuay.getEquipmentPlaces();
 
         assertThat(actualEquipmentPlaces).isNotEmpty();
-        EquipmentPlace actualEquipmentPlace = actualEquipmentPlaces.get(0);
+        EquipmentPlace actualEquipmentPlace = actualEquipmentPlaces.getFirst();
 
         assertThat(actualEquipmentPlace.getEquipmentPositions()).isNotEmpty();
 
-        EquipmentPosition actualEquipmentPosition = actualEquipmentPlace.getEquipmentPositions().get(0);
+        EquipmentPosition actualEquipmentPosition = actualEquipmentPlace.getEquipmentPositions().getFirst();
 
         assertThat(actualEquipmentPlaces).usingRecursiveComparison().ignoringFields("id","version").isEqualTo(equipmentPlaces);
         assertThat(actualEquipmentPosition.getReferencePointRef().getRef()).isEqualTo(pointRefStructure.getRef());
@@ -249,7 +249,7 @@ public class QuayTest extends TiamatIntegrationTest {
         assertThat(actualQuay.getCheckConstraints()).isNotNull();
         assertThat(actualQuay.getCheckConstraints()).isNotEmpty();
 
-        CheckConstraint actualCheckConstraint = actualQuay.getCheckConstraints().get(0);
+        CheckConstraint actualCheckConstraint = actualQuay.getCheckConstraints().getFirst();
         assertThat(actualCheckConstraint.getName().getValue()).isEqualTo(checkConstraint.getName().getValue());
     }
 
@@ -267,7 +267,7 @@ public class QuayTest extends TiamatIntegrationTest {
 
         Quay actualQuay = quayRepository.findFirstByNetexIdOrderByVersionDesc(quay.getNetexId());
         assertThat(actualQuay.getAlternativeNames()).isNotEmpty();
-        AlternativeName actualAlternativeName = actualQuay.getAlternativeNames().get(0);
+        AlternativeName actualAlternativeName = actualQuay.getAlternativeNames().getFirst();
         assertThat(actualAlternativeName.getNetexId()).isEqualTo(actualAlternativeName.getNetexId());
         assertThat(actualAlternativeName.getName().getValue()).isEqualTo(alternativeName.getName().getValue());
         assertThat(actualAlternativeName.getShortName().getValue()).isEqualTo(alternativeName.getShortName().getValue());

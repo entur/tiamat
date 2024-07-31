@@ -16,9 +16,9 @@
 package org.rutebanken.tiamat.importer.modifier;
 
 import org.apache.commons.lang3.SerializationUtils;
+import org.geotools.api.referencing.operation.TransformException;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
-import org.opengis.referencing.operation.TransformException;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.slf4j.Logger;
@@ -114,8 +114,8 @@ public class StopPlaceSplitter {
                     StopPlace newStopPlace = SerializationUtils.clone(originalStopPlace);
                     newStopPlace.getQuays().clear();
                     newStopPlace.getOriginalIds().clear();
-                    if(!quayList.get(0).getOriginalIds().isEmpty()) {
-                        String generatedOriginalId = quayList.get(0).getOriginalIds().iterator().next()+"-generated";
+                    if(!quayList.getFirst().getOriginalIds().isEmpty()) {
+                        String generatedOriginalId = quayList.getFirst().getOriginalIds().iterator().next() + "-generated";
                         newStopPlace.getOriginalIds().add(generatedOriginalId);
                     }
 

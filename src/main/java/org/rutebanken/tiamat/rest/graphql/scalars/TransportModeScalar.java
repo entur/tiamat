@@ -145,16 +145,14 @@ public class TransportModeScalar {
         transportModeFieldList.add(newFieldDefinition()
                 .name(SUBMODE)
                 .type(filteredSubmodes)
-                .dataFetcher(env -> resolveSubmode(env))
                 .build());
 
         return transportModeFieldList;
     }
 
-    private Object resolveSubmode(DataFetchingEnvironment env) {
+    public Object resolveSubmode(DataFetchingEnvironment env) {
         Object o = env.getSource();
-        if (o instanceof StopPlace) {
-            StopPlace stopPlace = (StopPlace) o;
+        if (o instanceof StopPlace stopPlace) {
             VehicleModeEnumeration mode = stopPlace.getTransportMode();
             if (mode != null) {
                 switch (mode) {

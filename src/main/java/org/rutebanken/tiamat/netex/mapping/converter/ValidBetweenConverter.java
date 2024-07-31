@@ -51,7 +51,7 @@ public class ValidBetweenConverter extends BidirectionalConverter<List<ValidBetw
 
         ZoneId mappingTimeZone = NetexMappingContextThreadLocal.get().defaultTimeZone;
 
-        ValidBetween netexValidBetween = validBetweens.get(0);
+        ValidBetween netexValidBetween = validBetweens.getFirst();
 
         org.rutebanken.tiamat.model.ValidBetween tiamatValidBetween = new org.rutebanken.tiamat.model.ValidBetween();
         if (netexValidBetween.getFromDate() != null) {

@@ -19,8 +19,6 @@ import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLInterfaceType;
 import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLObjectType;
-import org.rutebanken.tiamat.model.SiteRefStructure;
-import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.rest.graphql.scalars.TransportModeScalar;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -69,14 +67,7 @@ public class StopPlaceObjectTypeCreator {
                         .type(interchangeWeightingEnum))
                 .field(newFieldDefinition()
                         .name(PARENT_SITE_REF)
-                        .type(GraphQLString)
-                        .dataFetcher(env -> {
-                            SiteRefStructure parentSiteRef = ((StopPlace) env.getSource()).getParentSiteRef();
-                            if (parentSiteRef != null) {
-                                return parentSiteRef.getRef();
-                            }
-                            return null;
-                        }))
+                        .type(GraphQLString))
                 .field(newFieldDefinition()
                         .name(ADJACENT_SITES)
                         .type(new GraphQLList(versionLessEntityRef))

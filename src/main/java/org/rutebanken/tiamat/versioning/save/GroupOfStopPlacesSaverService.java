@@ -17,8 +17,7 @@ package org.rutebanken.tiamat.versioning.save;
 
 import com.google.api.client.util.Preconditions;
 import org.locationtech.jts.geom.Point;
-import org.rutebanken.helper.organisation.AuthorizationConstants;
-import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
+import org.rutebanken.tiamat.auth.AuthorizationService;
 import org.rutebanken.tiamat.auth.UsernameFetcher;
 import org.rutebanken.tiamat.model.GroupOfStopPlaces;
 import org.rutebanken.tiamat.model.PurposeOfGrouping;
@@ -70,7 +69,7 @@ public class GroupOfStopPlacesSaverService {
     private PrometheusMetricsService prometheusMetricsService;
 
     @Autowired
-    private ReflectionAuthorizationService authorizationService;
+    private AuthorizationService authorizationService;
 
     @Autowired
     private PurposeOfGroupingRepository purposeOfGroupingRepository;
@@ -131,7 +130,7 @@ public class GroupOfStopPlacesSaverService {
             Preconditions.checkArgument(resolvedMember.getParentSiteRef() == null,
                     "Member with reference " + member.getRef() + " Has a parent site ref. Use parent ref instead. " + groupOfStopPlaces);
 
-            authorizationService.assertAuthorized(AuthorizationConstants.ROLE_EDIT_STOPS, Arrays.asList(resolvedMember));
+            authorizationService.verifyCanEditEntities(Arrays.asList(resolvedMember));
         });
     }
 

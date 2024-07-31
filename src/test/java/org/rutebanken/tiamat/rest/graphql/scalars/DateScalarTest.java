@@ -15,6 +15,7 @@
 
 package org.rutebanken.tiamat.rest.graphql.scalars;
 
+import graphql.GraphQLContext;
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.Locale;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.rutebanken.tiamat.rest.graphql.scalars.DateScalar.EXAMPLE_DATE_TIME;
@@ -33,11 +35,14 @@ public class DateScalarTest extends TiamatIntegrationTest {
     @Autowired
     private DateScalar dateScalar;
 
+    private Locale local = Locale.getDefault();
+    private GraphQLContext graphQLContext = GraphQLContext.getDefault();
+
     @Test
     public void serializeDateTimeInAnyTimeZoneAndReturnCorrectOffset() {
         Instant instant = ZonedDateTime.of(2004, 2, 3, 4, 5, 6, 50 * 1000000, ZoneId.of("Chile/EasterIsland")).toInstant();
 
-        String actual = (String) dateScalar.getGraphQLDateScalar().getCoercing().serialize(instant);
+        String actual = (String) dateScalar.getGraphQLDateScalar().getCoercing().serialize(instant, graphQLContext,local);
 
         System.out.println(actual);
         assertThat(actual)
@@ -52,7 +57,7 @@ public class DateScalarTest extends TiamatIntegrationTest {
     @Test
     public void convertToAndReturnWithUTCTimeZone() {
         String input = "2017-04-04T12:43:06.050-0300";
-        Instant actual = (Instant) dateScalar.getGraphQLDateScalar().getCoercing().parseValue(input);
+        Instant actual = (Instant) dateScalar.getGraphQLDateScalar().getCoercing().parseValue(input, graphQLContext,local);
         System.out.println(actual);
 
         assertThat(LocalDateTime.ofInstant(actual, ZoneOffset.UTC).getHour()).as("Hour should be correct").isEqualTo(15);
@@ -60,21 +65,21 @@ public class DateScalarTest extends TiamatIntegrationTest {
 
     @Test
     public void parseExampleDate() {
-        Instant actual = (Instant) dateScalar.getGraphQLDateScalar().getCoercing().parseValue(EXAMPLE_DATE_TIME);
+        Instant actual = (Instant) dateScalar.getGraphQLDateScalar().getCoercing().parseValue(EXAMPLE_DATE_TIME,graphQLContext,local);
         System.out.println(actual);
         assertThat(LocalDateTime.ofInstant(actual, ZoneOffset.UTC).getHour()).as("Hour should be correct").isEqualTo(17);
     }
 
     @Test
     public void parseDateTimeWithoutMilliseconds() {
-        Instant actual = (Instant) dateScalar.getGraphQLDateScalar().getCoercing().parseValue( "2017-04-23T18:25:43Z");
+        Instant actual = (Instant) dateScalar.getGraphQLDateScalar().getCoercing().parseValue( "2017-04-23T18:25:43Z",graphQLContext,local);
         System.out.println(actual);
         assertThat(LocalDateTime.ofInstant(actual, ZoneOffset.UTC).getHour()).as("Hour should be correct").isEqualTo(18);
     }
 
     @Test
     public void parseDateTimeWithMicroseconds() {
-        Instant actual = (Instant) dateScalar.getGraphQLDateScalar().getCoercing().parseValue( "2017-04-23T18:25:43.123456+0100");
+        Instant actual = (Instant) dateScalar.getGraphQLDateScalar().getCoercing().parseValue( "2017-04-23T18:25:43.123456+0100",graphQLContext,local);
         System.out.println(actual);
         assertThat(LocalDateTime.ofInstant(actual, ZoneOffset.UTC).getHour()).as("Hour should be correct").isEqualTo(17);
     }
@@ -84,7 +89,7 @@ public class DateScalarTest extends TiamatIntegrationTest {
     @Test
     public void parseDefaultJavaScriptNewDate() {
         String input = "2017-04-04T11:08:38.398Z";
-        Instant actual = (Instant) dateScalar.getGraphQLDateScalar().getCoercing().parseValue(input);
+        Instant actual = (Instant) dateScalar.getGraphQLDateScalar().getCoercing().parseValue(input, graphQLContext,local);
         System.out.println(actual);
         assertThat(LocalDateTime.ofInstant(actual, ZoneOffset.UTC).getHour()).as("Hour should be correct").isEqualTo(11);
     }

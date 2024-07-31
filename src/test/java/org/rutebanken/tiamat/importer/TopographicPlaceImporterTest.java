@@ -73,10 +73,10 @@ public class TopographicPlaceImporterTest extends TiamatIntegrationTest {
                 .as("Imported topographic place of type poi should be updating existing version")
                 .hasSize(1);
 
-        assertThat(actuals.get(0).getValidBetween()).isEqualTo(poi.getValidBetween());
-        assertThat(actuals.get(0).getVersion()).isEqualTo(poi.getVersion());
-        assertThat(actuals.get(0).getChanged()).isAfterOrEqualTo(testStarted);
-        assertThat(actuals.get(0).getPolygon()).isEqualTo(poiNew.getPolygon());
+        assertThat(actuals.getFirst().getValidBetween()).isEqualTo(poi.getValidBetween());
+        assertThat(actuals.getFirst().getVersion()).isEqualTo(poi.getVersion());
+        assertThat(actuals.getFirst().getChanged()).isAfterOrEqualTo(testStarted);
+        assertThat(actuals.getFirst().getPolygon()).isEqualTo(poiNew.getPolygon());
 
     }
 

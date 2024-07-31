@@ -36,6 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -209,6 +210,7 @@ public class MergingStopPlaceImporter {
                         }
                         return true;
                     })
+                    .filter(Objects::nonNull)
                     .findAny();
 
             if(nearbyExistingStopPlace.isPresent()) {
@@ -227,7 +229,7 @@ public class MergingStopPlaceImporter {
         // Find existing nearby stop place based on type
         final List<StopPlace> nearbyStopsWithSameType = nearbyStopsWithSameTypeFinder.find(newStopPlace);
         if (!nearbyStopsWithSameType.isEmpty()) {
-            StopPlace nearbyStopWithSameType = nearbyStopsWithSameType.get(0);
+            StopPlace nearbyStopWithSameType = nearbyStopsWithSameType.getFirst();
             logger.debug("Found nearby stop place with same type: {}", nearbyStopWithSameType);
             return nearbyStopWithSameType;
         }

@@ -15,6 +15,7 @@
 
 package org.rutebanken.tiamat.service.stopplace;
 
+import jakarta.transaction.Transactional;
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
@@ -27,7 +28,6 @@ import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.Value;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.transaction.Transactional;
 import java.math.BigInteger;
 import java.util.Arrays;
 
@@ -97,7 +97,7 @@ public class StopPlaceQuayMergerTest extends TiamatIntegrationTest {
         fromStopPlace.getOriginalIds().add("TEST:StopPlace:5678");
 
         Quay fromQuay = new Quay();
-        fromQuay.setCompassBearing(new Float(90));
+        fromQuay.setCompassBearing(Float.valueOf(90));
         fromQuay.setCentroid(geometryFactory.createPoint(new Coordinate(11.2, 60.2)));
         fromQuay.getOriginalIds().add("TEST:Quay:123401");
         fromQuay.getOriginalIds().add("TEST:Quay:567801");
@@ -121,7 +121,7 @@ public class StopPlaceQuayMergerTest extends TiamatIntegrationTest {
         toQuay.setPublicCode("");
 
         Quay quayToKeepUnaltered = new Quay();
-        quayToKeepUnaltered.setCompassBearing(new Float(180));
+        quayToKeepUnaltered.setCompassBearing(Float.valueOf(180));
         quayToKeepUnaltered.setCentroid(geometryFactory.createPoint(new Coordinate(11.211, 60.211)));
         quayToKeepUnaltered.getOriginalIds().add("TEST:Quay:432102");
 
@@ -150,7 +150,7 @@ public class StopPlaceQuayMergerTest extends TiamatIntegrationTest {
                 assertThat(quay.getPlaceEquipments()).isNotNull();
                 assertThat(quay.getPlaceEquipments().getInstalledEquipment()).isNotNull();
                 assertThat(quay.getPlaceEquipments().getInstalledEquipment()).hasSize(1);
-                assertThat(quay.getPlaceEquipments().getInstalledEquipment().get(0)).isInstanceOf(ShelterEquipment.class);
+                assertThat(quay.getPlaceEquipments().getInstalledEquipment().getFirst()).isInstanceOf(ShelterEquipment.class);
 
                 assertThat(!quay.equals(toQuay)).isTrue();
                 assertThat(!quay.equals(fromQuay)).isTrue();
@@ -192,7 +192,7 @@ public class StopPlaceQuayMergerTest extends TiamatIntegrationTest {
 
         Quay fromQuay = new Quay();
         fromQuay.setVersion(2L);
-        fromQuay.setCompassBearing(new Float(90));
+        fromQuay.setCompassBearing(Float.valueOf(90));
         fromQuay.setCentroid(geometryFactory.createPoint(new Coordinate(11.2, 60.2)));
         fromQuay.getOriginalIds().add("TEST:Quay:999");
         fromQuay.getOriginalIds().add("TEST:Quay:8888");
@@ -218,7 +218,7 @@ public class StopPlaceQuayMergerTest extends TiamatIntegrationTest {
 
         Quay quayToKeepUnaltered = new Quay();
         toQuay.setVersion(10L);
-        quayToKeepUnaltered.setCompassBearing(new Float(180));
+        quayToKeepUnaltered.setCompassBearing(Float.valueOf(180));
         quayToKeepUnaltered.setCentroid(geometryFactory.createPoint(new Coordinate(11.211, 60.211)));
         quayToKeepUnaltered.getOriginalIds().add("TEST:Quay:xxxx");
 
@@ -261,7 +261,7 @@ public class StopPlaceQuayMergerTest extends TiamatIntegrationTest {
                 assertThat(quay.getPlaceEquipments()).isNotNull();
                 assertThat(quay.getPlaceEquipments().getInstalledEquipment()).isNotNull();
                 assertThat(quay.getPlaceEquipments().getInstalledEquipment()).hasSize(1);
-                assertThat(quay.getPlaceEquipments().getInstalledEquipment().get(0)).isInstanceOf(ShelterEquipment.class);
+                assertThat(quay.getPlaceEquipments().getInstalledEquipment().getFirst()).isInstanceOf(ShelterEquipment.class);
 
                 assertThat(!quay.equals(toQuay));
                 assertThat(!quay.equals(fromQuay));

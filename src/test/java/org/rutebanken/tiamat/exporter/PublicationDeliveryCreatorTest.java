@@ -15,6 +15,7 @@
 
 package org.rutebanken.tiamat.exporter;
 
+import jakarta.xml.bind.JAXBException;
 import org.junit.Test;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.netex.model.StopPlace;
@@ -23,21 +24,21 @@ import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.model.SiteRefStructure;
 import org.rutebanken.tiamat.model.ValidBetween;
 import org.rutebanken.tiamat.repository.search.ChangedStopPlaceSearch;
+import org.rutebanken.tiamat.rest.netex.publicationdelivery.ExportStopPlacesWithEffectiveChangeInPeriod;
 import org.rutebanken.tiamat.rest.netex.publicationdelivery.PublicationDeliveryTestHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
-import javax.xml.bind.JAXBException;
 import java.time.Instant;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class PublicationDeliveryExporterTest extends TiamatIntegrationTest {
+public class PublicationDeliveryCreatorTest extends TiamatIntegrationTest {
 
     @Autowired
-    private PublicationDeliveryExporter publicationDeliveryExporter;
+    private ExportStopPlacesWithEffectiveChangeInPeriod exportStopPlacesWithEffectiveChangeInPeriod;
 
     @Autowired
     private PublicationDeliveryTestHelper publicationDeliveryTestHelper;
@@ -69,7 +70,7 @@ public class PublicationDeliveryExporterTest extends TiamatIntegrationTest {
 
         ExportParams exportParams = ExportParams.newExportParamsBuilder().build();
 
-        PublicationDeliveryStructurePage publicationDeliveryStructurePage = publicationDeliveryExporter.exportStopPlacesWithEffectiveChangeInPeriod(changedStopPlaceSearch, exportParams);
+        PublicationDeliveryStructurePage publicationDeliveryStructurePage = exportStopPlacesWithEffectiveChangeInPeriod.export(changedStopPlaceSearch, exportParams);
 
         PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryStructurePage.publicationDeliveryStructure;
 
@@ -115,7 +116,7 @@ public class PublicationDeliveryExporterTest extends TiamatIntegrationTest {
 
         ExportParams exportParams = ExportParams.newExportParamsBuilder().build();
 
-        PublicationDeliveryStructurePage publicationDeliveryStructurePage = publicationDeliveryExporter.exportStopPlacesWithEffectiveChangeInPeriod(changedStopPlaceSearch, exportParams);
+        PublicationDeliveryStructurePage publicationDeliveryStructurePage = exportStopPlacesWithEffectiveChangeInPeriod.export(changedStopPlaceSearch, exportParams);
 
         PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryStructurePage.publicationDeliveryStructure;
 

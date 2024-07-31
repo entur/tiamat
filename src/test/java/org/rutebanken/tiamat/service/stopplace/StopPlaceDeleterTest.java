@@ -16,7 +16,7 @@
 package org.rutebanken.tiamat.service.stopplace;
 
 import org.junit.Test;
-import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
+import org.rutebanken.tiamat.auth.AuthorizationService;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.auth.UsernameFetcher;
 import org.rutebanken.tiamat.changelog.EntityChangedListener;
@@ -40,7 +40,7 @@ public class StopPlaceDeleterTest extends TiamatIntegrationTest {
     private StopPlaceRepository stopPlaceRepository = mock(StopPlaceRepository.class);
 
     private EntityChangedListener entityChangedListener = mock(EntityChangedListener.class);
-    private ReflectionAuthorizationService authorizationService = mock(ReflectionAuthorizationService.class);
+    private AuthorizationService authorizationService = mock(AuthorizationService.class);
     private UsernameFetcher usernameFetcher = mock(UsernameFetcher.class);
     private MutateLock mutateLock = new MutateLock(null) {
         @Override

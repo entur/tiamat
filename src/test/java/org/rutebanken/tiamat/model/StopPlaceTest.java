@@ -169,7 +169,7 @@ public class StopPlaceTest extends TiamatIntegrationTest {
         StopPlace actualStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId());
 
         assertThat(actualStopPlace.getAccessSpaces()).isNotEmpty();
-        assertThat(actualStopPlace.getAccessSpaces().get(0).getShortName().getValue()).isEqualTo(accessSpace.getShortName().getValue());
+        assertThat(actualStopPlace.getAccessSpaces().getFirst().getShortName().getValue()).isEqualTo(accessSpace.getShortName().getValue());
     }
 
     @Test
@@ -188,7 +188,7 @@ public class StopPlaceTest extends TiamatIntegrationTest {
         StopPlace actualStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId());
 
         assertThat(actualStopPlace.getEquipmentPlaces()).isNotEmpty();
-        assertThat(actualStopPlace.getEquipmentPlaces().get(0).getNetexId()).isEqualTo(equipmentPlace.getNetexId());
+        assertThat(actualStopPlace.getEquipmentPlaces().getFirst().getNetexId()).isEqualTo(equipmentPlace.getNetexId());
     }
 
     @Test
@@ -245,9 +245,9 @@ public class StopPlaceTest extends TiamatIntegrationTest {
         StopPlace actualStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId());
 
         assertThat(actualStopPlace.getLevels()).isNotEmpty();
-        assertThat(actualStopPlace.getLevels().get(0).getName().getValue()).isEqualTo(level.getName().getValue());
-        assertThat(actualStopPlace.getLevels().get(0).getPublicCode()).isEqualTo(level.getPublicCode());
-        assertThat(actualStopPlace.getLevels().get(0).getVersion()).isEqualTo(level.getVersion());
+        assertThat(actualStopPlace.getLevels().getFirst().getName().getValue()).isEqualTo(level.getName().getValue());
+        assertThat(actualStopPlace.getLevels().getFirst().getPublicCode()).isEqualTo(level.getPublicCode());
+        assertThat(actualStopPlace.getLevels().getFirst().getVersion()).isEqualTo(level.getVersion());
     }
 
     @Test
@@ -337,7 +337,7 @@ public class StopPlaceTest extends TiamatIntegrationTest {
         stopPlaceRepository.save(stopPlace);
         StopPlace actualStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId());
         assertThat(actualStopPlace.getAlternativeNames()).isNotEmpty();
-        assertThat(actualStopPlace.getAlternativeNames().get(0).getShortName().getValue()).isEqualTo(alternativeName.getShortName().getValue());
+        assertThat(actualStopPlace.getAlternativeNames().getFirst().getShortName().getValue()).isEqualTo(alternativeName.getShortName().getValue());
     }
 
     @Test
@@ -391,12 +391,11 @@ public class StopPlaceTest extends TiamatIntegrationTest {
 
         StopPlace actualStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId());
 
-        assertThat(actualStopPlace).isEqualToComparingOnlyGivenFields(actualStopPlace,
-                "stopPlaceType", "transportMode", "airSubmode", "coachSubmode",
+        assertThat(actualStopPlace).usingRecursiveComparison().comparingOnlyFields("stopPlaceType", "transportMode", "airSubmode", "coachSubmode",
                 "funicularSubmode", "otherTransportModes",
                 "weighting", "busSubmode", "covered", "gated", "modification",
                 "railSubmode", "metroSubmode", "siteType", "status", "waterSubmode",
-                "tramSubmode", "telecabinSubmode");
+                "tramSubmode", "telecabinSubmode").isEqualTo(stopPlace);
     }
 
     @Test
@@ -515,7 +514,7 @@ public class StopPlaceTest extends TiamatIntegrationTest {
         assertThat(actual.getTotalElements()).isEqualTo(1);
 
 
-        StopPlace actualStopPlace = actual.getContent().get(0);
+        StopPlace actualStopPlace = actual.getContent().getFirst();
         assertThat(actualStopPlace.getVersion()).isEqualTo(currentVersion.getVersion());
 
     }

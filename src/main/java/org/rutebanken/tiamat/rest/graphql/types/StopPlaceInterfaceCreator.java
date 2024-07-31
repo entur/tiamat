@@ -15,17 +15,12 @@
 
 package org.rutebanken.tiamat.rest.graphql.types;
 
-import graphql.schema.DataFetcher;
+
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLInterfaceType;
 import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLTypeReference;
-import graphql.schema.TypeResolver;
-import org.rutebanken.tiamat.model.GroupOfStopPlaces;
-import org.rutebanken.tiamat.rest.graphql.fetchers.StopPlaceFareZoneFetcher;
-import org.rutebanken.tiamat.rest.graphql.fetchers.StopPlaceTariffZoneFetcher;
-import org.rutebanken.tiamat.rest.graphql.fetchers.TagFetcher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -51,20 +46,12 @@ import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.altern
 @Component
 public class StopPlaceInterfaceCreator {
 
-    @Autowired
-    private StopPlaceTariffZoneFetcher stopPlaceTariffZoneFetcher;
 
-    @Autowired
-    private StopPlaceFareZoneFetcher stopPlaceFareZoneFetcher;
 
     @Autowired
     private TagObjectTypeCreator tagObjectTypeCreator;
 
-    @Autowired
-    private DataFetcher<List<GroupOfStopPlaces>> stopPlaceGroupsFetcher;
 
-    @Autowired
-    private TagFetcher tagFetcher;
 
     public List<GraphQLFieldDefinition> createCommonInterfaceFields(GraphQLObjectType tariffZoneObjectType,
                                                                     GraphQLObjectType fareZoneObjectType,
@@ -92,35 +79,30 @@ public class StopPlaceInterfaceCreator {
         stopPlaceInterfaceFields.add(newFieldDefinition()
                 .name(TARIFF_ZONES)
                 .type(new GraphQLList(tariffZoneObjectType))
-                .dataFetcher(stopPlaceTariffZoneFetcher)
                 .build());
 
         stopPlaceInterfaceFields.add(newFieldDefinition()
                 .name(FARE_ZONES)
                 .type(new GraphQLList(fareZoneObjectType))
-                .dataFetcher(stopPlaceFareZoneFetcher)
                 .build());
         stopPlaceInterfaceFields.add(newFieldDefinition()
                 .name(TAGS)
                 .type(new GraphQLList(tagObjectTypeCreator.create()))
-                .dataFetcher(tagFetcher).build());
+                .build());
         stopPlaceInterfaceFields.add(newFieldDefinition()
                 .name(STOP_PLACE_GROUPS)
                 .type(new GraphQLList(new GraphQLTypeReference(OUTPUT_TYPE_GROUP_OF_STOPPLACES)))
-                .dataFetcher(stopPlaceGroupsFetcher)
                 .build());
         return stopPlaceInterfaceFields;
     }
 
 
     public GraphQLInterfaceType createInterface(List<GraphQLFieldDefinition> stopPlaceInterfaceFields,
-                                                List<GraphQLFieldDefinition> commonFieldsList,
-                                                TypeResolver stopPlaceTypeResolver) {
+                                                List<GraphQLFieldDefinition> commonFieldsList) {
         return newInterface()
                 .name(OUTPUT_TYPE_STOPPLACE_INTERFACE)
                 .fields(commonFieldsList)
                 .fields(stopPlaceInterfaceFields)
-                .typeResolver(stopPlaceTypeResolver)
                 .build();
     }
 

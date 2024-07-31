@@ -16,7 +16,7 @@
 package org.rutebanken.tiamat.service.stopplace;
 
 import com.google.api.client.util.Preconditions;
-import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
+import org.rutebanken.tiamat.auth.AuthorizationService;
 import org.rutebanken.tiamat.lock.MutateLock;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -40,7 +40,6 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.Optional;
 
-import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.MERGED_ID_KEY;
 import static org.rutebanken.tiamat.versioning.save.DefaultVersionedSaverService.MILLIS_BETWEEN_VERSIONS;
 
@@ -61,7 +60,7 @@ public class StopPlaceMerger {
     private StopPlaceRepository stopPlaceRepository;
 
     @Autowired
-    private ReflectionAuthorizationService authorizationService;
+    private AuthorizationService authorizationService;
 
     @Autowired
     private KeyValuesMerger keyValuesMerger;
@@ -95,7 +94,7 @@ public class StopPlaceMerger {
 
             validateArguments(fromStopPlace, toStopPlace);
 
-            authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(fromStopPlace, toStopPlace));
+            authorizationService.verifyCanEditEntities( Arrays.asList(fromStopPlace, toStopPlace));
 
             StopPlace fromStopPlaceToTerminate = versionCreator.createCopy(fromStopPlace, StopPlace.class);
 

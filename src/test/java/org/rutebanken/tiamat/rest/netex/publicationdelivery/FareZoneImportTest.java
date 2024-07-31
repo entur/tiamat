@@ -15,6 +15,7 @@
 
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
+import jakarta.xml.bind.JAXBElement;
 import org.junit.Test;
 import org.rutebanken.netex.model.FareZone;
 import org.rutebanken.netex.model.LocationStructure;
@@ -36,7 +37,6 @@ import org.rutebanken.tiamat.importer.ImportParams;
 import org.rutebanken.tiamat.importer.ImportType;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.xml.bind.JAXBElement;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -76,7 +76,7 @@ public class FareZoneImportTest extends TiamatIntegrationTest {
                 .getTariffZones().getTariffZone();
 
         assertThat(actualZones).isNotEmpty();
-        assertThat(actualZones.get(0).getValue().getName().getValue()).isEqualTo(fareZone.getName().getValue());
+        assertThat(actualZones.getFirst().getValue().getName().getValue()).isEqualTo(fareZone.getName().getValue());
     }
 
     @Test
@@ -120,9 +120,9 @@ public class FareZoneImportTest extends TiamatIntegrationTest {
 
         assertThat(actualZones).isNotEmpty();
 
-        assertThat(actualZones.get(0).getValue().getName().getValue()).isEqualTo(fareZone.getName().getValue());
+        assertThat(actualZones.getFirst().getValue().getName().getValue()).isEqualTo(fareZone.getName().getValue());
         // Versions for tariff zones are incremented.
-        assertThat(actualZones.get(0).getValue().getVersion()).isEqualTo("2");
+        assertThat(actualZones.getFirst().getValue().getVersion()).isEqualTo("2");
 
     }
 
@@ -276,7 +276,7 @@ public class FareZoneImportTest extends TiamatIntegrationTest {
 
         List<StopPlace> actualIdMatchedStopPlaces = publicationDeliveryTestHelper.extractStopPlaces(matchReponse);
         assertThat(actualIdMatchedStopPlaces).hasSize(1);
-        assertThat(actualIdMatchedStopPlaces.get(0).getTariffZones().getTariffZoneRef()).as("number of tariff zone refs").hasSize(2);
+        assertThat(actualIdMatchedStopPlaces.getFirst().getTariffZones().getTariffZoneRef()).as("number of tariff zone refs").hasSize(2);
 
         importParams.importType = ImportType.ID_MATCH;
 
@@ -289,7 +289,7 @@ public class FareZoneImportTest extends TiamatIntegrationTest {
 
         actualIdMatchedStopPlaces = publicationDeliveryTestHelper.extractStopPlaces(matchReponse);
         assertThat(actualIdMatchedStopPlaces).hasSize(1);
-        assertThat(actualIdMatchedStopPlaces.get(0).getTariffZones().getTariffZoneRef()).as("number of tariff zone refs").hasSize(2);
+        assertThat(actualIdMatchedStopPlaces.getFirst().getTariffZones().getTariffZoneRef()).as("number of tariff zone refs").hasSize(2);
 
     }
 }

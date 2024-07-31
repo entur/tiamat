@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.service.batch;
 
+import jakarta.persistence.EntityManager;
 import org.hibernate.Session;
 import org.hibernate.internal.SessionImpl;
 import org.rutebanken.tiamat.exporter.async.ParentStopFetchingIterator;
@@ -21,7 +22,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -93,6 +93,7 @@ public class StopPlaceRefUpdaterService {
             logger.warn("Background job stopped because of exception", e);
         }
     }
+
     /*
      * Updates stop place tariff zone ref faster
      * Note currently this method updates only tariff zone refs
@@ -119,7 +120,7 @@ public class StopPlaceRefUpdaterService {
 
         long startTime = System.currentTimeMillis();
 
-        Session session =  entityManager.unwrap(SessionImpl.class);
+        Session session = entityManager.unwrap(SessionImpl.class);
         logger.info("About to update all currently valid stop places (tariff zone and topographic place refs)");
 
         SessionEntitiesEvictor sessionEntitiesEvictor = new SessionEntitiesEvictor((SessionImpl) session);
@@ -157,36 +158,27 @@ public class StopPlaceRefUpdaterService {
                 if (optionalStopPlace.isPresent()) {
                     stopsSaved.incrementAndGet();
                     StopPlace stopPlaceToSave = optionalStopPlace.get();
-                    if(stopPlaceToSave.getValidBetween() !=null) {
-                        if (stopPlaceToSave.getValidBetween().getToDate() == null || stopPlaceToSave.getValidBetween().getToDate().isAfter(Instant.now())) {
-                            //TODO: should we update Changed time?
-                            stopPlaceToSave.setChanged(Instant.now());
+                        stopPlaceToSave.setChanged(Instant.now());
 
-                            // Issues with topographic place not being updated.
-                            // https://stackoverflow.com/a/2370276
-                            // https://stackoverflow.com/a/5709244
+                        // Issues with topographic place not being updated.
+                        // https://stackoverflow.com/a/2370276
+                        // https://stackoverflow.com/a/5709244
 
-                            if (session.contains(stopPlaceToSave)) {
-                                session.evict(stopPlaceToSave);
-                            }
-
-                            session.update(stopPlaceToSave);
-
-
-                            logger.trace("Saved stop {}", stopPlaceToSave);
-                            session.flush();
-                    if (stopsIterated.get() % CLEAR_EACH == 0 && !stopPlaceIterator.hasNextParent()) {
-                                logger.trace("Flushing and clearing session at count {}", stopsIterated.get());
-                                session.clear();
-                            } else {
-                                sessionEntitiesEvictor.evictKnownEntitiesFromSession(stopPlaceToSave);
-                            }
-                        } else {
-                            logger.info("Skipping stop place update, cause its not current {}", stopPlaceToSave);
+                        if (session.contains(stopPlaceToSave)) {
+                            session.evict(stopPlaceToSave);
                         }
-                    } else {
-                        logger.info("Skipping stop place update, cause getValidBetween is null {}", stopPlaceToSave);
-                    }
+
+                        session.update(stopPlaceToSave);
+
+
+                        logger.trace("Saved stop {}", stopPlaceToSave);
+                        session.flush();
+                        if (stopsIterated.get() % CLEAR_EACH == 0 && !stopPlaceIterator.hasNextParent()) {
+                            logger.trace("Flushing and clearing session at count {}", stopsIterated.get());
+                            session.clear();
+                        } else {
+                            sessionEntitiesEvictor.evictKnownEntitiesFromSession(stopPlaceToSave);
+                        }
                 } else if (!stopPlaceIterator.hasNextParent()) {
                     session.flush();
                     session.clear();

@@ -15,14 +15,14 @@
 
 package org.rutebanken.tiamat.rest.exception;
 
+import jakarta.validation.ValidationException;
+import jakarta.ws.rs.NotAuthorizedException;
+import jakarta.ws.rs.core.Response;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.transaction.TransactionSystemException;
 
-import javax.validation.ValidationException;
-import javax.ws.rs.NotAuthorizedException;
-import javax.ws.rs.core.Response;
 import java.io.FileNotFoundException;
 
 
@@ -39,7 +39,7 @@ public class GeneralExceptionMapperTest {
     public void nestedAccessDeniedExceptionYieldsForbidden() {
         Response rsp = new GeneralExceptionMapper().toResponse(new TransactionSystemException("", new AccessDeniedException("Nope")));
         Assert.assertEquals(Response.Status.FORBIDDEN.getStatusCode(), rsp.getStatus());
-        Assert.assertEquals("Nope", ((ErrorResponseEntity) rsp.getEntity()).errors.get(0).message);
+        Assert.assertEquals("Nope", ((ErrorResponseEntity) rsp.getEntity()).errors.getFirst().message);
     }
 
 

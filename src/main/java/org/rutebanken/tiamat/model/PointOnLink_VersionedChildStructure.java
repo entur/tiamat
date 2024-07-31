@@ -15,7 +15,8 @@
 
 package org.rutebanken.tiamat.model;
 
-import javax.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBElement;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 

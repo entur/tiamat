@@ -15,7 +15,7 @@
 
 package org.rutebanken.tiamat.importer;
 
-import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
+import org.rutebanken.tiamat.auth.AuthorizationService;
 import org.rutebanken.tiamat.model.AddressablePlace;
 import org.rutebanken.tiamat.model.AddressablePlaceRefStructure;
 import org.rutebanken.tiamat.model.PathLink;
@@ -38,7 +38,6 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.stream.Collectors.toList;
-import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
 
 @Service
 @Transactional
@@ -56,10 +55,10 @@ public class PathLinksImporter {
 
     private final VersionIncrementor versionIncrementor;
 
-    private final ReflectionAuthorizationService authorizationService;
+    private final AuthorizationService authorizationService;
 
     @Autowired
-    public PathLinksImporter(PathLinkRepository pathLinkRepository, ReferenceResolver referenceResolver, NetexMapper netexMapper, KeyValueListAppender keyValueListAppender, VersionIncrementor versionIncrementor, ReflectionAuthorizationService authorizationService) {
+    public PathLinksImporter(PathLinkRepository pathLinkRepository, ReferenceResolver referenceResolver, NetexMapper netexMapper, KeyValueListAppender keyValueListAppender, VersionIncrementor versionIncrementor, AuthorizationService authorizationService) {
         this.pathLinkRepository = pathLinkRepository;
         this.referenceResolver = referenceResolver;
         this.netexMapper = netexMapper;
@@ -78,7 +77,7 @@ public class PathLinksImporter {
                     if(optionalPathLink.isPresent()) {
                         PathLink existing = optionalPathLink.get();
                         // Role edit stops. There could be a role for path links. But pathlinks are used in relation to stop place.
-                        authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(existing, pathLink));
+                        authorizationService.verifyCanEditEntities( Arrays.asList(existing, pathLink));
                         boolean changed = keyValueListAppender.appendToOriginalId(NetexIdMapper.ORIGINAL_ID_KEY, pathLink, existing);
                         if(changed) {
                             existing.setChanged(Instant.now());
@@ -87,7 +86,7 @@ public class PathLinksImporter {
                         versionIncrementor.incrementVersion(existing);
                         return existing;
                     } else {
-                        authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Arrays.asList(pathLink));
+                        authorizationService.verifyCanEditEntities( Arrays.asList(pathLink));
                         logger.debug("No existing path link. Using incoming {}", pathLink);
                         pathLink.setCreated(Instant.now());
                         pathLink.setVersion(VersionIncrementor.INITIAL_VERSION);

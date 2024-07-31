@@ -55,27 +55,6 @@ public class PathLinkObjectTypeCreator {
 
     public GraphQLObjectType create(GraphQLObjectType pathLinkEndObjecttype, GraphQLFieldDefinition netexIdFieldDefinition, GraphQLFieldDefinition geometryFieldDefinition) {
 
-        DataFetcher durationSecondsFetcher = (env) -> {
-
-            if (env.getSource() != null) {
-                TransferDuration transferDuration = (TransferDuration) env.getSource();
-
-                switch (env.getFields().get(0).getName()) {
-                    case DEFAULT_DURATION:
-                        return getSeconds(transferDuration.getDefaultDuration());
-                    case OCCASIONAL_TRAVELLER_DURATION:
-                        return getSeconds(transferDuration.getOccasionalTravellerDuration());
-                    case MOBILITY_RESTRICTED_TRAVELLER_DURATION:
-                        return getSeconds(transferDuration.getMobilityRestrictedTravellerDuration());
-                    case FREQUENT_TRAVELLER_DURATION:
-                        return getSeconds(transferDuration.getFrequentTravellerDuration());
-                    default:
-                        return null;
-                }
-            }
-            return null;
-        };
-
         return newObject()
                 .name(OUTPUT_TYPE_PATH_LINK)
                 .field(netexIdFieldDefinition)
@@ -97,24 +76,39 @@ public class PathLinkObjectTypeCreator {
                                 .field(newFieldDefinition()
                                         .name(DEFAULT_DURATION)
                                         .type(GraphQLInt)
-                                        .dataFetcher(durationSecondsFetcher)
                                         .description(DEFAULT_DURATION_DESCRIPTION))
                                 .field(newFieldDefinition()
                                         .name(FREQUENT_TRAVELLER_DURATION)
                                         .type(GraphQLInt)
-                                        .dataFetcher(durationSecondsFetcher)
                                         .description(FREQUENT_TRAVELLER_DURATION_DESCRIPTION))
                                 .field(newFieldDefinition()
                                         .name(OCCASIONAL_TRAVELLER_DURATION)
                                         .type(GraphQLInt)
-                                        .dataFetcher(durationSecondsFetcher)
                                         .description(OCCASIONAL_TRAVELLER_DURATION_DESCRIPTION))
                                 .field(newFieldDefinition()
                                         .name(MOBILITY_RESTRICTED_TRAVELLER_DURATION)
                                         .type(GraphQLInt)
-                                        .dataFetcher(durationSecondsFetcher)
                                         .description(MOBILITY_RESTRICTED_TRAVELLER_DURATION_DESCRIPTION))
                                 .build()))
                 .build();
+    }
+
+    public DataFetcher durationSecondsFetcher() {
+
+        return (env) -> {
+
+            if (env.getSource() != null) {
+                TransferDuration transferDuration = (TransferDuration) env.getSource();
+
+                return switch (env.getMergedField().getFields().getFirst().getName()) {
+                    case DEFAULT_DURATION -> getSeconds(transferDuration.getDefaultDuration());
+                    case OCCASIONAL_TRAVELLER_DURATION -> getSeconds(transferDuration.getOccasionalTravellerDuration());
+                    case MOBILITY_RESTRICTED_TRAVELLER_DURATION -> getSeconds(transferDuration.getMobilityRestrictedTravellerDuration());
+                    case FREQUENT_TRAVELLER_DURATION -> getSeconds(transferDuration.getFrequentTravellerDuration());
+                    default -> null;
+                };
+            }
+            return null;
+        };
     }
 }

@@ -16,6 +16,9 @@
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
 import com.google.common.collect.Sets;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.StreamingOutput;
+import jakarta.xml.bind.JAXBException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.rutebanken.netex.model.KeyValueStructure;
@@ -36,9 +39,6 @@ import org.rutebanken.tiamat.netex.mapping.PublicationDeliveryHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.xml.sax.SAXException;
 
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
-import javax.xml.bind.JAXBException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
@@ -139,8 +139,8 @@ public class ImportResourceTest extends TiamatIntegrationTest {
         List<StopPlace> result = publicationDeliveryTestHelper.extractStopPlaces(response);
 
         assertThat(result).as("Expecting one stop place in return, as stops imported has onstreet bus and bus station as type").hasSize(1);
-        publicationDeliveryTestHelper.hasOriginalId("RUT:StopPlace:123123", result.get(0));
-        publicationDeliveryTestHelper.hasOriginalId("RUT:StopPlace:987654321", result.get(0));
+        publicationDeliveryTestHelper.hasOriginalId("RUT:StopPlace:123123", result.getFirst());
+        publicationDeliveryTestHelper.hasOriginalId("RUT:StopPlace:987654321", result.getFirst());
     }
 
     @Test
@@ -181,7 +181,7 @@ public class ImportResourceTest extends TiamatIntegrationTest {
         List<StopPlace> result = publicationDeliveryTestHelper.extractStopPlaces(response);
 
         assertThat(result).hasSize(1);
-        assertThat(result.get(0).getStopPlaceType()).isEqualTo(StopTypeEnumeration.METRO_STATION);
+        assertThat(result.getFirst().getStopPlaceType()).isEqualTo(StopTypeEnumeration.METRO_STATION);
     }
 
     @Test
@@ -198,7 +198,7 @@ public class ImportResourceTest extends TiamatIntegrationTest {
         List<StopPlace> result = publicationDeliveryTestHelper.extractStopPlaces(response);
 
         assertThat(result).hasSize(1);
-        assertThat(result.get(0).getStopPlaceType()).isEqualTo(StopTypeEnumeration.BUS_STATION);
+        assertThat(result.getFirst().getStopPlaceType()).isEqualTo(StopTypeEnumeration.BUS_STATION);
     }
 
     @Test
@@ -237,8 +237,8 @@ public class ImportResourceTest extends TiamatIntegrationTest {
         List<StopPlace> result = publicationDeliveryTestHelper.extractStopPlaces(response);
 
         assertThat(result).as("Expecting one stop place in return, as stops imported has onstreet bus and bus station as type").hasSize(1);
-        publicationDeliveryTestHelper.hasOriginalId(stopPlaceToBeMatched.getId(), result.get(0));
-        publicationDeliveryTestHelper.hasOriginalId(incomingStopPlace.getId(), result.get(0));
+        publicationDeliveryTestHelper.hasOriginalId(stopPlaceToBeMatched.getId(), result.getFirst());
+        publicationDeliveryTestHelper.hasOriginalId(incomingStopPlace.getId(), result.getFirst());
     }
 
     /**
@@ -295,7 +295,7 @@ public class ImportResourceTest extends TiamatIntegrationTest {
         assertThat(result).as("Expecting one stop place in return, as there is no need to return duplicates").hasSize(1);
         assertThat(result2).as("Expecting one stop place in return, as there is no need to return duplicates").hasSize(1);
         assertThat(result3).as("Expecting one stop place in return, as there is no need to return duplicates").hasSize(1);
-        assertThat(result3.get(0).getVersion()).isEqualTo("3");
+        assertThat(result3.getFirst().getVersion()).isEqualTo("3");
     }
 
 
@@ -356,7 +356,7 @@ public class ImportResourceTest extends TiamatIntegrationTest {
         List<StopPlace> result = publicationDeliveryTestHelper.extractStopPlaces(response);
 
         assertThat(result).as("Expecting one stop place in return, as there is no need to return the same matching stop place twice").hasSize(1);
-        String importedIds = result.get(0).getKeyList().getKeyValue()
+        String importedIds = result.getFirst().getKeyList().getKeyValue()
                 .stream()
                 .filter(kv -> "imported-id".equals(kv.getKey()))
                 .map(KeyValueStructure::getValue)
@@ -364,7 +364,7 @@ public class ImportResourceTest extends TiamatIntegrationTest {
                 .get();
         assertThat(importedIds).contains(stopPlace.getId());
         assertThat(importedIds).contains(stopPlace2.getId());
-        assertThat(result.get(0).getQuays().getQuayRefOrQuay()).hasSize(2);
+        assertThat(result.getFirst().getQuays().getQuayRefOrQuay()).hasSize(2);
     }
 
     @Test
@@ -570,12 +570,6 @@ public class ImportResourceTest extends TiamatIntegrationTest {
             assertThat(matches)
                     .as("Expecting quay to contain two matching orignal IDs in key val")
                     .isEqualTo(2);
-
-//            assertThat(quays)
-//                    .extracting(Quay::getKeyList)
-//                    .extracting(KeyListStructure::getKeyValue)
-//                    .extracting(KeyValueStructure::getValue)
-//                    .contains("RUT:StopArea:0229012202");
         }
     }
 
@@ -641,7 +635,7 @@ public class ImportResourceTest extends TiamatIntegrationTest {
 
         List<Quay> actualQuays = publicationDeliveryTestHelper.extractQuays(actualStopPlace);
 
-        assertThat(actualQuays.get(0).getCreated()).as("The imported quay's created date must not be null").isNotNull();
+        assertThat(actualQuays.getFirst().getCreated()).as("The imported quay's created date must not be null").isNotNull();
     }
 
     @Test
@@ -666,7 +660,7 @@ public class ImportResourceTest extends TiamatIntegrationTest {
                 .isNotEmpty()
                 .hasSize(1);
 
-        ValidBetween validBetween = actualValidBetween.get(0);
+        ValidBetween validBetween = actualValidBetween.getFirst();
         assertThat(validBetween.getFromDate())
                 .as("From date should be set")
                 .isNotNull();
@@ -975,52 +969,53 @@ public class ImportResourceTest extends TiamatIntegrationTest {
     @Test
     public void importPublicationDeliveryAndVerifyStatusCode200() throws Exception {
 
-        String xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" +
-                "<PublicationDelivery version=\"1.0\" xmlns=\"http://www.netex.org.uk/netex\"\n" +
-                "                     xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
-                "                     xsi:schemaLocation=\"http://www.netex.org.uk/netex ../../xsd/NeTEx_publication.xsd\">\n" +
-                "    <PublicationTimestamp>2016-05-18T15:00:00.0Z</PublicationTimestamp>\n" +
-                "    <ParticipantRef>NHR</ParticipantRef>\n" +
-                "    <dataObjects>\n" +
-                "        <SiteFrame version=\"01\" id=\"nhr:sf:1\">\n" +
-                "            <FrameDefaults>\n" +
-                "               <DefaultLocale>\n" +
-                "                   <TimeZone>Europe/Oslo</TimeZone>\n" +
-                "                   <DefaultLanguage>no</DefaultLanguage>\n" +
-                "               </DefaultLocale>\n" +
-                "            </FrameDefaults>\n" +
-                "            <stopPlaces>\n" +
-                "                <StopPlace version=\"01\" created=\"2016-04-21T09:00:00.0Z\" id=\"nhr:sp:1\">\n" +
-                "                    <ValidBetween>\n" +
-                "                        <FromDate>2017-05-11T10:20:27.394+02:00</FromDate>\n" +
-                "                    </ValidBetween>" +
-                "                    <Name lang=\"no-NO\">Krokstien</Name>\n" +
-                "                    <Centroid>\n" +
-                "                        <Location srsName=\"WGS84\">\n" +
-                "                            <Longitude>10.8577903</Longitude>\n" +
-                "                            <Latitude>59.910579</Latitude>\n" +
-                "                        </Location>\n" +
-                "                    </Centroid>\n" +
-                "                    <TransportMode>bus</TransportMode>\n" +
-                "                    <StopPlaceType>onstreetBus</StopPlaceType>\n" +
-                "                    <quays>\n" +
-                "                        <Quay version=\"01\" created=\"2016-04-21T09:01:00.0Z\" id=\"nhr:Quay:1\">\n" +
-                "                            <Centroid>\n" +
-                "                                <Location srsName=\"WGS84\">\n" +
-                "                                    <Longitude>10.8577903</Longitude>\n" +
-                "                                    <Latitude>59.910579</Latitude>\n" +
-                "                                </Location>\n" +
-                "                            </Centroid>\n" +
-                "                            <Covered>outdoors</Covered>\n" +
-                "                            <Lighting>wellLit</Lighting>\n" +
-                "                            <QuayType>busStop</QuayType>\n" +
-                "                        </Quay>\n" +
-                "                    </quays>\n" +
-                "                </StopPlace>\n" +
-                "            </stopPlaces>\n" +
-                "        </SiteFrame>\n" +
-                "    </dataObjects>\n" +
-                "</PublicationDelivery>";
+        String xml = """
+                <?xml version="1.0" encoding="utf-8"?>
+                <PublicationDelivery version="1.0" xmlns="http://www.netex.org.uk/netex"
+                                     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                                     xsi:schemaLocation="http://www.netex.org.uk/netex ../../xsd/NeTEx_publication.xsd">
+                    <PublicationTimestamp>2016-05-18T15:00:00.0Z</PublicationTimestamp>
+                    <ParticipantRef>NHR</ParticipantRef>
+                    <dataObjects>
+                        <SiteFrame version="01" id="nhr:sf:1">
+                            <FrameDefaults>
+                               <DefaultLocale>
+                                   <TimeZone>Europe/Oslo</TimeZone>
+                                   <DefaultLanguage>no</DefaultLanguage>
+                               </DefaultLocale>
+                            </FrameDefaults>
+                            <stopPlaces>
+                                <StopPlace version="01" created="2016-04-21T09:00:00.0Z" id="nhr:sp:1">
+                                    <ValidBetween>
+                                        <FromDate>2017-05-11T10:20:27.394+02:00</FromDate>
+                                    </ValidBetween>\
+                                    <Name lang="no-NO">Krokstien</Name>
+                                    <Centroid>
+                                        <Location srsName="WGS84">
+                                            <Longitude>10.8577903</Longitude>
+                                            <Latitude>59.910579</Latitude>
+                                        </Location>
+                                    </Centroid>
+                                    <TransportMode>bus</TransportMode>
+                                    <StopPlaceType>onstreetBus</StopPlaceType>
+                                    <quays>
+                                        <Quay version="01" created="2016-04-21T09:01:00.0Z" id="nhr:Quay:1">
+                                            <Centroid>
+                                                <Location srsName="WGS84">
+                                                    <Longitude>10.8577903</Longitude>
+                                                    <Latitude>59.910579</Latitude>
+                                                </Location>
+                                            </Centroid>
+                                            <Covered>outdoors</Covered>
+                                            <Lighting>wellLit</Lighting>
+                                            <QuayType>busStop</QuayType>
+                                        </Quay>
+                                    </quays>
+                                </StopPlace>
+                            </stopPlaces>
+                        </SiteFrame>
+                    </dataObjects>
+                </PublicationDelivery>""";
 
 
         InputStream stream = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8));
@@ -1050,7 +1045,7 @@ public class ImportResourceTest extends TiamatIntegrationTest {
 
         List<StopPlace> changedStopPlaces = publicationDeliveryTestHelper.extractStopPlaces(response);
         Assert.assertEquals(1, changedStopPlaces.size());
-        StopPlace stopPlace = changedStopPlaces.get(0);
+        StopPlace stopPlace = changedStopPlaces.getFirst();
 
         List<ValidBetween> actualValidBetween = stopPlace.getValidBetween();
 
@@ -1060,7 +1055,7 @@ public class ImportResourceTest extends TiamatIntegrationTest {
                 .isNotEmpty()
                 .hasSize(1);
 
-        assertThat(actualValidBetween.get(0).getFromDate()).isEqualTo(firstValidFrom);
+        assertThat(actualValidBetween.getFirst().getFromDate()).isEqualTo(firstValidFrom);
     }
 
     /**
@@ -1069,33 +1064,35 @@ public class ImportResourceTest extends TiamatIntegrationTest {
     @Test
     public void importBasicStopPlace() throws JAXBException, IOException, SAXException {
 
-        String xml = "<PublicationDelivery\n" +
-                " version=\"any\"\n" +
-                " xmlns=\"http://www.netex.org.uk/netex\"\n" +
-                " xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
-                " xsi:schemaLocation=\"http://www.netex.org.uk/netex ../../xsd/NeTEx_publication.xsd\">\n" +
-                " <!-- Når denne dataleveransen ble generert -->\n" +
-                " <PublicationTimestamp>2016-05-18T15:00:00.0Z</PublicationTimestamp>\n" +
-                " <ParticipantRef>NHR</ParticipantRef>\n" +
-                " <dataObjects>\n" +
-                "  <SiteFrame version=\"any\" id=\"nhr:sf:1\">\n" +
-                "   <FrameDefaults>\n" +
-                "     <DefaultLocale>\n" +
-                "       <TimeZone>Europe/Oslo</TimeZone>\n" +
-                "       <DefaultLanguage>no</DefaultLanguage>\n" +
-                "     </DefaultLocale>\n" +
-                "   </FrameDefaults>\n" +
-                "   <stopPlaces>\n" +
-                "    <!--===Stop=== -->\n" +
-                "    <!-- Merk: Holdeplass-ID vil komme fra Holdeplassregisteret -->\n" +
-                "    <StopPlace version=\"1\" created=\"2016-04-21T09:00:00.0Z\" id=\"nhr:sp:2\">\n" +
-                "     <Name lang=\"no-NO\">Krokstien</Name>\n" +
-                "    </StopPlace>\n" +
-                "   </stopPlaces>\n" +
-                "  </SiteFrame>\n" +
-                " </dataObjects>\n" +
-                "</PublicationDelivery>\n" +
-                "\n";
+        String xml = """
+                <PublicationDelivery
+                 version="any"
+                 xmlns="http://www.netex.org.uk/netex"
+                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                 xsi:schemaLocation="http://www.netex.org.uk/netex ../../xsd/NeTEx_publication.xsd">
+                 <!-- Når denne dataleveransen ble generert -->
+                 <PublicationTimestamp>2016-05-18T15:00:00.0Z</PublicationTimestamp>
+                 <ParticipantRef>NHR</ParticipantRef>
+                 <dataObjects>
+                  <SiteFrame version="any" id="nhr:sf:1">
+                   <FrameDefaults>
+                     <DefaultLocale>
+                       <TimeZone>Europe/Oslo</TimeZone>
+                       <DefaultLanguage>no</DefaultLanguage>
+                     </DefaultLocale>
+                   </FrameDefaults>
+                   <stopPlaces>
+                    <!--===Stop=== -->
+                    <!-- Merk: Holdeplass-ID vil komme fra Holdeplassregisteret -->
+                    <StopPlace version="1" created="2016-04-21T09:00:00.0Z" id="nhr:sp:2">
+                     <Name lang="no-NO">Krokstien</Name>
+                    </StopPlace>
+                   </stopPlaces>
+                  </SiteFrame>
+                 </dataObjects>
+                </PublicationDelivery>
+
+                """;
 
         InputStream stream = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8));
 
@@ -1111,120 +1108,121 @@ public class ImportResourceTest extends TiamatIntegrationTest {
 
     @Test
     public void importNSBStopPlace() throws JAXBException, IOException, SAXException {
-        String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-                "<PublicationDelivery xmlns=\"http://www.netex.org.uk/netex\">\n" +
-                "   <PublicationTimestamp>2017-04-18T12:57:27.796+02:00</PublicationTimestamp>\n" +
-                "   <ParticipantRef>NSB</ParticipantRef>\n" +
-                "   <Description>NSB Grails stasjoner til NeTex</Description>\n" +
-                "   <dataObjects>\n" +
-                "      <SiteFrame id=\"NSB:SiteFrame:1\" version=\"1\">\n" +
-                "         <codespaces>\n" +
-                "            <Codespace id=\"nsb\">\n" +
-                "               <Xmlns>NSB</Xmlns>\n" +
-                "               <XmlnsUrl>http://www.rutebanken.org/ns/nsb</XmlnsUrl>\n" +
-                "            </Codespace>\n" +
-                "         </codespaces>\n" +
-                "         <FrameDefaults>\n" +
-                "           <DefaultLocale>\n" +
-                "               <TimeZone>Europe/Oslo</TimeZone>\n" +
-                "               <DefaultLanguage>no</DefaultLanguage>\n" +
-                "           </DefaultLocale>\n" +
-                "         </FrameDefaults>\n" +
-                "         <stopPlaces>\n" +
-                "   \n" +
-                "   \n" +
-                "            <StopPlace id=\"NSB:StopPlace:007602146\" version=\"1\">\n" +
-                "               <keyList>\n" +
-                "                  <KeyValue>\n" +
-                "                     <Key>grailsId</Key>\n" +
-                "                     <Value>3</Value>\n" +
-                "                  </KeyValue>\n" +
-                "                  <KeyValue>\n" +
-                "                     <Key>lisaId</Key>\n" +
-                "                     <Value>2146</Value>\n" +
-                "                  </KeyValue>\n" +
-                "                  <KeyValue>\n" +
-                "                     <Key>jbvCode</Key>\n" +
-                "                     <Value>ADL</Value>\n" +
-                "                  </KeyValue>\n" +
-                "                  <KeyValue>\n" +
-                "                     <Key>iffCode</Key>\n" +
-                "                     <Value>7602146</Value>\n" +
-                "                  </KeyValue>\n" +
-                "                  <KeyValue>\n" +
-                "                     <Key>uicCode</Key>\n" +
-                "                     <Value>7602146</Value>\n" +
-                "                  </KeyValue>\n" +
-                "                  <KeyValue>\n" +
-                "                     <Key>imported-id</Key>\n" +
-                "                     <Value>NRI:StopPlace:761037602</Value>\n" +
-                "                  </KeyValue>\n" +
-                "               </keyList>\n" +
-                "               <Name lang=\"no\">Arendal</Name>\n" +
-                "               <Centroid>\n" +
-                "                  <Location srsName=\"WGS84\"><!--Match on NRI quays--><Longitude>8.769146</Longitude>\n" +
-                "                     <Latitude>58.465256</Latitude>\n" +
-                "                  </Location>\n" +
-                "               </Centroid>\n" +
-                "               <Url>http://www.jernbaneverket.no/no/Jernbanen/Stasjonssok/-A-/Arendal/</Url>\n" +
-                "               <PostalAddress id=\"NSB:PostalAddress:3\" version=\"1\">\n" +
-                "                  <AddressLine1>Møllebakken 15</AddressLine1>\n" +
-                "                  <AddressLine2> 4841 Arendal</AddressLine2>\n" +
-                "               </PostalAddress>\n" +
-                "               <AccessibilityAssessment id=\"NSB:AccessibilityAssessment:3\" version=\"1\">\n" +
-                "                  <MobilityImpairedAccess>true</MobilityImpairedAccess>\n" +
-                "                  <limitations>\n" +
-                "                     <AccessibilityLimitation>\n" +
-                "                        <WheelchairAccess>true</WheelchairAccess>\n" +
-                "                        <StepFreeAccess>true</StepFreeAccess>\n" +
-                "                     </AccessibilityLimitation>\n" +
-                "                  </limitations>\n" +
-                "               </AccessibilityAssessment>\n" +
-                "               <placeEquipments>\n" +
-                "                  <WaitingRoomEquipment id=\"NSB:WaitingRoomEquipment:3\" version=\"1\"/>\n" +
-                "                  <SanitaryEquipment id=\"NSB:SanitaryEquipment:3\" version=\"1\">\n" +
-                "                     <Gender>both</Gender>\n" +
-                "                     <SanitaryFacilityList>toilet wheelChairAccessToilet</SanitaryFacilityList>\n" +
-                "                  </SanitaryEquipment>\n" +
-                "                  <TicketingEquipment id=\"NSB:TicketingEquipment:3\" version=\"1\">\n" +
-                "                     <NumberOfMachines>1</NumberOfMachines>\n" +
-                "                  </TicketingEquipment>\n" +
-                "               </placeEquipments>\n" +
-                "               <localServices>\n" +
-                "                  <LeftLuggageService id=\"NSB:LeftLuggageService:3\" version=\"1\">\n" +
-                "                     <SelfServiceLockers>true</SelfServiceLockers>\n" +
-                "                  </LeftLuggageService>\n" +
-                "                  <TicketingService id=\"NSB:TicketingService:3\" version=\"1\">\n" +
-                "                     <TicketCounterService>true</TicketCounterService>\n" +
-                "                  </TicketingService>\n" +
-                "               </localServices>\n" +
-                "               <StopPlaceType>railStation</StopPlaceType>\n" +
-                "               <Weighting>interchangeAllowed</Weighting>\n" +
-                "               <quays>\n" +
-                "                  <Quay id=\"NSB:Quay:0076021461\" version=\"1\">\n" +
-                "                     <keyList>\n" +
-                "                        <KeyValue>\n" +
-                "                           <Key>grails-platformId</Key>\n" +
-                "                           <Value>825930</Value>\n" +
-                "                        </KeyValue>\n" +
-                "                        <KeyValue>\n" +
-                "                           <Key>uicCode</Key>\n" +
-                "                           <Value>7602146</Value>\n" +
-                "                        </KeyValue>\n" +
-                "                     </keyList>\n" +
-                "                     <Centroid>\n" +
-                "                        <Location srsName=\"WGS84\"><!--Match on NRI quays--><Longitude>8.769146</Longitude>\n" +
-                "                           <Latitude>58.465256</Latitude>\n" +
-                "                        </Location>\n" +
-                "                     </Centroid>\n" +
-                "                     <PublicCode>1</PublicCode>\n" +
-                "                  </Quay>\n" +
-                "               </quays>\n" +
-                "            </StopPlace>\n" +
-                "           </stopPlaces>" +
-                "       </SiteFrame>" +
-                "   </dataObjects>" +
-                "</PublicationDelivery>";
+        String xml = """
+                <?xml version="1.0" encoding="UTF-8"?>
+                <PublicationDelivery xmlns="http://www.netex.org.uk/netex">
+                   <PublicationTimestamp>2017-04-18T12:57:27.796+02:00</PublicationTimestamp>
+                   <ParticipantRef>NSB</ParticipantRef>
+                   <Description>NSB Grails stasjoner til NeTex</Description>
+                   <dataObjects>
+                      <SiteFrame id="NSB:SiteFrame:1" version="1">
+                         <codespaces>
+                            <Codespace id="nsb">
+                               <Xmlns>NSB</Xmlns>
+                               <XmlnsUrl>http://www.rutebanken.org/ns/nsb</XmlnsUrl>
+                            </Codespace>
+                         </codespaces>
+                         <FrameDefaults>
+                           <DefaultLocale>
+                               <TimeZone>Europe/Oslo</TimeZone>
+                               <DefaultLanguage>no</DefaultLanguage>
+                           </DefaultLocale>
+                         </FrameDefaults>
+                         <stopPlaces>
+                  \s
+                  \s
+                            <StopPlace id="NSB:StopPlace:007602146" version="1">
+                               <keyList>
+                                  <KeyValue>
+                                     <Key>grailsId</Key>
+                                     <Value>3</Value>
+                                  </KeyValue>
+                                  <KeyValue>
+                                     <Key>lisaId</Key>
+                                     <Value>2146</Value>
+                                  </KeyValue>
+                                  <KeyValue>
+                                     <Key>jbvCode</Key>
+                                     <Value>ADL</Value>
+                                  </KeyValue>
+                                  <KeyValue>
+                                     <Key>iffCode</Key>
+                                     <Value>7602146</Value>
+                                  </KeyValue>
+                                  <KeyValue>
+                                     <Key>uicCode</Key>
+                                     <Value>7602146</Value>
+                                  </KeyValue>
+                                  <KeyValue>
+                                     <Key>imported-id</Key>
+                                     <Value>NRI:StopPlace:761037602</Value>
+                                  </KeyValue>
+                               </keyList>
+                               <Name lang="no">Arendal</Name>
+                               <Centroid>
+                                  <Location srsName="WGS84"><!--Match on NRI quays--><Longitude>8.769146</Longitude>
+                                     <Latitude>58.465256</Latitude>
+                                  </Location>
+                               </Centroid>
+                               <Url>http://www.jernbaneverket.no/no/Jernbanen/Stasjonssok/-A-/Arendal/</Url>
+                               <PostalAddress id="NSB:PostalAddress:3" version="1">
+                                  <AddressLine1>Møllebakken 15</AddressLine1>
+                                  <AddressLine2> 4841 Arendal</AddressLine2>
+                               </PostalAddress>
+                               <AccessibilityAssessment id="NSB:AccessibilityAssessment:3" version="1">
+                                  <MobilityImpairedAccess>true</MobilityImpairedAccess>
+                                  <limitations>
+                                     <AccessibilityLimitation>
+                                        <WheelchairAccess>true</WheelchairAccess>
+                                        <StepFreeAccess>true</StepFreeAccess>
+                                     </AccessibilityLimitation>
+                                  </limitations>
+                               </AccessibilityAssessment>
+                               <placeEquipments>
+                                  <WaitingRoomEquipment id="NSB:WaitingRoomEquipment:3" version="1"/>
+                                  <SanitaryEquipment id="NSB:SanitaryEquipment:3" version="1">
+                                     <Gender>both</Gender>
+                                     <SanitaryFacilityList>toilet wheelChairAccessToilet</SanitaryFacilityList>
+                                  </SanitaryEquipment>
+                                  <TicketingEquipment id="NSB:TicketingEquipment:3" version="1">
+                                     <NumberOfMachines>1</NumberOfMachines>
+                                  </TicketingEquipment>
+                               </placeEquipments>
+                               <localServices>
+                                  <LeftLuggageService id="NSB:LeftLuggageService:3" version="1">
+                                     <SelfServiceLockers>true</SelfServiceLockers>
+                                  </LeftLuggageService>
+                                  <TicketingService id="NSB:TicketingService:3" version="1">
+                                     <TicketCounterService>true</TicketCounterService>
+                                  </TicketingService>
+                               </localServices>
+                               <StopPlaceType>railStation</StopPlaceType>
+                               <Weighting>interchangeAllowed</Weighting>
+                               <quays>
+                                  <Quay id="NSB:Quay:0076021461" version="1">
+                                     <keyList>
+                                        <KeyValue>
+                                           <Key>grails-platformId</Key>
+                                           <Value>825930</Value>
+                                        </KeyValue>
+                                        <KeyValue>
+                                           <Key>uicCode</Key>
+                                           <Value>7602146</Value>
+                                        </KeyValue>
+                                     </keyList>
+                                     <Centroid>
+                                        <Location srsName="WGS84"><!--Match on NRI quays--><Longitude>8.769146</Longitude>
+                                           <Latitude>58.465256</Latitude>
+                                        </Location>
+                                     </Centroid>
+                                     <PublicCode>1</PublicCode>
+                                  </Quay>
+                               </quays>
+                            </StopPlace>
+                           </stopPlaces>\
+                       </SiteFrame>\
+                   </dataObjects>\
+                </PublicationDelivery>""";
 
 
         InputStream stream = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8));

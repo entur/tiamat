@@ -16,6 +16,9 @@
 package org.rutebanken.tiamat;
 
 import com.hazelcast.core.HazelcastInstance;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.EntityTransaction;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
@@ -51,15 +54,11 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityTransaction;
-
 import static org.rutebanken.tiamat.netex.id.GaplessIdGeneratorService.INITIAL_LAST_ID;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment= SpringBootTest.WebEnvironment.RANDOM_PORT, classes = TiamatTestApplication.class)
-@ActiveProfiles({"test","gcs-blobstore","activemq"})
+@ActiveProfiles({"test","gcs-blobstore"})
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 public abstract class TiamatIntegrationTest {
 

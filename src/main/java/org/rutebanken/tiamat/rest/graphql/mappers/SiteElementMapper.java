@@ -96,7 +96,7 @@ public class SiteElementMapper {
                 limitations = new ArrayList<>();
                 limitation = new AccessibilityLimitation();
             } else {
-                limitation = limitations.get(0);
+                limitation = limitations.getFirst();
             }
 
             AccessibilityLimitation limitationFromInput = accessibilityLimitationMapper.map((Map<String, LimitationStatusEnumeration>) accessibilityAssessmentInput.get("limitations"));

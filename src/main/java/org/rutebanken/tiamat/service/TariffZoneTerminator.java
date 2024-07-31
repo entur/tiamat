@@ -1,6 +1,6 @@
 package org.rutebanken.tiamat.service;
 
-import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
+import org.rutebanken.tiamat.auth.AuthorizationService;
 import org.rutebanken.tiamat.auth.UsernameFetcher;
 import org.rutebanken.tiamat.lock.MutateLock;
 import org.rutebanken.tiamat.model.DataManagedObjectStructure;
@@ -17,8 +17,6 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.util.Collections;
 
-import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
-
 @Service("tariffZoneTerminator")
 public class TariffZoneTerminator {
     private static final Logger logger= LoggerFactory.getLogger(TariffZoneTerminator.class);
@@ -28,14 +26,14 @@ public class TariffZoneTerminator {
     private final UsernameFetcher usernameFetcher;
     private final MutateLock mutateLock;
     private final BackgroundJobs backgroundJobs;
-    private final ReflectionAuthorizationService authorizationService;
+    private final AuthorizationService authorizationService;
     private final ReferenceResolver referenceResolver;
     @Autowired
     public TariffZoneTerminator(TariffZoneRepository tariffZoneRepository,
                                 UsernameFetcher usernameFetcher,
                                 MutateLock mutateLock,
                                 BackgroundJobs backgroundJobs,
-                                ReflectionAuthorizationService authorizationService,
+                                AuthorizationService authorizationService,
                                 ReferenceResolver referenceResolver) {
         this.tariffZoneRepository = tariffZoneRepository;
         this.usernameFetcher = usernameFetcher;
@@ -50,7 +48,7 @@ public class TariffZoneTerminator {
             String usernameForAuthenticatedUser = usernameFetcher.getUserNameForAuthenticatedUser();
             logger.warn("About to terminate tariff zone by ID {}. User: {}", tariffZoneId, usernameForAuthenticatedUser);
             DataManagedObjectStructure resolved = referenceResolver.resolve(new VersionOfObjectRefStructure(tariffZoneId));
-            authorizationService.assertAuthorized(ROLE_EDIT_STOPS, Collections.singletonList(resolved));
+            authorizationService.verifyCanEditEntities( Collections.singletonList(resolved));
             Instant now = Instant.now();
             Instant timeOfTermination;
 

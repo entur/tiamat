@@ -32,27 +32,28 @@ public class TiamatEntityResolver implements EntityResolver {
     @Override
     public Object resolveCorrectEntity(Object entity) {
 
-        if(entity == null) {
-            return null;
-        }
-
-        if(entity instanceof Quay) {
-            StopPlace stopPlace = stopPlaceRepository.findByQuay((Quay) entity);
-            if(stopPlace == null) {
-                throw new IllegalArgumentException("Cannot resolve stop place from quay: " + entity);
+        switch (entity) {
+            case null -> {
+                return null;
             }
-            return stopPlace;
-        }
-
-        if(entity instanceof Parking) {
-            Parking parking = (Parking) entity;
-            if (parking.getParentSiteRef() != null && parking.getParentSiteRef().getRef() != null) {
-                StopPlace stopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(parking.getParentSiteRef().getRef());
-
-                if(stopPlace == null) {
-                    throw new IllegalArgumentException("Cannot resolve stop place from parking: " + entity);
+            case Quay quay -> {
+                StopPlace stopPlace = stopPlaceRepository.findByQuay(quay);
+                if (stopPlace == null) {
+                    throw new IllegalArgumentException("Cannot resolve stop place from quay: " + entity);
                 }
                 return stopPlace;
+            }
+            case Parking parking -> {
+                if (parking.getParentSiteRef() != null && parking.getParentSiteRef().getRef() != null) {
+                    StopPlace stopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(parking.getParentSiteRef().getRef());
+
+                    if (stopPlace == null) {
+                        throw new IllegalArgumentException("Cannot resolve stop place from parking: " + entity);
+                    }
+                    return stopPlace;
+                }
+            }
+            default -> {
             }
         }
 

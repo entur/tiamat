@@ -16,6 +16,7 @@
 package org.rutebanken.tiamat.netex.mapping.converter;
 
 
+import jakarta.xml.bind.JAXBElement;
 import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;
@@ -36,7 +37,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.xml.bind.JAXBElement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
