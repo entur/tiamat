@@ -710,6 +710,13 @@ public class StopPlaceRegisterGraphQLSchema {
         dataFetcherGeometry(codeRegistryBuilder, OUTPUT_TYPE_TARIFF_ZONE);
         dataFetcherGeometry(codeRegistryBuilder, OUTPUT_TYPE_FARE_ZONE);
         dataFetcherGeometry(codeRegistryBuilder, OUTPUT_TYPE_BOARDING_POSITION);
+        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_GROUP_OF_STOPPLACES, GEOMETRY, env -> {
+            GroupOfStopPlaces source = env.getSource();
+            if (source.getCentroid()!=null) {
+                return source.getCentroid();
+            }
+            return null;
+        });
 
 
         dataFetcherPlaceEquipments(codeRegistryBuilder, OUTPUT_TYPE_STOPPLACE);

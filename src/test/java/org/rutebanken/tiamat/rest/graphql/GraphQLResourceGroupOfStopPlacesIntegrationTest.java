@@ -73,7 +73,7 @@ public class GraphQLResourceGroupOfStopPlacesIntegrationTest extends AbstractGra
                                         },
                                         geometry: {
                                             type: Point,
-                                            coordinates: [[ %f, %f ]]
+                                            coordinates: [ %f, %f ]
                                         },
                                         members: [
                                             {ref: "%s"},
