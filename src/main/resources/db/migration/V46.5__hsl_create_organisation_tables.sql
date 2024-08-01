@@ -34,6 +34,9 @@ create table organisation
     FOREIGN KEY (private_contact_details_id) REFERENCES contact(id) ON DELETE CASCADE
 );
 
+ALTER TABLE ONLY organisation
+    ADD CONSTRAINT organisation_netex_id_version_constraint UNIQUE (netex_id, version);
+
 CREATE SEQUENCE contact_seq
     START WITH 1
     INCREMENT BY 10

@@ -67,6 +67,9 @@ COMMENT ON COLUMN hsl_accessibility_properties.pedestrian_crossing_ramp_type IS 
 ALTER TABLE ONLY hsl_accessibility_properties
     ADD CONSTRAINT hsl_accessibility_properties_pkey PRIMARY KEY (id);
 
+ALTER TABLE ONLY hsl_accessibility_properties
+    ADD CONSTRAINT hsl_accessibility_properties_netex_id_version_constraint UNIQUE (netex_id, version);
+
 CREATE SEQUENCE hsl_accessibility_properties_seq
     START WITH 1
     INCREMENT BY 10
