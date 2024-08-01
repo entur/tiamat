@@ -23,7 +23,7 @@ import java.util.List;
 import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
 import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_ORGANISATION_EDIT;
 
-@Service
+@Service("organisationDeleter")
 public class OrganisationDeleter {
 
     private static final Logger logger = LoggerFactory.getLogger(OrganisationDeleter.class);

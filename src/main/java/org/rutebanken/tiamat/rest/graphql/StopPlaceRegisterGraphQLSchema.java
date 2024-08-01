@@ -98,6 +98,7 @@ import org.rutebanken.tiamat.rest.graphql.types.ZoneCommonFieldListCreator;
 import org.rutebanken.tiamat.service.TagCreator;
 import org.rutebanken.tiamat.service.TagRemover;
 import org.rutebanken.tiamat.service.TariffZoneTerminator;
+import org.rutebanken.tiamat.service.organisation.OrganisationDeleter;
 import org.rutebanken.tiamat.service.parking.ParkingDeleter;
 import org.rutebanken.tiamat.service.stopplace.MultiModalStopPlaceEditor;
 import org.rutebanken.tiamat.service.stopplace.StopPlaceDeleter;
@@ -300,6 +301,9 @@ public class StopPlaceRegisterGraphQLSchema {
     DataFetcher organisationUpdater;
 
     @Autowired
+    OrganisationDeleter organisationDeleter;
+
+    @Autowired
     DateScalar dateScalar;
 
     @Autowired
@@ -492,8 +496,8 @@ public class StopPlaceRegisterGraphQLSchema {
                         .name(FIND_ORGANISATION)
                         .type(new GraphQLList(organisationObjectType))
                         .description("Find organisation")
-                        .argument(createFindOrganisationArguments(allVersionsArgument))
-                        .dataFetcher(organisationFetcher))
+                        .arguments(createFindOrganisationArguments(allVersionsArgument))
+                        )
                 .field(newFieldDefinition()
                         .name(VALID_TRANSPORT_MODES)
                         .type(new GraphQLList(transportModeSubmodeObjectType))
@@ -628,7 +632,7 @@ public class StopPlaceRegisterGraphQLSchema {
                                 .name(OUTPUT_TYPE_ORGANISATION)
                                 .type(new GraphQLList(organisationInputObjectType)))
                         .description("Create new or update existing " + OUTPUT_TYPE_ORGANISATION)
-                        .dataFetcher(organisationUpdater))
+                        )
 
                 .field(newFieldDefinition()
                         .type(tariffZoneObjectType)
@@ -681,11 +685,19 @@ public class StopPlaceRegisterGraphQLSchema {
                     return null;
                 }
                 );
+        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_ACCESSIBILITY_ASSESSMENT, HSL_ACCESSIBILITY_PROPERTIES,
+                 env -> ((AccessibilityAssessment) env.getSource()).getHslAccessibilityProperties()
+        );
+
 
         registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_ACCESSIBILITY_LIMITATIONS , ID, getNetexIdFetcher());
         registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_ACCESSIBILITY_LIMITATIONS , ID, getNetexIdFetcher());
         registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_PURPOSE_OF_GROUPING , ID, getNetexIdFetcher());
 
+
+        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_HSL_ACCESSIBILITY_PROPERTIES, ID, getNetexIdFetcher());
+        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_ORGANISATION, ID, getNetexIdFetcher());
+        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_CONTACT, ID, getNetexIdFetcher());
 
 
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_STOPPLACE, TAGS, tagFetcher);
@@ -748,6 +760,7 @@ public class StopPlaceRegisterGraphQLSchema {
         registerDataFetcher(codeRegistryBuilder, STOPPLACES_REGISTER, TARIFF_ZONES, tariffZonesFetcher);
         registerDataFetcher(codeRegistryBuilder, STOPPLACES_REGISTER, FARE_ZONES, fareZonesFetcher);
         registerDataFetcher(codeRegistryBuilder, STOPPLACES_REGISTER, FARE_ZONES_AUTHORITIES, fareZoneAuthoritiesFetcher);
+        registerDataFetcher(codeRegistryBuilder, STOPPLACES_REGISTER, FIND_ORGANISATION, organisationFetcher);
 
 
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_GEO_JSON, TYPE, env -> {
@@ -907,6 +920,9 @@ public class StopPlaceRegisterGraphQLSchema {
 
         registerDataFetcher(codeRegistryBuilder,STOPPLACES_MUTATION,REMOVE_TAG,environment -> tagRemover.removeTag(environment.getArgument(TAG_NAME), environment.getArgument(TAG_ID_REFERENCE), environment.getArgument(TAG_COMMENT)));
         registerDataFetcher(codeRegistryBuilder,STOPPLACES_MUTATION,CREATE_TAG,environment -> tagCreator.createTag(environment.getArgument(TAG_NAME), environment.getArgument(TAG_ID_REFERENCE), environment.getArgument(TAG_COMMENT)));
+
+        registerDataFetcher(codeRegistryBuilder,STOPPLACES_MUTATION,MUTATE_ORGANISATION,organisationUpdater);
+        registerDataFetcher(codeRegistryBuilder,STOPPLACES_MUTATION,DELETE_ORGANISATION,environment -> organisationDeleter.deleteOrganisation(environment.getArgument(ORGANISATION_ID)));
 
         registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_GEO_JSON, LEGACY_COORDINATES,getLegacyCoordinates());
 
