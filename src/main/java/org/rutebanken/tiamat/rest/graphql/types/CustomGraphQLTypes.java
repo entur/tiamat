@@ -143,7 +143,7 @@ public class CustomGraphQLTypes {
     public static GraphQLEnumType electricityTypeEnum = createCustomEnumType(SHELTER_ELECTRICITY, ElectricityTypeEnumeration.class);
     public static GraphQLEnumType shelterConditionTypeEnum = createCustomEnumType(SHELTER_CONDITION, ShelterConditionEnumeration.class);
     public static GraphQLEnumType organisationTypeEnum = createCustomEnumType(ORGANISATION_TYPE, OrganisationTypeEnumeration.class);
-    public static GraphQLEnumType stopPlaceOrganisationRelationshipTypeEnum = createCustomEnumType(STOP_PLACE_ORGANISATION_REF, StopPlaceOrganisationRelationshipEnumeration.class);
+    public static GraphQLEnumType stopPlaceOrganisationRelationshipTypeEnum = createCustomEnumType(STOP_PLACE_ORGANISATION_RELATIONSHIP_TYPE, StopPlaceOrganisationRelationshipEnumeration.class);
 
 
     public static GraphQLEnumType createCustomEnumType(String name, Class c) {

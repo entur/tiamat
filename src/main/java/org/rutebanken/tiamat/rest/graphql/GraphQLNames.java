@@ -71,7 +71,7 @@ public class GraphQLNames {
     public static final String INPUT_TYPE_TARIFF_ZONE = OUTPUT_TYPE_TARIFF_ZONE + INPUT_TYPE_POSTFIX;
     public static final String TARIFF_ZONES = "tariffZones";
 
-    public static final String STOP_PLACE_ORGANISATION_REF = "stopPlaceOrganisationRef";
+    public static final String STOP_PLACE_ORGANISATION_RELATIONSHIP_TYPE = "stopPlaceOrganisationRelationshipType";
     public static final String OUTPUT_TYPE_STOP_PLACE_ORGANISATION_REF = "StopPlaceOrganisationRef";
     public static final String INPUT_TYPE_STOP_PLACE_ORGANISATION_REF = OUTPUT_TYPE_STOP_PLACE_ORGANISATION_REF + INPUT_TYPE_POSTFIX;
     public static final String ORGANISATIONS = "organisations";
