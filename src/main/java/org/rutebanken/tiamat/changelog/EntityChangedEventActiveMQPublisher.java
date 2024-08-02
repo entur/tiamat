@@ -15,6 +15,7 @@
 
 package org.rutebanken.tiamat.changelog;
 
+import org.jboss.logging.Logger;
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,8 +29,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Profile("activemq")
 public class EntityChangedEventActiveMQPublisher extends EntityChangedEventPublisher implements EntityChangedListener {
 
+    private static final Logger logger = Logger.getLogger(EntityChangedEventActiveMQPublisher.class);
+
+    /*
     @Autowired
     private JmsTemplate jmsTemplate;
+    */
 
     @Value("${changelog.queue.name:IrkallaChangelogQueue}")
     private String queueName;
@@ -40,14 +45,16 @@ public class EntityChangedEventActiveMQPublisher extends EntityChangedEventPubli
     @Override
     public void onChange(EntityInVersionStructure entity) {
         if (publish && isLoggedEntity(entity)) {
-            jmsTemplate.convertAndSend(queueName, toEntityChangedEvent(entity, false).toString());
+            logger.info("Entity changed: " + entity.toString());
+            // jmsTemplate.convertAndSend(queueName, toEntityChangedEvent(entity, false).toString());
         }
     }
 
     @Override
     public void onDelete(EntityInVersionStructure entity) {
         if (publish && isLoggedEntity(entity)) {
-            jmsTemplate.convertAndSend(queueName, toEntityChangedEvent(entity, true).toString());
+            logger.info("Entity deleted: " + entity.toString());
+            // jmsTemplate.convertAndSend(queueName, toEntityChangedEvent(entity, true).toString());
         }
     }
 }
