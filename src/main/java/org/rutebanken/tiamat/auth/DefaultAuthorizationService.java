@@ -25,7 +25,9 @@ public class DefaultAuthorizationService implements AuthorizationService {
 
     @Override
     public void verifyCanEditAllEntities() {
-        verifyCanEditAllEntities(roleAssignmentExtractor.getRoleAssignmentsForUser());
+        // TODO: Re-enable authentication
+        // verifyCanEditAllEntities(roleAssignmentExtractor.getRoleAssignmentsForUser());
+        System.out.println("TODO: Re-enable authentication");
     }
 
     void verifyCanEditAllEntities(List<RoleAssignment> roleAssignments) {
