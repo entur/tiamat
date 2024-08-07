@@ -64,6 +64,7 @@ import org.rutebanken.tiamat.rest.graphql.fetchers.AuthorizationCheckDataFetcher
 import org.rutebanken.tiamat.rest.graphql.fetchers.FareZoneAuthoritiesFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.GroupOfStopPlacesMembersFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.GroupOfStopPlacesPurposeOfGroupingFetcher;
+import org.rutebanken.tiamat.rest.graphql.fetchers.InfoSpotPosterFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.KeyValuesDataFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.PolygonFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.StopPlaceFareZoneFetcher;
@@ -83,6 +84,7 @@ import org.rutebanken.tiamat.rest.graphql.types.EntityRefObjectTypeCreator;
 import org.rutebanken.tiamat.rest.graphql.types.FareZoneObjectTypeCreator;
 import org.rutebanken.tiamat.rest.graphql.types.GroupOfStopPlacesObjectTypeCreator;
 import org.rutebanken.tiamat.rest.graphql.types.GroupOfTariffZonesObjectTypeCreator;
+import org.rutebanken.tiamat.rest.graphql.types.InfoSpotObjectTypeCreator;
 import org.rutebanken.tiamat.rest.graphql.types.ParentStopPlaceInputObjectTypeCreator;
 import org.rutebanken.tiamat.rest.graphql.types.ParentStopPlaceObjectTypeCreator;
 import org.rutebanken.tiamat.rest.graphql.types.PathLinkEndObjectTypeCreator;
@@ -232,6 +234,9 @@ public class StopPlaceRegisterGraphQLSchema {
     private FareZoneObjectTypeCreator fareZoneObjectTypeCreator;
 
     @Autowired
+    private InfoSpotObjectTypeCreator infoSpotObjectTypeCreator;
+
+    @Autowired
     private AuthorizationCheckDataFetcher authorizationCheckDataFetcher;
 
     @Autowired
@@ -274,6 +279,9 @@ public class StopPlaceRegisterGraphQLSchema {
     private DataFetcher<Page<FareZone>> fareZonesFetcher;
 
     @Autowired
+    private InfoSpotPosterFetcher infoSpotPosterFetcher;
+
+    @Autowired
     TariffZoneTerminator tariffZoneTerminator;
 
     @Autowired
@@ -302,6 +310,12 @@ public class StopPlaceRegisterGraphQLSchema {
 
     @Autowired
     OrganisationDeleter organisationDeleter;
+
+    @Autowired
+    DataFetcher infoSpotsFetcher;
+
+    @Autowired
+    DataFetcher infoSpotsUpdater;
 
     @Autowired
     DateScalar dateScalar;
@@ -452,6 +466,8 @@ public class StopPlaceRegisterGraphQLSchema {
 
         GraphQLObjectType parkingObjectType = createParkingObjectType(validBetweenObjectType);
 
+        GraphQLObjectType infoSpotObjectType = infoSpotObjectTypeCreator.createObjectType(validBetweenObjectType);
+
         GraphQLArgument allVersionsArgument = GraphQLArgument.newArgument()
                 .name(ALL_VERSIONS)
                 .type(GraphQLBoolean)
@@ -551,6 +567,11 @@ public class StopPlaceRegisterGraphQLSchema {
                         .type(new GraphQLList(GraphQLString))
                         .description("List all fare zone authorities.")
                         .build())
+                .field(newFieldDefinition()
+                        .name(INFO_SPOTS)
+                        .type(new GraphQLList(infoSpotObjectType))
+                        .description("Info spots")
+                        .arguments(createFindInfoSpotArguments(allVersionsArgument)))
                 .build();
 
 
@@ -572,6 +593,8 @@ public class StopPlaceRegisterGraphQLSchema {
         GraphQLInputObjectType groupOfStopPlacesInputObjectType = createGroupOfStopPlacesInputObjectType(validBetweenInputObjectType);
 
         GraphQLInputObjectType purposeOfGroupingInputObjectType =createPurposeOfGroupingInputObjectType();
+
+        GraphQLInputObjectType infoSpotInputObjectType = infoSpotObjectTypeCreator.infoSpotInputType();
 
         GraphQLObjectType stopPlaceRegisterMutation = newObject()
                 .name(STOPPLACES_MUTATION)
@@ -633,6 +656,15 @@ public class StopPlaceRegisterGraphQLSchema {
                                 .type(new GraphQLList(organisationInputObjectType)))
                         .description("Create new or update existing " + OUTPUT_TYPE_ORGANISATION)
                         )
+
+                .field(newFieldDefinition()
+                        .type(new GraphQLList(infoSpotObjectType))
+                        .name(MUTATE_INFO_SPOT)
+                        .argument(GraphQLArgument.newArgument()
+                                .name(OUTPUT_TYPE_INFO_SPOT)
+                                .type(new GraphQLList(infoSpotInputObjectType)))
+                        .description("Create new or update existing " + OUTPUT_TYPE_INFO_SPOT)
+                )
 
                 .field(newFieldDefinition()
                         .type(tariffZoneObjectType)
@@ -699,6 +731,7 @@ public class StopPlaceRegisterGraphQLSchema {
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_ORGANISATION, ID, getNetexIdFetcher());
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_CONTACT, ID, getNetexIdFetcher());
 
+        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_POSTER, ID, getNetexIdFetcher());
 
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_STOPPLACE, TAGS, tagFetcher);
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_PARENT_STOPPLACE, TAGS, tagFetcher);
@@ -935,6 +968,12 @@ public class StopPlaceRegisterGraphQLSchema {
 
         codeRegistryBuilder.typeResolver(OUTPUT_TYPE_STOPPLACE_INTERFACE, stopPlaceTypeResolver);
 
+        dataFetcherGeometry(codeRegistryBuilder, OUTPUT_TYPE_INFO_SPOT);
+        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_INFO_SPOT, ID, getNetexIdFetcher());
+        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_INFO_SPOT, OUTPUT_TYPE_POSTER, infoSpotPosterFetcher);
+        registerDataFetcher(codeRegistryBuilder, STOPPLACES_REGISTER, INFO_SPOTS, infoSpotsFetcher);
+        registerDataFetcher(codeRegistryBuilder, STOPPLACES_MUTATION,MUTATE_INFO_SPOT,infoSpotsUpdater);
+
         return codeRegistryBuilder.build();
     }
 
@@ -1042,6 +1081,20 @@ public class StopPlaceRegisterGraphQLSchema {
     }
 
     private List<GraphQLArgument> createFindOrganisationArguments(GraphQLArgument allVersionsArgument) {
+        List<GraphQLArgument> arguments = createPageAndSizeArguments();
+        arguments.add(GraphQLArgument.newArgument()
+                .name(ID)
+                .type(GraphQLString)
+                .build());
+        arguments.add(GraphQLArgument.newArgument()
+                .name(VERSION)
+                .type(GraphQLInt)
+                .build());
+        arguments.add(allVersionsArgument);
+        return arguments;
+    }
+
+    private List<GraphQLArgument> createFindInfoSpotArguments(GraphQLArgument allVersionsArgument) {
         List<GraphQLArgument> arguments = createPageAndSizeArguments();
         arguments.add(GraphQLArgument.newArgument()
                 .name(ID)

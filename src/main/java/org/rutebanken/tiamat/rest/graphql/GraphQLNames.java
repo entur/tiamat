@@ -546,4 +546,28 @@ public class GraphQLNames {
     public static final String FAX = "fax";
     public static final String URL = "url";
     public static final String FURTHER_DETAILS = "furtherDetails";
+
+    public static final String OUTPUT_TYPE_INFO_SPOT = "infoSpot";
+    public static final String INPUT_TYPE_INFO_SPOT = OUTPUT_TYPE_INFO_SPOT + INPUT_TYPE_POSTFIX;
+
+    public static final String INFO_SPOTS = "infoSpots";
+    public static final String MUTATE_INFO_SPOT = "mutateInfoSpots";
+
+    public static final String OUTPUT_TYPE_POSTER = "poster";
+    public static final String INPUT_TYPE_POSTER = OUTPUT_TYPE_POSTER + INPUT_TYPE_POSTFIX;
+
+    public static final String INFO_SPOT_TYPE = "infoSpotType";
+    public static final String PURPOSE = "purpose";
+    public static final String POSTER_PLACE_SIZE = "posterPlaceSize";
+    public static final String BACKLIGHT = "backlight";
+    public static final String MAINTENANCE = "maintenance";
+    public static final String ZONE_LABEL = "zoneLabel";
+    public static final String RAIL_INFORMATION = "railInformation";
+    public static final String FLOOR = "floor";
+    public static final String SPEECH_PROPERTY = "speechProperty";
+    public static final String DISPLAY_TYPE = "displayType";
+    public static final String INFO_SPOT_LOCATIONS = "infoSpotLocations";
+
+    public static final String POSTER_SIZE = "posterSize";
+    public static final String LINES = "lines";
 }

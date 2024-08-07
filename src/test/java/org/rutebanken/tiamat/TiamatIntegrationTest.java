@@ -28,7 +28,9 @@ import org.rutebanken.tiamat.netex.id.GeneratedIdState;
 import org.rutebanken.tiamat.repository.FareZoneRepository;
 import org.rutebanken.tiamat.repository.GroupOfStopPlacesRepository;
 import org.rutebanken.tiamat.repository.GroupOfTariffZonesRepository;
+import org.rutebanken.tiamat.repository.InfoSpotPosterRepository;
 import org.rutebanken.tiamat.repository.OrganisationRepository;
+import org.rutebanken.tiamat.repository.InfoSpotRepository;
 import org.rutebanken.tiamat.repository.ParkingRepository;
 import org.rutebanken.tiamat.repository.PathJunctionRepository;
 import org.rutebanken.tiamat.repository.PathLinkRepository;
@@ -114,6 +116,12 @@ public abstract class TiamatIntegrationTest {
     protected FareZoneRepository fareZoneRepository;
 
     @Autowired
+    protected InfoSpotRepository infoSpotRepository;
+
+    @Autowired
+    protected InfoSpotPosterRepository infoSpotPosterRepository;
+
+    @Autowired
     protected OrganisationRepository organisationRepository;
 
     @Autowired
@@ -186,6 +194,11 @@ public abstract class TiamatIntegrationTest {
 
         organisationRepository.deleteAll();
         organisationRepository.flush();
+        infoSpotRepository.deleteAll();
+        infoSpotRepository.flush();
+
+        infoSpotPosterRepository.deleteAll();
+        infoSpotPosterRepository.flush();
 
         clearIdGeneration();
 
