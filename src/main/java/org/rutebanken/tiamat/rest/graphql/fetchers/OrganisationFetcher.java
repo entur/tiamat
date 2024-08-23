@@ -34,31 +34,25 @@ public class OrganisationFetcher implements DataFetcher {
 
     @Override
     public Object get(DataFetchingEnvironment environment) {
-
-        PageRequest pageable = PageRequest.of(environment.getArgument(PAGE), environment.getArgument(SIZE));
-
-        Page<Organisation> allOrganisations;
-
         String organisationId = environment.getArgument(GraphQLNames.ID);
         Integer version = (Integer) environment.getArgument(VERSION);
 
+        List<Organisation> organisationList = new ArrayList<>();
         if (organisationId != null) {
-            List<Organisation> organisationList = new ArrayList<>();
             if(version != null && version > 0) {
                 logger.info("Finding organisation by netexid {} and version {}", organisationId, version);
                 organisationList = Arrays.asList(organisationRepository.findFirstByNetexIdAndVersion(organisationId, version));
-                allOrganisations = new PageImpl<>(organisationList, pageable, 1L);
             } else {
                 logger.info("Finding first organisation by netexid {} and highest version", organisationId);
                 organisationList.add(organisationRepository.findFirstByNetexIdOrderByVersionDesc(organisationId));
-                allOrganisations = new PageImpl<>(organisationList, pageable, 1L);
             }
         } else {
-            logger.info("Finding all organisations regardless of version and validity");
-            allOrganisations = organisationRepository.findAll(pageable);
+            logger.info("Finding newest versions of all organisations");
+            organisationList = organisationRepository.findAllMaxVersion();
         }
 
-        return allOrganisations;
+        PageRequest pageable = PageRequest.of(environment.getArgument(PAGE), environment.getArgument(SIZE));
+        return new PageImpl<>(organisationList, pageable, 1L);
     }
 
     public Object getForStopPlace(DataFetchingEnvironment environment) {

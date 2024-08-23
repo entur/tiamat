@@ -358,6 +358,48 @@ public class GraphQLResourceOrganisationIntegrationTest extends AbstractGraphQLR
     }
 
     @Test
+    public void testUpdateOrganisationAndQueryReturnsNewestVersion() {
+        Organisation organisation = createTestOrganisation();
+
+        organisationRepository.save(organisation);
+
+        String udpateOrganisationQuery = """
+            mutation {
+              organisation: mutateOrganisation (
+                Organisation: {
+                  id: "%s",
+                  name: "New Organisation Name"
+                }
+            ) {
+                id
+                version
+                name
+              }
+            }""".formatted(organisation.getNetexId());
+
+        executeGraphqQLQueryOnly(udpateOrganisationQuery)
+                .body("data.organisation", hasSize(1))
+                .body("data.organisation[0].id", equalTo(organisation.getNetexId()))
+                .body("data.organisation[0].version", equalTo("1"))
+                .body("data.organisation[0].name", equalTo("New Organisation Name"));
+
+       String allOrganisationsQuery = """
+            {
+              organisation {
+                id
+                version
+                name
+              }
+            }""";
+
+        executeGraphqQLQueryOnly(allOrganisationsQuery)
+                .body("data.organisation", hasSize(1))
+                .body("data.organisation[0].id", equalTo(organisation.getNetexId()))
+                .body("data.organisation[0].version", equalTo("1"))
+                .body("data.organisation[0].name", equalTo("New Organisation Name"));
+    }
+
+    @Test
     public void testDeleteOrganisation() {
         Organisation fillerOrganisation1 = createTestOrganisation();
         fillerOrganisation1.setName("Filler organisation 1");
