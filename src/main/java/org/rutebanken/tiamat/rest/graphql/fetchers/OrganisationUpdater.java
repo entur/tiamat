@@ -79,7 +79,6 @@ public class OrganisationUpdater implements DataFetcher {
             existingVersion = organisationRepository.findFirstByNetexIdOrderByVersionDesc(netexId);
             Preconditions.checkArgument(existingVersion != null, "Attempting to update Organisation [id = %s], but Organisation does not exist.", netexId);
             updatedOrganisation = versionCreator.createCopy(existingVersion, Organisation.class);
-
         } else {
             logger.info("Creating new Organisation");
             updatedOrganisation = new Organisation();
@@ -129,21 +128,33 @@ public class OrganisationUpdater implements DataFetcher {
         }
         if (input.get(CONTACT_DETAILS) != null) {
             Map contactDetailsInput = (Map) input.get(CONTACT_DETAILS);
-            Contact contactDetails = mapContactFromInput(contactDetailsInput);
-            updatedOrganisation.setContactDetails(contactDetails);
+            Contact existingContactDetails = updatedOrganisation.getContactDetails();
+            Contact contactDetails = initializeContact(existingContactDetails);
+            Contact updatedContactDetails = populateContact(contactDetailsInput, contactDetails);
+            updatedOrganisation.setContactDetails(updatedContactDetails);
+            isUpdated = true;
         }
         if (input.get(PRIVATE_CONTACT_DETAILS) != null) {
             Map contactDetailsInput = (Map) input.get(PRIVATE_CONTACT_DETAILS);
-            Contact contactDetails = mapContactFromInput(contactDetailsInput);
-            updatedOrganisation.setPrivateContactDetails(contactDetails);
+            Contact existingContactDetails = updatedOrganisation.getPrivateContactDetails();
+            Contact contactDetails = initializeContact(existingContactDetails);
+            Contact updatedContactDetails = populateContact(contactDetailsInput, contactDetails);
+            updatedOrganisation.setPrivateContactDetails(updatedContactDetails);
+            isUpdated = true;
         }
 
         return isUpdated;
     }
 
-    Contact mapContactFromInput(Map contactInput) {
-        Contact contact = new Contact();
+    Contact initializeContact(Contact existingContact) {
+        if (existingContact != null) {
+            return versionCreator.createCopy(existingContact, Contact.class);
+        } else {
+            return new Contact();
+        }
+    }
 
+    Contact populateContact(Map contactInput, Contact contact) {
         if (contactInput.get(CONTACT_PERSON) != null) {
             String contactPerson = (String) contactInput.get(CONTACT_PERSON);
             contact.setContactPerson(contactPerson);

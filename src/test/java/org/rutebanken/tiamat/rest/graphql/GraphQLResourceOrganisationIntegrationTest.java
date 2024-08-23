@@ -368,12 +368,26 @@ public class GraphQLResourceOrganisationIntegrationTest extends AbstractGraphQLR
               organisation: mutateOrganisation (
                 Organisation: {
                   id: "%s",
-                  name: "New Organisation Name"
+                  name: "New Organisation Name",
+                  privateContactDetails: {
+                    contactPerson: "John Doe",
+                    email: null,
+                    phone: "+358501122333"
+                  }
                 }
             ) {
                 id
                 version
                 name
+                contactDetails {
+                  id
+                  version
+                }
+                privateContactDetails {
+                  id
+                  version
+                  contactPerson
+                }
               }
             }""".formatted(organisation.getNetexId());
 
@@ -381,14 +395,28 @@ public class GraphQLResourceOrganisationIntegrationTest extends AbstractGraphQLR
                 .body("data.organisation", hasSize(1))
                 .body("data.organisation[0].id", equalTo(organisation.getNetexId()))
                 .body("data.organisation[0].version", equalTo("1"))
-                .body("data.organisation[0].name", equalTo("New Organisation Name"));
+                .body("data.organisation[0].name", equalTo("New Organisation Name"))
+                // Private contact details were modified, version incremented.
+                .body("data.organisation[0].privateContactDetails.id", equalTo(organisation.getPrivateContactDetails().getNetexId()))
+                .body("data.organisation[0].privateContactDetails.version", equalTo("1"))
+                .body("data.organisation[0].privateContactDetails.contactPerson", equalTo("John Doe"))
+                // Contact details were not modified, but still a new version is created.
+                .body("data.organisation[0].contactDetails.id", equalTo(organisation.getContactDetails().getNetexId()))
+                .body("data.organisation[0].contactDetails.version", equalTo("1"));
 
        String allOrganisationsQuery = """
             {
               organisation {
                 id
                 version
-                name
+                contactDetails {
+                  id
+                  version
+                }
+                privateContactDetails {
+                  id
+                  version
+                }
               }
             }""";
 
@@ -396,7 +424,10 @@ public class GraphQLResourceOrganisationIntegrationTest extends AbstractGraphQLR
                 .body("data.organisation", hasSize(1))
                 .body("data.organisation[0].id", equalTo(organisation.getNetexId()))
                 .body("data.organisation[0].version", equalTo("1"))
-                .body("data.organisation[0].name", equalTo("New Organisation Name"));
+                .body("data.organisation[0].privateContactDetails.id", equalTo(organisation.getPrivateContactDetails().getNetexId()))
+                .body("data.organisation[0].privateContactDetails.version", equalTo("1"))
+                .body("data.organisation[0].contactDetails.id", equalTo(organisation.getContactDetails().getNetexId()))
+                .body("data.organisation[0].contactDetails.version", equalTo("1"));
     }
 
     @Test

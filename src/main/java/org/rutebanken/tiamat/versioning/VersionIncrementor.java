@@ -20,6 +20,7 @@ import org.rutebanken.tiamat.model.AccessibilityLimitation;
 import org.rutebanken.tiamat.model.AlternativeName;
 import org.rutebanken.tiamat.model.BoardingPosition;
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
+import org.rutebanken.tiamat.model.Organisation;
 import org.rutebanken.tiamat.model.hsl.HslAccessibilityProperties;
 import org.rutebanken.tiamat.model.PlaceEquipment;
 import org.rutebanken.tiamat.model.SiteElement;
@@ -139,5 +140,16 @@ public class VersionIncrementor {
         if (boardingPosition != null) {
             initiateOrIncrement(boardingPosition);
         }
+    }
+
+    public Organisation initiateOrIncrementVersions(Organisation organisation) {
+        initiateOrIncrement(organisation);
+        if (organisation.getContactDetails() != null) {
+            initiateOrIncrement(organisation.getContactDetails());
+        }
+        if (organisation.getPrivateContactDetails() != null) {
+            initiateOrIncrement(organisation.getPrivateContactDetails());
+        }
+        return organisation;
     }
 }
