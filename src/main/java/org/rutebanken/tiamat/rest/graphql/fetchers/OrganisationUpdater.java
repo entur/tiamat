@@ -101,32 +101,32 @@ public class OrganisationUpdater implements DataFetcher {
     private boolean populateOrganisation(Map input, Organisation updatedOrganisation) {
         boolean isUpdated = false;
 
-        if (input.get(PRIVATE_CODE) != null) {
+        if (input.containsKey(PRIVATE_CODE)) {
             String privateCode = (String) input.get(PRIVATE_CODE);
             isUpdated = isUpdated || (!privateCode.equals(updatedOrganisation.getPrivateCode()));
             updatedOrganisation.setPrivateCode(privateCode);
         }
-        if (input.get(COMPANY_NUMBER) != null) {
+        if (input.containsKey(COMPANY_NUMBER)) {
             String companyNumber = (String) input.get(COMPANY_NUMBER);
             isUpdated = isUpdated || (!companyNumber.equals(updatedOrganisation.getCompanyNumber()));
             updatedOrganisation.setCompanyNumber(companyNumber);
         }
-        if (input.get(NAME) != null) {
+        if (input.containsKey(NAME)) {
             String name = (String) input.get(NAME);
             isUpdated = isUpdated || (!name.equals(updatedOrganisation.getName()));
             updatedOrganisation.setName(name);
         }
-        if (input.get(ORGANISATION_TYPE) != null) {
+        if (input.containsKey(ORGANISATION_TYPE)) {
             OrganisationTypeEnumeration organisationType = (OrganisationTypeEnumeration) input.get(ORGANISATION_TYPE);
             isUpdated = isUpdated || (!organisationType.equals(updatedOrganisation.getOrganisationType()));
             updatedOrganisation.setOrganisationType(organisationType);
         }
-        if (input.get(LEGAL_NAME) != null) {
+        if (input.containsKey(LEGAL_NAME)) {
             EmbeddableMultilingualString legalName = getEmbeddableString((Map) input.get(LEGAL_NAME));
             isUpdated = isUpdated || (!legalName.equals(updatedOrganisation.getLegalName()));
             updatedOrganisation.setLegalName(legalName);
         }
-        if (input.get(CONTACT_DETAILS) != null) {
+        if (input.containsKey(CONTACT_DETAILS)) {
             Map contactDetailsInput = (Map) input.get(CONTACT_DETAILS);
             Contact existingContactDetails = updatedOrganisation.getContactDetails();
             Contact contactDetails = initializeContact(existingContactDetails);
@@ -155,27 +155,27 @@ public class OrganisationUpdater implements DataFetcher {
     }
 
     Contact populateContact(Map contactInput, Contact contact) {
-        if (contactInput.get(CONTACT_PERSON) != null) {
+        if (contactInput.containsKey(CONTACT_PERSON)) {
             String contactPerson = (String) contactInput.get(CONTACT_PERSON);
             contact.setContactPerson(contactPerson);
         }
-        if (contactInput.get(EMAIL) != null) {
+        if (contactInput.containsKey(EMAIL)) {
             String email = (String) contactInput.get(EMAIL);
             contact.setEmail(email);
         }
-        if (contactInput.get(PHONE) != null) {
+        if (contactInput.containsKey(PHONE)) {
             String phone = (String) contactInput.get(PHONE);
             contact.setPhone(phone);
         }
-        if (contactInput.get(FAX) != null) {
+        if (contactInput.containsKey(FAX)) {
             String fax = (String) contactInput.get(FAX);
             contact.setFax(fax);
         }
-        if (contactInput.get(URL) != null) {
+        if (contactInput.containsKey(URL)) {
             String url = (String) contactInput.get(URL);
             contact.setUrl(url);
         }
-        if (contactInput.get(FURTHER_DETAILS) != null) {
+        if (contactInput.containsKey(FURTHER_DETAILS)) {
             String furtherDetails = (String) contactInput.get(FURTHER_DETAILS);
             contact.setFurtherDetails(furtherDetails);
         }
