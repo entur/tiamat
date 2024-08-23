@@ -1,6 +1,13 @@
 create table contact (
     id                                 bigint primary key,
     netex_id                           character varying(255),
+    changed                            timestamp without time zone,
+    created                            timestamp without time zone,
+    from_date                          timestamp without time zone,
+    to_date                            timestamp without time zone,
+    version                            bigint not null,
+    version_comment                    character varying(255),
+    changed_by                         character varying(255),
 
     contact_person                     character varying(255),
     email                              character varying(255),

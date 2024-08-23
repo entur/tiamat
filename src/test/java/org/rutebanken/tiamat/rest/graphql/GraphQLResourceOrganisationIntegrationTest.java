@@ -290,6 +290,74 @@ public class GraphQLResourceOrganisationIntegrationTest extends AbstractGraphQLR
     }
 
     @Test
+    public void testMutateOrganisationUpdateWithoutContactData() {
+        Organisation organisation = createTestOrganisation();
+
+        organisationRepository.save(organisation);
+        Contact contactDetails = organisation.getContactDetails();
+        Contact privateContactDetails = organisation.getPrivateContactDetails();
+
+        String graphQlJsonQuery = """
+            mutation {
+              organisation: mutateOrganisation (
+                Organisation: {
+                  id: "%s",
+                  name: "New Organisation"
+                }
+            ) {
+                id
+                version
+                privateCode
+                companyNumber
+                name
+                organisationType
+                legalName {
+                  value
+                  lang
+                }
+                contactDetails {
+                  contactPerson
+                  email
+                  phone
+                  fax
+                  url
+                  furtherDetails
+                }
+                privateContactDetails {
+                  contactPerson
+                  email
+                  phone
+                  fax
+                  url
+                  furtherDetails
+                }
+              }
+            }""".formatted(organisation.getNetexId());
+
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
+                .body("data.organisation", hasSize(1))
+                .body("data.organisation[0].id", equalTo(organisation.getNetexId()))
+                .body("data.organisation[0].privateCode", equalTo(organisation.getPrivateCode()))
+                .body("data.organisation[0].companyNumber", equalTo(organisation.getCompanyNumber()))
+                .body("data.organisation[0].name", equalTo("New Organisation"))
+                .body("data.organisation[0].organisationType", equalTo(organisation.getOrganisationType().value()))
+                .body("data.organisation[0].legalName.value", equalTo(organisation.getLegalName().getValue()))
+                .body("data.organisation[0].legalName.lang", equalTo(organisation.getLegalName().getLang()))
+                .body("data.organisation[0].contactDetails.contactPerson", equalTo(contactDetails.getContactPerson()))
+                .body("data.organisation[0].contactDetails.email", equalTo(contactDetails.getEmail()))
+                .body("data.organisation[0].contactDetails.phone", equalTo(contactDetails.getPhone()))
+                .body("data.organisation[0].contactDetails.fax", equalTo(contactDetails.getFax()))
+                .body("data.organisation[0].contactDetails.url", equalTo(contactDetails.getUrl()))
+                .body("data.organisation[0].contactDetails.furtherDetails", equalTo(contactDetails.getFurtherDetails()))
+                .body("data.organisation[0].privateContactDetails.contactPerson", equalTo(privateContactDetails.getContactPerson()))
+                .body("data.organisation[0].privateContactDetails.email", equalTo(privateContactDetails.getEmail()))
+                .body("data.organisation[0].privateContactDetails.phone", equalTo(privateContactDetails.getPhone()))
+                .body("data.organisation[0].privateContactDetails.fax", equalTo(privateContactDetails.getFax()))
+                .body("data.organisation[0].privateContactDetails.url", equalTo(privateContactDetails.getUrl()))
+                .body("data.organisation[0].privateContactDetails.furtherDetails", equalTo(privateContactDetails.getFurtherDetails()));
+    }
+
+    @Test
     public void testDeleteOrganisation() {
         Organisation fillerOrganisation1 = createTestOrganisation();
         fillerOrganisation1.setName("Filler organisation 1");
