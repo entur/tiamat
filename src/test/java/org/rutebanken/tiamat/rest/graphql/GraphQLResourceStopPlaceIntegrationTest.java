@@ -3211,6 +3211,57 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                 .body("[1].organisation.privateContactDetails.email", equalTo(organisation2.getPrivateContactDetails().getEmail()));
     }
 
+    @Test
+    public void testMutateStopPlaceEmptyOrganisations() {
+        Organisation organisation1 = new Organisation();
+        organisation1.setCompanyNumber("112233");
+        organisation1.setName("Test Organisation");
+        organisation1.setOrganisationType(OrganisationTypeEnumeration.OTHER);
+        Contact privateContactDetails1 = new Contact();
+        privateContactDetails1.setEmail("private@example.com");
+        organisation1.setPrivateContactDetails(privateContactDetails1);
+        organisationRepository.save(organisation1);
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setName(new EmbeddableMultilingualString("Name"));
+        // Set one existing organisation for the stop place.
+        stopPlace.getOrganisations().add(new StopPlaceOrganisationRef(
+                organisation1,
+                StopPlaceOrganisationRelationshipEnumeration.MAINTENANCE
+        ));
+
+        stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+
+        // Mutate without organisations -> should remove an existing organisation relationship.
+        var graphqlQuery = """
+            mutation {
+              stopPlace: mutateStopPlace(StopPlace: {
+                id: "%s"
+                organisations: []
+              }) {
+                id
+                organisations {
+                  organisationRef
+                  relationshipType
+                  organisation {
+                    id
+                    name
+                    privateContactDetails {
+                      email
+                    }
+                  }
+                }
+              }
+            }
+            """.formatted(stopPlace.getNetexId());
+
+        executeGraphqQLQueryOnly(graphqlQuery)
+                .body("data.stopPlace[0].id", equalTo(stopPlace.getNetexId()))
+                .rootPath("data.stopPlace[0].organisations")
+                .body(notNullValue())
+                .body("", hasSize(0));
+    }
+
     private StopPlace createStopPlaceWithMunicipalityRef(String name, TopographicPlace municipality, StopTypeEnumeration type) {
         StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(name));
         stopPlace.setStopPlaceType(type);
