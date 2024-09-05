@@ -10,7 +10,7 @@ on:
 
 jobs:
   tests:
-    runs-on: ubuntu-latest
+    runs-on: 24.04
     env:
       TZ: Europe/Oslo
     steps:
@@ -31,7 +31,7 @@ jobs:
   image:
     # only build and push the image when it's a commit to master in Entur's repository
     if: github.repository_owner == 'entur' && github.event_name == 'push'
-    runs-on: ubuntu-latest
+    runs-on: 24.04
     needs: [ tests ]
     env:
       CONTAINER_REPO: docker.io/entur/tiamat
