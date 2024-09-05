@@ -8,6 +8,9 @@ on:
 jobs:
   run_cypress_tests:
     name: Run cypress e2e tests from Docker
+    # These must run on ubuntu 22.04 or older.
+    # The MS SQL server used by jore4-jore3-importer,
+    # does not run on Linux kernels newer than 6.6.x.
     runs-on: ubuntu-22.04
 
     steps:

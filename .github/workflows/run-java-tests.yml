@@ -10,7 +10,7 @@ env:
 jobs:
   run-tests:
     name: Run java tests
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout code
@@ -26,13 +26,7 @@ jobs:
           java-package: jdk
           architecture: x64
           distribution: temurin
-
-      - name: Cache Maven packages
-        uses: actions/cache@v3
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2
+          cache: maven
 
       - name: Run tests and try building a package
         run: |
