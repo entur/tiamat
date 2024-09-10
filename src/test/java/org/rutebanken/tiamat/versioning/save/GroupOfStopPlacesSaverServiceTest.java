@@ -116,7 +116,7 @@ public class GroupOfStopPlacesSaverServiceTest extends TiamatIntegrationTest {
 
         GroupOfStopPlaces changed = new GroupOfStopPlaces();
         changed.setNetexId(saved.getNetexId());
-        changed.setName(new EmbeddableMultilingualString("name"));
+        changed.setName(new EmbeddableMultilingualString("name2"));
         changed.setPurposeOfGrouping(saved.getPurposeOfGrouping());
         changed.getMembers().add(new StopPlaceReference(stopPlace.getNetexId()));
         changed.getMembers().add(new StopPlaceReference(stopPlace2.getNetexId()));
