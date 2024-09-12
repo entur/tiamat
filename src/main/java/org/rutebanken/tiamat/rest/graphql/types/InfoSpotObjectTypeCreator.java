@@ -25,6 +25,7 @@ import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ID;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.INFO_SPOTS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.INFO_SPOT_LOCATIONS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.INFO_SPOT_TYPE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.INPUT_TYPE_INFO_SPOT;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.INPUT_TYPE_POSTER;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.LABEL;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.LINES;
@@ -143,7 +144,7 @@ public class InfoSpotObjectTypeCreator {
 
     public GraphQLInputObjectType infoSpotInputType() {
         return newInputObject()
-                .name(INFO_SPOTS)
+                .name(INPUT_TYPE_INFO_SPOT)
                 .field(newInputObjectField()
                         .name(ID)
                         .type(GraphQLString))
