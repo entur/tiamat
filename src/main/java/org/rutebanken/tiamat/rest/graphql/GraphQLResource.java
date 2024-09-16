@@ -27,6 +27,7 @@ import graphql.GraphQLError;
 import graphql.GraphQLException;
 import graphql.analysis.MaxQueryDepthInstrumentation;
 import graphql.execution.AbortExecutionException;
+import graphql.execution.DataFetcherResult;
 import graphql.execution.instrumentation.ChainedInstrumentation;
 import graphql.execution.instrumentation.Instrumentation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -39,6 +40,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.rutebanken.helper.organisation.NotAuthenticatedException;
+import org.rutebanken.tiamat.exception.HSLErrorCodeEnumeration;
 import org.rutebanken.tiamat.rest.exception.ErrorResponseEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,6 +48,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -155,7 +158,33 @@ public class GraphQLResource {
      * NRP-1992
      */
     private Response getGraphQLResponseInTransaction(String query, Map<String, Object> variables) {
-        return (Response) transactionTemplate.execute((transactionStatus) -> getGraphQLResponse(query, variables, transactionStatus));
+        try {
+            return (Response) transactionTemplate.execute((transactionStatus) -> getGraphQLResponse(query, variables, transactionStatus));
+        } catch (JpaSystemException e) {
+            for (HSLErrorCodeEnumeration hslError : HSLErrorCodeEnumeration.values()) {
+                if (e.getCause().getCause().getMessage().startsWith("ERROR: " + hslError.name())) {
+                    return customHSLErrorResponse(hslError, e);
+                }
+            }
+            throw e;
+        }
+    }
+
+    private Response customHSLErrorResponse(HSLErrorCodeEnumeration errorCodeEnumeration, Throwable throwable) {
+        var result = new DataFetcherResult(null,
+                List.of(GraphQLError.newError()
+                        .errorType(DataFetchingException)
+                                .message(cleanSQLErrorMessage(errorCodeEnumeration, throwable.getMessage()))
+                        .extensions(Map.of("errorCode", errorCodeEnumeration.toString()))
+                        .build()
+        ));
+        return Response.status(Response.Status.OK).entity(
+                result
+        ).build();
+    }
+
+    private String cleanSQLErrorMessage(HSLErrorCodeEnumeration errorCodeEnumeration, String message) {
+        return message.substring(message.indexOf(errorCodeEnumeration.name()), message.indexOf("\n"));
     }
 
     private Response getGraphQLResponse(String query, Map<String, Object> variables, TransactionStatus transactionStatus) {
@@ -259,6 +288,5 @@ public class GraphQLResource {
         }
         return rootCause;
     }
-
 
 }

@@ -22,10 +22,14 @@ import java.time.temporal.ChronoUnit;
 import java.util.Locale;
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
+import org.rutebanken.tiamat.exception.HSLErrorCodeEnumeration;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
+import org.rutebanken.tiamat.model.GroupOfStopPlaces;
 import org.rutebanken.tiamat.model.PurposeOfGrouping;
 import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.StopPlaceReference;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
+import org.rutebanken.tiamat.model.ValidBetween;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
@@ -140,5 +144,57 @@ public class GraphQLResourceGroupOfStopPlacesIntegrationTest extends AbstractGra
                     .body("name", nullValue())
                     .body("stopPlaceType", equalTo(StopTypeEnumeration.BUS_STATION.value()))
                     .body("version", equalTo(String.valueOf(stopPlace1.getVersion())));
+    }
+
+    @Test
+    public void groupOfStopPlacesErrorCodeTest() {
+        var stopPlace1 = new StopPlace();
+        stopPlace1.setCentroid(geometryFactory.createPoint(new Coordinate(12, 53)));
+        stopPlace1.setStopPlaceType(StopTypeEnumeration.BUS_STATION);
+        stopPlaceVersionedSaverService.saveNewVersion(stopPlace1);
+
+        var stopPlace2 = new StopPlace();
+        stopPlace2.setCentroid(geometryFactory.createPoint(new Coordinate(13, 61)));
+        stopPlace2.setStopPlaceType(StopTypeEnumeration.TRAM_STATION);
+        stopPlaceVersionedSaverService.saveNewVersion(stopPlace2);
+
+        Instant startDate = Instant.now();
+        Instant endDate = startDate.plus(20, ChronoUnit.DAYS);
+
+        var groupName = "conflictingName";
+
+        GroupOfStopPlaces groupOfStopPlaces = new GroupOfStopPlaces(new EmbeddableMultilingualString(groupName));
+        groupOfStopPlaces.getMembers().add(new StopPlaceReference(stopPlace1.getNetexId()));
+        groupOfStopPlaces.setValidBetween(new ValidBetween(startDate, endDate));
+        groupOfStopPlacesRepository.save(groupOfStopPlaces);
+
+        String graphQlJsonQuery = """
+                mutation {
+                    group: %s(GroupOfStopPlaces: {
+                        name: {value: "%s"},
+                        validBetween: {
+                            fromDate: "%s",
+                            toDate: "%s",
+                        },
+                        members: [
+                            {ref: "%s"}
+                        ]
+                    }) {
+                    id
+                    name {
+                      value
+                    }
+                  }
+                }
+                """.formatted(
+                MUTATE_GROUP_OF_STOP_PLACES,
+                groupName,
+                startDate.toString(),
+                endDate.toString(),
+                stopPlace2.getNetexId()
+        );
+
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
+                .body("errors[0].extensions.errorCode", equalTo(HSLErrorCodeEnumeration.GROUP_OF_STOP_PLACES_UNIQUE_NAME.name()));
     }
 }
