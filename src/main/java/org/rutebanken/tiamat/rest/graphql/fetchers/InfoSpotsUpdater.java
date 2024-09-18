@@ -4,9 +4,11 @@ import com.google.api.client.util.Preconditions;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
@@ -131,62 +133,62 @@ public class InfoSpotsUpdater implements DataFetcher {
 
         if (input.containsKey(LABEL)) {
             var label = (String) input.get(LABEL);
-            isUpdated = !label.equals(target.getLabel());
+            isUpdated = !Objects.equals(label, target.getLabel());
             target.setLabel(label);
         }
         if (input.containsKey(INFO_SPOT_TYPE)) {
             var infoSpotType = (InfoSpotTypeEnumeration) input.get(INFO_SPOT_TYPE);
-            isUpdated |= !infoSpotType.equals(target.getInfoSpotType());
+            isUpdated |= !Objects.equals(infoSpotType, target.getInfoSpotType());
             target.setInfoSpotType(infoSpotType);
         }
         if (input.containsKey(PURPOSE)) {
             var purpose = (String) input.get(PURPOSE);
-            isUpdated |= !purpose.equals(target.getPurpose());
+            isUpdated |= !Objects.equals(purpose, target.getPurpose());
             target.setPurpose(purpose);
         }
         if (input.containsKey(DESCRIPTION)) {
             var description = (Map) input.get(DESCRIPTION);
-            isUpdated |= !description.equals(target.getDescription());
+            isUpdated |= !Objects.equals(description, target.getDescription());
             target.setDescription(getEmbeddableString(description));
         }
         if (input.containsKey(POSTER_PLACE_SIZE)) {
             var posterPlaceSize = (PosterSizeEnumeration) input.get(POSTER_PLACE_SIZE);
-            isUpdated |= !posterPlaceSize.equals(target.getPosterPlaceSize());
+            isUpdated |= !Objects.equals(posterPlaceSize, target.getPosterPlaceSize());
             target.setPosterPlaceSize(posterPlaceSize);
         }
         if (input.containsKey(BACKLIGHT)) {
             var backlight = (Boolean) input.get(BACKLIGHT);
-            isUpdated |= !backlight.equals(target.getBacklight());
+            isUpdated |= !Objects.equals(backlight, target.getBacklight());
             target.setBacklight(backlight);
         }
         if (input.containsKey(MAINTENANCE)) {
             var maintenance = (String) input.get(MAINTENANCE);
-            isUpdated |= !maintenance.equals(target.getMaintenance());
+            isUpdated |= !Objects.equals(maintenance, target.getMaintenance());
             target.setMaintenance(maintenance);
         }
         if (input.containsKey(ZONE_LABEL)) {
             var zoneLabel = (String) input.get(ZONE_LABEL);
-            isUpdated |= !zoneLabel.equals(target.getZoneLabel());
+            isUpdated |= !Objects.equals(zoneLabel, target.getZoneLabel());
             target.setZoneLabel(zoneLabel);
         }
         if (input.containsKey(RAIL_INFORMATION)) {
             var railInformation = (String) input.get(RAIL_INFORMATION);
-            isUpdated |= !railInformation.equals(target.getRailInformation());
+            isUpdated |= !Objects.equals(railInformation, target.getRailInformation());
             target.setRailInformation(railInformation);
         }
         if (input.containsKey(FLOOR)) {
             var floor = (String) input.get(FLOOR);
-            isUpdated |= !floor.equals(target.getFloor());
+            isUpdated |= !Objects.equals(floor, target.getFloor());
             target.setFloor(floor);
         }
         if (input.containsKey(SPEECH_PROPERTY)) {
             var speechProperty = (Boolean) input.get(SPEECH_PROPERTY);
-            isUpdated |= !speechProperty.equals(target.getSpeechProperty());
+            isUpdated |= !Objects.equals(speechProperty, target.getSpeechProperty());
             target.setSpeechProperty(speechProperty);
         }
         if (input.containsKey(DISPLAY_TYPE)) {
             var displayType = (DisplayTypeEnumeration) input.get(DISPLAY_TYPE);
-            isUpdated |= !displayType.equals(target.getDisplayType());
+            isUpdated |= !Objects.equals(displayType, target.getDisplayType());
             target.setDisplayType(displayType);
         }
         if (input.containsKey(INFO_SPOT_LOCATIONS)) {
@@ -198,21 +200,25 @@ public class InfoSpotsUpdater implements DataFetcher {
 
         if (input.containsKey(OUTPUT_TYPE_POSTER)) {
             List<Map> posters = (List<Map>) input.get(OUTPUT_TYPE_POSTER);
-            Set<InfoSpotPosterRef> posterRefs = target.getPosters();
+            if (posters != null) {
+                Set<InfoSpotPosterRef> posterRefs = target.getPosters();
 
-            Set<InfoSpotPoster> existingPosters = posterRefs.stream()
-                    .map(p -> infoSpotPosterRepository.findFirstByNetexIdAndVersion(p.getRef(), Long.parseLong(p.getVersion())))
-                    .collect(Collectors.toSet());
+                Set<InfoSpotPoster> existingPosters = posterRefs.stream()
+                        .map(p -> infoSpotPosterRepository.findFirstByNetexIdAndVersion(p.getRef(), Long.parseLong(p.getVersion())))
+                        .collect(Collectors.toSet());
 
-            Set<InfoSpotPosterRef> updatedPosters = posters.stream()
-                    .map(p -> createPoster(p, existingPosters))
-                    .map(InfoSpotPosterRef::new)
-                    .collect(Collectors.toSet());
+                Set<InfoSpotPosterRef> updatedPosters = posters.stream()
+                        .map(p -> createPoster(p, existingPosters))
+                        .map(InfoSpotPosterRef::new)
+                        .collect(Collectors.toSet());
 
-            target.setPosters(updatedPosters);
+                target.setPosters(updatedPosters);
+            }
+            else {
+                target.setPosters(Collections.emptySet());
+            }
         }
         if (input.containsKey(GEOMETRY)) {
-
             target.setCentroid(geometryMapper.createGeoJsonPoint((Map) input.get(GEOMETRY)));
             isUpdated = true;
         }
