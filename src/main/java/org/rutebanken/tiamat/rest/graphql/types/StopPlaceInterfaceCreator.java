@@ -33,6 +33,7 @@ import static graphql.schema.GraphQLInterfaceType.newInterface;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ALTERNATIVE_NAMES;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.CHANGED_BY;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.FARE_ZONES;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.INFO_SPOTS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.OUTPUT_TYPE_GROUP_OF_STOPPLACES;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.OUTPUT_TYPE_STOPPLACE_INTERFACE;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.STOP_PLACE_GROUPS;
@@ -55,8 +56,9 @@ public class StopPlaceInterfaceCreator {
 
     public List<GraphQLFieldDefinition> createCommonInterfaceFields(GraphQLObjectType tariffZoneObjectType,
                                                                     GraphQLObjectType fareZoneObjectType,
-                                                              GraphQLObjectType topographicPlaceObjectType,
-                                                              GraphQLObjectType validBetweenObjectType) {
+                                                                    GraphQLObjectType topographicPlaceObjectType,
+                                                                    GraphQLObjectType validBetweenObjectType,
+                                                                    GraphQLObjectType infoSpotObjectType) {
         List<GraphQLFieldDefinition> stopPlaceInterfaceFields = new ArrayList<>();
         stopPlaceInterfaceFields.add(newFieldDefinition()
                 .name(VERSION_COMMENT)
@@ -92,6 +94,10 @@ public class StopPlaceInterfaceCreator {
         stopPlaceInterfaceFields.add(newFieldDefinition()
                 .name(STOP_PLACE_GROUPS)
                 .type(new GraphQLList(new GraphQLTypeReference(OUTPUT_TYPE_GROUP_OF_STOPPLACES)))
+                .build());
+        stopPlaceInterfaceFields.add(newFieldDefinition()
+                .name(INFO_SPOTS)
+                .type(new GraphQLList(infoSpotObjectType))
                 .build());
         return stopPlaceInterfaceFields;
     }

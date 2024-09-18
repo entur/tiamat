@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.rest.graphql;
 
+import java.time.Instant;
 import java.util.Set;
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
@@ -11,6 +12,8 @@ import org.rutebanken.tiamat.model.InfoSpotPoster;
 import org.rutebanken.tiamat.model.InfoSpotPosterRef;
 import org.rutebanken.tiamat.model.InfoSpotTypeEnumeration;
 import org.rutebanken.tiamat.model.PosterSizeEnumeration;
+import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.ValidBetween;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItems;
@@ -491,7 +494,58 @@ public class GraphQLResourceInfoSpotIntegrationTest extends AbstractGraphQLResou
                 .appendRootPath("poster[0]")
                 .body("label", equalTo(posterLabel))
                 .body("posterSize", equalTo(posterSize.value()))
-                .body("lines", equalTo(posterLines));    }
+                .body("lines", equalTo(posterLines));
+    }
+
+    @Test
+    public void listInfoSpotsForStopPlaceTest() {
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(5, 60)));
+        stopPlace.setName(new EmbeddableMultilingualString("info stop place"));
+        stopPlace.setValidBetween(new ValidBetween(Instant.now()));
+        stopPlace = stopPlaceRepository.save(stopPlace);
+
+        var infoSpot = new InfoSpot();
+        infoSpot.setVersion(1);
+        infoSpot.setLabel("I1111");
+        infoSpot.setInfoSpotType(InfoSpotTypeEnumeration.STATIC);
+        infoSpot.setBacklight(true);
+        infoSpot.setFloor("2");
+        infoSpot.setDescription(new EmbeddableMultilingualString("Descriptive"));
+        infoSpot.setMaintenance("Maintainer");
+        infoSpot.setPosterPlaceSize(PosterSizeEnumeration.CM80x120);
+        infoSpot.setPurpose("Purpose of info");
+        infoSpot.setRailInformation("Rail 1");
+        infoSpot.setZoneLabel("A");
+        infoSpot.setInfoSpotLocations(Set.of(stopPlace.getNetexId()));
+        infoSpot.setCentroid(stopPlace.getCentroid());
+
+        infoSpot = infoSpotRepository.save(infoSpot);
+
+        String graphQlJsonQuery = """
+                  {
+                  stopPlace: stopPlace (id:"%s") {
+                    id
+                    name { value }
+                    infoSpots {
+                        id
+                        label
+                        floor
+                        }
+                    }
+                  }""".formatted(stopPlace.getNetexId());
+
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
+                .body("data.stopPlace", hasSize(1))
+                .rootPath("data.stopPlace[0]")
+                .body("id", equalTo(stopPlace.getNetexId()))
+                .body("name.value", equalTo(stopPlace.getName().getValue()))
+                .body("infoSpots", hasSize(1))
+                .appendRootPath("infoSpots[0]")
+                .body("id", equalTo(infoSpot.getNetexId()))
+                .body("label", equalTo(infoSpot.getLabel()))
+                .body("floor", equalTo(infoSpot.getFloor()));
+    }
 
     private void insertInfoSpots() {
         // Insert base info spot

@@ -44,6 +44,7 @@ import org.rutebanken.tiamat.model.FareZone;
 import org.rutebanken.tiamat.model.GeneralSign;
 import org.rutebanken.tiamat.model.GroupOfStopPlaces;
 import org.rutebanken.tiamat.model.GroupOfTariffZones;
+import org.rutebanken.tiamat.model.InfoSpot;
 import org.rutebanken.tiamat.model.Link;
 import org.rutebanken.tiamat.model.Parking;
 import org.rutebanken.tiamat.model.PurposeOfGrouping;
@@ -330,6 +331,9 @@ public class StopPlaceRegisterGraphQLSchema {
     private DataFetcher<List<GroupOfStopPlaces>> stopPlaceGroupsFetcher;
 
     @Autowired
+    private DataFetcher<List<InfoSpot>> stopPlaceInfoSpotsFetcher;
+
+    @Autowired
     private KeyValuesDataFetcher keyValuesDataFetcher;
 
     @Autowired
@@ -432,7 +436,9 @@ public class StopPlaceRegisterGraphQLSchema {
 
         MutableTypeResolver stopPlaceTypeResolver = new MutableTypeResolver();
 
-        List<GraphQLFieldDefinition> stopPlaceInterfaceFields = stopPlaceInterfaceCreator.createCommonInterfaceFields(tariffZoneObjectType,fareZoneObjectType, topographicPlaceObjectType, validBetweenObjectType);
+        GraphQLObjectType infoSpotObjectType = infoSpotObjectTypeCreator.createObjectType(validBetweenObjectType);
+
+        List<GraphQLFieldDefinition> stopPlaceInterfaceFields = stopPlaceInterfaceCreator.createCommonInterfaceFields(tariffZoneObjectType,fareZoneObjectType, topographicPlaceObjectType, validBetweenObjectType, infoSpotObjectType);
         GraphQLInterfaceType stopPlaceInterface = stopPlaceInterfaceCreator.createInterface(stopPlaceInterfaceFields, commonFieldsList);
 
         GraphQLObjectType organisationObjectType = createOrganisationObjectType(validBetweenObjectType);
@@ -465,8 +471,6 @@ public class StopPlaceRegisterGraphQLSchema {
         GraphQLObjectType pathLinkObjectType = pathLinkObjectTypeCreator.create(pathLinkEndObjectType, netexIdFieldDefinition, geometryFieldDefinition);
 
         GraphQLObjectType parkingObjectType = createParkingObjectType(validBetweenObjectType);
-
-        GraphQLObjectType infoSpotObjectType = infoSpotObjectTypeCreator.createObjectType(validBetweenObjectType);
 
         GraphQLArgument allVersionsArgument = GraphQLArgument.newArgument()
                 .name(ALL_VERSIONS)
@@ -760,6 +764,7 @@ public class StopPlaceRegisterGraphQLSchema {
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_STOPPLACE, STOP_PLACE_GROUPS, stopPlaceGroupsFetcher);
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_PARENT_STOPPLACE, STOP_PLACE_GROUPS, stopPlaceGroupsFetcher);
 
+        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_STOPPLACE, INFO_SPOTS, stopPlaceInfoSpotsFetcher);
 
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_STOPPLACE, FARE_ZONES, stopPlaceFareZoneFetcher);
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_PARENT_STOPPLACE, FARE_ZONES, stopPlaceFareZoneFetcher);
