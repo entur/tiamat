@@ -9,7 +9,7 @@ BEGIN
         AND gosp.version = (
             SELECT MAX(version)
             FROM group_of_stop_places
-            WHERE netex_id = gosp.netex_id
+            WHERE netex_id = gosp.netex_id AND netex_id != NEW.netex_id
         )
         AND tstzrange(gosp.from_date, gosp.to_date, '[)') && tstzrange(NEW.from_date, NEW.to_date, '[)')
     ) THEN
@@ -23,7 +23,7 @@ BEGIN
         AND gosp.version = (
             SELECT MAX(version)
             FROM group_of_stop_places
-            WHERE netex_id = gosp.netex_id
+            WHERE netex_id = gosp.netex_id AND netex_id != NEW.netex_id
         )
         AND tstzrange(gosp.from_date, gosp.to_date, '[)') && tstzrange(NEW.from_date, NEW.to_date, '[)')
     ) THEN

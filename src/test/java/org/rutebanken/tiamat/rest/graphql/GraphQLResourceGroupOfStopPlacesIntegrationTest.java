@@ -197,4 +197,68 @@ public class GraphQLResourceGroupOfStopPlacesIntegrationTest extends AbstractGra
         executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .body("errors[0].extensions.errorCode", equalTo(HSLErrorCodeEnumeration.GROUP_OF_STOP_PLACES_UNIQUE_NAME.name()));
     }
+    @Test
+    public void groupOfStopPlacesAllowSameNameAgainTest() {
+        var stopPlace1 = new StopPlace();
+        stopPlace1.setCentroid(geometryFactory.createPoint(new Coordinate(12, 53)));
+        stopPlace1.setStopPlaceType(StopTypeEnumeration.BUS_STATION);
+        stopPlace1 = stopPlaceVersionedSaverService.saveNewVersion(stopPlace1);
+
+        var stopPlace2 = new StopPlace();
+        stopPlace2.setCentroid(geometryFactory.createPoint(new Coordinate(13, 61)));
+        stopPlace2.setStopPlaceType(StopTypeEnumeration.TRAM_STATION);
+        stopPlace2 = stopPlaceVersionedSaverService.saveNewVersion(stopPlace2);
+
+        Instant startDate = Instant.now();
+        Instant endDate = startDate.plus(20, ChronoUnit.DAYS);
+
+        var groupName = "allowedName";
+        var groupDescription = "allowedDescription";
+
+        GroupOfStopPlaces groupOfStopPlaces = new GroupOfStopPlaces(new EmbeddableMultilingualString(groupName));
+        groupOfStopPlaces.setDescription(new EmbeddableMultilingualString(groupDescription));
+        groupOfStopPlaces.getMembers().add(new StopPlaceReference(stopPlace1.getNetexId()));
+        groupOfStopPlaces.setValidBetween(new ValidBetween(startDate, endDate));
+        groupOfStopPlaces = groupOfStopPlacesRepository.save(groupOfStopPlaces);
+
+        String graphQlJsonQuery = """
+                mutation {
+                    group: %s(GroupOfStopPlaces: {
+                        id: "%s"
+                        name: {value: "%s"},
+                        description: {value: "%s"},
+                        validBetween: {
+                            fromDate: "%s",
+                            toDate: "%s",
+                        },
+                        members: [
+                            {ref: "%s"},
+                            {ref: "%s"}
+                        ]
+                    }) {
+                    id
+                    name {
+                      value
+                    }
+                    description {
+                      value
+                    }
+                  }
+                }
+                """.formatted(
+                MUTATE_GROUP_OF_STOP_PLACES,
+                groupOfStopPlaces.getNetexId(),
+                groupName,
+                groupDescription,
+                startDate.toString(),
+                endDate.toString(),
+                stopPlace1.getNetexId(),
+                stopPlace2.getNetexId()
+        );
+
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
+                .rootPath("data.group")
+                .body("name.value", equalTo(groupName))
+                .body("description.value", equalTo(groupDescription));
+    }
 }
