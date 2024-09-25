@@ -36,6 +36,18 @@ public interface AuthorizationService {
     void verifyCanDeleteEntities(Collection<? extends EntityStructure> entities);
 
     /**
+     * Verify that the current user has right to delete the given entity.
+     * @throws AccessDeniedException if not.
+     */
+    boolean canDeleteEntity(EntityStructure entity);
+
+    /**
+     * Verify that the current user has right to edit the given entity.
+     * @throws AccessDeniedException if not.
+     */
+    boolean canEditEntity(EntityStructure entity);
+
+    /**
      * Return the subset of the roles that the current user holds that apply to this entity.
      * */
     <T extends EntityStructure> Set<String> getRelevantRolesForEntity(T entity);
@@ -45,6 +57,14 @@ public interface AuthorizationService {
      * (for unit tests only)
      */
     <T extends EntityStructure> boolean canEditEntity(RoleAssignment roleAssignment, T entity);
+
+    Set<String> getAllowedStopPlaceTypes();
+
+    Set<String> getBannedStopPlaceTypes();
+
+    Set<String> getAllowedSubmodes();
+
+    Set<String> getBannedSubmodes();
 
 
 
