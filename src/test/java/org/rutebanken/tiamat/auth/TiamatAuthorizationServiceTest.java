@@ -29,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
@@ -142,6 +143,38 @@ public class TiamatAuthorizationServiceTest extends TiamatIntegrationTest {
 
         boolean authorized = authorizationService.canEditEntity(roleAssignment, stopPlace);
         assertThat("Should be authorized as both type and submode are allowed", authorized, is(true));
+    }
+    /**
+     * Test  allowed stop place types
+     * EntityType=StopPlace, StopPlaceType=railStation,railReplacementBus
+     */
+
+    @Test
+    public void authorizedGetAllowedStopPlaceTypesTest() {
+        roleAssignmentsForRailAndRailReplacementMocked(ROLE_EDIT_STOPS);
+
+        final Set<String> allowedStopPlaceTypes = authorizationService.getAllowedStopPlaceTypes();
+        assertThat("Should contain allowed StopPlaceType", allowedStopPlaceTypes.contains("railStation"), is(true));
+    }
+
+    /**
+     * Test  banned stop place types
+     * EntityType=StopPlace, StopPlaceType=railStation,railReplacementBus
+     */
+    @Test
+    public void authorizedGetBannedStopPlaceTypesTest() {
+        RoleAssignment roleAssignment = RoleAssignment.builder()
+                .withRole(ROLE_EDIT_STOPS)
+                .withOrganisation("OST")
+                .withEntityClassification(ENTITY_TYPE, "StopPlace")
+                .withEntityClassification("StopPlaceType", "!airport")
+                .withEntityClassification("Submode", "!railReplacementBus")
+                .build();
+
+        mockedRoleAssignmentExtractor.setNextReturnedRoleAssignment(roleAssignment);
+
+        final Set<String> bannedStopPlaceTypes = authorizationService.getBannedStopPlaceTypes();
+        assertThat("Should contain banned StopPlaceType", bannedStopPlaceTypes.contains("airport"), is(true));
     }
 
     /**
