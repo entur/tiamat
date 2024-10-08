@@ -1,0 +1,57 @@
+name: Build and push
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+jobs:
+  maven-verify:
+    env:
+      JFROG_USER: ${{ secrets.ARTIFACTORY_USER }}
+      JFROG_PASS: ${{ secrets.ARTIFACTORY_APIKEY }}
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Copy maven settings
+        run: |
+          wget https://raw.githubusercontent.com/entur/ror-maven-settings/master/.m2/settings.xml -O .github/workflows/settings.xml
+      - uses: actions/setup-java@v4
+        with:
+          java-version: 21.0.1+12
+          distribution: liberica
+          cache: 'maven'
+      - run: mvn verify -s .github/workflows/settings.xml
+      - uses: actions/upload-artifact@v4.4.0
+        with:
+          path: target/*.jar
+      - name: Sonar Scan
+        env:
+          SONAR_TOKEN: ${{ secrets.ENTUR_SONAR_PASSWORD }}
+          SONAR_PROJECT_NAME: ${{ github.event.repository.name }}
+          SONAR_PROJECT_KEY: entur_${{ github.event.repository.name }}
+        run: |
+          mvn -s .github/workflows/settings.xml \
+                  org.jacoco:jacoco-maven-plugin:prepare-agent verify \
+                  org.jacoco:jacoco-maven-plugin:report sonar:sonar \
+                  -Dmaven.main.skip \
+                  -DskipTests \
+                  -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
+                  -Dsonar.organization=enturas-github \
+                  -Dsonar.projectName=${SONAR_PROJECT_NAME} \
+                  -Dsonar.host.url=https://sonarcloud.io \
+                  -Dsonar.login=${SONAR_TOKEN}
+
+  docker-build:
+    needs: [maven-verify]
+    uses: entur/gha-docker/.github/workflows/build.yml@v1
+    with:
+      build_artifact_name: artifact
+      build_artifact_path: target
+  docker-push:
+    if: github.repository_owner == 'entur' && github.event_name == 'push'
+    needs: [docker-build]
+    uses: entur/gha-docker/.github/workflows/push.yml@v1
