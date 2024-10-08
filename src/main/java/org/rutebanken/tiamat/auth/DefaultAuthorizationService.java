@@ -5,6 +5,7 @@ import org.rutebanken.helper.organisation.AuthorizationConstants;
 import org.rutebanken.helper.organisation.DataScopedAuthorizationService;
 import org.rutebanken.helper.organisation.RoleAssignment;
 import org.rutebanken.helper.organisation.RoleAssignmentExtractor;
+import org.rutebanken.tiamat.auth.check.TopographicPlaceChecker;
 import org.rutebanken.tiamat.model.EntityStructure;
 import org.springframework.security.access.AccessDeniedException;
 
@@ -22,11 +23,15 @@ public class DefaultAuthorizationService implements AuthorizationService {
     private final RoleAssignmentExtractor roleAssignmentExtractor;
     private static final String STOP_PLACE_TYPE = "StopPlaceType";
     private static final String SUBMODE = "Submode";
+    private final TopographicPlaceChecker topographicPlaceChecker;
 
-    public DefaultAuthorizationService(DataScopedAuthorizationService dataScopedAuthorizationService, RoleAssignmentExtractor roleAssignmentExtractor) {
+    public DefaultAuthorizationService(DataScopedAuthorizationService dataScopedAuthorizationService,
+                                       RoleAssignmentExtractor roleAssignmentExtractor,
+                                       TopographicPlaceChecker topographicPlaceChecker) {
         this.dataScopedAuthorizationService = dataScopedAuthorizationService;
         this.roleAssignmentExtractor = roleAssignmentExtractor;
-        }
+        this.topographicPlaceChecker = topographicPlaceChecker;
+    }
 
     @Override
     public void verifyCanEditAllEntities() {
@@ -83,29 +88,30 @@ public class DefaultAuthorizationService implements AuthorizationService {
     }
 
     @Override
-    public Set<String> getAllowedStopPlaceTypes(){
-       return getStopTypesOrSubmode(STOP_PLACE_TYPE, true);
+    public Set<String> getAllowedStopPlaceTypes(Object entity){
+       return getStopTypesOrSubmode(STOP_PLACE_TYPE, true, entity);
     }
 
     @Override
-    public Set<String> getBannedStopPlaceTypes() {
-        return getStopTypesOrSubmode(STOP_PLACE_TYPE, false);
+    public Set<String> getBannedStopPlaceTypes(Object entity) {
+        return getStopTypesOrSubmode(STOP_PLACE_TYPE, false, entity);
     }
 
     @Override
-    public Set<String> getAllowedSubmodes() {
-        return  getStopTypesOrSubmode(SUBMODE, true);
+    public Set<String> getAllowedSubmodes(Object entity) {
+        return  getStopTypesOrSubmode(SUBMODE, true, entity);
     }
 
     @Override
-    public Set<String> getBannedSubmodes() {
-        return getStopTypesOrSubmode(SUBMODE, false);
+    public Set<String> getBannedSubmodes(Object entity) {
+        return getStopTypesOrSubmode(SUBMODE, false, entity);
     }
 
 
-    private Set<String> getStopTypesOrSubmode(String type, boolean isAllowed) {
+    private Set<String> getStopTypesOrSubmode(String type, boolean isAllowed, Object entity) {
         return roleAssignmentExtractor.getRoleAssignmentsForUser().stream()
                 .filter(roleAssignment -> roleAssignment.getEntityClassifications() != null)
+                .filter(roleAssignment -> topographicPlaceChecker.entityMatchesAdministrativeZone(roleAssignment, entity))
                 .filter(roleAssignment -> roleAssignment.getEntityClassifications().get(type) != null)
                 .map(roleAssignment -> roleAssignment.getEntityClassifications().get(type))
                 .flatMap(List::stream)

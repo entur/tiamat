@@ -41,10 +41,10 @@ public class EntityPermissionsFetcher implements DataFetcher {
 
         final boolean canEditEntities = authorizationService.canEditEntity(entityInVersionStructure);
         final boolean canDeleteEntity = authorizationService.canDeleteEntity(entityInVersionStructure);
-        final Set<String> allowedStopPlaceTypes = authorizationService.getAllowedStopPlaceTypes();
-        final Set<String> bannedStopPlaceTypes = authorizationService.getBannedStopPlaceTypes();
-        final Set<String> allowedSubmode = authorizationService.getAllowedSubmodes();
-        final Set<String> bannedSubmode = authorizationService.getBannedSubmodes();
+        final Set<String> allowedStopPlaceTypes = authorizationService.getAllowedStopPlaceTypes(entityInVersionStructure);
+        final Set<String> bannedStopPlaceTypes = authorizationService.getBannedStopPlaceTypes(entityInVersionStructure);
+        final Set<String> allowedSubmode = authorizationService.getAllowedSubmodes(entityInVersionStructure);
+        final Set<String> bannedSubmode = authorizationService.getBannedSubmodes(entityInVersionStructure);
 
 
         return new EntityPermissions(canEditEntities, canDeleteEntity, allowedStopPlaceTypes, bannedStopPlaceTypes, allowedSubmode, bannedSubmode);
