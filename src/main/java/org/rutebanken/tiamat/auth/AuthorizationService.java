@@ -58,13 +58,13 @@ public interface AuthorizationService {
      */
     <T extends EntityStructure> boolean canEditEntity(RoleAssignment roleAssignment, T entity);
 
-    Set<String> getAllowedStopPlaceTypes();
+    Set<String> getAllowedStopPlaceTypes(Object entity);
 
-    Set<String> getBannedStopPlaceTypes();
+    Set<String> getBannedStopPlaceTypes(Object entity);
 
-    Set<String> getAllowedSubmodes();
+    Set<String> getAllowedSubmodes(Object entity);
 
-    Set<String> getBannedSubmodes();
+    Set<String> getBannedSubmodes(Object entity);
 
 
 

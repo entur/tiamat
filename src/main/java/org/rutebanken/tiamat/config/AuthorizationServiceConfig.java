@@ -18,11 +18,11 @@ package org.rutebanken.tiamat.config;
 import org.rutebanken.helper.organisation.DataScopedAuthorizationService;
 import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
 import org.rutebanken.helper.organisation.RoleAssignmentExtractor;
+import org.rutebanken.tiamat.auth.AuthorizationService;
+import org.rutebanken.tiamat.auth.DefaultAuthorizationService;
 import org.rutebanken.tiamat.auth.TiamatEntityResolver;
 import org.rutebanken.tiamat.auth.check.TiamatOriganisationChecker;
 import org.rutebanken.tiamat.auth.check.TopographicPlaceChecker;
-import org.rutebanken.tiamat.auth.AuthorizationService;
-import org.rutebanken.tiamat.auth.DefaultAuthorizationService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -39,8 +39,8 @@ public class AuthorizationServiceConfig {
 
 
     @Bean
-    public AuthorizationService authorizationService(DataScopedAuthorizationService dataScopedAuthorizationService, RoleAssignmentExtractor roleAssignmentExtractor) {
-        return new DefaultAuthorizationService(dataScopedAuthorizationService, roleAssignmentExtractor);
+    public AuthorizationService authorizationService(DataScopedAuthorizationService dataScopedAuthorizationService, RoleAssignmentExtractor roleAssignmentExtractor, TopographicPlaceChecker topographicPlaceChecker) {
+        return new DefaultAuthorizationService(dataScopedAuthorizationService, roleAssignmentExtractor, topographicPlaceChecker);
     }
 
     @Bean

@@ -16,12 +16,19 @@
 package org.rutebanken.tiamat.auth;
 
 import org.junit.Test;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.LinearRing;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.geom.impl.CoordinateArraySequence;
 import org.rutebanken.helper.organisation.RoleAssignment;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.BusSubmodeEnumeration;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
+import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.model.WaterSubmodeEnumeration;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -151,9 +158,13 @@ public class TiamatAuthorizationServiceTest extends TiamatIntegrationTest {
 
     @Test
     public void authorizedGetAllowedStopPlaceTypesTest() {
-        roleAssignmentsForRailAndRailReplacementMocked(ROLE_EDIT_STOPS);
+        final List<RoleAssignment> roleAssignments = roleAssignmentsForRailAndRailReplacementMocked(ROLE_EDIT_STOPS);
 
-        final Set<String> allowedStopPlaceTypes = authorizationService.getAllowedStopPlaceTypes();
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setStopPlaceType(StopTypeEnumeration.BUS_STATION);
+        stopPlace.setBusSubmode(BusSubmodeEnumeration.REGIONAL_BUS);
+
+        final Set<String> allowedStopPlaceTypes = authorizationService.getAllowedStopPlaceTypes(stopPlace);
         assertThat("Should contain allowed StopPlaceType", allowedStopPlaceTypes.contains("railStation"), is(true));
     }
 
@@ -166,6 +177,7 @@ public class TiamatAuthorizationServiceTest extends TiamatIntegrationTest {
         RoleAssignment roleAssignment = RoleAssignment.builder()
                 .withRole(ROLE_EDIT_STOPS)
                 .withOrganisation("OST")
+                .withAdministrativeZone("KVE:TopographicalPlace:01")
                 .withEntityClassification(ENTITY_TYPE, "StopPlace")
                 .withEntityClassification("StopPlaceType", "!airport")
                 .withEntityClassification("Submode", "!railReplacementBus")
@@ -173,8 +185,35 @@ public class TiamatAuthorizationServiceTest extends TiamatIntegrationTest {
 
         mockedRoleAssignmentExtractor.setNextReturnedRoleAssignment(roleAssignment);
 
-        final Set<String> bannedStopPlaceTypes = authorizationService.getBannedStopPlaceTypes();
-        assertThat("Should contain banned StopPlaceType", bannedStopPlaceTypes.contains("airport"), is(true));
+        Point point = geometryFactory.createPoint(new Coordinate(9.84, 59.26));
+        Point point2 = geometryFactory.createPoint(new Coordinate(0, 0));
+
+        TopographicPlace municipality = new TopographicPlace();
+        municipality.setNetexId("KVE:TopographicalPlace:01");
+        municipality.setVersion(1);
+        municipality.setPolygon(createPolygon(point));
+        topographicPlaceRepository.saveAndFlush(municipality);
+
+
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setStopPlaceType(StopTypeEnumeration.BUS_STATION);
+        stopPlace.setBusSubmode(BusSubmodeEnumeration.REGIONAL_BUS);
+        stopPlace.setTopographicPlace(municipality);
+        stopPlace.setCentroid(point2);
+        stopPlaceRepository.saveAndFlush(stopPlace);
+
+        final Set<String> bannedStopPlaceTypes = authorizationService.getBannedStopPlaceTypes(stopPlace);
+        assertThat("Should contain banned StopPlaceType", bannedStopPlaceTypes.contains("airport"), is(false));
+        boolean authorized = authorizationService.canEditEntity(roleAssignment, stopPlace);
+        assertThat("Should be authorized as both type and submode are allowed", authorized, is(true));
+
+    }
+
+    private Polygon createPolygon(Point point) {
+        Geometry bufferedPoint = point.buffer(20);
+        LinearRing linearRing = new LinearRing(new CoordinateArraySequence(bufferedPoint.getCoordinates()), geometryFactory);
+        return geometryFactory.createPolygon(linearRing, null);
     }
 
     /**
