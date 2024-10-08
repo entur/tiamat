@@ -158,6 +158,9 @@ public class GraphQLNames {
     public static final String GROUP_OF_STOP_PLACES = "groupOfStopPlaces";
     public static final String STOP_PLACE_GROUPS = "groups";
 
+    public static final String PERMISSIONS = "permissions";
+    public static final String ENTITY_PERMISSIONS= "EntityPermissions";
+
     public static final String GROUP_OF_TARIFF_ZONES = "groupOfTariffZones";
     public static final String GROUP_OF_TARIFF_ZONES_MEMBERS = "members";
     public static final String OUTPUT_TYPE_GROUP_OF_TARIFF_ZONES ="GroupOfTariffZones";
