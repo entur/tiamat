@@ -234,46 +234,7 @@ It's all initiated by an entity listener annotated with `PrePersist` on the clas
 
 ## Keycloak/Auth0
 Both Tiamat and Abzu are set up to be used with Keycloak or Auth0.
-
-### Keycloak configuraiton
-- Create realm e.g. Entur
-- Create client for frontend e.g. abzu
-- Under client setting  configure Mapper e.g. entur-roles
-  - client > abuz > Mappers > Create
-  - add mapper by configuration role_assignments
-    - mapper type: User Attribute
-    - name: role_assignments
-    - User Attribute: role_assignments
-    - Token Claim Name: role_assignments
-    - Claim JSON Type: String
-    - Add to ID token: on
-    - Add to access token: on
-    - Add to userinfo: on
-    - Multivalued: on
-  - add mapper by configuration role
-    - mapper type: User Attribute
-    - name: role
-    - User Attribute: role
-    - Token Claim Name: role
-    - Claim JSON Type: String
-    - Add to ID token: on
-    - Add to access token: on
-    - Add to userinfo: on
-    - Multivalued: on
-    
-- Create Roles e.g. deleteStop, editStop, viewStop
-- Add User and assign roles
-- Add User attribute roles 
-
-exmaple of roles:
-
-  | Key | Value 
-  | --- | --- 
-  | role_assignments | {"r":"deleteStops","o":"RB"} 
-  | role_assignments | {"r":"editStops","o":"RB","e":{"EntityType":["*"]}}
-  | role_assignments | {"r":"editStops","o":"NSB","e":{"StopPlaceType":["*"]}}
-  | role             | editStops
-  | role             | deleteStops
+A detailed guide on how to setup Keycloak can be found [here](./Keycloak_Setup_Guide.md).
 
 ## Validation for incoming and outgoing NeTEx publication delivery
 
