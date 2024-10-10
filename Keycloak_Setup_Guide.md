@@ -115,11 +115,54 @@ A **client** in Keycloak represents an application that users will authenticate 
 5. In the Attributes tab, add a follwoing attributes to the user.
    - `role_assignments` with value `{"r":"deleteStops","o":"RB"}`
    - `role_assignments` with value `{"r":"editStops","o":"RB","e":{"EntityType":["*"]}}`
-   - `role_assignments` with value `{"r":"editStops","o":"NSB","e":{"StopPlaceType":["*"]}}`
-   - `roles` with value `editStops`
-   - `roles` with value `deleteStops`
 
----
+### Configure Client Roles
+1. Go to the **Clients** section and select the client you created (e.g., `abzu`).
+2. Click on the **Client Scopes** tab.
+3. Click on the **abzu-dedicated** client-scope, click on the **Add Mapper** and select **By Configuration**.
+4. Select User Attribute and set the following values:
+   - **Name**: `role_assignments`
+   - **User Attribute**: `role_assignments`
+   - **Token Claim Name**: `role_assignments`
+   - **Claim JSON Type**: `String`
+   - **Add to ID token**: `ON`
+   - **Add to access token**: `ON`
+   - **Add to userinfo**: `ON`
+   - **Add to token introspection**: `ON`
+   - **Multivalued**: `ON`
+   - **Aggregate attribute valuese**: `OFF`
+5. Click **Save**.
+6. To test click on Client Details and select the **Client Scopes** tab. Click on the **Evaluate** button and select/write username in **Usesr** and click on and click on **Generate Access Token**. You should see the roles in the token.
+     ```text
+        ...
+        ...
+        ...
+        "resource_access": {
+         "abzu": {
+                "roles": [
+                         "viewStops",
+                         "editStops",
+                         "deleteStops"
+                         ]
+                },
+          "account": {
+           "roles": [
+              "manage-account",
+              "manage-account-links",
+              "view-profile"
+             ]
+          }
+        },
+       "scope": "openid email profile kcAudience",
+       "sid": "xxxxxxxxxxxx",
+       "role_assignments": [
+             "{\"r\":\"deleteStops\",\"o\":\"RB\"}",
+             "{\"r\":\"editStops\",\"o\":\"RB\",\"e\":{\"EntityType\":[\"*\"]}}"
+        ],
+     ...
+     ...
+     ...
+  ```
 
 ## Step 7: Configure Tiamat and Abzu
 
