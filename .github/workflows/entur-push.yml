@@ -9,8 +9,8 @@ on:
 jobs:
   maven-verify:
     env:
-      JFROG_USER: ${{ secrets.ARTIFACTORY_USER }}
-      JFROG_PASS: ${{ secrets.ARTIFACTORY_APIKEY }}
+      JFROG_USER: ${{ secrets.ARTIFACTORY_AUTH_USER }}
+      JFROG_PASS: ${{ secrets.ARTIFACTORY_AUTH_TOKEN }}
     runs-on: ubuntu-24.04
     permissions:
       contents: read
