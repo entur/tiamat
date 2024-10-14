@@ -194,8 +194,8 @@ blobstore.local.folder=/tmp/local-gcs-storage/tiamat/export
 spring.profiles.active=local-blobstore,activemq
 
 
-
-
+# Should child stop places be able to keep the same name as the parent stop place
+allowSameNameForChild=false
 
 
 ```

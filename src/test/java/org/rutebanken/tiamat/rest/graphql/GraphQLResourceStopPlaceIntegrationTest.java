@@ -17,6 +17,7 @@ package org.rutebanken.tiamat.rest.graphql;
 
 import org.hamcrest.Matchers;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Point;
@@ -3310,6 +3311,47 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         executeGraphqQLQueryOnly(mutateChildQuery)
                 .body("data.stopPlace[0].id", equalTo(stop.getNetexId()))
                 .body("data.stopPlace[0].name.value", equalTo(newName));
+    }
+
+    @Ignore("Needs to have property set in order to skip clearing child stop names.")
+    @Test
+    public void testSameNameForParentAndChild() {
+        String name = "testname";
+
+        var stop = new StopPlace();
+        stop.setName(new EmbeddableMultilingualString(name));
+        stop.setCentroid(geometryFactory.createPoint(new Coordinate(10, 59.05)));
+        stop = stopPlaceVersionedSaverService.saveNewVersion(stop);
+
+        var graphQlJsonQuery = """
+                mutation {
+                stopPlace: createMultiModalStopPlace (input: {
+                         stopPlaceIds:["%s"]
+                         name: { value: "%s" }
+                      }) {
+                         id
+                         name { value }
+                         children {
+                          id name { value }
+                         }
+                      }
+                 }""".formatted(stop.getNetexId(), name);
+
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
+                .body("data.stopPlace.name.value", equalTo(name))
+                .body("data.stopPlace.children[0].name.value", equalTo(name));
+
+        var fetchChildNameQuery = """
+                {
+                stopPlace:  stopPlace (id:"%s", onlyMonomodalStopPlaces:true) {
+                          id
+                          name { value }
+                      }
+                  }
+                """.formatted(stop.getNetexId());
+
+        executeGraphqQLQueryOnly(fetchChildNameQuery)
+                .body("data.stopPlace[0].name.value", equalTo(name));
     }
 
     private StopPlace createStopPlaceWithMunicipalityRef(String name, TopographicPlace municipality, StopTypeEnumeration type) {

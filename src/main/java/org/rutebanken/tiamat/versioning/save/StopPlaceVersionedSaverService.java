@@ -39,6 +39,7 @@ import org.rutebanken.tiamat.versioning.validate.VersionValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
@@ -62,6 +63,9 @@ public class StopPlaceVersionedSaverService {
     public static final int ADJACENT_STOP_PLACE_MAX_DISTANCE_IN_METERS = 30;
 
     public static final InterchangeWeightingEnumeration DEFAULT_WEIGHTING = InterchangeWeightingEnumeration.INTERCHANGE_ALLOWED;
+
+    @Value("${tiamat.multimodal.allowSameNameForChild:false}")
+    private boolean allowSameNameForChild;
 
     @Autowired
     private ZoneDistanceChecker zoneDistanceChecker;
@@ -271,19 +275,21 @@ public class StopPlaceVersionedSaverService {
     }
 
     private void clearUnwantedChildFields(StopPlace stopPlaceToSave) {
-        if (stopPlaceToSave.getChildren() == null) return;
-        stopPlaceToSave.getChildren().forEach(child -> {
+        if (!allowSameNameForChild) {
+            if (stopPlaceToSave.getChildren() == null) return;
+            stopPlaceToSave.getChildren().forEach(child -> {
 
-            if (child.getName() != null
+                if (child.getName() != null
                         && stopPlaceToSave.getName() != null
                         && child.getName().getValue().equalsIgnoreCase(stopPlaceToSave.getName().getValue())
                         && (child.getName().getLang() == null || child.getName().getLang().equalsIgnoreCase(stopPlaceToSave.getName().getLang()))) {
-                logger.info("Name of child {}: {} is equal to parent's name {}. Clearing it", child.getNetexId(), stopPlaceToSave.getName(), stopPlaceToSave.getNetexId());
-                child.setName(null);
-            }
+                    logger.info("Name of child {}: {} is equal to parent's name {}. Clearing it", child.getNetexId(), stopPlaceToSave.getName(), stopPlaceToSave.getNetexId());
+                    child.setName(null);
+                }
 
-            child.setValidBetween(null);
-        });
+                child.setValidBetween(null);
+            });
+        }
     }
 
     /**
