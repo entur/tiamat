@@ -3262,6 +3262,56 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                 .body("", hasSize(0));
     }
 
+    @Test
+    public void testMutateChildStopPlace() {
+
+        var stop = new StopPlace();
+        stop.setName(new EmbeddableMultilingualString("Stop Place"));
+        stop.setCentroid(geometryFactory.createPoint(new Coordinate(10, 59.05)));
+        stop = stopPlaceVersionedSaverService.saveNewVersion(stop);
+
+        String stationName = "Station";
+
+        var graphQlJsonQuery = """
+                mutation {
+                stopPlace: createMultiModalStopPlace (input: {
+                         stopPlaceIds:["%s"]
+                         name: { value: "%s" }
+                      }) {
+                         id
+                         name { value }
+                         children {
+                          id name { value }
+                         }
+                      }
+                 }""".formatted(stop.getNetexId(), stationName);
+
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
+                .body("data.stopPlace.name.value", equalTo(stationName))
+                .body("data.stopPlace.children[0].name.value", equalTo(stop.getName().getValue()));
+
+        String newName = "new stop";
+
+        var mutateChildQuery = """
+                mutation {
+                  stopPlace: mutateStopPlace(StopPlace: {
+                    id: "%s"
+                    name: { value: "%s" }
+                  }) {
+                    id
+                    name { value }
+                  }
+                }
+                """.formatted(
+                stop.getNetexId(),
+                newName
+        );
+
+        executeGraphqQLQueryOnly(mutateChildQuery)
+                .body("data.stopPlace[0].id", equalTo(stop.getNetexId()))
+                .body("data.stopPlace[0].name.value", equalTo(newName));
+    }
+
     private StopPlace createStopPlaceWithMunicipalityRef(String name, TopographicPlace municipality, StopTypeEnumeration type) {
         StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(name));
         stopPlace.setStopPlaceType(type);
