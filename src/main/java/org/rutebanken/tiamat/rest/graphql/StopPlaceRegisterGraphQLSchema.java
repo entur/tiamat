@@ -61,6 +61,7 @@ import org.rutebanken.tiamat.model.Zone_VersionStructure;
 import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.rutebanken.tiamat.rest.graphql.fetchers.AuthorizationCheckDataFetcher;
+import org.rutebanken.tiamat.rest.graphql.fetchers.EntityPermissionsFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.FareZoneAuthoritiesFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.GroupOfStopPlacesMembersFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.GroupOfStopPlacesPurposeOfGroupingFetcher;
@@ -256,6 +257,9 @@ public class StopPlaceRegisterGraphQLSchema {
     private StopPlaceTariffZoneFetcher stopPlaceTariffZoneFetcher;
 
     @Autowired
+    private EntityPermissionsFetcher entityPermissionsFetcher;
+
+    @Autowired
     private StopPlaceFareZoneFetcher stopPlaceFareZoneFetcher;
 
     @Autowired
@@ -383,6 +387,35 @@ public class StopPlaceRegisterGraphQLSchema {
 
         GraphQLObjectType validBetweenObjectType = createValidBetweenObjectType();
 
+        GraphQLObjectType entityPermissionObjectType = newObject()
+                .name(ENTITY_PERMISSIONS)
+                .field(newFieldDefinition()
+                        .name("canEdit")
+                        .type(GraphQLBoolean)
+                        .build())
+                .field(newFieldDefinition()
+                        .name("canDelete")
+                        .type(GraphQLBoolean)
+                        .build())
+
+                .field(newFieldDefinition()
+                        .name("allowedStopPlaceTypes")
+                        .type(new GraphQLList(GraphQLString))
+                        .build())
+                .field(newFieldDefinition()
+                        .name("bannedStopPlaceTypes")
+                        .type(new GraphQLList(GraphQLString))
+                        .build())
+                .field(newFieldDefinition()
+                        .name("allowedSubmodes")
+                        .type(new GraphQLList(GraphQLString))
+                        .build())
+                .field(newFieldDefinition()
+                        .name("bannedSubmodes")
+                        .type(new GraphQLList(GraphQLString))
+                        .build())
+                .build();
+
         List<GraphQLFieldDefinition> zoneCommandFieldList = zoneCommonFieldListCreator.create(validBetweenObjectType);
 
         commonFieldsList.addAll(zoneCommandFieldList);
@@ -397,7 +430,7 @@ public class StopPlaceRegisterGraphQLSchema {
 
         MutableTypeResolver stopPlaceTypeResolver = new MutableTypeResolver();
 
-        List<GraphQLFieldDefinition> stopPlaceInterfaceFields = stopPlaceInterfaceCreator.createCommonInterfaceFields(tariffZoneObjectType,fareZoneObjectType, topographicPlaceObjectType, validBetweenObjectType);
+        List<GraphQLFieldDefinition> stopPlaceInterfaceFields = stopPlaceInterfaceCreator.createCommonInterfaceFields(tariffZoneObjectType,fareZoneObjectType, topographicPlaceObjectType, validBetweenObjectType, entityPermissionObjectType);
         GraphQLInterfaceType stopPlaceInterface = stopPlaceInterfaceCreator.createInterface(stopPlaceInterfaceFields, commonFieldsList);
 
         GraphQLObjectType stopPlaceObjectType = stopPlaceObjectTypeCreator.create(stopPlaceInterface, stopPlaceInterfaceFields, commonFieldsList, quayObjectType);
@@ -628,6 +661,9 @@ public class StopPlaceRegisterGraphQLSchema {
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_PARENT_STOPPLACE, IMPORTED_ID, getOriginalIdsFetcher());
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_QUAY, IMPORTED_ID, getOriginalIdsFetcher());
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_STOPPLACE, ID, getNetexIdFetcher());
+
+        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_STOPPLACE, PERMISSIONS, entityPermissionsFetcher);
+        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_PARENT_STOPPLACE, PERMISSIONS, entityPermissionsFetcher);
 
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_STOPPLACE, TARIFF_ZONES, stopPlaceTariffZoneFetcher);
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_PARENT_STOPPLACE, TARIFF_ZONES, stopPlaceTariffZoneFetcher);
