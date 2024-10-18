@@ -159,6 +159,7 @@ public class TiamatAuthorizationServiceTest extends TiamatIntegrationTest {
     @Test
     public void authorizedGetAllowedStopPlaceTypesTest() {
         final List<RoleAssignment> roleAssignments = roleAssignmentsForRailAndRailReplacementMocked(ROLE_EDIT_STOPS);
+        mockedRoleAssignmentExtractor.setNextReturnedRoleAssignment(roleAssignments);
 
         StopPlace stopPlace = new StopPlace();
         stopPlace.setStopPlaceType(StopTypeEnumeration.BUS_STATION);
