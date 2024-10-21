@@ -23,8 +23,17 @@ jobs:
         with:
           java-version: 21
           distribution: temurin
-          cache: 'maven'
-      - run: mvn verify -s .github/workflows/settings.xml
+      - name: Cache Maven dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+            ${{ runner.os }}-maven-
+
+      - name: Run maven build
+        run: mvn verify -s .github/workflows/settings.xml
       - uses: actions/upload-artifact@v4.4.0
         with:
           path: target/*.jar
