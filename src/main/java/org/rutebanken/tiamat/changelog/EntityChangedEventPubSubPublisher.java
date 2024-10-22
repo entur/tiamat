@@ -15,7 +15,7 @@
 
 package org.rutebanken.tiamat.changelog;
 
-import org.rutebanken.tiamat.config.GooglePubSubConfig;
+import com.google.cloud.spring.pubsub.core.PubSubTemplate;
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,7 +29,10 @@ import org.springframework.transaction.annotation.Transactional;
 public class EntityChangedEventPubSubPublisher extends EntityChangedEventPublisher implements EntityChangedListener {
 
     @Autowired
-    private GooglePubSubConfig.PubsubOutboundGateway pubsubOutboundGateway;
+    private PubSubTemplate pubSubTemplate;
+
+    @Value("${changelog.topic.name:ror.tiamat.changelog}")
+    private String pubSubTopic;
 
     @Value("${changelog.gcp.publish.enabled:true}")
     private boolean pubSubPublish;
@@ -37,7 +40,7 @@ public class EntityChangedEventPubSubPublisher extends EntityChangedEventPublish
     @Override
     public void onChange(EntityInVersionStructure entity) {
         if (pubSubPublish && isLoggedEntity(entity)) {
-            pubsubOutboundGateway.sendToPubsub(toEntityChangedEvent(entity, false).toString());
+            pubSubTemplate.publish(pubSubTopic,toEntityChangedEvent(entity, false).toString());
         }
 
     }
@@ -46,7 +49,7 @@ public class EntityChangedEventPubSubPublisher extends EntityChangedEventPublish
     public void onDelete(EntityInVersionStructure entity) {
 
         if (pubSubPublish && isLoggedEntity(entity)) {
-            pubsubOutboundGateway.sendToPubsub(toEntityChangedEvent(entity, true).toString());
+            pubSubTemplate.publish(pubSubTopic,toEntityChangedEvent(entity, true).toString());
         }
     }
 }
