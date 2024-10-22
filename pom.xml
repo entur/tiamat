@@ -76,12 +76,6 @@
             <artifactId>spring-cloud-gcp-starter-pubsub</artifactId>
             <version>${spring-cloud-gcp.version}</version>
         </dependency>
-
-        <dependency>
-            <groupId>org.springframework.integration</groupId>
-            <artifactId>spring-integration-core</artifactId>
-        </dependency>
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
