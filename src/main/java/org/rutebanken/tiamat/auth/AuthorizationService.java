@@ -37,13 +37,11 @@ public interface AuthorizationService {
 
     /**
      * Verify that the current user has right to delete the given entity.
-     * @throws AccessDeniedException if not.
      */
     boolean canDeleteEntity(EntityStructure entity);
 
     /**
      * Verify that the current user has right to edit the given entity.
-     * @throws AccessDeniedException if not.
      */
     boolean canEditEntity(EntityStructure entity);
 
