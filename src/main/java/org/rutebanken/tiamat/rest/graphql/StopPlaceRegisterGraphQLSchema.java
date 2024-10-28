@@ -448,7 +448,7 @@ public class StopPlaceRegisterGraphQLSchema {
         });
 
         GraphQLObjectType purposeOfGroupingType =purposeOfGroupingTypeCreator.create();
-        GraphQLObjectType groupOfStopPlacesObjectType = groupOfStopPlaceObjectTypeCreator.create(stopPlaceInterface, purposeOfGroupingType);
+        GraphQLObjectType groupOfStopPlacesObjectType = groupOfStopPlaceObjectTypeCreator.create(stopPlaceInterface, purposeOfGroupingType, entityPermissionObjectType);
         GraphQLObjectType groupOfTariffZonesObjectType = groupOfTariffZonesObjectTypeCreator.create();
 
         GraphQLObjectType addressablePlaceObjectType = createAddressablePlaceObjectType(commonFieldsList);
@@ -664,6 +664,7 @@ public class StopPlaceRegisterGraphQLSchema {
 
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_STOPPLACE, PERMISSIONS, entityPermissionsFetcher);
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_PARENT_STOPPLACE, PERMISSIONS, entityPermissionsFetcher);
+        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_GROUP_OF_STOPPLACES, PERMISSIONS, entityPermissionsFetcher);
 
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_STOPPLACE, TARIFF_ZONES, stopPlaceTariffZoneFetcher);
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_PARENT_STOPPLACE, TARIFF_ZONES, stopPlaceTariffZoneFetcher);
