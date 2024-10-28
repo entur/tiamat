@@ -56,8 +56,8 @@ public class StopPlaceInterfaceCreator {
 
     public List<GraphQLFieldDefinition> createCommonInterfaceFields(GraphQLObjectType tariffZoneObjectType,
                                                                     GraphQLObjectType fareZoneObjectType,
-                                                              GraphQLObjectType topographicPlaceObjectType,
-                                                              GraphQLObjectType validBetweenObjectType,
+                                                                    GraphQLObjectType topographicPlaceObjectType,
+                                                                    GraphQLObjectType validBetweenObjectType,
                                                                     GraphQLObjectType entityPermissionObjectType) {
         List<GraphQLFieldDefinition> stopPlaceInterfaceFields = new ArrayList<>();
         stopPlaceInterfaceFields.add(newFieldDefinition()

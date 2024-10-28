@@ -4,6 +4,7 @@ import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import org.rutebanken.tiamat.auth.AuthorizationService;
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
+import org.rutebanken.tiamat.model.GroupOfStopPlaces;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.authorization.EntityPermissions;
 import org.rutebanken.tiamat.netex.id.TypeFromIdResolver;
@@ -30,7 +31,15 @@ public class EntityPermissionsFetcher implements DataFetcher {
 
     @Override
     public Object get(DataFetchingEnvironment environment) throws Exception {
-        final String netexId = ((StopPlace) environment.getSource()).getNetexId();
+        String netexId = null;
+        if(environment.getSource() instanceof StopPlace stopPlace) {
+            netexId= stopPlace.getNetexId();
+        } else if (environment.getSource() instanceof GroupOfStopPlaces groupOfStopPlaces) {
+            netexId = groupOfStopPlaces.getNetexId();
+        } else {
+            throw new IllegalArgumentException("Cannot find entity with ID: " + netexId);
+        }
+
 
         Class clazz = typeFromIdResolver.resolveClassFromId(netexId);
         EntityInVersionStructure entityInVersionStructure = genericEntityInVersionRepository.findFirstByNetexIdOrderByVersionDesc(netexId, clazz);
