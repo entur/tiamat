@@ -7,6 +7,8 @@ import org.rutebanken.helper.organisation.RoleAssignment;
 import org.rutebanken.helper.organisation.RoleAssignmentExtractor;
 import org.rutebanken.tiamat.auth.check.TopographicPlaceChecker;
 import org.rutebanken.tiamat.model.EntityStructure;
+import org.rutebanken.tiamat.model.GroupOfStopPlaces;
+import org.rutebanken.tiamat.service.groupofstopplaces.GroupOfStopPlacesMembersResolver;
 import org.springframework.security.access.AccessDeniedException;
 
 import java.util.Collection;
@@ -24,13 +26,15 @@ public class DefaultAuthorizationService implements AuthorizationService {
     private static final String STOP_PLACE_TYPE = "StopPlaceType";
     private static final String SUBMODE = "Submode";
     private final TopographicPlaceChecker topographicPlaceChecker;
+    private final GroupOfStopPlacesMembersResolver groupOfStopPlacesMembersResolver;
 
     public DefaultAuthorizationService(DataScopedAuthorizationService dataScopedAuthorizationService,
                                        RoleAssignmentExtractor roleAssignmentExtractor,
-                                       TopographicPlaceChecker topographicPlaceChecker) {
+                                       TopographicPlaceChecker topographicPlaceChecker, GroupOfStopPlacesMembersResolver groupOfStopPlacesMembersResolver) {
         this.dataScopedAuthorizationService = dataScopedAuthorizationService;
         this.roleAssignmentExtractor = roleAssignmentExtractor;
         this.topographicPlaceChecker = topographicPlaceChecker;
+        this.groupOfStopPlacesMembersResolver = groupOfStopPlacesMembersResolver;
     }
 
     @Override
@@ -79,7 +83,11 @@ public class DefaultAuthorizationService implements AuthorizationService {
 
     @Override
     public boolean canDeleteEntity(EntityStructure entity) {
-        return dataScopedAuthorizationService.isAuthorized(ROLE_DELETE_STOPS, List.of(entity));
+        if(entity instanceof GroupOfStopPlaces groupOfStopPlaces) {
+            return dataScopedAuthorizationService.isAuthorized(ROLE_DELETE_STOPS, groupOfStopPlacesMembersResolver.resolve(groupOfStopPlaces));
+        } else {
+            return dataScopedAuthorizationService.isAuthorized(ROLE_DELETE_STOPS, List.of(entity));
+        }
     }
 
     @Override
