@@ -17,8 +17,6 @@ import java.util.Set;
 @Component
 public class EntityPermissionsFetcher implements DataFetcher {
 
-    private static final String STOP_PLACE_TYPE = "StopPlaceType";
-    private static final String SUBMODE = "Submode";
     @Autowired
     private GenericEntityInVersionRepository genericEntityInVersionRepository;
 
