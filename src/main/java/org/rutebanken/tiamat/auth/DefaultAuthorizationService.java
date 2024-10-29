@@ -92,7 +92,11 @@ public class DefaultAuthorizationService implements AuthorizationService {
 
     @Override
     public boolean canEditEntity(EntityStructure entity) {
-        return dataScopedAuthorizationService.isAuthorized(ROLE_EDIT_STOPS, List.of(entity));
+        if(entity instanceof GroupOfStopPlaces groupOfStopPlaces) {
+            return dataScopedAuthorizationService.isAuthorized(ROLE_EDIT_STOPS, groupOfStopPlacesMembersResolver.resolve(groupOfStopPlaces));
+        } else {
+            return dataScopedAuthorizationService.isAuthorized(ROLE_EDIT_STOPS, List.of(entity));
+        }
     }
 
     @Override
