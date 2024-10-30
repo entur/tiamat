@@ -204,7 +204,7 @@ public class InfoSpotsUpdater implements DataFetcher {
                 Set<InfoSpotPosterRef> posterRefs = target.getPosters();
 
                 Set<InfoSpotPoster> existingPosters = posterRefs.stream()
-                        .map(p -> infoSpotPosterRepository.findFirstByNetexIdAndVersion(p.getRef(), Long.parseLong(p.getVersion())))
+                        .map(p -> infoSpotPosterRepository.findFirstByNetexIdOrderByVersionDesc(p.getRef()))
                         .collect(Collectors.toSet());
 
                 Set<InfoSpotPosterRef> updatedPosters = posters.stream()
@@ -213,6 +213,7 @@ public class InfoSpotsUpdater implements DataFetcher {
                         .collect(Collectors.toSet());
 
                 target.setPosters(updatedPosters);
+                isUpdated = true;
             }
             else {
                 target.setPosters(Collections.emptySet());
@@ -229,25 +230,34 @@ public class InfoSpotsUpdater implements DataFetcher {
 
     private InfoSpotPoster createPoster(Map input, Set<InfoSpotPoster> existingPosters) {
         if (input.containsKey(LABEL)) {
+            boolean isUpdated = false;
             String label = (String) input.get(LABEL);
             var poster = existingPosters.stream()
                     .filter(p -> p.getLabel().equals(label))
                     .findFirst()
+                    .map(isp ->
+                        versionCreator.createCopy(isp, InfoSpotPoster.class)
+                    )
                     .orElseGet(() -> {
                         var isp = new InfoSpotPoster();
                         isp.setLabel(label);
                         return isp;
                     });
 
-            if (input.containsKey(LINES)) {
+            if (input.containsKey(LINES) && !Objects.equals(poster.getLines(), input.get(LINES))) {
                 poster.setLines((String) input.get(LINES));
+                isUpdated = true;
             }
 
-            if (input.containsKey(POSTER_SIZE)) {
+            if (input.containsKey(POSTER_SIZE) && !Objects.equals(poster.getPosterSize(), input.get(POSTER_SIZE))) {
                 poster.setPosterSize((PosterSizeEnumeration) input.get(POSTER_SIZE));
+                isUpdated = true;
             }
 
-            return infoSpotPosterVersionedSaverService.saveNewVersion(poster);
+            if (isUpdated) {
+                return infoSpotPosterVersionedSaverService.saveNewVersion(poster);
+            }
+            return poster;
         }
         else {
             throw new IllegalArgumentException("Expected label for poster, none provided");

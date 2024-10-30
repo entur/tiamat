@@ -547,6 +547,51 @@ public class GraphQLResourceInfoSpotIntegrationTest extends AbstractGraphQLResou
                 .body("floor", equalTo(infoSpot.getFloor()));
     }
 
+    @Test
+    public void updatePosterWithoutChangingReferences() {
+        insertInfoSpots();
+
+        String newLines = "789";
+
+        String graphQlJsonMutation = """
+                mutation {
+                    infoSpot: mutateInfoSpots(
+                        infoSpot: {
+                            id: "%s"
+                            poster: [
+                                {
+                                    label: "%s",
+                                    posterSize: %s,
+                                    lines: "%s"
+                                }
+                            ]
+                        }
+                    ) {
+                        id
+                        poster {
+                            label
+                            posterSize
+                            lines
+                        }
+                    }
+                }
+                """.formatted(
+                updatedInfoSpot.getNetexId(),
+                updatedPoster.getLabel(),
+                updatedPoster.getPosterSize().value(),
+                newLines
+        );
+
+        executeGraphqQLQueryOnly(graphQlJsonMutation)
+                .rootPath("data.infoSpot[0]")
+                .body("id", equalTo(updatedInfoSpot.getNetexId()))
+                .body("poster", hasSize(1))
+                .appendRootPath("poster[0]")
+                .body("label", equalTo(updatedPoster.getLabel()))
+                .body("posterSize", equalTo(updatedPoster.getPosterSize().value()))
+                .body("lines", equalTo(newLines));
+    }
+
     private void insertInfoSpots() {
         // Insert base info spot
         String oldLocation1 = "NSR:Shelter:2";
