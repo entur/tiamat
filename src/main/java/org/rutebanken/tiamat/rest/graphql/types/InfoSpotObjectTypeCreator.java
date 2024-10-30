@@ -58,6 +58,10 @@ public class InfoSpotObjectTypeCreator {
     public static GraphQLObjectType posterObjectType =
             newObject()
                     .name(OUTPUT_TYPE_POSTER)
+                    .field(netexIdFieldDefinition)
+                    .field(newFieldDefinition()
+                            .name(VERSION)
+                            .type(GraphQLString))
                     .field(newFieldDefinition()
                             .name(LABEL)
                             .type(GraphQLString))
