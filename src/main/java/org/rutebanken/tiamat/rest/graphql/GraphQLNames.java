@@ -159,8 +159,8 @@ public class GraphQLNames {
     public static final String STOP_PLACE_GROUPS = "groups";
 
     public static final String PERMISSIONS = "permissions";
-    public static final String ENTITY_PERMISSIONS= "entityPermissions";
-    public static final String USER_PERMISSIONS= "userPermissions";
+    public static final String ENTITY_PERMISSIONS= "EntityPermissions";
+    public static final String USER_PERMISSIONS= "UserPermissions";
     public static final String USER_CONTEXT= "userContext";
     public static final String LOCATION_PERMISSIONS= "locationPermissions";
 
