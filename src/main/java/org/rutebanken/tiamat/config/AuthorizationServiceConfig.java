@@ -40,8 +40,16 @@ public class AuthorizationServiceConfig {
 
 
     @Bean
-    public AuthorizationService authorizationService(DataScopedAuthorizationService dataScopedAuthorizationService, RoleAssignmentExtractor roleAssignmentExtractor, TopographicPlaceChecker topographicPlaceChecker, GroupOfStopPlacesMembersResolver groupOfStopPlacesMembersResolver) {
-        return new DefaultAuthorizationService(dataScopedAuthorizationService, roleAssignmentExtractor, topographicPlaceChecker, groupOfStopPlacesMembersResolver);
+    public AuthorizationService authorizationService(DataScopedAuthorizationService dataScopedAuthorizationService,
+                                                     @Value("${authorization.enabled:true}") boolean authorizationEnabled,
+                                                     RoleAssignmentExtractor roleAssignmentExtractor,
+                                                     TopographicPlaceChecker topographicPlaceChecker,
+                                                     GroupOfStopPlacesMembersResolver groupOfStopPlacesMembersResolver) {
+        return new DefaultAuthorizationService(dataScopedAuthorizationService,
+                authorizationEnabled,
+                roleAssignmentExtractor,
+                topographicPlaceChecker,
+                groupOfStopPlacesMembersResolver);
     }
 
     @Bean

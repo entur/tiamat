@@ -15,7 +15,7 @@ public interface AuthorizationService {
     /**
      * Verify that the current user have right to edit any entity?
      */
-    void verifyCanEditAllEntities();
+    boolean verifyCanEditAllEntities();
 
 
     /**
@@ -65,5 +65,5 @@ public interface AuthorizationService {
     Set<String> getBannedSubmodes(Object entity);
 
 
-
+    boolean isGuest();
 }
