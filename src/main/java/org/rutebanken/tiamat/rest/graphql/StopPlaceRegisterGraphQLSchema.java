@@ -395,7 +395,7 @@ public class StopPlaceRegisterGraphQLSchema {
 
         GraphQLObjectType validBetweenObjectType = createValidBetweenObjectType();
         GraphQLObjectType userPermissionsObjectType = newObject()
-                .name(USER_PERMISSIONS)
+                .name(OUTPUT_TYPE_USER_PERMISSIONS)
                 .field(newFieldDefinition()
                         .name("isGuest")
                         .type(GraphQLBoolean)
@@ -407,7 +407,7 @@ public class StopPlaceRegisterGraphQLSchema {
                 .build();
 
         GraphQLObjectType entityPermissionObjectType = newObject()
-                .name(ENTITY_PERMISSIONS)
+                .name(OUTPUT_TYPE_ENTITY_PERMISSIONS)
                 .field(newFieldDefinition()
                         .name("canEdit")
                         .type(GraphQLBoolean)
