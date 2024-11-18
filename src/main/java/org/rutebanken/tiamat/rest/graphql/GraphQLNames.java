@@ -159,7 +159,11 @@ public class GraphQLNames {
     public static final String STOP_PLACE_GROUPS = "groups";
 
     public static final String PERMISSIONS = "permissions";
-    public static final String ENTITY_PERMISSIONS= "EntityPermissions";
+    public static final String ENTITY_PERMISSIONS= "entityPermissions";
+    public static final String USER_PERMISSIONS= "userPermissions";
+    public static final String USER_CONTEXT= "userContext";
+    public static final String LOCATION_PERMISSIONS= "locationPermissions";
+
 
     public static final String GROUP_OF_TARIFF_ZONES = "groupOfTariffZones";
     public static final String GROUP_OF_TARIFF_ZONES_MEMBERS = "members";
@@ -346,6 +350,9 @@ public class GraphQLNames {
     public static final String HAS_PARKING = "hasParking";
     public static final String ONLY_MONOMODAL_STOPPLACES = "onlyMonomodalStopPlaces";
     public static final String ONLY_MONOMODAL_STOPPLACES_DESCRIPTION = "Set to true to only return mono modal stop places.";
+
+    public static final String LONGITUDE = "longitude";
+    public static final String LATITUDE = "latitude";
 
     public static final String LONGITUDE_MIN = "lonMin";
     public static final String LATITUDE_MIN = "latMin";

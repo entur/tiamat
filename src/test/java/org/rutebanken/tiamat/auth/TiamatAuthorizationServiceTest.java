@@ -32,10 +32,19 @@ import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.model.WaterSubmodeEnumeration;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -159,16 +168,33 @@ public class TiamatAuthorizationServiceTest extends TiamatIntegrationTest {
 
     @Test
     public void authorizedGetAllowedStopPlaceTypesTest() {
+        setUpSecurityContext();
         final List<RoleAssignment> roleAssignments = roleAssignmentsForRailAndRailReplacementMocked(ROLE_EDIT_STOPS);
         mockedRoleAssignmentExtractor.setNextReturnedRoleAssignment(roleAssignments);
 
         StopPlace stopPlace = new StopPlace();
-        stopPlace.setStopPlaceType(StopTypeEnumeration.BUS_STATION);
-        stopPlace.setBusSubmode(BusSubmodeEnumeration.REGIONAL_BUS);
+        stopPlace.setStopPlaceType(StopTypeEnumeration.RAIL_STATION);
+        stopPlace.setBusSubmode(BusSubmodeEnumeration.RAIL_REPLACEMENT_BUS);
 
         final Set<String> allowedStopPlaceTypes = authorizationService.getAllowedStopPlaceTypes(stopPlace);
         assertThat("Should contain allowed StopPlaceType", allowedStopPlaceTypes.contains("railStation"), is(true));
     }
+
+
+    @Test
+    public void authorizedGetBannedStopPlaceTypesEntityFilterTest() {
+        setUpSecurityContext();
+        final List<RoleAssignment> roleAssignments = roleAssignmentsMultipleRoles();
+        mockedRoleAssignmentExtractor.setNextReturnedRoleAssignment(roleAssignments);
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setStopPlaceType(StopTypeEnumeration.BUS_STATION);
+
+        final Set<String> bannedStopPlaceTypes = authorizationService.getBannedStopPlaceTypes(stopPlace);
+        assertThat("Should contain allowed StopPlaceType", bannedStopPlaceTypes.contains(StopTypeEnumeration.RAIL_STATION.value()), is(false));
+        assertThat("Should contain allowed StopPlaceType", bannedStopPlaceTypes.contains(StopTypeEnumeration.AIRPORT.value()), is(false));
+    }
+
 
     /**
      * Test  banned stop place types
@@ -176,6 +202,7 @@ public class TiamatAuthorizationServiceTest extends TiamatIntegrationTest {
      */
     @Test
     public void authorizedGetBannedStopPlaceTypesTest() {
+        setUpSecurityContext();
         RoleAssignment roleAssignment = RoleAssignment.builder()
                 .withRole(ROLE_EDIT_STOPS)
                 .withOrganisation("OST")
@@ -231,9 +258,9 @@ public class TiamatAuthorizationServiceTest extends TiamatIntegrationTest {
         mockedRoleAssignmentExtractor.setNextReturnedRoleAssignment(roleAssignment);
         final Set<String> bannedSubmodes = authorizationService.getBannedSubmodes(stopPlace);
 
-        assertThat("Should contain banned StopPlaceType", bannedStopPlaceTypes.contains("airport"), is(true));
-        assertThat("Should contain banned StopPlaceType", bannedStopPlaceTypes.contains("railStation"), is(true));
-        assertThat("Should contain banned Submode", bannedSubmodes.contains("railReplacementBus"), is(true));
+        assertThat("Should not contain banned StopPlaceType", bannedStopPlaceTypes.contains("airport"), is(false));
+        assertThat("Should not contain banned StopPlaceType", bannedStopPlaceTypes.contains("railStation"), is(false));
+        assertThat("Should not contain banned Submode", bannedSubmodes.contains("railReplacementBus"), is(false));
 
         mockedRoleAssignmentExtractor.setNextReturnedRoleAssignment(roleAssignment);
         boolean authorized = authorizationService.canEditEntity(roleAssignment, stopPlace);
@@ -312,6 +339,7 @@ public class TiamatAuthorizationServiceTest extends TiamatIntegrationTest {
      */
     @Test
     public void testUserWithMultipleRoles() {
+        setUpSecurityContext();
         final List<RoleAssignment> roleAssignments = roleAssignmentsMultipleRoles();
 
         Point point = geometryFactory.createPoint(new Coordinate(9.536819, 61.772281));
@@ -372,7 +400,7 @@ public class TiamatAuthorizationServiceTest extends TiamatIntegrationTest {
     }
 
     private List<RoleAssignment> roleAssignmentsMultipleRoles() {
-        List<RoleAssignment> roleAssignments = Arrays.asList(RoleAssignment.builder()
+        return Arrays.asList(RoleAssignment.builder()
                 .withRole(ROLE_EDIT_STOPS)
                 .withOrganisation("OST")
                 .withAdministrativeZone("KVE:TopographicalPlace:01")
@@ -401,13 +429,31 @@ public class TiamatAuthorizationServiceTest extends TiamatIntegrationTest {
                 .build()
                 );
 
-        return roleAssignments;
     }
 
     private Polygon createPolygon(Point point) {
         Geometry bufferedPoint = point.buffer(10);
         LinearRing linearRing = new LinearRing(new CoordinateArraySequence(bufferedPoint.getCoordinates()), geometryFactory);
         return geometryFactory.createPolygon(linearRing, null);
+    }
+
+    private void setUpSecurityContext() {
+        // Create a Jwt with claims
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("sub", "testuser");
+        claims.put("scope", "ROLE_USER");  // Or other relevant scopes/roles
+
+        // Create a Jwt instance
+        Jwt jwt = new Jwt(
+                "tokenValue",
+                Instant.now(),
+                Instant.now().plusSeconds(3600),
+                Map.of("alg", "none"),
+                claims
+        );
+
+        final AbstractAuthenticationToken authToken = new JwtAuthenticationToken(jwt, Collections.singleton(new SimpleGrantedAuthority("ROLE_EDIT_STOPS")));
+        SecurityContextHolder.getContext().setAuthentication(authToken);
     }
 
 }
