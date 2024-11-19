@@ -6,10 +6,8 @@ import org.rutebanken.helper.organisation.DataScopedAuthorizationService;
 import org.rutebanken.helper.organisation.RoleAssignment;
 import org.rutebanken.helper.organisation.RoleAssignmentExtractor;
 import org.rutebanken.tiamat.auth.check.TopographicPlaceChecker;
-import org.rutebanken.tiamat.model.BusSubmodeEnumeration;
 import org.rutebanken.tiamat.model.EntityStructure;
 import org.rutebanken.tiamat.model.GroupOfStopPlaces;
-import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.service.groupofstopplaces.GroupOfStopPlacesMembersResolver;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -154,28 +152,9 @@ public class DefaultAuthorizationService implements AuthorizationService {
                 .flatMap(List::stream)
                 .filter(types -> isAllowed ? !types.startsWith("!") : types.startsWith("!"))
                 .map(types -> isAllowed ? types : types.substring(1))
-                .filter(types -> filterByType(type,types, entity))
                 .collect(Collectors.toSet());
     }
 
-    private boolean filterByType(String stopTypeSubmode, String types, Object entity) {
-        if (types.equals(ENTITY_CLASSIFIER_ALL_ATTRIBUTES)) {
-            return true;
-        }
-
-        if(stopTypeSubmode.equals(STOP_PLACE_TYPE)) {
-           return  ((StopPlace)entity).getStopPlaceType().value().equals(types);
-
-        } else if(stopTypeSubmode.equals(SUBMODE)) {
-
-            final BusSubmodeEnumeration busSubmode = ((StopPlace) entity).getBusSubmode();
-            if(busSubmode == null) {
-                return false;
-            }
-            return busSubmode.value().equals(types);
-        }
-        return false;
-    }
 
     private boolean hasNoAuthentications() {
         if(!authorizationEnabled) {
