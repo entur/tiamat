@@ -159,6 +159,10 @@ public class DefaultAuthorizationService implements AuthorizationService {
     }
 
     private boolean filterByType(String stopTypeSubmode, String types, Object entity) {
+        if (types.equals(ENTITY_CLASSIFIER_ALL_ATTRIBUTES)) {
+            return true;
+        }
+
         if(stopTypeSubmode.equals(STOP_PLACE_TYPE)) {
            return  ((StopPlace)entity).getStopPlaceType().value().equals(types);
 
