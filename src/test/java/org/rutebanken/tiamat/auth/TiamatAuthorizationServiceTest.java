@@ -258,9 +258,9 @@ public class TiamatAuthorizationServiceTest extends TiamatIntegrationTest {
         mockedRoleAssignmentExtractor.setNextReturnedRoleAssignment(roleAssignment);
         final Set<String> bannedSubmodes = authorizationService.getBannedSubmodes(stopPlace);
 
-        assertThat("Should not contain banned StopPlaceType", bannedStopPlaceTypes.contains("airport"), is(false));
-        assertThat("Should not contain banned StopPlaceType", bannedStopPlaceTypes.contains("railStation"), is(false));
-        assertThat("Should not contain banned Submode", bannedSubmodes.contains("railReplacementBus"), is(false));
+        assertThat("Should contain banned StopPlaceType", bannedStopPlaceTypes.contains("airport"), is(true));
+        assertThat("Should contain banned StopPlaceType", bannedStopPlaceTypes.contains("railStation"), is(true));
+        assertThat("Should contain banned Submode", bannedSubmodes.contains("railReplacementBus"), is(true));
 
         mockedRoleAssignmentExtractor.setNextReturnedRoleAssignment(roleAssignment);
         boolean authorized = authorizationService.canEditEntity(roleAssignment, stopPlace);
