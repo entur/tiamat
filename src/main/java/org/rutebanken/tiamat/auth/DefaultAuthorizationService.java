@@ -145,14 +145,21 @@ public class DefaultAuthorizationService implements AuthorizationService {
             return Set.of();
         }
         return roleAssignmentExtractor.getRoleAssignmentsForUser().stream()
+                .filter(roleAssignment -> filterByRole(roleAssignment,entity))
                 .filter(roleAssignment -> roleAssignment.getEntityClassifications() != null)
                 .filter(roleAssignment -> topographicPlaceChecker.entityMatchesAdministrativeZone(roleAssignment, entity))
                 .filter(roleAssignment -> roleAssignment.getEntityClassifications().get(type) != null)
                 .map(roleAssignment -> roleAssignment.getEntityClassifications().get(type))
                 .flatMap(List::stream)
-                .filter(types -> isAllowed ? !types.startsWith("!") : types.startsWith("!"))
+                .filter(types -> isAllowed != types.startsWith("!"))
                 .map(types -> isAllowed ? types : types.substring(1))
                 .collect(Collectors.toSet());
+    }
+
+    private boolean filterByRole(RoleAssignment roleAssignment,Object entity) {
+        return dataScopedAuthorizationService.authorized(roleAssignment, entity, ROLE_EDIT_STOPS)
+                      || dataScopedAuthorizationService.authorized(roleAssignment, entity, ROLE_DELETE_STOPS);
+
     }
 
 
