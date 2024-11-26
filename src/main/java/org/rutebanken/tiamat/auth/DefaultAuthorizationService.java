@@ -119,6 +119,9 @@ public class DefaultAuthorizationService implements AuthorizationService {
 
     @Override
     public Set<String> getBannedStopPlaceTypes(Object entity) {
+        if(!dataScopedAuthorizationService.isAuthorized(ROLE_EDIT_STOPS, List.of(entity))) {
+            return Set.of(ENTITY_CLASSIFIER_ALL_ATTRIBUTES);
+        }
         return getStopTypesOrSubmode(STOP_PLACE_TYPE, false, entity);
     }
 
@@ -129,6 +132,9 @@ public class DefaultAuthorizationService implements AuthorizationService {
 
     @Override
     public Set<String> getBannedSubmodes(Object entity) {
+        if(!dataScopedAuthorizationService.isAuthorized(ROLE_EDIT_STOPS, List.of(entity))) {
+            return Set.of(ENTITY_CLASSIFIER_ALL_ATTRIBUTES);
+        }
         return getStopTypesOrSubmode(SUBMODE, false, entity);
     }
 
