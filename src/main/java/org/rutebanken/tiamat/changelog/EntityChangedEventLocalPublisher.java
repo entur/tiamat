@@ -25,7 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @Transactional
-@Profile("test")
+@Profile("local-changelog | test")
 public class EntityChangedEventLocalPublisher extends EntityChangedEventPublisher implements EntityChangedListener {
     public static final Logger logger = LoggerFactory.getLogger(EntityChangedEventLocalPublisher.class);
 

@@ -58,6 +58,87 @@ for more detail see https://www.testcontainers.org/supported_docker_environment/
 
 (default profiles are set in application.properties)
 
+## Running the service
+
+There are several options for running the service depending on what you need.
+
+ - [Run locally for development](#run-locally-for-development) is for people intending to maintain, modify and improve 
+   tiamat's source code
+ - [Run tiamat with Docker compose](#run-tiamat-with-docker-compose) if you just need to get the service running
+ - [Run with external properties file and PostgreSQL](#run-with-external-properties-file-and-postgresql) for low 
+   level debugging
+
+> **Note!** Each of these configurations use unique port numbers and such, be sure to read the provided documentation 
+> and configuration files for more details.
+
+## Run locally for development
+
+Local development is a combination of using Docker Compose based configuration for starting up the supporting 
+services and running Spring Boot with at least `local` profile enabled.
+
+When running,
+
+ - tiamat will be available at `http://localhost:37888`
+ - PostGIS will be available at `localhost:37432`
+
+### 1. Start Local Environment through Docker Compose
+
+Tiamat has [docker-compose.yml](./docker-compose.yml) which contains all necessary dependent services for running tiamat in
+various configurations. It is assumed this environment is always running when the service is being run locally
+(see below).
+
+> **Note!** This uses the compose version included with modern versions of Docker, not the separately installable
+> `docker-compose` command.
+
+All Docker Compose commands run in relation to the `docker-compose.yml` file located in the same directory in which the
+command is executed.
+
+```shell
+# run with defaults - use ^C to shutdown containers
+docker compose up
+# run with additional profiles, e.g. with LocalStack based AWS simulator
+docker compose --profile aws up
+# run in background
+docker compose up -d # or --detach
+# shutdown containers
+docker compose down
+# shutdown containers included in specific profile
+docker compose --profile aws down
+```
+
+See [Docker Compose reference](https://docs.docker.com/compose/reference/) for more details.
+
+### 2. Run the Service
+
+#### Available Profiles
+
+> **Note!** You must choose at least one of the options from each category below!
+
+> **Note!** `local` profile must always be included!
+
+##### Storage
+
+| profile           | description                                      |
+|:------------------|--------------------------------------------------|
+| `gcs-blobstore`   | GCP GCS implementation of tiamat's blob storage  |
+| `local-blobstore` | Use local directory as backing storage location. |
+
+##### Changelog
+
+| profile           | description                                                        |
+|:------------------|--------------------------------------------------------------------|
+| `local-changelog` | Simple local implementation which logs the sent events to `stdout` |
+| `activemq`        | JMS based ActiveMQ implementation.                                 |
+| `google-pubsub`   | GCP PubSub implementation for publishing tiamat entity changes.    |
+
+#### Run It!
+
+**IntelliJ**: Right-click on `TiamatApplication.java` and choose Run (or Cmd+Shift+F10). Open Run -> Edit 
+configurations, choose the correct configuration (Spring Boot -> App), and add a comma separated list of desired 
+profiles (e.g. `local,local-blobstore,activemq`) to Active profiles. Save the configuration.
+
+**Command line**: `mvn spring-boot:run`
+
 ## Run tiamat with Docker compose
 To run Tiamat with Docker compose, you need to have a docker-compose.yml file. In docker-compose folder you will find a compose.yml file.:
 
@@ -182,13 +263,6 @@ To start Tiamat with this configuration, specify **spring.config.location**:
 ### HikariCP
 Tiamat is using HikariCP. Most properties should be be possible to be specified in in application.properties, like `spring.datasource.initializationFailFast=false`. More information here. https://github.com/brettwooldridge/HikariCP/wiki/Configuration
 See also http://stackoverflow.com/a/26514779
-
-### Postgres
-
-#### Run postgres/gis for tiamat in docker for development
-```
-docker run -it -d -p 5435:5432 --name postgress-13 -e POSTGRES_USER=tiamat -e POSTGRES_PASSWORD="tiamat" -e POSTGRES_INITDB_ARGS="-d" postgis/postgis:13-master
-```
 
 ## ID Generation
 ### Background
