@@ -8,6 +8,7 @@ import org.rutebanken.helper.organisation.RoleAssignmentExtractor;
 import org.rutebanken.tiamat.auth.check.TopographicPlaceChecker;
 import org.rutebanken.tiamat.model.EntityStructure;
 import org.rutebanken.tiamat.model.GroupOfStopPlaces;
+import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.service.groupofstopplaces.GroupOfStopPlacesMembersResolver;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -89,27 +90,12 @@ public class DefaultAuthorizationService implements AuthorizationService {
 
     @Override
     public boolean canDeleteEntity(EntityStructure entity) {
-        if(hasNoAuthentications()) {
-            return false;
-        }
-        if(entity instanceof GroupOfStopPlaces groupOfStopPlaces) {
-            return dataScopedAuthorizationService.isAuthorized(ROLE_DELETE_STOPS, groupOfStopPlacesMembersResolver.resolve(groupOfStopPlaces));
-        } else {
-            return dataScopedAuthorizationService.isAuthorized(ROLE_DELETE_STOPS, List.of(entity));
-        }
+        return canEditDeleteEntity(entity, ROLE_DELETE_STOPS);
     }
 
     @Override
     public boolean canEditEntity(EntityStructure entity) {
-        if(hasNoAuthentications()) {
-            return false;
-        }
-
-        if(entity instanceof GroupOfStopPlaces groupOfStopPlaces) {
-            return dataScopedAuthorizationService.isAuthorized(ROLE_EDIT_STOPS, groupOfStopPlacesMembersResolver.resolve(groupOfStopPlaces));
-        } else {
-            return dataScopedAuthorizationService.isAuthorized(ROLE_EDIT_STOPS, List.of(entity));
-        }
+        return canEditDeleteEntity(entity, ROLE_EDIT_STOPS);
     }
 
     @Override
@@ -175,5 +161,19 @@ public class DefaultAuthorizationService implements AuthorizationService {
         }
         final Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         return !(auth instanceof JwtAuthenticationToken);
+    }
+
+    private boolean canEditDeleteEntity(EntityStructure entity, String role) {
+        if (hasNoAuthentications()) {
+            return false;
+        }
+
+        if (entity instanceof GroupOfStopPlaces groupOfStopPlaces) {
+            final List<StopPlace> gospMembers = groupOfStopPlacesMembersResolver.resolve(groupOfStopPlaces);
+            return gospMembers.stream()
+                    .allMatch(stopPlace -> dataScopedAuthorizationService.isAuthorized(role, List.of(stopPlace)));
+        } else {
+            return dataScopedAuthorizationService.isAuthorized(role, List.of(entity));
+        }
     }
 }
