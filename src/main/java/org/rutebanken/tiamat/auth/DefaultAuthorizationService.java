@@ -1,6 +1,7 @@
 package org.rutebanken.tiamat.auth;
 
 import org.apache.commons.lang3.StringUtils;
+import org.locationtech.jts.geom.Point;
 import org.rutebanken.helper.organisation.AuthorizationConstants;
 import org.rutebanken.helper.organisation.DataScopedAuthorizationService;
 import org.rutebanken.helper.organisation.RoleAssignment;
@@ -99,8 +100,21 @@ public class DefaultAuthorizationService implements AuthorizationService {
     }
 
     @Override
+    public boolean canEditEntity(Point point) {
+         return roleAssignmentExtractor.getRoleAssignmentsForUser().stream()
+                .filter(roleAssignment -> roleAssignment.getRole().equals(ROLE_EDIT_STOPS))
+                  .anyMatch(roleAssignment -> topographicPlaceChecker.pointMatchesAdministrativeZone(roleAssignment, point));
+
+    }
+
+    @Override
     public Set<String> getAllowedStopPlaceTypes(Object entity){
        return getStopTypesOrSubmode(STOP_PLACE_TYPE, true, entity);
+    }
+
+    @Override
+    public Set<String> getLocationAllowedStopPlaceTypes(boolean canEdit, Point point) {
+        return getLocationStopTypesOrSubmode(canEdit,STOP_PLACE_TYPE, true, point);
     }
 
     @Override
@@ -112,8 +126,18 @@ public class DefaultAuthorizationService implements AuthorizationService {
     }
 
     @Override
+    public Set<String> getLocationBannedStopPlaceTypes(boolean canEdit, Point point) {
+        return getLocationStopTypesOrSubmode(canEdit,STOP_PLACE_TYPE, false, point);
+    }
+
+    @Override
     public Set<String> getAllowedSubmodes(Object entity) {
         return  getStopTypesOrSubmode(SUBMODE, true, entity);
+    }
+
+    @Override
+    public Set<String> getLocationAllowedSubmodes(boolean canEdit, Point point) {
+        return getLocationStopTypesOrSubmode(canEdit,SUBMODE, true, point);
     }
 
     @Override
@@ -122,6 +146,11 @@ public class DefaultAuthorizationService implements AuthorizationService {
             return Set.of(ENTITY_CLASSIFIER_ALL_ATTRIBUTES);
         }
         return getStopTypesOrSubmode(SUBMODE, false, entity);
+    }
+
+    @Override
+    public Set<String> getLocationBannedSubmodes(boolean canEdit, Point point) {
+        return getLocationStopTypesOrSubmode(canEdit,SUBMODE, false, point);
     }
 
     @Override
@@ -140,6 +169,24 @@ public class DefaultAuthorizationService implements AuthorizationService {
                 .filter(roleAssignment -> filterByRole(roleAssignment,entity))
                 .filter(roleAssignment -> roleAssignment.getEntityClassifications() != null)
                 .filter(roleAssignment -> topographicPlaceChecker.entityMatchesAdministrativeZone(roleAssignment, entity))
+                .filter(roleAssignment -> roleAssignment.getEntityClassifications().get(type) != null)
+                .map(roleAssignment -> roleAssignment.getEntityClassifications().get(type))
+                .flatMap(List::stream)
+                .filter(types -> isAllowed != types.startsWith("!"))
+                .map(types -> isAllowed ? types : types.substring(1))
+                .collect(Collectors.toSet());
+    }
+
+    private Set<String> getLocationStopTypesOrSubmode(boolean canEdit, String type, boolean isAllowed, Point point) {
+        if (hasNoAuthentications()) {
+            return Set.of();
+        }
+        if (!canEdit && !isAllowed) {
+            return Set.of(ENTITY_CLASSIFIER_ALL_ATTRIBUTES);
+        }
+        return roleAssignmentExtractor.getRoleAssignmentsForUser().stream()
+                .filter(roleAssignment -> roleAssignment.getEntityClassifications() != null)
+                .filter(roleAssignment -> topographicPlaceChecker.entityMatchesAdministrativeZone(roleAssignment,point ))
                 .filter(roleAssignment -> roleAssignment.getEntityClassifications().get(type) != null)
                 .map(roleAssignment -> roleAssignment.getEntityClassifications().get(type))
                 .flatMap(List::stream)

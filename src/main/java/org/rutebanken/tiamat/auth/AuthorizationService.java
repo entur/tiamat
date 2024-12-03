@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.auth;
 
+import org.locationtech.jts.geom.Point;
 import org.rutebanken.helper.organisation.RoleAssignment;
 import org.rutebanken.tiamat.model.EntityStructure;
 import org.springframework.security.access.AccessDeniedException;
@@ -45,6 +46,8 @@ public interface AuthorizationService {
      */
     boolean canEditEntity(EntityStructure entity);
 
+    boolean canEditEntity(Point point);
+
     /**
      * Return the subset of the roles that the current user holds that apply to this entity.
      * */
@@ -58,11 +61,19 @@ public interface AuthorizationService {
 
     Set<String> getAllowedStopPlaceTypes(Object entity);
 
+    Set<String> getLocationAllowedStopPlaceTypes(boolean canEdit, Point point);
+
     Set<String> getBannedStopPlaceTypes(Object entity);
+
+    Set<String> getLocationBannedStopPlaceTypes(boolean canEdit,Point point);
 
     Set<String> getAllowedSubmodes(Object entity);
 
+    Set<String> getLocationAllowedSubmodes(boolean canEdit,Point point);
+
     Set<String> getBannedSubmodes(Object entity);
+
+    Set<String> getLocationBannedSubmodes(boolean canEdit,Point point);
 
 
     boolean isGuest();
