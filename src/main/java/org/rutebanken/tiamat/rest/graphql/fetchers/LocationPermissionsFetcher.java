@@ -7,13 +7,11 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 import org.rutebanken.tiamat.auth.AuthorizationService;
 import org.rutebanken.tiamat.model.authorization.EntityPermissions;
-import org.rutebanken.tiamat.netex.id.TypeFromIdResolver;
-import org.rutebanken.tiamat.repository.generic.GenericEntityInVersionRepository;
-import org.rutebanken.tiamat.service.TopographicPlaceLookupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.util.HashSet;
 import java.util.Set;
 
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.LATITUDE;
@@ -23,20 +21,10 @@ import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.LONGITUDE;
 public class LocationPermissionsFetcher implements DataFetcher {
 
     @Autowired
-    private GenericEntityInVersionRepository genericEntityInVersionRepository;
-
-    @Autowired
-    private TypeFromIdResolver typeFromIdResolver;
-
-
-    @Autowired
     private AuthorizationService authorizationService;
 
     @Autowired
     private GeometryFactory geometryFactory;
-
-    @Autowired
-    private TopographicPlaceLookupService topographicPlaceLookupService;
 
     @Override
     public Object get(DataFetchingEnvironment environment) throws Exception {
@@ -51,7 +39,30 @@ public class LocationPermissionsFetcher implements DataFetcher {
         final Set<String> locationAllowedSubmodes = authorizationService.getLocationAllowedSubmodes(canEditEntity, point);
         final Set<String> locationBannedSubmodes = authorizationService.getLocationBannedSubmodes(canEditEntity, point);
 
-        return new EntityPermissions(canEditEntity,false, locationAllowedStopPlaceTypes, locationBannedStopPlaceTypes, locationAllowedSubmodes, locationBannedSubmodes);
+
+        Set<String> allowedStopPlaceTypeCopy = new HashSet<>(locationAllowedStopPlaceTypes);
+        Set<String> bannedStopPlaceTypeCopy = new HashSet<>(locationBannedStopPlaceTypes);
+        Set<String> allowedSubmodeCopy = new HashSet<>(locationAllowedSubmodes);
+        Set<String> bannedSubmodeCopy = new HashSet<>(locationBannedSubmodes);
+
+        Set<String> duplicateStopPlaceTypes = new HashSet<>(locationAllowedStopPlaceTypes);
+        duplicateStopPlaceTypes.retainAll(locationBannedStopPlaceTypes);
+        Set<String> duplicateSubmodes = new HashSet<>(locationAllowedSubmodes);
+        duplicateSubmodes.retainAll(locationBannedSubmodes);
+
+        allowedStopPlaceTypeCopy.removeAll(duplicateStopPlaceTypes);
+        bannedStopPlaceTypeCopy.removeAll(duplicateStopPlaceTypes);
+        allowedSubmodeCopy.removeAll(duplicateSubmodes);
+        bannedSubmodeCopy.removeAll(duplicateSubmodes);
+        if(allowedStopPlaceTypeCopy.isEmpty()) {
+            allowedStopPlaceTypeCopy.add("*");
+
+        }
+        if(allowedSubmodeCopy.isEmpty()) {
+            allowedSubmodeCopy.add("*");
+        }
+
+        return new EntityPermissions(canEditEntity,false, allowedStopPlaceTypeCopy, bannedStopPlaceTypeCopy, allowedSubmodeCopy, bannedSubmodeCopy);
 
     }
 }
