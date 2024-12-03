@@ -38,6 +38,7 @@ import org.springframework.stereotype.Component;
 import static graphql.Scalars.GraphQLString;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLObjectType.newObject;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ALTERNATIVE_NAMES;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.DESCRIPTION;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.GROUP_OF_STOP_PLACES_MEMBERS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.NAME;
@@ -47,6 +48,7 @@ import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.SHORT_NAME;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.VALID_BETWEEN;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.VERSION;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.VERSION_COMMENT;
+import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.alternativeNameObjectType;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.embeddableMultilingualStringObjectType;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.geometryFieldDefinition;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.netexIdFieldDefinition;
@@ -69,6 +71,9 @@ public class GroupOfStopPlacesObjectTypeCreator {
                 .field(newFieldDefinition()
                         .name(DESCRIPTION)
                         .type(embeddableMultilingualStringObjectType))
+                .field(newFieldDefinition()
+                        .name(ALTERNATIVE_NAMES)
+                        .type(new GraphQLList(alternativeNameObjectType)))
                 .field(newFieldDefinition()
                         .name(VERSION)
                         .type(GraphQLString))
