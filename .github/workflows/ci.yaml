@@ -46,8 +46,18 @@ jobs:
           java-version: 21
           distribution: temurin
           cache: maven
+      - name: set variables
+        run: |
+          echo "GHA_DOCKER_PUSH_IMAGE_TAG=`date +%Y-%m-%dT%H-%M`" >> $GITHUB_ENV
 
       - name: Build container image with Jib, push to container repo
         run: |
-          image_date=`date +%Y-%m-%dT%H-%M`
-          mvn --batch-mode compile com.google.cloud.tools:jib-maven-plugin:build -Djib.to.tags=latest,$image_date
+          mvn --batch-mode compile com.google.cloud.tools:jib-maven-plugin:build -Djib.to.tags=latest,${{ env.GHA_DOCKER_PUSH_IMAGE_TAG }}
+
+      - name: Tag default branch with the container image tag ${{ env.GHA_DOCKER_PUSH_IMAGE_TAG }}
+        id: tag-version
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git tag --annotate "$GHA_DOCKER_PUSH_IMAGE_TAG" -m "chore(tag): $GHA_DOCKER_PUSH_IMAGE_TAG [skip ci]" --force
+          git push origin "$GHA_DOCKER_PUSH_IMAGE_TAG" --force
