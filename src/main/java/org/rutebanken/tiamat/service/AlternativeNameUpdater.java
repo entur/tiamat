@@ -17,8 +17,8 @@ package org.rutebanken.tiamat.service;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.rutebanken.tiamat.model.AlternativeName;
+import org.rutebanken.tiamat.model.EntityWithAlternativeNames;
 import org.rutebanken.tiamat.model.NameTypeEnumeration;
-import org.rutebanken.tiamat.model.SiteElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -41,7 +41,7 @@ public class AlternativeNameUpdater {
      * @param alternativeNames incoming alternative names
      * @return if alternative names were updated
      */
-    public boolean updateAlternativeNames(SiteElement entity, List<AlternativeName> alternativeNames) {
+    public boolean updateAlternativeNames(EntityWithAlternativeNames entity, List<AlternativeName> alternativeNames) {
         final AtomicInteger matchedExisting = new AtomicInteger();
 
         avoidDuplicateTranslationsPerLanguage(alternativeNames);
@@ -85,7 +85,7 @@ public class AlternativeNameUpdater {
                 });
     }
 
-    private Optional<AlternativeName> matchExisting(SiteElement entity, AlternativeName incomingAlternativeName) {
+    private Optional<AlternativeName> matchExisting(EntityWithAlternativeNames entity, AlternativeName incomingAlternativeName) {
         return entity.getAlternativeNames()
                 .stream()
                 .filter(existingAlternativeName -> existingAlternativeName.getName().equals(incomingAlternativeName.getName())

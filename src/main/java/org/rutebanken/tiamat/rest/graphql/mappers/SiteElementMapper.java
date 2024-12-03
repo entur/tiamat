@@ -45,12 +45,6 @@ public class SiteElementMapper {
     private static final Logger logger = LoggerFactory.getLogger(SiteElementMapper.class);
 
     @Autowired
-    private AlternativeNameMapper alternativeNameMapper;
-
-    @Autowired
-    private AlternativeNameUpdater alternativeNameUpdater;
-
-    @Autowired
     private AccessibilityLimitationMapper accessibilityLimitationMapper;
 
     @Autowired
@@ -65,17 +59,6 @@ public class SiteElementMapper {
     public boolean populate(Map input, SiteElement siteElement) {
 
         boolean isUpdated = false;
-
-        if (input.get(ALTERNATIVE_NAMES) != null) {
-            List alternativeNames = (List) input.get(ALTERNATIVE_NAMES);
-            List<AlternativeName> mappedAlternativeNames = alternativeNameMapper.mapAlternativeNames(alternativeNames);
-
-            if (alternativeNameUpdater.updateAlternativeNames(siteElement, mappedAlternativeNames)) {
-                isUpdated = true;
-            } else {
-                logger.info("AlternativeName not changed");
-            }
-        }
 
         if (input.get(GEOMETRY) != null) {
 

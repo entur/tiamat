@@ -15,9 +15,12 @@
 
 package org.rutebanken.tiamat.rest.graphql.mappers;
 
+import org.rutebanken.tiamat.model.AlternativeName;
+import org.rutebanken.tiamat.model.EntityWithAlternativeNames;
 import org.rutebanken.tiamat.model.GroupOfEntities_VersionStructure;
 import org.rutebanken.tiamat.model.SiteElement;
 import org.rutebanken.tiamat.model.Value;
+import org.rutebanken.tiamat.service.AlternativeNameUpdater;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +29,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Map;
 
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ALTERNATIVE_NAMES;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.DESCRIPTION;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.KEY;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.KEY_VALUES;
@@ -42,6 +46,12 @@ public class GroupOfEntitiesMapper {
 
     @Autowired
     private SiteElementMapper siteElementMapper;
+
+    @Autowired
+    private AlternativeNameMapper alternativeNameMapper;
+
+    @Autowired
+    private AlternativeNameUpdater alternativeNameUpdater;
 
     public boolean populate(Map input, GroupOfEntities_VersionStructure entity) {
         boolean isUpdated = false;
@@ -83,9 +93,21 @@ public class GroupOfEntitiesMapper {
             isUpdated = true;
         }
 
+        if (input.get(ALTERNATIVE_NAMES) != null && entity instanceof EntityWithAlternativeNames entityWithAlternativeNames) {
+            List alternativeNames = (List) input.get(ALTERNATIVE_NAMES);
+            List<AlternativeName> mappedAlternativeNames = alternativeNameMapper.mapAlternativeNames(alternativeNames);
+
+            if (alternativeNameUpdater.updateAlternativeNames(entityWithAlternativeNames, mappedAlternativeNames)) {
+                isUpdated = true;
+            } else {
+                logger.info("AlternativeName not changed");
+            }
+        }
+
         if(entity instanceof SiteElement siteElement) {
             isUpdated = isUpdated | siteElementMapper.populate(input, siteElement);
         }
+
         return isUpdated;
     }
 
