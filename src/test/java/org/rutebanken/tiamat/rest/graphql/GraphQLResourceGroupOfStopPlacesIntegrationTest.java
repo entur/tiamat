@@ -55,8 +55,9 @@ public class GraphQLResourceGroupOfStopPlacesIntegrationTest extends AbstractGra
         stopPlace2.setCentroid(geometryFactory.createPoint(new Coordinate(13, 61)));
         stopPlace2.setStopPlaceType(StopTypeEnumeration.TRAM_STATION);
         stopPlaceVersionedSaverService.saveNewVersion(stopPlace2);
-        
+
         var groupName = "Group name";
+        var groupSweName = "Gruppens namn";
         var versionComment = "VersionComment";
 
         Double lon =  Double.valueOf("10.111");
@@ -69,6 +70,10 @@ public class GraphQLResourceGroupOfStopPlacesIntegrationTest extends AbstractGra
                                     mutation {
                                     group: %s(GroupOfStopPlaces: {
                                         name: {value: "%s"},
+                                        alternativeNames: [{
+                                            name: { lang: "swe", value: "%s" },
+                                            nameType: translation
+                                        }],
                                         purposeOfGrouping: {ref: "%s"},
                                         versionComment: "%s",
                                         validBetween: {
@@ -108,11 +113,16 @@ public class GraphQLResourceGroupOfStopPlacesIntegrationTest extends AbstractGra
                                         stopPlaceType
                                       }
                                     }
+                                    alternativeNames {
+                                      name { lang, value }
+                                      nameType
+                                    }
                                   }
                                 }
                                 """.formatted(
                                                 MUTATE_GROUP_OF_STOP_PLACES,
                                                 groupName,
+                                                groupSweName,
                                                 purposeOfGrouping.getNetexId(),
                                                 versionComment,
                                                 startDate.toString(),
@@ -143,7 +153,10 @@ public class GraphQLResourceGroupOfStopPlacesIntegrationTest extends AbstractGra
                 .rootPath("data.group.members.find { it.id == '" + stopPlace1.getNetexId() + "'}")
                     .body("name", nullValue())
                     .body("stopPlaceType", equalTo(StopTypeEnumeration.BUS_STATION.value()))
-                    .body("version", equalTo(String.valueOf(stopPlace1.getVersion())));
+                    .body("version", equalTo(String.valueOf(stopPlace1.getVersion())))
+                .rootPath("data.group.alternativeNames.find { it.nameType == 'translation'}")
+                    .body("name.lang", equalTo("swe"))
+                    .body("name.value", equalTo(groupSweName));
     }
 
     @Test
