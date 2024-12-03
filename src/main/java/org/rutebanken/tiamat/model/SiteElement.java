@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @MappedSuperclass
-public abstract class SiteElement extends AddressablePlace {
+public abstract class SiteElement extends AddressablePlace implements EntityWithAlternativeNames {
 
     @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)

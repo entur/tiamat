@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.Set;
 
 @Entity
-public class GroupOfStopPlaces extends GroupOfEntities_VersionStructure {
+public class GroupOfStopPlaces extends GroupOfEntities_VersionStructure implements EntityWithAlternativeNames {
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<AlternativeName> alternativeNames = new ArrayList<>();
