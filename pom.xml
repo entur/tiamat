@@ -429,6 +429,9 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
                     <mainClass>org.rutebanken.tiamat.TiamatApplication</mainClass>
+                    <profiles>
+                        <profile>local,local-blobstore,local-changelog</profile>
+                    </profiles>
                 </configuration>
                 <executions>
                     <execution>

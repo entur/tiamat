@@ -45,13 +45,12 @@ Tiamat also includes a diff tool. This is used to compare and show the differenc
 
 ## Build
 
-`mvn clean install`
+```shell
+mvn clean install
+```
 
 You need the directory `/deployments/data` with rights for the user who
 performs the build.
-
-
-
 
 ## Integration tests
 Tiamat uses testcontainers to run integration tests against a real database.  To run Testcontainers-based tests, you need a Docker-API compatible container runtime
@@ -59,19 +58,102 @@ for more detail see https://www.testcontainers.org/supported_docker_environment/
 
 (default profiles are set in application.properties)
 
+## Running the service
+
+There are several options for running the service depending on what you need.
+
+ - [Run locally for development](#run-locally-for-development) is for people intending to maintain, modify and improve 
+   tiamat's source code
+ - [Run tiamat with Docker compose](#run-tiamat-with-docker-compose) if you just need to get the service running
+ - [Run with external properties file and PostgreSQL](#run-with-external-properties-file-and-postgresql) for low 
+   level debugging
+
+> **Note!** Each of these configurations use unique port numbers and such, be sure to read the provided documentation 
+> and configuration files for more details.
+
+## Run locally for development
+
+Local development is a combination of using Docker Compose based configuration for starting up the supporting 
+services and running Spring Boot with at least `local` profile enabled.
+
+When running,
+
+ - tiamat will be available at `http://localhost:37888`
+ - PostGIS will be available at `localhost:37432`
+
+### 1. Start Local Environment through Docker Compose
+
+Tiamat has [docker-compose.yml](./docker-compose.yml) which contains all necessary dependent services for running tiamat in
+various configurations. It is assumed this environment is always running when the service is being run locally
+(see below).
+
+> **Note!** This uses the compose version included with modern versions of Docker, not the separately installable
+> `docker-compose` command.
+
+All Docker Compose commands run in relation to the `docker-compose.yml` file located in the same directory in which the
+command is executed.
+
+```shell
+# run with defaults - use ^C to shutdown containers
+docker compose up
+# run with additional profiles, e.g. with LocalStack based AWS simulator
+docker compose --profile aws up
+# run in background
+docker compose up -d # or --detach
+# shutdown containers
+docker compose down
+# shutdown containers included in specific profile
+docker compose --profile aws down
+```
+
+See [Docker Compose reference](https://docs.docker.com/compose/reference/) for more details.
+
+### 2. Run the Service
+
+#### Available Profiles
+
+> **Note!** You must choose at least one of the options from each category below!
+
+> **Note!** `local` profile must always be included!
+
+##### Storage
+
+| profile           | description                                      |
+|:------------------|--------------------------------------------------|
+| `gcs-blobstore`   | GCP GCS implementation of tiamat's blob storage  |
+| `local-blobstore` | Use local directory as backing storage location. |
+
+##### Changelog
+
+| profile           | description                                                        |
+|:------------------|--------------------------------------------------------------------|
+| `local-changelog` | Simple local implementation which logs the sent events to `stdout` |
+| `activemq`        | JMS based ActiveMQ implementation.                                 |
+| `google-pubsub`   | GCP PubSub implementation for publishing tiamat entity changes.    |
+
+#### Run It!
+
+**IntelliJ**: Right-click on `TiamatApplication.java` and choose Run (or Cmd+Shift+F10). Open Run -> Edit 
+configurations, choose the correct configuration (Spring Boot -> App), and add a comma separated list of desired 
+profiles (e.g. `local,local-blobstore,activemq`) to Active profiles. Save the configuration.
+
+**Command line**: `mvn spring-boot:run`
+
 ## Run tiamat with Docker compose
 To run Tiamat with Docker compose, you need to have a docker-compose.yml file. In docker-compose folder you will find a compose.yml file.:
-```
+
+```shell
 docker compose up
 ```
+
 This will start Tiamat with PostgreSQL and Hazelcast. and you can access Tiamat on http://localhost:1888 and the database on http://localhost:5433 
 and graphiql on http://localhost:8777/services/stop_places/graphql , At start up tiamat copy empty schema to the database. Spring properties are set in application.properties.
 Security is disabled in this setup.
 
 ## Run with external properties file and PostgreSQL
-To run with PostgreSQL you ned an external application.properties.
-Below is an example of application.properties:
-```
+To run with PostgreSQL you need an external `application.properties`. Below is an example of `application.properties`:
+
+```properties
 spring.jpa.database=POSTGRESQL
 spring.datasource.platform=postgres
 spring.jpa.properties.hibernate.hbm2ddl.import_files_sql_extractor=org.hibernate.tool.hbm2ddl.MultipleLinesSqlCommandExtractor
@@ -82,13 +164,11 @@ spring.http.gzip.enabled=true
 
 #spring.jpa.properties.hibernate.format_sql=true
 
-
 spring.jpa.properties.hibernate.order_updates=true
 spring.jpa.properties.hibernate.batch_versioned_data=true
 
 spring.flyway.enabled=true
-spring.flyway.table =schema_version
-
+spring.flyway.table=schema_version
 
 server.compression.mime-types=application/json,application/xml,text/html,text/xml,text/plain
 
@@ -112,10 +192,7 @@ spring.jpa.properties.hibernate.jdbc.batch_size=20
 spring.jpa.properties.hibernate.default_batch_fetch_size=16
 spring.jpa.properties.hibernate.generate_statistics=false
 
-
-
 changelog.publish.enabled=false
-
 
 jettyMaxThreads=10
 jettyMinThreads=1
@@ -123,14 +200,11 @@ jettyMinThreads=1
 spring.datasource.hikari.maximumPoolSize=40
 spring.datasource.hikari.leakDetectionThreshold=30000
 
-
-
 tiamat.locals.language.default=eng
 
 tariffZoneLookupService.resetReferences=true
 
-
-debug=true 
+debug=true
 
 # Disable feature detection by this undocumented parameter. Check the org.hibernate.engine.jdbc.internal.JdbcServiceImpl.configure method for more details.
 spring.jpa.properties.hibernate.temp.use_jdbc_metadata_defaults = false
@@ -138,12 +212,9 @@ spring.jpa.properties.hibernate.temp.use_jdbc_metadata_defaults = false
 # Because detection is disabled you have to set correct dialect by hand.
 spring.jpa.database-platform=org.hibernate.dialect.PostgreSQL9Dialect
 
-
 tariffzoneLookupService.resetReferences=true
 
-
 spring.jpa.properties.hibernate.dialect=org.hibernate.spatial.dialect.postgis.PostgisDialect
-
 
 spring.database.driverClassName=org.postgresql.Driver
 spring.datasource.url=jdbc:postgresql://localhost:5436/tiamat
@@ -157,14 +228,9 @@ tiamat.oauth2.resourceserver.auth0.ror.claim.namespace=role_assignments
 
 spring.cloud.gcp.pubsub.enabled=false
 
-
-
-
 aspect.enabled=true
 
 netex.id.valid.prefix.list={TopographicPlace:{'KVE','WOF','OSM','ENT','LAN'},TariffZone:{'*'},FareZone:{'*'},GroupOfTariffZones:{'*'}}
-
-
 
 server.port=1888
 
@@ -178,13 +244,7 @@ management.security.enabled=false
 authorization.enabled = true
 rutebanken.kubernetes.enabled=false
 
-
-
-
-
-
 async.export.path=/tmp
-
 
 publicationDeliveryUnmarshaller.validateAgainstSchema=false
 publicationDeliveryStreamingOutput.validateAgainstSchema=false
@@ -192,12 +252,6 @@ netex.validPrefix=NSR
 netex.profile.version=1.12:NO-NeTEx-stops:1.4
 blobstore.local.folder=/tmp/local-gcs-storage/tiamat/export
 spring.profiles.active=local-blobstore,activemq
-
-
-
-
-
-
 ```
 
 To start Tiamat with this configuration, specify **spring.config.location**:
@@ -209,13 +263,6 @@ To start Tiamat with this configuration, specify **spring.config.location**:
 ### HikariCP
 Tiamat is using HikariCP. Most properties should be be possible to be specified in in application.properties, like `spring.datasource.initializationFailFast=false`. More information here. https://github.com/brettwooldridge/HikariCP/wiki/Configuration
 See also http://stackoverflow.com/a/26514779
-
-### Postgres
-
-#### Run postgres/gis for tiamat in docker for development
-```
-docker run -it -d -p 5435:5432 --name postgress-13 -e POSTGRES_USER=tiamat -e POSTGRES_PASSWORD="tiamat" -e POSTGRES_INITDB_ARGS="-d" postgis/postgis:13-master
-```
 
 ## ID Generation
 ### Background
@@ -240,7 +287,7 @@ A detailed guide on how to setup Keycloak can be found [here](./Keycloak_Setup_G
 
 It is possible to configure if tiamat should validate incoming and outgoing NeTEx xml when unmarshalling or marshalling publication deliveries.
 Default values are true. Can be deactivated with setting properties to false.
-```
+```properties
 publicationDeliveryStreamingOutput.validateAgainstSchema=false
 publicationDeliveryUnmarshaller.validateAgainstSchema=true
 ```
@@ -250,45 +297,45 @@ It is possible to export stop places and topographic places directly to NeTEx fo
 https://api.dev.entur.io/stop-places/v1/netex
 
 ### Query by name example:
-```
-https://api.dev.entur.io/stop-places/v1/netex?q=Arne%20Garborgs%20vei
+```http request
+GET https://api.dev.entur.io/stop-places/v1/netex?q=Arne%20Garborgs%20vei
 ```
 
 ### Query by ids that contains the number 3115
- ```
- https://api.dev.entur.io/stop-places/v1/netex?q=3115
- ```
+```http request
+GET https://api.dev.entur.io/stop-places/v1/netex?q=3115
+```
 
 ### Query by stop place type
-```
-https://api.dev.entur.io/stop-places/v1/netex?stopPlaceType=RAIL_STATION
+```http request
+GET https://api.dev.entur.io/stop-places/v1/netex?stopPlaceType=RAIL_STATION
 ```
 It is also possible with multiple types.
 
 ### Query by municipality ID
-```
-https://api.dev.entur.io/stop-places/v1/netex?municipalityReference=KVE:TopographicPlace:1003
+```http request
+GET https://api.dev.entur.io/stop-places/v1/netex?municipalityReference=KVE:TopographicPlace:1003
 ```
 
 ### Query by county ID
-```
-https://api.dev.entur.io/stop-places/v1/netex?countyReference=KVE:TopographicPlace:11
+```http request
+GET https://api.dev.entur.io/stop-places/v1/netex?countyReference=KVE:TopographicPlace:11
 ```
 
 ### Limit size of results
-```
-https://api.dev.entur.io/stop-places/v1/netex?size=1000
+```http request
+GET https://api.dev.entur.io/stop-places/v1/netex?size=1000
 ```
 
 ### Page
-```
-https://api.dev.entur.io/stop-places/v1/netex?page=1
+```http request
+GET https://api.dev.entur.io/stop-places/v1/netex?page=1
 ```
 
 ### ID list
 You can specify a list of NSR stop place IDs to return
-```
-https://api.dev.entur.io/stop-places/v1/netex?idList=NSR:StopPlace:3378&idList=NSR:StopPlace:123
+```http request
+GET https://api.dev.entur.io/stop-places/v1/netex?idList=NSR:StopPlace:3378&idList=NSR:StopPlace:123
 ```
 
 ### All Versions
@@ -375,8 +422,8 @@ This NeTEx file should not contain NSR ID. (The NSR prefix is configurable in th
 
 Tiamat will return the modified NeTEx structure with it's own NSR IDs. Original IDs will be present in key value list on each object.
 
-```
-curl  -XPOST -H"Content-Type: application/xml" -d@my-nice-netex-file.xml http://localhost:1997/services/stop_places/netex
+```shell
+curl -XPOST -H"Content-Type: application/xml" -d@my-nice-netex-file.xml http://localhost:1997/services/stop_places/netex
 ```
 
 ### Importing with importType=INITIAL
@@ -384,8 +431,9 @@ curl  -XPOST -H"Content-Type: application/xml" -d@my-nice-netex-file.xml http://
 When importing with _importType=INITIAL_, a parallel stream will be created, spawning the original process. During import, user authorizations is checked, thus accessing SecurityContextHolder.
 By default, SecurityContextHolder use DEFAULT\_LOCAL\_STRATEGY. When using INITIAL importType, you should tell Spring to use MODE\_INHERITABLETHREADLOCAL for SecurityContextHolder, allowing Spring to duplicate Security Context in spawned threads.
 This can be done setting env variable :
-
-    -Dspring.security.strategy=MODE_INHERITABLETHREADLOCAL
+```shell
+-Dspring.security.strategy=MODE_INHERITABLETHREADLOCAL
+```
 
 If not, the application may complain about user not being authenticated if Spring tries to check authorization in a spawned process
 
