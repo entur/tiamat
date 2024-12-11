@@ -111,7 +111,7 @@ public class GroupOfStopPlacesSaverService {
             }
         }
 
-        versionIncrementor.incrementVersion(result);
+        versionIncrementor.initiateOrIncrementGroupOfStopPlaces(result);
         result = groupOfStopPlacesRepository.save(result);
 
         prometheusMetricsService.registerEntitySaved(newVersion.getClass(),1L);
