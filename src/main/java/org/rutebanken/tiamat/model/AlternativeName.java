@@ -149,6 +149,8 @@ public class AlternativeName
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
+                .add("id", id)
+                .add("netexId", netexId)
                 .add("lang", lang)
                 .add("nameType", nameType)
                 .add("name", name)
