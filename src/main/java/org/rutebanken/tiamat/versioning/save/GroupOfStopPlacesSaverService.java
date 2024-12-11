@@ -92,8 +92,6 @@ public class GroupOfStopPlacesSaverService {
         GroupOfStopPlaces result;
         if(existing != null) {
             BeanUtils.copyProperties(newVersion, existing, "id", "created", "version");
-            existing.getMembers().clear();
-            existing.getMembers().addAll(newVersion.getMembers());
             existing.setChanged(Instant.now());
             if(purposeOfGrouping != null){
                 existing.setPurposeOfGrouping(purposeOfGrouping);
