@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 @Component
 public class AlternativeNameUpdater {
 
-    private static final Logger logger = LoggerFactory.getLogger(AlternativeName.class);
+    private static final Logger logger = LoggerFactory.getLogger(AlternativeNameUpdater.class);
 
     /**
      * Saving alternative names always overwrites existing alternative names,
