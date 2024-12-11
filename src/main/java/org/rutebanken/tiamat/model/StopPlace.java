@@ -354,6 +354,7 @@ public class StopPlace
                 .add("netexId", netexId)
                 .add("version", version)
                 .add("name", name)
+                .add("alternativeNames", getAlternativeNames())
                 .add("stopPlaceType", stopPlaceType)
                 .add("centroid", centroid)
                 .add("keyValues", getKeyValues())
