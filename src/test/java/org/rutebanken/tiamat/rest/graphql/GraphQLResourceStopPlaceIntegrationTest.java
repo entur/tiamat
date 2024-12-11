@@ -1387,6 +1387,57 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
     }
 
     @Test
+    public void testSimpleMutationUpdateAlternativeNamesStopPlace() throws Exception {
+        StopPlace stopPlace = createStopPlace("Espa");
+        stopPlace.setShortName(new EmbeddableMultilingualString("E"));
+        stopPlace.setDescription(new EmbeddableMultilingualString("E6s beste boller"));
+        stopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
+        stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(10, 59)));
+        stopPlace.setAllAreasWheelchairAccessible(false);
+        stopPlace.setWeighting(InterchangeWeightingEnumeration.NO_INTERCHANGE);
+
+        final var translationValue = "E6s bästa bullarna";
+        final var aliasValue = "Alias";
+
+        final var translation = new AlternativeName();
+        translation.setName(new EmbeddableMultilingualString(translationValue, "swe"));
+        translation.setNameType(NameTypeEnumeration.TRANSLATION);
+        stopPlace.getAlternativeNames().add(translation);
+
+        stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+
+        String graphQlJsonQuery = """
+                 mutation {
+                  stopPlace: mutateStopPlace (StopPlace: {
+                          id: "%s"
+                          alternativeNames: [{
+                              name: { lang: "swe", value: "%s" },
+                              nameType: translation
+                          }, {
+                              name: { lang: "swe", value: "%s" },
+                              nameType: alias
+                          }],
+                      }) {
+                          id
+                          alternativeNames {
+                              nameType,
+                              name { lang, value }
+                          }
+                      }
+                  }""".formatted(stopPlace.getNetexId(), translationValue, aliasValue);
+
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
+                .rootPath("data.stopPlace[0]")
+                .body("id", equalTo(stopPlace.getNetexId()))
+                .body("alternativeNames[0].nameType", equalTo("translation"))
+                .body("alternativeNames[0].name.lang", equalTo("swe"))
+                .body("alternativeNames[0].name.value", equalTo(translationValue))
+                .body("alternativeNames[1].nameType", equalTo("alias"))
+                .body("alternativeNames[1].name.lang", equalTo("swe"))
+                .body("alternativeNames[1].name.value", equalTo(aliasValue));
+    }
+
+    @Test
     public void testSimpleStopPlaceWithAccessibilityAssesment() throws Exception {
         String stopPlaceName = "StopPlace";
         StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(stopPlaceName));
