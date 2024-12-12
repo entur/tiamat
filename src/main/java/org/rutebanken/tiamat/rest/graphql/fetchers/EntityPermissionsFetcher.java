@@ -12,6 +12,7 @@ import org.rutebanken.tiamat.repository.generic.GenericEntityInVersionRepository
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Component
@@ -53,7 +54,30 @@ public class EntityPermissionsFetcher implements DataFetcher {
         final Set<String> allowedSubmode = authorizationService.getAllowedSubmodes(entityInVersionStructure);
         final Set<String> bannedSubmode = authorizationService.getBannedSubmodes(entityInVersionStructure);
 
+        Set<String> allowedStopPlaceTypeCopy = new HashSet<>(allowedStopPlaceTypes);
+        Set<String> bannedStopPlaceTypeCopy = new HashSet<>(bannedStopPlaceTypes);
+        Set<String> allowedSubmodeCopy = new HashSet<>(allowedSubmode);
+        Set<String> bannedSubmodeCopy = new HashSet<>(bannedSubmode);
 
-        return new EntityPermissions(canEditEntities, canDeleteEntity, allowedStopPlaceTypes, bannedStopPlaceTypes, allowedSubmode, bannedSubmode);
+        Set<String> duplicateStopPlaceTypes = new HashSet<>(allowedStopPlaceTypes);
+        duplicateStopPlaceTypes.retainAll(bannedStopPlaceTypes);
+        Set<String> duplicateSubmodes = new HashSet<>(allowedSubmode);
+        duplicateSubmodes.retainAll(bannedSubmode);
+
+        allowedStopPlaceTypeCopy.removeAll(duplicateStopPlaceTypes);
+        bannedStopPlaceTypeCopy.removeAll(duplicateStopPlaceTypes);
+        allowedSubmodeCopy.removeAll(duplicateSubmodes);
+        bannedSubmodeCopy.removeAll(duplicateSubmodes);
+        if(allowedStopPlaceTypeCopy.isEmpty()) {
+            allowedStopPlaceTypeCopy.add("*");
+
+        }
+        if(allowedSubmodeCopy.isEmpty()) {
+            allowedSubmodeCopy.add("*");
+        }
+
+
+        return new EntityPermissions(canEditEntities, canDeleteEntity, allowedStopPlaceTypeCopy, bannedStopPlaceTypeCopy, allowedSubmodeCopy, bannedSubmodeCopy);
+
     }
 }
