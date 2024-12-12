@@ -59,19 +59,19 @@ public interface AuthorizationService {
      */
     <T extends EntityStructure> boolean canEditEntity(RoleAssignment roleAssignment, T entity);
 
-    Set<String> getAllowedStopPlaceTypes(Object entity);
+    Set<String> getAllowedStopPlaceTypes(EntityStructure entity);
 
     Set<String> getLocationAllowedStopPlaceTypes(boolean canEdit, Point point);
 
-    Set<String> getBannedStopPlaceTypes(Object entity);
+    Set<String> getBannedStopPlaceTypes(EntityStructure entity);
 
     Set<String> getLocationBannedStopPlaceTypes(boolean canEdit,Point point);
 
-    Set<String> getAllowedSubmodes(Object entity);
+    Set<String> getAllowedSubmodes(EntityStructure entity);
 
     Set<String> getLocationAllowedSubmodes(boolean canEdit,Point point);
 
-    Set<String> getBannedSubmodes(Object entity);
+    Set<String> getBannedSubmodes(EntityStructure entity);
 
     Set<String> getLocationBannedSubmodes(boolean canEdit,Point point);
 

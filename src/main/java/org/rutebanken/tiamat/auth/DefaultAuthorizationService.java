@@ -108,7 +108,7 @@ public class DefaultAuthorizationService implements AuthorizationService {
     }
 
     @Override
-    public Set<String> getAllowedStopPlaceTypes(Object entity){
+    public Set<String> getAllowedStopPlaceTypes(EntityStructure entity){
        return getStopTypesOrSubmode(STOP_PLACE_TYPE, true, entity);
     }
 
@@ -118,7 +118,7 @@ public class DefaultAuthorizationService implements AuthorizationService {
     }
 
     @Override
-    public Set<String> getBannedStopPlaceTypes(Object entity) {
+    public Set<String> getBannedStopPlaceTypes(EntityStructure entity) {
         if(!dataScopedAuthorizationService.isAuthorized(ROLE_EDIT_STOPS, List.of(entity))) {
             return Set.of(ENTITY_CLASSIFIER_ALL_ATTRIBUTES);
         }
@@ -131,7 +131,7 @@ public class DefaultAuthorizationService implements AuthorizationService {
     }
 
     @Override
-    public Set<String> getAllowedSubmodes(Object entity) {
+    public Set<String> getAllowedSubmodes(EntityStructure entity) {
         return  getStopTypesOrSubmode(SUBMODE, true, entity);
     }
 
@@ -141,7 +141,7 @@ public class DefaultAuthorizationService implements AuthorizationService {
     }
 
     @Override
-    public Set<String> getBannedSubmodes(Object entity) {
+    public Set<String> getBannedSubmodes(EntityStructure entity) {
         if(!dataScopedAuthorizationService.isAuthorized(ROLE_EDIT_STOPS, List.of(entity))) {
             return Set.of(ENTITY_CLASSIFIER_ALL_ATTRIBUTES);
         }
@@ -161,12 +161,12 @@ public class DefaultAuthorizationService implements AuthorizationService {
         return roleAssignmentExtractor.getRoleAssignmentsForUser().isEmpty();
     }
 
-    private Set<String> getStopTypesOrSubmode(String type, boolean isAllowed, Object entity) {
+    private Set<String> getStopTypesOrSubmode(String type, boolean isAllowed, EntityStructure entity) {
         if (hasNoAuthentications()) {
             return Set.of();
         }
         return roleAssignmentExtractor.getRoleAssignmentsForUser().stream()
-                .filter(roleAssignment -> filterByRole(roleAssignment,entity))
+                .filter(roleAssignment -> canEditDeleteEntity(entity,roleAssignment.getRole()))
                 .filter(roleAssignment -> roleAssignment.getEntityClassifications() != null)
                 .filter(roleAssignment -> topographicPlaceChecker.entityMatchesAdministrativeZone(roleAssignment, entity))
                 .filter(roleAssignment -> roleAssignment.getEntityClassifications().get(type) != null)
@@ -196,6 +196,11 @@ public class DefaultAuthorizationService implements AuthorizationService {
     }
 
     private boolean filterByRole(RoleAssignment roleAssignment,Object entity) {
+        if (entity instanceof GroupOfStopPlaces groupOfStopPlaces) {
+            final List<StopPlace> gospMembers = groupOfStopPlacesMembersResolver.resolve(groupOfStopPlaces);
+            dataScopedAuthorizationService.isAuthorized(roleAssignment.getRole(), gospMembers);
+        }
+
         return dataScopedAuthorizationService.authorized(roleAssignment, entity, ROLE_EDIT_STOPS)
                       || dataScopedAuthorizationService.authorized(roleAssignment, entity, ROLE_DELETE_STOPS);
 
