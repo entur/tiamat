@@ -118,10 +118,26 @@ See [Docker Compose reference](https://docs.docker.com/compose/reference/) for m
 
 ##### Storage
 
-| profile           | description                                      |
-|:------------------|--------------------------------------------------|
-| `gcs-blobstore`   | GCP GCS implementation of tiamat's blob storage  |
-| `local-blobstore` | Use local directory as backing storage location. |
+| profile                | description                                                                                                                                                                                                                                                                             |
+|:-----------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `gcs-blobstore`        | GCP GCS implementation of tiamat's blob storage                                                                                                                                                                                                                                         |
+| `local-blobstore`      | Use local directory as backing storage location.                                                                                                                                                                                                                                        |
+| `rutebanken-blobstore` | Use [`rutebanken-helpers/storage`](https://github.<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>com/entur/rutebanken-helpers/tree/master/storage) based implementation for storage. Must be combined with one of the supported extra profiles (see below). |
+
+###### Supported `rutebanken-blobstore` extra profiles
+
+If this profile is chosen, an additional implementation must be chosen to activate the underlying actual implementation.
+Supported extra profiles are
+
+| extra profile          | description                              |
+|:-----------------------|------------------------------------------|
+| `local-disk-blobstore` | Similar to `local-blobstore`.            |
+| `in-memory-blobstore`  | Entirely in-memory based implementation. |
+
+**Example: Activating `in-memory-blobstore` for local development**
+```properties
+spring.profiles.active=local,rutebanken-blobstore,in-memory-blobstore,local-changelog
+```
 
 ##### Changelog
 

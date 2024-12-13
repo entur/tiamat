@@ -67,6 +67,7 @@
         <xercesImpl.version>2.12.2</xercesImpl.version>
         <maven.compiler.args>--add-opens java.base/java.lang=ALL-UNNAMED</maven.compiler.args>
         <testcontainers.version>1.19.2</testcontainers.version>
+        <rutebanken-storage.version>4.7</rutebanken-storage.version>
     </properties>
 
     <dependencies>
@@ -127,6 +128,12 @@
         <dependency>
             <groupId>io.dropwizard.metrics</groupId>
             <artifactId>metrics-graphite</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.entur.ror.helpers</groupId>
+            <artifactId>storage</artifactId>
+            <version>${rutebanken-storage.version}</version>
         </dependency>
 
         <dependency>
