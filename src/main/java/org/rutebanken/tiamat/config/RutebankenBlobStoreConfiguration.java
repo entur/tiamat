@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.config;
 
+import org.rutebanken.helper.aws.repository.S3BlobStoreRepository;
 import org.rutebanken.helper.storage.repository.BlobStoreRepository;
 import org.rutebanken.helper.storage.repository.InMemoryBlobStoreRepository;
 import org.rutebanken.helper.storage.repository.LocalDiskBlobStoreRepository;
@@ -8,8 +9,19 @@ import org.rutebanken.tiamat.service.RutebankenBlobStoreService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Profile;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.core.client.config.ClientOverrideConfiguration;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.S3ClientBuilder;
 
+import java.net.URI;
+import java.time.Duration;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -33,6 +45,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * {@link org.rutebanken.tiamat.service.GcsBlobStoreService} first needs to be adapted directly, and additional feature
  * gap fixing will probably need to be done in <code>rutebanken-helpers</code> as well.
  */
+@Lazy
 @Configuration
 @Profile("rutebanken-blobstore")
 public class RutebankenBlobStoreConfiguration {
@@ -61,5 +74,56 @@ public class RutebankenBlobStoreConfiguration {
         InMemoryBlobStoreRepository inMemoryBlobStoreRepository = new InMemoryBlobStoreRepository(new ConcurrentHashMap<>());
         inMemoryBlobStoreRepository.setContainerName(containerName);
         return inMemoryBlobStoreRepository;
+    }
+
+    @Bean
+    BlobStoreRepository blobStoreRepository(
+            @Value("${blobstore.s3.bucket}") String containerName,
+            S3Client s3Client
+    ) {
+        S3BlobStoreRepository s3BlobStoreRepository = new S3BlobStoreRepository(s3Client);
+        s3BlobStoreRepository.setContainerName(containerName);
+        return s3BlobStoreRepository;
+    }
+
+    @Profile("local | test")
+    @Bean
+    public AwsCredentialsProvider localCredentials(
+            @Value("blobstore.s3.access-key-id") String accessKeyId,
+            @Value("blobstore.s3.secret-key") String secretKey
+    ) {
+        return StaticCredentialsProvider.create(
+                AwsBasicCredentials.create(accessKeyId, secretKey)
+        );
+    }
+
+    @Profile("!local & !test")
+    @Bean
+    public AwsCredentialsProvider cloudCredentials() {
+        return DefaultCredentialsProvider.create();
+    }
+
+    @Bean
+    public S3Client s3Client(
+            @Value("${blobstore.s3.region}") String region,
+            @Value("${blobstore.s3.endpoint-override:#{null}}") String endpointOverride,
+            AwsCredentialsProvider credentialsProvider
+    ) {
+        S3ClientBuilder builder = S3Client
+                .builder()
+                .region(Region.of(region))
+                .credentialsProvider(credentialsProvider)
+                .overrideConfiguration(
+                        ClientOverrideConfiguration
+                                .builder()
+                                .apiCallAttemptTimeout(Duration.ofSeconds(15))
+                                .apiCallTimeout(Duration.ofSeconds(15))
+                                .retryPolicy(retryPolicy -> retryPolicy.numRetries(5))
+                                .build()
+                );
+        if (endpointOverride != null) {
+            builder = builder.endpointOverride(URI.create(endpointOverride));
+        }
+        return builder.build();
     }
 }

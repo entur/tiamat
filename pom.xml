@@ -135,6 +135,11 @@
             <artifactId>storage</artifactId>
             <version>${rutebanken-storage.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.entur.ror.helpers</groupId>
+            <artifactId>storage-aws-s3</artifactId>
+            <version>${rutebanken-storage.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>io.micrometer</groupId>

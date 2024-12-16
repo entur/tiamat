@@ -106,11 +106,31 @@ docker compose down
 docker compose --profile aws down
 ```
 
+#### Supported Docker Compose profiles
+
+Docker Compose has its own profiles which start up additional supporting services to e.g. make specific feature 
+development easier. You may include any number of additional profiles when working with Docker Compose by listing 
+them in the commands with the `--profile {profile name}` argument. Multiple profiles are activated by providing the 
+same attribute multiple times, for example starting Compose environment with profiles a and b would be
+```shell
+docker compose --profile a --profile b up
+```
+
+The provided profiles for Tiamat development are
+
+
+| profile | description                                                                                       |
+|:--------|---------------------------------------------------------------------------------------------------|
+| `aws`   | Starts up [LocalStack](https://www.localstack.cloud/) meant for developing AWS specific features. |
+
+
 See [Docker Compose reference](https://docs.docker.com/compose/reference/) for more details.
+
+See [Supported Docker Compose Profiles](#supported-docker-compose-profiles) for more information on provided profiles.
 
 ### 2. Run the Service
 
-#### Available Profiles
+#### Available Spring Boot Profiles
 
 > **Note!** You must choose at least one of the options from each category below!
 
@@ -118,11 +138,13 @@ See [Docker Compose reference](https://docs.docker.com/compose/reference/) for m
 
 ##### Storage
 
-| profile                | description                                                                                                                                                                                                                                                                             |
-|:-----------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `gcs-blobstore`        | GCP GCS implementation of tiamat's blob storage                                                                                                                                                                                                                                         |
-| `local-blobstore`      | Use local directory as backing storage location.                                                                                                                                                                                                                                        |
-| `rutebanken-blobstore` | Use [`rutebanken-helpers/storage`](https://github.<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>com/entur/rutebanken-helpers/tree/master/storage) based implementation for storage. Must be combined with one of the supported extra profiles (see below). |
+| profile                | description                                                                                                                                                     |
+|:-----------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `gcs-blobstore`        | GCP GCS implementation of tiamat's blob storage                                                                                                                 |
+| `local-blobstore`      | Use local directory as backing storage location.                                                                                                                |
+| `rutebanken-blobstore` | Use [`rutebanken-helpers/storage`][rutebanken-storage] based implementation for storage. Must be combined with one of the supported extra profiles (see below). |
+
+[rutebanken-storage]: https://github.com/entur/rutebanken-helpers/tree/master/storage
 
 ###### Supported `rutebanken-blobstore` extra profiles
 
@@ -133,11 +155,15 @@ Supported extra profiles are
 |:-----------------------|------------------------------------------|
 | `local-disk-blobstore` | Similar to `local-blobstore`.            |
 | `in-memory-blobstore`  | Entirely in-memory based implementation. |
+| `s3-blobstore`         | AWS S3 implementation.                   |
 
 **Example: Activating `in-memory-blobstore` for local development**
 ```properties
 spring.profiles.active=local,rutebanken-blobstore,in-memory-blobstore,local-changelog
 ```
+
+See the [`RutebankenBlobStoreServiceConfiguration`](./src/main/java/org/rutebanken/tiamat/config/RutebankenBlobStoreConfiguration.java)
+class for configuration keys and additional information.
 
 ##### Changelog
 
@@ -146,6 +172,28 @@ spring.profiles.active=local,rutebanken-blobstore,in-memory-blobstore,local-chan
 | `local-changelog` | Simple local implementation which logs the sent events to `stdout` |
 | `activemq`        | JMS based ActiveMQ implementation.                                 |
 | `google-pubsub`   | GCP PubSub implementation for publishing tiamat entity changes.    |
+
+#### Supported Docker Compose Profiles
+
+Tiamat's [`docker-compose.yml`](./docker-compose.yml) comes with built-in profiles for various use cases. The profiles 
+are mostly optional, default profile contains all mandatory configuration while the named profiles add features on 
+top of that. You can always activate zero or more profiles at the same time, e.g.
+
+```shell
+docker compose --profile first --profile second up
+# or
+COMPOSE_PROFILES=first,second docker compose up
+```
+
+### Default profile (no activation key)
+
+Starts up PostGIS server with settings matching the ones in [`application-local.properties`](./src/main/resources/application-local.properties).
+
+### `aws` profile
+
+Starts up [LocalStack](https://www.localstack.cloud/) meant for developing AWS specific features.
+
+See also [Disable AWS S3 Autoconfiguration](#disable-aws-s3-autoconfiguration), [NeTEx Export](#netex-export).
 
 #### Run It!
 
@@ -482,5 +530,4 @@ https://github.com/entur/tiamat-scripts
 
 ## CircleCI
 Tiamat is built using CircleCI. See the .circleci folder.
-
 
