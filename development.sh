@@ -8,7 +8,7 @@ cd "${WD}"
 
 DOCKER_COMPOSE_CMD="docker  compose -f ./docker/docker-compose.yml -f ./docker/docker-compose.custom.yml"
 
-function check_docker {
+function download_docker_compose_bundle {
   curl https://raw.githubusercontent.com/HSLdevcom/jore4-tools/main/docker/download-docker-bundle.sh | bash
 }
 
@@ -36,7 +36,7 @@ function run_tests {
   mvn test
 }
 
-function usage {
+function print_usage {
   echo "
   Usage $(basename "$0") <command>
 
@@ -66,18 +66,18 @@ function usage {
 COMMAND=${1:-}
 
 if [[ -z $COMMAND ]]; then
-  usage
+  print_usage
   exit 1
 fi
 
 case $COMMAND in
   start)
-    check_docker
+    download_docker_compose_bundle
     start
     ;;
 
   start:deps)
-    check_docker
+    download_docker_compose_bundle
     start_dependencies
     ;;
 
@@ -104,7 +104,7 @@ case $COMMAND in
   *)
     echo ""
     echo "Unknown command: '${COMMAND}'"
-    usage
+    print_usage
     exit 1
     ;;
 esac
