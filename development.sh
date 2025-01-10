@@ -6,9 +6,6 @@ set -euo pipefail
 WD=$(dirname "$0")
 cd "${WD}"
 
-# initialize package folder
-mkdir -p ./docker
-
 DOCKER_COMPOSE_CMD="docker  compose -f ./docker/docker-compose.yml -f ./docker/docker-compose.custom.yml"
 
 function check_docker {
