@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -eo pipefail
+set -euo pipefail
 
 # allow running from any working directory
 WD=$(dirname "$0")
@@ -16,22 +16,18 @@ function check_docker {
 }
 
 function start {
-  check_docker
   $DOCKER_COMPOSE_CMD up --build -d jore4-tiamat jore4-testdb
 }
 
 function start_dependencies {
-  check_docker
   $DOCKER_COMPOSE_CMD up -d jore4-testdb
 }
 
 function stop_all {
-  check_docker
   $DOCKER_COMPOSE_CMD stop
 }
 
 function remove_all {
-  check_docker
   $DOCKER_COMPOSE_CMD down
 }
 
@@ -45,7 +41,7 @@ function run_tests {
 
 function usage {
   echo "
-  Usage $0 <command>
+  Usage $(basename "$0") <command>
 
   build
     Build the project locally
@@ -70,15 +66,21 @@ function usage {
   "
 }
 
-if [[ -z ${1} ]]; then
+COMMAND=${1:-}
+
+if [[ -z $COMMAND ]]; then
   usage
-else
-  case $1 in
+  exit 1
+fi
+
+case $COMMAND in
   start)
+    check_docker
     start
     ;;
 
   start:deps)
+    check_docker
     start_dependencies
     ;;
 
@@ -103,7 +105,9 @@ else
     ;;
 
   *)
+    echo ""
+    echo "Unknown command: '${COMMAND}'"
     usage
+    exit 1
     ;;
-  esac
-fi
+esac
