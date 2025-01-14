@@ -51,9 +51,8 @@ download_docker_compose_bundle() {
 
   echo "Downloading the JORE4 Docker Compose bundle..."
 
-  # Download the latest Docker Compose bundle from the
-  # jore4-docker-compose-bundle repository as a ZIP file and extract its
-  # contents to a temporary directory.
+  # Download Docker Compose bundle from the jore4-docker-compose-bundle
+  # repository as a ZIP file and extract its contents to a temporary directory.
   gh api "repos/${repo_owner}/${repo_name}/zipball/${commit_sha}" > "$zip_file" \
     && unzip -q "$zip_file" -d /tmp
 
@@ -105,21 +104,21 @@ function print_usage {
   build
     Build the project locally
 
-  start [<commit SHA>]
+  start [<commit reference>]
     Start Tiamat service in Docker container.
 
-    Optionally, you can pass an SHA digest as an argument (or its initial
-    substring) to point to a commit (of the jore4-docker-compose-bundle
-    repository), which specifies the Docker Compose bundle version to fetch. By
-    default, the tip of the main branch is used.
+    Optionally, you can pass a commit reference as an argument (like commit SHA
+    or its initial substring) to point to a commit (of the
+    jore4-docker-compose-bundle repository), which determines the Docker Compose
+    bundle version to download. By default, the tip of the main branch is used.
 
-  start:deps [<commit SHA>]
+  start:deps [<commit reference>]
     Start the dependencies of jore4-tiamat.
 
-    Optionally, you can pass an SHA digest as an argument (or its initial
-    substring) to point to a commit (of the jore4-docker-compose-bundle
-    repository), which specifies the Docker Compose bundle version to fetch. By
-    default, the tip of the main branch is used.
+    Optionally, you can pass a commit reference as an argument (like commit SHA
+    or its initial substring) to point to a commit (of the
+    jore4-docker-compose-bundle repository), which determines the Docker Compose
+    bundle version to download. By default, the tip of the main branch is used.
 
   stop
     Stop Tiamat Docker container and all dependencies
