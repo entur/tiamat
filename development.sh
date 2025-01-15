@@ -2,6 +2,14 @@
 
 set -euo pipefail
 
+# By default, the tip of the main branch of the jore4-docker-compose-bundle
+# repository is used as the commit reference, which determines the version of
+# the Docker Compose bundle to download. For debugging purposes, this default
+# can be overridden by some other commit reference (e.g., commit SHA or its
+# initial substring), which you can pass via the `BUNDLE_REF` environment
+# variable.
+DOCKER_COMPOSE_BUNDLE_REF=${BUNDLE_REF:-main}
+
 # allow running from any working directory
 WD=$(dirname "$0")
 cd "${WD}"
@@ -11,10 +19,10 @@ DOCKER_COMPOSE_CMD="docker  compose -f ./docker/docker-compose.yml -f ./docker/d
 # Download Docker Compose bundle from the "jore4-docker-compose-bundle"
 # repository. GitHub CLI is required to be installed.
 #
-# A commit reference can be given as an argument. It can contain, for example,
-# only a substring of an actual SHA digest.
+# A commit reference is read from global `DOCKER_COMPOSE_BUNDLE_REF` variable,
+# which should be set based on the script execution arguments.
 download_docker_compose_bundle() {
-  local commit_ref="${1:-main}"
+  local commit_ref="$DOCKER_COMPOSE_BUNDLE_REF"
 
   local repo_name="jore4-docker-compose-bundle"
   local repo_owner="HSLdevcom"
@@ -108,21 +116,21 @@ function print_usage {
   build
     Build the project locally
 
-  start [<commit_ref>]
+  start
     Start Tiamat service in Docker container.
 
-    Optionally, you can pass a commit reference as an argument (like commit SHA
-    or its initial substring) to point to a commit (of the
-    jore4-docker-compose-bundle repository), which determines the Docker Compose
-    bundle version to download. By default, the tip of the main branch is used.
+    You can control which version of the Docker Compose bundle is downloaded by
+    passing a commit reference to the jore4-docker-compose-bundle repository via
+    the BUNDLE_REF environment variable. By default, the latest version is
+    downloaded.
 
-  start:deps [<commit_ref>]
+  start:deps
     Start the dependencies of jore4-tiamat.
 
-    Optionally, you can pass a commit reference as an argument (like commit SHA
-    or its initial substring) to point to a commit (of the
-    jore4-docker-compose-bundle repository), which determines the Docker Compose
-    bundle version to download. By default, the tip of the main branch is used.
+    You can control which version of the Docker Compose bundle is downloaded by
+    passing a commit reference to the jore4-docker-compose-bundle repository via
+    the BUNDLE_REF environment variable. By default, the latest version is
+    downloaded.
 
   stop
     Stop Tiamat Docker container and all dependencies
@@ -145,18 +153,14 @@ if [[ -z $COMMAND ]]; then
   exit 1
 fi
 
-# Shift other arguments after the command so that we can refer to them later
-# with "$@".
-shift
-
 case $COMMAND in
   start)
-    download_docker_compose_bundle "$@"
+    download_docker_compose_bundle
     start
     ;;
 
   start:deps)
-    download_docker_compose_bundle "$@"
+    download_docker_compose_bundle
     start_dependencies
     ;;
 
