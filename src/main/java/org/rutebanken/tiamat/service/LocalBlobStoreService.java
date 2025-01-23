@@ -1,6 +1,5 @@
 package org.rutebanken.tiamat.service;
 
-import com.google.cloud.storage.Storage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -58,15 +57,5 @@ public class LocalBlobStoreService implements BlobStoreService {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    @Override
-    public String createBlobIdName(String blobPath, String fileName) {
-        return blobPath + '/' + fileName;
-    }
-
-    @Override
-    public Storage getStorage() {
-        return null;
     }
 }

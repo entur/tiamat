@@ -18,6 +18,28 @@ services:
     networks:
       - tiamat-net
 
+  localstack:
+    container_name: "${COMPOSE_PROJECT_NAME}_localstack"
+    profiles: ["aws"]
+    image: localstack/localstack:4.0
+    ports:
+      - "37566:4566"             # LocalStack Gateway
+      - "37510-37559:4510-4559"  # external services port range
+    environment:
+      - DEBUG=${DEBUG-}
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - DISABLE_EVENTS=1
+      - SERVICES=s3
+      - AWS_ACCESS_KEY_ID=localstack
+      - AWS_SECRET_ACCESS_KEY=localstack
+      - AWS_DEFAULT_REGION=eu-north-1
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "${LOCALSTACK_VOLUME_DIR:-./volume}:/var/lib/localstack"
+      - "./scripts/init-localstack.sh:/etc/localstack/init/ready.d/init-localstack.sh"
+    networks:
+      - tiamat-net
+
 volumes:
   postgres-data:
 

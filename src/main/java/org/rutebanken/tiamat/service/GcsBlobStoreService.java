@@ -40,9 +40,9 @@ public class GcsBlobStoreService implements BlobStoreService {
 
 
     public GcsBlobStoreService(@Value("${blobstore.gcs.credential.path:#{null}") String credentialPath,
-                            @Value("${blobstore.gcs.bucket.name}") String bucketName,
-                            @Value("${blobstore.gcs.blob.path}") String blobPath,
-                            @Value("${blobstore.gcs.project.id}") String projectId) {
+                               @Value("${blobstore.gcs.bucket.name}") String bucketName,
+                               @Value("${blobstore.gcs.blob.path}") String blobPath,
+                               @Value("${blobstore.gcs.project.id}") String projectId) {
 
         this.bucketName = bucketName;
         this.blobPath = blobPath;
@@ -61,7 +61,7 @@ public class GcsBlobStoreService implements BlobStoreService {
         }
     }
 
-    public Storage getStorage() {
+    private Storage getStorage() {
         try {
             logger.info("Get storage for project {}", projectId);
             if (credentialPath == null || credentialPath.isEmpty()) {
