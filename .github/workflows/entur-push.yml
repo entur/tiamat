@@ -8,6 +8,9 @@ on:
       - master
 jobs:
   maven-verify:
+    env:
+      JFROG_USER: ${{ secrets.ARTIFACTORY_AUTH_USER }}
+      JFROG_PASS: ${{ secrets.ARTIFACTORY_AUTH_TOKEN }}
     runs-on: ubuntu-24.04
     permissions:
       contents: read
@@ -37,16 +40,15 @@ jobs:
           SONAR_PROJECT_NAME: ${{ github.event.repository.name }}
           SONAR_PROJECT_KEY: entur_${{ github.event.repository.name }}
         run: |
-          mvn 
-                  org.jacoco:jacoco-maven-plugin:prepare-agent verify \
-                  org.jacoco:jacoco-maven-plugin:report sonar:sonar \
-                  -Dmaven.main.skip \
-                  -DskipTests \
-                  -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
-                  -Dsonar.organization=enturas-github \
-                  -Dsonar.projectName=${SONAR_PROJECT_NAME} \
-                  -Dsonar.host.url=https://sonarcloud.io \
-                  -Dsonar.login=${SONAR_TOKEN}
+          mvn org.jacoco:jacoco-maven-plugin:prepare-agent verify \
+              org.jacoco:jacoco-maven-plugin:report sonar:sonar \
+              -Dmaven.main.skip \
+              -DskipTests \
+              -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
+              -Dsonar.organization=enturas-github \
+              -Dsonar.projectName=${SONAR_PROJECT_NAME} \
+              -Dsonar.host.url=https://sonarcloud.io \
+              -Dsonar.login=${SONAR_TOKEN}
 
   docker-build:
     needs: [maven-verify]
