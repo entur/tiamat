@@ -8,17 +8,11 @@ on:
       - master
 jobs:
   maven-verify:
-    env:
-      JFROG_USER: ${{ secrets.ARTIFACTORY_AUTH_USER }}
-      JFROG_PASS: ${{ secrets.ARTIFACTORY_AUTH_TOKEN }}
     runs-on: ubuntu-24.04
     permissions:
       contents: read
     steps:
       - uses: actions/checkout@v4
-      - name: Copy maven settings
-        run: |
-          wget https://raw.githubusercontent.com/entur/ror-maven-settings/master/.m2/settings.xml -O .github/workflows/settings.xml
       - uses: actions/setup-java@v4
         with:
           java-version: 21
@@ -33,7 +27,7 @@ jobs:
             ${{ runner.os }}-maven-
 
       - name: Run maven build
-        run: mvn verify -s .github/workflows/settings.xml
+        run: mvn verify
       - uses: actions/upload-artifact@v4.4.0
         with:
           path: target/*.jar
@@ -43,7 +37,7 @@ jobs:
           SONAR_PROJECT_NAME: ${{ github.event.repository.name }}
           SONAR_PROJECT_KEY: entur_${{ github.event.repository.name }}
         run: |
-          mvn -s .github/workflows/settings.xml \
+          mvn 
                   org.jacoco:jacoco-maven-plugin:prepare-agent verify \
                   org.jacoco:jacoco-maven-plugin:report sonar:sonar \
                   -Dmaven.main.skip \
