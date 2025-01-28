@@ -68,16 +68,15 @@ public class EntityPermissionsFetcher implements DataFetcher {
         bannedStopPlaceTypeCopy.removeAll(duplicateStopPlaceTypes);
         allowedSubmodeCopy.removeAll(duplicateSubmodes);
         bannedSubmodeCopy.removeAll(duplicateSubmodes);
-        if(!authorizationService.isGuest())
-        {
-            if(allowedStopPlaceTypeCopy.isEmpty()) {
+
+        if(allowedStopPlaceTypeCopy.isEmpty() && !bannedStopPlaceTypeCopy.contains("*")) {
                 allowedStopPlaceTypeCopy.add("*");
 
-            }
-            if(allowedSubmodeCopy.isEmpty()) {
-                allowedSubmodeCopy.add("*");
-            }
         }
+        if(allowedSubmodeCopy.isEmpty() && !bannedSubmodeCopy.contains("*")) {
+                allowedSubmodeCopy.add("*");
+        }
+
 
         return new EntityPermissions(canEditEntities, canDeleteEntity, allowedStopPlaceTypeCopy, bannedStopPlaceTypeCopy, allowedSubmodeCopy, bannedSubmodeCopy);
 
