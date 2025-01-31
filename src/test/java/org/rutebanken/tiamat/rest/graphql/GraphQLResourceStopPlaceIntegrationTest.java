@@ -1567,6 +1567,8 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         String privateCodeValue = "PB03";
         String privateCodeType = "Type";
 
+        String versionComment = "This is the initial version of the quay";
+
         Float lon =  Float.valueOf("10.11111");
         Float lat =  Float.valueOf("59.11111");
 
@@ -1574,12 +1576,13 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                 mutation {
                  stopPlace:mutateStopPlace(StopPlace: {
                           id: "%s"
-                          quays: [{ 
+                          quays: [{
                             name: { value: "%s" }
                             shortName: { value: "%s" }
                             description: { value: "%s" }
                             publicCode: "%s"
                             privateCode: { value: "%s", type: "%s" }
+                            versionComment: "%s"
                             geometry: {
                               type: Point
                               coordinates: [%s,%s]
@@ -1595,10 +1598,11 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                             description { value }
                             publicCode
                             privateCode { value type }
+                            versionComment
                             geometry { type coordinates }
                           }
                       }
-                  }""".formatted(stopPlace.getNetexId(), name, shortName, description, publicCode, privateCodeValue, privateCodeType, lon, lat);
+                  }""".formatted(stopPlace.getNetexId(), name, shortName, description, publicCode, privateCodeValue, privateCodeType, versionComment, lon, lat);
 
 
         executeGraphqQLQueryOnly(graphQlJsonQuery)
@@ -1612,6 +1616,8 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                     .body("publicCode", equalTo(publicCode))
                     .body("privateCode.value", equalTo(privateCodeValue))
                     .body("privateCode.type", equalTo(privateCodeType))
+                    .body("privateCode.type", equalTo(privateCodeType))
+                    .body("versionComment", equalTo(versionComment))
                     .body("geometry.type", equalTo("Point"))
                     .body("geometry.coordinates[0]", comparesEqualTo(lon))
                     .body("geometry.coordinates[1]", comparesEqualTo(lat));

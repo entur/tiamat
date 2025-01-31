@@ -1411,8 +1411,10 @@ public class StopPlaceRegisterGraphQLSchema {
                             .type(new GraphQLList(alternativeNameObjectType)))
                     .field(newFieldDefinition()
                             .name(BOARDING_POSITIONS)
-                            .type(new GraphQLList(boardingPositionsObjectType))
-                    )
+                            .type(new GraphQLList(boardingPositionsObjectType)))
+                    .field(newFieldDefinition()
+                            .name(VERSION_COMMENT)
+                            .type(GraphQLString))
                     .build();
     }
 
@@ -1546,12 +1548,9 @@ public class StopPlaceRegisterGraphQLSchema {
         return newInputObject()
                 .name(INPUT_TYPE_QUAY)
                 .fields(graphQLCommonInputObjectFieldsList)
-                .field(newInputObjectField()
-                        .name(COMPASS_BEARING)
-                        .type(GraphQLBigDecimal))
-                .field(newInputObjectField()
-                .name(BOARDING_POSITIONS)
-                .type(new GraphQLList(boardingPositionsInputObjectType)))
+                .field(newInputObjectField().name(COMPASS_BEARING).type(GraphQLBigDecimal))
+                .field(newInputObjectField().name(BOARDING_POSITIONS).type(new GraphQLList(boardingPositionsInputObjectType)))
+                .field(newInputObjectField().name(VERSION_COMMENT).type(GraphQLString))
                 .build();
     }
 
