@@ -334,6 +334,9 @@ public class StopPlaceRegisterGraphQLSchema {
     private DataFetcher<List<InfoSpot>> stopPlaceInfoSpotsFetcher;
 
     @Autowired
+    private DataFetcher<List<InfoSpot>> quayInfoSpotsFetcher;
+
+    @Autowired
     private KeyValuesDataFetcher keyValuesDataFetcher;
 
     @Autowired
@@ -426,7 +429,15 @@ public class StopPlaceRegisterGraphQLSchema {
 
         commonFieldsList.addAll(zoneCommandFieldList);
 
-        GraphQLObjectType quayObjectType = createQuayObjectType(commonFieldsList);
+        GraphQLArgument allVersionsArgument = GraphQLArgument.newArgument()
+                .name(ALL_VERSIONS)
+                .type(GraphQLBoolean)
+                .description(ALL_VERSIONS_ARG_DESCRIPTION)
+                .build();
+
+        GraphQLObjectType infoSpotObjectType = infoSpotObjectTypeCreator.createObjectType(validBetweenObjectType);
+
+        GraphQLObjectType quayObjectType = createQuayObjectType(commonFieldsList, infoSpotObjectType, allVersionsArgument);
 
 
         GraphQLObjectType topographicPlaceObjectType = topographicPlaceObjectTypeCreator.create();
@@ -435,8 +446,6 @@ public class StopPlaceRegisterGraphQLSchema {
         GraphQLObjectType fareZoneObjectType = fareZoneObjectTypeCreator.create(zoneCommandFieldList);
 
         MutableTypeResolver stopPlaceTypeResolver = new MutableTypeResolver();
-
-        GraphQLObjectType infoSpotObjectType = infoSpotObjectTypeCreator.createObjectType(validBetweenObjectType);
 
         List<GraphQLFieldDefinition> stopPlaceInterfaceFields = stopPlaceInterfaceCreator.createCommonInterfaceFields(tariffZoneObjectType,fareZoneObjectType, topographicPlaceObjectType, validBetweenObjectType, infoSpotObjectType);
         GraphQLInterfaceType stopPlaceInterface = stopPlaceInterfaceCreator.createInterface(stopPlaceInterfaceFields, commonFieldsList);
@@ -471,12 +480,6 @@ public class StopPlaceRegisterGraphQLSchema {
         GraphQLObjectType pathLinkObjectType = pathLinkObjectTypeCreator.create(pathLinkEndObjectType, netexIdFieldDefinition, geometryFieldDefinition);
 
         GraphQLObjectType parkingObjectType = createParkingObjectType(validBetweenObjectType);
-
-        GraphQLArgument allVersionsArgument = GraphQLArgument.newArgument()
-                .name(ALL_VERSIONS)
-                .type(GraphQLBoolean)
-                .description(ALL_VERSIONS_ARG_DESCRIPTION)
-                .build();
 
         GraphQLObjectType stopPlaceRegisterQuery = newObject()
                 .name(STOPPLACES_REGISTER)
@@ -765,6 +768,8 @@ public class StopPlaceRegisterGraphQLSchema {
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_PARENT_STOPPLACE, STOP_PLACE_GROUPS, stopPlaceGroupsFetcher);
 
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_STOPPLACE, INFO_SPOTS, stopPlaceInfoSpotsFetcher);
+
+        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_QUAY, INFO_SPOTS, quayInfoSpotsFetcher);
 
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_STOPPLACE, FARE_ZONES, stopPlaceFareZoneFetcher);
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_PARENT_STOPPLACE, FARE_ZONES, stopPlaceFareZoneFetcher);
@@ -1399,7 +1404,10 @@ public class StopPlaceRegisterGraphQLSchema {
         return arguments;
     }
 
-    private GraphQLObjectType createQuayObjectType(List<GraphQLFieldDefinition> commonFieldsList) {
+    private GraphQLObjectType createQuayObjectType(
+            List<GraphQLFieldDefinition> commonFieldsList,
+            GraphQLObjectType infoSpotObjectType,
+            GraphQLArgument allVersionsArgument) {
         return newObject()
                     .name(OUTPUT_TYPE_QUAY)
                     .fields(commonFieldsList)
@@ -1415,6 +1423,11 @@ public class StopPlaceRegisterGraphQLSchema {
                     .field(newFieldDefinition()
                             .name(VERSION_COMMENT)
                             .type(GraphQLString))
+                    .field(newFieldDefinition()
+                            .name(INFO_SPOTS)
+                            .type(new GraphQLList(infoSpotObjectType))
+                            .description("Info spots")
+                            .arguments(createFindInfoSpotArguments(allVersionsArgument)))
                     .build();
     }
 
