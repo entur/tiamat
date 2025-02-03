@@ -101,6 +101,9 @@ public class DefaultAuthorizationService implements AuthorizationService {
 
     @Override
     public boolean canEditEntity(Point point) {
+        if(hasNoAuthentications()) {
+            return false;
+        }
          return roleAssignmentExtractor.getRoleAssignmentsForUser().stream()
                 .filter(roleAssignment -> roleAssignment.getRole().equals(ROLE_EDIT_STOPS))
                   .anyMatch(roleAssignment -> topographicPlaceChecker.pointMatchesAdministrativeZone(roleAssignment, point));
@@ -181,12 +184,12 @@ public class DefaultAuthorizationService implements AuthorizationService {
 
     private Set<String> getLocationStopTypesOrSubmode(boolean canEdit, String type, boolean isAllowed, Point point) {
         if (hasNoAuthentications()) {
-            return Set.of();
+                return Set.of();
         }
         if (!canEdit && !isAllowed) {
             return Set.of(ENTITY_CLASSIFIER_ALL_ATTRIBUTES);
         }
-        return roleAssignmentExtractor.getRoleAssignmentsForUser().stream()
+        Set<String> stopTypesSubmodes = roleAssignmentExtractor.getRoleAssignmentsForUser().stream()
                 .filter(roleAssignment -> roleAssignment.getEntityClassifications() != null)
                 .filter(roleAssignment -> topographicPlaceChecker.entityMatchesAdministrativeZone(roleAssignment,point ))
                 .filter(roleAssignment -> roleAssignment.getEntityClassifications().get(type) != null)
@@ -195,6 +198,10 @@ public class DefaultAuthorizationService implements AuthorizationService {
                 .filter(types -> isAllowed != types.startsWith("!"))
                 .map(types -> isAllowed ? types : types.substring(1))
                 .collect(Collectors.toSet());
+        if (canEdit && stopTypesSubmodes.isEmpty() && isAllowed) {
+            stopTypesSubmodes.add(ENTITY_CLASSIFIER_ALL_ATTRIBUTES);
+        }
+        return stopTypesSubmodes;
     }
 
     private boolean filterByRole(RoleAssignment roleAssignment,Object entity) {

@@ -1,0 +1,181 @@
+package org.rutebanken.tiamat.auth;
+
+import org.junit.Test;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.LinearRing;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.geom.impl.CoordinateArraySequence;
+import org.rutebanken.helper.organisation.RoleAssignment;
+import org.rutebanken.tiamat.TiamatIntegrationTest;
+import org.rutebanken.tiamat.model.BusSubmodeEnumeration;
+import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.StopTypeEnumeration;
+import org.rutebanken.tiamat.model.TopographicPlace;
+import org.rutebanken.tiamat.repository.StopPlaceRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Instant;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
+import static org.rutebanken.helper.organisation.AuthorizationConstants.ENTITY_TYPE;
+import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
+
+
+public class TiamatAuthorizationServiceLocationPermissionsTest extends TiamatIntegrationTest {
+
+    @Autowired
+    private AuthorizationService authorizationService;
+
+    @Autowired
+    private MockedRoleAssignmentExtractor roleAssignmentExtractor;
+
+    @Autowired
+    private StopPlaceRepository stopPlaceRepository;
+
+
+    @Test
+    @Transactional
+    public void outSideLocationPermissionsTest() {
+
+        setUpSecurityContext();
+
+        RoleAssignment roleAssignment = RoleAssignment.builder()
+                .withRole(ROLE_EDIT_STOPS)
+                .withOrganisation("OST")
+                .withAdministrativeZone("KVE:TopographicalPlace:01")
+                .withEntityClassification(ENTITY_TYPE, "StopPlace")
+                .withEntityClassification("StopPlaceType", "!airport")
+                .withEntityClassification("StopPlaceType", "!railStation")
+                .withEntityClassification("Submode", "!railReplacementBus")
+                .build();
+
+        roleAssignmentExtractor.setNextReturnedRoleAssignment(roleAssignment);
+
+
+        Point point = geometryFactory.createPoint(new Coordinate(9.536819, 61.772281));
+        Point point2 = geometryFactory.createPoint(new Coordinate(5.536819, 50.772281));
+
+
+        TopographicPlace municipality = new TopographicPlace();
+        municipality.setNetexId("KVE:TopographicalPlace:01");
+        municipality.setVersion(1);
+        municipality.setPolygon(createPolygon(point));
+        topographicPlaceRepository.saveAndFlush(municipality);
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setStopPlaceType(StopTypeEnumeration.BUS_STATION);
+        stopPlace.setBusSubmode(BusSubmodeEnumeration.REGIONAL_BUS);
+        stopPlace.setTopographicPlace(municipality);
+        stopPlace.setCentroid(point);
+        stopPlaceRepository.saveAndFlush(stopPlace);
+
+
+        assertThat("Can not edit stopplaces", authorizationService.canEditEntity(point2), is(false));
+
+        roleAssignmentExtractor.setNextReturnedRoleAssignment(roleAssignment);
+
+        final Set<String> locationAllowedStopPlaceTypes = authorizationService.getLocationAllowedStopPlaceTypes(false, point);
+        assertThat("Allowed stop place types", locationAllowedStopPlaceTypes.size(), is(0));
+
+        roleAssignmentExtractor.setNextReturnedRoleAssignment(roleAssignment);
+        final Set<String> locationBannedStopPlaceTypes = authorizationService.getLocationBannedStopPlaceTypes(false, point);
+        assertThat("Banned stop place types", locationBannedStopPlaceTypes.size(), is(1));
+        assertThat("Banned stop place types", locationBannedStopPlaceTypes.iterator().next(), is("*"));
+
+    }
+
+
+    @Test
+    @Transactional
+    public void insideLocationPermissionTest() {
+        setUpSecurityContext();
+
+        RoleAssignment roleAssignment = RoleAssignment.builder()
+                .withRole(ROLE_EDIT_STOPS)
+                .withOrganisation("OST")
+                .withAdministrativeZone("KVE:TopographicalPlace:01")
+                .withEntityClassification(ENTITY_TYPE, "*")
+                .withEntityClassification("StopPlaceType", "!airport")
+                .withEntityClassification("StopPlaceType", "!railStation")
+                .withEntityClassification("Submode", "!railReplacementBus")
+                .build();
+
+        roleAssignmentExtractor.setNextReturnedRoleAssignment(roleAssignment);
+
+        Point point = geometryFactory.createPoint(new Coordinate(9.536819, 61.772281));
+        Point point2 = geometryFactory.createPoint(new Coordinate(8.536819, 59.772281));
+
+
+        TopographicPlace municipality = new TopographicPlace();
+        municipality.setNetexId("KVE:TopographicalPlace:01");
+        municipality.setVersion(1);
+        municipality.setPolygon(createPolygon(point));
+        topographicPlaceRepository.saveAndFlush(municipality);
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setStopPlaceType(StopTypeEnumeration.BUS_STATION);
+        stopPlace.setBusSubmode(BusSubmodeEnumeration.REGIONAL_BUS);
+        stopPlace.setTopographicPlace(municipality);
+        stopPlace.setCentroid(point);
+        stopPlaceRepository.saveAndFlush(stopPlace);
+
+
+        final boolean canEditEntity = authorizationService.canEditEntity(point2);
+        assertThat("Can edit stopplaces", canEditEntity, is(true));
+
+
+
+        final Set<String> locationAllowedStopPlaceTypes = authorizationService.getLocationAllowedStopPlaceTypes(canEditEntity, point);
+        assertThat("Allowed stop place types", locationAllowedStopPlaceTypes.size(), is(1));
+        assertThat("Allowed stop place types", locationAllowedStopPlaceTypes.contains("*"), is(true));
+
+        roleAssignmentExtractor.setNextReturnedRoleAssignment(roleAssignment);
+
+        final Set<String> locationBannedStopPlaceTypes = authorizationService.getLocationBannedStopPlaceTypes(canEditEntity, point);
+        assertThat("Banned stop place types", locationBannedStopPlaceTypes.size(), is(2));
+        assertThat("Banned stop place types", locationBannedStopPlaceTypes.contains("airport"), is(true));
+    }
+
+    private Polygon createPolygon(Point point) {
+        Geometry bufferedPoint = point.buffer(10);
+        LinearRing linearRing = new LinearRing(new CoordinateArraySequence(bufferedPoint.getCoordinates()), geometryFactory);
+        return geometryFactory.createPolygon(linearRing, null);
+    }
+
+    private void setUpSecurityContext() {
+        // Create a Jwt with claims
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("sub", "testuser");
+        claims.put("scope", "ROLE_USER");  // Or other relevant scopes/roles
+
+        // Create a Jwt instance
+        Jwt jwt = new Jwt(
+                "tokenValue",
+                Instant.now(),
+                Instant.now().plusSeconds(3600),
+                Map.of("alg", "none"),
+                claims
+        );
+
+        final AbstractAuthenticationToken authToken = new JwtAuthenticationToken(jwt, Collections.singleton(new SimpleGrantedAuthority("ROLE_EDIT_STOPS")));
+        SecurityContextHolder.getContext().setAuthentication(authToken);
+    }
+
+
+
+}
+
+

@@ -54,13 +54,6 @@ public class LocationPermissionsFetcher implements DataFetcher {
         bannedStopPlaceTypeCopy.removeAll(duplicateStopPlaceTypes);
         allowedSubmodeCopy.removeAll(duplicateSubmodes);
         bannedSubmodeCopy.removeAll(duplicateSubmodes);
-        if(allowedStopPlaceTypeCopy.isEmpty()) {
-            allowedStopPlaceTypeCopy.add("*");
-
-        }
-        if(allowedSubmodeCopy.isEmpty()) {
-            allowedSubmodeCopy.add("*");
-        }
 
         return new EntityPermissions(canEditEntity,false, allowedStopPlaceTypeCopy, bannedStopPlaceTypeCopy, allowedSubmodeCopy, bannedSubmodeCopy);
 
