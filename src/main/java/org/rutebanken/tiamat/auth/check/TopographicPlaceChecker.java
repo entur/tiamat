@@ -15,6 +15,7 @@
 
 package org.rutebanken.tiamat.auth.check;
 
+import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
 import org.rutebanken.helper.organisation.AdministrativeZoneChecker;
 import org.rutebanken.helper.organisation.RoleAssignment;
@@ -69,6 +70,28 @@ public class TopographicPlaceChecker implements AdministrativeZoneChecker {
 
         }
         logger.warn("Cannot look for matches in topographic place for entity {} ({})", entity, entity.getClass().getSimpleName());
+        return true;
+    }
+
+    public boolean pointMatchesAdministrativeZone(RoleAssignment roleAssignment, Point point) {
+        if (roleAssignment.getAdministrativeZone() != null) {
+            TopographicPlace topographicPlace = topographicPlaceRepository.findFirstByNetexIdOrderByVersionDesc(roleAssignment.getAdministrativeZone());
+            if (topographicPlace == null) {
+                logger.warn("RoleAssignment contains unknown adminZone reference: {}. Will not allow authorization", roleAssignment.getAdministrativeZone());
+                return false;
+            }
+            Polygon polygon = topographicPlace.getPolygon();
+
+                if (polygon.contains(point)) {
+                    logger.debug("Polygon for topographic place {}-{} contains point for {}", topographicPlace.getNetexId(), topographicPlace.getVersion(), point);
+                    return true;
+                } else {
+                    logger.warn("No polygon match for topographic place {}-{} and point {}", topographicPlace.getNetexId(), topographicPlace.getVersion(), point);
+                    return false;
+                }
+
+        }
+        logger.warn("Cannot look for matches in topographic place for point {} ({})", point, point.getClass().getSimpleName());
         return true;
     }
 }

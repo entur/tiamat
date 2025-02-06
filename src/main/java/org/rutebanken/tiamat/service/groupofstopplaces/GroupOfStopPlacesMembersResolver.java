@@ -40,7 +40,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import static java.util.stream.Collectors.toList;
 
 @Service
 public class GroupOfStopPlacesMembersResolver {
@@ -54,12 +53,9 @@ public class GroupOfStopPlacesMembersResolver {
 
             return groupOfStopPlaces.getMembers()
                     .stream()
-                    .map(ref -> {
-                        StopPlace stopPlace = referenceResolver.resolve(ref);
-                        return stopPlace;
-                    })
+                    .map(ref -> referenceResolver.<StopPlace>resolve(ref))
                     .filter(Objects::nonNull)
-                    .collect(toList());
+                    .toList();
         }
         return new ArrayList<>();
     }
