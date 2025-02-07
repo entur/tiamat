@@ -3633,6 +3633,64 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                 .body("data.stopPlace[0].name.value", equalTo(newName));
     }
 
+    @Test
+    public void testMultimodalStopKeepsEquipmentNetexIds() {
+
+        var stop = new StopPlace();
+        stop.setName(new EmbeddableMultilingualString("Stop Place"));
+        stop.setCentroid(geometryFactory.createPoint(new Coordinate(10, 59.05)));
+        var quay = new Quay();
+        quay.setPublicCode("Q1234");
+        var placeEquipment = new PlaceEquipment();
+        var shelter = new ShelterEquipment();
+        shelter.setEnclosed(true);
+        placeEquipment.getInstalledEquipment().add(shelter);
+        quay.setPlaceEquipments(placeEquipment);
+        stop.setQuays(Set.of(quay));
+        stop = stopPlaceVersionedSaverService.saveNewVersion(stop);
+
+        String stationName = "Station";
+
+        var graphQlJsonQuery = """
+                mutation {
+                stopPlace: createMultiModalStopPlace (input: {
+                         stopPlaceIds:["%s"]
+                         name: { value: "%s" }
+                      }) {
+                         id
+                         name { value }
+                         children {
+                           id
+                           name { value }
+                           quays {
+                             id
+                             placeEquipments {
+                               shelterEquipment {
+                                 id
+                                 enclosed
+                               }
+                             }
+                           }
+                         }
+                      }
+                 }""".formatted(stop.getNetexId(), stationName);
+
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
+                .rootPath("data.stopPlace")
+                .body("name.value", equalTo(stationName))
+                .body("children", hasSize(1))
+                .appendRootPath("children[0]")
+                .body("name.value", equalTo(stop.getName().getValue()))
+                .body("quays", hasSize(1))
+                .appendRootPath("quays[0]")
+                .body("id", equalTo(quay.getNetexId()))
+                .appendRootPath("placeEquipments")
+                .body("shelterEquipment", hasSize(1))
+                .appendRootPath("shelterEquipment[0]")
+                .body("id", equalTo(shelter.getNetexId()))
+                .body("enclosed", equalTo(shelter.isEnclosed()));
+    }
+
     @Ignore("Needs to have property set in order to skip clearing child stop names.")
     @Test
     public void testSameNameForParentAndChild() {
