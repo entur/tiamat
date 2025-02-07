@@ -15,6 +15,7 @@
 
 package org.rutebanken.tiamat.rest.graphql;
 
+import java.util.Set;
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -85,6 +86,7 @@ import java.util.List;
 import java.util.ArrayList;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.comparesEqualTo;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
@@ -3116,6 +3118,267 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                 .body("shelterFasciaBoardTaping", equalTo(true));
     }
 
+    @Test
+    public void testMutateQuayEquipmentKeepsNetexId() {
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setName(new EmbeddableMultilingualString("stopPlaceWithEquipment"));
+        Quay quay = new Quay();
+        quay.setName(new EmbeddableMultilingualString("quayWithEquipment"));
+        PlaceEquipment placeEquipment = new PlaceEquipment();
+        ShelterEquipment shelterEquipment = new ShelterEquipment();
+        shelterEquipment.setEnclosed(false);
+        placeEquipment.getInstalledEquipment().add(shelterEquipment);
+        quay.setPlaceEquipments(placeEquipment);
+        stopPlace.setQuays(Set.of(quay));
+        stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+
+        var savedQuay = stopPlace.getQuays().stream().findAny().orElseThrow();
+        var savedPlaceEquipment = savedQuay.getPlaceEquipments();
+        var installedEquipment = savedPlaceEquipment.getInstalledEquipment().stream().findAny().orElseThrow();
+
+        var graphqlQuery = """
+            mutation {
+              stopPlace: mutateStopPlace(StopPlace: {
+                id: "%s"
+                quays: {
+                  id: "%s"
+                  placeEquipments: {
+                    shelterEquipment: [{
+                      id: "%s"
+                      enclosed: true
+                    }]
+                  }
+                }
+              }) {
+                id
+                quays {
+                  id
+                  placeEquipments {
+                    shelterEquipment {
+                      id
+                      version
+                      enclosed
+                    }
+                  }
+                }
+              }
+            }
+            """.formatted(
+                stopPlace.getNetexId(),
+                savedQuay.getNetexId(),
+                installedEquipment.getNetexId()
+        );
+
+        executeGraphqQLQueryOnly(graphqlQuery)
+                .body("data.stopPlace[0].id", equalTo(stopPlace.getNetexId()))
+                .rootPath("data.stopPlace[0].quays[0]")
+                .body("id", equalTo(savedQuay.getNetexId()))
+                .appendRootPath("placeEquipments.shelterEquipment[0]")
+                .body(notNullValue())
+                .body("id", equalTo(installedEquipment.getNetexId()))
+                .body("version", equalTo(String.valueOf(installedEquipment.getVersion() + 1)))
+                .body("enclosed", equalTo(true));
+    }
+
+    @Test
+    public void testMutateQuayEquipmentReplacesShelterWhenNoNetexId() {
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setName(new EmbeddableMultilingualString("stopPlaceWithEquipment"));
+        Quay quay = new Quay();
+        quay.setName(new EmbeddableMultilingualString("quayWithEquipment"));
+        PlaceEquipment placeEquipment = new PlaceEquipment();
+        ShelterEquipment shelterEquipment = new ShelterEquipment();
+        shelterEquipment.setEnclosed(false);
+        placeEquipment.getInstalledEquipment().add(shelterEquipment);
+        quay.setPlaceEquipments(placeEquipment);
+        stopPlace.setQuays(Set.of(quay));
+        stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+
+        var savedQuay = stopPlace.getQuays().stream().findAny().orElseThrow();
+        var savedPlaceEquipment = savedQuay.getPlaceEquipments();
+        var installedEquipment = savedPlaceEquipment.getInstalledEquipment().stream().findAny().orElseThrow();
+
+        var graphqlQuery = """
+            mutation {
+              stopPlace: mutateStopPlace(StopPlace: {
+                id: "%s"
+                quays: {
+                  id: "%s"
+                  placeEquipments: {
+                    shelterEquipment: [{
+                      enclosed: true
+                    }]
+                  }
+                }
+              }) {
+                id
+                quays {
+                  id
+                  placeEquipments {
+                    shelterEquipment {
+                      id
+                      version
+                      enclosed
+                    }
+                  }
+                }
+              }
+            }
+            """.formatted(
+                stopPlace.getNetexId(),
+                savedQuay.getNetexId(),
+                installedEquipment.getNetexId()
+        );
+
+        executeGraphqQLQueryOnly(graphqlQuery)
+                .body("data.stopPlace[0].id", equalTo(stopPlace.getNetexId()))
+                .rootPath("data.stopPlace[0].quays[0]")
+                .body("id", equalTo(savedQuay.getNetexId()))
+                .appendRootPath("placeEquipments.shelterEquipment[0]")
+                .body(notNullValue())
+                .body("id", not(equalTo(installedEquipment.getNetexId())))
+                .body("version", equalTo("1"))
+                .body("enclosed", equalTo(true));
+    }
+
+    @Test
+    public void testMutateQuayEquipmentDoNotClearEquipmentWhenNotDefined() {
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setName(new EmbeddableMultilingualString("stopPlaceWithEquipment"));
+        Quay quay = new Quay();
+        quay.setName(new EmbeddableMultilingualString("quayWithEquipment"));
+        PlaceEquipment placeEquipment = new PlaceEquipment();
+        ShelterEquipment shelterEquipment = new ShelterEquipment();
+        shelterEquipment.setEnclosed(false);
+        placeEquipment.getInstalledEquipment().add(shelterEquipment);
+        quay.setPlaceEquipments(placeEquipment);
+        stopPlace.setQuays(Set.of(quay));
+        stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+
+        var savedQuay = stopPlace.getQuays().stream().findAny().orElseThrow();
+        var savedPlaceEquipment = savedQuay.getPlaceEquipments();
+        var installedEquipment = savedPlaceEquipment.getInstalledEquipment().stream().findAny().orElseThrow();
+
+        var graphqlQuery = """
+            mutation {
+              stopPlace: mutateStopPlace(StopPlace: {
+                id: "%s"
+                quays: {
+                  id: "%s"
+                  placeEquipments: {
+                    sanitaryEquipment: {
+                      numberOfToilets: 5
+                    }
+                  }
+                }
+              }) {
+                id
+                quays {
+                  id
+                  placeEquipments {
+                    shelterEquipment {
+                      id
+                      version
+                      enclosed
+                    }
+                    sanitaryEquipment {
+                      numberOfToilets
+                    }
+                  }
+                }
+              }
+            }
+            """.formatted(
+                stopPlace.getNetexId(),
+                savedQuay.getNetexId()
+        );
+
+        executeGraphqQLQueryOnly(graphqlQuery)
+                .body("data.stopPlace[0].id", equalTo(stopPlace.getNetexId()))
+                .rootPath("data.stopPlace[0].quays[0]")
+                .body("id", equalTo(savedQuay.getNetexId()))
+                .appendRootPath("placeEquipments.shelterEquipment[0]")
+                .body(notNullValue())
+                .body("id", equalTo(installedEquipment.getNetexId()))
+                .body("version", equalTo(String.valueOf(installedEquipment.getVersion() + 1)))
+                .body("enclosed", equalTo(shelterEquipment.isEnclosed()));
+    }
+
+    @Test
+    public void testMutateQuayEquipmentRemoveUndefined() {
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setName(new EmbeddableMultilingualString("stopPlaceWithEquipment"));
+        Quay quay = new Quay();
+        quay.setName(new EmbeddableMultilingualString("quayWithEquipment"));
+        PlaceEquipment placeEquipment = new PlaceEquipment();
+        ShelterEquipment shelterEquipment = new ShelterEquipment();
+        shelterEquipment.setEnclosed(true);
+        ShelterEquipment shelterEquipment2 = new ShelterEquipment();
+        shelterEquipment2.setEnclosed(true);
+        placeEquipment.getInstalledEquipment().add(shelterEquipment);
+        placeEquipment.getInstalledEquipment().add(shelterEquipment2);
+        quay.setPlaceEquipments(placeEquipment);
+        stopPlace.setQuays(Set.of(quay));
+        stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+
+        var savedQuay = stopPlace.getQuays().stream().findAny().orElseThrow();
+        var savedPlaceEquipment = savedQuay.getPlaceEquipments();
+        var installedEquipment = savedPlaceEquipment.getInstalledEquipment();
+
+        var graphqlQuery = """
+            mutation {
+              stopPlace: mutateStopPlace(StopPlace: {
+                id: "%s"
+                quays: {
+                  id: "%s"
+                  placeEquipments: {
+                    shelterEquipment: [{
+                      id: "%s"
+                      enclosed: false
+                    },
+                    {
+                      enclosed: true
+                    }
+                    ]
+                  }
+                }
+              }) {
+                id
+                quays {
+                  id
+                  placeEquipments {
+                    shelterEquipment {
+                      id
+                      version
+                      enclosed
+                    }
+                  }
+                }
+              }
+            }
+            """.formatted(
+                stopPlace.getNetexId(),
+                savedQuay.getNetexId(),
+                installedEquipment.getFirst().getNetexId()
+        );
+
+        executeGraphqQLQueryOnly(graphqlQuery)
+                .body("data.stopPlace[0].id", equalTo(stopPlace.getNetexId()))
+                .rootPath("data.stopPlace[0].quays[0]")
+                .body("id", equalTo(savedQuay.getNetexId()))
+                .appendRootPath("placeEquipments")
+                .body("shelterEquipment", hasSize(2))
+                .appendRootPath("shelterEquipment[0]")
+                .body(notNullValue())
+                .body("id", equalTo(installedEquipment.getFirst().getNetexId()))
+                .body("version", equalTo(String.valueOf(installedEquipment.getFirst().getVersion() + 1)))
+                .body("enclosed", equalTo(false))
+                .detachRootPath("shelterEquipment[0]")
+                .appendRootPath("shelterEquipment[1]")
+                .body("id", not(anyOf(equalTo(installedEquipment.getFirst().getNetexId()), equalTo(installedEquipment.getLast().getNetexId()))))
+                .body("version", equalTo("1"))
+                .body("enclosed", equalTo(true));
+    }
     @Test
     public void testNullExistingStopPlaceEquipmentShelterHSL() {
         StopPlace stopPlace = new StopPlace();

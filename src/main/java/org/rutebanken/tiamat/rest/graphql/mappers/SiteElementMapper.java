@@ -123,7 +123,16 @@ public class SiteElementMapper {
             }
         }
 
-        Optional<PlaceEquipment> placeEquipment = placeEquipmentMapper.map(input);
+        PlaceEquipment oldPlaceEquipment;
+        if (siteElement instanceof Site_VersionStructure siteVersionStructure) {
+            oldPlaceEquipment = siteVersionStructure.getPlaceEquipments();
+        } else if (siteElement instanceof SiteComponent_VersionStructure siteComponentVersionStructure) {
+            oldPlaceEquipment = siteComponentVersionStructure.getPlaceEquipments();
+        } else {
+            oldPlaceEquipment = new PlaceEquipment();
+        }
+
+        Optional<PlaceEquipment> placeEquipment = placeEquipmentMapper.map(oldPlaceEquipment, input);
 
         if (placeEquipment.isPresent()) {
             if (siteElement instanceof Site_VersionStructure) {

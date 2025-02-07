@@ -96,9 +96,8 @@ public class VersionCreator {
                 .byDefault()
                 .register();
 
-
         List<Class<? extends EntityInVersionStructure>> excludeNetexIdAndVersionsForEntities =
-                Arrays.asList(PlaceEquipment.class, InstalledEquipment_VersionStructure.class);
+                List.of(PlaceEquipment.class);
 
         excludeNetexIdAndVersionsForEntities.forEach(clazz -> {
             mapperFactory.classMap(clazz, clazz)
@@ -107,7 +106,6 @@ public class VersionCreator {
                     .byDefault()
                     .register();
         });
-
 
         mapperFactory.classMap(StopPlace.class, StopPlace.class)
                 .fieldMap("topographicPlace").converter(stopPlacePassThroughId).add()

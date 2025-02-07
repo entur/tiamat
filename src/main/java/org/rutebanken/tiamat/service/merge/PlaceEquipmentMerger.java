@@ -18,6 +18,7 @@ package org.rutebanken.tiamat.service.merge;
 import org.rutebanken.tiamat.model.InstalledEquipment_VersionStructure;
 import org.rutebanken.tiamat.model.PlaceEquipment;
 import org.rutebanken.tiamat.versioning.VersionCreator;
+import org.rutebanken.tiamat.versioning.VersionIncrementor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +30,9 @@ public class PlaceEquipmentMerger {
     @Autowired
     private VersionCreator versionCreator;
 
+    @Autowired
+    private VersionIncrementor versionIncrementor;
+
     public PlaceEquipment mergePlaceEquipments(PlaceEquipment fromPlaceEquipments, PlaceEquipment toPlaceEquipments) {
         if (fromPlaceEquipments != null) {
             if (toPlaceEquipments == null) {
@@ -38,9 +42,9 @@ public class PlaceEquipmentMerger {
             List<InstalledEquipment_VersionStructure> toInstalledEquipment = toPlaceEquipments.getInstalledEquipment();
             if (fromInstalledEquipment != null) {
                 fromInstalledEquipment.forEach(eq -> {
-                    toInstalledEquipment.add(
-                            versionCreator.createCopy(eq, InstalledEquipment_VersionStructure.class)
-                    );
+                    var newVersion = versionCreator.createCopy(eq, InstalledEquipment_VersionStructure.class);
+                    versionIncrementor.incrementVersion(newVersion);
+                    toInstalledEquipment.add(newVersion);
                 });
             }
         }
