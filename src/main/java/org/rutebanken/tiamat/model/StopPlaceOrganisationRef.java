@@ -2,6 +2,7 @@ package org.rutebanken.tiamat.model;
 
 import jakarta.persistence.Embeddable;
 import java.io.Serializable;
+import java.util.Objects;
 
 @Embeddable
 public class StopPlaceOrganisationRef implements Serializable {
@@ -35,5 +36,18 @@ public class StopPlaceOrganisationRef implements Serializable {
 
     public void setOrganisationRef(String organisationId) {
         this.organisationRef = organisationId;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof StopPlaceOrganisationRef that)) {
+            return false;
+        }
+        return Objects.equals(organisationRef, that.organisationRef) && relationshipType == that.relationshipType;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(organisationRef, relationshipType);
     }
 }
