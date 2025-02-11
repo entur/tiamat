@@ -83,7 +83,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.ArrayList;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.anyOf;
@@ -333,6 +332,51 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                     .body("placeEquipments", notNullValue())
                 .rootPath("data.stopPlace[0].quays[0].placeEquipments.shelterEquipment[0]")
                 .body("seats", equalTo(3));
+    }
+
+    @Test
+    public void mutateStopPlaceRemoveAllShelterEquipmentFromQuay() {
+        var quay = new Quay();
+        var firstQuayName = "quay to add place equipment on";
+        quay.setName(new EmbeddableMultilingualString(firstQuayName));
+
+        var stopPlaceName = "StopPlace";
+        var stopPlace = new StopPlace(new EmbeddableMultilingualString(stopPlaceName));
+
+        var placeEquipments = new PlaceEquipment();
+        var shelter = new ShelterEquipment();
+        shelter.setBicycleParking(true);
+        shelter.setTrashCan(true);
+        placeEquipments.getInstalledEquipment().add(shelter);
+        quay.setPlaceEquipments(placeEquipments);
+
+        stopPlace.setQuays(new HashSet<>());
+        stopPlace.getQuays().add(quay);
+
+        stopPlaceRepository.save(stopPlace);
+
+        var graphqlQuery = """
+            mutation {
+              stopPlace: mutateStopPlace(StopPlace: {id: "%s", quays: [{id: "%s", placeEquipments: {shelterEquipment: []}}]}) {
+                id
+                quays {
+                  id
+                  placeEquipments {
+                    shelterEquipment {
+                      bicycleParking
+                      trashCan
+                    }
+                  }
+                }
+              }
+            }
+            """.formatted(stopPlace.getNetexId(),quay.getNetexId());
+
+        executeGraphqQLQueryOnly(graphqlQuery)
+                .rootPath("data.stopPlace[0].quays[0]")
+                .body("placeEquipments", notNullValue())
+                .rootPath("data.stopPlace[0].quays[0].placeEquipments")
+                .body("shelterEquipments", nullValue());
     }
 
     /**
