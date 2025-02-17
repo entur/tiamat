@@ -173,7 +173,7 @@ case $COMMAND in
     ;;
 
   help)
-    usage
+    print_usage
     ;;
 
   build)
