@@ -114,7 +114,7 @@ print_usage() {
   Usage $(basename "$0") <command>
 
   start
-    Start Tiamat service in Docker container.
+    Start Tiamat service and its dependent services in Docker containers.
 
     You can control which version of the Docker Compose bundle is downloaded by
     passing a commit reference to the jore4-docker-compose-bundle repository via
@@ -130,19 +130,19 @@ print_usage() {
     downloaded.
 
   build
-    Build the project locally
+    Build the project locally.
 
   test
-    Run tests locally
+    Run tests locally.
 
   stop
-    Stop Tiamat Docker container and all dependencies
+    Stop Tiamat Docker container and all dependencies.
 
   remove
-    Stop and remove Tiamat Docker container and all dependencies
+    Stop and remove Tiamat Docker container and all dependencies.
 
   help
-    Show this usage information
+    Show this usage information.
   "
 }
 
