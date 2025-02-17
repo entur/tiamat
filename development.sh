@@ -106,7 +106,7 @@ stop_all() {
 }
 
 remove_all() {
-  $DOCKER_COMPOSE_CMD down
+  $DOCKER_COMPOSE_CMD down --volumes
 }
 
 print_usage() {
