@@ -93,14 +93,6 @@ start_dependencies() {
   $DOCKER_COMPOSE_CMD up -d jore4-testdb
 }
 
-stop_all() {
-  $DOCKER_COMPOSE_CMD stop
-}
-
-remove_all() {
-  $DOCKER_COMPOSE_CMD down
-}
-
 build() {
   mvn clean package spring-boot:repackage
 }
@@ -109,12 +101,17 @@ run_tests() {
   mvn test
 }
 
+stop_all() {
+  $DOCKER_COMPOSE_CMD stop
+}
+
+remove_all() {
+  $DOCKER_COMPOSE_CMD down
+}
+
 print_usage() {
   echo "
   Usage $(basename "$0") <command>
-
-  build
-    Build the project locally
 
   start
     Start Tiamat service in Docker container.
@@ -132,14 +129,17 @@ print_usage() {
     the BUNDLE_REF environment variable. By default, the latest version is
     downloaded.
 
+  build
+    Build the project locally
+
+  test
+    Run tests locally
+
   stop
     Stop Tiamat Docker container and all dependencies
 
   remove
     Stop and remove Tiamat Docker container and all dependencies
-
-  test
-    Run tests locally
 
   help
     Show this usage information
