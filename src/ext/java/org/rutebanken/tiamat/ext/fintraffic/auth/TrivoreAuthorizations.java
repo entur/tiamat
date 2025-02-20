@@ -235,7 +235,7 @@ public class TrivoreAuthorizations {
                 .flatMap(openIdConfiguration -> {
                     try {
                         UserInfo userInfo = userInfoCache.get(new TokenAndConfiguration(jwt, openIdConfiguration));
-                        logger.debug("[{}] current permissions: {}", getCurrentSubject(), userInfo.externalPermissions().active());
+                        logger.trace("[{}] current permissions: {}", getCurrentSubject(), userInfo.externalPermissions().active());
                         return Optional.of(userInfo);
                     } catch (ExecutionException e) {
                         logger.warn("Failed to fetch user info for user [{}]", getCurrentSubject(), e);
@@ -313,12 +313,23 @@ public class TrivoreAuthorizations {
                 .map(groupMemberships -> {
                     for (GroupMembership groupMembership : groupMemberships) {
                         if (groupMembership.customFields().getOrDefault(CUSTOM_FIELD_CODESPACE, "").equals(codespace)) {
+                            if (logger.isTraceEnabled()) {
+                                logger.trace("User [{}] is allowed to access codespace {} [{}]", getCurrentSubject(), codespace, groupMembership.id());
+                            }
                             return true;
                         }
                     }
+                    if (logger.isTraceEnabled()) {
+                        logger.trace("User [{}] is not allowed to access codespace {}", getCurrentSubject(), codespace);
+                    }
                     return false;
                 })
-                .orElse(false);
+                .orElseGet(() -> {
+                    if (logger.isTraceEnabled()) {
+                        logger.trace("Could not resolve {} codespace access for user [{}]", codespace, getCurrentSubject());
+                    }
+                    return false;
+                });
     }
 
     public boolean canEditAllEntities() {
