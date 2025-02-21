@@ -1,4 +1,4 @@
-package org.rutebanken.tiamat.ext.fintraffic.auth.model.oidc;
+package org.rutebanken.tiamat.ext.fintraffic.auth.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
