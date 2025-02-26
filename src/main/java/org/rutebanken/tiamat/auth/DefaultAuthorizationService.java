@@ -204,18 +204,6 @@ public class DefaultAuthorizationService implements AuthorizationService {
         return stopTypesSubmodes;
     }
 
-    private boolean filterByRole(RoleAssignment roleAssignment,Object entity) {
-        if (entity instanceof GroupOfStopPlaces groupOfStopPlaces) {
-            final List<StopPlace> gospMembers = groupOfStopPlacesMembersResolver.resolve(groupOfStopPlaces);
-            dataScopedAuthorizationService.isAuthorized(roleAssignment.getRole(), gospMembers);
-        }
-
-        return dataScopedAuthorizationService.authorized(roleAssignment, entity, ROLE_EDIT_STOPS)
-                      || dataScopedAuthorizationService.authorized(roleAssignment, entity, ROLE_DELETE_STOPS);
-
-    }
-
-
     private boolean hasNoAuthentications() {
         if(!authorizationEnabled) {
             return true;
