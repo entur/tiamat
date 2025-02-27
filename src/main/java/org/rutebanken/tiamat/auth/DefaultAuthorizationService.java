@@ -68,10 +68,6 @@ public class DefaultAuthorizationService implements AuthorizationService {
         return dataScopedAuthorizationService.isAuthorized(ROLE_EDIT_STOPS, entities);
     }
 
-    @Override
-    public <T extends EntityStructure> boolean canEditEntity(RoleAssignment roleAssignment, T entity) {
-        return dataScopedAuthorizationService.authorized(roleAssignment, entity, ROLE_EDIT_STOPS);
-    }
 
     @Override
     public void verifyCanEditEntities(Collection<? extends EntityStructure> entities) {
@@ -217,12 +213,16 @@ public class DefaultAuthorizationService implements AuthorizationService {
             return gospMembers.stream()
                     .allMatch(stopPlace -> dataScopedAuthorizationService.isAuthorized(role, List.of(stopPlace)));
         } else {
-            StopPlace stopPlace = (StopPlace) entity;
-            if(!stopPlace.getChildren().isEmpty()) {
-                return stopPlace.getChildren().stream()
-                        .allMatch(child -> dataScopedAuthorizationService.isAuthorized(role, List.of(child)));
+            if(entity instanceof StopPlace stopPlace) {
+                if(!stopPlace.getChildren().isEmpty()) {
+                    return stopPlace.getChildren().stream()
+                            .allMatch(child -> dataScopedAuthorizationService.isAuthorized(role, List.of(child)));
+                } else {
+                    return dataScopedAuthorizationService.isAuthorized(role, List.of(stopPlace));
+                }
+
             }
-            return dataScopedAuthorizationService.isAuthorized(role, List.of(stopPlace));
+            return dataScopedAuthorizationService.isAuthorized(role, List.of(entity));
         }
     }
 }

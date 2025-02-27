@@ -48,12 +48,6 @@ public interface AuthorizationService {
 
     boolean canEditEntity(Point point);
 
-    /**
-     * Does the role assignment give edit right on the given entity?
-     * (for unit tests only)
-     */
-    <T extends EntityStructure> boolean canEditEntity(RoleAssignment roleAssignment, T entity);
-
     Set<String> getAllowedStopPlaceTypes(EntityStructure entity);
 
     Set<String> getLocationAllowedStopPlaceTypes(boolean canEdit, Point point);

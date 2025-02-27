@@ -79,10 +79,13 @@ public class TiamatAuthorizationServiceTest extends TiamatIntegrationTest {
                 .withEntityClassification("StopPlaceType", "!railStation")
                 .build();
 
+
+        mockedRoleAssignmentExtractor.setNextReturnedRoleAssignment(roleAssignment);
         StopPlace stopPlace = new StopPlace();
         stopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
 
-        boolean authorized = authorizationService.canEditEntity(roleAssignment, stopPlace);
+
+        boolean authorized = authorizationService.canEditEntity(stopPlace);
         assertThat(authorized, is(true));
     }
 
@@ -96,6 +99,8 @@ public class TiamatAuthorizationServiceTest extends TiamatIntegrationTest {
                 .withEntityClassification("StopPlaceType", "onstreetBus")
                 .build();
 
+
+        mockedRoleAssignmentExtractor.setNextReturnedRoleAssignment(roleAssignment);
         StopPlace stopPlace = new StopPlace();
         stopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
 
@@ -104,7 +109,7 @@ public class TiamatAuthorizationServiceTest extends TiamatIntegrationTest {
 
         stopPlaceRepository.save(stopPlace);
 
-        boolean authorized = authorizationService.canEditEntity(roleAssignment, quay);
+        boolean authorized = authorizationService.canEditEntity(quay);
         assertThat(authorized, is(true));
     }
 
@@ -118,10 +123,11 @@ public class TiamatAuthorizationServiceTest extends TiamatIntegrationTest {
                 .withEntityClassification("StopPlaceType", "!airport")
                 .withEntityClassification("StopPlaceType", "!railStation")
                 .build();
+        mockedRoleAssignmentExtractor.setNextReturnedRoleAssignment(roleAssignment);
 
         StopPlace stopPlace = new StopPlace();
         stopPlace.setStopPlaceType(StopTypeEnumeration.RAIL_STATION);
-        boolean authorized = authorizationService.canEditEntity(roleAssignment, stopPlace);
+        boolean authorized = authorizationService.canEditEntity(stopPlace);
         assertThat(authorized, is(false));
     }
 
@@ -138,11 +144,12 @@ public class TiamatAuthorizationServiceTest extends TiamatIntegrationTest {
                 .withEntityClassification("Submode", "!railReplacementBus")
                 .build();
 
+        mockedRoleAssignmentExtractor.setNextReturnedRoleAssignment(roleAssignment);
         StopPlace stopPlace = new StopPlace();
         stopPlace.setStopPlaceType(StopTypeEnumeration.AIRPORT);
         stopPlace.setBusSubmode(BusSubmodeEnumeration.RAIL_REPLACEMENT_BUS);
 
-        boolean authorized = authorizationService.canEditEntity(roleAssignment, stopPlace);
+        boolean authorized = authorizationService.canEditEntity(stopPlace);
         assertThat("Should NOT be authorized as both type and submode does not match", authorized, is(false));
     }
 
@@ -160,7 +167,8 @@ public class TiamatAuthorizationServiceTest extends TiamatIntegrationTest {
         stopPlace.setStopPlaceType(StopTypeEnumeration.BUS_STATION);
         stopPlace.setBusSubmode(BusSubmodeEnumeration.REGIONAL_BUS);
 
-        boolean authorized = authorizationService.canEditEntity(roleAssignment, stopPlace);
+        mockedRoleAssignmentExtractor.setNextReturnedRoleAssignment(roleAssignment);
+        boolean authorized = authorizationService.canEditEntity(stopPlace);
         assertThat("Should be authorized as both type and submode are allowed", authorized, is(true));
     }
     /**
@@ -267,16 +275,16 @@ public class TiamatAuthorizationServiceTest extends TiamatIntegrationTest {
         assertThat("Should contain banned Submode", bannedSubmodes.contains("railReplacementBus"), is(true));
 
         mockedRoleAssignmentExtractor.setNextReturnedRoleAssignment(roleAssignment);
-        boolean authorized = authorizationService.canEditEntity(roleAssignment, stopPlace);
+        boolean authorized = authorizationService.canEditEntity(stopPlace);
         assertThat("Should be authorized as both type and submode are allowed", authorized, is(true));
 
         mockedRoleAssignmentExtractor.setNextReturnedRoleAssignment(roleAssignment);
-        boolean authorizedRail = authorizationService.canEditEntity(roleAssignment, railStation);
+        boolean authorizedRail = authorizationService.canEditEntity(railStation);
         assertThat("Should not be authorized as rail station is banned", authorizedRail, is(false));
 
 
         mockedRoleAssignmentExtractor.setNextReturnedRoleAssignment(roleAssignment);
-        boolean authorizedOutside = authorizationService.canEditEntity(roleAssignment, outsideStopPlace);
+        boolean authorizedOutside = authorizationService.canEditEntity(outsideStopPlace);
         assertThat("Should be authorized as outside stop place is not in the same topographical place", authorizedOutside, is(false));
 
         mockedRoleAssignmentExtractor.setNextReturnedRoleAssignment(roleAssignment);
