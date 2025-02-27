@@ -222,7 +222,12 @@ public class DefaultAuthorizationService implements AuthorizationService {
             return gospMembers.stream()
                     .allMatch(stopPlace -> dataScopedAuthorizationService.isAuthorized(role, List.of(stopPlace)));
         } else {
-            return dataScopedAuthorizationService.isAuthorized(role, List.of(entity));
+            StopPlace stopPlace = (StopPlace) entity;
+            if(!stopPlace.getChildren().isEmpty()) {
+                return stopPlace.getChildren().stream()
+                        .allMatch(child -> dataScopedAuthorizationService.isAuthorized(role, List.of(child)));
+            }
+            return dataScopedAuthorizationService.isAuthorized(role, List.of(stopPlace));
         }
     }
 }
