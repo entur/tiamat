@@ -49,11 +49,6 @@ public interface AuthorizationService {
     boolean canEditEntity(Point point);
 
     /**
-     * Return the subset of the roles that the current user holds that apply to this entity.
-     * */
-    <T extends EntityStructure> Set<String> getRelevantRolesForEntity(T entity);
-
-    /**
      * Does the role assignment give edit right on the given entity?
      * (for unit tests only)
      */

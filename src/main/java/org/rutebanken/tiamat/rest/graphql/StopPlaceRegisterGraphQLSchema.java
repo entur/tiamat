@@ -60,7 +60,6 @@ import org.rutebanken.tiamat.model.WaitingRoomEquipment;
 import org.rutebanken.tiamat.model.Zone_VersionStructure;
 import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
-import org.rutebanken.tiamat.rest.graphql.fetchers.AuthorizationCheckDataFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.EntityPermissionsFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.FareZoneAuthoritiesFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.GroupOfStopPlacesMembersFetcher;
@@ -129,8 +128,6 @@ import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 import static org.rutebanken.tiamat.rest.graphql.mappers.EmbeddableMultilingualStringMapper.getEmbeddableString;
 import static org.rutebanken.tiamat.rest.graphql.operations.MultiModalityOperationsBuilder.ADD_TO_MULTI_MODAL_STOP_PLACE_INPUT;
 import static org.rutebanken.tiamat.rest.graphql.scalars.TransportModeScalar.getValidSubmodes;
-import static org.rutebanken.tiamat.rest.graphql.types.AuthorizationCheckCreator.createAuthorizationCheckArguments;
-import static org.rutebanken.tiamat.rest.graphql.types.AuthorizationCheckCreator.createAuthorizationCheckOutputType;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.accessibilityAssessmentInputObjectType;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.accessibilityAssessmentObjectType;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.alternativeNameInputObjectType;
@@ -224,9 +221,6 @@ public class StopPlaceRegisterGraphQLSchema {
 
     @Autowired
     private FareZoneObjectTypeCreator fareZoneObjectTypeCreator;
-
-    @Autowired
-    private AuthorizationCheckDataFetcher authorizationCheckDataFetcher;
 
     @Autowired
     private MultiModalityOperationsBuilder multiModalityOperationsBuilder;
@@ -526,11 +520,6 @@ public class StopPlaceRegisterGraphQLSchema {
                         .type(new GraphQLList(transportModeSubmodeObjectType))
                         .description("List all valid Transportmode/Submode-combinations."))
                 .field(newFieldDefinition()
-                        .name(CHECK_AUTHORIZED)
-                        .type(createAuthorizationCheckOutputType())
-                        .description(AUTHORIZATION_CHECK_DESCRIPTION)
-                        .arguments(createAuthorizationCheckArguments()))
-                .field(newFieldDefinition()
                         .name(TAGS)
                         .type(new GraphQLList(tagObjectTypeCreator.create()))
                         .description(TAGS_DESCRIPTION)
@@ -769,7 +758,6 @@ public class StopPlaceRegisterGraphQLSchema {
         registerDataFetcher(codeRegistryBuilder, STOPPLACES_REGISTER, FIND_TOPOGRAPHIC_PLACE, topographicPlaceFetcher);
         registerDataFetcher(codeRegistryBuilder, STOPPLACES_REGISTER, FIND_PATH_LINK, pathLinkFetcher);
         registerDataFetcher(codeRegistryBuilder, STOPPLACES_REGISTER, FIND_PARKING, parkingFetcher);
-        registerDataFetcher(codeRegistryBuilder, STOPPLACES_REGISTER, CHECK_AUTHORIZED, authorizationCheckDataFetcher);
         registerDataFetcher(codeRegistryBuilder, STOPPLACES_REGISTER, TAGS, tagFetcher);
         registerDataFetcher(codeRegistryBuilder, STOPPLACES_REGISTER, GROUP_OF_STOP_PLACES, groupOfStopPlacesFetcher);
         registerDataFetcher(codeRegistryBuilder, STOPPLACES_REGISTER, PURPOSE_OF_GROUPING, purposeOfGroupingFetcher);

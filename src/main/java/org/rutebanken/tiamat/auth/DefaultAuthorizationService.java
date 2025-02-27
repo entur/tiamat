@@ -85,11 +85,6 @@ public class DefaultAuthorizationService implements AuthorizationService {
     }
 
     @Override
-    public <T extends EntityStructure> Set<String> getRelevantRolesForEntity(T entity) {
-        return dataScopedAuthorizationService.getRelevantRolesForEntity(entity);
-    }
-
-    @Override
     public boolean canDeleteEntity(EntityStructure entity) {
         return canEditDeleteEntity(entity, ROLE_DELETE_STOPS);
     }
