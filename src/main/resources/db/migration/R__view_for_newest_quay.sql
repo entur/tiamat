@@ -41,7 +41,7 @@ FROM quay AS q
          LEFT JOIN value_items AS validityEnd ON qkvValidityEnd.key_values_id = validityEnd.value_id
 
          LEFT JOIN quay_key_values AS qkvELYCode ON
-    q.id = qkvELYCode.quay_id AND qkvELYCode.key_values_key = 'ELYCode'
+    q.id = qkvELYCode.quay_id AND qkvELYCode.key_values_key = 'elyNumber'
          LEFT JOIN value_items AS ELYCode ON qkvELYCode.key_values_id = ELYCode.value_id
 
          LEFT JOIN quay_key_values AS qkvPostalCode ON

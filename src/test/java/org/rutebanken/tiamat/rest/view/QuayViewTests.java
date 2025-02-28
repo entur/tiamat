@@ -413,7 +413,7 @@ public class QuayViewTests extends TiamatIntegrationTest {
             }
 
             if (testData.ELYCode != null) {
-                testData.quay.getKeyValues().put("ELYCode", testData.ELYCode);
+                testData.quay.getKeyValues().put("elyNumber", testData.ELYCode);
             }
 
             if (testData.postalCode != null) {
