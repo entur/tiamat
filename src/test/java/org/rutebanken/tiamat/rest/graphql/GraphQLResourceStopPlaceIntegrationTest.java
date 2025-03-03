@@ -24,6 +24,7 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Point;
 import org.rutebanken.tiamat.changelog.EntityChangedEvent;
 import org.rutebanken.tiamat.changelog.EntityChangedJMSListener;
+import org.rutebanken.tiamat.exception.HSLErrorCodeEnumeration;
 import org.rutebanken.tiamat.model.AccessibilityAssessment;
 import org.rutebanken.tiamat.model.AccessibilityLimitation;
 import org.rutebanken.tiamat.model.AlternativeName;
@@ -3774,6 +3775,159 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
 
         executeGraphqQLQueryOnly(fetchChildNameQuery)
                 .body("data.stopPlace[0].name.value", equalTo(name));
+    }
+
+    @Test
+    public void forbidOverlappingValidityPeriodsWithSameName() {
+
+        String startDate = "1990-01-01";
+        String endDate = "1991-01-01";
+        String newStartDate = "1990-06-01";
+        String newEndDate = "1991-06-01";
+
+        String stopPlaceName = "SameName";
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(stopPlaceName));
+
+        stopPlace.getKeyValues().put("validityStart", new Value(startDate));
+        stopPlace.getKeyValues().put("validityEnd", new Value(endDate));
+        stopPlaceRepository.save(stopPlace);
+
+        String graphQlJsonQuery = """
+                mutation {
+                stopPlace: mutateStopPlace(StopPlace: {
+                          name: { value:"%s" }
+                          keyValues: [
+                            { key:"validityStart" values:"%s" },
+                            { key:"validityEnd" values:"%s" }
+                          ]
+                  }) {
+                        id
+                    }
+                }
+                """.formatted(
+                        stopPlaceName,
+                        newStartDate,
+                        newEndDate
+                );
+
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
+                .body("errors[0].extensions.errorCode", equalTo(HSLErrorCodeEnumeration.STOP_PLACE_UNIQUE_NAME.name()));
+    }
+
+    @Test
+    public void forbidOverlappingValidityPeriodsWithSamePrivateCode() {
+
+        String startDate = "1990-01-01";
+        String endDate = "1991-01-01";
+        String newStartDate = "1990-06-01";
+        String newEndDate = "1991-06-01";
+
+        String stopPlaceName = "OldName";
+        String newStopPlaceName = "NewName";
+
+        String privateCode = "X1234";
+
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(stopPlaceName));
+
+        stopPlace.setPrivateCode(new PrivateCodeStructure(privateCode, "COD"));
+        stopPlace.getKeyValues().put("validityStart", new Value(startDate));
+        stopPlace.getKeyValues().put("validityEnd", new Value(endDate));
+        stopPlaceRepository.save(stopPlace);
+
+        String graphQlJsonQuery = """
+                mutation {
+                stopPlace: mutateStopPlace(StopPlace: {
+                          name: { value:"%s" }
+                          privateCode: { type: "COD", value: "%s" },
+                          keyValues: [
+                            { key:"validityStart" values:"%s" },
+                            { key:"validityEnd" values:"%s" }
+                          ]
+                  }) {
+                        id
+                    }
+                }
+                """.formatted(
+                newStopPlaceName,
+                privateCode,
+                newStartDate,
+                newEndDate
+        );
+
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
+                .body("errors[0].extensions.errorCode", equalTo(HSLErrorCodeEnumeration.STOP_PLACE_UNIQUE_PRIVATE_CODE.name()));
+    }
+
+    @Test
+    public void forbidOverlappingValidityPeriodsWithNoEndDate() {
+
+        String startDate = "1990-01-01";
+        String newStartDate = "1990-06-01";
+        String newEndDate = "1991-06-01";
+
+        String stopPlaceName = "SameName";
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(stopPlaceName));
+
+        stopPlace.getKeyValues().put("validityStart", new Value(startDate));
+        stopPlaceRepository.save(stopPlace);
+
+        String graphQlJsonQuery = """
+                mutation {
+                stopPlace: mutateStopPlace(StopPlace: {
+                          name: { value:"%s" }
+                          keyValues: [
+                            { key:"validityStart" values:"%s" },
+                            { key:"validityEnd" values:"%s" }
+                          ]
+                  }) {
+                        id
+                    }
+                }
+                """.formatted(
+                stopPlaceName,
+                newStartDate,
+                newEndDate
+        );
+
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
+                .body("errors[0].extensions.errorCode", equalTo(HSLErrorCodeEnumeration.STOP_PLACE_UNIQUE_NAME.name()));
+    }
+
+    @Test
+    public void allowNotOverlappingValidityPeriodsWithSameName() {
+
+        String startDate = "1990-01-01";
+        String endDate = "1991-01-01";
+        String newStartDate = "1991-01-02";
+        String newEndDate = "1992-01-01";
+
+        String stopPlaceName = "SameName";
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(stopPlaceName));
+
+        stopPlace.getKeyValues().put("validityStart", new Value(startDate));
+        stopPlace.getKeyValues().put("validityEnd", new Value(endDate));
+        stopPlace = stopPlaceRepository.save(stopPlace);
+
+        String graphQlJsonQuery = """
+                mutation {
+                stopPlace: mutateStopPlace(StopPlace: {
+                          name: { value:"%s" }
+                          keyValues: [
+                            { key:"validityStart" values:"%s" },
+                            { key:"validityEnd" values:"%s" }
+                          ]
+                  }) {
+                        id
+                    }
+                }
+                """.formatted(
+                stopPlaceName,
+                newStartDate,
+                newEndDate
+        );
+
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
+                .body("data.stopPlace.id", not(equalTo(stopPlace.getNetexId())));
     }
 
     private StopPlace createStopPlaceWithMunicipalityRef(String name, TopographicPlace municipality, StopTypeEnumeration type) {
