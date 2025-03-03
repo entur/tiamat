@@ -3,10 +3,11 @@ package org.rutebanken.tiamat.rest.graphql.fetchers;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import org.rutebanken.tiamat.auth.AuthorizationService;
-import org.rutebanken.tiamat.diff.generic.StopPlaceTypeSubmodeEnumuration;
+import org.rutebanken.tiamat.diff.generic.SubmodeEnumuration;
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
 import org.rutebanken.tiamat.model.GroupOfStopPlaces;
 import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.rutebanken.tiamat.model.authorization.EntityPermissions;
 import org.rutebanken.tiamat.netex.id.TypeFromIdResolver;
 import org.rutebanken.tiamat.repository.generic.GenericEntityInVersionRepository;
@@ -50,36 +51,18 @@ public class EntityPermissionsFetcher implements DataFetcher {
 
         final boolean canEditEntities = authorizationService.canEditEntity(entityInVersionStructure);
         final boolean canDeleteEntity = authorizationService.canDeleteEntity(entityInVersionStructure);
-        final Set<StopPlaceTypeSubmodeEnumuration> allowedStopPlaceTypes = authorizationService.getAllowedStopPlaceTypes(entityInVersionStructure);
-        final Set<StopPlaceTypeSubmodeEnumuration> bannedStopPlaceTypes = authorizationService.getBannedStopPlaceTypes(entityInVersionStructure);
-        final Set<StopPlaceTypeSubmodeEnumuration> allowedSubmode = authorizationService.getAllowedSubmodes(entityInVersionStructure);
-        final Set<StopPlaceTypeSubmodeEnumuration> bannedSubmode = authorizationService.getBannedSubmodes(entityInVersionStructure);
+        final Set<StopTypeEnumeration> allowedStopPlaceTypes = authorizationService.getAllowedStopPlaceTypes(entityInVersionStructure);
+        final Set<StopTypeEnumeration> bannedStopPlaceTypes = authorizationService.getBannedStopPlaceTypes(entityInVersionStructure);
+        final Set<SubmodeEnumuration> allowedSubmode = authorizationService.getAllowedSubmodes(entityInVersionStructure);
+        final Set<SubmodeEnumuration> bannedSubmode = authorizationService.getBannedSubmodes(entityInVersionStructure);
 
-        Set<StopPlaceTypeSubmodeEnumuration> allowedStopPlaceTypeCopy = new HashSet<>(allowedStopPlaceTypes);
-        Set<StopPlaceTypeSubmodeEnumuration> bannedStopPlaceTypeCopy = new HashSet<>(bannedStopPlaceTypes);
-        Set<StopPlaceTypeSubmodeEnumuration> allowedSubmodeCopy = new HashSet<>(allowedSubmode);
-        Set<StopPlaceTypeSubmodeEnumuration> bannedSubmodeCopy = new HashSet<>(bannedSubmode);
-
-        Set<StopPlaceTypeSubmodeEnumuration> duplicateStopPlaceTypes = new HashSet<>(allowedStopPlaceTypes);
-        duplicateStopPlaceTypes.retainAll(bannedStopPlaceTypes);
-        Set<StopPlaceTypeSubmodeEnumuration> duplicateSubmodes = new HashSet<>(allowedSubmode);
-        duplicateSubmodes.retainAll(bannedSubmode);
-
-        allowedStopPlaceTypeCopy.removeAll(duplicateStopPlaceTypes);
-        bannedStopPlaceTypeCopy.removeAll(duplicateStopPlaceTypes);
-        allowedSubmodeCopy.removeAll(duplicateSubmodes);
-        bannedSubmodeCopy.removeAll(duplicateSubmodes);
-
-        if(allowedStopPlaceTypeCopy.isEmpty() && !bannedStopPlaceTypeCopy.contains(StopPlaceTypeSubmodeEnumuration.ALL)) {
-                allowedStopPlaceTypeCopy.add(StopPlaceTypeSubmodeEnumuration.ALL);
-
-        }
-        if(allowedSubmodeCopy.isEmpty() && !bannedSubmodeCopy.contains(StopPlaceTypeSubmodeEnumuration.ALL)) {
-                allowedSubmodeCopy.add(StopPlaceTypeSubmodeEnumuration.ALL);
-        }
-
-
-        return new EntityPermissions(canEditEntities, canDeleteEntity, allowedStopPlaceTypeCopy, bannedStopPlaceTypeCopy, allowedSubmodeCopy, bannedSubmodeCopy);
-
+        return new EntityPermissions.Builder()
+                .canDelete(canDeleteEntity)
+                .canEdit(canEditEntities)
+                .allowedSubmodes(allowedSubmode)
+                .bannedSubmodes(bannedSubmode)
+                .allowedStopPlaceTypes(allowedStopPlaceTypes)
+                .bannedStopPlaceTypes(bannedStopPlaceTypes)
+                .build();
     }
 }

@@ -1,8 +1,9 @@
 package org.rutebanken.tiamat.auth;
 
 import org.locationtech.jts.geom.Point;
-import org.rutebanken.tiamat.diff.generic.StopPlaceTypeSubmodeEnumuration;
+import org.rutebanken.tiamat.diff.generic.SubmodeEnumuration;
 import org.rutebanken.tiamat.model.EntityStructure;
+import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.springframework.security.access.AccessDeniedException;
 
 import java.util.Collection;
@@ -48,21 +49,21 @@ public interface AuthorizationService {
 
     boolean canEditEntity(Point point);
 
-    Set<StopPlaceTypeSubmodeEnumuration> getAllowedStopPlaceTypes(EntityStructure entity);
+    Set<StopTypeEnumeration> getAllowedStopPlaceTypes(EntityStructure entity);
 
-    Set<StopPlaceTypeSubmodeEnumuration> getLocationAllowedStopPlaceTypes(boolean canEdit, Point point);
+    Set<StopTypeEnumeration> getLocationAllowedStopPlaceTypes(boolean canEdit, Point point);
 
-    Set<StopPlaceTypeSubmodeEnumuration> getBannedStopPlaceTypes(EntityStructure entity);
+    Set<StopTypeEnumeration> getBannedStopPlaceTypes(EntityStructure entity);
 
-    Set<StopPlaceTypeSubmodeEnumuration> getLocationBannedStopPlaceTypes(boolean canEdit, Point point);
+    Set<StopTypeEnumeration> getLocationBannedStopPlaceTypes(boolean canEdit, Point point);
 
-    Set<StopPlaceTypeSubmodeEnumuration> getAllowedSubmodes(EntityStructure entity);
+    Set<SubmodeEnumuration> getAllowedSubmodes(EntityStructure entity);
 
-    Set<StopPlaceTypeSubmodeEnumuration> getLocationAllowedSubmodes(boolean canEdit, Point point);
+    Set<SubmodeEnumuration> getLocationAllowedSubmodes(boolean canEdit, Point point);
 
-    Set<StopPlaceTypeSubmodeEnumuration> getBannedSubmodes(EntityStructure entity);
+    Set<SubmodeEnumuration> getBannedSubmodes(EntityStructure entity);
 
-    Set<StopPlaceTypeSubmodeEnumuration> getLocationBannedSubmodes(boolean canEdit, Point point);
+    Set<SubmodeEnumuration> getLocationBannedSubmodes(boolean canEdit, Point point);
 
 
     boolean isGuest();

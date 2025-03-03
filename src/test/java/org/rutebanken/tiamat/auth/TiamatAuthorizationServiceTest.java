@@ -25,7 +25,7 @@ import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.geom.impl.CoordinateArraySequence;
 import org.rutebanken.helper.organisation.RoleAssignment;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
-import org.rutebanken.tiamat.diff.generic.StopPlaceTypeSubmodeEnumuration;
+import org.rutebanken.tiamat.diff.generic.SubmodeEnumuration;
 import org.rutebanken.tiamat.model.BusSubmodeEnumeration;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -187,8 +187,8 @@ public class TiamatAuthorizationServiceTest extends TiamatIntegrationTest {
         stopPlace.setStopPlaceType(StopTypeEnumeration.RAIL_STATION);
         stopPlace.setBusSubmode(BusSubmodeEnumeration.RAIL_REPLACEMENT_BUS);
 
-        final Set<StopPlaceTypeSubmodeEnumuration> allowedStopPlaceTypes = authorizationService.getAllowedStopPlaceTypes(stopPlace);
-        assertThat("Should contain allowed StopPlaceType", allowedStopPlaceTypes.contains(StopPlaceTypeSubmodeEnumuration.RAIL_STATION), is(true));
+        final Set<StopTypeEnumeration> allowedStopPlaceTypes = authorizationService.getAllowedStopPlaceTypes(stopPlace);
+        assertThat("Should contain allowed StopPlaceType", allowedStopPlaceTypes.contains(StopTypeEnumeration.RAIL_STATION), is(true));
     }
 
 
@@ -201,9 +201,9 @@ public class TiamatAuthorizationServiceTest extends TiamatIntegrationTest {
         StopPlace stopPlace = new StopPlace();
         stopPlace.setStopPlaceType(StopTypeEnumeration.BUS_STATION);
 
-        final Set<StopPlaceTypeSubmodeEnumuration> bannedStopPlaceTypes = authorizationService.getBannedStopPlaceTypes(stopPlace);
-        assertThat("Should contain allowed StopPlaceType", bannedStopPlaceTypes.contains(StopPlaceTypeSubmodeEnumuration.RAIL_STATION), is(false));
-        assertThat("Should contain allowed StopPlaceType", bannedStopPlaceTypes.contains(StopPlaceTypeSubmodeEnumuration.AIRPORT), is(false));
+        final Set<StopTypeEnumeration> bannedStopPlaceTypes = authorizationService.getBannedStopPlaceTypes(stopPlace);
+        assertThat("Should contain allowed StopPlaceType", bannedStopPlaceTypes.contains(StopTypeEnumeration.RAIL_STATION), is(false));
+        assertThat("Should contain allowed StopPlaceType", bannedStopPlaceTypes.contains(StopTypeEnumeration.AIRPORT), is(false));
     }
 
 
@@ -266,10 +266,10 @@ public class TiamatAuthorizationServiceTest extends TiamatIntegrationTest {
         outsideStopPlace.setCentroid(point2);
         stopPlaceRepository.saveAndFlush(outsideStopPlace);
 
-        final Set<StopPlaceTypeSubmodeEnumuration> bannedStopPlaceTypes = authorizationService.getBannedStopPlaceTypes(stopPlace);
+        final Set<StopTypeEnumeration> bannedStopPlaceTypes = authorizationService.getBannedStopPlaceTypes(stopPlace);
 
         mockedRoleAssignmentExtractor.setNextReturnedRoleAssignment(roleAssignment);
-        final Set<StopPlaceTypeSubmodeEnumuration> bannedSubmodes = authorizationService.getBannedSubmodes(stopPlace);
+        final Set<SubmodeEnumuration> bannedSubmodes = authorizationService.getBannedSubmodes(stopPlace);
 
         assertThat("Should contain banned StopPlaceType", bannedStopPlaceTypes.contains("airport"), is(true));
         assertThat("Should contain banned StopPlaceType", bannedStopPlaceTypes.contains("railStation"), is(true));
@@ -289,11 +289,11 @@ public class TiamatAuthorizationServiceTest extends TiamatIntegrationTest {
         assertThat("Should be authorized as outside stop place is not in the same topographical place", authorizedOutside, is(false));
 
         mockedRoleAssignmentExtractor.setNextReturnedRoleAssignment(roleAssignment);
-        final Set<StopPlaceTypeSubmodeEnumuration> bannedSubmodesOutside = authorizationService.getBannedSubmodes(outsideStopPlace);
+        final Set<SubmodeEnumuration> bannedSubmodesOutside = authorizationService.getBannedSubmodes(outsideStopPlace);
         assertThat("Should contain all banned Submode", bannedSubmodesOutside.contains(ENTITY_CLASSIFIER_ALL_TYPES), is(true));
 
         mockedRoleAssignmentExtractor.setNextReturnedRoleAssignment(roleAssignment);
-        final Set<StopPlaceTypeSubmodeEnumuration> bannedStopPlaceTypesOutside = authorizationService.getBannedSubmodes(outsideStopPlace);
+        final Set<SubmodeEnumuration> bannedStopPlaceTypesOutside = authorizationService.getBannedSubmodes(outsideStopPlace);
         assertThat("Should not contain banned stop place type", bannedStopPlaceTypesOutside.isEmpty(), is(true));
     }
 

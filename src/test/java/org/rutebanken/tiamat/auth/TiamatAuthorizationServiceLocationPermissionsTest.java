@@ -9,7 +9,6 @@ import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.geom.impl.CoordinateArraySequence;
 import org.rutebanken.helper.organisation.RoleAssignment;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
-import org.rutebanken.tiamat.diff.generic.StopPlaceTypeSubmodeEnumuration;
 import org.rutebanken.tiamat.model.BusSubmodeEnumeration;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
@@ -88,13 +87,13 @@ public class TiamatAuthorizationServiceLocationPermissionsTest extends TiamatInt
 
         roleAssignmentExtractor.setNextReturnedRoleAssignment(roleAssignment);
 
-        final Set<StopPlaceTypeSubmodeEnumuration> locationAllowedStopPlaceTypes = authorizationService.getLocationAllowedStopPlaceTypes(false, point);
+        final Set<StopTypeEnumeration> locationAllowedStopPlaceTypes = authorizationService.getLocationAllowedStopPlaceTypes(false, point);
         assertThat("Allowed stop place types", locationAllowedStopPlaceTypes.size(), is(0));
 
         roleAssignmentExtractor.setNextReturnedRoleAssignment(roleAssignment);
-        final Set<StopPlaceTypeSubmodeEnumuration> locationBannedStopPlaceTypes = authorizationService.getLocationBannedStopPlaceTypes(false, point);
-        assertThat("Banned stop place types", locationBannedStopPlaceTypes.size(), is(1));
-        assertThat("Banned stop place types", locationBannedStopPlaceTypes.iterator().next(), is(StopPlaceTypeSubmodeEnumuration.ALL));
+        final Set<StopTypeEnumeration> locationBannedStopPlaceTypes = authorizationService.getLocationBannedStopPlaceTypes(false, point);
+        assertThat("Banned stop place types", locationBannedStopPlaceTypes.isEmpty(), is(true));
+        assertThat("Banned stop place types", locationBannedStopPlaceTypes.contains(StopTypeEnumeration.AIRPORT), is(false));
 
     }
 
@@ -139,15 +138,15 @@ public class TiamatAuthorizationServiceLocationPermissionsTest extends TiamatInt
 
 
 
-        final Set<StopPlaceTypeSubmodeEnumuration> locationAllowedStopPlaceTypes = authorizationService.getLocationAllowedStopPlaceTypes(canEditEntity, point);
-        assertThat("Allowed stop place types", locationAllowedStopPlaceTypes.size(), is(1));
-        assertThat("Allowed stop place types", locationAllowedStopPlaceTypes.contains(StopPlaceTypeSubmodeEnumuration.ALL), is(true));
+        final Set<StopTypeEnumeration> locationAllowedStopPlaceTypes = authorizationService.getLocationAllowedStopPlaceTypes(canEditEntity, point);
+        assertThat("Allowed stop place types", locationAllowedStopPlaceTypes.isEmpty(), is(true));
+        assertThat("Allowed stop place types", locationAllowedStopPlaceTypes.contains(StopTypeEnumeration.AIRPORT), is(false));
 
         roleAssignmentExtractor.setNextReturnedRoleAssignment(roleAssignment);
 
-        final Set<StopPlaceTypeSubmodeEnumuration> locationBannedStopPlaceTypes = authorizationService.getLocationBannedStopPlaceTypes(canEditEntity, point);
+        final Set<StopTypeEnumeration> locationBannedStopPlaceTypes = authorizationService.getLocationBannedStopPlaceTypes(canEditEntity, point);
         assertThat("Banned stop place types", locationBannedStopPlaceTypes.size(), is(2));
-        assertThat("Banned stop place types", locationBannedStopPlaceTypes.contains(StopPlaceTypeSubmodeEnumuration.AIRPORT), is(true));
+        assertThat("Banned stop place types", locationBannedStopPlaceTypes.contains(StopTypeEnumeration.AIRPORT), is(true));
     }
 
     private Polygon createPolygon(Point point) {

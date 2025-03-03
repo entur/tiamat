@@ -23,7 +23,7 @@ import graphql.schema.GraphQLInputType;
 import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLNonNull;
 import graphql.schema.GraphQLObjectType;
-import org.rutebanken.tiamat.diff.generic.StopPlaceTypeSubmodeEnumuration;
+import org.rutebanken.tiamat.diff.generic.SubmodeEnumuration;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.model.AirSubmodeEnumeration;
 import org.rutebanken.tiamat.model.BoardingPositionTypeEnumeration;
@@ -103,7 +103,7 @@ public class CustomGraphQLTypes {
     public static GraphQLEnumType parkingTypeEnum = createCustomEnumType(PARKING_TYPE_ENUM, ParkingTypeEnumeration.class);
     public static GraphQLEnumType topographicPlaceTypeEnum = createCustomEnumType(TOPOGRAPHIC_PLACE_TYPE_ENUM, TopographicPlaceTypeEnumeration.class);
     public static GraphQLEnumType stopPlaceTypeEnum = createCustomEnumType(STOP_PLACE_TYPE_ENUM, StopTypeEnumeration.class);
-    public static GraphQLEnumType stopPlaceTypeSubmodeEnum = createCustomEnumType(STOP_PLACE_TYPE_SUBMODE_ENUM, StopPlaceTypeSubmodeEnumuration.class);
+    public static GraphQLEnumType submodeEnum = createCustomEnumType(SUBMODE_ENUM, SubmodeEnumuration.class);
     public static GraphQLEnumType interchangeWeightingEnum = createCustomEnumType(INTERCHANGE_WEIGHTING_TYPE_ENUM, InterchangeWeightingEnumeration.class);
     public static GraphQLEnumType cycleStorageTypeEnum = createCustomEnumType(CYCLE_STORAGE_TYPE, CycleStorageEnumeration.class);
     public static GraphQLEnumType signContentTypeEnum = createCustomEnumType(SIGN_CONTENT_TYPE, SignContentEnumeration.class);

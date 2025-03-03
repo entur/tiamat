@@ -151,7 +151,7 @@ import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.privat
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.privateCodeInputType;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.scopingMethodEnumType;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.stopPlaceTypeEnum;
-import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.stopPlaceTypeSubmodeEnum;
+import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.submodeEnum;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.topographicPlaceInputObjectType;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.topographicPlaceTypeEnum;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.transportModeSubmodeObjectType;
@@ -414,19 +414,19 @@ public class StopPlaceRegisterGraphQLSchema {
 
                 .field(newFieldDefinition()
                         .name("allowedStopPlaceTypes")
-                        .type(new GraphQLList(stopPlaceTypeSubmodeEnum))
+                        .type(new GraphQLList(stopPlaceTypeEnum))
                         .build())
                 .field(newFieldDefinition()
                         .name("bannedStopPlaceTypes")
-                        .type(new GraphQLList(stopPlaceTypeSubmodeEnum))
+                        .type(new GraphQLList(stopPlaceTypeEnum))
                         .build())
                 .field(newFieldDefinition()
                         .name("allowedSubmodes")
-                        .type(new GraphQLList(stopPlaceTypeSubmodeEnum))
+                        .type(new GraphQLList(submodeEnum))
                         .build())
                 .field(newFieldDefinition()
                         .name("bannedSubmodes")
-                        .type(new GraphQLList(stopPlaceTypeSubmodeEnum))
+                        .type(new GraphQLList(submodeEnum))
                         .build())
                 .build();
 

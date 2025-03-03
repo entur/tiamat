@@ -20,35 +20,16 @@ package org.rutebanken.tiamat.diff.generic;
  */
 
 
-public enum StopPlaceTypeSubmodeEnumuration {
-    ONSTREET_BUS("onstreetBus"),
-    ONSTREET_TRAM("onstreetTram"),
-    AIRPORT("airport"),
-    RAIL_STATION("railStation"),
-    METRO_STATION("metroStation"),
-    BUS_STATION("busStation"),
-    COACH_STATION("coachStation"),
-    TRAM_STATION("tramStation"),
-    HARBOUR_PORT("harbourPort"),
-    FERRY_PORT("ferryPort"),
-    FERRY_STOP("ferryStop"),
-    LIFT_STATION("liftStation"),
-    VEHICLE_RAIL_INTERCHANGE("vehicleRailInterchange"),
-    OTHER("other"),
-    RAIL_REPLACEMENT_BUS("railReplacementBus"),
-    ALL("all");
-
+public enum SubmodeEnumuration {
+    RAIL_REPLACEMENT_BUS("railReplacementBus");
     private final String value;
 
-    StopPlaceTypeSubmodeEnumuration(String v) {
+    SubmodeEnumuration(String v) {
         value = v;
     }
 
-    public static StopPlaceTypeSubmodeEnumuration fromValue(String value) {
-        if(value.equals("*")) {
-            return ALL;
-        }
-        for (StopPlaceTypeSubmodeEnumuration stopPlaceType : StopPlaceTypeSubmodeEnumuration.values()) {
+    public static SubmodeEnumuration fromValue(String value) {
+        for (SubmodeEnumuration stopPlaceType : SubmodeEnumuration.values()) {
             if (stopPlaceType.value.equals(value)) {
                 return stopPlaceType;
             }
