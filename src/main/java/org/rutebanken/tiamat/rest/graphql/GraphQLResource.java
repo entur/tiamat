@@ -161,9 +161,13 @@ public class GraphQLResource {
         try {
             return (Response) transactionTemplate.execute((transactionStatus) -> getGraphQLResponse(query, variables, transactionStatus));
         } catch (JpaSystemException e) {
+            var rootCause = e.getRootCause();
             for (HSLErrorCodeEnumeration hslError : HSLErrorCodeEnumeration.values()) {
                 if (e.getMessage().contains("ERROR: " + hslError.name())) {
                     return customHSLErrorResponse(hslError, e);
+                }
+                if (rootCause != null && rootCause.getMessage().contains("ERROR: " + hslError.name())) {
+                    return customHSLErrorResponse(hslError, rootCause);
                 }
             }
             throw e;
