@@ -7,6 +7,7 @@ import org.rutebanken.helper.organisation.DataScopedAuthorizationService;
 import org.rutebanken.helper.organisation.RoleAssignment;
 import org.rutebanken.helper.organisation.RoleAssignmentExtractor;
 import org.rutebanken.tiamat.auth.check.TopographicPlaceChecker;
+import org.rutebanken.tiamat.diff.generic.StopPlaceTypeSubmodeEnumuration;
 import org.rutebanken.tiamat.model.EntityStructure;
 import org.rutebanken.tiamat.model.GroupOfStopPlaces;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -102,50 +103,50 @@ public class DefaultAuthorizationService implements AuthorizationService {
     }
 
     @Override
-    public Set<String> getAllowedStopPlaceTypes(EntityStructure entity){
+    public Set<StopPlaceTypeSubmodeEnumuration> getAllowedStopPlaceTypes(EntityStructure entity){
        return getStopTypesOrSubmode(STOP_PLACE_TYPE, true, entity);
     }
 
     @Override
-    public Set<String> getLocationAllowedStopPlaceTypes(boolean canEdit, Point point) {
+    public Set<StopPlaceTypeSubmodeEnumuration> getLocationAllowedStopPlaceTypes(boolean canEdit, Point point) {
         return getLocationStopTypesOrSubmode(canEdit,STOP_PLACE_TYPE, true, point);
     }
 
     @Override
-    public Set<String> getBannedStopPlaceTypes(EntityStructure entity) {
+    public Set<StopPlaceTypeSubmodeEnumuration> getBannedStopPlaceTypes(EntityStructure entity) {
 
 
         if(hasNoAuthentications() || !dataScopedAuthorizationService.isAuthorized(ROLE_EDIT_STOPS, List.of(entity))) {
-            return Set.of(ENTITY_CLASSIFIER_ALL_ATTRIBUTES);
+            return Set.of(StopPlaceTypeSubmodeEnumuration.ALL);
         }
         return getStopTypesOrSubmode(STOP_PLACE_TYPE, false, entity);
     }
 
     @Override
-    public Set<String> getLocationBannedStopPlaceTypes(boolean canEdit, Point point) {
+    public Set<StopPlaceTypeSubmodeEnumuration> getLocationBannedStopPlaceTypes(boolean canEdit, Point point) {
         return getLocationStopTypesOrSubmode(canEdit,STOP_PLACE_TYPE, false, point);
     }
 
     @Override
-    public Set<String> getAllowedSubmodes(EntityStructure entity) {
+    public Set<StopPlaceTypeSubmodeEnumuration> getAllowedSubmodes(EntityStructure entity) {
         return  getStopTypesOrSubmode(SUBMODE, true, entity);
     }
 
     @Override
-    public Set<String> getLocationAllowedSubmodes(boolean canEdit, Point point) {
+    public Set<StopPlaceTypeSubmodeEnumuration> getLocationAllowedSubmodes(boolean canEdit, Point point) {
         return getLocationStopTypesOrSubmode(canEdit,SUBMODE, true, point);
     }
 
     @Override
-    public Set<String> getBannedSubmodes(EntityStructure entity) {
+    public Set<StopPlaceTypeSubmodeEnumuration> getBannedSubmodes(EntityStructure entity) {
         if(hasNoAuthentications() || !dataScopedAuthorizationService.isAuthorized(ROLE_EDIT_STOPS, List.of(entity))) {
-            return Set.of(ENTITY_CLASSIFIER_ALL_ATTRIBUTES);
+            return Set.of(StopPlaceTypeSubmodeEnumuration.ALL);
         }
         return getStopTypesOrSubmode(SUBMODE, false, entity);
     }
 
     @Override
-    public Set<String> getLocationBannedSubmodes(boolean canEdit, Point point) {
+    public Set<StopPlaceTypeSubmodeEnumuration> getLocationBannedSubmodes(boolean canEdit, Point point) {
         return getLocationStopTypesOrSubmode(canEdit,SUBMODE, false, point);
     }
 
@@ -157,7 +158,7 @@ public class DefaultAuthorizationService implements AuthorizationService {
         return roleAssignmentExtractor.getRoleAssignmentsForUser().isEmpty();
     }
 
-    private Set<String> getStopTypesOrSubmode(String type, boolean isAllowed, EntityStructure entity) {
+    private Set<StopPlaceTypeSubmodeEnumuration> getStopTypesOrSubmode(String type, boolean isAllowed, EntityStructure entity) {
         if (hasNoAuthentications()) {
             return Set.of();
         }
@@ -170,15 +171,16 @@ public class DefaultAuthorizationService implements AuthorizationService {
                 .flatMap(List::stream)
                 .filter(types -> isAllowed != types.startsWith("!"))
                 .map(types -> isAllowed ? types : types.substring(1))
+                .map(StopPlaceTypeSubmodeEnumuration::fromValue)
                 .collect(Collectors.toSet());
     }
 
-    private Set<String> getLocationStopTypesOrSubmode(boolean canEdit, String type, boolean isAllowed, Point point) {
+    private Set<StopPlaceTypeSubmodeEnumuration> getLocationStopTypesOrSubmode(boolean canEdit, String type, boolean isAllowed, Point point) {
         if (hasNoAuthentications()) {
                 return Set.of();
         }
         if (!canEdit && !isAllowed) {
-            return Set.of(ENTITY_CLASSIFIER_ALL_ATTRIBUTES);
+            return Set.of(StopPlaceTypeSubmodeEnumuration.ALL);
         }
         Set<String> stopTypesSubmodes = roleAssignmentExtractor.getRoleAssignmentsForUser().stream()
                 .filter(roleAssignment -> roleAssignment.getEntityClassifications() != null)
@@ -192,7 +194,7 @@ public class DefaultAuthorizationService implements AuthorizationService {
         if (canEdit && stopTypesSubmodes.isEmpty() && isAllowed) {
             stopTypesSubmodes.add(ENTITY_CLASSIFIER_ALL_ATTRIBUTES);
         }
-        return stopTypesSubmodes;
+        return stopTypesSubmodes.stream().map(StopPlaceTypeSubmodeEnumuration::fromValue).collect(Collectors.toSet());
     }
 
     private boolean hasNoAuthentications() {

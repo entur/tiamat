@@ -3,6 +3,7 @@ package org.rutebanken.tiamat.rest.graphql.fetchers;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import org.rutebanken.tiamat.auth.AuthorizationService;
+import org.rutebanken.tiamat.diff.generic.StopPlaceTypeSubmodeEnumuration;
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
 import org.rutebanken.tiamat.model.GroupOfStopPlaces;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -49,19 +50,19 @@ public class EntityPermissionsFetcher implements DataFetcher {
 
         final boolean canEditEntities = authorizationService.canEditEntity(entityInVersionStructure);
         final boolean canDeleteEntity = authorizationService.canDeleteEntity(entityInVersionStructure);
-        final Set<String> allowedStopPlaceTypes = authorizationService.getAllowedStopPlaceTypes(entityInVersionStructure);
-        final Set<String> bannedStopPlaceTypes = authorizationService.getBannedStopPlaceTypes(entityInVersionStructure);
-        final Set<String> allowedSubmode = authorizationService.getAllowedSubmodes(entityInVersionStructure);
-        final Set<String> bannedSubmode = authorizationService.getBannedSubmodes(entityInVersionStructure);
+        final Set<StopPlaceTypeSubmodeEnumuration> allowedStopPlaceTypes = authorizationService.getAllowedStopPlaceTypes(entityInVersionStructure);
+        final Set<StopPlaceTypeSubmodeEnumuration> bannedStopPlaceTypes = authorizationService.getBannedStopPlaceTypes(entityInVersionStructure);
+        final Set<StopPlaceTypeSubmodeEnumuration> allowedSubmode = authorizationService.getAllowedSubmodes(entityInVersionStructure);
+        final Set<StopPlaceTypeSubmodeEnumuration> bannedSubmode = authorizationService.getBannedSubmodes(entityInVersionStructure);
 
-        Set<String> allowedStopPlaceTypeCopy = new HashSet<>(allowedStopPlaceTypes);
-        Set<String> bannedStopPlaceTypeCopy = new HashSet<>(bannedStopPlaceTypes);
-        Set<String> allowedSubmodeCopy = new HashSet<>(allowedSubmode);
-        Set<String> bannedSubmodeCopy = new HashSet<>(bannedSubmode);
+        Set<StopPlaceTypeSubmodeEnumuration> allowedStopPlaceTypeCopy = new HashSet<>(allowedStopPlaceTypes);
+        Set<StopPlaceTypeSubmodeEnumuration> bannedStopPlaceTypeCopy = new HashSet<>(bannedStopPlaceTypes);
+        Set<StopPlaceTypeSubmodeEnumuration> allowedSubmodeCopy = new HashSet<>(allowedSubmode);
+        Set<StopPlaceTypeSubmodeEnumuration> bannedSubmodeCopy = new HashSet<>(bannedSubmode);
 
-        Set<String> duplicateStopPlaceTypes = new HashSet<>(allowedStopPlaceTypes);
+        Set<StopPlaceTypeSubmodeEnumuration> duplicateStopPlaceTypes = new HashSet<>(allowedStopPlaceTypes);
         duplicateStopPlaceTypes.retainAll(bannedStopPlaceTypes);
-        Set<String> duplicateSubmodes = new HashSet<>(allowedSubmode);
+        Set<StopPlaceTypeSubmodeEnumuration> duplicateSubmodes = new HashSet<>(allowedSubmode);
         duplicateSubmodes.retainAll(bannedSubmode);
 
         allowedStopPlaceTypeCopy.removeAll(duplicateStopPlaceTypes);
@@ -69,12 +70,12 @@ public class EntityPermissionsFetcher implements DataFetcher {
         allowedSubmodeCopy.removeAll(duplicateSubmodes);
         bannedSubmodeCopy.removeAll(duplicateSubmodes);
 
-        if(allowedStopPlaceTypeCopy.isEmpty() && !bannedStopPlaceTypeCopy.contains("*")) {
-                allowedStopPlaceTypeCopy.add("*");
+        if(allowedStopPlaceTypeCopy.isEmpty() && !bannedStopPlaceTypeCopy.contains(StopPlaceTypeSubmodeEnumuration.ALL)) {
+                allowedStopPlaceTypeCopy.add(StopPlaceTypeSubmodeEnumuration.ALL);
 
         }
-        if(allowedSubmodeCopy.isEmpty() && !bannedSubmodeCopy.contains("*")) {
-                allowedSubmodeCopy.add("*");
+        if(allowedSubmodeCopy.isEmpty() && !bannedSubmodeCopy.contains(StopPlaceTypeSubmodeEnumuration.ALL)) {
+                allowedSubmodeCopy.add(StopPlaceTypeSubmodeEnumuration.ALL);
         }
 
 

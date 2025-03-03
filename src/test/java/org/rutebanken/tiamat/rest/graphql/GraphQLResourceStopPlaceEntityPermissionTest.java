@@ -17,6 +17,7 @@ package org.rutebanken.tiamat.rest.graphql;
 
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
+import org.rutebanken.tiamat.diff.generic.StopPlaceTypeSubmodeEnumuration;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.StopPlace;
 
@@ -63,7 +64,7 @@ public class GraphQLResourceStopPlaceEntityPermissionTest extends AbstractGraphQ
                 .body("data.stopPlace[0].permissions.bannedSubmodes", hasSize(1))
                 .body("data.stopPlace[0].permissions.allowedStopPlaceTypes", hasSize(0))
                 .body("data.stopPlace[0].permissions.bannedStopPlaceTypes", hasSize(1))
-                .body("data.stopPlace[0].permissions.bannedStopPlaceTypes[0]", comparesEqualTo("*"))
-                .body("data.stopPlace[0].permissions.bannedSubmodes[0]", comparesEqualTo("*"));
+                .body("data.stopPlace[0].permissions.bannedStopPlaceTypes[0]", comparesEqualTo(StopPlaceTypeSubmodeEnumuration.ALL.value()))
+                .body("data.stopPlace[0].permissions.bannedSubmodes[0]", comparesEqualTo(StopPlaceTypeSubmodeEnumuration.ALL.value()));
     }
 }

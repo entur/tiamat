@@ -224,6 +224,7 @@ public class GraphQLNames {
     public static final String LIMITATION_STATUS_ENUM = "LimitationStatusType";
 
     public static final String STOP_PLACE_TYPE_ENUM = "StopPlaceType";
+    public static final String STOP_PLACE_TYPE_SUBMODE_ENUM = "StopPlaceTypeSubmode";
     public static final String INTERCHANGE_WEIGHTING_TYPE_ENUM = "InterchangeWeightingType";
 
     public static final String PARKING_TYPE_ENUM = "ParkingType";
