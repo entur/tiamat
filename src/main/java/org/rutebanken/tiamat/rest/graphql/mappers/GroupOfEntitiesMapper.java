@@ -64,11 +64,12 @@ public class GroupOfEntitiesMapper {
             entity.setShortName(getEmbeddableString((Map) input.get(SHORT_NAME)));
             isUpdated = true;
         }
-        if (input.get(DESCRIPTION) != null) {
-            entity.setDescription(getEmbeddableString((Map) input.get(DESCRIPTION)));
-            isUpdated = true;
-        } else if (input.get(DESCRIPTION) == null){
-            entity.setDescription(null);
+        if (input.containsKey(DESCRIPTION)) {
+            if (input.get(DESCRIPTION) instanceof Map descriptionMap) {
+                entity.setDescription(getEmbeddableString(descriptionMap));
+            } else {
+                entity.setDescription(null);
+            }
             isUpdated = true;
         }
 
