@@ -9,14 +9,14 @@ import java.util.List;
 class DefaultAuthorizationServiceTest {
 
     @Test
-    void verifyCanEditAllEntities() {
+    void canEditAllEntities() {
         List<RoleAssignment> roleAssignments = RoleAssignmentListBuilder.builder().withAccessAllAreas().build();
         DefaultAuthorizationService defaultAuthorizationService = new DefaultAuthorizationService(null,false, null, null, null);
         Assertions.assertTrue(defaultAuthorizationService.verifyCanEditAllEntities(roleAssignments));
     }
 
     @Test
-    void verifyCanEditAllEntitiesMissingRoleAssignment() {
+    void canEditAllEntitiesMissingRoleAssignment() {
         List<RoleAssignment> roleAssignments = RoleAssignmentListBuilder.builder().build();
         DefaultAuthorizationService defaultAuthorizationService = new DefaultAuthorizationService(null,false, null, null, null);
         Assertions.assertFalse(defaultAuthorizationService.verifyCanEditAllEntities(roleAssignments));

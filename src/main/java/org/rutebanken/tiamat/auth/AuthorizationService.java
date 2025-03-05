@@ -15,9 +15,9 @@ import java.util.Set;
 public interface AuthorizationService {
 
     /**
-     * Verify that the current user have right to edit any entity?
+     * Does the current user have right to edit any entity?
      */
-    boolean verifyCanEditAllEntities();
+    boolean canEditAllEntities();
 
 
     /**

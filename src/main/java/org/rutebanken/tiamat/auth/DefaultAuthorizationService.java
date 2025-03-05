@@ -48,7 +48,7 @@ public class DefaultAuthorizationService implements AuthorizationService {
     }
 
     @Override
-    public boolean verifyCanEditAllEntities() {
+    public boolean canEditAllEntities() {
         if(hasNoAuthentications()) {
             return false;
         }

@@ -38,7 +38,7 @@ public class UserPermissionsFetcher implements DataFetcher {
     public Object get(DataFetchingEnvironment dataFetchingEnvironment) {
 
         final boolean isGuest = authorizationService.isGuest();
-        final boolean allowNewStopEverywhere = authorizationService.verifyCanEditAllEntities();
+        final boolean allowNewStopEverywhere = authorizationService.canEditAllEntities();
 
         logger.debug("isGuest: {}, allowNewStopEverywhere: {} " , allowNewStopEverywhere, isGuest);
 

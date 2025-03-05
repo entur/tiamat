@@ -95,7 +95,7 @@ public class PublicationDeliveryImporter {
 
     @SuppressWarnings("unchecked")
     public PublicationDeliveryStructure importPublicationDelivery(PublicationDeliveryStructure incomingPublicationDelivery, ImportParams importParams) {
-        if(authorizationEnabled && !authorizationService.verifyCanEditAllEntities()){
+        if(authorizationEnabled && !authorizationService.canEditAllEntities()){
                 throw new AccessDeniedException("Insufficient privileges for operation");
             }
 
