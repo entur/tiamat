@@ -23,7 +23,7 @@ services:
     volumes:
       - ./spring:/etc/application-config
     ports:
-      - "8777:8777"
+      - "1888:1888"
 
   db:
     image: 'postgis/postgis:13-master'

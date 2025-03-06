@@ -158,6 +158,16 @@ public class GraphQLNames {
     public static final String GROUP_OF_STOP_PLACES = "groupOfStopPlaces";
     public static final String STOP_PLACE_GROUPS = "groups";
 
+
+    public static final String PERMISSIONS = "permissions";
+    public static final String ENTITY_PERMISSIONS= "entityPermissions";
+    public static final String OUTPUT_TYPE_ENTITY_PERMISSIONS= "EntityPermissions";
+    public static final String USER_PERMISSIONS= "userPermissions";
+    public static final String OUTPUT_TYPE_USER_PERMISSIONS= "UserPermissions";
+    public static final String USER_CONTEXT= "userContext";
+    public static final String LOCATION_PERMISSIONS= "locationPermissions";
+
+
     public static final String GROUP_OF_TARIFF_ZONES = "groupOfTariffZones";
     public static final String GROUP_OF_TARIFF_ZONES_MEMBERS = "members";
     public static final String OUTPUT_TYPE_GROUP_OF_TARIFF_ZONES ="GroupOfTariffZones";
@@ -206,9 +216,6 @@ public class GraphQLNames {
     public static final String OUTPUT_TYPE_PARKING_AREA = "ParkingArea";
     public static final String INPUT_TYPE_PARKING_AREA = OUTPUT_TYPE_PARKING_AREA + INPUT_TYPE_POSTFIX;
 
-    public static final String OUTPUT_TYPE_AUTHORIZATION_CHECK = "AuthorizationCheck";
-    public static final String AUTHORIZATION_CHECK_DESCRIPTION = "Check if authorized for entity with role";
-    public static final String AUTHORIZATION_CHECK_ROLES = "roles";
 
     public static final String GEOMETRY_TYPE_ENUM = "GeoJSONType";
 
@@ -217,6 +224,7 @@ public class GraphQLNames {
     public static final String LIMITATION_STATUS_ENUM = "LimitationStatusType";
 
     public static final String STOP_PLACE_TYPE_ENUM = "StopPlaceType";
+    public static final String SUBMODE_ENUM = "Submode";
     public static final String INTERCHANGE_WEIGHTING_TYPE_ENUM = "InterchangeWeightingType";
 
     public static final String PARKING_TYPE_ENUM = "ParkingType";
@@ -344,6 +352,9 @@ public class GraphQLNames {
     public static final String ONLY_MONOMODAL_STOPPLACES = "onlyMonomodalStopPlaces";
     public static final String ONLY_MONOMODAL_STOPPLACES_DESCRIPTION = "Set to true to only return mono modal stop places.";
 
+    public static final String LONGITUDE = "longitude";
+    public static final String LATITUDE = "latitude";
+
     public static final String LONGITUDE_MIN = "lonMin";
     public static final String LATITUDE_MIN = "latMin";
     public static final String LONGITUDE_MAX = "lonMax";
@@ -423,7 +434,6 @@ public class GraphQLNames {
     public static final String DELETE_GROUP_OF_STOPPLACES="deleteGroupOfStopPlaces";
 
     /** Check if authorized to edit entity */
-    public static final String CHECK_AUTHORIZED = "checkAuthorized";
     public static final String FIND_STOPPLACE_BY_BBOX = "stopPlaceBBox";
     public static final String FIND_TOPOGRAPHIC_PLACE = "topographicPlace";
     public static final String FIND_PATH_LINK = "pathLink";

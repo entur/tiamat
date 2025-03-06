@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.Timer;
@@ -94,9 +95,10 @@ public class PublicationDeliveryImporter {
 
     @SuppressWarnings("unchecked")
     public PublicationDeliveryStructure importPublicationDelivery(PublicationDeliveryStructure incomingPublicationDelivery, ImportParams importParams) {
-        if(authorizationEnabled){
-            authorizationService.verifyCanEditAllEntities();
-        }
+        if(authorizationEnabled && !authorizationService.canEditAllEntities()){
+                throw new AccessDeniedException("Insufficient privileges for operation");
+            }
+
 
         if (incomingPublicationDelivery.getDataObjects() == null) {
             String responseMessage = "Received publication delivery but it does not contain any data objects.";
