@@ -18,7 +18,6 @@ public class FintrafficSecurityConfig {
     @Value("${tiamat.ext.fintraffic.security.client-id}") String clientId,
     @Value("${tiamat.ext.fintraffic.security.client-secret}") String clientSecret
   ) {
-    System.out.println("FintrafficSecurityConfig.authorizationService");
     TrivoreAuthorizations trivoreAuthorizations = new TrivoreAuthorizations(oidcServerUri, clientId, clientSecret);
     return new FintrafficAuthorizationService(trivoreAuthorizations);
   }

@@ -99,7 +99,7 @@ public class FintrafficAuthorizationService implements AuthorizationService {
                 || trivoreAuthorizations.canDeleteAllEntities()
                 || trivoreAuthorizations.canManageCodespaceEntities(codespace)
                 || trivoreAuthorizations.canDeleteCodespaceEntities(codespace);
-        logger.debug("canDeleteEntity({}, {}) = {}", entity.getId(), entity.getNetexId(), allowed);
+        logger.debug("canDeleteEntity({}:{}, {}) = {}", entity.getId(), entity.getClass().getSimpleName(), entity.getNetexId(), allowed);
         return allowed;
     }
 
@@ -110,7 +110,7 @@ public class FintrafficAuthorizationService implements AuthorizationService {
                 || trivoreAuthorizations.canEditAllEntities()
                 || trivoreAuthorizations.canManageCodespaceEntities(codespace)
                 || trivoreAuthorizations.canEditEntities(codespace);
-        logger.debug("canEditEntity({}, {}) = {}", entity.getId(), entity.getNetexId(), allowed);
+        logger.debug("canEditEntity({}:{}, {}) = {}", entity.getId(), entity.getClass().getSimpleName(), entity.getNetexId(), allowed);
         return allowed;
     }
 
