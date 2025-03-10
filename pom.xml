@@ -61,7 +61,7 @@
         <netex-java-model.version>2.0.14</netex-java-model.version>
         <entur.helpers.version>2.31</entur.helpers.version>
         <jts-core.version>1.19.0</jts-core.version>
-        <groovy-all.version>4.0.23</groovy-all.version>
+        <groovy-all.version>4.0.26</groovy-all.version>
         <rest-assured.version>5.4.0</rest-assured.version>
         <argLine/>
 
