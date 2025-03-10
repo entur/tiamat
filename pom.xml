@@ -67,7 +67,7 @@
 
         <xercesImpl.version>2.12.2</xercesImpl.version>
         <maven.compiler.args>--add-opens java.base/java.lang=ALL-UNNAMED</maven.compiler.args>
-        <testcontainers.version>1.20.2</testcontainers.version>
+        <testcontainers.version>1.20.6</testcontainers.version>
         <rutebanken-storage.version>4.7</rutebanken-storage.version>
     </properties>
 
