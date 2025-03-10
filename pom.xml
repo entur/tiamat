@@ -359,6 +359,12 @@
             </exclusions>
         </dependency>
 
+        <!-- Spring Core uses Commons Logging directly, causing core classes to bypass Logback configuration -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>org.apache.groovy</groupId>
             <artifactId>groovy-all</artifactId>
