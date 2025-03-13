@@ -16,9 +16,10 @@ public class FintrafficSecurityConfig {
   AuthorizationService authorizationService(
     @Value("${tiamat.ext.fintraffic.security.oidc-server-uri}") String oidcServerUri,
     @Value("${tiamat.ext.fintraffic.security.client-id}") String clientId,
-    @Value("${tiamat.ext.fintraffic.security.client-secret}") String clientSecret
+    @Value("${tiamat.ext.fintraffic.security.client-secret}") String clientSecret,
+    @Value("${tiamat.ext.fintraffic.security.enable-codespace-filtering:false}") boolean enableCodespaceFiltering
   ) {
-    TrivoreAuthorizations trivoreAuthorizations = new TrivoreAuthorizations(oidcServerUri, clientId, clientSecret);
+    TrivoreAuthorizations trivoreAuthorizations = new TrivoreAuthorizations(oidcServerUri, clientId, clientSecret, enableCodespaceFiltering);
     return new FintrafficAuthorizationService(trivoreAuthorizations);
   }
 }
