@@ -8,6 +8,7 @@ import com.github.mizosoft.methanol.Methanol;
 import com.github.mizosoft.methanol.MutableRequest;
 import com.github.mizosoft.methanol.TypeRef;
 import com.github.mizosoft.methanol.adapter.jackson.JacksonAdapterFactory;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -27,9 +28,12 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 import static java.time.temporal.ChronoUnit.MINUTES;
@@ -43,72 +47,15 @@ import static java.time.temporal.ChronoUnit.MINUTES;
  */
 public class TrivoreAuthorizations {
 
+    public static final String ENTITY_TYPE_ALL = "{entities}";
+    public static final String TRANSPORT_MODE_ALL = "{all}";
     private final Logger logger = LoggerFactory.getLogger(TrivoreAuthorizations.class);
-
-    /*
-     * Permissions are modeled as URN-like triplets. There are some constants which are not in use but have been listed
-     * here for completeness' sake, as the same values can be found from the Trivore Id side, so they are meant for you,
-     * the developer, as guide to affirm that what you're looking at is exactly what you think it on the other side as
-     * well.
-     */
-    /**
-     * Entities are all NeTEx entitities, e.g. StopPlace, Quay etc. etc. Practically synonymous to NeTEx model in this
-     * context.
-     */
-    private static final String ENTITIES_PERMISSIONS = "entities:<scope>:<permission>";
-
-    /**
-     * View (R) permission identifier.
-     */
-    private static final String PERMISSION_VIEW = "view";
-    /**
-     * Edit (R,U) permission identifier.
-     */
-    private static final String PERMISSION_EDIT = "edit";
-    /**
-     * Manage (C, R, U) permission identifier.
-     */
-    private static final String PERMISSION_MANAGE = "manage";
-    /**
-     * Administer (C, R, U, D) permission identifier.
-     */
-    private static final String PERMISSION_ADMINISTER = "administer";
-
-    /**
-     * Special scope defining <b>all</b> possible targets as scope. Overriding, admin-like behavior to be expected.
-     */
-    private static final String SPECIAL_SCOPE_ALL = "{all}";
-    /**
-     * Special scope allowing <b>own/self-owned</b> targets as scope. Limits permission to contextual group, such as
-     * codespaces the user has access to.
-     */
-    private static final String SPECIAL_SCOPE_OWN = "{own}";
-    /**
-     * Permission for performing CRU operations on all entities. Logically matches <code>canEdit*()</code>.
-     */
-    private static final String MANAGE_ALL_ENTITIES = ENTITIES_PERMISSIONS.replace("<scope>", SPECIAL_SCOPE_ALL).replace("<permission>", PERMISSION_MANAGE);
-    /**
-     * Permission for performing CRU operations on owned entities. Logically matches <code>canEdit*(codespace)</code>.
-     */
-    private static final String MANAGE_OWN_ENTITIES = ENTITIES_PERMISSIONS.replace("<scope>", SPECIAL_SCOPE_OWN).replace("<permission>", PERMISSION_MANAGE);
-    /**
-     * Permission for performing CRUD operations on all entities. Logically matches <code>canManage*()</code>.
-     */
-    private static final String ADMINISTER_ALL_ENTITIES = ENTITIES_PERMISSIONS.replace("<scope>", SPECIAL_SCOPE_ALL).replace("<permission>", PERMISSION_ADMINISTER);
-    /**
-     * Permission for performing CRUD operations on owned entities. Logically matches <code>canManage*(codespace)</code>.
-     */
-    private static final String ADMINISTER_OWN_ENTITIES = ENTITIES_PERMISSIONS.replace("<scope>", SPECIAL_SCOPE_OWN).replace("<permission>", PERMISSION_ADMINISTER);
-
-    /**
-     * Metadata field which contains <code>codespace</code> value.
-     */
-    private static final String CUSTOM_FIELD_CODESPACE = "codespace";
 
     private final Methanol httpClient;
     private final String oidcServerUri;
     private final String clientId;
     private final String clientSecret;
+    private final boolean enableCodespaceFiltering;
 
     /**
      * Poor man's infinite cache. This content needs to be loaded once and should never change.
@@ -119,10 +66,12 @@ public class TrivoreAuthorizations {
 
     public TrivoreAuthorizations(String oidcServerUri,
                                  String clientId,
-                                 String clientSecret) {
+                                 String clientSecret,
+                                 boolean enableCodespaceFiltering) {
         this.oidcServerUri = oidcServerUri;
         this.clientId = clientId;
         this.clientSecret = clientSecret;
+        this.enableCodespaceFiltering = enableCodespaceFiltering;
         this.httpClient = initializeHttpClient();
         this.externalPermissionCache = createCache(50, Duration.of(5, MINUTES), new CacheLoader<>() {
             public ExternalPermission load(PermissionIdentifiers permissionIdentifiers) throws Exception {
@@ -299,12 +248,18 @@ public class TrivoreAuthorizations {
         return hasPermission;
     }
 
-    private boolean hasAccessToCodespace(String codespace) {
+    public boolean hasAccessToCodespace(String codespace) {
+        if (!enableCodespaceFiltering) {
+            logger.debug("Codespace filtering is disabled, will not block access to {}", codespace);
+            return true;
+        }
+
         return getToken()
                 .flatMap(jwt -> fetchTrivoreUsersGroupMemberships(jwt.getSubject()))
                 .map(groupMemberships -> {
                     for (GroupMembership groupMembership : groupMemberships) {
-                        if (groupMembership.customFields().getOrDefault(CUSTOM_FIELD_CODESPACE, "").equals(codespace)) {
+                        Set<String> accessibleCodespaces = groupMembership.getCodespaces();
+                        if (accessibleCodespaces.contains(codespace)) {
                             if (logger.isTraceEnabled()) {
                                 logger.trace("User [{}] is allowed to access codespace {} [{}]", getCurrentSubject(), codespace, groupMembership.id());
                             }
@@ -324,32 +279,57 @@ public class TrivoreAuthorizations {
                 });
     }
 
-    public boolean canEditAllEntities() {
-        return hasDirectPermission(ADMINISTER_ALL_ENTITIES) || hasDirectPermission(MANAGE_ALL_ENTITIES);
+    private static final Map<String, List<String>> SUPERCEDING_PERMISSIONS = Map.of(
+            "view", List.of("administer", "manage", "edit", "view"),
+            "edit", List.of("administer", "manage", "edit"),
+            "manage", List.of("administer", "manage"),
+            "administer", List.of("administer")
+    );
+
+    @VisibleForTesting
+    List<String> generateCascadingPermissions(String entityType, String transportMode, TrivorePermission permission) {
+        List<String> permissions = new ArrayList<>();
+
+        for (String entity : uniqueList("{entities}", entityType)) {
+            for (String mode : uniqueList("{all}", transportMode)) {
+                for (String applicablePermission : SUPERCEDING_PERMISSIONS.getOrDefault(permission.getValue(), List.of())) {
+                    permissions.add(entity + ":" + mode + ":" + applicablePermission);
+                }
+            }
+        }
+        return permissions;
     }
 
-    public boolean canDeleteAllEntities() {
-        return hasDirectPermission(ADMINISTER_ALL_ENTITIES);
+    private static List<String> uniqueList(String... elements) {
+        List<String> uniqueElements = new ArrayList<>();
+        for (String element : elements) {
+            if (!uniqueElements.contains(element)) {
+                uniqueElements.add(element);
+            }
+        }
+        return uniqueElements;
     }
 
-    public boolean canManageAllEntities() {
-        return hasDirectPermission(ADMINISTER_ALL_ENTITIES);
-    }
+    public boolean hasAccess(String entityType, String transportMode, TrivorePermission permission) {
+        List<String> cascadingPermissions = generateCascadingPermissions(entityType, transportMode, permission);
+        Optional<String> r = cascadingPermissions
+                .stream()
+                .filter(this::hasDirectPermission)
+                .findFirst();
 
-    public boolean canManageCodespaceEntities(String codespace) {
-        return hasDirectPermission(ADMINISTER_ALL_ENTITIES)
-            || ((hasDirectPermission(ADMINISTER_OWN_ENTITIES) || hasDirectPermission(MANAGE_OWN_ENTITIES))
-                && hasAccessToCodespace(codespace));
-    }
+        if (logger.isDebugEnabled()) {
+            String requiredPermission = entityType + ":" + transportMode + ":" + permission.getValue();
+            String s = "User [" + getCurrentSubject() + "]";
+            if (r.isPresent()) {
+                s += " has permission [" + r.get() + "] granting access to [" + requiredPermission + "]";
+            } else {
+                s += " is not allowed to access [" + requiredPermission + "]";
+            }
+            s += (", possible applicable permissions were " + cascadingPermissions);
+            logger.debug(s);
+        }
 
-    public boolean canDeleteCodespaceEntities(String codespace) {
-        return hasDirectPermission(ADMINISTER_ALL_ENTITIES)
-            || (hasDirectPermission(ADMINISTER_OWN_ENTITIES) && hasAccessToCodespace(codespace));
-    }
-
-    public boolean canEditEntities(String codespace) {
-        return (hasDirectPermission(ADMINISTER_ALL_ENTITIES) || hasDirectPermission(ADMINISTER_OWN_ENTITIES))
-            || (hasDirectPermission(MANAGE_OWN_ENTITIES) && hasAccessToCodespace(codespace));
+        return r.isPresent();
     }
 
     public boolean isAuthenticated() {
