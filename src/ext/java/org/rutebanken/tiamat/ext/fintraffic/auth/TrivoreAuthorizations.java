@@ -41,9 +41,7 @@ import static java.time.temporal.ChronoUnit.MINUTES;
 /**
  * Encapsulation for handling permission checks from Trivore ID Management API.
  * <p>
- * Permission methods in this class only test for the permission specified by the method itself. If you need to do
- * compositions, such as <code>if (admin || hasSpecificPermission) do ...</code>, create these compositions in your
- * calling code, not inside this class.
+ * Permission tests use a cascading model where the more permissive elements of a requested permission are detected and tested automatically. Generally when calling methods of this class the most specific permission can be defined as parameters, this class handles necessary extrapolation. 
  */
 public class TrivoreAuthorizations {
 
