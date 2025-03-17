@@ -1,13 +1,5 @@
 package org.rutebanken.tiamat.ext.fintraffic.auth;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.mizosoft.methanol.AdapterCodec;
-import com.github.mizosoft.methanol.MediaType;
-import com.github.mizosoft.methanol.Methanol;
-import com.github.mizosoft.methanol.MutableRequest;
-import com.github.mizosoft.methanol.TypeRef;
-import com.github.mizosoft.methanol.adapter.jackson.JacksonAdapterFactory;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -17,17 +9,17 @@ import org.rutebanken.tiamat.ext.fintraffic.auth.model.ExternalPermissionGrant;
 import org.rutebanken.tiamat.ext.fintraffic.auth.model.GroupMembership;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
-import java.io.IOException;
-import java.net.http.HttpClient;
-import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
@@ -51,7 +43,7 @@ public class TrivoreAuthorizations {
     public static final String TRANSPORT_MODE_ALL = "{all}";
     private final Logger logger = LoggerFactory.getLogger(TrivoreAuthorizations.class);
 
-    private final Methanol httpClient;
+    private final WebClient httpClient;
     private final String oidcServerUri;
     private final String clientId;
     private final String clientSecret;
@@ -64,7 +56,8 @@ public class TrivoreAuthorizations {
     private final LoadingCache<UserIdentifier, List<GroupMembership>> usersGroupMembershipCache;
     private final LoadingCache<UserIdentifier, List<ExternalPermissionGrant>> usersExternalPermissionsCache;
 
-    public TrivoreAuthorizations(String oidcServerUri,
+    public TrivoreAuthorizations(WebClient webClient,
+                                 String oidcServerUri,
                                  String clientId,
                                  String clientSecret,
                                  boolean enableCodespaceFiltering) {
@@ -72,7 +65,7 @@ public class TrivoreAuthorizations {
         this.clientId = clientId;
         this.clientSecret = clientSecret;
         this.enableCodespaceFiltering = enableCodespaceFiltering;
-        this.httpClient = initializeHttpClient();
+        this.httpClient = webClient;
         this.externalPermissionCache = createCache(50, Duration.of(5, MINUTES), new CacheLoader<>() {
             public ExternalPermission load(PermissionIdentifiers permissionIdentifiers) throws Exception {
                 return loadExternalPermission(permissionIdentifiers);
@@ -98,32 +91,6 @@ public class TrivoreAuthorizations {
                 .build(loader);
     }
 
-    private static Methanol initializeHttpClient() {
-        ObjectMapper mapper = initializeObjectMapper();
-        AdapterCodec adapterCodec = AdapterCodec.newBuilder()
-                .basic()
-                .encoder(JacksonAdapterFactory.createEncoder(mapper, MediaType.APPLICATION_JSON))
-                .decoder(JacksonAdapterFactory.createDecoder(mapper, MediaType.APPLICATION_JSON))
-                .build();
-
-        return Methanol
-                .newBuilder()
-                .adapterCodec(adapterCodec)
-                .connectTimeout(Duration.ofSeconds(30))
-                .requestTimeout(Duration.ofSeconds(30))
-                .headersTimeout(Duration.ofSeconds(30))
-                .readTimeout(Duration.ofSeconds(30))
-                .followRedirects(HttpClient.Redirect.NORMAL)
-                .userAgent("Entur Tiamat/" + LocalDate.now().format(DateTimeFormatter.ISO_DATE))
-                .build();
-    }
-
-    private static ObjectMapper initializeObjectMapper() {
-        ObjectMapper om = new ObjectMapper();
-        om.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        return om;
-    }
-
     private static Optional<Jwt> getToken() {
         if (SecurityContextHolder.getContext().getAuthentication() instanceof JwtAuthenticationToken token
                 && (token.getPrincipal() instanceof Jwt jwt)) {
@@ -144,13 +111,12 @@ public class TrivoreAuthorizations {
     }
 
     private List<GroupMembership> loadUsersGroupMemberships(UserIdentifier userIdentifier) throws CacheLoadingException {
-        MutableRequest request = MutableRequest
-                .GET(oidcServerUri + "/api/rest/v1/user/" + userIdentifier.userId() + "/groupmembership")
-                .header("Authorization",
-                        "Basic " + basicAuthenticationHeaderValue())
-                .header("Content-Type",
-                        "application/json");
-        Optional<List<GroupMembership>> groupMembership = executeRequest(request, new TypeRef<List<GroupMembership>>() {});
+        Optional<List<GroupMembership>> groupMembership = executeRequest(
+                HttpMethod.GET,
+                oidcServerUri + "/api/rest/v1/user/" + userIdentifier.userId() + "/groupmembership",
+                Map.of("Authorization", "Basic " + basicAuthenticationHeaderValue(),
+                        "Content-Type", "application/json"),
+                new ParameterizedTypeReference<List<GroupMembership>>() {});
         if (groupMembership.isPresent()) {
             return groupMembership.get();
         } else {
@@ -158,13 +124,12 @@ public class TrivoreAuthorizations {
         }
     }
     private ExternalPermission loadExternalPermission(PermissionIdentifiers permissionIdentifiers) throws CacheLoadingException {
-        MutableRequest request = MutableRequest
-                .GET(oidcServerUri + "/api/rest/v1/externalpermission/group/" + permissionIdentifiers.permissionGroupId() + "/permission/" + permissionIdentifiers.permissionId())
-                .header("Authorization",
-                        "Basic " + basicAuthenticationHeaderValue())
-                .header("Content-Type",
-                        "application/json");
-        Optional<ExternalPermission> externalPermission = executeRequest(request, new TypeRef<ExternalPermission>() {});
+        Optional<ExternalPermission> externalPermission = executeRequest(
+                HttpMethod.GET,
+                oidcServerUri + "/api/rest/v1/externalpermission/group/" + permissionIdentifiers.permissionGroupId() + "/permission/" + permissionIdentifiers.permissionId(),
+                Map.of("Authorization", "Basic " + basicAuthenticationHeaderValue(),
+                        "Content-Type", "application/json"),
+                new ParameterizedTypeReference<ExternalPermission>() {});
         if (externalPermission.isPresent()) {
             return externalPermission.get();
         } else {
@@ -173,13 +138,12 @@ public class TrivoreAuthorizations {
     }
 
     private List<ExternalPermissionGrant> loadUsersExternalPermissionGrants(UserIdentifier userIdentifier) throws CacheLoadingException {
-        MutableRequest request = MutableRequest
-                .GET(oidcServerUri + "/api/rest/v1/user/" + userIdentifier.userId() + "/externalpermissions")
-                .header("Authorization",
-                        "Basic " + basicAuthenticationHeaderValue())
-                .header("Content-Type",
-                        "application/json");
-        Optional<List<ExternalPermissionGrant>> userExternalPermissionGrants = executeRequest(request, new TypeRef<List<ExternalPermissionGrant>>() {});
+        Optional<List<ExternalPermissionGrant>> userExternalPermissionGrants = executeRequest(
+                HttpMethod.GET,
+                oidcServerUri + "/api/rest/v1/user/" + userIdentifier.userId() + "/externalpermissions",
+                Map.of("Authorization", "Basic " + basicAuthenticationHeaderValue(),
+                        "Content-Type", "application/json"),
+                new ParameterizedTypeReference<List<ExternalPermissionGrant>>() {});
         if (userExternalPermissionGrants.isPresent()) {
             return userExternalPermissionGrants.get();
         } else {
@@ -215,21 +179,26 @@ public class TrivoreAuthorizations {
         }
     }
 
-    private <T> Optional<T> executeRequest(MutableRequest request, TypeRef<T> type) {
+    private <T> Optional<T> executeRequest(HttpMethod method, String uri, Map<String, String> headers, ParameterizedTypeReference<T> type) {
         try {
-            HttpResponse<T> response = httpClient.send(request, type);
-            logger.debug("HTTP {} {} returned {}", request.method(), request.uri(), response.statusCode());
-            if (response.statusCode() >= 200 && response.statusCode() < 299) {
-                return Optional.ofNullable(response.body());
-            } else {
-                return Optional.empty();
-            }
-        } catch (IOException e) {
-            throw new AuthorizationException("Failed to execute request " + request.method() + " " + request.uri(), e);
-        } catch (InterruptedException e) {
-            logger.warn("Operation interrupted during HTTP request, interrupting current thread", e);
-            Thread.currentThread().interrupt();
-            return Optional.empty();
+            return httpClient.method(method)
+                    .uri(uri)
+                    .accept(org.springframework.http.MediaType.APPLICATION_JSON)
+                    .headers(requestHeaders -> headers.forEach(requestHeaders::set))
+                    .retrieve()
+                    .toEntity(type)
+                    .flatMap(entity -> {
+                        HttpStatusCode statusCode = entity.getStatusCode();
+                        logger.debug("HTTP {} {} returned {}", method, uri, statusCode.value());
+                        if (statusCode.is2xxSuccessful()) {
+                            return Mono.justOrEmpty(entity.getBody());
+                        } else {
+                            return Mono.empty();
+                        }
+                    })
+                    .blockOptional();
+        } catch (Exception e) {
+            throw new AuthorizationException("Failed to execute request " + method + " " + uri, e);
         }
     }
 
