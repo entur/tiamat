@@ -63,12 +63,15 @@
         <jts-core.version>1.19.0</jts-core.version>
         <groovy-all.version>4.0.26</groovy-all.version>
         <rest-assured.version>5.4.0</rest-assured.version>
+        <spring-cloud-aws-secrets-manager.version>3.1.1</spring-cloud-aws-secrets-manager.version>
+        <aws-secretsmanager.version>2.0.2</aws-secretsmanager.version>
         <argLine/>
 
         <xercesImpl.version>2.12.2</xercesImpl.version>
         <maven.compiler.args>--add-opens java.base/java.lang=ALL-UNNAMED</maven.compiler.args>
         <testcontainers.version>1.20.6</testcontainers.version>
         <rutebanken-storage.version>4.7</rutebanken-storage.version>
+        <build-helper-maven-plugin.version>3.6.0</build-helper-maven-plugin.version>
     </properties>
 
     <dependencies>
@@ -263,6 +266,11 @@
         </dependency>
 
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-config</artifactId>
         </dependency>
@@ -412,6 +420,19 @@
                 </exclusion>
             </exclusions>
         </dependency>
+
+        <!-- AWS: enable use of Secrets Manager as parameter source in configurations -->
+        <dependency>
+            <groupId>io.awspring.cloud</groupId>
+            <artifactId>spring-cloud-aws-starter-secrets-manager</artifactId>
+            <version>${spring-cloud-aws-secrets-manager.version}</version>
+        </dependency>
+        <!-- AWS: acquire and refresh jdbc credentials from Secrets Manager in cloud environments -->
+        <dependency>
+            <groupId>com.amazonaws.secretsmanager</groupId>
+            <artifactId>aws-secretsmanager-jdbc</artifactId>
+            <version>${aws-secretsmanager.version}</version>
+        </dependency>
     </dependencies>
     <repositories>
         <repository>
@@ -429,6 +450,39 @@
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>${build-helper-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>build-helper-generate-sources</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>src/main/java</source>
+                                <source>src/ext/java</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>build-helper-generate-test-sources</id>
+                        <phase>generate-test-sources</phase>
+                        <goals>
+                            <goal>add-test-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>src/test/java</source>
+                                <source>src/ext-test/java</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
