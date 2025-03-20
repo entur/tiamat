@@ -1,4 +1,4 @@
-# Tiamat
+# Tiamat ![Build] (https://github.com/entur/tiamat/actions/workflows/entur-push.yml/badge.svg)
 
 Tiamat is the Stop Place Register.
 It is used nationally in Norway, and other places.
