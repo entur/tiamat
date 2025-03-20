@@ -14,7 +14,7 @@ class TrivoreAuthorizationsTest {
 
     @BeforeEach
     void setUp() {
-        trivoreAuthorizations = new TrivoreAuthorizations("", "", "", false);
+        trivoreAuthorizations = new TrivoreAuthorizations(null, "", "", "", false);
     }
 
     @Test
