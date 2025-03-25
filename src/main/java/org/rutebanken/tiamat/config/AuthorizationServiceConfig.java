@@ -25,6 +25,7 @@ import org.rutebanken.tiamat.auth.check.TiamatOriganisationChecker;
 import org.rutebanken.tiamat.auth.check.TopographicPlaceChecker;
 import org.rutebanken.tiamat.service.groupofstopplaces.GroupOfStopPlacesMembersResolver;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -38,7 +39,7 @@ import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.SUBMODE;
 @Configuration
 public class AuthorizationServiceConfig {
 
-
+    @ConditionalOnMissingBean
     @Bean
     public AuthorizationService authorizationService(DataScopedAuthorizationService dataScopedAuthorizationService,
                                                      @Value("${authorization.enabled:true}") boolean authorizationEnabled,
@@ -52,6 +53,7 @@ public class AuthorizationServiceConfig {
                 groupOfStopPlacesMembersResolver);
     }
 
+    @ConditionalOnMissingBean
     @Bean
     public DataScopedAuthorizationService dataScopedAuthorizationService(RoleAssignmentExtractor roleAssignmentExtractor,
                                                                          @Value("${authorization.enabled:true}") boolean authorizationEnabled,
