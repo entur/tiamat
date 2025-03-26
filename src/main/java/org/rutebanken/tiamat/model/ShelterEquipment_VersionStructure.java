@@ -58,6 +58,10 @@ public class ShelterEquipment_VersionStructure
 
     protected Boolean shelterFasciaBoardTaping;
 
+    protected Integer shelterNumber;
+
+    protected String shelterExternalId;
+
     public Boolean isEnclosed() {
         return enclosed;
     }
@@ -160,5 +164,21 @@ public class ShelterEquipment_VersionStructure
 
     public void setShelterFasciaBoardTaping(Boolean shelterFasciaBoardTaping) {
         this.shelterFasciaBoardTaping = shelterFasciaBoardTaping;
+    }
+
+    public Integer getShelterNumber() {
+        return shelterNumber;
+    }
+
+    public void setShelterNumber(Integer shelterNumber) {
+        this.shelterNumber = shelterNumber;
+    }
+
+    public String getShelterExternalId() {
+        return shelterExternalId;
+    }
+
+    public void setShelterExternalId(String shelterExternalId) {
+        this.shelterExternalId = shelterExternalId;
     }
 }

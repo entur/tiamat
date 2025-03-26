@@ -69,9 +69,11 @@ import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.SEATS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.SHELTER_CONDITION;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.SHELTER_ELECTRICITY;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.SHELTER_EQUIPMENT;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.SHELTER_EXTERNAL_ID;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.SHELTER_FASCIA_BOARD_TAPING;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.SHELTER_HAS_DISPLAY;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.SHELTER_LIGHTING;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.SHELTER_NUMBER;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.SHELTER_TYPE;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.SIGN_CONTENT_TYPE;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.STEP_FREE;
@@ -142,6 +144,8 @@ public class PlaceEquipmentMapper {
                     leskur.setLeaningRail((Boolean) shelterEquipment.get(LEANING_RAIL));
                     leskur.setOutsideBench((Boolean) shelterEquipment.get(OUTSIDE_BENCH));
                     leskur.setShelterFasciaBoardTaping((Boolean) shelterEquipment.get(SHELTER_FASCIA_BOARD_TAPING));
+                    leskur.setShelterNumber((Integer) shelterEquipment.get(SHELTER_NUMBER));
+                    leskur.setShelterExternalId((String) shelterEquipment.get(SHELTER_EXTERNAL_ID));
                     equipments.getInstalledEquipment().add(leskur);
                 }
 

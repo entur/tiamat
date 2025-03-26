@@ -2971,6 +2971,8 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                     leaningRail
                     outsideBench
                     shelterFasciaBoardTaping
+                    shelterNumber
+                    shelterExternalId
                   }
                 }
               }
@@ -2991,7 +2993,9 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                 .body("bicycleParking", equalTo(shelterEquipment.isBicycleParking()))
                 .body("leaningRail", equalTo(shelterEquipment.isLeaningRail()))
                 .body("outsideBench", equalTo(shelterEquipment.isOutsideBench()))
-                .body("shelterFasciaBoardTaping", equalTo(shelterEquipment.isShelterFasciaBoardTaping()));
+                .body("shelterFasciaBoardTaping", equalTo(shelterEquipment.isShelterFasciaBoardTaping()))
+                .body("shelterNumber", equalTo(shelterEquipment.getShelterNumber()))
+                .body("shelterExternalId", equalTo(shelterEquipment.getShelterExternalId()));
     }
 
     @Test
@@ -3019,6 +3023,8 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                     leaningRail: false
                     outsideBench: true
                     shelterFasciaBoardTaping: true
+                    shelterNumber: 1
+                    shelterExternalId: "99"
                   },
                   {
                     enclosed: false
@@ -3033,6 +3039,8 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                     leaningRail: true
                     outsideBench: false
                     shelterFasciaBoardTaping: false
+                    shelterNumber: 3
+                    shelterExternalId: "98"
                   }]
                 }
               }) {
@@ -3051,6 +3059,8 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                     leaningRail
                     outsideBench
                     shelterFasciaBoardTaping
+                    shelterNumber
+                    shelterExternalId
                   }
                 }
               }
@@ -3075,6 +3085,8 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                 .body("leaningRail", equalTo(false))
                 .body("outsideBench", equalTo(true))
                 .body("shelterFasciaBoardTaping", equalTo(true))
+                .body("shelterNumber", equalTo(1))
+                .body("shelterExternalId", equalTo("99"))
                 .rootPath("data.stopPlace[0].placeEquipments.shelterEquipment[1]")
                 .body(notNullValue())
                 .body("enclosed", equalTo(false))
@@ -3088,7 +3100,9 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                 .body("bicycleParking", equalTo(false))
                 .body("leaningRail", equalTo(true))
                 .body("outsideBench", equalTo(false))
-                .body("shelterFasciaBoardTaping", equalTo(false));
+                .body("shelterFasciaBoardTaping", equalTo(false))
+                .body("shelterNumber", equalTo(3))
+                .body("shelterExternalId", equalTo("98"));
     }
 
     @Test
@@ -3119,6 +3133,8 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                     leaningRail: false
                     outsideBench: true
                     shelterFasciaBoardTaping: true
+                    shelterNumber: 2
+                    shelterExternalId: "9"
                   }]
                 }
               }) {
@@ -3137,6 +3153,8 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                     leaningRail
                     outsideBench
                     shelterFasciaBoardTaping
+                    shelterNumber
+                    shelterExternalId
                   }
                 }
               }
@@ -3160,7 +3178,9 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                 .body("bicycleParking", equalTo(true))
                 .body("leaningRail", equalTo(false))
                 .body("outsideBench", equalTo(true))
-                .body("shelterFasciaBoardTaping", equalTo(true));
+                .body("shelterFasciaBoardTaping", equalTo(true))
+                .body("shelterNumber", equalTo(2))
+                .body("shelterExternalId", equalTo("9"));
     }
 
     @Test
@@ -4056,6 +4076,8 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         shelterEquipment.setLeaningRail(false);
         shelterEquipment.setOutsideBench(true);
         shelterEquipment.setShelterFasciaBoardTaping(false);
+        shelterEquipment.setShelterNumber(3);
+        shelterEquipment.setShelterExternalId("ext123");
         return shelterEquipment;
     }
 }

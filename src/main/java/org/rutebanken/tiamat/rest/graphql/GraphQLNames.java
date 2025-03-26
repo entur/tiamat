@@ -320,6 +320,8 @@ public class GraphQLNames {
     public static final String LEANING_RAIL = "leaningRail";
     public static final String OUTSIDE_BENCH = "outsideBench";
     public static final String SHELTER_FASCIA_BOARD_TAPING = "shelterFasciaBoardTaping";
+    public static final String SHELTER_NUMBER = "shelterNumber";
+    public static final String SHELTER_EXTERNAL_ID = "shelterExternalId";
 
     // TicketingEquipment
     public static final String TICKET_MACHINES = "ticketMachines";
