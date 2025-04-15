@@ -65,6 +65,22 @@ jobs:
             --tag $IMAGE_NAME:latest \
             .
 
+  publish_docker_image_to_acr:
+    needs:
+      - run_java_tests
+    name: Publish Docker image to ACR
+    permissions:
+      id-token: write
+      contents: read
+    uses: HSLdevcom/jore4-tools/.github/workflows/shared-build-and-publish-docker-image.yml@shared-build-and-publish-docker-image-v1
+    with:
+      docker_image_name: jore4-tiamat
+      build_arm64_image: true
+    secrets:
+      azure_client_id: ${{ secrets.AZURE_CLIENT_ID }}
+      azure_tenant_id: ${{ secrets.AZURE_TENANT_ID }}
+      azure_subscription_id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
   run_cypress_tests:
     needs:
       - run_java_tests
