@@ -12,7 +12,7 @@ jobs:
     name: Run Java tests
     uses: ./.github/workflows/run-java-tests.yml
 
-  push_to_registry:
+  publish_docker_image_to_docker_hub:
     needs: run_java_tests
     name: Build & Push Docker image to Docker Hub
     runs-on: ubuntu-24.04
@@ -84,5 +84,5 @@ jobs:
   run_cypress_tests:
     needs:
       - run_java_tests
-      - push_to_registry
+      - publish_docker_image_to_docker_hub
     uses: ./.github/workflows/run-cypress-tests.yml
