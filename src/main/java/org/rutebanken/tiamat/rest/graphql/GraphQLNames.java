@@ -570,6 +570,12 @@ public class GraphQLNames {
     public static final String DISPLAY_TYPE = "displayType";
     public static final String INFO_SPOT_LOCATIONS = "infoSpotLocations";
 
+    public static final String EXTERNAL_LINKS = "externalLinks";
+    public static final String OUTPUT_TYPE_EXTERNAL_LINK = "externalLink";
+    public static final String INPUT_TYPE_EXTERNAL_LINK = OUTPUT_TYPE_EXTERNAL_LINK + INPUT_TYPE_POSTFIX;
+    public static final String EXTERNAL_LINK_NAME = "name";
+    public static final String EXTERNAL_LINK_LOCATION = "location";
+
     public static final String POSTER_SIZE = "posterSize";
     public static final String LINES = "lines";
 }

@@ -15,6 +15,7 @@
 
 package org.rutebanken.tiamat.model;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
@@ -289,4 +290,24 @@ public class QuayTest extends TiamatIntegrationTest {
         assertThat(actualQuay.getBoardingPositions()).isNotEmpty();
     }
 
+    @Test
+    public void persistHSLExternalLinks() {
+        Quay quay = new Quay();
+
+        QuayExternalLink link1 = new QuayExternalLink();
+        link1.setName("testName");
+        link1.setLocation("www.hsl.fi");
+
+        QuayExternalLink link2 = new QuayExternalLink();
+        link2.setName("test2Name");
+        link2.setLocation("www.hsl.fi");
+
+        quay.setExternalLinks(List.of(link1, link2));
+
+        quay = quayRepository.save(quay);
+
+        Quay quayInRepository = quayRepository.findById(quay.getId()).orElseThrow();
+
+        Assert.assertEquals(quayInRepository.externalLinks, quay.externalLinks);
+    }
 }

@@ -49,6 +49,7 @@ import org.rutebanken.tiamat.model.Link;
 import org.rutebanken.tiamat.model.Parking;
 import org.rutebanken.tiamat.model.PurposeOfGrouping;
 import org.rutebanken.tiamat.model.Quay;
+import org.rutebanken.tiamat.model.QuayExternalLink;
 import org.rutebanken.tiamat.model.SanitaryEquipment;
 import org.rutebanken.tiamat.model.ShelterEquipment;
 import org.rutebanken.tiamat.model.SiteRefStructure;
@@ -82,6 +83,7 @@ import org.rutebanken.tiamat.rest.graphql.resolvers.MutableTypeResolver;
 import org.rutebanken.tiamat.rest.graphql.scalars.DateScalar;
 import org.rutebanken.tiamat.rest.graphql.scalars.TransportModeScalar;
 import org.rutebanken.tiamat.rest.graphql.types.EntityRefObjectTypeCreator;
+import org.rutebanken.tiamat.rest.graphql.types.ExternalLinkObjectTypeCreator;
 import org.rutebanken.tiamat.rest.graphql.types.FareZoneObjectTypeCreator;
 import org.rutebanken.tiamat.rest.graphql.types.GroupOfStopPlacesObjectTypeCreator;
 import org.rutebanken.tiamat.rest.graphql.types.GroupOfTariffZonesObjectTypeCreator;
@@ -242,6 +244,9 @@ public class StopPlaceRegisterGraphQLSchema {
 
     @Autowired
     private MultiModalityOperationsBuilder multiModalityOperationsBuilder;
+
+    @Autowired
+    private ExternalLinkObjectTypeCreator externalLinkObjectTypeCreator;
 
     @Autowired
     DataFetcher stopPlaceFetcher;
@@ -437,7 +442,9 @@ public class StopPlaceRegisterGraphQLSchema {
 
         GraphQLObjectType infoSpotObjectType = infoSpotObjectTypeCreator.createObjectType(validBetweenObjectType);
 
-        GraphQLObjectType quayObjectType = createQuayObjectType(commonFieldsList, infoSpotObjectType, allVersionsArgument);
+        GraphQLObjectType externalLinkObjectType = externalLinkObjectTypeCreator.externalLinkObjectType();
+
+        GraphQLObjectType quayObjectType = createQuayObjectType(commonFieldsList, infoSpotObjectType, externalLinkObjectType, allVersionsArgument);
 
 
         GraphQLObjectType topographicPlaceObjectType = topographicPlaceObjectTypeCreator.create();
@@ -584,7 +591,9 @@ public class StopPlaceRegisterGraphQLSchema {
 
         List<GraphQLInputObjectField> commonInputFieldList = createCommonInputFieldList(embeddableMultiLingualStringInputObjectType);
 
-        GraphQLInputObjectType quayInputObjectType = createQuayInputObjectType(commonInputFieldList);
+        GraphQLInputObjectType externalLinkInputObjectType = externalLinkObjectTypeCreator.externalLinkInputType();
+
+        GraphQLInputObjectType quayInputObjectType = createQuayInputObjectType(commonInputFieldList, externalLinkInputObjectType);
 
         GraphQLInputObjectType validBetweenInputObjectType = createValidBetweenInputObjectType();
 
@@ -727,7 +736,6 @@ public class StopPlaceRegisterGraphQLSchema {
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_ACCESSIBILITY_ASSESSMENT, HSL_ACCESSIBILITY_PROPERTIES,
                  env -> ((AccessibilityAssessment) env.getSource()).getHslAccessibilityProperties()
         );
-
 
         registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_ACCESSIBILITY_LIMITATIONS , ID, getNetexIdFetcher());
         registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_ACCESSIBILITY_LIMITATIONS , ID, getNetexIdFetcher());
@@ -1407,6 +1415,7 @@ public class StopPlaceRegisterGraphQLSchema {
     private GraphQLObjectType createQuayObjectType(
             List<GraphQLFieldDefinition> commonFieldsList,
             GraphQLObjectType infoSpotObjectType,
+            GraphQLObjectType externalLinkObjectType,
             GraphQLArgument allVersionsArgument) {
         return newObject()
                     .name(OUTPUT_TYPE_QUAY)
@@ -1428,6 +1437,10 @@ public class StopPlaceRegisterGraphQLSchema {
                             .type(new GraphQLList(infoSpotObjectType))
                             .description("Info spots")
                             .arguments(createFindInfoSpotArguments(allVersionsArgument)))
+                    .field(newFieldDefinition()
+                            .name(EXTERNAL_LINKS)
+                            .type(new GraphQLList(externalLinkObjectType))
+                            .description("External links"))
                     .build();
     }
 
@@ -1557,10 +1570,15 @@ public class StopPlaceRegisterGraphQLSchema {
     }
 
 
-    private GraphQLInputObjectType createQuayInputObjectType(List<GraphQLInputObjectField> graphQLCommonInputObjectFieldsList) {
+    private GraphQLInputObjectType createQuayInputObjectType(
+            List<GraphQLInputObjectField> graphQLCommonInputObjectFieldsList,
+            GraphQLInputObjectType externalLinkType) {
         return newInputObject()
                 .name(INPUT_TYPE_QUAY)
                 .fields(graphQLCommonInputObjectFieldsList)
+                .field(newInputObjectField()
+                        .name(EXTERNAL_LINKS)
+                        .type(new GraphQLList(externalLinkType)))
                 .field(newInputObjectField().name(COMPASS_BEARING).type(GraphQLBigDecimal))
                 .field(newInputObjectField().name(BOARDING_POSITIONS).type(new GraphQLList(boardingPositionsInputObjectType)))
                 .field(newInputObjectField().name(VERSION_COMMENT).type(GraphQLString))

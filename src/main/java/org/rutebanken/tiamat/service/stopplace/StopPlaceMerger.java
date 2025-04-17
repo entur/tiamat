@@ -51,7 +51,7 @@ public class StopPlaceMerger {
     /**
      * Properties to ignore on merge.
      */
-    public static final String[] IGNORE_PROPERTIES_ON_MERGE = {"keyValues", "placeEquipments", "accessibilityAssessment", "tariffZones", "alternativeNames", "transportMode", "airSubmode", "busSubmode", "funicularSubmode", "metroSubmode", "tramSubmode", "telecabinSubmode", "railSubmode", "waterSubmode"};
+    public static final String[] IGNORE_PROPERTIES_ON_MERGE = {"keyValues", "placeEquipments", "accessibilityAssessment", "tariffZones", "alternativeNames", "transportMode", "airSubmode", "busSubmode", "funicularSubmode", "metroSubmode", "tramSubmode", "telecabinSubmode", "railSubmode", "waterSubmode", "externalLinks"};
 
     @Autowired
     private StopPlaceVersionedSaverService stopPlaceVersionedSaverService;

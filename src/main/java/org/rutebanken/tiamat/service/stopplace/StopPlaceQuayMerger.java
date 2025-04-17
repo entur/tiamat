@@ -38,6 +38,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.MERGED_ID_KEY;
 import static org.rutebanken.tiamat.service.stopplace.StopPlaceMerger.IGNORE_PROPERTIES_ON_MERGE;
@@ -147,6 +148,10 @@ public class StopPlaceQuayMerger {
 
         if (fromQuay.getAlternativeNames() != null) {
             alternativeNamesMerger.mergeAlternativeNames(fromQuay.getAlternativeNames(), toQuay.getAlternativeNames());
+        }
+
+        if (fromQuay.getExternalLinks() != null) {
+            toQuay.setExternalLinks(Stream.concat(toQuay.getExternalLinks().stream(), fromQuay.getExternalLinks().stream()).toList());
         }
     }
 }
