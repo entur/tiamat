@@ -95,3 +95,7 @@ data:
     # pubsub
     spring.cloud.gcp.project-id={{ .Values.configMap.pubsubProjectId }}
     changelog.topic.name={{ .Values.configMap.pubsbuTopicName }}
+
+    # Compression
+    server.compression.enabled=true
+    server.compression.mime-types=application/json,application/xml,text/html,text/xml,text/plain

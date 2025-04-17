@@ -34,6 +34,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.Timer;
@@ -59,6 +61,7 @@ public class PublicationDeliveryImporter {
     private final TopographicPlaceImportHandler topographicPlaceImportHandler;
     private final BackgroundJobs backgroundJobs;
     private final AuthorizationService authorizationService;
+    private final boolean authorizationEnabled;
 
     @Autowired
     public PublicationDeliveryImporter(PublicationDeliveryHelper publicationDeliveryHelper, NetexMapper netexMapper,
@@ -69,7 +72,9 @@ public class PublicationDeliveryImporter {
                                        GroupOfTariffZonesImportHandler groupOfTariffZonesImportHandler,
                                        StopPlaceImportHandler stopPlaceImportHandler,
                                        ParkingsImportHandler parkingsImportHandler,
-                                       BackgroundJobs backgroundJobs, AuthorizationService authorizationService) {
+                                       BackgroundJobs backgroundJobs,
+                                       AuthorizationService authorizationService,
+                                       @Value("${authorization.enabled:true}") boolean authorizationEnabled) {
         this.publicationDeliveryHelper = publicationDeliveryHelper;
         this.parkingsImportHandler = parkingsImportHandler;
         this.publicationDeliveryCreator = publicationDeliveryCreator;
@@ -80,6 +85,7 @@ public class PublicationDeliveryImporter {
         this.stopPlaceImportHandler = stopPlaceImportHandler;
         this.backgroundJobs = backgroundJobs;
         this.authorizationService = authorizationService;
+        this.authorizationEnabled = authorizationEnabled;
     }
 
 
@@ -89,8 +95,10 @@ public class PublicationDeliveryImporter {
 
     @SuppressWarnings("unchecked")
     public PublicationDeliveryStructure importPublicationDelivery(PublicationDeliveryStructure incomingPublicationDelivery, ImportParams importParams) {
+        if(authorizationEnabled && !authorizationService.canEditAllEntities()){
+                throw new AccessDeniedException("Insufficient privileges for operation");
+            }
 
-        authorizationService.verifyCanEditAllEntities();
 
         if (incomingPublicationDelivery.getDataObjects() == null) {
             String responseMessage = "Received publication delivery but it does not contain any data objects.";

@@ -43,6 +43,7 @@ import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.DESCRIPTION;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.GROUP_OF_STOP_PLACES_MEMBERS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.NAME;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.OUTPUT_TYPE_GROUP_OF_STOPPLACES;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PERMISSIONS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PURPOSE_OF_GROUPING;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.SHORT_NAME;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.VALID_BETWEEN;
@@ -58,6 +59,7 @@ public class GroupOfStopPlacesObjectTypeCreator {
 
     public GraphQLObjectType create(GraphQLInterfaceType stopPlaceInterface,
                                     GraphQLObjectType purposeOfGroupingType,
+                                    GraphQLObjectType entityPermissionObjectType,
                                     GraphQLObjectType validBetweenObjectType) {
         return newObject()
                 .name(OUTPUT_TYPE_GROUP_OF_STOPPLACES)
@@ -90,6 +92,9 @@ public class GroupOfStopPlacesObjectTypeCreator {
                 .field(newFieldDefinition()
                         .name(GROUP_OF_STOP_PLACES_MEMBERS)
                         .type(new GraphQLList(stopPlaceInterface)))
+                .field(newFieldDefinition()
+                        .name(PERMISSIONS)
+                        .type(entityPermissionObjectType))
                         .build();
     }
 }
