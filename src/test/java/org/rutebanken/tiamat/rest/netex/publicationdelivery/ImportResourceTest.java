@@ -1265,6 +1265,25 @@ public class ImportResourceTest extends TiamatIntegrationTest {
         streamingOutput.write(byteArrayOutputStream);
         System.out.println(byteArrayOutputStream.toString());
     }
+
+
+    @Test
+    public void importParking() throws JAXBException, IOException, SAXException {
+        final org.rutebanken.tiamat.model.StopPlace stopPlace = new org.rutebanken.tiamat.model.StopPlace();
+        stopPlace.setNetexId("NSR:StopPlace:408");
+        stopPlace.setVersion(1);
+        stopPlaceRepository.save(stopPlace);
+
+        final FileInputStream fileInputStream = new FileInputStream("src/test/resources/org/rutebanken/tiamat/rest/netex/publicationdelivery/parking.xml");
+
+        Response response = importResource.importPublicationDelivery(fileInputStream);
+        assertThat(response.getStatus()).isEqualTo(200);
+
+        StreamingOutput streamingOutput = (StreamingOutput) response.getEntity();
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        streamingOutput.write(byteArrayOutputStream);
+        System.out.println(byteArrayOutputStream.toString());
+    }
     private void setUpSecurityContext() {
         // Create a Jwt with claims
         Map<String, Object> claims = new HashMap<>();
