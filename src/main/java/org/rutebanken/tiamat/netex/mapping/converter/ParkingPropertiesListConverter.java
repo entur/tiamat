@@ -78,7 +78,28 @@ public class ParkingPropertiesListConverter extends BidirectionalConverter<List<
         List<ParkingProperties> parkingPropertiesList = new ArrayList<>();
         if (parkingProperties_relStructure != null && parkingProperties_relStructure.getParkingProperties() != null) {
             parkingProperties_relStructure.getParkingProperties().stream()
-                    .map(netexParkingProperty -> mapperFacade.map(netexParkingProperty, ParkingProperties.class))
+                    .map(netexParkingProperty -> {
+                        ParkingProperties parkingProperties = new ParkingProperties();
+                        parkingProperties.setNetexId(netexParkingProperty.getId());
+                        parkingProperties.setVersion(Integer.parseInt(netexParkingProperty.getVersion()));
+                        final List<org.rutebanken.tiamat.model.ParkingUserEnumeration> parkingUserEnumeration = mapperFacade.mapAsList(netexParkingProperty.getParkingUserTypes(), org.rutebanken.tiamat.model.ParkingUserEnumeration.class);
+
+                        parkingProperties.getParkingUserTypes().addAll(parkingUserEnumeration);
+                        List<org.rutebanken.tiamat.model.ParkingCapacity> parkingCapacityList = new ArrayList<>();
+                        netexParkingProperty.getSpaces().getParkingCapacityRefOrParkingCapacity().forEach(space -> {
+                            org.rutebanken.tiamat.model.ParkingCapacity parkingCapacity = new org.rutebanken.tiamat.model.ParkingCapacity();
+                            if (space instanceof ParkingCapacity netexParkingCapacity) {
+                                parkingCapacity.setNetexId(netexParkingCapacity.getId());
+                                parkingCapacity.setVersion(Integer.parseInt(netexParkingCapacity.getVersion()));
+                                parkingCapacity.setNumberOfSpaces(netexParkingCapacity.getNumberOfSpaces());
+                                parkingCapacity.setNumberOfSpacesWithRechargePoint(netexParkingCapacity.getNumberOfSpacesWithRechargePoint());
+                                parkingCapacity.setParkingUserType(mapperFacade.map(netexParkingCapacity.getParkingUserType(), org.rutebanken.tiamat.model.ParkingUserEnumeration.class));
+                            }
+                            parkingCapacityList.add(parkingCapacity);
+                        });
+                        parkingProperties.setSpaces(parkingCapacityList);
+                        return parkingProperties;
+                    })
                     .forEach(parkingPropertiesList::add);
         }
 
