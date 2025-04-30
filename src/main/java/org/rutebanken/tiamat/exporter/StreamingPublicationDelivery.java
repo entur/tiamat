@@ -240,17 +240,25 @@ public class StreamingPublicationDelivery {
         prepareTariffZones(exportParams, stopPlacePrimaryIds, mappedTariffZonesCount, netexSiteFrame, entitiesEvictor);
         prepareParkings(exportParams, stopPlacePrimaryIds, mappedParkingCount, netexSiteFrame, entitiesEvictor);
         prepareGroupOfStopPlaces(exportParams, stopPlacePrimaryIds, mappedGroupOfStopPlacesCount, netexSiteFrame,netexResourceFrame, entitiesEvictor);
+        prepareFareZones(exportParams,stopPlacePrimaryIds,mappedFareZonesCount,mappedGroupOfTariffZonesCount,netexSiteFrame,netexFareFrame,entitiesEvictor);
+        prepareScheduledStopPoints(stopPlacePrimaryIds, netexServiceFrame);
 
 
         PublicationDeliveryStructure publicationDeliveryStructure;
-
-        if (exportParams.getServiceFrameExportMode() == ExportParams.ExportMode.ALL) {
-            prepareFareZones(exportParams,stopPlacePrimaryIds,mappedFareZonesCount,mappedGroupOfTariffZonesCount,netexSiteFrame,netexFareFrame,entitiesEvictor);
-            prepareScheduledStopPoints(stopPlacePrimaryIds, netexServiceFrame);
-            publicationDeliveryStructure = publicationDeliveryCreator.createPublicationDelivery(netexSiteFrame, netexServiceFrame,netexFareFrame,netexResourceFrame);
+        if(!exportParams.getFareZoneExportMode().equals(ExportParams.ExportMode.NONE)) {
+            if(exportParams.getGroupOfStopPlacesExportMode().equals(ExportParams.ExportMode.NONE)) {
+                publicationDeliveryStructure = publicationDeliveryCreator.createPublicationDelivery(netexSiteFrame, netexServiceFrame, netexFareFrame);
+            } else {
+                publicationDeliveryStructure = publicationDeliveryCreator.createPublicationDelivery(netexSiteFrame, netexServiceFrame, netexFareFrame, netexResourceFrame);
+            }
         } else {
-            publicationDeliveryStructure = publicationDeliveryCreator.createPublicationDelivery(netexSiteFrame,netexResourceFrame);
+            if(exportParams.getGroupOfStopPlacesExportMode().equals(ExportParams.ExportMode.NONE)) {
+                publicationDeliveryStructure = publicationDeliveryCreator.createPublicationDelivery(netexSiteFrame, netexServiceFrame);
+            } else {
+                publicationDeliveryStructure = publicationDeliveryCreator.createPublicationDelivery(netexSiteFrame, netexServiceFrame, netexResourceFrame);
+            }
         }
+
 
         Marshaller marshaller = createMarshaller();
 
@@ -290,10 +298,16 @@ public class StreamingPublicationDelivery {
             fareZoneIterator = Collections.emptyIterator();
         }
         var fareZonesInFrameRelStructure = new FareZonesInFrame_RelStructure();
-        List<FareZone> netexFareZone = new NetexMappingIteratorList<>(() -> new NetexMappingIterator<>(netexMapper, fareZoneIterator,
-                FareZone.class, mappedFareZonesCount, evictor));
-        if (!netexFareZone.isEmpty()){
-            setField(FareZonesInFrame_RelStructure.class, "fareZone", fareZonesInFrameRelStructure, netexFareZone);
+        List<FareZone> netexFareZones= new ArrayList<>();
+        while (fareZoneIterator.hasNext()) {
+            final org.rutebanken.tiamat.model.FareZone fareZone = fareZoneIterator.next();
+            final FareZone netexFareZone = netexMapper.mapToNetexModel(fareZone);
+            netexFareZones.add(netexFareZone);
+            mappedFareZonesCount.incrementAndGet();
+
+        }
+        if (!netexFareZones.isEmpty()){
+            setField(FareZonesInFrame_RelStructure.class, "fareZone", fareZonesInFrameRelStructure, netexFareZones);
             netexFareFrame.setFareZones(fareZonesInFrameRelStructure);
             }
 

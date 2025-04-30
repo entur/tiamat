@@ -50,18 +50,6 @@ public class PublicationDeliveryCreator {
         return publicationDeliveryStructure;
     }
 
-    public PublicationDeliveryStructure createPublicationDelivery(org.rutebanken.netex.model.SiteFrame siteFrame, ResourceFrame netexResourceFrame) {
-        PublicationDeliveryStructure publicationDeliveryStructure = createPublicationDelivery();
-        publicationDeliveryStructure.withDataObjects(
-                new PublicationDeliveryStructure.DataObjects()
-                        .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(siteFrame))
-                        .withCompositeFrameOrCommonFrame(new ObjectFactory().createResourceFrame(netexResourceFrame))
-        );
-
-        logger.info("Returning publication delivery {} with site frame", publicationDeliveryStructure);
-        return publicationDeliveryStructure;
-    }
-
     public PublicationDeliveryStructure createPublicationDelivery(org.rutebanken.netex.model.SiteFrame siteFrame,
                                                                   org.rutebanken.netex.model.ServiceFrame serviceFrame,
                                                                   org.rutebanken.netex.model.FareFrame fareFrame,
@@ -82,6 +70,58 @@ public class PublicationDeliveryCreator {
         return publicationDeliveryStructure;
     }
 
+    public PublicationDeliveryStructure createPublicationDelivery(org.rutebanken.netex.model.SiteFrame siteFrame,
+                                                                  org.rutebanken.netex.model.ServiceFrame serviceFrame,
+                                                                  org.rutebanken.netex.model.FareFrame fareFrame
+    ) {
+        PublicationDeliveryStructure publicationDeliveryStructure = createPublicationDelivery();
+
+        publicationDeliveryStructure.withDataObjects
+                (
+                        new PublicationDeliveryStructure.DataObjects()
+                                .withCompositeFrameOrCommonFrame(new ObjectFactory().createServiceFrame(serviceFrame))
+                                .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(siteFrame))
+                                .withCompositeFrameOrCommonFrame(new ObjectFactory().createFareFrame(fareFrame))
+                );
+
+        logger.info("Returning publication delivery {} with site frame and  service frame", publicationDeliveryStructure);
+        return publicationDeliveryStructure;
+    }
+
+    public PublicationDeliveryStructure createPublicationDelivery(org.rutebanken.netex.model.SiteFrame siteFrame,
+                                                                  org.rutebanken.netex.model.ServiceFrame serviceFrame,
+                                                                  ResourceFrame netexResourceFrame
+    ) {
+        PublicationDeliveryStructure publicationDeliveryStructure = createPublicationDelivery();
+
+        publicationDeliveryStructure.withDataObjects
+                (
+                        new PublicationDeliveryStructure.DataObjects()
+                                .withCompositeFrameOrCommonFrame(new ObjectFactory().createServiceFrame(serviceFrame))
+                                .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(siteFrame))
+                                .withCompositeFrameOrCommonFrame(new ObjectFactory().createResourceFrame(netexResourceFrame))
+                );
+
+        logger.info("Returning publication delivery {} with site frame and  service frame", publicationDeliveryStructure);
+        return publicationDeliveryStructure;
+    }
+
+    public PublicationDeliveryStructure createPublicationDelivery(org.rutebanken.netex.model.SiteFrame siteFrame,
+                                                                  org.rutebanken.netex.model.ServiceFrame serviceFrame
+    ) {
+        PublicationDeliveryStructure publicationDeliveryStructure = createPublicationDelivery();
+
+        publicationDeliveryStructure.withDataObjects
+                (
+                        new PublicationDeliveryStructure.DataObjects()
+                                .withCompositeFrameOrCommonFrame(new ObjectFactory().createServiceFrame(serviceFrame))
+                                .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(siteFrame))
+                );
+
+        logger.info("Returning publication delivery {} with site frame and  service frame", publicationDeliveryStructure);
+        return publicationDeliveryStructure;
+    }
+
 
 
     private ResourceFrame createResourceFrame() {
@@ -93,7 +133,7 @@ public class PublicationDeliveryCreator {
 
         return new ResourceFrame().withId("NSR:RescourceFrame:1").withVersion("1")
                 .withTypesOfValue(new ObjectFactory()
-                        .createTypesOfValueInFrame_RelStructure().withValueSetOrTypeOfValue(purposeOfGroupingList ));
+                        .createTypesOfValueInFrame_RelStructure().withValueSetOrTypeOfValue(purposeOfGroupingList));
     }
 
 
