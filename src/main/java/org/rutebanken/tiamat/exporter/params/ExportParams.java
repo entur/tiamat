@@ -83,12 +83,6 @@ public class ExportParams {
     @Schema(description = "Group of tariff zones export mode")
     private ExportMode groupOfTariffZonesExportMode = DEFAULT_GROUP_OF_TARIFF_ZONES_EXPORT_MODE;
 
-    @QueryParam(value = "serviceFrameExportMode")
-    @DefaultValue(value = "NONE")
-    @Parameter(description = "Controls exported service frame, if set to all, netex export will be exported with service frame with Scheduled Stop Points and Passenger Stop Assignments")
-    @Schema(description = "Service Frame export mode")
-    private ExportMode serviceFrameExportMode = DEFAULT_SERVICE_FRAME_EXPORT_MODE;
-
     @QueryParam(value = "municipalityReference")
     @Parameter(description = MUNICIPALITY_REF_ARG_DESCRIPTION)
     @Schema(description = "municipalityReference")
@@ -118,7 +112,6 @@ public class ExportParams {
                          ExportMode fareZoneExportMode,
                          ExportMode groupOfStopPlacesExportMode,
                          ExportMode groupOfTariffZonesExportMode,
-                         ExportMode serviceFrameExportMode,
                          List<String> municipalityReferences,
                          List<String> countyReferences,
                          List<String> countryReferences,
@@ -129,7 +122,6 @@ public class ExportParams {
         this.fareZoneExportMode = fareZoneExportMode;
         this.groupOfStopPlacesExportMode = groupOfStopPlacesExportMode;
         this.groupOfTariffZonesExportMode = groupOfTariffZonesExportMode;
-        this.serviceFrameExportMode = serviceFrameExportMode;
         this.municipalityReferences = municipalityReferences;
         this.countyReferences = countyReferences;
         this.countryReferences = countryReferences;
@@ -162,10 +154,6 @@ public class ExportParams {
 
     public ExportMode getGroupOfTariffZonesExportMode() {
         return groupOfTariffZonesExportMode;
-    }
-
-    public ExportMode getServiceFrameExportMode() {
-        return serviceFrameExportMode;
     }
 
     public List<String> getMunicipalityReferences() {
@@ -201,7 +189,6 @@ public class ExportParams {
                 .add("stopPlaceSearch", stopPlaceSearch)
                 .add("tariffZoneExportMode", tariffZoneExportMode)
                 .add("fareZoneExportMode", fareZoneExportMode)
-                .add("serviceFrameExportMode",serviceFrameExportMode)
                 .add("codeSpace", codeSpace)
                 .toString();
     }
@@ -212,7 +199,6 @@ public class ExportParams {
         private ExportMode topographicPlaceExportMode = DEFAULT_TOPOGRAPHIC_PLACE_EXPORT_MODE;
         private ExportMode groupOfStopPlacesExportMode = DEFAULT_GROUP_OF_STOP_PLACES_EXPORT_MODE;
         private ExportMode groupOfTariffZonesExportMode = DEFAULT_GROUP_OF_TARIFF_ZONES_EXPORT_MODE;
-        private ExportMode serviceFrameExportMode = DEFAULT_SERVICE_FRAME_EXPORT_MODE;
         private List<String> municipalityReferences;
         private List<String> countyReferences;
         private List<String> countryReferences;
@@ -224,11 +210,6 @@ public class ExportParams {
 
         public Builder setTopographicPlaceExportMode(ExportMode topographicPlaceExportMode) {
             this.topographicPlaceExportMode = topographicPlaceExportMode;
-            return this;
-        }
-
-        public Builder setServiceFrameExportMode(ExportMode serviceFrameExportMode) {
-            this.serviceFrameExportMode = serviceFrameExportMode;
             return this;
         }
 
@@ -297,7 +278,6 @@ public class ExportParams {
                     tariffZoneExportMode,fareZoneExportMode,
                     groupOfStopPlacesExportMode,
                     groupOfTariffZonesExportMode,
-                    serviceFrameExportMode,
                     municipalityReferences,
                     countyReferences,
                     countryReferences,
