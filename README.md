@@ -300,7 +300,6 @@ server.port=1888
 
 blobstore.gcs.blob.path=exports
 blobstore.gcs.bucket.name=tiamat-test
-blobstore.gcs.credential.path=gcloud-storage.json
 blobstore.gcs.project.id=carbon-1287
 
 security.basic.enabled=false

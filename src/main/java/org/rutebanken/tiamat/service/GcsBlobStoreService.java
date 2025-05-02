@@ -35,18 +35,15 @@ public class GcsBlobStoreService implements BlobStoreService {
     private final String bucketName;
 
     private final String blobPath;
-    private final String credentialPath;
     private final String projectId;
 
 
-    public GcsBlobStoreService(@Value("${blobstore.gcs.credential.path:#{null}") String credentialPath,
-                               @Value("${blobstore.gcs.bucket.name}") String bucketName,
+    public GcsBlobStoreService(@Value("${blobstore.gcs.bucket.name}") String bucketName,
                                @Value("${blobstore.gcs.blob.path}") String blobPath,
                                @Value("${blobstore.gcs.project.id}") String projectId) {
 
         this.bucketName = bucketName;
         this.blobPath = blobPath;
-        this.credentialPath = credentialPath;
         this.projectId = projectId;
     }
 
@@ -64,13 +61,9 @@ public class GcsBlobStoreService implements BlobStoreService {
     private Storage getStorage() {
         try {
             logger.info("Get storage for project {}", projectId);
-            if (credentialPath == null || credentialPath.isEmpty()) {
-                // Use default default gcp credentials
                 return BlobStoreHelper.getStorage(projectId);
-            }
-            return BlobStoreHelper.getStorage(credentialPath, projectId);
         } catch (RuntimeException e) {
-            throw new RuntimeException("Error setting up BlobStore from blobstore.gcs.credential.path '" + credentialPath + "' and blobstore.gcs.project.id '" + projectId + "'", e);
+            throw new RuntimeException("Error setting up BlobStore from blobstore.gcs.project.id '" + projectId + "'", e);
         }
     }
 
