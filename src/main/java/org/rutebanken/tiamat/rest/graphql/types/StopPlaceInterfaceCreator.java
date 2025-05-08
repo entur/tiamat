@@ -36,6 +36,7 @@ import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.FARE_ZONES;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.INFO_SPOTS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.OUTPUT_TYPE_GROUP_OF_STOPPLACES;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.OUTPUT_TYPE_STOPPLACE_INTERFACE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PERMISSIONS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.STOP_PLACE_GROUPS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.TAGS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.TARIFF_ZONES;
@@ -58,6 +59,7 @@ public class StopPlaceInterfaceCreator {
                                                                     GraphQLObjectType fareZoneObjectType,
                                                                     GraphQLObjectType topographicPlaceObjectType,
                                                                     GraphQLObjectType validBetweenObjectType,
+                                                                    GraphQLObjectType entityPermissionObjectType,
                                                                     GraphQLObjectType infoSpotObjectType) {
         List<GraphQLFieldDefinition> stopPlaceInterfaceFields = new ArrayList<>();
         stopPlaceInterfaceFields.add(newFieldDefinition()
@@ -98,6 +100,10 @@ public class StopPlaceInterfaceCreator {
         stopPlaceInterfaceFields.add(newFieldDefinition()
                 .name(INFO_SPOTS)
                 .type(new GraphQLList(infoSpotObjectType))
+                .build());
+        stopPlaceInterfaceFields.add(newFieldDefinition()
+                .name(PERMISSIONS)
+                .type(entityPermissionObjectType)
                 .build());
         return stopPlaceInterfaceFields;
     }

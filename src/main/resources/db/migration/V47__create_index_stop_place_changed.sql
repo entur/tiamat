@@ -1,0 +1,1 @@
+CREATE INDEX idx_stop_place_changed_desc ON stop_place (changed DESC);

@@ -58,7 +58,7 @@ public class Quay extends StopPlaceSpace_VersionStructure {
             joinColumns = @JoinColumn(name = "quayId")
     )
     @OrderColumn(name = "orderNum")
-    protected List<QuayExternalLink> externalLinks;
+    protected List<QuayExternalLink> externalLinks = new ArrayList<>();
 
     public Quay(EmbeddableMultilingualString name) {
         super(name);

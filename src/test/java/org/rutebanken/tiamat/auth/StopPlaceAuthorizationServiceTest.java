@@ -31,6 +31,7 @@ import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.rutebanken.tiamat.model.ValidBetween;
+import org.rutebanken.tiamat.service.groupofstopplaces.GroupOfStopPlacesMembersResolver;
 import org.rutebanken.tiamat.service.stopplace.MultiModalStopPlaceEditor;
 import org.rutebanken.tiamat.versioning.VersionCreator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,6 +87,9 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
     @Autowired
     private TiamatEntityResolver tiamatEntityResolver;
 
+    @Autowired
+    private GroupOfStopPlacesMembersResolver groupOfStopPlacesMembersResolver;
+
 
     @Autowired
     private TiamatOriganisationChecker tiamatOriganisationChecker;
@@ -122,7 +126,7 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
                 tiamatOriganisationChecker,
                 topographicPlaceChecker,
                 tiamatEntityResolver);
-        this.authorizationService = authorizationServiceConfig.authorizationService(dataScopedAuthorizationService, roleAssignmentExtractor);
+        this.authorizationService = authorizationServiceConfig.authorizationService(dataScopedAuthorizationService,false, roleAssignmentExtractor,topographicPlaceChecker,groupOfStopPlacesMembersResolver);
 
 
 

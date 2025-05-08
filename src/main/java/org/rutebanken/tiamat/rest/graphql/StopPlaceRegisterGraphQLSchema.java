@@ -62,16 +62,18 @@ import org.rutebanken.tiamat.model.WaitingRoomEquipment;
 import org.rutebanken.tiamat.model.Zone_VersionStructure;
 import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
-import org.rutebanken.tiamat.rest.graphql.fetchers.AuthorizationCheckDataFetcher;
+import org.rutebanken.tiamat.rest.graphql.fetchers.EntityPermissionsFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.FareZoneAuthoritiesFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.GroupOfStopPlacesMembersFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.GroupOfStopPlacesPurposeOfGroupingFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.InfoSpotPosterFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.KeyValuesDataFetcher;
+import org.rutebanken.tiamat.rest.graphql.fetchers.LocationPermissionsFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.PolygonFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.StopPlaceFareZoneFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.StopPlaceTariffZoneFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.TagFetcher;
+import org.rutebanken.tiamat.rest.graphql.fetchers.UserPermissionsFetcher;
 import org.rutebanken.tiamat.rest.graphql.mappers.GeometryMapper;
 import org.rutebanken.tiamat.rest.graphql.mappers.ValidBetweenMapper;
 import org.rutebanken.tiamat.rest.graphql.operations.MultiModalityOperationsBuilder;
@@ -134,8 +136,6 @@ import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 import static org.rutebanken.tiamat.rest.graphql.mappers.EmbeddableMultilingualStringMapper.getEmbeddableString;
 import static org.rutebanken.tiamat.rest.graphql.operations.MultiModalityOperationsBuilder.ADD_TO_MULTI_MODAL_STOP_PLACE_INPUT;
 import static org.rutebanken.tiamat.rest.graphql.scalars.TransportModeScalar.getValidSubmodes;
-import static org.rutebanken.tiamat.rest.graphql.types.AuthorizationCheckCreator.createAuthorizationCheckArguments;
-import static org.rutebanken.tiamat.rest.graphql.types.AuthorizationCheckCreator.createAuthorizationCheckOutputType;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.accessibilityAssessmentInputObjectType;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.accessibilityAssessmentObjectType;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.alternativeNameInputObjectType;
@@ -162,6 +162,7 @@ import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.privat
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.scopingMethodEnumType;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.stopPlaceOrganisationRefInputObjectType;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.stopPlaceTypeEnum;
+import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.submodeEnum;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.topographicPlaceInputObjectType;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.topographicPlaceTypeEnum;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.transportModeSubmodeObjectType;
@@ -240,9 +241,6 @@ public class StopPlaceRegisterGraphQLSchema {
     private InfoSpotObjectTypeCreator infoSpotObjectTypeCreator;
 
     @Autowired
-    private AuthorizationCheckDataFetcher authorizationCheckDataFetcher;
-
-    @Autowired
     private MultiModalityOperationsBuilder multiModalityOperationsBuilder;
 
     @Autowired
@@ -277,6 +275,12 @@ public class StopPlaceRegisterGraphQLSchema {
 
     @Autowired
     private StopPlaceTariffZoneFetcher stopPlaceTariffZoneFetcher;
+
+    @Autowired
+    private EntityPermissionsFetcher entityPermissionsFetcher;
+
+    @Autowired
+    private LocationPermissionsFetcher locationPermissionsFetcher;
 
     @Autowired
     private StopPlaceFareZoneFetcher stopPlaceFareZoneFetcher;
@@ -398,6 +402,9 @@ public class StopPlaceRegisterGraphQLSchema {
     @Autowired
     private TopographicPlaceRepository topographicPlaceRepository;
 
+    @Autowired
+    private UserPermissionsFetcher userPermissionsFetcher;
+
 
     @PostConstruct
     public void init() {
@@ -429,6 +436,46 @@ public class StopPlaceRegisterGraphQLSchema {
         );
 
         GraphQLObjectType validBetweenObjectType = createValidBetweenObjectType();
+        GraphQLObjectType userPermissionsObjectType = newObject()
+                .name(OUTPUT_TYPE_USER_PERMISSIONS)
+                .field(newFieldDefinition()
+                        .name("isGuest")
+                        .type(GraphQLBoolean)
+                        .build())
+                .field(newFieldDefinition()
+                        .name("allowNewStopEverywhere")
+                        .type(GraphQLBoolean)
+                        .build())
+                .build();
+
+        GraphQLObjectType entityPermissionObjectType = newObject()
+                .name(OUTPUT_TYPE_ENTITY_PERMISSIONS)
+                .field(newFieldDefinition()
+                        .name("canEdit")
+                        .type(GraphQLBoolean)
+                        .build())
+                .field(newFieldDefinition()
+                        .name("canDelete")
+                        .type(GraphQLBoolean)
+                        .build())
+
+                .field(newFieldDefinition()
+                        .name("allowedStopPlaceTypes")
+                        .type(new GraphQLList(stopPlaceTypeEnum))
+                        .build())
+                .field(newFieldDefinition()
+                        .name("bannedStopPlaceTypes")
+                        .type(new GraphQLList(stopPlaceTypeEnum))
+                        .build())
+                .field(newFieldDefinition()
+                        .name("allowedSubmodes")
+                        .type(new GraphQLList(submodeEnum))
+                        .build())
+                .field(newFieldDefinition()
+                        .name("bannedSubmodes")
+                        .type(new GraphQLList(submodeEnum))
+                        .build())
+                .build();
 
         List<GraphQLFieldDefinition> zoneCommandFieldList = zoneCommonFieldListCreator.create(validBetweenObjectType);
 
@@ -454,7 +501,7 @@ public class StopPlaceRegisterGraphQLSchema {
 
         MutableTypeResolver stopPlaceTypeResolver = new MutableTypeResolver();
 
-        List<GraphQLFieldDefinition> stopPlaceInterfaceFields = stopPlaceInterfaceCreator.createCommonInterfaceFields(tariffZoneObjectType,fareZoneObjectType, topographicPlaceObjectType, validBetweenObjectType, infoSpotObjectType);
+        List<GraphQLFieldDefinition> stopPlaceInterfaceFields = stopPlaceInterfaceCreator.createCommonInterfaceFields(tariffZoneObjectType,fareZoneObjectType, topographicPlaceObjectType, validBetweenObjectType, entityPermissionObjectType, infoSpotObjectType);
         GraphQLInterfaceType stopPlaceInterface = stopPlaceInterfaceCreator.createInterface(stopPlaceInterfaceFields, commonFieldsList);
 
         GraphQLObjectType organisationObjectType = createOrganisationObjectType(validBetweenObjectType);
@@ -475,7 +522,7 @@ public class StopPlaceRegisterGraphQLSchema {
         });
 
         GraphQLObjectType purposeOfGroupingType =purposeOfGroupingTypeCreator.create();
-        GraphQLObjectType groupOfStopPlacesObjectType = groupOfStopPlaceObjectTypeCreator.create(stopPlaceInterface, purposeOfGroupingType, validBetweenObjectType);
+        GraphQLObjectType groupOfStopPlacesObjectType = groupOfStopPlaceObjectTypeCreator.create(stopPlaceInterface, purposeOfGroupingType, entityPermissionObjectType, validBetweenObjectType);
         GraphQLObjectType groupOfTariffZonesObjectType = groupOfTariffZonesObjectTypeCreator.create();
 
         GraphQLObjectType addressablePlaceObjectType = createAddressablePlaceObjectType(commonFieldsList);
@@ -533,11 +580,6 @@ public class StopPlaceRegisterGraphQLSchema {
                         .type(new GraphQLList(transportModeSubmodeObjectType))
                         .description("List all valid Transportmode/Submode-combinations."))
                 .field(newFieldDefinition()
-                        .name(CHECK_AUTHORIZED)
-                        .type(createAuthorizationCheckOutputType())
-                        .description(AUTHORIZATION_CHECK_DESCRIPTION)
-                        .arguments(createAuthorizationCheckArguments()))
-                .field(newFieldDefinition()
                         .name(TAGS)
                         .type(new GraphQLList(tagObjectTypeCreator.create()))
                         .description(TAGS_DESCRIPTION)
@@ -586,6 +628,17 @@ public class StopPlaceRegisterGraphQLSchema {
                         .type(new GraphQLList(infoSpotObjectType))
                         .description("Info spots")
                         .arguments(createFindInfoSpotArguments(allVersionsArgument)))
+                .field(newFieldDefinition()
+                                        .name(USER_PERMISSIONS)
+                                        .description("User permissions")
+                                        .type(userPermissionsObjectType)
+
+                        .build())
+                .field(newFieldDefinition()
+                        .name(LOCATION_PERMISSIONS)
+                        .description("Location permissions")
+                        .type(entityPermissionObjectType)
+                        .arguments(createLocationArguments()))
                 .build();
 
 
@@ -720,6 +773,10 @@ public class StopPlaceRegisterGraphQLSchema {
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_QUAY, IMPORTED_ID, getOriginalIdsFetcher());
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_STOPPLACE, ID, getNetexIdFetcher());
 
+        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_STOPPLACE, PERMISSIONS, entityPermissionsFetcher);
+        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_PARENT_STOPPLACE, PERMISSIONS, entityPermissionsFetcher);
+        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_GROUP_OF_STOPPLACES, PERMISSIONS, entityPermissionsFetcher);
+
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_STOPPLACE, TARIFF_ZONES, stopPlaceTariffZoneFetcher);
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_PARENT_STOPPLACE, TARIFF_ZONES, stopPlaceTariffZoneFetcher);
 
@@ -810,7 +867,6 @@ public class StopPlaceRegisterGraphQLSchema {
         registerDataFetcher(codeRegistryBuilder, STOPPLACES_REGISTER, FIND_TOPOGRAPHIC_PLACE, topographicPlaceFetcher);
         registerDataFetcher(codeRegistryBuilder, STOPPLACES_REGISTER, FIND_PATH_LINK, pathLinkFetcher);
         registerDataFetcher(codeRegistryBuilder, STOPPLACES_REGISTER, FIND_PARKING, parkingFetcher);
-        registerDataFetcher(codeRegistryBuilder, STOPPLACES_REGISTER, CHECK_AUTHORIZED, authorizationCheckDataFetcher);
         registerDataFetcher(codeRegistryBuilder, STOPPLACES_REGISTER, TAGS, tagFetcher);
         registerDataFetcher(codeRegistryBuilder, STOPPLACES_REGISTER, GROUP_OF_STOP_PLACES, groupOfStopPlacesFetcher);
         registerDataFetcher(codeRegistryBuilder, STOPPLACES_REGISTER, PURPOSE_OF_GROUPING, purposeOfGroupingFetcher);
@@ -845,12 +901,7 @@ public class StopPlaceRegisterGraphQLSchema {
             return null;
         });
 
-        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_SHELTER_EQUIPMENT,ID,getNetexIdFetcher());
-        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_SANITARY_EQUIPMENT,ID,getNetexIdFetcher());
-        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_CYCLE_STORAGE_EQUIPMENT,ID,getNetexIdFetcher());
-        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_GENERAL_SIGN_EQUIPMENT,ID,getNetexIdFetcher());
-        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_TICKETING_EQUIPMENT,ID,getNetexIdFetcher());
-        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_WAITING_ROOM_EQUIPMENT,ID,getNetexIdFetcher());
+        mapNetexId(codeRegistryBuilder, OUTPUT_TYPE_SHELTER_EQUIPMENT, OUTPUT_TYPE_SANITARY_EQUIPMENT, OUTPUT_TYPE_CYCLE_STORAGE_EQUIPMENT, OUTPUT_TYPE_GENERAL_SIGN_EQUIPMENT, OUTPUT_TYPE_TICKETING_EQUIPMENT, OUTPUT_TYPE_WAITING_ROOM_EQUIPMENT);
         registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_BOARDING_POSITION,ID,getNetexIdFetcher());
 
         registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_ENTITY_REF,ADDRESSABLE_PLACE,referenceFetcher);
@@ -899,7 +950,8 @@ public class StopPlaceRegisterGraphQLSchema {
             return null;
         });
 
-
+        registerDataFetcher(codeRegistryBuilder,STOPPLACES_REGISTER,USER_PERMISSIONS,userPermissionsFetcher);
+        registerDataFetcher(codeRegistryBuilder,STOPPLACES_REGISTER,LOCATION_PERMISSIONS,locationPermissionsFetcher);
 
 
 
@@ -993,6 +1045,15 @@ public class StopPlaceRegisterGraphQLSchema {
         registerDataFetcher(codeRegistryBuilder, STOPPLACES_MUTATION,MUTATE_INFO_SPOT,infoSpotsUpdater);
 
         return codeRegistryBuilder.build();
+    }
+
+    private void mapNetexId(GraphQLCodeRegistry.Builder codeRegistryBuilder, String outputTypeShelterEquipment, String outputTypeSanitaryEquipment, String outputTypeCycleStorageEquipment, String outputTypeGeneralSignEquipment, String outputTypeTicketingEquipment, String outputTypeWaitingRoomEquipment) {
+        registerDataFetcher(codeRegistryBuilder, outputTypeShelterEquipment,ID,getNetexIdFetcher());
+        registerDataFetcher(codeRegistryBuilder, outputTypeSanitaryEquipment,ID,getNetexIdFetcher());
+        registerDataFetcher(codeRegistryBuilder, outputTypeCycleStorageEquipment,ID,getNetexIdFetcher());
+        registerDataFetcher(codeRegistryBuilder, outputTypeGeneralSignEquipment,ID,getNetexIdFetcher());
+        registerDataFetcher(codeRegistryBuilder, outputTypeTicketingEquipment,ID,getNetexIdFetcher());
+        registerDataFetcher(codeRegistryBuilder, outputTypeWaitingRoomEquipment,ID,getNetexIdFetcher());
     }
 
     private void dataFetcherPlaceEquipments(GraphQLCodeRegistry.Builder codeRegistryBuilder, String source) {
@@ -1351,6 +1412,23 @@ public class StopPlaceRegisterGraphQLSchema {
                 .description(SEARCH_WITH_CODE_SPACE_ARG_DESCRIPTION)
                 .build());
         return arguments;
+    }
+
+    private List<GraphQLArgument> createLocationArguments() {
+        List<GraphQLArgument> arguments = new ArrayList<>();
+        arguments.add(GraphQLArgument.newArgument()
+                .name(LONGITUDE)
+                .description("longitude")
+                .type(new GraphQLNonNull(GraphQLBigDecimal))
+                .build());
+        arguments.add(GraphQLArgument.newArgument()
+                .name(LATITUDE)
+                .description("latitude")
+                .type(new GraphQLNonNull(GraphQLBigDecimal))
+                .build());
+
+        return arguments;
+
     }
 
     private List<GraphQLArgument> createBboxArguments() {

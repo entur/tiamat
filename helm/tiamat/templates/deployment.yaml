@@ -59,7 +59,7 @@ spec:
           image: {{ .Values.image.identifier }}
           imagePullPolicy: {{ .Values.image.imagePullPolicy }}
           env:
-            - name: JAVA_OPTIONS
+            - name: JDK_JAVA_OPTIONS
               value: -server -Xss{{ .Values.resources.xss }} -Xmx{{ .Values.resources.xmx }} -Dspring.config.location=/etc/application-config/application.properties
                 -Dfile.encoding=UTF-8
                 -Dhazelcast.ignoreXxeProtectionFailures=true
