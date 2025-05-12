@@ -585,6 +585,8 @@ public class GraphQLNames {
     public static final String INPUT_TYPE_EXTERNAL_LINK = OUTPUT_TYPE_EXTERNAL_LINK + INPUT_TYPE_POSTFIX;
     public static final String EXTERNAL_LINK_NAME = "name";
     public static final String EXTERNAL_LINK_LOCATION = "location";
+    public static final String EXTERNAL_LINK_QUAY_ID = "quayId";
+    public static final String EXTERNAL_LINK_ORDER_NUM = "orderNum";
 
     public static final String POSTER_SIZE = "posterSize";
     public static final String LINES = "lines";

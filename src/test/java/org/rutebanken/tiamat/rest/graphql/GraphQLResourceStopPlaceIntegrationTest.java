@@ -3979,11 +3979,15 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                 externalLinks {
                   name
                   location
+                  quayId
+                  orderNum
                 }
               }
             }
           }
         }""".formatted(stopPlace.getNetexId());
+
+        int quayId = stopPlace.getQuays().stream().findFirst().map(Quay::getId).map(Long::intValue).get();
 
         executeGraphqQLQueryOnly(graphQLJsonQuery)
                 .rootPath("data.stopPlace[0]")
@@ -3993,8 +3997,12 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                 .body("externalLinks", hasSize(2))
                 .body("externalLinks[0].name", equalTo(link1.getName()))
                 .body("externalLinks[0].location", equalTo(link1.getLocation()))
+                .body("externalLinks[0].quayId", equalTo(quayId))
+                .body("externalLinks[0].orderNum", equalTo(0))
                 .body("externalLinks[1].name", equalTo(link2.getName()))
-                .body("externalLinks[1].location", equalTo(link2.getLocation()));
+                .body("externalLinks[1].location", equalTo(link2.getLocation()))
+                .body("externalLinks[1].quayId", equalTo(quayId))
+                .body("externalLinks[1].orderNum", equalTo(1));
     }
 
     @Test
