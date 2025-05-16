@@ -16,6 +16,8 @@ UPDATE stop_place
 SET private_code_type = 'HSL/TEST'
 WHERE private_code_type = 'HSL';
 
+COMMIT;
+
 -- Add in the DB constraint
 ALTER TABLE stop_place
     ADD CONSTRAINT has_valid_hsl_private_code
