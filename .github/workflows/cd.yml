@@ -84,14 +84,11 @@ jobs:
   run_cypress_tests:
     needs:
       - run_java_tests
-      - publish_docker_image_to_docker_hub
+      - publish_docker_image_to_acr
     name: Run E2E tests
     runs-on: ubuntu-24.04
     steps:
-      - name: Extract metadata to env variables
-        uses: HSLdevcom/jore4-tools/github-actions/extract-metadata@extract-metadata-v1
-
       - name: Setup environment and run e2e tests from GitHub action
         uses: HSLdevcom/jore4-tools/github-actions/run-ci@main
         with:
-          tiamat_version: "${{ env.IMAGE_NAME }}:${{ env.COMMIT_ID }}"
+          tiamat_version: "${{ needs.publish_docker_image_to_acr.outputs.docker_image }}"
