@@ -31,7 +31,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -194,7 +193,7 @@ public class MultiModalStopPlaceEditorTest extends TiamatIntegrationTest {
         secondStopPlace.setVersion(1L);
         secondStopPlace = stopPlaceRepository.save(secondStopPlace);
 
-        List<String> childIds = Stream.of(firstStopPlaceVersion2, secondStopPlace).map(sp -> sp.getNetexId()).collect(Collectors.toList());
+        List<String> childIds = Stream.of(firstStopPlaceVersion2, secondStopPlace).map(sp -> sp.getNetexId()).toList();
 
         String parentStopPlaceName = "Super duper StopPlace";
         StopPlace superDuperStopPlace = multiModalStopPlaceEditor.createMultiModalParentStopPlace(childIds, new EmbeddableMultilingualString(parentStopPlaceName));

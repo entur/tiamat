@@ -32,7 +32,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static graphql.Scalars.GraphQLString;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
@@ -98,7 +97,7 @@ public class FareZoneObjectTypeCreator {
         if (!neighbours.isEmpty()) {
             return neighbours.stream()
                     .map(neighbour -> fareZoneRepository.findFirstByNetexIdOrderByVersionDesc(neighbour.getRef()))
-                    .collect(Collectors.toList());
+                    .toList();
         }
         return Collections.emptyList();
 
@@ -109,7 +108,7 @@ public class FareZoneObjectTypeCreator {
         if (!fareZoneMembers.isEmpty()) {
             return fareZoneMembers.stream()
                     .map(member -> stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(member.getRef()))
-                    .collect(Collectors.toList());
+                    .toList();
         }
         return Collections.emptyList();
 

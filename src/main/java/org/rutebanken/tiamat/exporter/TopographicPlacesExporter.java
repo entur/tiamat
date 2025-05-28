@@ -36,7 +36,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.rutebanken.tiamat.exporter.params.ExportParams.ExportMode.ALL;
@@ -71,20 +70,20 @@ public class TopographicPlacesExporter {
                     .filter(netexIdRef -> netexIdRef.getSecond() != null)
                     .distinct()
                     .map(netexIdRef -> topographicPlaceRepository.findFirstByNetexIdAndVersion(netexIdRef.getFirst(), netexIdRef.getSecond()))
-                    .collect(Collectors.toList());
+                    .toList();
 
             List<org.rutebanken.tiamat.model.TopographicPlace> counties = municipalities.stream()
                     .filter(municipality -> municipality.getParentTopographicPlaceRef() != null)
                     .map(municipality -> municipality.getParentTopographicPlaceRef())
                     .map(county -> topographicPlaceRepository.findFirstByNetexIdAndVersion(county.getRef(), Long.parseLong(county.getVersion())))
                     .distinct()
-                    .collect(Collectors.toList());
+                    .toList();
 
             return Stream.of(counties, municipalities)
                     .flatMap(topographicPlaces -> topographicPlaces.stream())
                     .distinct()
                     .map(topographicPlace -> netexMapper.mapToNetexModel(topographicPlace))
-                    .collect(Collectors.toList());
+                    .toList();
         }
 
         return null;

@@ -33,7 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
+
 
 /**
  * Some nearby stops like airports can be treated as the same if they are close enough.
@@ -129,7 +129,7 @@ public class NearbyStopsWithSameTypeFinder {
                 return stopPlacesNetexIds
                         .stream()
                         .map(netexId -> stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(netexId))
-                        .collect(Collectors.toList());
+                        .toList();
             }
 
             logger.debug("Could not find any stop places with type {} and envelope {}", stopPlace.getStopPlaceType(), envelope);

@@ -47,7 +47,6 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 import static org.rutebanken.tiamat.versioning.save.DefaultVersionedSaverService.MILLIS_BETWEEN_VERSIONS;
@@ -197,7 +196,7 @@ public class StopPlaceVersionedSaverService {
             if (logger.isDebugEnabled()) {
                 logger.debug("Saved children: {}", newVersion.getChildren().stream()
                                                            .map(sp -> "{id:" + sp.getId() + " netexId:" + sp.getNetexId() + " version:" + sp.getVersion() + "}")
-                                                           .collect(Collectors.toList()));
+                                                            .toList());
             }
         }
         newVersion = stopPlaceRepository.save(newVersion);

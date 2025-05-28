@@ -98,13 +98,13 @@ public class TariffZoneImportHandler {
                     .filter(this::isTariffZone)
                     .map(jaxbElement -> (TariffZone) jaxbElement.getValue())
                     .map(netexMapper::mapToTiamatModel)
-                    .collect(Collectors.toList());
+                    .toList();
 
             List<org.rutebanken.tiamat.model.FareZone> tiamatFareZones = netexSiteFrame.getTariffZones().getTariffZone().stream()
                     .filter(this::isFareZone)
                     .map(jaxbElement -> (FareZone) jaxbElement.getValue())
                     .map(netexMapper::mapToTiamatModel)
-                    .collect(Collectors.toList());
+                    .toList();
 
             logger.debug("Mapped {} tariff zones from netex to internal model", tiamatTariffZones.size());
             List<JAXBElement<? extends Zone_VersionStructure>> importedTariffZones = tariffZoneImporter.importTariffZones(tiamatTariffZones).stream()

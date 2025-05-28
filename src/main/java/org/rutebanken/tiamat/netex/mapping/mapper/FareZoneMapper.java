@@ -65,7 +65,7 @@ public class FareZoneMapper extends CustomMapper<FareZone, org.rutebanken.tiamat
         if (!tiamatFareZone.getNeighbours().isEmpty()) {
             final List<FareZoneRefStructure> fareZoneRefs = tiamatFareZone.getNeighbours().stream()
                     .map(tariffZoneRef -> new FareZoneRefStructure().withRef(tariffZoneRef.getRef()))
-                    .collect(Collectors.toList());
+                    .toList();
             final FareZoneRefs_RelStructure fareZoneRefsRelStructure = new FareZoneRefs_RelStructure().withFareZoneRef(fareZoneRefs);
             netexFareZone.withNeighbours(fareZoneRefsRelStructure);
         }

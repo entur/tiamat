@@ -61,7 +61,7 @@ public class AlternativeNameUpdater {
                         return incomingAlternativeName;
                     }
                 })
-                .collect(Collectors.toList());
+                .toList();
 
 
         entity.getAlternativeNames().clear();

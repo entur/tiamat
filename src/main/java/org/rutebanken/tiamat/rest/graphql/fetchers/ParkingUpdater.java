@@ -51,7 +51,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.BOOKING_URL;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.FREE_PARKING_OUT_OF_HOURS;
@@ -116,7 +115,7 @@ class ParkingUpdater implements DataFetcher {
         if (input != null) {
             parkings = input.stream()
              .map(m -> createOrUpdateParking(m))
-            .collect(Collectors.toList());
+                    .toList();
         }
         return parkings;
     }

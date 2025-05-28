@@ -6,7 +6,7 @@ import org.rutebanken.netex.model.GroupOfTariffZones;
 import org.rutebanken.tiamat.model.TariffZoneRef;
 
 import java.util.List;
-import java.util.stream.Collectors;
+
 
 public class GroupOfTariffZonesMapper extends CustomMapper<GroupOfTariffZones, org.rutebanken.tiamat.model.GroupOfTariffZones> {
 
@@ -15,7 +15,7 @@ public class GroupOfTariffZonesMapper extends CustomMapper<GroupOfTariffZones, o
         super.mapAtoB(netexGroupOfTariffZones, tiamatGroupOfTariffZones, context);
         if (netexGroupOfTariffZones.getMembers() != null && !netexGroupOfTariffZones.getMembers().getTariffZoneRef().isEmpty()) {
             final List<TariffZoneRef> tiamatTariffZoneRefList = netexGroupOfTariffZones.getMembers().getTariffZoneRef().stream()
-                    .map(tzr -> new TariffZoneRef(tzr.getRef())).collect(Collectors.toList());
+                    .map(tzr -> new TariffZoneRef(tzr.getRef())).toList();
 
             tiamatGroupOfTariffZones.getMembers().addAll(tiamatTariffZoneRefList);
         }

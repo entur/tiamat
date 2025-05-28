@@ -60,7 +60,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.stream.Collectors;
+
 
 @Component
 public class GroupOfTariffZonesImportHandler {
@@ -90,11 +90,11 @@ public class GroupOfTariffZonesImportHandler {
             List<String> tariffZoneIds = netexSiteFrame.getTariffZones().getTariffZone().stream()
                     .map(jaxbElement -> (FareZone) jaxbElement.getValue())
                     .map(tz -> tz.getId())
-                    .collect(Collectors.toList());
+                    .toList();
 
             List<org.rutebanken.tiamat.model.GroupOfTariffZones> tiamatGroupOfTariffZones = netexSiteFrame.getGroupsOfTariffZones().getGroupOfTariffZones().stream()
                     .map(netexMapper::mapToTiamatModel)
-                    .collect(Collectors.toList());
+                    .toList();
 
             //Checks if netex import file contains all the fare zones
             validateMembers(tiamatGroupOfTariffZones,tariffZoneIds);

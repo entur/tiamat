@@ -25,7 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ALL_VERSIONS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.FIND_BY_STOP_PLACE_ID;
@@ -68,7 +67,7 @@ class PathLinkFetcher implements DataFetcher {
                             return pathLinkRepository.findFirstByNetexIdOrderByVersionDesc(netexId);
                         }
                     })
-                    .collect(Collectors.toList());
+                    .toList();
         }
 
         return pathLinkRepository.findAll();

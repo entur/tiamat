@@ -163,7 +163,7 @@ public class StopPlaceFromOriginalIdFinder {
                     List<StopPlace> stopPlaces = matchingStopPlaceNetexIds.stream()
                             .peek(matchingStopPlaceNetexId -> logger.debug("Cache match. Key {}, stop place id: {}", cacheKey, matchingStopPlaceNetexId))
                             .map(matchingStopPlaceNetexId -> stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(matchingStopPlaceNetexId))
-                            .collect(Collectors.toList());
+                            .toList();
 
                     if(!stopPlaces.isEmpty()) {
                         return stopPlaces;
@@ -180,7 +180,7 @@ public class StopPlaceFromOriginalIdFinder {
                 .stream()
                 .map(stopPlaceNetexId -> stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlaceNetexId))
                 .peek(this::update)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private String keyValKey(String key, String value) {

@@ -48,7 +48,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
-import java.util.stream.Collectors;
+
 
 @Component
 public class StopPlaceImportHandler {
@@ -214,7 +214,7 @@ public class StopPlaceImportHandler {
                 .map(StopPlace::getTopographicPlace)
                 .map(topographicPlace -> Pair.of(topographicPlace.getNetexId(), topographicPlace.getVersion()))
                 .distinct()
-                .collect(Collectors.toList());
+                .toList();
     }
 
 }

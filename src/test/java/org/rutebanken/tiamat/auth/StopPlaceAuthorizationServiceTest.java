@@ -40,7 +40,6 @@ import org.springframework.security.access.AccessDeniedException;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -360,7 +359,7 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
     }
 
     private List<String> toIdList(List<StopPlace> children) {
-        return children.stream().map(s -> s.getNetexId()).collect(Collectors.toList());
+        return children.stream().map(s -> s.getNetexId()).toList();
     }
 
     private void setRoleAssignmentReturned(RoleAssignment roleAssignment) {

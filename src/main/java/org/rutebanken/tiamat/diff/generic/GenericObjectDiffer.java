@@ -245,7 +245,7 @@ public class GenericObjectDiffer {
         }
         return fields.stream()
                        .filter(field -> !ignoreFields.contains(field.getName()))
-                       .collect(Collectors.toList()).toArray(new Field[]{});
+                        .toList().toArray(new Field[]{});
     }
 
     private Field identifierField(Set<String> identifiers, Field[] fields) {

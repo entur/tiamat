@@ -87,7 +87,7 @@ public class StopPlaceAuthorizationService {
                     mustBeAuthorizedToEditTheseChildren = newVersion.getChildren();
                 }
 
-                logger.debug("Must be authorized to edit these children: {}", mustBeAuthorizedToEditTheseChildren.stream().map(child -> child.getNetexId()).collect(Collectors.toList()));
+                logger.debug("Must be authorized to edit these children: {}", mustBeAuthorizedToEditTheseChildren.stream().map(child -> child.getNetexId()).toList());
                 authorizationService.verifyCanEditEntities( mustBeAuthorizedToEditTheseChildren);
 
                 Set<String> existingChildrenIds = existingVersion.getChildren().stream().map(s -> s.getNetexId()).collect(Collectors.toSet());

@@ -25,7 +25,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
+
 
 @Component
 public class BoardingPositionUpdater {
@@ -57,7 +57,7 @@ public class BoardingPositionUpdater {
                         return incomingBoardingPosition;
                     }
                 })
-                .collect(Collectors.toList());
+                .toList();
 
 
         quay.getBoardingPositions().clear();

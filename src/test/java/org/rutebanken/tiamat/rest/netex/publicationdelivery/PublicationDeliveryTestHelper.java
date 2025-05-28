@@ -57,7 +57,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static jakarta.xml.bind.JAXBContext.newInstance;
@@ -157,7 +156,7 @@ public class PublicationDeliveryTestHelper {
                 .map(value -> value.split(","))
                 .flatMap(values -> Stream.of(values))
                 .filter(value -> value.equals(expectedId))
-                .collect(Collectors.toList());
+                .toList();
         assertThat(list).as("Matching original ID "+expectedId).hasSize(1);
     }
 

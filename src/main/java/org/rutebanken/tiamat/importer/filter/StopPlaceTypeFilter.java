@@ -23,7 +23,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
+
 
 @Component
 public class StopPlaceTypeFilter {
@@ -42,7 +42,7 @@ public class StopPlaceTypeFilter {
 
         List<StopPlace> filteredStopPlaces = stopPlaceList.stream()
                 .filter(stopPlace -> negate ? !allowedTypes.contains(stopPlace.getStopPlaceType()) : allowedTypes.contains(stopPlace.getStopPlaceType()))
-                .collect(Collectors.toList());
+                .toList();
 
         if (filteredStopPlaces.size() < stopPlaceList.size()) {
             logger.info("Filtered {} stop place. {}/{} {} negate: {}", stopPlaceList.size() - filteredStopPlaces.size(),

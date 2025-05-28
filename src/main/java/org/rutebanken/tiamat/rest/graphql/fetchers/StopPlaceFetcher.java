@@ -43,7 +43,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 import static org.rutebanken.tiamat.exporter.params.ExportParams.newExportParamsBuilder;
 import static org.rutebanken.tiamat.exporter.params.StopPlaceSearch.newStopPlaceSearchBuilder;
@@ -186,7 +185,7 @@ class StopPlaceFetcher implements DataFetcher {
                 if (stopTypes != null && !stopTypes.isEmpty()) {
                     stopPlaceSearchBuilder.setStopTypeEnumerations(stopTypes.stream()
                             .filter(type -> type != null)
-                            .collect(Collectors.toList())
+                            .toList()
                     );
                 }
 
@@ -195,7 +194,7 @@ class StopPlaceFetcher implements DataFetcher {
                     exportParamsBuilder.setCountryReferences(
                             countryRef.stream()
                                     .filter(countryRefValue -> countryRefValue != null && !countryRefValue.isEmpty())
-                                    .collect(Collectors.toList())
+                                    .toList()
                     );
                 }
 
@@ -204,7 +203,7 @@ class StopPlaceFetcher implements DataFetcher {
                     exportParamsBuilder.setCountyReferences(
                             countyRef.stream()
                                     .filter(countyRefValue -> countyRefValue != null && !countyRefValue.isEmpty())
-                                    .collect(Collectors.toList())
+                                    .toList()
                     );
                 }
 
@@ -213,7 +212,7 @@ class StopPlaceFetcher implements DataFetcher {
                     exportParamsBuilder.setMunicipalityReferences(
                             municipalityRef.stream()
                                     .filter(municipalityRefValue -> municipalityRefValue != null && !municipalityRefValue.isEmpty())
-                                    .collect(Collectors.toList())
+                                    .toList()
                     );
                 }
 

@@ -31,7 +31,7 @@ import org.rutebanken.tiamat.model.PlaceEquipment;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.stream.Collectors;
+
 
 @Component
 public class PlaceEquipmentMapper extends CustomMapper<PlaceEquipments_RelStructure, PlaceEquipment> {
@@ -57,7 +57,7 @@ public class PlaceEquipmentMapper extends CustomMapper<PlaceEquipments_RelStruct
                             equipment instanceof GeneralSign);
                 })
                 .map(jaxbElement -> (InstalledEquipment_VersionStructure)jaxbElement.getValue())
-                .collect(Collectors.toList());
+                .toList();
         List<org.rutebanken.tiamat.model.InstalledEquipment_VersionStructure> installedEquipment_versionStructures = mapperFacade.mapAsList(netexInstalledEquipmentList, org.rutebanken.tiamat.model.InstalledEquipment_VersionStructure.class, context);
 
         if (!installedEquipment_versionStructures.isEmpty()) {
@@ -90,7 +90,7 @@ public class PlaceEquipmentMapper extends CustomMapper<PlaceEquipments_RelStruct
                         default -> null;
                     };
                 })
-                .collect(Collectors.toList());
+                .toList();
 
 
         if (!jaxbElements.isEmpty()) {

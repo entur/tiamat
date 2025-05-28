@@ -32,7 +32,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.FIND_BY_STOP_PLACE_ID;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PAGE;
@@ -77,7 +76,7 @@ class ParkingFetcher implements DataFetcher {
             return parkingRepository.findByStopPlaceNetexId(stopPlaceId).stream()
                     .peek(parkingNetexId -> logger.info("Finding parking by netexid {} and highest version", parkingNetexId))
                     .map(netexId -> parkingRepository.findFirstByNetexIdOrderByVersionDesc(netexId))
-                    .collect(Collectors.toList());
+                    .toList();
         } else {
             logger.info("Finding all parkings regardless of version and validity");
             allParkings = parkingRepository.findAll(pageable);

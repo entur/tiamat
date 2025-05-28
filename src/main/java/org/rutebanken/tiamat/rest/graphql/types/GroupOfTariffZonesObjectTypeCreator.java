@@ -43,7 +43,6 @@ import org.springframework.stereotype.Component;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static graphql.Scalars.GraphQLString;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
@@ -99,7 +98,7 @@ public class GroupOfTariffZonesObjectTypeCreator {
         if (!members.isEmpty()) {
             return members.stream()
                     .map(member -> fareZoneRepository.findFirstByNetexIdOrderByVersionDesc(member.getRef()))
-                    .collect(Collectors.toList());
+                    .toList();
         }
         return Collections.emptyList();
     }
