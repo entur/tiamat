@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.entur.ror</groupId>
         <artifactId>superpom</artifactId>
-        <version>2.13</version>
+        <version>3.0</version>
     </parent>
     <groupId>org.rutebanken</groupId>
     <artifactId>tiamat</artifactId>
@@ -72,6 +72,7 @@
         <testcontainers.version>1.20.6</testcontainers.version>
         <rutebanken-storage.version>4.7</rutebanken-storage.version>
         <build-helper-maven-plugin.version>3.6.0</build-helper-maven-plugin.version>
+        <metrics-graphite.version>4.2.30</metrics-graphite.version>
     </properties>
 
     <dependencies>
@@ -87,7 +88,7 @@
         </dependency>
         <dependency>
             <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-core</artifactId>
+            <artifactId>flyway-database-postgresql</artifactId>
         </dependency>
 
         <dependency>
@@ -132,6 +133,7 @@
         <dependency>
             <groupId>io.dropwizard.metrics</groupId>
             <artifactId>metrics-graphite</artifactId>
+            <version>${metrics-graphite.version}</version>
         </dependency>
 
         <dependency>
