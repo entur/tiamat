@@ -16,25 +16,29 @@
 package org.rutebanken.tiamat.auth;
 
 
-import org.springframework.security.core.Authentication;
+import org.rutebanken.helper.organisation.user.UserInfoExtractor;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
+
+import javax.annotation.Nullable;
 
 @Service
 public class UsernameFetcher {
 
+    private final UserInfoExtractor userInfoExtractor;
+
+    public UsernameFetcher(UserInfoExtractor userInfoExtractor) {
+        this.userInfoExtractor = userInfoExtractor;
+    }
+
     /**
-     * Gets username from Spring Security
-     * <p>
-     * Expects property keycloak.principal-attribute=preferred_username
+     * Return the preferred username or null if the user is not authenticated.
      */
+    @Nullable
     public String getUserNameForAuthenticatedUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            if (authentication != null && authentication.getPrincipal() != null &&
-                    authentication.getPrincipal() instanceof Jwt) {
-                return ((Jwt) authentication.getPrincipal()).getClaimAsString("preferred_username");
+        if(SecurityContextHolder.getContext().getAuthentication() == null) {
+            return null;
         }
-        return null;
+        return userInfoExtractor.getPreferredName();
     }
 }
