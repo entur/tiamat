@@ -2,8 +2,8 @@ package org.rutebanken.tiamat.service.metrics;
 
 import io.micrometer.core.instrument.ImmutableTag;
 import io.micrometer.core.instrument.Tag;
-import io.micrometer.prometheus.PrometheusConfig;
-import io.micrometer.prometheus.PrometheusMeterRegistry;
+import io.micrometer.prometheusmetrics.PrometheusConfig;
+import io.micrometer.prometheusmetrics.PrometheusMeterRegistry;
 import jakarta.annotation.PreDestroy;
 import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
 import org.slf4j.Logger;

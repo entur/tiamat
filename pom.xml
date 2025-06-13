@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.entur.ror</groupId>
         <artifactId>superpom</artifactId>
-        <version>2.13</version>
+        <version>4.5</version>
     </parent>
     <groupId>org.rutebanken</groupId>
     <artifactId>tiamat</artifactId>
@@ -59,7 +59,7 @@
         <hazelcast.version>5.2.4</hazelcast.version>
         <swagger-jersey2.version>2.2.20</swagger-jersey2.version>
         <netex-java-model.version>2.0.14</netex-java-model.version>
-        <entur.helpers.version>2.31</entur.helpers.version>
+        <entur.helpers.version>5.14</entur.helpers.version>
         <jts-core.version>1.19.0</jts-core.version>
         <groovy-all.version>4.0.26</groovy-all.version>
         <rest-assured.version>5.5.1</rest-assured.version>
@@ -70,8 +70,10 @@
         <xercesImpl.version>2.12.2</xercesImpl.version>
         <maven.compiler.args>--add-opens java.base/java.lang=ALL-UNNAMED</maven.compiler.args>
         <testcontainers.version>1.20.6</testcontainers.version>
-        <rutebanken-storage.version>4.7</rutebanken-storage.version>
         <build-helper-maven-plugin.version>3.6.0</build-helper-maven-plugin.version>
+        <metrics-graphite.version>4.2.30</metrics-graphite.version>
+        <!-- There is breaking change in spring-boot 3.4/hibernate 6.6.5 -->
+        <hibernate.version>6.5.3.Final</hibernate.version>
     </properties>
 
     <dependencies>
@@ -87,7 +89,7 @@
         </dependency>
         <dependency>
             <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-core</artifactId>
+            <artifactId>flyway-database-postgresql</artifactId>
         </dependency>
 
         <dependency>
@@ -132,17 +134,18 @@
         <dependency>
             <groupId>io.dropwizard.metrics</groupId>
             <artifactId>metrics-graphite</artifactId>
+            <version>${metrics-graphite.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.entur.ror.helpers</groupId>
             <artifactId>storage</artifactId>
-            <version>${rutebanken-storage.version}</version>
+            <version>${entur.helpers.version}</version>
         </dependency>
         <dependency>
             <groupId>org.entur.ror.helpers</groupId>
             <artifactId>storage-aws-s3</artifactId>
-            <version>${rutebanken-storage.version}</version>
+            <version>${entur.helpers.version}</version>
         </dependency>
 
         <dependency>
@@ -199,7 +202,7 @@
 
         <dependency>
             <groupId>org.entur.ror.helpers</groupId>
-            <artifactId>gcp-storage</artifactId>
+            <artifactId>storage-gcp-gcs</artifactId>
             <version>${entur.helpers.version}</version>
             <exclusions>
                 <exclusion>
@@ -294,11 +297,13 @@
         <dependency>
             <groupId>org.hibernate.orm</groupId>
             <artifactId>hibernate-spatial</artifactId>
+            <version>${hibernate.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.hibernate.orm</groupId>
             <artifactId>hibernate-core</artifactId>
+            <version>${hibernate.version}</version>
         </dependency>
 
         <dependency>
