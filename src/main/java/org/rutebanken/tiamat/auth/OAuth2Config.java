@@ -3,7 +3,9 @@ package org.rutebanken.tiamat.auth;
 import org.entur.oauth2.JwtRoleAssignmentExtractor;
 import org.entur.oauth2.multiissuer.MultiIssuerAuthenticationManagerResolver;
 import org.entur.oauth2.multiissuer.MultiIssuerAuthenticationManagerResolverBuilder;
+import org.entur.oauth2.user.JwtUserInfoExtractor;
 import org.rutebanken.helper.organisation.RoleAssignmentExtractor;
+import org.rutebanken.helper.organisation.user.UserInfoExtractor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,6 +13,12 @@ import org.springframework.context.annotation.Profile;
 
 @Configuration
 public class OAuth2Config {
+
+    @Bean
+    public UserInfoExtractor userInfoExtractor() {
+        return new JwtUserInfoExtractor();
+    }
+
     /**
      * Extract role assignments from a JWT token.
      *
