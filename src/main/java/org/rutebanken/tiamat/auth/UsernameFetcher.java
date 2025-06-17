@@ -17,7 +17,9 @@ package org.rutebanken.tiamat.auth;
 
 
 import org.rutebanken.helper.organisation.user.UserInfoExtractor;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nullable;
@@ -36,7 +38,10 @@ public class UsernameFetcher {
      */
     @Nullable
     public String getUserNameForAuthenticatedUser() {
-        if(SecurityContextHolder.getContext().getAuthentication() == null) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if(authentication == null
+                || authentication.getPrincipal() == null
+                || !(authentication.getPrincipal() instanceof Jwt)) {
             return null;
         }
         return userInfoExtractor.getPreferredName();
