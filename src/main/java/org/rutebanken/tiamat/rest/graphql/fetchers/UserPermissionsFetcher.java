@@ -17,6 +17,7 @@ package org.rutebanken.tiamat.rest.graphql.fetchers;
 
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
+import org.rutebanken.helper.organisation.user.UserInfoExtractor;
 import org.rutebanken.tiamat.auth.AuthorizationService;
 import org.rutebanken.tiamat.model.authorization.UserPermissions;
 import org.slf4j.Logger;
@@ -34,14 +35,18 @@ public class UserPermissionsFetcher implements DataFetcher {
     @Autowired
     private AuthorizationService authorizationService;
 
+    @Autowired
+    private UserInfoExtractor userInfoExtractor;
+
     @Override
     public Object get(DataFetchingEnvironment dataFetchingEnvironment) {
 
         final boolean isGuest = authorizationService.isGuest();
         final boolean allowNewStopEverywhere = authorizationService.canEditAllEntities();
+        final String preferredName = userInfoExtractor.getPreferredName();
 
-        logger.debug("isGuest: {}, allowNewStopEverywhere: {} " , allowNewStopEverywhere, isGuest);
+        logger.debug("isGuest: {}, allowNewStopEverywhere: {}, preferredName: {}" , allowNewStopEverywhere, isGuest, preferredName);
 
-        return new UserPermissions(isGuest, allowNewStopEverywhere);
+        return new UserPermissions(isGuest, allowNewStopEverywhere, preferredName);
     }
 }

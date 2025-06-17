@@ -399,6 +399,10 @@ public class StopPlaceRegisterGraphQLSchema {
                         .name("allowNewStopEverywhere")
                         .type(GraphQLBoolean)
                         .build())
+                .field(newFieldDefinition()
+                        .name("preferredName")
+                        .type(GraphQLString)
+                        .build())
                 .build();
 
         GraphQLObjectType entityPermissionObjectType = newObject()
