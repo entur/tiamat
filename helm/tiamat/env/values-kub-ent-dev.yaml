@@ -19,6 +19,15 @@ auth0:
       url: https://internal.dev.entur.org/
     partner:
       url: https://partner.dev.entur.org/
+  client:
+      id: Yd0qVrMoFE9qXT4zJvsTCOw6UT4Wi2WF
+      url: https://internal.dev.entur.org/oauth/token
+      audience: https://ror.api.dev.entur.io
+
+organisation:
+  service: http://baba.dev.entur.internal
+
+roleAssignmentExtractor: baba
 
 rbac:
   enabled: true

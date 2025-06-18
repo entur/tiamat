@@ -19,6 +19,15 @@ auth0:
       url: https://internal.entur.org/
     partner:
       url: https://partner.entur.org/
+  client:
+    id: ga01hAU7XrM8cPOSuYXOocFoM8c1wB42
+    url: https://internal.entur.org/oauth/token
+    audience: https://ror.api.entur.io
+
+organisation:
+  service: http://baba.prd.entur.internal
+
+roleAssignmentExtractor: jwt
 
 rbac:
   enabled: true
