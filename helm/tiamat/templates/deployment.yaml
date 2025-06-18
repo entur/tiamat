@@ -74,6 +74,8 @@ spec:
           envFrom:
             - secretRef:
                 name: tiamat-psql-credentials
+            - secretRef:
+                name: auth-internal-credentials
           resources:
             limits:
               memory: {{ .Values.resources.memLimit }}
