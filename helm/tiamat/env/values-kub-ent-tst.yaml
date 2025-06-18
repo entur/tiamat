@@ -19,6 +19,15 @@ auth0:
       url: https://internal.staging.entur.org/
     partner:
       url: https://partner.staging.entur.org/
+  client:
+    id: 9x7HiPyzNWLZuHIaeTzI5QgGBv5hI9w7
+    url: https://internal.staging.entur.org/oauth/token
+    audience: https://ror.api.staging.entur.io
+
+organisation:
+  service: http://baba.tst.entur.internal
+
+roleAssignmentExtractor: jwt
 
 rbac:
   enabled: true

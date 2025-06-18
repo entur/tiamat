@@ -54,8 +54,10 @@ data:
 
 
     # Security config with auth0
-
     authorization.enabled=true
+    tiamat.security.role.assignment.extractor={{ .Values.roleAssignmentExtractor }}
+    tiamat.user.permission.rest.service.url={{ .Values.organisation.service }}/services/organisations/users
+
 
     # OAuth2 Resource Server for Entur Partner tenant
     tiamat.oauth2.resourceserver.auth0.entur.partner.jwt.issuer-uri={{ .Values.auth0.entur.partner.url }}
@@ -70,6 +72,11 @@ data:
     tiamat.oauth2.resourceserver.auth0.ror.jwt.audience={{ .Values.auth0.ror.audience }}
     tiamat.oauth2.resourceserver.auth0.ror.claim.namespace=https://ror.entur.io/
 
+    # OAuth Entur Internal client
+    spring.security.oauth2.client.registration.internal.authorization-grant-type=client_credentials
+    spring.security.oauth2.client.registration.internal.client-id={{ .Values.auth0.client.id }}
+    spring.security.oauth2.client.provider.internal.token-uri={{ .Values.auth0.client.url }}
+    tiamat.oauth2.client.audience={{ .Values.auth0.client.audience }}
 
     # Logging Properties
     logging.level.org.rutebanken.tiamat=INFO
