@@ -518,6 +518,9 @@ public class CustomGraphQLTypes {
             .field(newFieldDefinition()
                     .name(AUDIBLE_SIGNALS_AVAILABLE)
                     .type(limitationStatusEnum))
+            .field(newFieldDefinition()
+                    .name(VISUAL_SIGNS_AVAILABLE)
+                    .type(limitationStatusEnum))
             .build();
 
     public static GraphQLObjectType accessibilityAssessmentObjectType = newObject()
@@ -558,6 +561,9 @@ public class CustomGraphQLTypes {
                     .type(new GraphQLNonNull(limitationStatusEnum)))
             .field(newInputObjectField()
                     .name(AUDIBLE_SIGNALS_AVAILABLE)
+                    .type(new GraphQLNonNull(limitationStatusEnum)))
+            .field(newInputObjectField()
+                    .name(VISUAL_SIGNS_AVAILABLE)
                     .type(new GraphQLNonNull(limitationStatusEnum)))
             .build();
 
