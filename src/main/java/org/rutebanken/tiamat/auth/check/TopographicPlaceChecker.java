@@ -60,7 +60,6 @@ public class TopographicPlaceChecker implements AdministrativeZoneChecker {
                     logger.debug("Polygon for topographic place {}-{} contains centroid for {}", topographicPlace.getNetexId(), topographicPlace.getVersion(), zone);
                     return true;
                 } else {
-                    logger.warn("No polygon match for topographic place {}-{} and centroid for zone {}", topographicPlace.getNetexId(), topographicPlace.getVersion(), zone);
                     return false;
                 }
             }
