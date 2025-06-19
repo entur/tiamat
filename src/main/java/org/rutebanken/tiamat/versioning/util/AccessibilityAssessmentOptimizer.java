@@ -104,6 +104,7 @@ public class AccessibilityAssessmentOptimizer {
         AccessibilityLimitation limitation = new AccessibilityLimitation();
         limitation.setWheelchairAccess(stopLimitation.getWheelchairAccess());
         limitation.setAudibleSignalsAvailable(stopLimitation.getAudibleSignalsAvailable());
+        limitation.setVisualSignsAvailable(stopLimitation.getVisualSignsAvailable());
         limitation.setLiftFreeAccess(stopLimitation.getLiftFreeAccess());
         limitation.setEscalatorFreeAccess(stopLimitation.getEscalatorFreeAccess());
         limitation.setStepFreeAccess(stopLimitation.getStepFreeAccess());
@@ -117,6 +118,7 @@ public class AccessibilityAssessmentOptimizer {
         AccessibilityLimitation limitation = new AccessibilityLimitation();
         limitation.setWheelchairAccess(LimitationStatusEnumeration.UNKNOWN);
         limitation.setAudibleSignalsAvailable(LimitationStatusEnumeration.UNKNOWN);
+        limitation.setVisualSignsAvailable(LimitationStatusEnumeration.UNKNOWN);
         limitation.setLiftFreeAccess(LimitationStatusEnumeration.UNKNOWN);
         limitation.setEscalatorFreeAccess(LimitationStatusEnumeration.UNKNOWN);
         limitation.setStepFreeAccess(LimitationStatusEnumeration.UNKNOWN);
@@ -139,6 +141,7 @@ public class AccessibilityAssessmentOptimizer {
 
             LimitationStatusEnumeration wheelchairAccess = limitation.getWheelchairAccess();
             LimitationStatusEnumeration audibleSignalsAvailable = limitation.getAudibleSignalsAvailable();
+            LimitationStatusEnumeration visualSignsAvailable = limitation.getVisualSignsAvailable();
             LimitationStatusEnumeration liftFreeAccess = limitation.getLiftFreeAccess();
             LimitationStatusEnumeration escalatorFreeAccess = limitation.getEscalatorFreeAccess();
             LimitationStatusEnumeration stepFreeAccess = limitation.getStepFreeAccess();
@@ -148,6 +151,7 @@ public class AccessibilityAssessmentOptimizer {
                 for (AccessibilityLimitation accessibilityLimitation : aa.getLimitations()) {
                     if (accessibilityLimitation.getWheelchairAccess() != wheelchairAccess |
                             accessibilityLimitation.getAudibleSignalsAvailable() != audibleSignalsAvailable |
+                            accessibilityLimitation.getVisualSignsAvailable() != visualSignsAvailable |
                             accessibilityLimitation.getLiftFreeAccess() != liftFreeAccess |
                             accessibilityLimitation.getEscalatorFreeAccess() != escalatorFreeAccess |
                             accessibilityLimitation.getStepFreeAccess() != stepFreeAccess) {

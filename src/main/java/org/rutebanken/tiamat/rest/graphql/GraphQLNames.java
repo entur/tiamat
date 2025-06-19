@@ -15,7 +15,10 @@
 
 package org.rutebanken.tiamat.rest.graphql;
 
+import org.rutebanken.netex.model.SanitaryFacilityEnumeration;
 import org.rutebanken.tiamat.rest.graphql.scalars.DateScalar;
+
+import java.util.List;
 
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.MERGED_ID_KEY;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
@@ -257,6 +260,7 @@ public class GraphQLNames {
     public static final String ESCALATOR_FREE_ACCESS = "escalatorFreeAccess";
     public static final String LIFT_FREE_ACCESS = "liftFreeAccess";
     public static final String AUDIBLE_SIGNALS_AVAILABLE = "audibleSignalsAvailable";
+    public static final String VISUAL_SIGNS_AVAILABLE = "visualSignsAvailable";
 
     public static final String PLACE_EQUIPMENTS = "placeEquipments";
     public static final String TICKETING_EQUIPMENT = "ticketingEquipment";

@@ -100,12 +100,14 @@ public class SiteElementMapper {
             //Only flag as updated if limitations are updated
             if (limitationFromInput.getWheelchairAccess() != limitation.getWheelchairAccess() |
                     limitationFromInput.getAudibleSignalsAvailable() != limitation.getAudibleSignalsAvailable() |
+                    limitationFromInput.getVisualSignsAvailable() != limitation.getVisualSignsAvailable() |
                     limitationFromInput.getStepFreeAccess() != limitation.getStepFreeAccess() |
                     limitationFromInput.getLiftFreeAccess() != limitation.getLiftFreeAccess() |
                     limitationFromInput.getEscalatorFreeAccess() != limitation.getEscalatorFreeAccess()) {
 
                 limitation.setWheelchairAccess(limitationFromInput.getWheelchairAccess());
                 limitation.setAudibleSignalsAvailable(limitationFromInput.getAudibleSignalsAvailable());
+                limitation.setVisualSignsAvailable(limitationFromInput.getVisualSignsAvailable());
                 limitation.setStepFreeAccess(limitationFromInput.getStepFreeAccess());
                 limitation.setLiftFreeAccess(limitationFromInput.getLiftFreeAccess());
                 limitation.setEscalatorFreeAccess(limitationFromInput.getEscalatorFreeAccess());
