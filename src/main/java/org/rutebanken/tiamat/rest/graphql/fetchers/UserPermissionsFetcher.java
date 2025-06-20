@@ -40,10 +40,9 @@ public class UserPermissionsFetcher implements DataFetcher {
 
     @Override
     public Object get(DataFetchingEnvironment dataFetchingEnvironment) {
-
         final boolean isGuest = authorizationService.isGuest();
         final boolean allowNewStopEverywhere = authorizationService.canEditAllEntities();
-        final String preferredName = userInfoExtractor.getPreferredName();
+        final String preferredName = isGuest ? null : userInfoExtractor.getPreferredName();
 
         logger.debug("isGuest: {}, allowNewStopEverywhere: {}, preferredName: {}" , allowNewStopEverywhere, isGuest, preferredName);
 
