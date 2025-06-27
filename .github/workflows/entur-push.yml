@@ -52,6 +52,7 @@ jobs:
               -Dsonar.login=${SONAR_TOKEN}
 
   docker-build:
+    if: github.repository_owner == 'entur' && github.event_name == 'push'
     needs: [maven-verify]
     uses: entur/gha-docker/.github/workflows/build.yml@v1
     with:
