@@ -66,17 +66,17 @@ public class AccessibilityAssessmentOptimizerTest extends TiamatIntegrationTest 
     public void persistStopPlaceWithAllEqualAccessibilityAssessmentLimitation() {
         Quay quay1 = new Quay();
         quay1.setName(createEmbeddableString("quay1"));
-        quay1.setAccessibilityAssessment(createAccessibilityAssessment(TRUE, TRUE, TRUE, TRUE, TRUE));
+        quay1.setAccessibilityAssessment(createAccessibilityAssessment(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE));
 
         Quay quay2 = new Quay();
         quay2.setName(createEmbeddableString("quay2"));
-        quay2.setAccessibilityAssessment(createAccessibilityAssessment(TRUE, TRUE, TRUE, TRUE, TRUE));
+        quay2.setAccessibilityAssessment(createAccessibilityAssessment(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE));
 
         quayRepository.save(quay1);
         quayRepository.save(quay2);
 
         StopPlace stopPlace = new StopPlace();
-        stopPlace.setAccessibilityAssessment(createAccessibilityAssessment(TRUE, TRUE, TRUE, TRUE, TRUE));
+        stopPlace.setAccessibilityAssessment(createAccessibilityAssessment(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE));
 
         stopPlace.getQuays().add(quay1);
         stopPlace.getQuays().add(quay2);
@@ -112,11 +112,11 @@ public class AccessibilityAssessmentOptimizerTest extends TiamatIntegrationTest 
     public void persistStopPlaceWithAllQuaysEqualAccessibilityAssessmentLimitation() {
         Quay quay1 = new Quay();
         quay1.setName(createEmbeddableString("quay1"));
-        quay1.setAccessibilityAssessment(createAccessibilityAssessment(TRUE, TRUE, TRUE, TRUE, TRUE));
+        quay1.setAccessibilityAssessment(createAccessibilityAssessment(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE));
 
         Quay quay2 = new Quay();
         quay2.setName(createEmbeddableString("quay2"));
-        quay2.setAccessibilityAssessment(createAccessibilityAssessment(TRUE, TRUE, TRUE, TRUE, TRUE));
+        quay2.setAccessibilityAssessment(createAccessibilityAssessment(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE));
 
         StopPlace stopPlace = new StopPlace();
         stopPlace.setAccessibilityAssessment(null);
@@ -158,18 +158,18 @@ public class AccessibilityAssessmentOptimizerTest extends TiamatIntegrationTest 
 
         Quay quay1 = new Quay();
         quay1.setName(createEmbeddableString("quay1"));
-        quay1.setAccessibilityAssessment(createAccessibilityAssessment(TRUE, TRUE, TRUE, TRUE, TRUE));
+        quay1.setAccessibilityAssessment(createAccessibilityAssessment(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE));
 
         Quay quay2 = new Quay();
         quay2.setName(createEmbeddableString("quay2"));
-        quay2.setAccessibilityAssessment(createAccessibilityAssessment(TRUE, TRUE, TRUE, TRUE, TRUE));
+        quay2.setAccessibilityAssessment(createAccessibilityAssessment(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE));
 
         StopPlace stopPlace = new StopPlace();
 
-        AccessibilityAssessment accessibilityAssessment = createAccessibilityAssessment(TRUE, TRUE, TRUE, TRUE, TRUE);
+        AccessibilityAssessment accessibilityAssessment = createAccessibilityAssessment(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE);
         AccessibilityLimitation limitation = accessibilityAssessment.getLimitations().getFirst();
 
-        stopPlace.setAccessibilityAssessment(createAccessibilityAssessment(TRUE, TRUE, TRUE, TRUE, TRUE));
+        stopPlace.setAccessibilityAssessment(createAccessibilityAssessment(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE));
 
         stopPlace.getQuays().add(quay1);
         stopPlace.getQuays().add(quay2);
@@ -185,7 +185,7 @@ public class AccessibilityAssessmentOptimizerTest extends TiamatIntegrationTest 
 
         Quay quay3 = new Quay();
         quay3.setName(createEmbeddableString("quay3"));
-        quay3.setAccessibilityAssessment(createAccessibilityAssessment(PARTIAL, TRUE, TRUE, TRUE, TRUE));
+        quay3.setAccessibilityAssessment(createAccessibilityAssessment(PARTIAL, TRUE, TRUE, TRUE, TRUE, TRUE));
 
         actualStopPlace.getQuays().add(quay3);
 
@@ -232,14 +232,14 @@ public class AccessibilityAssessmentOptimizerTest extends TiamatIntegrationTest 
 
         Quay quay1 = new Quay();
         quay1.setName(createEmbeddableString("quay1"));
-        quay1.setAccessibilityAssessment(createAccessibilityAssessment(FALSE, TRUE, TRUE, TRUE, TRUE));
+        quay1.setAccessibilityAssessment(createAccessibilityAssessment(FALSE, TRUE, TRUE, TRUE, TRUE, TRUE));
 
         Quay quay2 = new Quay();
         quay2.setName(createEmbeddableString("quay2"));
-        quay2.setAccessibilityAssessment(createAccessibilityAssessment(TRUE, TRUE, TRUE, TRUE, TRUE));
+        quay2.setAccessibilityAssessment(createAccessibilityAssessment(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE));
 
         StopPlace stopPlace = new StopPlace();
-        stopPlace.setAccessibilityAssessment(createAccessibilityAssessment(TRUE, TRUE, TRUE, TRUE, TRUE));
+        stopPlace.setAccessibilityAssessment(createAccessibilityAssessment(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE));
 
         stopPlace.getQuays().add(quay1);
         stopPlace.getQuays().add(quay2);
@@ -334,7 +334,7 @@ public class AccessibilityAssessmentOptimizerTest extends TiamatIntegrationTest 
         Set<Quay> quays = actualStopPlace.getQuays();
         for (Quay quay : quays) {
             if (quay.getName().getValue().equals(quay1.getName().getValue())) {
-                quay.setAccessibilityAssessment(createAccessibilityAssessment(FALSE, TRUE, TRUE, TRUE, TRUE));
+                quay.setAccessibilityAssessment(createAccessibilityAssessment(FALSE, TRUE, TRUE, TRUE, TRUE, TRUE));
             }
         }
 
@@ -379,17 +379,17 @@ public class AccessibilityAssessmentOptimizerTest extends TiamatIntegrationTest 
 
         Quay quay1 = new Quay();
         quay1.setName(createEmbeddableString("quay1"));
-        quay1.setAccessibilityAssessment(createAccessibilityAssessment(PARTIAL, TRUE, TRUE, TRUE, TRUE));
+        quay1.setAccessibilityAssessment(createAccessibilityAssessment(PARTIAL, TRUE, TRUE, TRUE, TRUE, TRUE));
 
         Quay quay2 = new Quay();
         quay2.setName(createEmbeddableString("quay2"));
-        quay2.setAccessibilityAssessment(createAccessibilityAssessment(TRUE, TRUE, TRUE, TRUE, TRUE));
+        quay2.setAccessibilityAssessment(createAccessibilityAssessment(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE));
 
         quayRepository.save(quay1);
         quayRepository.save(quay2);
 
         StopPlace stopPlace = new StopPlace();
-        stopPlace.setAccessibilityAssessment(createAccessibilityAssessment(TRUE, TRUE, TRUE, TRUE, TRUE));
+        stopPlace.setAccessibilityAssessment(createAccessibilityAssessment(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE));
         stopPlace.getQuays().add(quay1);
         stopPlace.getQuays().add(quay2);
 
@@ -436,7 +436,7 @@ public class AccessibilityAssessmentOptimizerTest extends TiamatIntegrationTest 
 
         Quay quay1 = new Quay();
         quay1.setName(createEmbeddableString("quay1"));
-        quay1.setAccessibilityAssessment(createAccessibilityAssessment(PARTIAL, TRUE, TRUE, TRUE, TRUE));
+        quay1.setAccessibilityAssessment(createAccessibilityAssessment(PARTIAL, TRUE, TRUE, TRUE, TRUE, TRUE));
 
         Quay quay2 = new Quay();
         quay2.setName(createEmbeddableString("quay2"));
@@ -446,7 +446,7 @@ public class AccessibilityAssessmentOptimizerTest extends TiamatIntegrationTest 
         quayRepository.save(quay2);
 
         StopPlace stopPlace = new StopPlace();
-        stopPlace.setAccessibilityAssessment(createAccessibilityAssessment(TRUE, TRUE, TRUE, TRUE, TRUE));
+        stopPlace.setAccessibilityAssessment(createAccessibilityAssessment(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE));
         stopPlace.getQuays().add(quay1);
         stopPlace.getQuays().add(quay2);
 
@@ -493,17 +493,17 @@ public class AccessibilityAssessmentOptimizerTest extends TiamatIntegrationTest 
 
         Quay quay1 = new Quay();
         quay1.setName(createEmbeddableString("quay1"));
-        quay1.setAccessibilityAssessment(createAccessibilityAssessment(TRUE, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN));
+        quay1.setAccessibilityAssessment(createAccessibilityAssessment(TRUE, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN));
 
         Quay quay2 = new Quay();
         quay2.setName(createEmbeddableString("quay2"));
-        quay2.setAccessibilityAssessment(createAccessibilityAssessment(TRUE, TRUE, TRUE, TRUE, TRUE));
+        quay2.setAccessibilityAssessment(createAccessibilityAssessment(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE));
 
         quayRepository.save(quay1);
         quayRepository.save(quay2);
 
         StopPlace stopPlace = new StopPlace();
-        stopPlace.setAccessibilityAssessment(createAccessibilityAssessment(TRUE, TRUE, TRUE, TRUE, TRUE));
+        stopPlace.setAccessibilityAssessment(createAccessibilityAssessment(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE));
 
         stopPlace.getQuays().add(quay1);
         stopPlace.getQuays().add(quay2);
@@ -550,7 +550,7 @@ public class AccessibilityAssessmentOptimizerTest extends TiamatIntegrationTest 
     }
 
 
-    protected static AccessibilityAssessment createAccessibilityAssessment(LimitationStatusEnumeration wheelchairAccess, LimitationStatusEnumeration liftFreeAccess, LimitationStatusEnumeration escalatorFreeAccess, LimitationStatusEnumeration audibleSignalsAvailable, LimitationStatusEnumeration stepFreeAccess) {
+    protected static AccessibilityAssessment createAccessibilityAssessment(LimitationStatusEnumeration wheelchairAccess, LimitationStatusEnumeration liftFreeAccess, LimitationStatusEnumeration escalatorFreeAccess, LimitationStatusEnumeration audibleSignalsAvailable, LimitationStatusEnumeration stepFreeAccess, LimitationStatusEnumeration visualSignsAvailable) {
         AccessibilityAssessment accessibilityAssessment = new AccessibilityAssessment();
 
         AccessibilityLimitation accessibilityLimitation = new AccessibilityLimitation();
@@ -559,6 +559,7 @@ public class AccessibilityAssessmentOptimizerTest extends TiamatIntegrationTest 
         accessibilityLimitation.setEscalatorFreeAccess(escalatorFreeAccess);
         accessibilityLimitation.setAudibleSignalsAvailable(audibleSignalsAvailable);
         accessibilityLimitation.setStepFreeAccess(stepFreeAccess);
+        accessibilityLimitation.setVisualSignsAvailable(visualSignsAvailable);
         List<AccessibilityLimitation> limitations = new ArrayList<>();
         limitations.add(accessibilityLimitation);
         accessibilityAssessment.setLimitations(limitations);

@@ -25,6 +25,7 @@ import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.AUDIBLE_SIGNALS_AV
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ESCALATOR_FREE_ACCESS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.LIFT_FREE_ACCESS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.STEP_FREE_ACCESS;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.VISUAL_SIGNS_AVAILABLE;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.WHEELCHAIR_ACCESS;
 
 @Component
@@ -34,6 +35,7 @@ public class AccessibilityLimitationMapper {
         AccessibilityLimitation limitation = new AccessibilityLimitation();
         limitation.setWheelchairAccess(limitationsInput.get(WHEELCHAIR_ACCESS));
         limitation.setAudibleSignalsAvailable(limitationsInput.get(AUDIBLE_SIGNALS_AVAILABLE));
+        limitation.setVisualSignsAvailable(limitationsInput.get(VISUAL_SIGNS_AVAILABLE));
         limitation.setStepFreeAccess(limitationsInput.get(STEP_FREE_ACCESS));
         limitation.setLiftFreeAccess(limitationsInput.get(LIFT_FREE_ACCESS));
         limitation.setEscalatorFreeAccess(limitationsInput.get(ESCALATOR_FREE_ACCESS));
