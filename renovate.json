@@ -1,6 +1,24 @@
 {
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:recommended"
+  "extends": ["github>entur/ror-renovate-config"],
+  "separateMinorPatch": true,
+  "packageRules": [
+    {
+      "description": "Ensure simultaneous upgrade of graphql-java and graphql-java-extended-scalars",
+      "groupName": "com.graphql-java",
+      "matchDatasources": ["maven"],
+      "matchPackageNames": ["com.graphql-java:graphql-java", "com.graphql-java:graphql-java-extended-scalars"],
+      "versioning": "semver-coerced"
+    },
+    {
+      "description": "Do not automerge Flyway minor releases",
+      "matchPackageNames": [
+        "org.flywaydb:flyway-database-postgresql"
+      ],
+      "matchUpdateTypes": [
+        "major",
+        "minor"
+      ],
+      "automerge": false
+    }
   ]
 }
