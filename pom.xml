@@ -62,7 +62,7 @@
         <entur.helpers.version>5.42.0</entur.helpers.version>
         <jts-core.version>1.19.0</jts-core.version>
         <groovy-all.version>4.0.26</groovy-all.version>
-        <rest-assured.version>5.5.1</rest-assured.version>
+        <rest-assured.version>5.5.5</rest-assured.version>
         <spring-cloud-aws-secrets-manager.version>3.1.1</spring-cloud-aws-secrets-manager.version>
         <aws-secretsmanager.version>2.0.2</aws-secretsmanager.version>
         <argLine/>
