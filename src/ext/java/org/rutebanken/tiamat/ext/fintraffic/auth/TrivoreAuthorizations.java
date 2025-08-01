@@ -18,6 +18,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import javax.annotation.Nonnull;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -27,6 +28,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 import static java.time.temporal.ChronoUnit.MINUTES;
 
@@ -67,18 +69,23 @@ public class TrivoreAuthorizations {
         this.enableCodespaceFiltering = enableCodespaceFiltering;
         this.httpClient = webClient;
         this.externalPermissionCache = createCache(50, Duration.of(5, MINUTES), new CacheLoader<>() {
-            public ExternalPermission load(PermissionIdentifiers permissionIdentifiers) throws Exception {
+            @Override
+            @Nonnull
+            public ExternalPermission load(@Nonnull PermissionIdentifiers permissionIdentifiers) throws Exception {
                 return loadExternalPermission(permissionIdentifiers);
             }
         });
         this.usersGroupMembershipCache = createCache(1000, Duration.of(5, MINUTES), new CacheLoader<>() {
             @Override
-            public List<GroupMembership> load(UserIdentifier userIdentifier) throws Exception {
+            @Nonnull
+            public List<GroupMembership> load(@Nonnull UserIdentifier userIdentifier) throws Exception {
                 return loadUsersGroupMemberships(userIdentifier);
             }
         });
         this.usersExternalPermissionsCache = createCache(50, Duration.of(5, MINUTES), new CacheLoader<>() {
-            public List<ExternalPermissionGrant> load(UserIdentifier userIdentifier) throws Exception {
+            @Override
+            @Nonnull
+            public List<ExternalPermissionGrant> load(@Nonnull UserIdentifier userIdentifier) throws Exception {
                 return loadUsersExternalPermissionGrants(userIdentifier);
             }
         });
@@ -116,7 +123,7 @@ public class TrivoreAuthorizations {
                 oidcServerUri + "/api/rest/v1/user/" + userIdentifier.userId() + "/groupmembership",
                 Map.of("Authorization", "Basic " + basicAuthenticationHeaderValue(),
                         "Content-Type", "application/json"),
-                new ParameterizedTypeReference<List<GroupMembership>>() {});
+                new ParameterizedTypeReference<>() {});
         if (groupMembership.isPresent()) {
             return groupMembership.get();
         } else {
@@ -129,7 +136,7 @@ public class TrivoreAuthorizations {
                 oidcServerUri + "/api/rest/v1/externalpermission/group/" + permissionIdentifiers.permissionGroupId() + "/permission/" + permissionIdentifiers.permissionId(),
                 Map.of("Authorization", "Basic " + basicAuthenticationHeaderValue(),
                         "Content-Type", "application/json"),
-                new ParameterizedTypeReference<ExternalPermission>() {});
+                new ParameterizedTypeReference<>() {});
         if (externalPermission.isPresent()) {
             return externalPermission.get();
         } else {
@@ -143,7 +150,7 @@ public class TrivoreAuthorizations {
                 oidcServerUri + "/api/rest/v1/user/" + userIdentifier.userId() + "/externalpermissions",
                 Map.of("Authorization", "Basic " + basicAuthenticationHeaderValue(),
                         "Content-Type", "application/json"),
-                new ParameterizedTypeReference<List<ExternalPermissionGrant>>() {});
+                new ParameterizedTypeReference<>() {});
         if (userExternalPermissionGrants.isPresent()) {
             return userExternalPermissionGrants.get();
         } else {
@@ -246,6 +253,20 @@ public class TrivoreAuthorizations {
                     }
                     return false;
                 });
+    }
+
+    public Set<String> getAccessibleCodespaces() {
+        return getToken()
+                .flatMap(jwt -> fetchTrivoreUsersGroupMemberships(jwt.getSubject()))
+                .map(TrivoreAuthorizations::collectAllCodespaces)
+                .orElseGet(() -> {
+                    logger.trace("Could not resolve codespaces for user [{}]", getCurrentSubject());
+                    return Set.of();
+                });
+    }
+
+    private static Set<String> collectAllCodespaces(List<GroupMembership> groupMemberships) {
+        return groupMemberships.stream().flatMap(groupMembership -> groupMembership.getCodespaces().stream()).collect(Collectors.toSet());
     }
 
     private static final Map<String, List<String>> SUPERCEDING_PERMISSIONS = Map.of(
