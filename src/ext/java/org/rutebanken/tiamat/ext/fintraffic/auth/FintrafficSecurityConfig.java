@@ -1,6 +1,7 @@
 package org.rutebanken.tiamat.ext.fintraffic.auth;
 
 import org.rutebanken.tiamat.auth.AuthorizationService;
+import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,10 +23,11 @@ public class FintrafficSecurityConfig {
             @Value("${tiamat.ext.fintraffic.security.oidc-server-uri}") String oidcServerUri,
             @Value("${tiamat.ext.fintraffic.security.client-id}") String clientId,
             @Value("${tiamat.ext.fintraffic.security.client-secret}") String clientSecret,
-            @Value("${tiamat.ext.fintraffic.security.enable-codespace-filtering:false}") boolean enableCodespaceFiltering
+            @Value("${tiamat.ext.fintraffic.security.enable-codespace-filtering:false}") boolean enableCodespaceFiltering,
+            TopographicPlaceRepository topographicPlaceRepository
     ) {
         TrivoreAuthorizations trivoreAuthorizations = new TrivoreAuthorizations(prepareWebClient(webClientBuilder), oidcServerUri, clientId, clientSecret, enableCodespaceFiltering);
-        return new FintrafficAuthorizationService(trivoreAuthorizations);
+        return new FintrafficAuthorizationService(trivoreAuthorizations, topographicPlaceRepository);
     }
 
     private WebClient prepareWebClient(WebClient.Builder webClientBuilder) {
