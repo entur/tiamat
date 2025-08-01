@@ -69,7 +69,7 @@
 
         <xercesImpl.version>2.12.2</xercesImpl.version>
         <maven.compiler.args>--add-opens java.base/java.lang=ALL-UNNAMED</maven.compiler.args>
-        <testcontainers.version>1.20.6</testcontainers.version>
+        <testcontainers.version>1.21.3</testcontainers.version>
         <build-helper-maven-plugin.version>3.6.1</build-helper-maven-plugin.version>
         <metrics-graphite.version>4.2.33</metrics-graphite.version>
         <!-- There is breaking change in spring-boot 3.4/hibernate 6.6.5 -->
