@@ -1,20 +1,34 @@
 package org.rutebanken.tiamat.ext.fintraffic.auth;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import org.locationtech.jts.geom.Point;
 import org.rutebanken.tiamat.auth.AuthorizationService;
 import org.rutebanken.tiamat.diff.generic.SubmodeEnumuration;
+import org.rutebanken.tiamat.exporter.params.ExportParams;
+import org.rutebanken.tiamat.exporter.params.TopographicPlaceSearch;
 import org.rutebanken.tiamat.model.EntityStructure;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
+import org.rutebanken.tiamat.model.TopographicPlace;
+import org.rutebanken.tiamat.model.TopographicPlaceTypeEnumeration;
+import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 
+import javax.annotation.Nonnull;
+import java.time.Duration;
 import java.util.Collection;
 import java.util.EnumSet;
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static org.rutebanken.tiamat.ext.fintraffic.auth.TrivoreAuthorizations.ENTITY_TYPE_ALL;
 import static org.rutebanken.tiamat.ext.fintraffic.auth.TrivoreAuthorizations.TRANSPORT_MODE_ALL;
@@ -30,8 +44,24 @@ public class FintrafficAuthorizationService implements AuthorizationService {
 
     private final TrivoreAuthorizations trivoreAuthorizations;
 
-    public FintrafficAuthorizationService(TrivoreAuthorizations trivoreAuthorizations) {
+    private final TopographicPlaceRepository topographicPlaceRepository;
+
+    private final LoadingCache<String, List<TopographicPlace>> fintrafficAdministrativeZoneCache;
+
+    public FintrafficAuthorizationService(TrivoreAuthorizations trivoreAuthorizations,
+                                          TopographicPlaceRepository topographicPlaceRepository) {
         this.trivoreAuthorizations = trivoreAuthorizations;
+        this.topographicPlaceRepository = topographicPlaceRepository;
+        this.fintrafficAdministrativeZoneCache = CacheBuilder.newBuilder()
+                .maximumSize(100)
+                .expireAfterWrite(Duration.ofMinutes(10))
+                .build(new CacheLoader<>() {
+                    @Override
+                    @Nonnull
+                    public List<TopographicPlace> load(@Nonnull String codespace) {
+                        return loadTopographicPlaces(codespace);
+                    }
+                });
     }
 
     @Override
@@ -69,8 +99,16 @@ public class FintrafficAuthorizationService implements AuthorizationService {
     @Override
     public boolean canEditEntity(EntityStructure entity) {
         String codespace = getCodespace(entity.getNetexId());
-        return trivoreAuthorizations.hasAccess(detectEntityType(entity), detectTransportMode(entity), MANAGE)
-                && trivoreAuthorizations.hasAccessToCodespace(codespace);
+        if (!trivoreAuthorizations.hasAccess(detectEntityType(entity), detectTransportMode(entity), MANAGE)) {
+            return false;
+        }
+        if (!trivoreAuthorizations.hasAccessToCodespace(codespace)) {
+            return false;
+        }
+        if (entity instanceof StopPlace sp) {
+            return canEditEntity(sp.getCentroid());
+        }
+        return true;
     }
 
     private static String detectEntityType(EntityStructure entity) {
@@ -79,7 +117,7 @@ public class FintrafficAuthorizationService implements AuthorizationService {
 
     private static String detectTransportMode(EntityStructure entity) {
         return switch (entity) {
-            case StopPlace sp -> sp.getTransportMode().value();
+            case StopPlace sp -> Optional.ofNullable(sp.getTransportMode()).map(Enum::name).orElse(TRANSPORT_MODE_ALL);
             default -> TRANSPORT_MODE_ALL;
         };
     }
@@ -87,8 +125,38 @@ public class FintrafficAuthorizationService implements AuthorizationService {
     @Override
     public boolean canEditEntity(Point point) {
         logger.trace("FintrafficAuthorizationService.canEditEntity({})", point);
-        return true;  // TODO: implement geofencing support
+        Set<String> accessibleCodespaces = trivoreAuthorizations.getAccessibleCodespaces();
+
+        if (accessibleCodespaces.isEmpty()) {
+            logger.trace("FintrafficAuthorizationService.canEditEntity({}) codespaces is empty", point);
+            return false;
+        }
+        boolean result = accessibleCodespaces.stream().anyMatch(codespace ->
+                {
+                    try {
+                        List<TopographicPlace> topographicPlacesForCodespace = fintrafficAdministrativeZoneCache.get(codespace);
+                        return topographicPlacesForCodespace.stream().anyMatch(tp -> tp.getPolygon() != null && tp.getPolygon().contains(point));
+                    } catch (ExecutionException e) {
+                        logger.warn("Failed to fetch topographic places for codespaces [{}]", accessibleCodespaces, e);
+                        return false;
+                    }
+                }
+        );
+        logger.trace("FintrafficAuthorizationService.canEditEntity({}, {}, {})", result, point, accessibleCodespaces);
+        return result;
     }
+
+    private List<TopographicPlace> loadTopographicPlaces(String codespace) {
+        logger.trace("FintrafficAuthorizationService.loadTopographicPlaces({})", codespace);
+        List<TopographicPlace> topographicPlaces = topographicPlaceRepository.findTopographicPlace(
+                TopographicPlaceSearch.newTopographicPlaceSearchBuilder().versionValidity(ExportParams.VersionValidity.CURRENT).build()
+        );
+
+        return topographicPlaces.stream()
+                .filter(tp -> tp.getTopographicPlaceType().equals(TopographicPlaceTypeEnumeration.REGION))
+                .filter(tp -> tp.getKeyValues().get("codespace").getItems().contains(codespace))
+                .collect(Collectors.toList());
+    };
 
     @Override
     public Set<StopTypeEnumeration> getAllowedStopPlaceTypes(EntityStructure entity) {

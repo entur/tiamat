@@ -1,6 +1,5 @@
 package org.rutebanken.tiamat.ext.fintraffic.auth.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Splitter;
 
 import java.util.HashSet;
@@ -14,7 +13,7 @@ public record GroupMembership(String id,
                               boolean member,
                               String eligibleFrom,
                               String eligibleUntil,
-                              @JsonProperty("custom_fields") Map<String, Object> customFields) {
+                              Map<String, Object> customFields) {
 
 
     /**
@@ -23,8 +22,8 @@ public record GroupMembership(String id,
     private static final String CUSTOM_FIELD_CODESPACE = "codespaces";
 
     public Set<String> getCodespaces() {
-        if (customFields() != null) {
-            String codespaceField = customFields().getOrDefault(CUSTOM_FIELD_CODESPACE, "").toString();
+        if (customFields != null) {
+            String codespaceField = customFields.getOrDefault(CUSTOM_FIELD_CODESPACE, "").toString();
             List<String> codespaces = Splitter.on(",")
                     .trimResults()
                     .omitEmptyStrings()
