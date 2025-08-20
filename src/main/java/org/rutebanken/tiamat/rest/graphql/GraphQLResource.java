@@ -23,8 +23,10 @@ import graphql.ExceptionWhileDataFetching;
 import graphql.ExecutionInput;
 import graphql.ExecutionResult;
 import graphql.GraphQL;
+import graphql.GraphQLContext;
 import graphql.GraphQLError;
 import graphql.GraphQLException;
+import org.dataloader.DataLoaderRegistry;
 import graphql.analysis.MaxQueryDepthInstrumentation;
 import graphql.execution.AbortExecutionException;
 import graphql.execution.instrumentation.ChainedInstrumentation;
@@ -40,6 +42,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.rutebanken.helper.organisation.NotAuthenticatedException;
 import org.rutebanken.tiamat.rest.exception.ErrorResponseEntity;
+import org.rutebanken.tiamat.rest.graphql.dataloader.GraphQLDataLoaderRegistryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,6 +90,9 @@ public class GraphQLResource {
 
     @Autowired
     private RequestLoggingInstrumentation requestLoggingInstrumentation;
+    
+    @Autowired
+    private GraphQLDataLoaderRegistryService dataLoaderRegistryService;
 
 
     private final TransactionTemplate transactionTemplate;
@@ -162,10 +168,14 @@ public class GraphQLResource {
         Response.ResponseBuilder res = Response.status(Response.Status.OK);
         HashMap<String, Object> content = new HashMap<>();
         try {
+            // Create DataLoader registry for this request
+            DataLoaderRegistry dataLoaderRegistry = dataLoaderRegistryService.createDataLoaderRegistry();
+            
             final ExecutionInput executionInput = ExecutionInput.newExecutionInput()
                     .query(query)
                     .root(null)
                     .variables(variables)
+                    .dataLoaderRegistry(dataLoaderRegistry)
                     .build();
             ExecutionResult executionResult = graphQL.execute(executionInput);
 

@@ -28,10 +28,10 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
@@ -48,12 +48,9 @@ public class ParentStopPlacesFetcher {
 
     private final EntityManager entityManager;
 
-    private final ParentStopPlaceDataLoader parentStopPlaceDataLoader;
-
-    public ParentStopPlacesFetcher(StopPlaceRepository stopPlaceRepository, EntityManager entityManager, ParentStopPlaceDataLoader parentStopPlaceDataLoader) {
+    public ParentStopPlacesFetcher(StopPlaceRepository stopPlaceRepository, EntityManager entityManager) {
         this.stopPlaceRepository = stopPlaceRepository;
         this.entityManager = entityManager;
-        this.parentStopPlaceDataLoader = parentStopPlaceDataLoader;
     }
 
     /**
@@ -106,13 +103,13 @@ public class ParentStopPlacesFetcher {
         // This still provides significant performance improvement over individual queries
         return resolveParentsWithBatchLoading(result, nonParentStops, keepChilds, session);
     }
-    
+
     private List<StopPlace> resolveParentsWithBatchLoading(
             List<StopPlace> result,
             List<StopPlace> nonParentStops,
             boolean keepChilds,
             Session session) {
-        
+
         // Collect all parent references that need to be loaded
         Map<ParentStopPlaceDataLoader.ParentStopPlaceKey, StopPlace> keyToChild = new HashMap<>();
         for (StopPlace nonParentStop : nonParentStops) {
@@ -131,7 +128,7 @@ public class ParentStopPlacesFetcher {
         if (!keyToChild.isEmpty()) {
             // Load all parents in batch using direct repository calls
             Map<ParentStopPlaceDataLoader.ParentStopPlaceKey, StopPlace> parentMap = loadParentsBatch(keyToChild.keySet());
-            
+
             // Process results
             for (Map.Entry<ParentStopPlaceDataLoader.ParentStopPlaceKey, StopPlace> entry : keyToChild.entrySet()) {
                 ParentStopPlaceDataLoader.ParentStopPlaceKey key = entry.getKey();
@@ -168,58 +165,63 @@ public class ParentStopPlacesFetcher {
 
         return result;
     }
-    
+
     private Map<ParentStopPlaceDataLoader.ParentStopPlaceKey, StopPlace> loadParentsBatch(Set<ParentStopPlaceDataLoader.ParentStopPlaceKey> keys) {
         Map<ParentStopPlaceDataLoader.ParentStopPlaceKey, StopPlace> resultMap = new HashMap<>();
         
-        // Group keys by netexId to reduce number of queries
-        Map<String, List<ParentStopPlaceDataLoader.ParentStopPlaceKey>> keysByNetexId = keys.stream()
-            .collect(toMap(
-                ParentStopPlaceDataLoader.ParentStopPlaceKey::getNetexId,
-                k -> List.of(k),
-                (existing, replacement) -> {
-                    List<ParentStopPlaceDataLoader.ParentStopPlaceKey> combined = new ArrayList<>(existing);
-                    combined.addAll(replacement);
-                    return combined;
-                }
-            ));
-        
-        // For each unique netexId, fetch all versions needed
-        for (Map.Entry<String, List<ParentStopPlaceDataLoader.ParentStopPlaceKey>> entry : keysByNetexId.entrySet()) {
-            String netexId = entry.getKey();
-            List<ParentStopPlaceDataLoader.ParentStopPlaceKey> netexIdKeys = entry.getValue();
+        if (keys.isEmpty()) {
+            return resultMap;
+        }
+
+        logger.debug("Batch loading {} parent stop places in single query", keys.size());
+
+        // Group keys by unique netexId to avoid duplicate queries for same netexId with different versions
+        Map<String, Set<Long>> netexIdToVersions = new HashMap<>();
+        for (ParentStopPlaceDataLoader.ParentStopPlaceKey key : keys) {
+            netexIdToVersions.computeIfAbsent(key.getNetexId(), k -> new HashSet<>()).add(key.getVersion());
+        }
+
+        try {
+            // Create a single batch query for all unique netexIds and their versions
+            String jpql = "SELECT sp FROM StopPlace sp WHERE sp.netexId IN :netexIds";
+            var query = entityManager.createQuery(jpql, StopPlace.class);
+            query.setParameter("netexIds", netexIdToVersions.keySet());
+
+            List<StopPlace> stopPlaces = query.getResultList();
             
-            // Extract unique versions for this netexId
-            List<Long> versions = netexIdKeys.stream()
-                .map(ParentStopPlaceDataLoader.ParentStopPlaceKey::getVersion)
-                .distinct()
-                .collect(toList());
-            
-            if (versions.size() == 1) {
-                // Single version - use existing method
-                Long version = versions.get(0);
-                StopPlace stopPlace = stopPlaceRepository.findFirstByNetexIdAndVersion(netexId, version);
-                if (stopPlace != null) {
+            // Filter results to only include exact (netexId, version) matches and map back to keys
+            for (StopPlace stopPlace : stopPlaces) {
+                String netexId = stopPlace.getNetexId();
+                Long version = stopPlace.getVersion();
+                
+                // Check if this specific (netexId, version) combination was requested
+                Set<Long> requestedVersions = netexIdToVersions.get(netexId);
+                if (requestedVersions != null && requestedVersions.contains(version)) {
                     ParentStopPlaceDataLoader.ParentStopPlaceKey key = new ParentStopPlaceDataLoader.ParentStopPlaceKey(netexId, version);
                     resultMap.put(key, stopPlace);
                 }
-            } else {
-                // Multiple versions - use batch query
-                var query = entityManager.createQuery(
-                    "SELECT sp FROM StopPlace sp WHERE sp.netexId = :netexId AND sp.version IN :versions", 
-                    StopPlace.class);
-                query.setParameter("netexId", netexId);
-                query.setParameter("versions", versions);
+            }
+            
+            logger.debug("Successfully loaded {}/{} parent stop places in single query", 
+                resultMap.size(), keys.size());
                 
-                List<StopPlace> stopPlaces = query.getResultList();
-                for (StopPlace stopPlace : stopPlaces) {
-                    ParentStopPlaceDataLoader.ParentStopPlaceKey key = new ParentStopPlaceDataLoader.ParentStopPlaceKey(
-                        stopPlace.getNetexId(), stopPlace.getVersion());
-                    resultMap.put(key, stopPlace);
+        } catch (Exception e) {
+            logger.error("Batch query failed, falling back to individual queries", e);
+            
+            // Fallback: individual queries if the batch query fails
+            for (ParentStopPlaceDataLoader.ParentStopPlaceKey key : keys) {
+                try {
+                    StopPlace stopPlace = stopPlaceRepository.findFirstByNetexIdAndVersion(
+                        key.getNetexId(), key.getVersion());
+                    if (stopPlace != null) {
+                        resultMap.put(key, stopPlace);
+                    }
+                } catch (Exception individualError) {
+                    logger.warn("Failed to load individual parent stop place: {}", key, individualError);
                 }
             }
         }
-        
+
         return resultMap;
     }
 

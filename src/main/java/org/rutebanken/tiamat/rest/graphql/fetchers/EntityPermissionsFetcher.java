@@ -3,7 +3,6 @@ package org.rutebanken.tiamat.rest.graphql.fetchers;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import org.rutebanken.tiamat.auth.AuthorizationService;
-import org.rutebanken.tiamat.rest.graphql.dataloader.EntityPermissionsDataLoader;
 import org.rutebanken.tiamat.diff.generic.SubmodeEnumuration;
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
 import org.rutebanken.tiamat.model.GroupOfStopPlaces;
@@ -11,9 +10,9 @@ import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.rutebanken.tiamat.model.authorization.EntityPermissions;
 
-import java.util.Map;
 import org.rutebanken.tiamat.netex.id.TypeFromIdResolver;
 import org.rutebanken.tiamat.repository.generic.GenericEntityInVersionRepository;
+import org.rutebanken.tiamat.rest.graphql.dataloader.GraphQLDataLoaderRegistryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,20 +36,22 @@ public class EntityPermissionsFetcher implements DataFetcher {
     @Autowired
     private AuthorizationService authorizationService;
     
-    @Autowired
-    private EntityPermissionsDataLoader entityPermissionsDataLoader;
 
     @Override
     public Object get(DataFetchingEnvironment environment) throws Exception {
         String netexId = extractNetexId(environment.getSource());
 
-        // Try to get from preloaded cache first (for bbox queries)
-        EntityPermissions preloadedPermissions = getPreloadedPermissions(environment, netexId);
-        if (preloadedPermissions != null) {
-            return preloadedPermissions;
+        // Try to use DataLoader first (proper GraphQL way)
+        org.dataloader.DataLoader<String, EntityPermissions> dataLoader = 
+            environment.getDataLoader(GraphQLDataLoaderRegistryService.ENTITY_PERMISSIONS_LOADER);
+        
+        if (dataLoader != null) {
+            logger.debug("Using DataLoader for entity permissions: {}", netexId);
+            return dataLoader.load(netexId);
         }
 
-        // Fall back to individual loading (existing logic)
+        // Fallback: individual loading (existing logic)
+        logger.debug("No DataLoader available, falling back to individual permissions loading for: {}", netexId);
         return loadPermissionsIndividually(netexId);
     }
     
@@ -68,30 +69,6 @@ public class EntityPermissionsFetcher implements DataFetcher {
         }
     }
     
-    /**
-     * Get preloaded permissions from GraphQL context if available
-     */
-    @SuppressWarnings("unchecked")
-    private EntityPermissions getPreloadedPermissions(DataFetchingEnvironment environment, String netexId) {
-        try {
-            Map<String, EntityPermissions> preloadedPermissions = 
-                environment.getGraphQlContext().get("preloadedPermissions");
-            
-            if (preloadedPermissions != null) {
-                EntityPermissions permissions = preloadedPermissions.get(netexId);
-                if (permissions != null) {
-                    // Using debug level to avoid spamming logs, but this shows the cache hit
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Using preloaded permissions for entity: {}", netexId);
-                    }
-                    return permissions;
-                }
-            }
-        } catch (Exception e) {
-            logger.warn("Error accessing preloaded permissions for entity {}, falling back to individual loading", netexId, e);
-        }
-        return null;
-    }
     
     /**
      * Load permissions individually (original implementation)
