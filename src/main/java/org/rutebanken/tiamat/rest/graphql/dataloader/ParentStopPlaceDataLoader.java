@@ -23,11 +23,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.TypedQuery;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -39,11 +38,9 @@ public class ParentStopPlaceDataLoader {
 
     private static final Logger logger = LoggerFactory.getLogger(ParentStopPlaceDataLoader.class);
 
-    private final EntityManager entityManager;
     private final StopPlaceRepository stopPlaceRepository;
 
-    public ParentStopPlaceDataLoader(EntityManager entityManager, StopPlaceRepository stopPlaceRepository) {
-        this.entityManager = entityManager;
+    public ParentStopPlaceDataLoader(StopPlaceRepository stopPlaceRepository) {
         this.stopPlaceRepository = stopPlaceRepository;
     }
 
@@ -56,44 +53,30 @@ public class ParentStopPlaceDataLoader {
             logger.debug("Batch loading {} parent stop places", keys.size());
             
             return CompletableFuture.supplyAsync(() -> {
+                // Group keys by netexId to versions for batch loading
+                Map<String, Set<Long>> netexIdToVersions = keys.stream()
+                    .collect(Collectors.groupingBy(
+                        ParentStopPlaceKey::getNetexId,
+                        Collectors.mapping(
+                            ParentStopPlaceKey::getVersion,
+                            Collectors.toSet()
+                        )
+                    ));
+                
+                // Use repository's batch method for efficient loading
+                Map<String, Map<Long, StopPlace>> batchResults = stopPlaceRepository.findByNetexIdsAndVersions(netexIdToVersions);
+                
+                // Convert batch results back to key-based map
                 Map<ParentStopPlaceKey, StopPlace> resultMap = new HashMap<>();
-                
-                // Group keys by netexId to reduce number of queries
-                Map<String, List<ParentStopPlaceKey>> keysByNetexId = keys.stream()
-                    .collect(Collectors.groupingBy(ParentStopPlaceKey::getNetexId));
-                
-                // For each unique netexId, fetch all versions needed
-                for (Map.Entry<String, List<ParentStopPlaceKey>> entry : keysByNetexId.entrySet()) {
-                    String netexId = entry.getKey();
-                    List<ParentStopPlaceKey> netexIdKeys = entry.getValue();
+                for (Map.Entry<String, Map<Long, StopPlace>> netexIdEntry : batchResults.entrySet()) {
+                    String netexId = netexIdEntry.getKey();
+                    Map<Long, StopPlace> versionMap = netexIdEntry.getValue();
                     
-                    // Extract unique versions for this netexId
-                    List<Long> versions = netexIdKeys.stream()
-                        .map(ParentStopPlaceKey::getVersion)
-                        .distinct()
-                        .collect(Collectors.toList());
-                    
-                    if (versions.size() == 1) {
-                        // Single version - use existing method
-                        Long version = versions.get(0);
-                        StopPlace stopPlace = stopPlaceRepository.findFirstByNetexIdAndVersion(netexId, version);
-                        if (stopPlace != null) {
-                            ParentStopPlaceKey key = new ParentStopPlaceKey(netexId, version);
-                            resultMap.put(key, stopPlace);
-                        }
-                    } else {
-                        // Multiple versions - use batch query
-                        TypedQuery<StopPlace> query = entityManager.createQuery(
-                            "SELECT sp FROM StopPlace sp WHERE sp.netexId = :netexId AND sp.version IN :versions", 
-                            StopPlace.class);
-                        query.setParameter("netexId", netexId);
-                        query.setParameter("versions", versions);
-                        
-                        List<StopPlace> stopPlaces = query.getResultList();
-                        for (StopPlace stopPlace : stopPlaces) {
-                            ParentStopPlaceKey key = new ParentStopPlaceKey(stopPlace.getNetexId(), stopPlace.getVersion());
-                            resultMap.put(key, stopPlace);
-                        }
+                    for (Map.Entry<Long, StopPlace> versionEntry : versionMap.entrySet()) {
+                        Long version = versionEntry.getKey();
+                        StopPlace stopPlace = versionEntry.getValue();
+                        ParentStopPlaceKey key = new ParentStopPlaceKey(netexId, version);
+                        resultMap.put(key, stopPlace);
                     }
                 }
                 

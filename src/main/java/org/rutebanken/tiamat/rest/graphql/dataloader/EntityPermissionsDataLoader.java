@@ -26,10 +26,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import org.dataloader.BatchLoader;
+import org.dataloader.DataLoader;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 /**
@@ -51,6 +55,40 @@ public class EntityPermissionsDataLoader {
         this.genericEntityInVersionRepository = genericEntityInVersionRepository;
         this.typeFromIdResolver = typeFromIdResolver;
         this.authorizationService = authorizationService;
+    }
+
+    /**
+     * Creates a DataLoader for batching entity permissions lookups
+     * @return DataLoader configured for entity permissions batch loading
+     */
+    public DataLoader<String, EntityPermissions> createDataLoader() {
+        BatchLoader<String, EntityPermissions> batchLoader = keys -> {
+            logger.debug("Batch loading entity permissions for {} entities", keys.size());
+            
+            return CompletableFuture.supplyAsync(() -> {
+                try {
+                    Map<String, EntityPermissions> permissionsMap = batchLoadEntityPermissions(keys);
+                    
+                    // Return results in same order as input keys
+                    List<EntityPermissions> results = keys.stream()
+                        .map(permissionsMap::get)
+                        .collect(Collectors.toList());
+                    
+                    logger.debug("Successfully batch loaded permissions for {}/{} entities", 
+                        results.stream().mapToInt(p -> p != null ? 1 : 0).sum(), keys.size());
+                    
+                    return results;
+                } catch (Exception e) {
+                    logger.error("Error in entity permissions batch loader", e);
+                    // Return null list to indicate failure - DataLoader will handle this
+                    return keys.stream()
+                        .map(id -> (EntityPermissions) null)
+                        .collect(Collectors.toList());
+                }
+            });
+        };
+        
+        return DataLoader.newDataLoader(batchLoader);
     }
 
     /**

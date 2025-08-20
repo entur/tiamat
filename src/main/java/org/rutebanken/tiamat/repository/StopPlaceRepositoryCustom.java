@@ -83,4 +83,11 @@ public interface StopPlaceRepositoryCustom extends DataManagedObjectStructureRep
     Map<String, Set<String>> listStopPlaceIdsAndQuayIds(Instant validFrom, Instant validTo);
 
     int deleteStopPlaceTariffZoneRefs();
+
+    /**
+     * Batch load stop places by netexId and version combinations
+     * @param netexIdToVersions map of netexId to set of versions to load
+     * @return map of (netexId, version) to StopPlace
+     */
+    Map<String, Map<Long, StopPlace>> findByNetexIdsAndVersions(Map<String, Set<Long>> netexIdToVersions);
 }

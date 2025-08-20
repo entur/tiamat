@@ -15,7 +15,6 @@
 
 package org.rutebanken.tiamat.rest.graphql.dataloader;
 
-import org.dataloader.BatchLoader;
 import org.dataloader.DataLoader;
 import org.dataloader.DataLoaderRegistry;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -24,10 +23,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 /**
  * Service for creating and configuring DataLoader registry for GraphQL execution.
@@ -58,57 +53,15 @@ public class GraphQLDataLoaderRegistryService {
         DataLoaderRegistry registry = new DataLoaderRegistry();
         
         // Entity Permissions DataLoader
-        DataLoader<String, EntityPermissions> entityPermissionsLoader = createEntityPermissionsDataLoader();
+        DataLoader<String, EntityPermissions> entityPermissionsLoader = entityPermissionsDataLoader.createDataLoader();
         registry.register(ENTITY_PERMISSIONS_LOADER, entityPermissionsLoader);
         
         // Parent StopPlace DataLoader  
-        DataLoader<ParentStopPlaceDataLoader.ParentStopPlaceKey, StopPlace> parentStopPlaceLoader = createParentStopPlaceDataLoader();
+        DataLoader<ParentStopPlaceDataLoader.ParentStopPlaceKey, StopPlace> parentStopPlaceLoader = parentStopPlaceDataLoader.createDataLoader();
         registry.register(PARENT_STOP_PLACE_LOADER, parentStopPlaceLoader);
         
         logger.debug("DataLoaderRegistry created with {} DataLoaders", registry.getKeys().size());
         
         return registry;
-    }
-
-    /**
-     * Creates EntityPermissions DataLoader with proper batch function
-     */
-    private DataLoader<String, EntityPermissions> createEntityPermissionsDataLoader() {
-        BatchLoader<String, EntityPermissions> batchLoader = (List<String> netexIds) -> {
-            logger.debug("Batch loading entity permissions for {} entities", netexIds.size());
-            
-            return CompletableFuture.supplyAsync(() -> {
-                try {
-                    var permissionsMap = entityPermissionsDataLoader.batchLoadEntityPermissions(netexIds);
-                    
-                    // Return results in same order as input keys
-                    List<EntityPermissions> results = netexIds.stream()
-                        .map(permissionsMap::get)
-                        .collect(Collectors.toList());
-                    
-                    logger.debug("Successfully batch loaded permissions for {}/{} entities", 
-                        results.stream().mapToInt(p -> p != null ? 1 : 0).sum(), netexIds.size());
-                    
-                    return results;
-                } catch (Exception e) {
-                    logger.error("Error in entity permissions batch loader", e);
-                    // Return null list to indicate failure - DataLoader will handle this
-                    return netexIds.stream()
-                        .map(id -> (EntityPermissions) null)
-                        .collect(Collectors.toList());
-                }
-            });
-        };
-        
-        return DataLoader.newDataLoader(batchLoader);
-    }
-
-    /**
-     * Creates ParentStopPlace DataLoader with proper batch function
-     */
-    private DataLoader<ParentStopPlaceDataLoader.ParentStopPlaceKey, StopPlace> createParentStopPlaceDataLoader() {
-        // Delegate to the existing ParentStopPlaceDataLoader which already has proper batching logic
-        logger.debug("Creating ParentStopPlace DataLoader using existing batch infrastructure");
-        return parentStopPlaceDataLoader.createDataLoader();
     }
 }

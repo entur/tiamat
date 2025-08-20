@@ -822,5 +822,47 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         final Query nativeQuery = entityManager.createNativeQuery(sql);
         return nativeQuery.executeUpdate();
     }
+
+    @Override
+    public Map<String, Map<Long, StopPlace>> findByNetexIdsAndVersions(Map<String, Set<Long>> netexIdToVersions) {
+        Map<String, Map<Long, StopPlace>> resultMap = new HashMap<>();
+        
+        if (netexIdToVersions.isEmpty()) {
+            return resultMap;
+        }
+
+        logger.debug("Batch loading stop places for {} unique netexIds", netexIdToVersions.size());
+
+        try {
+            // Create a single batch query for all unique netexIds
+            String jpql = "SELECT sp FROM StopPlace sp WHERE sp.netexId IN :netexIds";
+            TypedQuery<StopPlace> query = entityManager.createQuery(jpql, StopPlace.class);
+            query.setParameter("netexIds", netexIdToVersions.keySet());
+
+            List<StopPlace> stopPlaces = query.getResultList();
+            
+            // Filter results to only include exact (netexId, version) matches and organize by netexId and version
+            for (StopPlace stopPlace : stopPlaces) {
+                String netexId = stopPlace.getNetexId();
+                Long version = stopPlace.getVersion();
+                
+                // Check if this specific (netexId, version) combination was requested
+                Set<Long> requestedVersions = netexIdToVersions.get(netexId);
+                if (requestedVersions != null && requestedVersions.contains(version)) {
+                    resultMap.computeIfAbsent(netexId, k -> new HashMap<>()).put(version, stopPlace);
+                }
+            }
+            
+            logger.debug("Successfully loaded stop places for {}/{} requested netexId/version combinations", 
+                resultMap.values().stream().mapToInt(Map::size).sum(), 
+                netexIdToVersions.values().stream().mapToInt(Set::size).sum());
+                
+        } catch (Exception e) {
+            logger.error("Batch query failed for findByNetexIdsAndVersions", e);
+            throw e;
+        }
+
+        return resultMap;
+    }
 }
 
