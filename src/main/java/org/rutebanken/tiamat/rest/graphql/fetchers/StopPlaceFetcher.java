@@ -17,7 +17,11 @@ package org.rutebanken.tiamat.rest.graphql.fetchers;
 
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
+import org.dataloader.DataLoader;
 import org.rutebanken.tiamat.dtoassembling.dto.BoundingBoxDto;
+import org.rutebanken.tiamat.model.authorization.EntityPermissions;
+import org.rutebanken.tiamat.rest.graphql.dataloader.ParentStopPlaceDataLoader;
+import org.rutebanken.tiamat.rest.graphql.fetchers.BatchedEntityPermissionsFetcher;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.exporter.params.StopPlaceSearch;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -41,6 +45,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -97,6 +102,12 @@ class StopPlaceFetcher implements DataFetcher {
 
     @Autowired
     private ParentStopPlacesFetcher parentStopPlacesFetcher;
+    
+    @Autowired
+    private ParentStopPlaceDataLoader parentStopPlaceDataLoader;
+    
+    @Autowired
+    private BatchedEntityPermissionsFetcher batchedEntityPermissionsFetcher;
 
     @Override
     @Transactional
@@ -265,8 +276,23 @@ class StopPlaceFetcher implements DataFetcher {
         if (onlyMonomodalStopplaces) {
             return getStopPlaces(environment, stopPlaces, stopPlaces.size());
         } else {
-            List<StopPlace> parentsResolved = parentStopPlacesFetcher.resolveParents(stopPlaces, KEEP_CHILDREN);
-            return getStopPlaces(environment,parentsResolved,parentsResolved.size());
+            // Use DataLoader for bbox queries to solve N+1 problem
+            DataLoader<ParentStopPlaceDataLoader.ParentStopPlaceKey, StopPlace> dataLoader = null;
+            boolean isBboxQuery = environment.getArgument(LONGITUDE_MIN) != null;
+            
+            if (isBboxQuery) {
+                // This is a bbox query, create DataLoader for batching
+                dataLoader = parentStopPlaceDataLoader.createDataLoader();
+            }
+            
+            List<StopPlace> parentsResolved = parentStopPlacesFetcher.resolveParents(stopPlaces, KEEP_CHILDREN, dataLoader);
+            
+            // Preload permissions for bbox queries to solve permissions N+1 problem
+            if (isBboxQuery) {
+                preloadEntityPermissions(environment, parentsResolved);
+            }
+            
+            return getStopPlaces(environment, parentsResolved, parentsResolved.size());
         }
     }
 
@@ -281,5 +307,45 @@ class StopPlaceFetcher implements DataFetcher {
             return value;
         }
         return null;
+    }
+    
+    /**
+     * Preload entity permissions for all stop places to solve N+1 problem.
+     * This method collects all entities (parent stop places + children) and batch loads their permissions,
+     * storing them in the GraphQL context for EntityPermissionsFetcher to use.
+     */
+    private void preloadEntityPermissions(DataFetchingEnvironment environment, List<StopPlace> stopPlaces) {
+        try {
+            logger.debug("Preloading entity permissions for {} stop places", stopPlaces.size());
+            
+            // Collect all entities that might need permissions
+            List<org.rutebanken.tiamat.model.EntityInVersionStructure> allEntities = new ArrayList<>();
+            
+            for (StopPlace stopPlace : stopPlaces) {
+                // Add the stop place itself
+                allEntities.add(stopPlace);
+                
+                // If it's a parent stop place, add its children too
+                if (stopPlace.isParentStopPlace() && stopPlace.getChildren() != null) {
+                    allEntities.addAll(stopPlace.getChildren());
+                }
+            }
+            
+            logger.debug("Batch loading permissions for {} entities (including children)", allEntities.size());
+            
+            // Batch load permissions for all entities
+            Map<String, EntityPermissions> permissionsCache = 
+                batchedEntityPermissionsFetcher.batchLoadPermissions(allEntities);
+            
+            logger.debug("Successfully preloaded permissions for {} entities", permissionsCache.size());
+            
+            // Store in GraphQL context for EntityPermissionsFetcher to use
+            environment.getGraphQlContext().put("preloadedPermissions", permissionsCache);
+            
+        } catch (Exception e) {
+            logger.warn("Failed to preload entity permissions, falling back to individual loading", e);
+            // Don't fail the entire request if preloading fails
+            // EntityPermissionsFetcher will fall back to individual loading
+        }
     }
 }

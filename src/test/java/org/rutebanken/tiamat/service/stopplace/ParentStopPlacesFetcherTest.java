@@ -42,7 +42,7 @@ public class ParentStopPlacesFetcherTest {
     private StopPlaceRepository stopPlaceRepository = mock(StopPlaceRepository.class);
 
     private EntityManager entityManager = mock(EntityManager.class);
-    private ParentStopPlacesFetcher parentStopPlacesFetcher = new ParentStopPlacesFetcher(stopPlaceRepository, entityManager);
+    private ParentStopPlacesFetcher parentStopPlacesFetcher = new ParentStopPlacesFetcher(stopPlaceRepository, entityManager, mock(org.rutebanken.tiamat.rest.graphql.dataloader.ParentStopPlaceDataLoader.class));
 
     @Before
     public void before() {

@@ -14,6 +14,8 @@ package org.rutebanken.tiamat.repository.generic;
  * limitations under the Licence.
  */
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
 import org.rutebanken.tiamat.model.DataManagedObjectStructure;
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
 import org.rutebanken.tiamat.repository.DataManagedObjectStructureRepository;
@@ -23,13 +25,21 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.data.repository.support.Repositories;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class GenericEntityInVersionRepository {
 
     private Repositories repositories = null;
+    
+    @Autowired
+    private EntityManager entityManager;
 
     @Autowired
     public GenericEntityInVersionRepository(ApplicationContext appContext) {
@@ -60,5 +70,57 @@ public class GenericEntityInVersionRepository {
             return netexId;
         }
         throw new IllegalArgumentException("Cannot find " + clazz.getSimpleName() + " from key: '" + key + "', value: '" + values);
+    }
+    
+    /**
+     * Batch load latest version entities by netex IDs for a specific entity type
+     * 
+     * @param netexIds List of netex IDs to load
+     * @param clazz Entity class type
+     * @return List of latest version entities
+     */
+    public <T extends EntityInVersionStructure> List<T> findLatestVersionByNetexIds(List<String> netexIds, Class<T> clazz) {
+        if (netexIds == null || netexIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+        
+        // Use a subquery to find the latest version for each netex ID
+        String jpql = "SELECT e FROM " + clazz.getSimpleName() + " e WHERE e.netexId IN :netexIds " +
+                     "AND e.version = (SELECT MAX(e2.version) FROM " + clazz.getSimpleName() + " e2 WHERE e2.netexId = e.netexId)";
+        
+        TypedQuery<T> query = entityManager.createQuery(jpql, clazz);
+        query.setParameter("netexIds", netexIds);
+        
+        return query.getResultList();
+    }
+    
+    /**
+     * Batch load latest version entities grouped by type
+     * 
+     * @param netexIdsByType Map of entity class to list of netex IDs
+     * @return Map of netex ID to entity
+     */
+    public Map<String, EntityInVersionStructure> findLatestVersionByNetexIdsGrouped(Map<Class<?>, List<String>> netexIdsByType) {
+        Map<String, EntityInVersionStructure> result = new HashMap<>();
+        
+        for (Map.Entry<Class<?>, List<String>> entry : netexIdsByType.entrySet()) {
+            Class<?> entityType = entry.getKey();
+            List<String> netexIds = entry.getValue();
+            
+            if (EntityInVersionStructure.class.isAssignableFrom(entityType)) {
+                @SuppressWarnings("unchecked")
+                Class<? extends EntityInVersionStructure> entityClass = 
+                    (Class<? extends EntityInVersionStructure>) entityType;
+                
+                List<? extends EntityInVersionStructure> entities = 
+                    findLatestVersionByNetexIds(netexIds, entityClass);
+                
+                for (EntityInVersionStructure entity : entities) {
+                    result.put(entity.getNetexId(), entity);
+                }
+            }
+        }
+        
+        return result;
     }
 }
