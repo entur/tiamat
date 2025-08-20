@@ -182,7 +182,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         jpql.append("SELECT s FROM StopPlace s ")
             .append("WHERE within(s.centroid, :geometryFilter) = true ")
             .append("AND s.parentStopPlace = false ")
-            .append("AND s.version = (SELECT MAX(sv.version) FROM StopPlace sv WHERE sv.netexId = s.netexId) ");
+            .append("AND NOT EXISTS (SELECT 1 FROM StopPlace sv WHERE sv.netexId = s.netexId AND sv.version > s.version) ");
 
         if (ignoreStopPlaceId != null) {
             jpql.append("AND s.netexId != :ignoreStopPlaceId ");
