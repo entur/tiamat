@@ -67,6 +67,7 @@ import org.rutebanken.tiamat.rest.graphql.fetchers.GroupOfStopPlacesPurposeOfGro
 import org.rutebanken.tiamat.rest.graphql.fetchers.KeyValuesDataFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.LocationPermissionsFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.PolygonFetcher;
+import org.rutebanken.tiamat.rest.graphql.fetchers.TopographicPlaceDataFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.StopPlaceFareZoneFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.StopPlaceTariffZoneFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.TagFetcher;
@@ -276,6 +277,9 @@ public class StopPlaceRegisterGraphQLSchema {
 
     @Autowired
     DataFetcher topographicPlaceFetcher;
+
+    @Autowired
+    TopographicPlaceDataFetcher topographicPlaceDataFetcher;
 
     @Autowired
     DataFetcher stopPlaceUpdater;
@@ -837,6 +841,7 @@ public class StopPlaceRegisterGraphQLSchema {
         registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_TOPOGRAPHIC_PLACE,POLYGON,polygonFetcher);
 
         registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_STOPPLACE,SUBMODE,env -> transportModeScalar.resolveSubmode(env));
+        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_STOPPLACE,TOPOGRAPHIC_PLACE,topographicPlaceDataFetcher);
         registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_STOPPLACE,PARENT_SITE_REF,env -> {
             SiteRefStructure parentSiteRef = ((StopPlace) env.getSource()).getParentSiteRef();
             if (parentSiteRef != null) {

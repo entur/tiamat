@@ -21,6 +21,7 @@ import org.rutebanken.tiamat.model.TopographicPlaceTypeEnumeration;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 
@@ -35,4 +36,11 @@ public interface TopographicPlaceRepositoryCustom extends DataManagedObjectStruc
     Iterator<TopographicPlace> scrollTopographicPlaces();
 
     List<TopographicPlace> getTopographicPlacesFromStopPlaceIds(Set<Long> stopPlaceDbIds);
+
+    /**
+     * Batch loading method for DataLoader - efficiently loads topographic places by netexId and version combinations
+     * @param netexIdToVersions Map of netexId to set of versions for each topographic place to load
+     * @return Map structured as netexId -> version -> TopographicPlace for efficient lookup
+     */
+    Map<String, Map<Long, TopographicPlace>> findByNetexIdsAndVersions(Map<String, Set<Long>> netexIdToVersions);
 }

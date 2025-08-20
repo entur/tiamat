@@ -18,6 +18,7 @@ package org.rutebanken.tiamat.rest.graphql.dataloader;
 import org.dataloader.DataLoader;
 import org.dataloader.DataLoaderRegistry;
 import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.model.authorization.EntityPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,12 +36,16 @@ public class GraphQLDataLoaderRegistryService {
     
     public static final String ENTITY_PERMISSIONS_LOADER = "entityPermissions";
     public static final String STOP_PLACE_LOADER = "stopPlace";
+    public static final String TOPOGRAPHIC_PLACE_LOADER = "topographicPlace";
 
     @Autowired
     private EntityPermissionsDataLoader entityPermissionsDataLoader;
 
     @Autowired
     private StopPlaceDataLoader stopPlaceDataLoader;
+
+    @Autowired
+    private TopographicPlaceDataLoader topographicPlaceDataLoader;
 
     /**
      * Creates a new DataLoaderRegistry configured with all necessary DataLoaders
@@ -59,6 +64,10 @@ public class GraphQLDataLoaderRegistryService {
         // StopPlace DataLoader  
         DataLoader<StopPlaceDataLoader.StopPlaceKey, StopPlace> stopPlaceLoader = stopPlaceDataLoader.createDataLoader();
         registry.register(STOP_PLACE_LOADER, stopPlaceLoader);
+        
+        // TopographicPlace DataLoader
+        DataLoader<TopographicPlaceDataLoader.TopographicPlaceKey, TopographicPlace> topographicPlaceLoader = topographicPlaceDataLoader.createDataLoader();
+        registry.register(TOPOGRAPHIC_PLACE_LOADER, topographicPlaceLoader);
         
         logger.debug("DataLoaderRegistry created with {} DataLoaders", registry.getKeys().size());
         

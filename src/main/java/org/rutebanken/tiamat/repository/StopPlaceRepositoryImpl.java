@@ -155,52 +155,88 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
      */
     @Override
     public Page<StopPlace> findStopPlacesWithin(double xMin, double yMin, double xMax, double yMax, String ignoreStopPlaceId, Instant pointInTime, Pageable pageable) {
-        Envelope envelope = new Envelope(xMin, xMax, yMin, yMax);
+        return findStopPlacesWithinJPQL(xMin, yMin, xMax, yMax, ignoreStopPlaceId, pointInTime, pageable);
+    }
 
+    /**
+     * JPQL implementation of bbox query that properly supports lazy loading for topographic places.
+     * This replaces the native SQL implementation to enable proper lazy loading of TopographicPlace entities.
+     * The native SQL was causing eager loading because SELECT s.* included topographic_place_id column.
+     */
+    private Page<StopPlace> findStopPlacesWithinJPQL(double xMin, double yMin, double xMax, double yMax, String ignoreStopPlaceId, Instant pointInTime, Pageable pageable) {
+        Envelope envelope = new Envelope(xMin, xMax, yMin, yMax);
         Geometry geometryFilter = geometryFactory.toGeometry(envelope);
 
-
-        String queryString;
         if (pointInTime != null) {
-        queryString = "SELECT s.* FROM stop_place s " +
-                                     SQL_LEFT_JOIN_PARENT_STOP +
-                                     "WHERE " +
-                                        SQL_CHILD_OR_PARENT_WITHIN +
-                                        "AND "
-                                        + SQL_NOT_PARENT_STOP_PLACE +
-                                        "AND "
-                                        + SQL_STOP_PLACE_OR_PARENT_IS_VALID_AT_POINT_IN_TIME;
-            if(ignoreStopPlaceId != null) {
-                queryString += "AND " + SQL_IGNORE_STOP_PLACE_ID;
-
-            }
+            return findStopPlacesWithinAtPointInTime(geometryFilter, ignoreStopPlaceId, pointInTime, pageable);
         } else {
-            // If no point in time is set, use max version to only get one version per stop place
-            final String subQueryString = getSubQueryString(ignoreStopPlaceId);
+            return findStopPlacesWithinMaxVersion(geometryFilter, ignoreStopPlaceId, pageable);
+        }
+    }
 
-            queryString = "SELECT s.* FROM stop_place s " +
-                    "WHERE (netex_id,version) in (" + subQueryString + ")" ;
+    /**
+     * Find stop places within bounding box with max version (no point in time)
+     */
+    private Page<StopPlace> findStopPlacesWithinMaxVersion(Geometry geometryFilter, String ignoreStopPlaceId, Pageable pageable) {
+        StringBuilder jpql = new StringBuilder();
+        jpql.append("SELECT s FROM StopPlace s ")
+            .append("WHERE within(s.centroid, :geometryFilter) = true ")
+            .append("AND s.parentStopPlace = false ")
+            .append("AND s.version = (SELECT MAX(sv.version) FROM StopPlace sv WHERE sv.netexId = s.netexId) ");
 
+        if (ignoreStopPlaceId != null) {
+            jpql.append("AND s.netexId != :ignoreStopPlaceId ");
         }
 
-        logger.debug("finding stops within bounding box with query: {}", queryString);
+        logger.debug("Finding stops within bounding box with JPQL: {}", jpql);
 
-        final Query query = entityManager.createNativeQuery(queryString, StopPlace.class);
-        query.setParameter("filter", geometryFilter);
+        TypedQuery<StopPlace> query = entityManager.createQuery(jpql.toString(), StopPlace.class);
+        query.setParameter("geometryFilter", geometryFilter);
 
-        if(ignoreStopPlaceId != null) {
+        if (ignoreStopPlaceId != null) {
             query.setParameter("ignoreStopPlaceId", ignoreStopPlaceId);
-        }
-
-        if (pointInTime != null) {
-            query.setParameter("pointInTime", Date.from(pointInTime));
         }
 
         query.setFirstResult(Math.toIntExact(pageable.getOffset()));
         query.setMaxResults(pageable.getPageSize());
+        
         List<StopPlace> stopPlaces = query.getResultList();
         return new PageImpl<>(stopPlaces, pageable, stopPlaces.size());
     }
+
+    /**
+     * Find stop places within bounding box at a specific point in time (includes parent logic)
+     */
+    private Page<StopPlace> findStopPlacesWithinAtPointInTime(Geometry geometryFilter, String ignoreStopPlaceId, Instant pointInTime, Pageable pageable) {
+        StringBuilder jpql = new StringBuilder();
+        jpql.append("SELECT DISTINCT s FROM StopPlace s ")
+            .append("LEFT JOIN StopPlace p ON s.parentSiteRef.ref = p.netexId AND s.parentSiteRef.version = CAST(p.version AS string) ")
+            .append("WHERE (within(s.centroid, :geometryFilter) = true OR within(p.centroid, :geometryFilter) = true) ")
+            .append("AND s.parentStopPlace = false ")
+            .append("AND ((p.netexId IS NOT NULL AND (p.validBetween.fromDate IS NULL OR p.validBetween.fromDate <= :pointInTime) AND (p.validBetween.toDate IS NULL OR p.validBetween.toDate > :pointInTime)) ")
+            .append("OR (p.netexId IS NULL AND (s.validBetween.fromDate IS NULL OR s.validBetween.fromDate <= :pointInTime) AND (s.validBetween.toDate IS NULL OR s.validBetween.toDate > :pointInTime))) ");
+
+        if (ignoreStopPlaceId != null) {
+            jpql.append("AND (s.netexId != :ignoreStopPlaceId AND (p.netexId IS NULL OR p.netexId != :ignoreStopPlaceId)) ");
+        }
+
+        logger.debug("Finding stops within bounding box at point in time with JPQL: {}", jpql);
+
+        TypedQuery<StopPlace> query = entityManager.createQuery(jpql.toString(), StopPlace.class);
+        query.setParameter("geometryFilter", geometryFilter);
+        query.setParameter("pointInTime", pointInTime);
+
+        if (ignoreStopPlaceId != null) {
+            query.setParameter("ignoreStopPlaceId", ignoreStopPlaceId);
+        }
+
+        query.setFirstResult(Math.toIntExact(pageable.getOffset()));
+        query.setMaxResults(pageable.getPageSize());
+        
+        List<StopPlace> stopPlaces = query.getResultList();
+        return new PageImpl<>(stopPlaces, pageable, stopPlaces.size());
+    }
+
 
     private static String getSubQueryString(String ignoreStopPlaceId) {
         String subQueryString = "SELECT s.netex_id,max(s.version) FROM stop_place s " +
