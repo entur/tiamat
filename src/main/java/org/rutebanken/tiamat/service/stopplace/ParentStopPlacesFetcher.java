@@ -182,21 +182,17 @@ public class ParentStopPlacesFetcher {
         }
 
         try {
-            // Create a single batch query for all unique netexIds and their versions
-            String jpql = "SELECT sp FROM StopPlace sp WHERE sp.netexId IN :netexIds";
-            var query = entityManager.createQuery(jpql, StopPlace.class);
-            query.setParameter("netexIds", netexIdToVersions.keySet());
-
-            List<StopPlace> stopPlaces = query.getResultList();
+            // Use repository's batch method for consistent data access pattern
+            Map<String, Map<Long, StopPlace>> batchResults = stopPlaceRepository.findByNetexIdsAndVersions(netexIdToVersions);
             
-            // Filter results to only include exact (netexId, version) matches and map back to keys
-            for (StopPlace stopPlace : stopPlaces) {
-                String netexId = stopPlace.getNetexId();
-                Long version = stopPlace.getVersion();
+            // Convert repository results back to key-based map
+            for (Map.Entry<String, Map<Long, StopPlace>> netexIdEntry : batchResults.entrySet()) {
+                String netexId = netexIdEntry.getKey();
+                Map<Long, StopPlace> versionMap = netexIdEntry.getValue();
                 
-                // Check if this specific (netexId, version) combination was requested
-                Set<Long> requestedVersions = netexIdToVersions.get(netexId);
-                if (requestedVersions != null && requestedVersions.contains(version)) {
+                for (Map.Entry<Long, StopPlace> versionEntry : versionMap.entrySet()) {
+                    Long version = versionEntry.getKey();
+                    StopPlace stopPlace = versionEntry.getValue();
                     ParentStopPlaceDataLoader.ParentStopPlaceKey key = new ParentStopPlaceDataLoader.ParentStopPlaceKey(netexId, version);
                     resultMap.put(key, stopPlace);
                 }
