@@ -102,7 +102,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
             createLeftJoinParentStopQuery("p");
 
     public static final String SQL_LEFT_JOIN_PARENT_STOP_TEMPLATE =
-            "LEFT JOIN stop_place %s ON s.parent_site_ref = %s.netex_id AND s.parent_site_ref_version = CAST(%s.version as text) ";
+            "LEFT JOIN stop_place %s ON s.parent_site_ref = %s.netex_id AND CAST(s.parent_site_ref_version as bigint) = %s.version ";
 
     public static String createLeftJoinParentStopQuery(String parentAlias) {
         return String.format(SQL_LEFT_JOIN_PARENT_STOP_TEMPLATE, Collections.nCopies(3, parentAlias).toArray());
@@ -210,7 +210,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     private Page<StopPlace> findStopPlacesWithinAtPointInTime(Geometry geometryFilter, String ignoreStopPlaceId, Instant pointInTime, Pageable pageable) {
         StringBuilder jpql = new StringBuilder();
         jpql.append("SELECT DISTINCT s FROM StopPlace s ")
-            .append("LEFT JOIN StopPlace p ON s.parentSiteRef.ref = p.netexId AND s.parentSiteRef.version = CAST(p.version AS string) ")
+            .append("LEFT JOIN StopPlace p ON s.parentSiteRef.ref = p.netexId AND CAST(s.parentSiteRef.version AS long) = p.version ")
             .append("WHERE (within(s.centroid, :geometryFilter) = true OR within(p.centroid, :geometryFilter) = true) ")
             .append("AND s.parentStopPlace = false ")
             .append("AND ((p.netexId IS NOT NULL AND (p.validBetween.fromDate IS NULL OR p.validBetween.fromDate <= :pointInTime) AND (p.validBetween.toDate IS NULL OR p.validBetween.toDate > :pointInTime)) ")
@@ -793,7 +793,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
                     "      SELECT sp2.id FROM stop_place sp2 " +
                     "      INNER JOIN stop_place parent " +
                     "        ON parent.netex_id = sp2.parent_site_ref " +
-                    "          AND cast(parent.version AS TEXT) = sp2.parent_site_ref_version " +
+                    "          AND parent.version = CAST(sp2.parent_site_ref_version AS bigint) " +
                     "          AND (parent.from_date BETWEEN :from AND :to OR parent.to_date BETWEEN :from AND :to ) " +
                     "        WHERE sp2.netex_id = spinner.netex_id " +
                     "          AND sp2.version > spinner.version " +
@@ -847,7 +847,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
                                 "(SELECT S.ID " +
                                     "FROM STOP_PLACE S " +
                                 "LEFT JOIN STOP_PLACE P ON S.PARENT_SITE_REF = P.NETEX_ID " +
-                                "AND S.PARENT_SITE_REF_VERSION = CAST(P.VERSION AS text) " +
+                                "AND CAST(S.PARENT_SITE_REF_VERSION AS bigint) = P.VERSION " +
                                     "WHERE ((S.FROM_DATE <= NOW() " +
                                     "AND (S.TO_DATE >= NOW() " +
                                     "OR S.TO_DATE IS NULL)) " +

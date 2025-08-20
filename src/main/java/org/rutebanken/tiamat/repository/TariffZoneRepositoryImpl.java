@@ -242,7 +242,7 @@ public class TariffZoneRepositoryImpl implements TariffZoneRepositoryCustom {
                         SELECT
                             SP.ID,
                             tz.netex_id,
-                            CAST(tz.version as text)
+                            tz.version::text
                         FROM
                             TARIFF_ZONE TZ
                         JOIN
@@ -269,7 +269,7 @@ public class TariffZoneRepositoryImpl implements TariffZoneRepositoryCustom {
                         LEFT JOIN
                             STOP_PLACE PSP
                                 ON SP.PARENT_SITE_REF = PSP.NETEX_ID
-                                AND sp.parent_site_ref_version = CAST(psp.version as text)
+                                AND CAST(sp.parent_site_ref_version as bigint) = psp.version
                         where
                             (
                                 (
