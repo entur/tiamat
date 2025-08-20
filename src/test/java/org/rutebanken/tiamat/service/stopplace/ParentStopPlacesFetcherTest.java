@@ -38,7 +38,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import org.dataloader.DataLoader;
-import org.rutebanken.tiamat.rest.graphql.dataloader.ParentStopPlaceDataLoader;
+import org.rutebanken.tiamat.rest.graphql.dataloader.StopPlaceDataLoader;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -54,14 +54,14 @@ public class ParentStopPlacesFetcherTest {
         when(entityManager.unwrap(any())).thenReturn(mock(Session.class));
     }
 
-    private DataLoader<ParentStopPlaceDataLoader.ParentStopPlaceKey, StopPlace> createMockDataLoader() {
+    private DataLoader<StopPlaceDataLoader.StopPlaceKey, StopPlace> createMockDataLoader() {
         @SuppressWarnings("unchecked")
-        DataLoader<ParentStopPlaceDataLoader.ParentStopPlaceKey, StopPlace> mockDataLoader = mock(DataLoader.class);
+        DataLoader<StopPlaceDataLoader.StopPlaceKey, StopPlace> mockDataLoader = mock(DataLoader.class);
         
         // Mock the load method to return the parent based on the key
-        when(mockDataLoader.load(any(ParentStopPlaceDataLoader.ParentStopPlaceKey.class)))
+        when(mockDataLoader.load(any(StopPlaceDataLoader.StopPlaceKey.class)))
             .thenAnswer(invocation -> {
-                ParentStopPlaceDataLoader.ParentStopPlaceKey key = invocation.getArgument(0);
+                StopPlaceDataLoader.StopPlaceKey key = invocation.getArgument(0);
                 StopPlace result = stopPlaceRepository.findFirstByNetexIdAndVersion(key.getNetexId(), key.getVersion());
                 return CompletableFuture.completedFuture(result);
             });
@@ -90,7 +90,7 @@ public class ParentStopPlacesFetcherTest {
         child2.setParentStopPlace(false);
         addParentRef(child2, parent);
 
-        DataLoader<ParentStopPlaceDataLoader.ParentStopPlaceKey, StopPlace> mockDataLoader = createMockDataLoader();
+        DataLoader<StopPlaceDataLoader.StopPlaceKey, StopPlace> mockDataLoader = createMockDataLoader();
         List<StopPlace> result = parentStopPlacesFetcher.resolveParents(Arrays.asList(parent, parentSecondVersion, child1, child2), false, mockDataLoader);
 
         assertThat(result).extracting(this::concatenateNetexIdVersion)
@@ -127,7 +127,7 @@ public class ParentStopPlacesFetcherTest {
         child2.setParentStopPlace(false);
         addParentRef(child2, parent);
 
-        DataLoader<ParentStopPlaceDataLoader.ParentStopPlaceKey, StopPlace> mockDataLoader = createMockDataLoader();
+        DataLoader<StopPlaceDataLoader.StopPlaceKey, StopPlace> mockDataLoader = createMockDataLoader();
         List<StopPlace> result = parentStopPlacesFetcher.resolveParents(Arrays.asList(parent, parentSecondVersion, child1, child2), true, mockDataLoader);
 
         assertThat(result).extracting(this::concatenateNetexIdVersion)

@@ -31,46 +31,46 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 /**
- * DataLoader for batching parent stop place lookups to solve N+1 query problem
+ * DataLoader for batching stop place lookups to solve N+1 query problem
  */
 @Component
-public class ParentStopPlaceDataLoader {
+public class StopPlaceDataLoader {
 
-    private static final Logger logger = LoggerFactory.getLogger(ParentStopPlaceDataLoader.class);
+    private static final Logger logger = LoggerFactory.getLogger(StopPlaceDataLoader.class);
 
     private final StopPlaceRepository stopPlaceRepository;
 
-    public ParentStopPlaceDataLoader(StopPlaceRepository stopPlaceRepository) {
+    public StopPlaceDataLoader(StopPlaceRepository stopPlaceRepository) {
         this.stopPlaceRepository = stopPlaceRepository;
     }
 
     /**
-     * Creates a DataLoader for batching parent stop place lookups
-     * @return DataLoader configured for parent stop place batch loading
+     * Creates a DataLoader for batching stop place lookups
+     * @return DataLoader configured for stop place batch loading
      */
-    public DataLoader<ParentStopPlaceKey, StopPlace> createDataLoader() {
-        BatchLoader<ParentStopPlaceKey, StopPlace> batchLoader = keys -> {
-            logger.debug("Batch loading {} parent stop places", keys.size());
+    public DataLoader<StopPlaceKey, StopPlace> createDataLoader() {
+        BatchLoader<StopPlaceKey, StopPlace> batchLoader = keys -> {
+            logger.debug("Batch loading {} stop places", keys.size());
             
             try {
                 // Group keys by netexId to versions for batch loading
                 Map<String, Set<Long>> netexIdToVersions = keys.stream()
                     .collect(Collectors.groupingBy(
-                        ParentStopPlaceKey::getNetexId,
+                        StopPlaceKey::getNetexId,
                         Collectors.mapping(
-                            ParentStopPlaceKey::getVersion,
+                            StopPlaceKey::getVersion,
                             Collectors.toSet()
                         )
                     ));
                 
-                logger.debug("Batching {} parent stop place keys into {} unique netexIds", 
+                logger.debug("Batching {} stop place keys into {} unique netexIds", 
                     keys.size(), netexIdToVersions.size());
                 
                 // Use repository's batch method for efficient loading (synchronous to stay in session)
                 Map<String, Map<Long, StopPlace>> batchResults = stopPlaceRepository.findByNetexIdsAndVersions(netexIdToVersions);
                 
                 // Convert batch results back to key-based map
-                Map<ParentStopPlaceKey, StopPlace> resultMap = new HashMap<>();
+                Map<StopPlaceKey, StopPlace> resultMap = new HashMap<>();
                 for (Map.Entry<String, Map<Long, StopPlace>> netexIdEntry : batchResults.entrySet()) {
                     String netexId = netexIdEntry.getKey();
                     Map<Long, StopPlace> versionMap = netexIdEntry.getValue();
@@ -78,7 +78,7 @@ public class ParentStopPlaceDataLoader {
                     for (Map.Entry<Long, StopPlace> versionEntry : versionMap.entrySet()) {
                         Long version = versionEntry.getKey();
                         StopPlace stopPlace = versionEntry.getValue();
-                        ParentStopPlaceKey key = new ParentStopPlaceKey(netexId, version);
+                        StopPlaceKey key = new StopPlaceKey(netexId, version);
                         resultMap.put(key, stopPlace);
                     }
                 }
@@ -88,12 +88,12 @@ public class ParentStopPlaceDataLoader {
                     .map(resultMap::get)
                     .collect(Collectors.toList());
                 
-                logger.debug("Successfully batch loaded {}/{} parent stop places", 
+                logger.debug("Successfully batch loaded {}/{} stop places", 
                     results.stream().mapToInt(sp -> sp != null ? 1 : 0).sum(), keys.size());
                 
                 return CompletableFuture.completedFuture(results);
             } catch (Exception e) {
-                logger.error("Error in parent stop place batch loader", e);
+                logger.error("Error in stop place batch loader", e);
                 // Return null list to indicate failure - DataLoader will handle this
                 List<StopPlace> nullResults = keys.stream()
                     .map(key -> (StopPlace) null)
@@ -106,13 +106,13 @@ public class ParentStopPlaceDataLoader {
     }
 
     /**
-     * Key class for parent stop place lookups combining netexId and version
+     * Key class for stop place lookups combining netexId and version
      */
-    public static class ParentStopPlaceKey {
+    public static class StopPlaceKey {
         private final String netexId;
         private final Long version;
 
-        public ParentStopPlaceKey(String netexId, Long version) {
+        public StopPlaceKey(String netexId, Long version) {
             this.netexId = netexId;
             this.version = version;
         }
@@ -129,7 +129,7 @@ public class ParentStopPlaceDataLoader {
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            ParentStopPlaceKey that = (ParentStopPlaceKey) o;
+            StopPlaceKey that = (StopPlaceKey) o;
             return netexId.equals(that.netexId) && version.equals(that.version);
         }
 
@@ -140,7 +140,7 @@ public class ParentStopPlaceDataLoader {
 
         @Override
         public String toString() {
-            return "ParentStopPlaceKey{" +
+            return "StopPlaceKey{" +
                 "netexId='" + netexId + '\'' +
                 ", version=" + version +
                 '}';

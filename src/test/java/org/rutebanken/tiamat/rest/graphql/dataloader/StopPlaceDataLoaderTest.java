@@ -39,7 +39,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ParentStopPlaceDataLoaderTest {
+public class StopPlaceDataLoaderTest {
 
     @Mock
     private EntityManager entityManager;
@@ -65,13 +65,13 @@ public class ParentStopPlaceDataLoaderTest {
             .thenReturn(batchResponse);
 
         // Create DataLoader
-        ParentStopPlaceDataLoader dataLoaderComponent = new ParentStopPlaceDataLoader(stopPlaceRepository);
-        DataLoader<ParentStopPlaceDataLoader.ParentStopPlaceKey, StopPlace> dataLoader = 
+        StopPlaceDataLoader dataLoaderComponent = new StopPlaceDataLoader(stopPlaceRepository);
+        DataLoader<StopPlaceDataLoader.StopPlaceKey, StopPlace> dataLoader = 
             dataLoaderComponent.createDataLoader();
 
         // Test batching
-        ParentStopPlaceDataLoader.ParentStopPlaceKey key = 
-            new ParentStopPlaceDataLoader.ParentStopPlaceKey("NSR:StopPlace:12345", 1L);
+        StopPlaceDataLoader.StopPlaceKey key = 
+            new StopPlaceDataLoader.StopPlaceKey("NSR:StopPlace:12345", 1L);
 
         CompletableFuture<StopPlace> future1 = dataLoader.load(key);
         CompletableFuture<StopPlace> future2 = dataLoader.load(key);
@@ -107,15 +107,15 @@ public class ParentStopPlaceDataLoaderTest {
             .thenReturn(batchResponse);
 
         // Create DataLoader
-        ParentStopPlaceDataLoader dataLoaderComponent = new ParentStopPlaceDataLoader(stopPlaceRepository);
-        DataLoader<ParentStopPlaceDataLoader.ParentStopPlaceKey, StopPlace> dataLoader = 
+        StopPlaceDataLoader dataLoaderComponent = new StopPlaceDataLoader(stopPlaceRepository);
+        DataLoader<StopPlaceDataLoader.StopPlaceKey, StopPlace> dataLoader = 
             dataLoaderComponent.createDataLoader();
 
         // Test batching with multiple versions
-        ParentStopPlaceDataLoader.ParentStopPlaceKey key1 = 
-            new ParentStopPlaceDataLoader.ParentStopPlaceKey("NSR:StopPlace:12345", 1L);
-        ParentStopPlaceDataLoader.ParentStopPlaceKey key2 = 
-            new ParentStopPlaceDataLoader.ParentStopPlaceKey("NSR:StopPlace:12345", 2L);
+        StopPlaceDataLoader.StopPlaceKey key1 = 
+            new StopPlaceDataLoader.StopPlaceKey("NSR:StopPlace:12345", 1L);
+        StopPlaceDataLoader.StopPlaceKey key2 = 
+            new StopPlaceDataLoader.StopPlaceKey("NSR:StopPlace:12345", 2L);
 
         CompletableFuture<StopPlace> future1 = dataLoader.load(key1);
         CompletableFuture<StopPlace> future2 = dataLoader.load(key2);
@@ -132,13 +132,13 @@ public class ParentStopPlaceDataLoaderTest {
     }
 
     @Test
-    public void testParentStopPlaceKey() {
-        ParentStopPlaceDataLoader.ParentStopPlaceKey key1 = 
-            new ParentStopPlaceDataLoader.ParentStopPlaceKey("NSR:StopPlace:12345", 1L);
-        ParentStopPlaceDataLoader.ParentStopPlaceKey key2 = 
-            new ParentStopPlaceDataLoader.ParentStopPlaceKey("NSR:StopPlace:12345", 1L);
-        ParentStopPlaceDataLoader.ParentStopPlaceKey key3 = 
-            new ParentStopPlaceDataLoader.ParentStopPlaceKey("NSR:StopPlace:12345", 2L);
+    public void testStopPlaceKey() {
+        StopPlaceDataLoader.StopPlaceKey key1 = 
+            new StopPlaceDataLoader.StopPlaceKey("NSR:StopPlace:12345", 1L);
+        StopPlaceDataLoader.StopPlaceKey key2 = 
+            new StopPlaceDataLoader.StopPlaceKey("NSR:StopPlace:12345", 1L);
+        StopPlaceDataLoader.StopPlaceKey key3 = 
+            new StopPlaceDataLoader.StopPlaceKey("NSR:StopPlace:12345", 2L);
 
         // Test equality
         assertThat(key1).isEqualTo(key2);

@@ -20,7 +20,7 @@ import graphql.schema.DataFetchingEnvironment;
 import org.dataloader.DataLoader;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.rest.graphql.dataloader.GraphQLDataLoaderRegistryService;
-import org.rutebanken.tiamat.rest.graphql.dataloader.ParentStopPlaceDataLoader;
+import org.rutebanken.tiamat.rest.graphql.dataloader.StopPlaceDataLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -50,15 +50,15 @@ public class ParentStopPlaceDataFetcher implements DataFetcher<Object> {
         }
         
         // Try to use DataLoader for batching
-        DataLoader<ParentStopPlaceDataLoader.ParentStopPlaceKey, StopPlace> dataLoader = 
-            environment.getDataLoader(GraphQLDataLoaderRegistryService.PARENT_STOP_PLACE_LOADER);
+        DataLoader<StopPlaceDataLoader.StopPlaceKey, StopPlace> dataLoader = 
+            environment.getDataLoader(GraphQLDataLoaderRegistryService.STOP_PLACE_LOADER);
         
         if (dataLoader != null) {
             String parentRef = stopPlace.getParentSiteRef().getRef();
             Long parentVersion = Long.parseLong(stopPlace.getParentSiteRef().getVersion());
             
-            ParentStopPlaceDataLoader.ParentStopPlaceKey key = 
-                new ParentStopPlaceDataLoader.ParentStopPlaceKey(parentRef, parentVersion);
+            StopPlaceDataLoader.StopPlaceKey key = 
+                new StopPlaceDataLoader.StopPlaceKey(parentRef, parentVersion);
             
             logger.debug("Using DataLoader to resolve parent {} for child {}", parentRef, stopPlace.getNetexId());
             return dataLoader.load(key);

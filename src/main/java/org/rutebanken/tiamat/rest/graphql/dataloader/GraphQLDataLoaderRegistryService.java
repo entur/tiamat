@@ -34,13 +34,13 @@ public class GraphQLDataLoaderRegistryService {
     private static final Logger logger = LoggerFactory.getLogger(GraphQLDataLoaderRegistryService.class);
     
     public static final String ENTITY_PERMISSIONS_LOADER = "entityPermissions";
-    public static final String PARENT_STOP_PLACE_LOADER = "parentStopPlace";
+    public static final String STOP_PLACE_LOADER = "stopPlace";
 
     @Autowired
     private EntityPermissionsDataLoader entityPermissionsDataLoader;
 
     @Autowired
-    private ParentStopPlaceDataLoader parentStopPlaceDataLoader;
+    private StopPlaceDataLoader stopPlaceDataLoader;
 
     /**
      * Creates a new DataLoaderRegistry configured with all necessary DataLoaders
@@ -56,9 +56,9 @@ public class GraphQLDataLoaderRegistryService {
         DataLoader<String, EntityPermissions> entityPermissionsLoader = entityPermissionsDataLoader.createDataLoader();
         registry.register(ENTITY_PERMISSIONS_LOADER, entityPermissionsLoader);
         
-        // Parent StopPlace DataLoader  
-        DataLoader<ParentStopPlaceDataLoader.ParentStopPlaceKey, StopPlace> parentStopPlaceLoader = parentStopPlaceDataLoader.createDataLoader();
-        registry.register(PARENT_STOP_PLACE_LOADER, parentStopPlaceLoader);
+        // StopPlace DataLoader  
+        DataLoader<StopPlaceDataLoader.StopPlaceKey, StopPlace> stopPlaceLoader = stopPlaceDataLoader.createDataLoader();
+        registry.register(STOP_PLACE_LOADER, stopPlaceLoader);
         
         logger.debug("DataLoaderRegistry created with {} DataLoaders", registry.getKeys().size());
         

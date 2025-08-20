@@ -21,7 +21,7 @@ import org.dataloader.DataLoader;
 import org.hibernate.Session;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
-import org.rutebanken.tiamat.rest.graphql.dataloader.ParentStopPlaceDataLoader;
+import org.rutebanken.tiamat.rest.graphql.dataloader.StopPlaceDataLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -64,7 +64,7 @@ public class ParentStopPlacesFetcher {
      * @param dataLoader optional DataLoader for batching parent lookups
      * @return list of resolved parent stop places
      */
-    public List<StopPlace> resolveParents(List<StopPlace> stopPlaceList, boolean keepChilds, DataLoader<ParentStopPlaceDataLoader.ParentStopPlaceKey, StopPlace> dataLoader) {
+    public List<StopPlace> resolveParents(List<StopPlace> stopPlaceList, boolean keepChilds, DataLoader<StopPlaceDataLoader.StopPlaceKey, StopPlace> dataLoader) {
         Session session = entityManager.unwrap(Session.class);
 
         if (stopPlaceList == null || stopPlaceList.stream().noneMatch(sp -> sp != null)) {
@@ -85,7 +85,7 @@ public class ParentStopPlacesFetcher {
             List<StopPlace> result,
             List<StopPlace> nonParentStops,
             boolean keepChilds,
-            DataLoader<ParentStopPlaceDataLoader.ParentStopPlaceKey, StopPlace> dataLoader,
+            DataLoader<StopPlaceDataLoader.StopPlaceKey, StopPlace> dataLoader,
             Session session) {
 
         // Collect all futures first to allow batching (use List to avoid key collisions)
@@ -93,7 +93,7 @@ public class ParentStopPlacesFetcher {
         
         for (StopPlace nonParentStop : nonParentStops) {
             if (nonParentStop.getParentSiteRef() != null) {
-                ParentStopPlaceDataLoader.ParentStopPlaceKey key = new ParentStopPlaceDataLoader.ParentStopPlaceKey(
+                StopPlaceDataLoader.StopPlaceKey key = new StopPlaceDataLoader.StopPlaceKey(
                         nonParentStop.getParentSiteRef().getRef(),
                         Long.parseLong(nonParentStop.getParentSiteRef().getVersion())
                 );
