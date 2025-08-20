@@ -32,6 +32,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
@@ -54,18 +55,6 @@ public class ParentStopPlacesFetcher {
     }
 
     /**
-     * Resolve and fetch parent stop places from a list of stops.
-     * This method uses batching to solve the N+1 query problem.
-     *
-     * @param stopPlaceList list of stop places to resolve parents for
-     * @param keepChilds whether to keep child stop places in the result
-     * @return list of resolved parent stop places
-     */
-    public List<StopPlace> resolveParents(List<StopPlace> stopPlaceList, boolean keepChilds) {
-        return resolveParents(stopPlaceList, keepChilds, null);
-    }
-
-    /**
      * Resolve and fetch parent stop places from a list of stops using DataLoader for batching.
      *
      * @param stopPlaceList list of stop places to resolve parents for
@@ -83,13 +72,11 @@ public class ParentStopPlacesFetcher {
         List<StopPlace> result = stopPlaceList.stream().filter(StopPlace::isParentStopPlace).collect(toList());
         List<StopPlace> nonParentStops = stopPlaceList.stream().filter(stopPlace -> !stopPlace.isParentStopPlace()).collect(toList());
 
-        if (dataLoader != null) {
-            // Use DataLoader for batching
-            return resolveParentsWithDataLoader(result, nonParentStops, keepChilds, dataLoader, session);
-        } else {
-            // Fall back to original implementation for backwards compatibility
-            return resolveParentsOriginal(result, nonParentStops, keepChilds, session);
+        if (dataLoader == null) {
+            throw new IllegalArgumentException("DataLoader is required for parent resolution");
         }
+        
+        return resolveParentsWithDataLoader(result, nonParentStops, keepChilds, dataLoader, session);
     }
 
     private List<StopPlace> resolveParentsWithDataLoader(
@@ -99,164 +86,49 @@ public class ParentStopPlacesFetcher {
             DataLoader<ParentStopPlaceDataLoader.ParentStopPlaceKey, StopPlace> dataLoader,
             Session session) {
 
-        // For now, fall back to batch loading without DataLoader to avoid complexity
-        // This still provides significant performance improvement over individual queries
-        return resolveParentsWithBatchLoading(result, nonParentStops, keepChilds, session);
-    }
-
-    private List<StopPlace> resolveParentsWithBatchLoading(
-            List<StopPlace> result,
-            List<StopPlace> nonParentStops,
-            boolean keepChilds,
-            Session session) {
-
-        // Collect all parent references that need to be loaded
-        Map<ParentStopPlaceDataLoader.ParentStopPlaceKey, StopPlace> keyToChild = new HashMap<>();
         for (StopPlace nonParentStop : nonParentStops) {
             if (nonParentStop.getParentSiteRef() != null) {
                 ParentStopPlaceDataLoader.ParentStopPlaceKey key = new ParentStopPlaceDataLoader.ParentStopPlaceKey(
-                    nonParentStop.getParentSiteRef().getRef(),
-                    Long.parseLong(nonParentStop.getParentSiteRef().getVersion())
+                        nonParentStop.getParentSiteRef().getRef(),
+                        Long.parseLong(nonParentStop.getParentSiteRef().getVersion())
                 );
-                keyToChild.put(key, nonParentStop);
+
+                // Use DataLoader for batched parent lookup
+                CompletableFuture<StopPlace> parentFuture = dataLoader.load(key);
+                StopPlace parent = parentFuture.join(); // This will be batched by DataLoader
+
+                if (parent != null) {
+                    logger.debug("Resolved parent via DataLoader: {} {} from child {}",
+                            parent.getNetexId(), parent.getName(), nonParentStop.getNetexId());
+
+                    // Copy name from parent to child if child has no name
+                    if (nonParentStop.getName() == null || Strings.isNullOrEmpty(nonParentStop.getName().getValue())) {
+                        logger.debug("Copying name from parent {} to child stop: {}", parent.getId(), parent.getName());
+                        nonParentStop.setName(parent.getName());
+                        session.setReadOnly(nonParentStop, true);
+                    }
+
+                    // Add parent to result if not already present
+                    if (result.stream().noneMatch(stopPlace -> stopPlace.getNetexId() != null
+                            && (stopPlace.getNetexId().equals(parent.getNetexId()) && stopPlace.getVersion() == parent.getVersion()))) {
+                        result.add(parent);
+                    }
+
+                    // Add child to result if requested
+                    if (keepChilds) {
+                        result.add(nonParentStop);
+                    }
+                } else {
+                    logger.warn("Could not resolve parent via DataLoader from {}", nonParentStop.getParentSiteRef());
+                    // Add child to result even if parent couldn't be resolved
+                    result.add(nonParentStop);
+                }
             } else {
                 // No parent reference, add child directly
                 result.add(nonParentStop);
             }
         }
 
-        if (!keyToChild.isEmpty()) {
-            // Load all parents in batch using direct repository calls
-            Map<ParentStopPlaceDataLoader.ParentStopPlaceKey, StopPlace> parentMap = loadParentsBatch(keyToChild.keySet());
-
-            // Process results
-            for (Map.Entry<ParentStopPlaceDataLoader.ParentStopPlaceKey, StopPlace> entry : keyToChild.entrySet()) {
-                ParentStopPlaceDataLoader.ParentStopPlaceKey key = entry.getKey();
-                StopPlace child = entry.getValue();
-                StopPlace parent = parentMap.get(key);
-
-                if (parent != null) {
-                    logger.debug("Resolved parent: {} {} from child {}", parent.getNetexId(), parent.getName(), child.getNetexId());
-
-                    // Copy name from parent to child if child has no name
-                    if (child.getName() == null || Strings.isNullOrEmpty(child.getName().getValue())) {
-                        logger.debug("Copying name from parent {} to child stop: {}", parent.getId(), parent.getName());
-                        child.setName(parent.getName());
-                        session.setReadOnly(child, true);
-                    }
-
-                    // Add parent to result if not already present
-                    if (result.stream().noneMatch(stopPlace -> stopPlace.getNetexId() != null
-                        && (stopPlace.getNetexId().equals(parent.getNetexId()) && stopPlace.getVersion() == parent.getVersion()))) {
-                        result.add(parent);
-                    }
-
-                    // Add child to result if requested
-                    if (keepChilds) {
-                        result.add(child);
-                    }
-                } else {
-                    logger.warn("Could not resolve parent from {}", child.getParentSiteRef());
-                    // Add child to result even if parent couldn't be resolved
-                    result.add(child);
-                }
-            }
-        }
-
         return result;
     }
-
-    private Map<ParentStopPlaceDataLoader.ParentStopPlaceKey, StopPlace> loadParentsBatch(Set<ParentStopPlaceDataLoader.ParentStopPlaceKey> keys) {
-        Map<ParentStopPlaceDataLoader.ParentStopPlaceKey, StopPlace> resultMap = new HashMap<>();
-        
-        if (keys.isEmpty()) {
-            return resultMap;
-        }
-
-        logger.debug("Batch loading {} parent stop places in single query", keys.size());
-
-        // Group keys by unique netexId to avoid duplicate queries for same netexId with different versions
-        Map<String, Set<Long>> netexIdToVersions = new HashMap<>();
-        for (ParentStopPlaceDataLoader.ParentStopPlaceKey key : keys) {
-            netexIdToVersions.computeIfAbsent(key.getNetexId(), k -> new HashSet<>()).add(key.getVersion());
-        }
-
-        try {
-            // Use repository's batch method for consistent data access pattern
-            Map<String, Map<Long, StopPlace>> batchResults = stopPlaceRepository.findByNetexIdsAndVersions(netexIdToVersions);
-            
-            // Convert repository results back to key-based map
-            for (Map.Entry<String, Map<Long, StopPlace>> netexIdEntry : batchResults.entrySet()) {
-                String netexId = netexIdEntry.getKey();
-                Map<Long, StopPlace> versionMap = netexIdEntry.getValue();
-                
-                for (Map.Entry<Long, StopPlace> versionEntry : versionMap.entrySet()) {
-                    Long version = versionEntry.getKey();
-                    StopPlace stopPlace = versionEntry.getValue();
-                    ParentStopPlaceDataLoader.ParentStopPlaceKey key = new ParentStopPlaceDataLoader.ParentStopPlaceKey(netexId, version);
-                    resultMap.put(key, stopPlace);
-                }
-            }
-            
-            logger.debug("Successfully loaded {}/{} parent stop places in single query", 
-                resultMap.size(), keys.size());
-                
-        } catch (Exception e) {
-            logger.error("Batch query failed, falling back to individual queries", e);
-            
-            // Fallback: individual queries if the batch query fails
-            for (ParentStopPlaceDataLoader.ParentStopPlaceKey key : keys) {
-                try {
-                    StopPlace stopPlace = stopPlaceRepository.findFirstByNetexIdAndVersion(
-                        key.getNetexId(), key.getVersion());
-                    if (stopPlace != null) {
-                        resultMap.put(key, stopPlace);
-                    }
-                } catch (Exception individualError) {
-                    logger.warn("Failed to load individual parent stop place: {}", key, individualError);
-                }
-            }
-        }
-
-        return resultMap;
-    }
-
-    private List<StopPlace> resolveParentsOriginal(
-            List<StopPlace> result,
-            List<StopPlace> nonParentStops,
-            boolean keepChilds,
-            Session session) {
-
-        nonParentStops.forEach(nonParentStop -> {
-            if (nonParentStop.getParentSiteRef() != null) {
-                // Parent stop place refs should have version. If not, let it fail.
-                StopPlace parent = stopPlaceRepository.findFirstByNetexIdAndVersion(nonParentStop.getParentSiteRef().getRef(),
-                        Long.parseLong(nonParentStop.getParentSiteRef().getVersion()));
-                if (parent != null) {
-                    logger.info("Resolved parent: {} {} from child {}", parent.getNetexId(), parent.getName(), nonParentStop.getNetexId());
-
-                    if(nonParentStop.getName() == null || Strings.isNullOrEmpty(nonParentStop.getName().getValue())) {
-                        logger.info("Copying name from parent {} to child stop: {}", parent.getId(), parent.getName());
-                        nonParentStop.setName(parent.getName());
-                        session.setReadOnly(nonParentStop, true);
-                    }
-
-                    if (result.stream().noneMatch(stopPlace -> stopPlace.getNetexId() != null
-                                                                       && (stopPlace.getNetexId().equals(parent.getNetexId()) && stopPlace.getVersion() == parent.getVersion()))) {
-                        result.add(parent);
-                    }
-                    if (keepChilds) {
-                        result.add(nonParentStop);
-                    }
-                } else {
-                    logger.warn("Could not resolve parent from {}", nonParentStop.getParentSiteRef());
-                }
-            } else {
-                result.add(nonParentStop);
-            }
-        });
-
-        return result;
-    }
-
 }
