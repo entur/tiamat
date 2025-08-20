@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -33,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
@@ -86,6 +88,9 @@ public class ParentStopPlacesFetcher {
             DataLoader<ParentStopPlaceDataLoader.ParentStopPlaceKey, StopPlace> dataLoader,
             Session session) {
 
+        // Collect all futures first to allow batching (use List to avoid key collisions)
+        List<Map.Entry<StopPlace, CompletableFuture<StopPlace>>> childToParentFutures = new ArrayList<>();
+        
         for (StopPlace nonParentStop : nonParentStops) {
             if (nonParentStop.getParentSiteRef() != null) {
                 ParentStopPlaceDataLoader.ParentStopPlaceKey key = new ParentStopPlaceDataLoader.ParentStopPlaceKey(
@@ -93,38 +98,53 @@ public class ParentStopPlacesFetcher {
                         Long.parseLong(nonParentStop.getParentSiteRef().getVersion())
                 );
 
-                // Use DataLoader for batched parent lookup
+                // Register load with DataLoader (doesn't block)
                 CompletableFuture<StopPlace> parentFuture = dataLoader.load(key);
-                StopPlace parent = parentFuture.join(); // This will be batched by DataLoader
+                childToParentFutures.add(new AbstractMap.SimpleEntry<>(nonParentStop, parentFuture));
+            } else {
+                // No parent reference, add child directly
+                result.add(nonParentStop);
+            }
+        }
+        
+        // Now dispatch and wait for all futures to complete
+        dataLoader.dispatch();
+        List<CompletableFuture<StopPlace>> futures = childToParentFutures.stream()
+            .map(Map.Entry::getValue)
+            .collect(Collectors.toList());
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+        
+        // Process results after all parents are loaded
+        logger.debug("Processing {} child-parent pairs", childToParentFutures.size());
+        for (Map.Entry<StopPlace, CompletableFuture<StopPlace>> entry : childToParentFutures) {
+            StopPlace nonParentStop = entry.getKey();
+            StopPlace parent = entry.getValue().getNow(null); // Should be completed now
+            logger.debug("Processing child {} with parent {}", nonParentStop.getNetexId(), parent != null ? parent.getNetexId() : "null");
+            
+            if (parent != null) {
+                logger.debug("Resolved parent via DataLoader: {} {} from child {}",
+                        parent.getNetexId(), parent.getName(), nonParentStop.getNetexId());
 
-                if (parent != null) {
-                    logger.debug("Resolved parent via DataLoader: {} {} from child {}",
-                            parent.getNetexId(), parent.getName(), nonParentStop.getNetexId());
+                // Copy name from parent to child if child has no name
+                if (nonParentStop.getName() == null || Strings.isNullOrEmpty(nonParentStop.getName().getValue())) {
+                    logger.debug("Copying name from parent {} to child stop: {}", parent.getId(), parent.getName());
+                    nonParentStop.setName(parent.getName());
+                    session.setReadOnly(nonParentStop, true);
+                }
 
-                    // Copy name from parent to child if child has no name
-                    if (nonParentStop.getName() == null || Strings.isNullOrEmpty(nonParentStop.getName().getValue())) {
-                        logger.debug("Copying name from parent {} to child stop: {}", parent.getId(), parent.getName());
-                        nonParentStop.setName(parent.getName());
-                        session.setReadOnly(nonParentStop, true);
-                    }
+                // Add parent to result if not already present
+                if (result.stream().noneMatch(stopPlace -> stopPlace.getNetexId() != null
+                        && (stopPlace.getNetexId().equals(parent.getNetexId()) && stopPlace.getVersion() == parent.getVersion()))) {
+                    result.add(parent);
+                }
 
-                    // Add parent to result if not already present
-                    if (result.stream().noneMatch(stopPlace -> stopPlace.getNetexId() != null
-                            && (stopPlace.getNetexId().equals(parent.getNetexId()) && stopPlace.getVersion() == parent.getVersion()))) {
-                        result.add(parent);
-                    }
-
-                    // Add child to result if requested
-                    if (keepChilds) {
-                        result.add(nonParentStop);
-                    }
-                } else {
-                    logger.warn("Could not resolve parent via DataLoader from {}", nonParentStop.getParentSiteRef());
-                    // Add child to result even if parent couldn't be resolved
+                // Add child to result if requested
+                if (keepChilds) {
                     result.add(nonParentStop);
                 }
             } else {
-                // No parent reference, add child directly
+                logger.warn("Could not resolve parent via DataLoader from {}", nonParentStop.getParentSiteRef());
+                // Add child to result even if parent couldn't be resolved
                 result.add(nonParentStop);
             }
         }

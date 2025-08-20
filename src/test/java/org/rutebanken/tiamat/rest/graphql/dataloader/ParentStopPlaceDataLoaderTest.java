@@ -29,6 +29,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.Map;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -55,12 +57,15 @@ public class ParentStopPlaceDataLoaderTest {
         parentStop.setNetexId("NSR:StopPlace:12345");
         parentStop.setVersion(1L);
 
-        // Mock repository response
-        when(stopPlaceRepository.findFirstByNetexIdAndVersion("NSR:StopPlace:12345", 1L))
-            .thenReturn(parentStop);
+        // Mock repository batch response
+        Map<String, Map<Long, StopPlace>> batchResponse = Map.of(
+            "NSR:StopPlace:12345", Map.of(1L, parentStop)
+        );
+        when(stopPlaceRepository.findByNetexIdsAndVersions(any()))
+            .thenReturn(batchResponse);
 
         // Create DataLoader
-        ParentStopPlaceDataLoader dataLoaderComponent = new ParentStopPlaceDataLoader(entityManager, stopPlaceRepository);
+        ParentStopPlaceDataLoader dataLoaderComponent = new ParentStopPlaceDataLoader(stopPlaceRepository);
         DataLoader<ParentStopPlaceDataLoader.ParentStopPlaceKey, StopPlace> dataLoader = 
             dataLoaderComponent.createDataLoader();
 
@@ -94,15 +99,15 @@ public class ParentStopPlaceDataLoaderTest {
         parentStop2.setNetexId("NSR:StopPlace:12345");
         parentStop2.setVersion(2L);
 
-        // Mock EntityManager query
-        when(entityManager.createQuery(anyString(), eq(StopPlace.class)))
-            .thenReturn(typedQuery);
-        when(typedQuery.setParameter(eq("netexId"), anyString())).thenReturn(typedQuery);
-        when(typedQuery.setParameter(eq("versions"), any(List.class))).thenReturn(typedQuery);
-        when(typedQuery.getResultList()).thenReturn(Arrays.asList(parentStop1, parentStop2));
+        // Mock repository batch response
+        Map<String, Map<Long, StopPlace>> batchResponse = Map.of(
+            "NSR:StopPlace:12345", Map.of(1L, parentStop1, 2L, parentStop2)
+        );
+        when(stopPlaceRepository.findByNetexIdsAndVersions(any()))
+            .thenReturn(batchResponse);
 
         // Create DataLoader
-        ParentStopPlaceDataLoader dataLoaderComponent = new ParentStopPlaceDataLoader(entityManager, stopPlaceRepository);
+        ParentStopPlaceDataLoader dataLoaderComponent = new ParentStopPlaceDataLoader(stopPlaceRepository);
         DataLoader<ParentStopPlaceDataLoader.ParentStopPlaceKey, StopPlace> dataLoader = 
             dataLoaderComponent.createDataLoader();
 

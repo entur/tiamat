@@ -65,6 +65,9 @@ public class ParentStopPlacesFetcherTest {
                 StopPlace result = stopPlaceRepository.findFirstByNetexIdAndVersion(key.getNetexId(), key.getVersion());
                 return CompletableFuture.completedFuture(result);
             });
+        
+        // Mock dispatch to return completed future (no-op for our test)    
+        when(mockDataLoader.dispatch()).thenReturn(CompletableFuture.completedFuture(null));
             
         return mockDataLoader;
     }

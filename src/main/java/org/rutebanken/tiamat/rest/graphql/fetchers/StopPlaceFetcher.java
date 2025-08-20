@@ -270,14 +270,9 @@ class StopPlaceFetcher implements DataFetcher {
         if (onlyMonomodalStopplaces) {
             return getStopPlaces(environment, stopPlaces, stopPlaces.size());
         } else {
-            // Use DataLoader for bbox queries to solve N+1 problem
-            DataLoader<ParentStopPlaceDataLoader.ParentStopPlaceKey, StopPlace> dataLoader = null;
-            boolean isBboxQuery = environment.getArgument(LONGITUDE_MIN) != null;
-            
-            if (isBboxQuery) {
-                // This is a bbox query, create DataLoader for batching
-                dataLoader = parentStopPlaceDataLoader.createDataLoader();
-            }
+            // Always use DataLoader to solve N+1 problem for parent resolution
+            DataLoader<ParentStopPlaceDataLoader.ParentStopPlaceKey, StopPlace> dataLoader = 
+                parentStopPlaceDataLoader.createDataLoader();
             
             List<StopPlace> parentsResolved = parentStopPlacesFetcher.resolveParents(stopPlaces, KEEP_CHILDREN, dataLoader);
             
