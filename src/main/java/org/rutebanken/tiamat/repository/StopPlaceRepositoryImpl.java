@@ -870,23 +870,42 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         logger.debug("Batch loading stop places for {} unique netexIds", netexIdToVersions.size());
 
         try {
-            // Create a single batch query for all unique netexIds
-            String jpql = "SELECT sp FROM StopPlace sp WHERE sp.netexId IN :netexIds";
+            // Build list of exact (netexId, version) pairs to query for
+            List<String> whereClauses = new ArrayList<>();
+            Map<String, Object> parameters = new HashMap<>();
+            int paramIndex = 0;
+            
+            for (Map.Entry<String, Set<Long>> entry : netexIdToVersions.entrySet()) {
+                String netexId = entry.getKey();
+                Set<Long> versions = entry.getValue();
+                
+                for (Long version : versions) {
+                    String netexIdParam = "netexId" + paramIndex;
+                    String versionParam = "version" + paramIndex;
+                    
+                    whereClauses.add("(sp.netexId = :" + netexIdParam + " AND sp.version = :" + versionParam + ")");
+                    parameters.put(netexIdParam, netexId);
+                    parameters.put(versionParam, version);
+                    paramIndex++;
+                }
+            }
+            
+            // Create optimized query that hits the composite index directly
+            String jpql = "SELECT sp FROM StopPlace sp WHERE " + String.join(" OR ", whereClauses);
             TypedQuery<StopPlace> query = entityManager.createQuery(jpql, StopPlace.class);
-            query.setParameter("netexIds", netexIdToVersions.keySet());
+            
+            // Set all parameters
+            for (Map.Entry<String, Object> param : parameters.entrySet()) {
+                query.setParameter(param.getKey(), param.getValue());
+            }
 
             List<StopPlace> stopPlaces = query.getResultList();
             
-            // Filter results to only include exact (netexId, version) matches and organize by netexId and version
+            // Organize results by netexId and version - no filtering needed since we queried exact pairs
             for (StopPlace stopPlace : stopPlaces) {
                 String netexId = stopPlace.getNetexId();
                 Long version = stopPlace.getVersion();
-                
-                // Check if this specific (netexId, version) combination was requested
-                Set<Long> requestedVersions = netexIdToVersions.get(netexId);
-                if (requestedVersions != null && requestedVersions.contains(version)) {
-                    resultMap.computeIfAbsent(netexId, k -> new HashMap<>()).put(version, stopPlace);
-                }
+                resultMap.computeIfAbsent(netexId, k -> new HashMap<>()).put(version, stopPlace);
             }
             
             logger.debug("Successfully loaded stop places for {}/{} requested netexId/version combinations", 
