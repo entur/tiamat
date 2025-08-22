@@ -33,6 +33,7 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
 import org.rutebanken.tiamat.dtoassembling.dto.JbvCodeMappingDto;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
+import org.rutebanken.tiamat.model.PlaceEquipment;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
@@ -1168,5 +1169,78 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
         return new PageImpl<>(stopPlaces, exportParams.getStopPlaceSearch().getPageable(), stopPlaces.size());
     }
-}
 
+    @Override
+    public Map<Long, Set<StopPlace>> findChildrenByParentStopPlaceIds(Set<Long> parentStopPlaceIds) {
+        if (parentStopPlaceIds == null || parentStopPlaceIds.isEmpty()) {
+            return new HashMap<>();
+        }
+
+        logger.debug("Batch loading children for {} parent stop places", parentStopPlaceIds.size());
+
+        // Use JPQL to fetch children with their parent stop place IDs
+        String jpql = """
+            SELECT p.id, c FROM StopPlace p 
+            JOIN p.children c 
+            WHERE p.id IN :parentIds
+            """;
+
+        TypedQuery<Object[]> query = entityManager.createQuery(jpql, Object[].class);
+        query.setParameter("parentIds", parentStopPlaceIds);
+
+        List<Object[]> results = query.getResultList();
+
+        // Group children by parent ID
+        Map<Long, Set<StopPlace>> childrenByParentId = new HashMap<>();
+        for (Object[] result : results) {
+            Long parentId = (Long) result[0];
+            StopPlace child = (StopPlace) result[1];
+            childrenByParentId.computeIfAbsent(parentId, k -> new HashSet<>()).add(child);
+        }
+
+        // Ensure all requested parent IDs have entries (even if empty)
+        for (Long parentId : parentStopPlaceIds) {
+            childrenByParentId.putIfAbsent(parentId, new HashSet<>());
+        }
+
+        logger.debug("Found children for {} parent stop places", childrenByParentId.size());
+        return childrenByParentId;
+    }
+
+    @Override
+    public Map<Long, PlaceEquipment> findPlaceEquipmentsByIds(Set<Long> placeEquipmentIds) {
+        if (placeEquipmentIds == null || placeEquipmentIds.isEmpty()) {
+            return new HashMap<>();
+        }
+
+        logger.debug("Batch loading place equipment for {} IDs", placeEquipmentIds.size());
+
+        // Use JPQL with JOIN FETCH to eagerly load the installed equipment
+        String jpql = """
+            SELECT pe FROM PlaceEquipment pe
+            LEFT JOIN FETCH pe.installedEquipment
+            WHERE pe.id IN :placeEquipmentIds
+            """;
+
+        TypedQuery<PlaceEquipment> query = entityManager.createQuery(jpql, PlaceEquipment.class);
+        query.setParameter("placeEquipmentIds", placeEquipmentIds);
+
+        List<PlaceEquipment> placeEquipments = query.getResultList();
+
+        // Create map for lookup
+        Map<Long, PlaceEquipment> equipmentById = new HashMap<>();
+        for (PlaceEquipment pe : placeEquipments) {
+            equipmentById.put(pe.getId(), pe);
+        }
+
+        // Ensure all requested IDs have entries (even if null for missing equipment)
+        for (Long equipmentId : placeEquipmentIds) {
+            if (!equipmentById.containsKey(equipmentId)) {
+                equipmentById.put(equipmentId, null);
+            }
+        }
+
+        logger.debug("Found place equipment for {} IDs", equipmentById.size());
+        return equipmentById;
+    }
+}

@@ -18,8 +18,11 @@ package org.rutebanken.tiamat.repository;
 import jakarta.persistence.QueryHint;
 import org.rutebanken.tiamat.model.tag.Tag;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.QueryHints;
+import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Set;
 
 public interface TagRepository extends JpaRepository<Tag, Long> {
@@ -32,4 +35,13 @@ public interface TagRepository extends JpaRepository<Tag, Long> {
 
     @QueryHints(value = {@QueryHint(name = "org.hibernate.cacheable", value = "true")}, forCounting = false)
     Tag findByNameAndIdReference(String name, String idReference);
+
+    /**
+     * Batch loading method for DataLoader - efficiently loads tags by multiple ID references
+     * @param idReferences Set of netex ID references to load tags for
+     * @return List of tags for the given references (excludes removed tags)
+     */
+    @Query("SELECT t FROM Tag t WHERE t.idReference IN :idReferences AND t.removed IS NULL")
+    @QueryHints(value = {@QueryHint(name = "org.hibernate.cacheable", value = "true")}, forCounting = false)
+    List<Tag> findByIdReferencesIn(@Param("idReferences") Set<String> idReferences);
 }

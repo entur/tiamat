@@ -293,4 +293,104 @@ public class TariffZoneRepositoryImpl implements TariffZoneRepositoryCustom {
 
         return query.executeUpdate();
     }
+
+    @Override
+    public Map<Long, List<TariffZone>> findTariffZonesByStopPlaceIds(Set<Long> stopPlaceIds) {
+        if (stopPlaceIds == null || stopPlaceIds.isEmpty()) {
+            return new HashMap<>();
+        }
+
+        logger.debug("Batch loading tariff zones for {} stop places", stopPlaceIds.size());
+
+        // Query to find tariff zones for the given stop place IDs
+        String sql = """
+            SELECT sptz.stop_place_id, tz.*
+            FROM stop_place_tariff_zones sptz
+            INNER JOIN tariff_zone tz ON tz.netex_id = sptz.ref
+            WHERE sptz.stop_place_id IN :stopPlaceIds
+              AND (
+                  (sptz.version IS NOT NULL AND CAST(tz.version AS text) = sptz.version)
+                  OR (sptz.version IS NULL AND tz.version = (
+                      SELECT MAX(tzv.version)
+                      FROM tariff_zone tzv
+                      WHERE tzv.netex_id = tz.netex_id
+                  ))
+              )
+            """;
+
+        Query query = entityManager.createNativeQuery(sql);
+        query.setParameter("stopPlaceIds", stopPlaceIds);
+
+        @SuppressWarnings("unchecked")
+        List<Object[]> results = query.getResultList();
+
+        // Group tariff zones by stop place ID
+        Map<Long, List<TariffZone>> tariffZonesByStopPlaceId = new HashMap<>();
+
+        for (Object[] row : results) {
+            Long stopPlaceId = ((Number) row[0]).longValue();
+            
+            // Reconstruct TariffZone from the remaining columns
+            // This is a bit complex due to native query, so let's use a simpler approach
+        }
+
+        // Alternative approach using existing method and then mapping
+        // Get all tariff zones for the stop places
+        List<TariffZone> allTariffZones = getTariffZonesFromStopPlaceIds(stopPlaceIds);
+        
+        // Now we need to map them back to stop place IDs
+        // Since the existing method doesn't return the mapping, we'll need to query the relationship
+        String mappingSql = """
+            SELECT sptz.stop_place_id, sptz.ref, sptz.version
+            FROM stop_place_tariff_zones sptz
+            WHERE sptz.stop_place_id IN :stopPlaceIds
+            """;
+
+        Query mappingQuery = entityManager.createNativeQuery(mappingSql);
+        mappingQuery.setParameter("stopPlaceIds", stopPlaceIds);
+
+        @SuppressWarnings("unchecked")
+        List<Object[]> mappings = mappingQuery.getResultList();
+
+        // Create a map of netexId+version to TariffZone
+        Map<String, TariffZone> tariffZoneByKey = new HashMap<>();
+        for (TariffZone tz : allTariffZones) {
+            String key = tz.getNetexId() + "_" + tz.getVersion();
+            tariffZoneByKey.put(key, tz);
+        }
+
+        // Map tariff zones to stop place IDs
+        for (Object[] mapping : mappings) {
+            Long stopPlaceId = ((Number) mapping[0]).longValue();
+            String netexId = (String) mapping[1];
+            String version = mapping[2] != null ? (String) mapping[2] : null;
+            
+            // Find the matching tariff zone
+            TariffZone matchingZone = null;
+            if (version != null) {
+                matchingZone = tariffZoneByKey.get(netexId + "_" + version);
+            } else {
+                // Find the latest version
+                for (TariffZone tz : allTariffZones) {
+                    if (tz.getNetexId().equals(netexId)) {
+                        if (matchingZone == null || tz.getVersion() > matchingZone.getVersion()) {
+                            matchingZone = tz;
+                        }
+                    }
+                }
+            }
+            
+            if (matchingZone != null) {
+                tariffZonesByStopPlaceId.computeIfAbsent(stopPlaceId, k -> new ArrayList<>()).add(matchingZone);
+            }
+        }
+
+        // Ensure all requested stop place IDs have entries (even if empty)
+        for (Long stopPlaceId : stopPlaceIds) {
+            tariffZonesByStopPlaceId.putIfAbsent(stopPlaceId, new ArrayList<>());
+        }
+
+        logger.debug("Found tariff zones for {} stop places", tariffZonesByStopPlaceId.size());
+        return tariffZonesByStopPlaceId;
+    }
 }

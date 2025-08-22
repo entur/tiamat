@@ -19,6 +19,7 @@ import org.locationtech.jts.geom.Envelope;
 import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
 import org.rutebanken.tiamat.dtoassembling.dto.JbvCodeMappingDto;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
+import org.rutebanken.tiamat.model.PlaceEquipment;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
@@ -112,9 +113,23 @@ public interface StopPlaceRepositoryCustom extends DataManagedObjectStructureRep
     Page<StopPlace> findStopPlacesForReport(ExportParams exportParams, boolean includeChildren, boolean includeQuays);
 
     /**
+     * Batch loading method for DataLoader - efficiently loads children by parent stop place IDs
+     * @param parentStopPlaceIds Set of parent stop place IDs to load children for
+     * @return Map of parent stop place ID to set of children
+     */
+    Map<Long, Set<StopPlace>> findChildrenByParentStopPlaceIds(Set<Long> parentStopPlaceIds);
+
+    /**
      * Batch loading method for DataLoader - efficiently loads key-value pairs by stop place IDs
      * @param stopPlaceIds Set of stop place IDs to load key-values for
      * @return Map of stop place ID to map of key-value pairs
      */
     Map<Long, Map<String, Value>> findKeyValuesByIds(Set<Long> stopPlaceIds);
+
+    /**
+     * Batch loading method for DataLoader - efficiently loads place equipment with installed equipment
+     * @param placeEquipmentIds Set of place equipment IDs to load
+     * @return Map of place equipment ID to PlaceEquipment with eagerly loaded installed equipment
+     */
+    Map<Long, PlaceEquipment> findPlaceEquipmentsByIds(Set<Long> placeEquipmentIds);
 }

@@ -17,6 +17,7 @@ package org.rutebanken.tiamat.rest.graphql.dataloader;
 
 import org.dataloader.BatchLoader;
 import org.dataloader.DataLoader;
+import org.dataloader.DataLoaderOptions;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.slf4j.Logger;
@@ -102,7 +103,9 @@ public class StopPlaceDataLoader {
             }
         };
         
-        return DataLoader.newDataLoader(batchLoader);
+        return DataLoader.newDataLoader(batchLoader, DataLoaderOptions.newOptions()
+            .setBatchingEnabled(true)
+            .setMaxBatchSize(100));
     }
 
     /**

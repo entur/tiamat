@@ -17,6 +17,7 @@ package org.rutebanken.tiamat.rest.graphql.dataloader;
 
 import org.dataloader.DataLoader;
 import org.dataloader.DataLoaderFactory;
+import org.dataloader.DataLoaderOptions;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.VersionOfObjectRefStructure;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -159,6 +160,8 @@ public class GroupOfStopPlacesMembersDataLoader {
                 logger.error("Error in GroupOfStopPlacesMembersDataLoader batch function", e);
                 return CompletableFuture.failedFuture(new RuntimeException("Failed to load GroupOfStopPlaces members", e));
             }
-        });
+        }, DataLoaderOptions.newOptions()
+            .setBatchingEnabled(true)
+            .setMaxBatchSize(100));
     }
 }

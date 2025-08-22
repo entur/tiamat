@@ -28,6 +28,7 @@ import org.springframework.stereotype.Component;
 
 import org.dataloader.BatchLoader;
 import org.dataloader.DataLoader;
+import org.dataloader.DataLoaderOptions;
 
 import java.util.HashMap;
 import java.util.List;
@@ -88,7 +89,9 @@ public class EntityPermissionsDataLoader {
             });
         };
         
-        return DataLoader.newDataLoader(batchLoader);
+        return DataLoader.newDataLoader(batchLoader, DataLoaderOptions.newOptions()
+            .setBatchingEnabled(true)
+            .setMaxBatchSize(100));
     }
 
     /**

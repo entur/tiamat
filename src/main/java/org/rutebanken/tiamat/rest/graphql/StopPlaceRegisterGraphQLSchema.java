@@ -63,13 +63,19 @@ import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.rutebanken.tiamat.rest.graphql.fetchers.AccessibilityAssessmentDataFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.EntityPermissionsFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.FareZoneAuthoritiesFetcher;
+import org.rutebanken.tiamat.rest.graphql.fetchers.FareZonesDataFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.GroupOfStopPlacesMembersFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.GroupOfStopPlacesPurposeOfGroupingFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.KeyValuesDataFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.LocationPermissionsFetcher;
+import org.rutebanken.tiamat.rest.graphql.fetchers.PlaceEquipmentsDataFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.QuayKeyValuesDataFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.StopPlaceKeyValuesDataFetcher;
+import org.rutebanken.tiamat.rest.graphql.fetchers.TagsDataFetcher;
+import org.rutebanken.tiamat.rest.graphql.fetchers.ChildrenDataFetcher;
+import org.rutebanken.tiamat.rest.graphql.fetchers.GroupsDataFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.PolygonFetcher;
+import org.rutebanken.tiamat.rest.graphql.fetchers.TariffZonesDataFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.TopographicPlaceDataFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.QuayDataFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.StopPlaceFareZoneFetcher;
@@ -296,6 +302,24 @@ public class StopPlaceRegisterGraphQLSchema {
 
     @Autowired
     StopPlaceKeyValuesDataFetcher stopPlaceKeyValuesDataFetcher;
+
+    @Autowired
+    TagsDataFetcher tagsDataFetcher;
+
+    @Autowired
+    ChildrenDataFetcher childrenDataFetcher;
+
+    @Autowired
+    GroupsDataFetcher groupsDataFetcher;
+
+    @Autowired
+    TariffZonesDataFetcher tariffZonesDataFetcher;
+
+    @Autowired
+    FareZonesDataFetcher fareZonesDataFetcher;
+
+    @Autowired
+    PlaceEquipmentsDataFetcher placeEquipmentsDataFetcher;
 
     @Autowired
     DataFetcher stopPlaceUpdater;
@@ -711,8 +735,8 @@ public class StopPlaceRegisterGraphQLSchema {
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_PARENT_STOPPLACE, PERMISSIONS, entityPermissionsFetcher);
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_GROUP_OF_STOPPLACES, PERMISSIONS, entityPermissionsFetcher);
 
-        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_STOPPLACE, TARIFF_ZONES, stopPlaceTariffZoneFetcher);
-        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_PARENT_STOPPLACE, TARIFF_ZONES, stopPlaceTariffZoneFetcher);
+        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_STOPPLACE, TARIFF_ZONES, tariffZonesDataFetcher);
+        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_PARENT_STOPPLACE, TARIFF_ZONES, tariffZonesDataFetcher);
 
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_ACCESSIBILITY_ASSESSMENT, ID, getNetexIdFetcher());
         registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_ACCESSIBILITY_ASSESSMENT , LIMITATIONS,
@@ -752,8 +776,8 @@ public class StopPlaceRegisterGraphQLSchema {
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_PARENT_STOPPLACE, STOP_PLACE_GROUPS, stopPlaceGroupsFetcher);
 
 
-        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_STOPPLACE, FARE_ZONES, stopPlaceFareZoneFetcher);
-        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_PARENT_STOPPLACE, FARE_ZONES, stopPlaceFareZoneFetcher);
+        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_STOPPLACE, FARE_ZONES, fareZonesDataFetcher);
+        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_PARENT_STOPPLACE, FARE_ZONES, fareZonesDataFetcher);
 
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_PARENT_STOPPLACE, ID, getNetexIdFetcher());
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_QUAY, ID, getNetexIdFetcher());
@@ -769,6 +793,14 @@ public class StopPlaceRegisterGraphQLSchema {
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_TARIFF_ZONE, KEY_VALUES, keyValuesDataFetcher);
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_FARE_ZONE, KEY_VALUES, keyValuesDataFetcher);
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_QUAY, KEY_VALUES, quayKeyValuesDataFetcher);
+
+        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_STOPPLACE, TAGS, tagsDataFetcher);
+        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_PARENT_STOPPLACE, TAGS, tagsDataFetcher);
+
+        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_PARENT_STOPPLACE, CHILDREN, childrenDataFetcher);
+
+        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_STOPPLACE, STOP_PLACE_GROUPS, groupsDataFetcher);
+        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_PARENT_STOPPLACE, STOP_PLACE_GROUPS, groupsDataFetcher);
 
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_STOPPLACE, POLYGON, polygonFetcher);
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_PARENT_STOPPLACE, POLYGON, polygonFetcher);
@@ -968,14 +1000,7 @@ public class StopPlaceRegisterGraphQLSchema {
     }
 
     private void dataFetcherPlaceEquipments(GraphQLCodeRegistry.Builder codeRegistryBuilder, String source) {
-        registerDataFetcher(codeRegistryBuilder, source, PLACE_EQUIPMENTS, env -> {
-            if (env.getSource() instanceof StopPlace stopPlace) {
-                return stopPlace.getPlaceEquipments();
-            } else if (env.getSource() instanceof Quay quay) {
-                return quay.getPlaceEquipments();
-            }
-            return null;
-        });
+        registerDataFetcher(codeRegistryBuilder, source, PLACE_EQUIPMENTS, placeEquipmentsDataFetcher);
     }
 
     private void dataFetcherGeometry(GraphQLCodeRegistry.Builder codeRegistryBuilder, String parentType) {

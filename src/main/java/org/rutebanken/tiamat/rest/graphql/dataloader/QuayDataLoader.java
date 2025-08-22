@@ -17,6 +17,7 @@ package org.rutebanken.tiamat.rest.graphql.dataloader;
 
 import org.dataloader.DataLoader;
 import org.dataloader.DataLoaderFactory;
+import org.dataloader.DataLoaderOptions;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.slf4j.Logger;
@@ -73,6 +74,8 @@ public class QuayDataLoader {
                 logger.error("Error in QuayDataLoader batch function", e);
                 return CompletableFuture.failedFuture(new RuntimeException("Failed to load quays for stop places", e));
             }
-        });
+        }, DataLoaderOptions.newOptions()
+            .setBatchingEnabled(true)
+            .setMaxBatchSize(100));
     }
 }

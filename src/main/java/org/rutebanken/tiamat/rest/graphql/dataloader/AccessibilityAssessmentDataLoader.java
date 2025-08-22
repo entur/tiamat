@@ -17,6 +17,7 @@ package org.rutebanken.tiamat.rest.graphql.dataloader;
 
 import org.dataloader.DataLoader;
 import org.dataloader.DataLoaderFactory;
+import org.dataloader.DataLoaderOptions;
 import org.rutebanken.tiamat.model.AccessibilityAssessment;
 import org.rutebanken.tiamat.repository.AccessibilityAssessmentRepository;
 import org.slf4j.Logger;
@@ -75,6 +76,8 @@ public class AccessibilityAssessmentDataLoader {
                 logger.error("Error in AccessibilityAssessmentDataLoader batch function", e);
                 return CompletableFuture.failedFuture(new RuntimeException("Failed to load accessibility assessments", e));
             }
-        });
+        }, DataLoaderOptions.newOptions()
+            .setBatchingEnabled(true)
+            .setMaxBatchSize(100));
     }
 }

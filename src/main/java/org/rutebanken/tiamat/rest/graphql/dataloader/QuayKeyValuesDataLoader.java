@@ -17,6 +17,7 @@ package org.rutebanken.tiamat.rest.graphql.dataloader;
 
 import org.dataloader.DataLoader;
 import org.dataloader.DataLoaderFactory;
+import org.dataloader.DataLoaderOptions;
 import org.rutebanken.tiamat.model.Value;
 import org.rutebanken.tiamat.repository.QuayRepository;
 import org.slf4j.Logger;
@@ -87,6 +88,8 @@ public class QuayKeyValuesDataLoader {
                     .collect(Collectors.toList());
                 return CompletableFuture.completedFuture(emptyResult);
             }
-        });
+        }, DataLoaderOptions.newOptions()
+            .setBatchingEnabled(true)
+            .setMaxBatchSize(100));
     }
 }

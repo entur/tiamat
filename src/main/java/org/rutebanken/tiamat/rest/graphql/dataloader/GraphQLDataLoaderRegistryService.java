@@ -18,11 +18,13 @@ package org.rutebanken.tiamat.rest.graphql.dataloader;
 import org.dataloader.DataLoader;
 import org.dataloader.DataLoaderRegistry;
 import org.rutebanken.tiamat.model.AccessibilityAssessment;
+import org.rutebanken.tiamat.model.PlaceEquipment;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.model.Value;
 import org.rutebanken.tiamat.model.authorization.EntityPermissions;
+import org.rutebanken.tiamat.rest.graphql.loaders.PlaceEquipmentsDataLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +32,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Service for creating and configuring DataLoader registry for GraphQL execution.
@@ -48,6 +51,12 @@ public class GraphQLDataLoaderRegistryService {
     public static final String ACCESSIBILITY_ASSESSMENT_LOADER = "accessibilityAssessmentDataLoader";
     public static final String GROUP_OF_STOP_PLACES_MEMBERS_LOADER = "groupOfStopPlacesMembersDataLoader";
     public static final String STOP_PLACE_KEY_VALUES_LOADER = "stopPlaceKeyValuesDataLoader";
+    public static final String TAGS_LOADER = "tagsDataLoader";
+    public static final String CHILDREN_LOADER = "childrenDataLoader";
+    public static final String GROUPS_LOADER = "groupsDataLoader";
+    public static final String TARIFF_ZONES_LOADER = "tariffZonesDataLoader";
+    public static final String FARE_ZONES_LOADER = "fareZonesDataLoader";
+    public static final String PLACE_EQUIPMENTS_LOADER = "placeEquipmentsDataLoader";
 
     @Autowired
     private EntityPermissionsDataLoader entityPermissionsDataLoader;
@@ -72,6 +81,24 @@ public class GraphQLDataLoaderRegistryService {
 
     @Autowired
     private QuayKeyValuesDataLoader quayKeyValuesDataLoader;
+
+    @Autowired
+    private TagsDataLoader tagsDataLoader;
+
+    @Autowired
+    private ChildrenDataLoader childrenDataLoader;
+
+    @Autowired
+    private GroupsDataLoader groupsDataLoader;
+
+    @Autowired
+    private TariffZonesDataLoader tariffZonesDataLoader;
+
+    @Autowired
+    private FareZonesDataLoader fareZonesDataLoader;
+
+    @Autowired
+    private PlaceEquipmentsDataLoader placeEquipmentsDataLoader;
 
     /**
      * Creates a new DataLoaderRegistry configured with all necessary DataLoaders
@@ -114,6 +141,30 @@ public class GraphQLDataLoaderRegistryService {
         // StopPlaceKeyValues DataLoader
         DataLoader<Long, Map<String, Value>> stopPlaceKeyValuesLoader = stopPlaceKeyValuesDataLoader.createDataLoader();
         registry.register(STOP_PLACE_KEY_VALUES_LOADER, stopPlaceKeyValuesLoader);
+
+        // Tags DataLoader
+        DataLoader<String, Set<org.rutebanken.tiamat.model.tag.Tag>> tagsLoader = tagsDataLoader.createDataLoader();
+        registry.register(TAGS_LOADER, tagsLoader);
+
+        // Children DataLoader
+        DataLoader<Long, Set<StopPlace>> childrenLoader = childrenDataLoader.createDataLoader();
+        registry.register(CHILDREN_LOADER, childrenLoader);
+
+        // Groups DataLoader
+        DataLoader<Long, List<org.rutebanken.tiamat.model.GroupOfStopPlaces>> groupsLoader = groupsDataLoader.createDataLoader();
+        registry.register(GROUPS_LOADER, groupsLoader);
+
+        // TariffZones DataLoader
+        DataLoader<Long, List<org.rutebanken.tiamat.model.TariffZone>> tariffZonesLoader = tariffZonesDataLoader.createDataLoader();
+        registry.register(TARIFF_ZONES_LOADER, tariffZonesLoader);
+
+        // FareZones DataLoader
+        DataLoader<Long, List<org.rutebanken.tiamat.model.FareZone>> fareZonesLoader = fareZonesDataLoader.createDataLoader();
+        registry.register(FARE_ZONES_LOADER, fareZonesLoader);
+
+        // PlaceEquipments DataLoader
+        DataLoader<Long, PlaceEquipment> placeEquipmentsLoader = placeEquipmentsDataLoader.create();
+        registry.register(PLACE_EQUIPMENTS_LOADER, placeEquipmentsLoader);
 
         logger.debug("DataLoaderRegistry created with {} DataLoaders", registry.getKeys().size());
 
