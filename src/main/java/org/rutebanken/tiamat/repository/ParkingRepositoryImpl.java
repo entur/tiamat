@@ -220,6 +220,27 @@ public class ParkingRepositoryImpl implements ParkingRepositoryCustom {
         }
     }
 
+    @Override
+    public List<Parking> findParkingEntitiesByStopPlaceNetexId(String netexStopPlaceId) {
+        String sql = "SELECT p.* " +
+                "FROM parking p " +
+                "WHERE p.parent_site_ref = :netexStopPlaceId " +
+                "AND p.version = (SELECT MAX(pv.version) FROM parking pv WHERE pv.netex_id = p.netex_id) " +
+                "ORDER BY p.netex_id";
+
+        Query query = entityManager.createNativeQuery(sql, Parking.class);
+        query.setParameter("netexStopPlaceId", netexStopPlaceId);
+
+        try {
+            @SuppressWarnings("unchecked")
+            List<Parking> results = query.getResultList();
+            return results;
+
+        } catch (NoResultException noResultException) {
+            return new ArrayList<>();
+        }
+    }
+
     private <T> T getOneOrNull(TypedQuery<T> query) {
         try {
             List<T> resultList = query.getResultList();
