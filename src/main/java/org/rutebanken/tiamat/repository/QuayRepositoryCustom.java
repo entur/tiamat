@@ -39,4 +39,11 @@ public interface QuayRepositoryCustom extends DataManagedObjectStructureReposito
      * @return Map of stop place ID to list of quays
      */
     Map<Long, List<Quay>> findQuaysByStopPlaceIds(Set<Long> stopPlaceIds);
+
+    /**
+     * Batch loading method for DataLoader - efficiently loads key-value pairs by quay IDs
+     * @param quayIds Set of quay IDs to load key-values for
+     * @return Map of quay ID to map of key-value pairs
+     */
+    Map<Long, Map<String, Value>> findKeyValuesByIds(Set<Long> quayIds);
 }

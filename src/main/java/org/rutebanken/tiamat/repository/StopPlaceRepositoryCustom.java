@@ -22,6 +22,7 @@ import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
+import org.rutebanken.tiamat.model.Value;
 import org.rutebanken.tiamat.repository.search.ChangedStopPlaceSearch;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -109,4 +110,11 @@ public interface StopPlaceRepositoryCustom extends DataManagedObjectStructureRep
      * @return Page of StopPlaces with eagerly loaded associations
      */
     Page<StopPlace> findStopPlacesForReport(ExportParams exportParams, boolean includeChildren, boolean includeQuays);
+
+    /**
+     * Batch loading method for DataLoader - efficiently loads key-value pairs by stop place IDs
+     * @param stopPlaceIds Set of stop place IDs to load key-values for
+     * @return Map of stop place ID to map of key-value pairs
+     */
+    Map<Long, Map<String, Value>> findKeyValuesByIds(Set<Long> stopPlaceIds);
 }

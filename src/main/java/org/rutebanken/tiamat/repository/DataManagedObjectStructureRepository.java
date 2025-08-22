@@ -24,7 +24,4 @@ import java.util.Set;
 public interface DataManagedObjectStructureRepository<T extends DataManagedObjectStructure> {
 
     String findFirstByKeyValues(String key, Set<String> originalIds);
-    default Map<Long, Map<String, Value>> findKeyValuesByIds(Set<Long> ids) {
-        throw new UnsupportedOperationException("No implemenation found for findKeyValuesByIds");
-    }
 }
