@@ -90,4 +90,23 @@ public interface StopPlaceRepositoryCustom extends DataManagedObjectStructureRep
      * @return map of (netexId, version) to StopPlace
      */
     Map<String, Map<Long, StopPlace>> findByNetexIdsAndVersions(Map<String, Set<Long>> netexIdToVersions);
+
+    /**
+     * Efficiently finds latest version StopPlaces for the given netex IDs using a window function approach
+     * @param netexIds List of netex IDs to find latest versions for
+     * @return List of latest version StopPlace entities
+     */
+    List<StopPlace> findLatestVersionByNetexIds(List<String> netexIds);
+
+    /**
+     * Optimized method for report queries that eagerly fetches all required associations
+     * to avoid N+1 query problems when loading large datasets with deep nesting.
+     * This method uses JOIN FETCH to load all data in minimal queries.
+     *
+     * @param exportParams The search parameters
+     * @param includeChildren Whether to fetch children for parent stop places
+     * @param includeQuays Whether to fetch quays and their associations
+     * @return Page of StopPlaces with eagerly loaded associations
+     */
+    Page<StopPlace> findStopPlacesForReport(ExportParams exportParams, boolean includeChildren, boolean includeQuays);
 }

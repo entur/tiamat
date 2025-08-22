@@ -60,14 +60,18 @@ import org.rutebanken.tiamat.model.WaitingRoomEquipment;
 import org.rutebanken.tiamat.model.Zone_VersionStructure;
 import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
+import org.rutebanken.tiamat.rest.graphql.fetchers.AccessibilityAssessmentDataFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.EntityPermissionsFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.FareZoneAuthoritiesFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.GroupOfStopPlacesMembersFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.GroupOfStopPlacesPurposeOfGroupingFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.KeyValuesDataFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.LocationPermissionsFetcher;
+import org.rutebanken.tiamat.rest.graphql.fetchers.QuayKeyValuesDataFetcher;
+import org.rutebanken.tiamat.rest.graphql.fetchers.StopPlaceKeyValuesDataFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.PolygonFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.TopographicPlaceDataFetcher;
+import org.rutebanken.tiamat.rest.graphql.fetchers.QuayDataFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.StopPlaceFareZoneFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.StopPlaceTariffZoneFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.TagFetcher;
@@ -280,6 +284,18 @@ public class StopPlaceRegisterGraphQLSchema {
 
     @Autowired
     TopographicPlaceDataFetcher topographicPlaceDataFetcher;
+
+    @Autowired
+    QuayDataFetcher quayDataFetcher;
+
+    @Autowired
+    AccessibilityAssessmentDataFetcher accessibilityAssessmentDataFetcher;
+
+    @Autowired
+    QuayKeyValuesDataFetcher quayKeyValuesDataFetcher;
+
+    @Autowired
+    StopPlaceKeyValuesDataFetcher stopPlaceKeyValuesDataFetcher;
 
     @Autowired
     DataFetcher stopPlaceUpdater;
@@ -748,11 +764,11 @@ public class StopPlaceRegisterGraphQLSchema {
 
         registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_PARKING,ID,getNetexIdFetcher());
 
-        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_STOPPLACE, KEY_VALUES, keyValuesDataFetcher);
-        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_PARENT_STOPPLACE, KEY_VALUES, keyValuesDataFetcher);
+        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_STOPPLACE, KEY_VALUES, stopPlaceKeyValuesDataFetcher);
+        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_PARENT_STOPPLACE, KEY_VALUES, stopPlaceKeyValuesDataFetcher);
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_TARIFF_ZONE, KEY_VALUES, keyValuesDataFetcher);
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_FARE_ZONE, KEY_VALUES, keyValuesDataFetcher);
-        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_QUAY, KEY_VALUES, keyValuesDataFetcher);
+        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_QUAY, KEY_VALUES, quayKeyValuesDataFetcher);
 
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_STOPPLACE, POLYGON, polygonFetcher);
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_PARENT_STOPPLACE, POLYGON, polygonFetcher);
@@ -810,7 +826,7 @@ public class StopPlaceRegisterGraphQLSchema {
         registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_FARE_ZONE,FARE_ZONES_MEMBERS,env -> fareZoneObjectTypeCreator.fareZoneMemberType(env));
 
         registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_GROUP_OF_STOPPLACES,PURPOSE_OF_GROUPING,groupOfStopPlacesPurposeOfGroupingFetcher);
-        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_GROUP_OF_STOPPLACES,GROUP_OF_STOP_PLACES_MEMBERS,groupOfStopPlacesMembersFetcher);
+        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_GROUP_OF_STOPPLACES,GROUP_OF_STOP_PLACES_MEMBERS, groupOfStopPlacesMembersFetcher);
 
         registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_GROUP_OF_TARIFF_ZONES,GROUP_OF_TARIFF_ZONES_MEMBERS,env -> groupOfTariffZonesObjectTypeCreator.groupOfTariffZoneMembersType(env));
         registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_GROUP_OF_TARIFF_ZONES,ID,getNetexIdFetcher());
@@ -842,6 +858,10 @@ public class StopPlaceRegisterGraphQLSchema {
 
         registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_STOPPLACE,SUBMODE,env -> transportModeScalar.resolveSubmode(env));
         registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_STOPPLACE,TOPOGRAPHIC_PLACE,topographicPlaceDataFetcher);
+        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_STOPPLACE,QUAYS,quayDataFetcher);
+        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_STOPPLACE,ACCESSIBILITY_ASSESSMENT,accessibilityAssessmentDataFetcher);
+        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_PARENT_STOPPLACE,ACCESSIBILITY_ASSESSMENT,accessibilityAssessmentDataFetcher);
+        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_QUAY,ACCESSIBILITY_ASSESSMENT,accessibilityAssessmentDataFetcher);
         registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_STOPPLACE,PARENT_SITE_REF,env -> {
             SiteRefStructure parentSiteRef = ((StopPlace) env.getSource()).getParentSiteRef();
             if (parentSiteRef != null) {

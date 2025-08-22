@@ -36,6 +36,7 @@ import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
+import org.rutebanken.tiamat.model.Value;
 import org.rutebanken.tiamat.repository.iterator.ScrollableResultIterator;
 import org.rutebanken.tiamat.repository.search.ChangedStopPlaceSearch;
 import org.rutebanken.tiamat.repository.search.SearchHelper;
@@ -199,7 +200,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
         query.setFirstResult(Math.toIntExact(pageable.getOffset()));
         query.setMaxResults(pageable.getPageSize());
-        
+
         List<StopPlace> stopPlaces = query.getResultList();
         return new PageImpl<>(stopPlaces, pageable, stopPlaces.size());
     }
@@ -232,7 +233,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
         query.setFirstResult(Math.toIntExact(pageable.getOffset()));
         query.setMaxResults(pageable.getPageSize());
-        
+
         List<StopPlace> stopPlaces = query.getResultList();
         return new PageImpl<>(stopPlaces, pageable, stopPlaces.size());
     }
@@ -862,7 +863,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     @Override
     public Map<String, Map<Long, StopPlace>> findByNetexIdsAndVersions(Map<String, Set<Long>> netexIdToVersions) {
         Map<String, Map<Long, StopPlace>> resultMap = new HashMap<>();
-        
+
         if (netexIdToVersions.isEmpty()) {
             return resultMap;
         }
@@ -874,50 +875,298 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
             List<String> whereClauses = new ArrayList<>();
             Map<String, Object> parameters = new HashMap<>();
             int paramIndex = 0;
-            
+
             for (Map.Entry<String, Set<Long>> entry : netexIdToVersions.entrySet()) {
                 String netexId = entry.getKey();
                 Set<Long> versions = entry.getValue();
-                
+
                 for (Long version : versions) {
                     String netexIdParam = "netexId" + paramIndex;
                     String versionParam = "version" + paramIndex;
-                    
+
                     whereClauses.add("(sp.netexId = :" + netexIdParam + " AND sp.version = :" + versionParam + ")");
                     parameters.put(netexIdParam, netexId);
                     parameters.put(versionParam, version);
                     paramIndex++;
                 }
             }
-            
+
             // Create optimized query that hits the composite index directly
             String jpql = "SELECT sp FROM StopPlace sp WHERE " + String.join(" OR ", whereClauses);
             TypedQuery<StopPlace> query = entityManager.createQuery(jpql, StopPlace.class);
-            
+
             // Set all parameters
             for (Map.Entry<String, Object> param : parameters.entrySet()) {
                 query.setParameter(param.getKey(), param.getValue());
             }
 
             List<StopPlace> stopPlaces = query.getResultList();
-            
+
             // Organize results by netexId and version - no filtering needed since we queried exact pairs
             for (StopPlace stopPlace : stopPlaces) {
                 String netexId = stopPlace.getNetexId();
                 Long version = stopPlace.getVersion();
                 resultMap.computeIfAbsent(netexId, k -> new HashMap<>()).put(version, stopPlace);
             }
-            
-            logger.debug("Successfully loaded stop places for {}/{} requested netexId/version combinations", 
-                resultMap.values().stream().mapToInt(Map::size).sum(), 
+
+            logger.debug("Successfully loaded stop places for {}/{} requested netexId/version combinations",
+                resultMap.values().stream().mapToInt(Map::size).sum(),
                 netexIdToVersions.values().stream().mapToInt(Set::size).sum());
-                
+
         } catch (Exception e) {
             logger.error("Batch query failed for findByNetexIdsAndVersions", e);
             throw e;
         }
 
         return resultMap;
+    }
+
+    @Override
+    public List<StopPlace> findLatestVersionByNetexIds(List<String> netexIds) {
+        if (netexIds == null || netexIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        logger.debug("Batch loading latest versions for {} stop places using optimized window function query", netexIds.size());
+
+        try {
+            // Use a more efficient approach with window function instead of correlated subquery
+            // This leverages the (netex_id, version DESC) index better
+            String nativeSQL = """
+                WITH latest_versions AS (
+                    SELECT netex_id, version,
+                           ROW_NUMBER() OVER (PARTITION BY netex_id ORDER BY version DESC) as rn
+                    FROM stop_place 
+                    WHERE netex_id = ANY(:netexIds)
+                )
+                SELECT sp.* FROM stop_place sp
+                INNER JOIN latest_versions lv ON sp.netex_id = lv.netex_id AND sp.version = lv.version
+                WHERE lv.rn = 1
+                """;
+
+            Query nativeQuery = entityManager.createNativeQuery(nativeSQL, StopPlace.class);
+            nativeQuery.setParameter("netexIds", netexIds.toArray(new String[0]));
+
+            @SuppressWarnings("unchecked")
+            List<StopPlace> stopPlaces = nativeQuery.getResultList();
+
+            logger.debug("Found {} latest version stop places for {} requested netex IDs",
+                stopPlaces.size(), netexIds.size());
+
+            return stopPlaces;
+
+        } catch (Exception e) {
+            logger.error("Optimized batch query failed for findLatestVersionByNetexIds, falling back to JPQL", e);
+
+            // Fallback to the original JPQL approach if native SQL fails
+            String jpql = "SELECT sp FROM StopPlace sp WHERE sp.netexId IN :netexIds " +
+                         "AND sp.version = (SELECT MAX(sp2.version) FROM StopPlace sp2 WHERE sp2.netexId = sp.netexId)";
+
+            TypedQuery<StopPlace> jpqlQuery = entityManager.createQuery(jpql, StopPlace.class);
+            jpqlQuery.setParameter("netexIds", netexIds);
+
+            return jpqlQuery.getResultList();
+        }
+    }
+
+    @Override
+    public Map<Long, Map<String, Value>> findKeyValuesByIds(Set<Long> stopPlaceIds) {
+        Map<Long, Map<String, Value>> resultMap = new HashMap<>();
+
+        if (stopPlaceIds == null || stopPlaceIds.isEmpty()) {
+            return resultMap;
+        }
+
+        logger.debug("Batch loading keyValues for {} stop places", stopPlaceIds.size());
+
+        // Query to get all keyValues for the requested stop place IDs
+        String sql = "SELECT spkv.stop_place_id, spkv.key_values_key, spkv.key_values_id " +
+                     "FROM stop_place_key_values spkv " +
+                     "WHERE spkv.stop_place_id IN :stopPlaceIds";
+
+        Query query = entityManager.createNativeQuery(sql);
+        query.setParameter("stopPlaceIds", stopPlaceIds);
+
+        @SuppressWarnings("unchecked")
+        List<Object[]> results = query.getResultList();
+
+        // First get all value IDs
+        Set<Long> valueIds = new HashSet<>();
+        Map<Long, Map<String, Long>> stopPlaceKeyToValueId = new HashMap<>();
+
+        for (Object[] row : results) {
+            Long stopPlaceId = ((Number) row[0]).longValue();
+            String key = (String) row[1];
+            Long valueId = ((Number) row[2]).longValue();
+
+            valueIds.add(valueId);
+            stopPlaceKeyToValueId.computeIfAbsent(stopPlaceId, k -> new HashMap<>()).put(key, valueId);
+        }
+
+        // Now batch load all Value entities with their IDs
+        Map<Long, Value> valuesById = new HashMap<>();
+        if (!valueIds.isEmpty()) {
+            String jpql = "SELECT v.id, v FROM Value v WHERE v.id IN :valueIds";
+            jakarta.persistence.TypedQuery<Object[]> valueQuery = entityManager.createQuery(jpql, Object[].class);
+            valueQuery.setParameter("valueIds", valueIds);
+
+            List<Object[]> valueResults = valueQuery.getResultList();
+            for (Object[] row : valueResults) {
+                Long valueId = (Long) row[0];
+                Value value = (Value) row[1];
+                valuesById.put(valueId, value);
+            }
+        }
+
+        // Build the final result map
+        for (Map.Entry<Long, Map<String, Long>> stopPlaceEntry : stopPlaceKeyToValueId.entrySet()) {
+            Long stopPlaceId = stopPlaceEntry.getKey();
+            Map<String, Value> keyValuesForStopPlace = new HashMap<>();
+
+            for (Map.Entry<String, Long> keyValueEntry : stopPlaceEntry.getValue().entrySet()) {
+                String key = keyValueEntry.getKey();
+                Long valueId = keyValueEntry.getValue();
+                Value value = valuesById.get(valueId);
+
+                if (value != null) {
+                    keyValuesForStopPlace.put(key, value);
+                }
+            }
+
+            resultMap.put(stopPlaceId, keyValuesForStopPlace);
+        }
+
+        // Ensure all requested stop place IDs have entries (even empty maps)
+        for (Long stopPlaceId : stopPlaceIds) {
+            resultMap.putIfAbsent(stopPlaceId, new HashMap<>());
+        }
+
+        logger.debug("Found keyValues for {}/{} requested stop places",
+            resultMap.size(), stopPlaceIds.size());
+
+        return resultMap;
+    }
+
+    @Override
+    public Page<StopPlace> findStopPlacesForReport(ExportParams exportParams, boolean includeChildren, boolean includeQuays) {
+        logger.info("Using optimized findStopPlacesForReport with eager fetching");
+
+        // First get the base stop places using the existing query logic
+        Pair<String, Map<String, Object>> queryWithParams = stopPlaceQueryFromSearchBuilder.buildQueryString(exportParams);
+
+        // Get the IDs first to avoid cartesian product issues
+        String idQuery = queryWithParams.getFirst().replace("SELECT s.*", "SELECT s.id");
+        Query idNativeQuery = entityManager.createNativeQuery(idQuery);
+        queryWithParams.getSecond().forEach(idNativeQuery::setParameter);
+
+        long firstResult = exportParams.getStopPlaceSearch().getPageable().getOffset();
+        idNativeQuery.setFirstResult(Math.toIntExact(firstResult));
+        idNativeQuery.setMaxResults(exportParams.getStopPlaceSearch().getPageable().getPageSize());
+
+        @SuppressWarnings("unchecked")
+        List<Number> stopPlaceIds = idNativeQuery.getResultList();
+
+        if (stopPlaceIds.isEmpty()) {
+            return new PageImpl<>(new ArrayList<>(), exportParams.getStopPlaceSearch().getPageable(), 0);
+        }
+
+        // Now fetch with all associations using JPQL and JOIN FETCH
+        // We use multiple queries to avoid cartesian products with multiple collections
+
+        // Query 1: Fetch StopPlaces with basic associations
+        String jpql1 = """
+            SELECT DISTINCT sp FROM StopPlace sp
+            LEFT JOIN FETCH sp.keyValues
+            LEFT JOIN FETCH sp.alternativeNames
+            LEFT JOIN FETCH sp.validBetweens
+            LEFT JOIN FETCH sp.accessibilityAssessment aa1
+            LEFT JOIN FETCH aa1.limitations
+            LEFT JOIN FETCH sp.placeEquipments pe1
+            LEFT JOIN FETCH pe1.installedEquipment
+            LEFT JOIN FETCH sp.topographicPlace tp
+            LEFT JOIN FETCH tp.parentTopographicPlaceRef
+            WHERE sp.id IN :ids
+            """;
+
+        TypedQuery<StopPlace> query1 = entityManager.createQuery(jpql1, StopPlace.class);
+        query1.setParameter("ids", stopPlaceIds.stream().map(Number::longValue).collect(Collectors.toList()));
+        query1.setHint("hibernate.query.passDistinctThrough", false);
+        List<StopPlace> stopPlaces = query1.getResultList();
+
+        // Query 2: Fetch quays if requested
+        if (includeQuays && !stopPlaces.isEmpty()) {
+            String jpql2 = """
+                SELECT DISTINCT sp FROM StopPlace sp
+                LEFT JOIN FETCH sp.quays q
+                LEFT JOIN FETCH q.keyValues
+                LEFT JOIN FETCH q.boardingPositions bp
+                LEFT JOIN FETCH q.accessibilityAssessment aa2
+                LEFT JOIN FETCH aa2.limitations
+                LEFT JOIN FETCH q.placeEquipments pe2
+                LEFT JOIN FETCH pe2.installedEquipment
+                WHERE sp IN :stopPlaces
+                """;
+
+            TypedQuery<StopPlace> query2 = entityManager.createQuery(jpql2, StopPlace.class);
+            query2.setParameter("stopPlaces", stopPlaces);
+            query2.setHint("hibernate.query.passDistinctThrough", false);
+            query2.getResultList(); // This will initialize the quays collection
+        }
+
+        // Query 3: Fetch children for parent stop places if requested
+        if (includeChildren) {
+            List<StopPlace> parentStops = stopPlaces.stream()
+                .filter(StopPlace::isParentStopPlace)
+                .collect(Collectors.toList());
+
+            if (!parentStops.isEmpty()) {
+                String jpql3 = """
+                    SELECT DISTINCT sp FROM StopPlace sp
+                    LEFT JOIN FETCH sp.children c
+                    LEFT JOIN FETCH c.keyValues
+                    LEFT JOIN FETCH c.alternativeNames
+                    LEFT JOIN FETCH c.validBetweens
+                    LEFT JOIN FETCH c.accessibilityAssessment aa3
+                    LEFT JOIN FETCH aa3.limitations
+                    LEFT JOIN FETCH c.placeEquipments pe3
+                    LEFT JOIN FETCH pe3.installedEquipment
+                    WHERE sp IN :parentStops
+                    """;
+
+                TypedQuery<StopPlace> query3 = entityManager.createQuery(jpql3, StopPlace.class);
+                query3.setParameter("parentStops", parentStops);
+                query3.setHint("hibernate.query.passDistinctThrough", false);
+                query3.getResultList(); // This will initialize the children collection
+
+                // If we need quays for children too
+                if (includeQuays) {
+                    Set<StopPlace> allChildren = parentStops.stream()
+                        .flatMap(p -> p.getChildren().stream())
+                        .collect(Collectors.toSet());
+
+                    if (!allChildren.isEmpty()) {
+                        String jpql4 = """
+                            SELECT DISTINCT c FROM StopPlace c
+                            LEFT JOIN FETCH c.quays q
+                            LEFT JOIN FETCH q.keyValues
+                            LEFT JOIN FETCH q.boardingPositions
+                            LEFT JOIN FETCH q.accessibilityAssessment aa4
+                            LEFT JOIN FETCH aa4.limitations
+                            WHERE c IN :children
+                            """;
+
+                        TypedQuery<StopPlace> query4 = entityManager.createQuery(jpql4, StopPlace.class);
+                        query4.setParameter("children", allChildren);
+                        query4.setHint("hibernate.query.passDistinctThrough", false);
+                        query4.getResultList(); // This will initialize child quays
+                    }
+                }
+            }
+        }
+
+        logger.info("Loaded {} stop places with eager fetching for report", stopPlaces.size());
+
+        return new PageImpl<>(stopPlaces, exportParams.getStopPlaceSearch().getPageable(), stopPlaces.size());
     }
 }
 

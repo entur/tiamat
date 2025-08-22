@@ -15,16 +15,17 @@
 
 package org.rutebanken.tiamat.repository;
 
-import org.rutebanken.tiamat.model.DataManagedObjectStructure;
-import org.rutebanken.tiamat.model.Value;
+import org.rutebanken.tiamat.model.AccessibilityAssessment;
 
 import java.util.Map;
 import java.util.Set;
 
-public interface DataManagedObjectStructureRepository<T extends DataManagedObjectStructure> {
+public interface AccessibilityAssessmentRepositoryCustom {
 
-    String findFirstByKeyValues(String key, Set<String> originalIds);
-    default Map<Long, Map<String, Value>> findKeyValuesByIds(Set<Long> ids) {
-        throw new UnsupportedOperationException("No implemenation found for findKeyValuesByIds");
-    }
+    /**
+     * Batch loading method for DataLoader - efficiently loads accessibility assessments by site element IDs
+     * @param siteElementIds Set of site element IDs to load accessibility assessments for
+     * @return Map of site element ID to AccessibilityAssessment
+     */
+    Map<Long, AccessibilityAssessment> findBySiteElementIds(Set<Long> siteElementIds);
 }

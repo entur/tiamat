@@ -15,16 +15,9 @@
 
 package org.rutebanken.tiamat.repository;
 
-import org.rutebanken.tiamat.model.DataManagedObjectStructure;
-import org.rutebanken.tiamat.model.Value;
+import org.rutebanken.tiamat.model.AccessibilityAssessment;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.Map;
-import java.util.Set;
+public interface AccessibilityAssessmentRepository extends JpaRepository<AccessibilityAssessment, Long>, AccessibilityAssessmentRepositoryCustom {
 
-public interface DataManagedObjectStructureRepository<T extends DataManagedObjectStructure> {
-
-    String findFirstByKeyValues(String key, Set<String> originalIds);
-    default Map<Long, Map<String, Value>> findKeyValuesByIds(Set<Long> ids) {
-        throw new UnsupportedOperationException("No implemenation found for findKeyValuesByIds");
-    }
 }

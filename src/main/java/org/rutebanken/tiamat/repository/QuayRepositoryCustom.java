@@ -18,9 +18,11 @@ package org.rutebanken.tiamat.repository;
 import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
 import org.rutebanken.tiamat.dtoassembling.dto.JbvCodeMappingDto;
 import org.rutebanken.tiamat.model.Quay;
+import org.rutebanken.tiamat.model.Value;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public interface QuayRepositoryCustom extends DataManagedObjectStructureRepository<Quay> {
@@ -31,4 +33,10 @@ public interface QuayRepositoryCustom extends DataManagedObjectStructureReposito
 
     List<JbvCodeMappingDto> findJbvCodeMappingsForQuay();
 
+    /**
+     * Batch loading method for DataLoader - efficiently loads quays by stop place IDs
+     * @param stopPlaceIds Set of stop place IDs to load quays for
+     * @return Map of stop place ID to list of quays
+     */
+    Map<Long, List<Quay>> findQuaysByStopPlaceIds(Set<Long> stopPlaceIds);
 }
