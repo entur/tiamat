@@ -13,6 +13,7 @@ import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.model.TopographicPlaceTypeEnumeration;
+import org.rutebanken.tiamat.model.Zone_VersionStructure;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -98,6 +99,9 @@ public class FintrafficAuthorizationService implements AuthorizationService {
 
     @Override
     public boolean canEditEntity(EntityStructure entity) {
+        if (entity == null) {
+            return true;
+        }
         String codespace = getCodespace(entity.getNetexId());
         if (!trivoreAuthorizations.hasAccess(detectEntityType(entity), detectTransportMode(entity), MANAGE)) {
             return false;
@@ -105,8 +109,19 @@ public class FintrafficAuthorizationService implements AuthorizationService {
         if (!trivoreAuthorizations.hasAccessToCodespace(codespace)) {
             return false;
         }
-        if (entity instanceof StopPlace sp) {
-            return canEditEntity(sp.getCentroid());
+
+        if (entity instanceof StopPlace stop) {
+            // Ensure that user has sufficient permission to edit all nested entities
+            if (!stop.getChildren().stream().allMatch(this::canEditEntity)) {
+                return false;
+            }
+            if (!stop.getQuays().stream().allMatch(this::canEditEntity)) {
+                return false;
+            }
+        }
+
+        if (entity instanceof Zone_VersionStructure zone) {
+            return canEditEntity(zone.getCentroid());
         }
         return true;
     }
@@ -155,8 +170,9 @@ public class FintrafficAuthorizationService implements AuthorizationService {
         return topographicPlaces.stream()
                 .filter(tp -> tp.getTopographicPlaceType().equals(TopographicPlaceTypeEnumeration.REGION))
                 .filter(tp -> tp.getKeyValues().get("codespace").getItems().contains(codespace))
+                .peek(Zone_VersionStructure::getPolygon) // Prefetch polygons
                 .collect(Collectors.toList());
-    };
+    }
 
     @Override
     public Set<StopTypeEnumeration> getAllowedStopPlaceTypes(EntityStructure entity) {
@@ -213,6 +229,9 @@ public class FintrafficAuthorizationService implements AuthorizationService {
 
     private final Pattern netexIdPattern = Pattern.compile("([A-Z]{3}):([^:]*):([^:]*)");
     private String getCodespace(String netexId) {
+        if (netexId == null) {
+            return null;
+        }
         Matcher matcher = netexIdPattern.matcher(netexId);
         if (matcher.matches()) {
             return matcher.group(1);
