@@ -27,7 +27,7 @@ auth0:
 organisation:
   service: http://baba.prd.entur.internal
 
-roleAssignmentExtractor: jwt
+roleAssignmentExtractor: baba
 
 rbac:
   enabled: true
