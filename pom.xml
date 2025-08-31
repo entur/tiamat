@@ -71,7 +71,7 @@
         <maven.compiler.args>--add-opens java.base/java.lang=ALL-UNNAMED</maven.compiler.args>
         <testcontainers.version>1.21.3</testcontainers.version>
         <build-helper-maven-plugin.version>3.6.1</build-helper-maven-plugin.version>
-        <metrics-graphite.version>4.2.35</metrics-graphite.version>
+        <metrics-graphite.version>4.2.36</metrics-graphite.version>
         <!-- There is breaking change in spring-boot 3.4/hibernate 6.6.5 -->
         <hibernate.version>6.5.3.Final</hibernate.version>
     </properties>
