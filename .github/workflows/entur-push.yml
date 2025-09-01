@@ -50,6 +50,11 @@ jobs:
               -Dsonar.projectName=${SONAR_PROJECT_NAME} \
               -Dsonar.host.url=https://sonarcloud.io \
               -Dsonar.login=${SONAR_TOKEN}
+  docker-lint:
+    needs: [maven-verify]
+    uses: entur/gha-docker/.github/workflows/lint.yml@v1
+    with:
+      ignore: [DL3018]
 
   docker-build:
     if: github.repository_owner == 'entur' && github.event_name == 'push'
@@ -62,3 +67,9 @@ jobs:
     if: github.repository_owner == 'entur' && github.event_name == 'push'
     needs: [docker-build]
     uses: entur/gha-docker/.github/workflows/push.yml@v1
+
+  docker-scan:
+    needs: [ docker-build ]
+    uses: entur/gha-security/.github/workflows/docker-scan.yml@v2
+    with:
+      image_artifact: ${{ needs.docker-build.outputs.image_artifact }}
