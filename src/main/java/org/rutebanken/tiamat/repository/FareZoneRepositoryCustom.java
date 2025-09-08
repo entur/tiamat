@@ -21,6 +21,7 @@ import org.rutebanken.tiamat.model.FareZone;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -46,4 +47,11 @@ public interface FareZoneRepositoryCustom extends DataManagedObjectStructureRepo
     void updateStopPlaceTariffZoneRef();
 
     List<String> findAllFareZoneAuthorities();
+
+    /**
+     * Batch loading method for DataLoader - efficiently loads fare zones by stop place IDs
+     * @param stopPlaceIds Set of stop place IDs to load fare zones for
+     * @return Map of stop place ID to list of fare zones
+     */
+    Map<Long, List<FareZone>> findFareZonesByStopPlaceIds(Set<Long> stopPlaceIds);
 }
