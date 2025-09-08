@@ -35,6 +35,7 @@ import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
+import org.rutebanken.tiamat.auth.AuthorizationService;
 import org.rutebanken.tiamat.model.AccessibilityAssessment;
 import org.rutebanken.tiamat.model.AccessibilityLimitation;
 import org.rutebanken.tiamat.model.CycleStorageEquipment;
@@ -359,6 +360,10 @@ public class StopPlaceRegisterGraphQLSchema {
     private UserPermissionsFetcher userPermissionsFetcher;
 
 
+    @Autowired
+    private AuthorizationService authorizationService;
+
+    @Autowired
     @PostConstruct
     public void init() {
 
@@ -683,6 +688,10 @@ public class StopPlaceRegisterGraphQLSchema {
     public GraphQLCodeRegistry buildCodeRegistry(TypeResolver stopPlaceTypeResolver) {
         GraphQLCodeRegistry.Builder codeRegistryBuilder = GraphQLCodeRegistry.newCodeRegistry();
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_STOPPLACE, IMPORTED_ID, getOriginalIdsFetcher());
+
+        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_STOPPLACE, CHANGED_BY, getChangedByFetcher(authorizationService));
+        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_PARENT_STOPPLACE, CHANGED_BY, getChangedByFetcher(authorizationService));
+
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_PARENT_STOPPLACE, IMPORTED_ID, getOriginalIdsFetcher());
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_QUAY, IMPORTED_ID, getOriginalIdsFetcher());
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_STOPPLACE, ID, getNetexIdFetcher());
@@ -996,6 +1005,15 @@ public class StopPlaceRegisterGraphQLSchema {
         return env -> {
             if(env.getSource() instanceof DataManagedObjectStructure dataManagedObjectStructure){
                 return dataManagedObjectStructure.getOriginalIds();
+            }
+            return null;
+        };
+    }
+
+    private static DataFetcher<Object> getChangedByFetcher(AuthorizationService authorizationService) {
+        return env -> {
+            if(env.getSource() instanceof DataManagedObjectStructure dataManagedObjectStructure && !authorizationService.isGuest()){
+                return dataManagedObjectStructure.getChangedBy();
             }
             return null;
         };
