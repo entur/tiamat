@@ -95,6 +95,7 @@ data:
     logging.level.io.micrometer.prometheus=WARN
     logging.level.org.geotools=WARN
     logging.level.hsqldb.db=WARN
+    logging.level.org.rutebanken.helper.organisation.ReflectionAuthorizationService=ERROR
 
     #Profile
     spring.profiles.active=gcs-blobstore,google-pubsub
