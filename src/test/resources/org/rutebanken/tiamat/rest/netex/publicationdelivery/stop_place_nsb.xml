@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PublicationDelivery xmlns="http://www.netex.org.uk/netex">
+    <PublicationTimestamp>2017-04-18T12:57:27.796+02:00</PublicationTimestamp>
+    <ParticipantRef>NSB</ParticipantRef>
+    <Description>NSB Grails stasjoner til NeTex</Description>
+    <dataObjects>
+        <SiteFrame id="NSB:SiteFrame:1" version="1">
+            <codespaces>
+                <Codespace id="nsb">
+                    <Xmlns>NSB</Xmlns>
+                    <XmlnsUrl>http://www.rutebanken.org/ns/nsb</XmlnsUrl>
+                </Codespace>
+            </codespaces>
+            <FrameDefaults>
+                <DefaultLocale>
+                    <TimeZone>Europe/Oslo</TimeZone>
+                    <DefaultLanguage>no</DefaultLanguage>
+                </DefaultLocale>
+            </FrameDefaults>
+            <stopPlaces>
+                <StopPlace id="NSB:StopPlace:007602146" version="1">
+                    <keyList>
+                        <KeyValue>
+                            <Key>grailsId</Key>
+                            <Value>3</Value>
+                        </KeyValue>
+                        <KeyValue>
+                            <Key>lisaId</Key>
+                            <Value>2146</Value>
+                        </KeyValue>
+                        <KeyValue>
+                            <Key>jbvCode</Key>
+                            <Value>ADL</Value>
+                        </KeyValue>
+                        <KeyValue>
+                            <Key>iffCode</Key>
+                            <Value>7602146</Value>
+                        </KeyValue>
+                        <KeyValue>
+                            <Key>uicCode</Key>
+                            <Value>7602146</Value>
+                        </KeyValue>
+                        <KeyValue>
+                            <Key>imported-id</Key>
+                            <Value>NRI:StopPlace:761037602</Value>
+                        </KeyValue>
+                    </keyList>
+                    <Name lang="no">Arendal</Name>
+                    <Centroid>
+                        <Location srsName="WGS84"><!--Match on NRI quays--><Longitude>8.769146</Longitude>
+                            <Latitude>58.465256</Latitude>
+                        </Location>
+                    </Centroid>
+                    <Url>http://www.jernbaneverket.no/no/Jernbanen/Stasjonssok/-A-/Arendal/</Url>
+                    <PostalAddress id="NSB:PostalAddress:3" version="1">
+                        <AddressLine1>Møllebakken 15</AddressLine1>
+                        <AddressLine2> 4841 Arendal</AddressLine2>
+                    </PostalAddress>
+                    <AccessibilityAssessment id="NSB:AccessibilityAssessment:3" version="1">
+                        <MobilityImpairedAccess>true</MobilityImpairedAccess>
+                        <limitations>
+                            <AccessibilityLimitation>
+                                <WheelchairAccess>true</WheelchairAccess>
+                                <StepFreeAccess>true</StepFreeAccess>
+                            </AccessibilityLimitation>
+                        </limitations>
+                    </AccessibilityAssessment>
+                    <placeEquipments>
+                        <WaitingRoomEquipment id="NSB:WaitingRoomEquipment:3" version="1"/>
+                        <SanitaryEquipment id="NSB:SanitaryEquipment:3" version="1">
+                            <Gender>both</Gender>
+                            <SanitaryFacilityList>toilet wheelChairAccessToilet</SanitaryFacilityList>
+                        </SanitaryEquipment>
+                        <TicketingEquipment id="NSB:TicketingEquipment:3" version="1">
+                            <NumberOfMachines>1</NumberOfMachines>
+                        </TicketingEquipment>
+                    </placeEquipments>
+                    <localServices>
+                        <LeftLuggageService id="NSB:LeftLuggageService:3" version="1">
+                            <SelfServiceLockers>true</SelfServiceLockers>
+                        </LeftLuggageService>
+                        <TicketingService id="NSB:TicketingService:3" version="1">
+                            <TicketCounterService>true</TicketCounterService>
+                        </TicketingService>
+                    </localServices>
+                    <StopPlaceType>railStation</StopPlaceType>
+                    <Weighting>interchangeAllowed</Weighting>
+                    <quays>
+                        <Quay id="NSB:Quay:0076021461" version="1">
+                            <keyList>
+                                <KeyValue>
+                                    <Key>grails-platformId</Key>
+                                    <Value>825930</Value>
+                                </KeyValue>
+                                <KeyValue>
+                                    <Key>uicCode</Key>
+                                    <Value>7602146</Value>
+                                </KeyValue>
+                            </keyList>
+                            <Centroid>
+                                <Location srsName="WGS84"><!--Match on NRI quays--><Longitude>8.769146</Longitude>
+                                    <Latitude>58.465256</Latitude>
+                                </Location>
+                            </Centroid>
+                            <PublicCode>1</PublicCode>
+                        </Quay>
+                    </quays>
+                </StopPlace>
+            </stopPlaces>
+        </SiteFrame>
+    </dataObjects>
+</PublicationDelivery>

@@ -45,13 +45,10 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.xml.sax.SAXException;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -66,7 +63,6 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class ImportResourceTest extends TiamatIntegrationTest {
-    //todo: refactor this test and move xml files in test resources
 
     @Autowired
     private ImportResource importResource;
@@ -77,7 +73,7 @@ public class ImportResourceTest extends TiamatIntegrationTest {
     @Autowired
     private PublicationDeliveryHelper publicationDeliveryHelper;
 
-    private LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
+    private final LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
 
     /**
      * When sending a stop place with the same ID twice, the same stop place must be returned.
@@ -376,7 +372,7 @@ public class ImportResourceTest extends TiamatIntegrationTest {
                 .filter(kv -> "imported-id".equals(kv.getKey()))
                 .map(KeyValueStructure::getValue)
                 .findFirst()
-                .get();
+                .orElse(null);
         assertThat(importedIds).contains(stopPlace.getId());
         assertThat(importedIds).contains(stopPlace2.getId());
         assertThat(result.getFirst().getQuays().getQuayRefOrQuay()).hasSize(2);
@@ -428,8 +424,6 @@ public class ImportResourceTest extends TiamatIntegrationTest {
 
     /**
      * When importing a stop place witch is a direct match with import type MERGE. No changes should be made to the stop place.
-     * <p>
-     * https://rutebanken.atlassian.net/browse/NRP-1587
      */
     @Test
     public void initialImportThenMergeShouldNotMergeNearbyQuays() throws Exception {
@@ -482,9 +476,6 @@ public class ImportResourceTest extends TiamatIntegrationTest {
 
     }
 
-    /**
-     * https://rutebanken.atlassian.net/browse/NRP-830
-     */
     @Test
     public void handleChangesToQuaysWithoutSavingDuplicates() throws Exception {
 
@@ -984,59 +975,9 @@ public class ImportResourceTest extends TiamatIntegrationTest {
     @Test
     public void importPublicationDeliveryAndVerifyStatusCode200() throws Exception {
 
-        String xml = """
-                <?xml version="1.0" encoding="utf-8"?>
-                <PublicationDelivery version="1.0" xmlns="http://www.netex.org.uk/netex"
-                                     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                                     xsi:schemaLocation="http://www.netex.org.uk/netex ../../xsd/NeTEx_publication.xsd">
-                    <PublicationTimestamp>2016-05-18T15:00:00.0Z</PublicationTimestamp>
-                    <ParticipantRef>NHR</ParticipantRef>
-                    <dataObjects>
-                        <SiteFrame version="01" id="nhr:sf:1">
-                            <FrameDefaults>
-                               <DefaultLocale>
-                                   <TimeZone>Europe/Oslo</TimeZone>
-                                   <DefaultLanguage>no</DefaultLanguage>
-                               </DefaultLocale>
-                            </FrameDefaults>
-                            <stopPlaces>
-                                <StopPlace version="01" created="2016-04-21T09:00:00.0Z" id="nhr:sp:1">
-                                    <ValidBetween>
-                                        <FromDate>2017-05-11T10:20:27.394+02:00</FromDate>
-                                    </ValidBetween>\
-                                    <Name lang="no-NO">Krokstien</Name>
-                                    <Centroid>
-                                        <Location srsName="WGS84">
-                                            <Longitude>10.8577903</Longitude>
-                                            <Latitude>59.910579</Latitude>
-                                        </Location>
-                                    </Centroid>
-                                    <TransportMode>bus</TransportMode>
-                                    <StopPlaceType>onstreetBus</StopPlaceType>
-                                    <quays>
-                                        <Quay version="01" created="2016-04-21T09:01:00.0Z" id="nhr:Quay:1">
-                                            <Centroid>
-                                                <Location srsName="WGS84">
-                                                    <Longitude>10.8577903</Longitude>
-                                                    <Latitude>59.910579</Latitude>
-                                                </Location>
-                                            </Centroid>
-                                            <Covered>outdoors</Covered>
-                                            <Lighting>wellLit</Lighting>
-                                            <QuayType>busStop</QuayType>
-                                        </Quay>
-                                    </quays>
-                                </StopPlace>
-                            </stopPlaces>
-                        </SiteFrame>
-                    </dataObjects>
-                </PublicationDelivery>""";
+        final FileInputStream fileInputStream = new FileInputStream("src/test/resources/org/rutebanken/tiamat/rest/netex/publicationdelivery/stop_place_basic.xml");
 
-
-        InputStream stream = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8));
-
-
-        Response response = importResource.importPublicationDelivery(stream);
+        Response response = importResource.importPublicationDelivery(fileInputStream);
 
         assertThat(response.getStatus()).isEqualTo(200);
     }
@@ -1079,40 +1020,8 @@ public class ImportResourceTest extends TiamatIntegrationTest {
     @Test
     public void importBasicStopPlace() throws JAXBException, IOException, SAXException {
 
-        String xml = """
-                <PublicationDelivery
-                 version="any"
-                 xmlns="http://www.netex.org.uk/netex"
-                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                 xsi:schemaLocation="http://www.netex.org.uk/netex ../../xsd/NeTEx_publication.xsd">
-                 <!-- Når denne dataleveransen ble generert -->
-                 <PublicationTimestamp>2016-05-18T15:00:00.0Z</PublicationTimestamp>
-                 <ParticipantRef>NHR</ParticipantRef>
-                 <dataObjects>
-                  <SiteFrame version="any" id="nhr:sf:1">
-                   <FrameDefaults>
-                     <DefaultLocale>
-                       <TimeZone>Europe/Oslo</TimeZone>
-                       <DefaultLanguage>no</DefaultLanguage>
-                     </DefaultLocale>
-                   </FrameDefaults>
-                   <stopPlaces>
-                    <!--===Stop=== -->
-                    <!-- Merk: Holdeplass-ID vil komme fra Holdeplassregisteret -->
-                    <StopPlace version="1" created="2016-04-21T09:00:00.0Z" id="nhr:sp:2">
-                     <Name lang="no-NO">Krokstien</Name>
-                    </StopPlace>
-                   </stopPlaces>
-                  </SiteFrame>
-                 </dataObjects>
-                </PublicationDelivery>
-
-                """;
-
-        InputStream stream = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8));
-
-
-        Response response = importResource.importPublicationDelivery(stream);
+        final FileInputStream fileInputStream = new FileInputStream("src/test/resources/org/rutebanken/tiamat/rest/netex/publicationdelivery/stop_place_basic.xml");
+        Response response = importResource.importPublicationDelivery(fileInputStream);
         assertThat(response.getStatus()).isEqualTo(200);
 
         StreamingOutput streamingOutput = (StreamingOutput) response.getEntity();
@@ -1123,127 +1032,9 @@ public class ImportResourceTest extends TiamatIntegrationTest {
 
     @Test
     public void importNSBStopPlace() throws JAXBException, IOException, SAXException {
-        String xml = """
-                <?xml version="1.0" encoding="UTF-8"?>
-                <PublicationDelivery xmlns="http://www.netex.org.uk/netex">
-                   <PublicationTimestamp>2017-04-18T12:57:27.796+02:00</PublicationTimestamp>
-                   <ParticipantRef>NSB</ParticipantRef>
-                   <Description>NSB Grails stasjoner til NeTex</Description>
-                   <dataObjects>
-                      <SiteFrame id="NSB:SiteFrame:1" version="1">
-                         <codespaces>
-                            <Codespace id="nsb">
-                               <Xmlns>NSB</Xmlns>
-                               <XmlnsUrl>http://www.rutebanken.org/ns/nsb</XmlnsUrl>
-                            </Codespace>
-                         </codespaces>
-                         <FrameDefaults>
-                           <DefaultLocale>
-                               <TimeZone>Europe/Oslo</TimeZone>
-                               <DefaultLanguage>no</DefaultLanguage>
-                           </DefaultLocale>
-                         </FrameDefaults>
-                         <stopPlaces>
-                  \s
-                  \s
-                            <StopPlace id="NSB:StopPlace:007602146" version="1">
-                               <keyList>
-                                  <KeyValue>
-                                     <Key>grailsId</Key>
-                                     <Value>3</Value>
-                                  </KeyValue>
-                                  <KeyValue>
-                                     <Key>lisaId</Key>
-                                     <Value>2146</Value>
-                                  </KeyValue>
-                                  <KeyValue>
-                                     <Key>jbvCode</Key>
-                                     <Value>ADL</Value>
-                                  </KeyValue>
-                                  <KeyValue>
-                                     <Key>iffCode</Key>
-                                     <Value>7602146</Value>
-                                  </KeyValue>
-                                  <KeyValue>
-                                     <Key>uicCode</Key>
-                                     <Value>7602146</Value>
-                                  </KeyValue>
-                                  <KeyValue>
-                                     <Key>imported-id</Key>
-                                     <Value>NRI:StopPlace:761037602</Value>
-                                  </KeyValue>
-                               </keyList>
-                               <Name lang="no">Arendal</Name>
-                               <Centroid>
-                                  <Location srsName="WGS84"><!--Match on NRI quays--><Longitude>8.769146</Longitude>
-                                     <Latitude>58.465256</Latitude>
-                                  </Location>
-                               </Centroid>
-                               <Url>http://www.jernbaneverket.no/no/Jernbanen/Stasjonssok/-A-/Arendal/</Url>
-                               <PostalAddress id="NSB:PostalAddress:3" version="1">
-                                  <AddressLine1>Møllebakken 15</AddressLine1>
-                                  <AddressLine2> 4841 Arendal</AddressLine2>
-                               </PostalAddress>
-                               <AccessibilityAssessment id="NSB:AccessibilityAssessment:3" version="1">
-                                  <MobilityImpairedAccess>true</MobilityImpairedAccess>
-                                  <limitations>
-                                     <AccessibilityLimitation>
-                                        <WheelchairAccess>true</WheelchairAccess>
-                                        <StepFreeAccess>true</StepFreeAccess>
-                                     </AccessibilityLimitation>
-                                  </limitations>
-                               </AccessibilityAssessment>
-                               <placeEquipments>
-                                  <WaitingRoomEquipment id="NSB:WaitingRoomEquipment:3" version="1"/>
-                                  <SanitaryEquipment id="NSB:SanitaryEquipment:3" version="1">
-                                     <Gender>both</Gender>
-                                     <SanitaryFacilityList>toilet wheelChairAccessToilet</SanitaryFacilityList>
-                                  </SanitaryEquipment>
-                                  <TicketingEquipment id="NSB:TicketingEquipment:3" version="1">
-                                     <NumberOfMachines>1</NumberOfMachines>
-                                  </TicketingEquipment>
-                               </placeEquipments>
-                               <localServices>
-                                  <LeftLuggageService id="NSB:LeftLuggageService:3" version="1">
-                                     <SelfServiceLockers>true</SelfServiceLockers>
-                                  </LeftLuggageService>
-                                  <TicketingService id="NSB:TicketingService:3" version="1">
-                                     <TicketCounterService>true</TicketCounterService>
-                                  </TicketingService>
-                               </localServices>
-                               <StopPlaceType>railStation</StopPlaceType>
-                               <Weighting>interchangeAllowed</Weighting>
-                               <quays>
-                                  <Quay id="NSB:Quay:0076021461" version="1">
-                                     <keyList>
-                                        <KeyValue>
-                                           <Key>grails-platformId</Key>
-                                           <Value>825930</Value>
-                                        </KeyValue>
-                                        <KeyValue>
-                                           <Key>uicCode</Key>
-                                           <Value>7602146</Value>
-                                        </KeyValue>
-                                     </keyList>
-                                     <Centroid>
-                                        <Location srsName="WGS84"><!--Match on NRI quays--><Longitude>8.769146</Longitude>
-                                           <Latitude>58.465256</Latitude>
-                                        </Location>
-                                     </Centroid>
-                                     <PublicCode>1</PublicCode>
-                                  </Quay>
-                               </quays>
-                            </StopPlace>
-                           </stopPlaces>\
-                       </SiteFrame>\
-                   </dataObjects>\
-                </PublicationDelivery>""";
 
-
-        InputStream stream = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8));
-
-
-        Response response = importResource.importPublicationDelivery(stream);
+        final FileInputStream fileInputStream = new FileInputStream("src/test/resources/org/rutebanken/tiamat/rest/netex/publicationdelivery/stop_place_nsb.xml");
+        Response response = importResource.importPublicationDelivery(fileInputStream);
         assertThat(response.getStatus()).isEqualTo(200);
 
         StreamingOutput streamingOutput = (StreamingOutput) response.getEntity();

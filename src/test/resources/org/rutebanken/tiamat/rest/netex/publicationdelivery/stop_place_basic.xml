@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<PublicationDelivery
+        version="any"
+        xmlns="http://www.netex.org.uk/netex"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.netex.org.uk/netex ../../xsd/NeTEx_publication.xsd">
+    <!-- Når denne dataleveransen ble generert -->
+    <PublicationTimestamp>2016-05-18T15:00:00.0Z</PublicationTimestamp>
+    <ParticipantRef>NHR</ParticipantRef>
+    <dataObjects>
+        <SiteFrame version="any" id="nhr:sf:1">
+            <FrameDefaults>
+                <DefaultLocale>
+                    <TimeZone>Europe/Oslo</TimeZone>
+                    <DefaultLanguage>no</DefaultLanguage>
+                </DefaultLocale>
+            </FrameDefaults>
+            <stopPlaces>
+                <!--===Stop=== -->
+                <!-- Merk: Holdeplass-ID vil komme fra Holdeplassregisteret -->
+                <StopPlace version="1" created="2016-04-21T09:00:00.0Z" id="nhr:sp:2">
+                    <Name lang="no-NO">Krokstien</Name>
+                </StopPlace>
+            </stopPlaces>
+        </SiteFrame>
+    </dataObjects>
+</PublicationDelivery>
