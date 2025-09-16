@@ -103,6 +103,7 @@ public class JerseyConfig {
         publicServicesJersey.setLoadOnStartup(0);
         publicServicesJersey.getInitParameters().put("swagger.scanner.id", PUBLIC_SWAGGER_SCANNER_ID);
         publicServicesJersey.getInitParameters().put("swagger.config.id", PUBLIC_SWAGGER_CONFIG_ID);
+        publicServicesJersey.getInitParameters().put("jersey.config.server.provider.packages", "org.rutebanken.tiamat");
         return publicServicesJersey;
     }
 
@@ -129,6 +130,7 @@ public class JerseyConfig {
 
         healthServicesJersey.getInitParameters().put("swagger.scanner.id", HEALTH_SWAGGER_SCANNER_ID);
         healthServicesJersey.getInitParameters().put("swagger.config.id", HEALTH_SWAGGER_CONFIG_ID);
+        healthServicesJersey.getInitParameters().put("jersey.config.server.provider.packages", "org.rutebanken.tiamat");
         healthServicesJersey.setLoadOnStartup(0);
         return healthServicesJersey;
     }
@@ -156,6 +158,7 @@ public class JerseyConfig {
 
         prometheusServicesJersey.getInitParameters().put("swagger.scanner.id", PROMETHEUS_SWAGGER_SCANNER_ID);
         prometheusServicesJersey.getInitParameters().put("swagger.config.id", PROMETHEUS_SWAGGER_CONFIG_ID);
+        prometheusServicesJersey.getInitParameters().put("jersey.config.server.provider.packages", "org.rutebanken.tiamat");
         prometheusServicesJersey.setLoadOnStartup(0);
         return prometheusServicesJersey;
     }
@@ -184,6 +187,7 @@ public class JerseyConfig {
         adminServicesJersey.setLoadOnStartup(0);
         adminServicesJersey.getInitParameters().put("swagger.scanner.id", ADMIN_SWAGGER_SCANNER_ID);
         adminServicesJersey.getInitParameters().put("swagger.config.id", ADMIN_SWAGGER_CONFIG_ID);
+        adminServicesJersey.getInitParameters().put("jersey.config.server.provider.packages", "org.rutebanken.tiamat");
         return adminServicesJersey;
     }
 
