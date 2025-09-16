@@ -247,7 +247,7 @@ public class StopPlaceQueryFromSearchBuilder {
                 String countryQuery = "topographic_place_id in (" +
                         "select tp.id from topographic_place tp " +
                             "left join topographic_place ptp " +
-                                "on tp.parent_ref = ptp.netex_id and tp.parent_ref_version = CAST(ptp.version as text) " +
+                                "on tp.parent_ref = ptp.netex_id and CAST(tp.parent_ref_version as bigint) = ptp.version " +
                             "where (tp.topographic_place_type = 'MUNICIPALITY' or tp.topographic_place_type = 'COUNTY' or tp.topographic_place_type = 'COUNTRY') " +
                             "and (tp.parent_ref = :countryId or ptp.parent_ref = :countryId or tp.netex_id = :countryId) " +
                             "and tp.version = (select max(tpv.version) from topographic_place tpv where tpv.netex_id = tp.netex_id))";
