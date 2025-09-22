@@ -31,6 +31,8 @@ public class TicketingEquipment_VersionStructure
     protected Boolean ticketMachines;
     protected BigInteger numberOfMachines;
     protected Boolean ticketOffice;
+    protected Boolean audioInterfaceAvailable;
+    protected Boolean tactileInterfaceAvailable;
 
     @Transient
     protected List<VehicleModeEnumeration> vehicleModes;
@@ -189,4 +191,19 @@ public class TicketingEquipment_VersionStructure
         this.inductionLoops = value;
     }
 
+    public Boolean isAudioInterfaceAvailable() {
+        return audioInterfaceAvailable;
+    }
+
+    public void setAudioInterfaceAvailable(Boolean value) {
+        this.audioInterfaceAvailable = value;
+    }
+
+    public Boolean isTactileInterfaceAvailable() {
+        return tactileInterfaceAvailable;
+    }
+
+    public void setTactileInterfaceAvailable(Boolean value) {
+        this.tactileInterfaceAvailable = value;
+    }
 }

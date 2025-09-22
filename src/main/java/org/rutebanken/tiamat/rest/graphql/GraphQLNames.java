@@ -287,6 +287,8 @@ public class GraphQLNames {
     public static final String TICKET_MACHINES = "ticketMachines";
     public static final String TICKET_OFFICE = "ticketOffice";
     public static final String NUMBER_OF_MACHINES = "numberOfMachines";
+    public static final String AUDIO_INTERFACE_AVAILABLE = "audioInterfaceAvailable";
+    public static final String TACTILE_INTERFACE_AVAILABLE = "tactileInterfaceAvailable";
 
     //CycleStorageEquipment
     public static final String NUMBER_OF_SPACES = "numberOfSpaces";

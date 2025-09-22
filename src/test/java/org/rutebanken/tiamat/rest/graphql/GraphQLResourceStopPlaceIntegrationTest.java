@@ -259,6 +259,8 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                 .body("placeEquipments.ticketingEquipment[0].ticketMachines", equalTo(ticketingEquipment.isTicketMachines()))
                 .body("placeEquipments.ticketingEquipment[0].ticketOffice", equalTo(ticketingEquipment.isTicketOffice()))
                 .body("placeEquipments.ticketingEquipment[0].numberOfMachines", equalTo(ticketingEquipment.getNumberOfMachines().intValue()))
+                .body("placeEquipments.ticketingEquipment[0].audioInterfaceAvailable", equalTo(ticketingEquipment.isAudioInterfaceAvailable()))
+                .body("placeEquipments.ticketingEquipment[0].tactileInterfaceAvailable", equalTo(ticketingEquipment.isTactileInterfaceAvailable()))
                 //waitingRoomEquipment
                 .body("placeEquipments.waitingRoomEquipment[0].id", equalTo(waitingRoomEquipment.getNetexId()))
                 .body("placeEquipments.waitingRoomEquipment[0].seats", equalTo(waitingRoomEquipment.getSeats().intValue()))
