@@ -74,6 +74,16 @@ public class QuayTest extends TiamatIntegrationTest {
     }
 
     @Test
+    public void persistQuayWithUrl() {
+        Quay quay = new Quay();
+        quay.setUrl("https://example.com/test-quay");
+        quayRepository.save(quay);
+
+        Quay actual = quayRepository.findFirstByNetexIdOrderByVersionDesc(quay.getNetexId());
+        assertThat(actual.getUrl()).isEqualTo("https://example.com/test-quay");
+    }
+
+    @Test
     public void persistQuayWithPrivateCode() {
         Quay quay = new Quay();
 

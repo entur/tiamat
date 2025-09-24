@@ -49,6 +49,7 @@ import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.STOP_PLACE_TYPE;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.SUBMODE;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.TRANSPORT_MODE;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.TYPE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.URL;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.VALID_BETWEEN;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.VALUE;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.WEIGHTING;
@@ -123,6 +124,11 @@ public class StopPlaceMapper {
             }
             stopPlace.getPrivateCode().setType((String) privateCodeInputMap.get(TYPE));
             stopPlace.getPrivateCode().setValue((String) privateCodeInputMap.get(VALUE));
+            isUpdated = true;
+        }
+
+        if (input.get(URL) != null) {
+            stopPlace.setUrl((String) input.get(URL));
             isUpdated = true;
         }
 

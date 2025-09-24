@@ -607,6 +607,9 @@ public class CustomGraphQLTypes {
             .field(newFieldDefinition()
                 .name(PUBLIC_CODE)
                 .type(GraphQLString))
+            .field(newFieldDefinition()
+                .name(URL)
+                .type(GraphQLString))
             .field(geometryFieldDefinition)
             .build();
 
@@ -618,6 +621,9 @@ public class CustomGraphQLTypes {
                     .type(GraphQLString))
             .field(newInputObjectField()
                 .name(PUBLIC_CODE)
+                .type(GraphQLString))
+            .field(newInputObjectField()
+                .name(URL)
                 .type(GraphQLString))
             .field(newInputObjectField()
                     .name(GEOMETRY)
@@ -792,6 +798,9 @@ public class CustomGraphQLTypes {
             .field(newFieldDefinition()
                     .name(PARKING_PROPERTIES)
                     .type(parkingPropertiesObjectType))
+            .field(newFieldDefinition()
+                    .name(URL)
+                    .type(GraphQLString))
             .build();
 
     public static GraphQLInputObjectType parkingAreaInputObjectType = GraphQLInputObjectType.newInputObject()
@@ -805,6 +814,9 @@ public class CustomGraphQLTypes {
             .field(newInputObjectField()
                     .name(PARKING_PROPERTIES)
                     .type(parkingPropertiesInputObjectType))
+            .field(newInputObjectField()
+                    .name(URL)
+                    .type(GraphQLString))
             .build();
 
     public static GraphQLObjectType transportModeSubmodeObjectType = newObject()
@@ -881,6 +893,9 @@ public class CustomGraphQLTypes {
                 .field(newFieldDefinition()
                         .name(PARKING_AREAS)
                         .type(new GraphQLList(parkingAreaObjectType)))
+                .field(newFieldDefinition()
+                        .name(URL)
+                        .type(GraphQLString))
                 .field(geometryFieldDefinition)
                 .build();
     }
@@ -950,6 +965,9 @@ public class CustomGraphQLTypes {
                 .field(newInputObjectField()
                         .name(VALID_BETWEEN)
                         .type(validBetweenInputObjectType))
+                .field(newInputObjectField()
+                        .name(URL)
+                        .type(GraphQLString))
                 .build();
     }
 }

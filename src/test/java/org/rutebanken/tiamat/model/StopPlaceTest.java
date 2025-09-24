@@ -251,6 +251,15 @@ public class StopPlaceTest extends TiamatIntegrationTest {
     }
 
     @Test
+    public void persistStopPlaceWithUrl() {
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setUrl("https://example.com/test-stop-place");
+        stopPlaceRepository.save(stopPlace);
+        StopPlace actualStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId());
+        assertThat(actualStopPlace.getUrl()).isEqualTo("https://example.com/test-stop-place");
+    }
+
+    @Test
     public void persistStopPlaceWithValidBetween() {
 
         StopPlace stopPlace = new StopPlace();

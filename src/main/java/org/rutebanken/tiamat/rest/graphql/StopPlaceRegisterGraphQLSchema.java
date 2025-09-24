@@ -393,6 +393,11 @@ public class StopPlaceRegisterGraphQLSchema {
                         .build()
         );
 
+        commonFieldsList.add(newFieldDefinition()
+                .name(URL)
+                .type(GraphQLString)
+                .build());
+
         GraphQLObjectType validBetweenObjectType = createValidBetweenObjectType();
         GraphQLObjectType userPermissionsObjectType = newObject()
                 .name(OUTPUT_TYPE_USER_PERMISSIONS)
@@ -1493,6 +1498,7 @@ public class StopPlaceRegisterGraphQLSchema {
         commonInputFieldsList.add(newInputObjectField().name(ALTERNATIVE_NAMES).type(new GraphQLList(alternativeNameInputObjectType)).build());
         commonInputFieldsList.add(newInputObjectField().name(PLACE_EQUIPMENTS).type(equipmentInputType).build());
         commonInputFieldsList.add(newInputObjectField().name(KEY_VALUES).type(new GraphQLList(keyValuesObjectInputType)).build());
+        commonInputFieldsList.add(newInputObjectField().name(URL).type(GraphQLString).build());
         commonInputFieldsList.add(
                 newInputObjectField()
                         .name(ACCESSIBILITY_ASSESSMENT)

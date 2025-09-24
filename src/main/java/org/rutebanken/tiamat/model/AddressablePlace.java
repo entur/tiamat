@@ -22,7 +22,6 @@ import jakarta.persistence.Transient;
 @MappedSuperclass
 public abstract class AddressablePlace extends Place {
 
-    @Transient
     protected String url;
 
     @Transient

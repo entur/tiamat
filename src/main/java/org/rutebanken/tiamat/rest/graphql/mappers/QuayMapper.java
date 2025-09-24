@@ -38,6 +38,7 @@ import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ID;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PRIVATE_CODE;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PUBLIC_CODE;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.TYPE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.URL;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.VALUE;
 
 @Component
@@ -92,6 +93,11 @@ public class QuayMapper {
         }
         if (quayInputMap.get(PUBLIC_CODE) != null) {
             quay.setPublicCode((String) quayInputMap.get(PUBLIC_CODE));
+            isQuayUpdated = true;
+        }
+
+        if (quayInputMap.get(URL) != null) {
+            quay.setUrl((String) quayInputMap.get(URL));
             isQuayUpdated = true;
         }
 
