@@ -31,5 +31,13 @@ public interface GroupOfStopPlacesRepositoryCustom {
     Iterator<GroupOfStopPlaces> scrollGroupOfStopPlaces();
 
     Iterator<GroupOfStopPlaces> scrollGroupOfStopPlaces(Set<Long> stopPlaceDbIds);
+
+    /**
+     * Batch loading method for DataLoader - efficiently loads groups by stop place IDs
+     * Returns groups mapped by stop place ID for efficient DataLoader usage
+     * @param stopPlaceIds Set of stop place IDs to load groups for
+     * @return Map of stop place ID to list of groups containing that stop place
+     */
+    java.util.Map<Long, List<GroupOfStopPlaces>> findGroupsByStopPlaceIds(Set<Long> stopPlaceIds);
 }
 
