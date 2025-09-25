@@ -284,6 +284,12 @@ public class CustomGraphQLTypes {
             .field(newFieldDefinition()
                     .name(NUMBER_OF_MACHINES)
                     .type(GraphQLBigInteger))
+            .field(newFieldDefinition()
+                    .name(AUDIO_INTERFACE_AVAILABLE)
+                    .type(GraphQLBoolean))
+            .field(newFieldDefinition()
+                    .name(TACTILE_INTERFACE_AVAILABLE)
+                    .type(GraphQLBoolean))
             .build();
 
 
@@ -298,6 +304,12 @@ public class CustomGraphQLTypes {
             .field(newInputObjectField()
                     .name(NUMBER_OF_MACHINES)
                     .type(GraphQLBigInteger))
+            .field(newInputObjectField()
+                    .name(AUDIO_INTERFACE_AVAILABLE)
+                    .type(GraphQLBoolean))
+            .field(newInputObjectField()
+                    .name(TACTILE_INTERFACE_AVAILABLE)
+                    .type(GraphQLBoolean))
             .build();
 
     public static GraphQLObjectType cycleStorageEquipmentType = newObject()

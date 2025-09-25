@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.AUDIO_INTERFACE_AVAILABLE;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.CONTENT;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.CYCLE_STORAGE_EQUIPMENT;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.CYCLE_STORAGE_TYPE;
@@ -49,6 +50,7 @@ import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.SEATS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.SHELTER_EQUIPMENT;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.SIGN_CONTENT_TYPE;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.STEP_FREE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.TACTILE_INTERFACE_AVAILABLE;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.TICKETING_EQUIPMENT;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.TICKET_MACHINES;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.TICKET_OFFICE;
@@ -125,6 +127,8 @@ public class PlaceEquipmentMapper {
                     billettAutomat.setTicketOffice((Boolean) ticketingEquipment.get(TICKET_OFFICE));
                     billettAutomat.setTicketMachines((Boolean) ticketingEquipment.get(TICKET_MACHINES));
                     billettAutomat.setNumberOfMachines((BigInteger) ticketingEquipment.get(NUMBER_OF_MACHINES));
+                    billettAutomat.setAudioInterfaceAvailable((Boolean) ticketingEquipment.get(AUDIO_INTERFACE_AVAILABLE));
+                    billettAutomat.setTactileInterfaceAvailable((Boolean) ticketingEquipment.get(TACTILE_INTERFACE_AVAILABLE));
                     equipments.getInstalledEquipment().add(billettAutomat);
                 }
             }
