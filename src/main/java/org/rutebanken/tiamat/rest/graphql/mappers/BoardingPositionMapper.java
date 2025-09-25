@@ -28,6 +28,7 @@ import java.util.Map;
 
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.GEOMETRY;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PUBLIC_CODE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.URL;
 
 @Component
 public class BoardingPositionMapper {
@@ -41,11 +42,13 @@ public class BoardingPositionMapper {
     public BoardingPosition mapBoardingPosition(Map entry) {
 
         final String publicCode = (String) entry.get(PUBLIC_CODE);
+        final String url = (String) entry.get(URL);
         final Point geoJsonPoint = geometryMapper.createGeoJsonPoint((Map) entry.get(GEOMETRY));
 
         BoardingPosition boardingPosition = new BoardingPosition();
         boardingPosition.setPublicCode(publicCode);
         boardingPosition.setCentroid(geoJsonPoint);
+        boardingPosition.setUrl(url);
 
         return boardingPosition;
     }

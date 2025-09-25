@@ -138,6 +138,7 @@ public class GraphQLResourceParkingIntegrationTest extends AbstractGraphQLResour
                 "    realTimeOccupancyAvailable:false, " +
                 "    parkingReservation:reservationAllowed, " +
                 "    bookingUrl:\\\"https://www.rutebanken.org\\\", " +
+                "    url:\\\"https://example.com/test-parking-mutation\\\", " +
                 "    freeParkingOutOfHours:true, " +
                 "    parkingProperties: {, " +
                 "      parkingUserTypes:all," +
@@ -150,6 +151,7 @@ public class GraphQLResourceParkingIntegrationTest extends AbstractGraphQLResour
                 "    parkingAreas: [{" +
                 "      label: {value:\\\"Plan 1\\\"}" +
                 "      totalCapacity:432" +
+                "      url:\\\"https://example.com/test-parking-area-mutation\\\"" +
                 "      parkingProperties: {" +
                 "          parkingUserTypes:all, " +
                 "          spaces : [{" +
@@ -175,6 +177,7 @@ public class GraphQLResourceParkingIntegrationTest extends AbstractGraphQLResour
                 "    realTimeOccupancyAvailable," +
                 "    parkingReservation," +
                 "    bookingUrl," +
+                "    url," +
                 "    freeParkingOutOfHours," +
                 "    parkingProperties {" +
                 "      parkingUserTypes," +
@@ -188,6 +191,7 @@ public class GraphQLResourceParkingIntegrationTest extends AbstractGraphQLResour
                 "    parkingAreas {" +
                 "      label {value}" +
                 "      totalCapacity" +
+                "      url" +
                 "      parkingProperties {" +
                 "        parkingUserTypes," +
 //                "        maximumStay," +
@@ -226,10 +230,12 @@ public class GraphQLResourceParkingIntegrationTest extends AbstractGraphQLResour
                     .body("realTimeOccupancyAvailable", notNullValue())
                     .body("parkingReservation", notNullValue())
                     .body("bookingUrl", notNullValue())
+                    .body("url", equalTo("https://example.com/test-parking-mutation"))
                     .body("parkingProperties.parkingUserTypes", notNullValue())
                     .body("parkingProperties.spaces", notNullValue())
                     .body("parkingAreas", notNullValue())
                     .body("parkingAreas.label.value", notNullValue())
+                    .body("parkingAreas[0].url", equalTo("https://example.com/test-parking-area-mutation"))
                     .body("parkingAreas.totalCapacity", notNullValue())
                     .body("parkingAreas.parkingProperties", notNullValue());
 

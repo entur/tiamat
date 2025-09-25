@@ -80,6 +80,7 @@ import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.RECHARGING_AVAILAB
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.SECURE;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.SPACES;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.TOTAL_CAPACITY;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.URL;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.VALID_BETWEEN;
 import static org.rutebanken.tiamat.rest.graphql.mappers.EmbeddableMultilingualStringMapper.getEmbeddableString;
 
@@ -256,6 +257,12 @@ class ParkingUpdater implements DataFetcher {
             updatedParking.setBookingUrl(bookingUrl);
         }
 
+        if (input.get(URL) != null) {
+            String url = (String) input.get(URL);
+            isUpdated = isUpdated || (!url.equals(updatedParking.getUrl()));
+            updatedParking.setUrl(url);
+        }
+
         if (input.get(PARKING_PROPERTIES) != null) {
             List<ParkingProperties> parkingPropertiesList = resolveParkingPropertiesList((List) input.get(PARKING_PROPERTIES));
             int total_capacity = parkingPropertiesList.stream()
@@ -330,6 +337,7 @@ class ParkingUpdater implements DataFetcher {
         area.setLabel(getEmbeddableString((Map) input.get(LABEL)));
         area.setTotalCapacity((BigInteger) input.get(TOTAL_CAPACITY));
         area.setParkingProperties(resolveSingleParkingProperties((Map) input.get(PARKING_PROPERTIES)));
+        area.setUrl((String) input.get(URL));
         return area;
     }
 }
