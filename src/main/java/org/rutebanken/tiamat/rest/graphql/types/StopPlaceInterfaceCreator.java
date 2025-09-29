@@ -40,6 +40,7 @@ import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.STOP_PLACE_GROUPS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.TAGS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.TARIFF_ZONES;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.TOPOGRAPHIC_PLACE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.URL;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.VALID_BETWEEN;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.VERSION_COMMENT;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.alternativeNameObjectType;
@@ -98,6 +99,10 @@ public class StopPlaceInterfaceCreator {
         stopPlaceInterfaceFields.add(newFieldDefinition()
                 .name(PERMISSIONS)
                 .type(entityPermissionObjectType)
+                .build());
+        stopPlaceInterfaceFields.add(newFieldDefinition()
+                .name(URL)
+                .type(GraphQLString)
                 .build());
         return stopPlaceInterfaceFields;
     }

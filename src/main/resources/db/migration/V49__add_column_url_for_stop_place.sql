@@ -1,0 +1,1 @@
+ALTER TABLE stop_place ADD COLUMN url VARCHAR(2048);
