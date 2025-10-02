@@ -1449,6 +1449,9 @@ public class StopPlaceRegisterGraphQLSchema {
                         .name(ADJACENT_SITES)
                         .description(ADJACENT_SITES_DESCRIPTION)
                         .type(new GraphQLList(versionLessRefInputObjectType)))
+                .field(newInputObjectField()
+                        .name(URL)
+                        .type(GraphQLString).build())
                 .build();
     }
 
