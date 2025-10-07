@@ -235,6 +235,9 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                                     numberOfMachines
                                     audioInterfaceAvailable
                                     tactileInterfaceAvailable
+                                    ticketCounter
+                                    inductionLoops
+                                    lowCounterAccess
                                 }
                                 generalSign {
                                     id
@@ -265,6 +268,9 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                 .body("placeEquipments.ticketingEquipment[0].numberOfMachines", equalTo(ticketingEquipment.getNumberOfMachines().intValue()))
                 .body("placeEquipments.ticketingEquipment[0].audioInterfaceAvailable", equalTo(ticketingEquipment.isAudioInterfaceAvailable()))
                 .body("placeEquipments.ticketingEquipment[0].tactileInterfaceAvailable", equalTo(ticketingEquipment.isTactileInterfaceAvailable()))
+                .body("placeEquipments.ticketingEquipment[0].ticketCounter", equalTo(ticketingEquipment.isTicketCounter()))
+                .body("placeEquipments.ticketingEquipment[0].inductionLoops", equalTo(ticketingEquipment.isInductionLoops()))
+                .body("placeEquipments.ticketingEquipment[0].lowCounterAccess", equalTo(ticketingEquipment.isLowCounterAccess()))
                 //waitingRoomEquipment
                 .body("placeEquipments.waitingRoomEquipment[0].id", equalTo(waitingRoomEquipment.getNetexId()))
                 .body("placeEquipments.waitingRoomEquipment[0].seats", equalTo(waitingRoomEquipment.getSeats().intValue()))
