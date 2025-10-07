@@ -93,6 +93,7 @@ public class StopPlace
     @OneToOne(fetch = FetchType.LAZY)
     @Transient
     protected NavigationPaths_RelStructure navigationPaths;
+    protected String url;
     private boolean parentStopPlace;
     @OneToMany(cascade = CascadeType.ALL)
     private Set<Quay> quays = new HashSet<>();
@@ -303,6 +304,16 @@ public class StopPlace
 
     public void setModificationEnumeration(ModificationEnumeration modificationEnumeration) {
         this.modificationEnumeration = modificationEnumeration;
+    }
+
+    @Override
+    public String getUrl() {
+        return url;
+    }
+
+    @Override
+    public void setUrl(String value) {
+        this.url = value;
     }
 
     @Override

@@ -324,6 +324,7 @@ public class GraphQLNames {
     public static final String DRY_RUN = "dryRun";
     public static final String PUBLIC_CODE = "publicCode";
     public static final String WEIGHTING = "weighting";
+    public static final String URL = "url";
 
     public static final String IMPORTED_ID_QUERY = "importedId";
     public static final String IMPORTED_ID_ARG_DESCRIPTION = "Searches for StopPlace by importedId.";

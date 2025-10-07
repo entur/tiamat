@@ -50,7 +50,7 @@
 
     <properties>
         <java.version>21</java.version>
-        <spring-cloud-gcp.version>5.13.4</spring-cloud-gcp.version>
+        <spring-cloud-gcp.version>5.13.5</spring-cloud-gcp.version>
         <geotools.version>30.2</geotools.version>
         <orika-core.version>1.5.4</orika-core.version>
         <graphql-java.version>20.9</graphql-java.version>
@@ -59,7 +59,7 @@
         <hazelcast.version>5.2.5</hazelcast.version>
         <swagger-jersey2.version>2.2.38</swagger-jersey2.version>
         <netex-java-model.version>2.0.14</netex-java-model.version>
-        <entur.helpers.version>5.46.0</entur.helpers.version>
+        <entur.helpers.version>5.47.0</entur.helpers.version>
         <jts-core.version>1.20.0</jts-core.version>
         <groovy-all.version>4.0.28</groovy-all.version>
         <rest-assured.version>5.5.6</rest-assured.version>

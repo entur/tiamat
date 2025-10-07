@@ -974,6 +974,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         String name = "Testing name";
         String shortName = "Testing shortname";
         String description = "Testing description";
+        String url = "https://example.com/test-stop-place-mutation";
 
         Float lon =  Float.valueOf("10.11111");
         Float lat = Float.valueOf("59.11111");
@@ -989,6 +990,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                                                  type: Point
                                                  coordinates: [%s,%s]
                                                }
+                                               url:"%s"
                                        }) {
                                   id
                                   weighting
@@ -997,9 +999,10 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                                   description { value }
                                   stopPlaceType
                                   geometry { type coordinates }
+                                  url
                                  }
                                 }
-                """.formatted(GraphQLNames.MUTATE_STOPPLACE,name, shortName, description,StopTypeEnumeration.TRAM_STATION.value(), lon, lat);
+                """.formatted(GraphQLNames.MUTATE_STOPPLACE,name, shortName, description,StopTypeEnumeration.TRAM_STATION.value(), lon, lat, url);
 
         executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .rootPath("data.stopPlace[0]")
@@ -1011,7 +1014,8 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                     .body("geometry.type", equalTo("Point"))
                     .body("geometry.coordinates[0]", comparesEqualTo(lon))
                     .body("geometry.coordinates[1]", comparesEqualTo(lat))
-                    .body("weighting", comparesEqualTo(InterchangeWeightingEnumeration.INTERCHANGE_ALLOWED.value()));
+                    .body("weighting", comparesEqualTo(InterchangeWeightingEnumeration.INTERCHANGE_ALLOWED.value()))
+                    .body("url", comparesEqualTo(url));
 
         // for unit test we don't have a real JMS listener, so we need to check the event manually
         assertThat(entityChangedJMSListener.hasReceivedEvent(null, 1L, EntityChangedEvent.CrudAction.CREATE, null)).isFalse();
