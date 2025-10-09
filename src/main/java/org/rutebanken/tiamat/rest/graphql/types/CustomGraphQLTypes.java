@@ -290,6 +290,15 @@ public class CustomGraphQLTypes {
             .field(newFieldDefinition()
                     .name(TACTILE_INTERFACE_AVAILABLE)
                     .type(GraphQLBoolean))
+            .field(newFieldDefinition()
+                    .name(TICKET_COUNTER)
+                    .type(GraphQLBoolean))
+            .field(newFieldDefinition()
+                    .name(INDUCTION_LOOPS)
+                    .type(GraphQLBoolean))
+            .field(newFieldDefinition()
+                    .name(LOW_COUNTER_ACCESS)
+                    .type(GraphQLBoolean))
             .build();
 
 
@@ -309,6 +318,15 @@ public class CustomGraphQLTypes {
                     .type(GraphQLBoolean))
             .field(newInputObjectField()
                     .name(TACTILE_INTERFACE_AVAILABLE)
+                    .type(GraphQLBoolean))
+            .field(newInputObjectField()
+                    .name(TICKET_COUNTER)
+                    .type(GraphQLBoolean))
+            .field(newInputObjectField()
+                    .name(INDUCTION_LOOPS)
+                    .type(GraphQLBoolean))
+            .field(newInputObjectField()
+                    .name(LOW_COUNTER_ACCESS)
                     .type(GraphQLBoolean))
             .build();
 

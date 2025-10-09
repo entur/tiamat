@@ -40,6 +40,9 @@ import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ENCLOSED;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.GENDER;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.GENERAL_SIGN;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.HEATED;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.TICKET_COUNTER;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.INDUCTION_LOOPS;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.LOW_COUNTER_ACCESS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.NUMBER_OF_MACHINES;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.NUMBER_OF_SPACES;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.NUMBER_OF_TOILETS;
@@ -129,6 +132,9 @@ public class PlaceEquipmentMapper {
                     billettAutomat.setNumberOfMachines((BigInteger) ticketingEquipment.get(NUMBER_OF_MACHINES));
                     billettAutomat.setAudioInterfaceAvailable((Boolean) ticketingEquipment.get(AUDIO_INTERFACE_AVAILABLE));
                     billettAutomat.setTactileInterfaceAvailable((Boolean) ticketingEquipment.get(TACTILE_INTERFACE_AVAILABLE));
+                    billettAutomat.setTicketCounter((Boolean) ticketingEquipment.get(TICKET_COUNTER));
+                    billettAutomat.setInductionLoops((Boolean) ticketingEquipment.get(INDUCTION_LOOPS));
+                    billettAutomat.setLowCounterAccess((Boolean) ticketingEquipment.get(LOW_COUNTER_ACCESS));
                     equipments.getInstalledEquipment().add(billettAutomat);
                 }
             }

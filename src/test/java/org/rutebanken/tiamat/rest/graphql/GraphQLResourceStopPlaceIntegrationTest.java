@@ -176,9 +176,12 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         TicketingEquipment ticketingEquipment = new TicketingEquipment();
         ticketingEquipment.setTicketMachines(true);
         ticketingEquipment.setTicketOffice(true);
+        ticketingEquipment.setTicketCounter(true);
         ticketingEquipment.setNumberOfMachines(BigInteger.valueOf(6));
         ticketingEquipment.setAudioInterfaceAvailable(false);
         ticketingEquipment.setTactileInterfaceAvailable(false);
+        ticketingEquipment.setLowCounterAccess(false);
+        ticketingEquipment.setInductionLoops(false);
 
         installedEquipments.add(ticketingEquipment);
 
@@ -232,9 +235,12 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                                     id
                                     ticketMachines
                                     ticketOffice
+                                    ticketCounter
                                     numberOfMachines
                                     audioInterfaceAvailable
                                     tactileInterfaceAvailable
+                                    inductionLoops
+                                    lowCounterAccess
                                 }
                                 generalSign {
                                     id
@@ -265,6 +271,9 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                 .body("placeEquipments.ticketingEquipment[0].numberOfMachines", equalTo(ticketingEquipment.getNumberOfMachines().intValue()))
                 .body("placeEquipments.ticketingEquipment[0].audioInterfaceAvailable", equalTo(ticketingEquipment.isAudioInterfaceAvailable()))
                 .body("placeEquipments.ticketingEquipment[0].tactileInterfaceAvailable", equalTo(ticketingEquipment.isTactileInterfaceAvailable()))
+                .body("placeEquipments.ticketingEquipment[0].ticketCounter", equalTo(ticketingEquipment.isTicketCounter()))
+                .body("placeEquipments.ticketingEquipment[0].inductionLoops", equalTo(ticketingEquipment.isInductionLoops()))
+                .body("placeEquipments.ticketingEquipment[0].lowCounterAccess", equalTo(ticketingEquipment.isLowCounterAccess()))
                 //waitingRoomEquipment
                 .body("placeEquipments.waitingRoomEquipment[0].id", equalTo(waitingRoomEquipment.getNetexId()))
                 .body("placeEquipments.waitingRoomEquipment[0].seats", equalTo(waitingRoomEquipment.getSeats().intValue()))
@@ -1848,9 +1857,12 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         TicketingEquipment ticketingEquipment = new TicketingEquipment();
         ticketingEquipment.setTicketMachines(null);
         ticketingEquipment.setTicketOffice(null);
+        ticketingEquipment.setTicketCounter(null);
         ticketingEquipment.setNumberOfMachines(BigInteger.valueOf(7));
         ticketingEquipment.setTactileInterfaceAvailable(false);
         ticketingEquipment.setAudioInterfaceAvailable(false);
+        ticketingEquipment.setInductionLoops(false);
+        ticketingEquipment.setLowCounterAccess(false);
 
         PlaceEquipment placeEquipment = new PlaceEquipment();
 

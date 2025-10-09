@@ -33,6 +33,9 @@ public class TicketingEquipment_VersionStructure
     protected Boolean ticketOffice;
     protected Boolean audioInterfaceAvailable;
     protected Boolean tactileInterfaceAvailable;
+    protected Boolean ticketCounter;
+    protected Boolean lowCounterAccess;
+    protected Boolean inductionLoops;
 
     @Transient
     protected List<VehicleModeEnumeration> vehicleModes;
@@ -42,9 +45,6 @@ public class TicketingEquipment_VersionStructure
 
     @Transient
     protected List<TicketingFacilityEnumeration> ticketingFacilityList;
-
-    @Transient
-    protected Boolean ticketCounter;
 
     @Transient
     protected BigInteger numberOfTills;
@@ -62,13 +62,7 @@ public class TicketingEquipment_VersionStructure
     protected List<TicketingFacilityEnumeration> scopeOfTicketsAvailable;
 
     @Transient
-    protected Boolean lowCounterAccess;
-
-    @Transient
     protected BigDecimal heightOfLowCounter;
-
-    @Transient
-    protected Boolean inductionLoops;
 
     public List<VehicleModeEnumeration> getVehicleModes() {
         if (vehicleModes == null) {
