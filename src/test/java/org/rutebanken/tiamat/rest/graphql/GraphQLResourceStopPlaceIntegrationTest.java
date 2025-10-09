@@ -235,10 +235,10 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                                     id
                                     ticketMachines
                                     ticketOffice
+                                    ticketCounter
                                     numberOfMachines
                                     audioInterfaceAvailable
                                     tactileInterfaceAvailable
-                                    ticketCounter
                                     inductionLoops
                                     lowCounterAccess
                                 }
