@@ -132,7 +132,7 @@ public class PlaceEquipmentMapper {
                     billettAutomat.setNumberOfMachines((BigInteger) ticketingEquipment.get(NUMBER_OF_MACHINES));
                     billettAutomat.setAudioInterfaceAvailable((Boolean) ticketingEquipment.get(AUDIO_INTERFACE_AVAILABLE));
                     billettAutomat.setTactileInterfaceAvailable((Boolean) ticketingEquipment.get(TACTILE_INTERFACE_AVAILABLE));
-                    billettAutomat.setInductionLoops((Boolean) ticketingEquipment.get(TICKET_COUNTER));
+                    billettAutomat.setTicketCounter((Boolean) ticketingEquipment.get(TICKET_COUNTER));
                     billettAutomat.setInductionLoops((Boolean) ticketingEquipment.get(INDUCTION_LOOPS));
                     billettAutomat.setLowCounterAccess((Boolean) ticketingEquipment.get(LOW_COUNTER_ACCESS));
                     equipments.getInstalledEquipment().add(billettAutomat);

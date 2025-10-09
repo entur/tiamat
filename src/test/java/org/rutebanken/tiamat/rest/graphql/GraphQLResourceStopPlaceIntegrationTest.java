@@ -176,9 +176,12 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         TicketingEquipment ticketingEquipment = new TicketingEquipment();
         ticketingEquipment.setTicketMachines(true);
         ticketingEquipment.setTicketOffice(true);
+        ticketingEquipment.setTicketCounter(true);
         ticketingEquipment.setNumberOfMachines(BigInteger.valueOf(6));
         ticketingEquipment.setAudioInterfaceAvailable(false);
         ticketingEquipment.setTactileInterfaceAvailable(false);
+        ticketingEquipment.setLowCounterAccess(false);
+        ticketingEquipment.setInductionLoops(false);
 
         installedEquipments.add(ticketingEquipment);
 
@@ -1854,9 +1857,12 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         TicketingEquipment ticketingEquipment = new TicketingEquipment();
         ticketingEquipment.setTicketMachines(null);
         ticketingEquipment.setTicketOffice(null);
+        ticketingEquipment.setTicketCounter(null);
         ticketingEquipment.setNumberOfMachines(BigInteger.valueOf(7));
         ticketingEquipment.setTactileInterfaceAvailable(false);
         ticketingEquipment.setAudioInterfaceAvailable(false);
+        ticketingEquipment.setInductionLoops(false);
+        ticketingEquipment.setLowCounterAccess(false);
 
         PlaceEquipment placeEquipment = new PlaceEquipment();
 
