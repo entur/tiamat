@@ -21,6 +21,7 @@ import org.rutebanken.tiamat.model.TariffZone;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -42,4 +43,11 @@ public interface TariffZoneRepositoryCustom extends DataManagedObjectStructureRe
     List<TariffZone> findValidTariffZones(List<String> netexIds);
 
     int updateStopPlaceTariffZoneRef();
+
+    /**
+     * Batch loading method for DataLoader - efficiently loads tariff zones by stop place IDs
+     * @param stopPlaceIds Set of stop place IDs to load tariff zones for
+     * @return Map of stop place ID to list of tariff zones
+     */
+    Map<Long, List<TariffZone>> findTariffZonesByStopPlaceIds(Set<Long> stopPlaceIds);
 }
