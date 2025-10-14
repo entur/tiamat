@@ -26,6 +26,7 @@ import org.rutebanken.tiamat.model.InterchangeWeightingEnumeration;
 import org.rutebanken.tiamat.model.SiteRefStructure;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.TariffZoneRef;
+import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.repository.reference.ReferenceResolver;
 import org.rutebanken.tiamat.service.TariffZonesLookupService;
@@ -134,11 +135,13 @@ public class StopPlaceVersionedSaverService {
 
         versionValidator.validate(existingVersion, newVersion);
 
-        if (newVersion.getParentSiteRef() != null && !newVersion.isParentStopPlace()) {
-            throw new IllegalArgumentException("StopPlace " +
-                                                       newVersion.getNetexId() +
-                                                       " seems to be a child stop. Save the parent stop place instead: "
-                                                       + newVersion.getParentSiteRef());
+        if (isParent(newVersion)) {
+            System.out.println("Parent: " + newVersion.getName());
+            //
+        }
+
+        if (isChild(newVersion)) {
+            System.out.println("Child: " + newVersion.getName());
         }
 
         if (newVersion.getTariffZones() != null) {
@@ -201,7 +204,7 @@ public class StopPlaceVersionedSaverService {
             }
         }
         newVersion = stopPlaceRepository.save(newVersion);
-        logger.debug("Saved stop place with id: {} and childs {}", newVersion.getId(), newVersion.getChildren().stream().map(ch -> ch.getId()).collect(toList()));
+        logger.debug("Saved stop place with id: {} and childs {}", newVersion.getId(), newVersion.getChildren().stream().map(IdentifiedEntity::getId).collect(toList()));
 
         updateParentSiteRefsForChildren(newVersion);
 
@@ -294,11 +297,19 @@ public class StopPlaceVersionedSaverService {
     private void updateParentSiteRefsForChildren(StopPlace parentStopPlace) {
         long count = 0;
         if (parentStopPlace.getChildren() != null) {
-            parentStopPlace.getChildren().stream()
+            parentStopPlace.getChildren()
                     .forEach(child -> child.setParentSiteRef(new SiteRefStructure(parentStopPlace.getNetexId(), String.valueOf(parentStopPlace.getVersion()))));
             count = parentStopPlace.getChildren().size();
         }
         logger.info("Updated {} childs with parent site refs", count);
+    }
+
+    private boolean isParent(StopPlace stopPlace) {
+        return stopPlace.isParentStopPlace() || (stopPlace.getQuays() != null && stopPlace.getQuays().isEmpty());
+    }
+
+    private boolean isChild(StopPlace stopPlace) {
+        return stopPlace.getParentSiteRef() != null;
     }
 
 }
