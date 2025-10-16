@@ -135,15 +135,6 @@ public class StopPlaceVersionedSaverService {
 
         versionValidator.validate(existingVersion, newVersion);
 
-        if (isParent(newVersion)) {
-            System.out.println("Parent: " + newVersion.getName());
-            //
-        }
-
-        if (isChild(newVersion)) {
-            System.out.println("Child: " + newVersion.getName());
-        }
-
         if (newVersion.getTariffZones() != null) {
             for (TariffZoneRef tariffZoneRef : newVersion.getTariffZones()) {
                 if (referenceResolver.resolve(tariffZoneRef) == null) {
@@ -302,14 +293,6 @@ public class StopPlaceVersionedSaverService {
             count = parentStopPlace.getChildren().size();
         }
         logger.info("Updated {} childs with parent site refs", count);
-    }
-
-    private boolean isParent(StopPlace stopPlace) {
-        return stopPlace.isParentStopPlace() || (stopPlace.getQuays() != null && stopPlace.getQuays().isEmpty());
-    }
-
-    private boolean isChild(StopPlace stopPlace) {
-        return stopPlace.getParentSiteRef() != null;
     }
 
 }
