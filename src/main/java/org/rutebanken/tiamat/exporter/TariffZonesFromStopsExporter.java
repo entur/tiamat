@@ -60,52 +60,53 @@ public class TariffZonesFromStopsExporter {
 
         Map<String, JAXBElement<? extends Zone_VersionStructure>> tariffZoneMap = new HashMap<>();
 
-        if(responseSiteFrame.getTariffZones() != null && responseSiteFrame.getTariffZones().getTariffZone() != null) {
-            responseSiteFrame.getTariffZones().getTariffZone()
-                    .forEach(tariffZone -> tariffZoneMap.put(key(tariffZone.getValue().getId(), tariffZone.getValue().getVersion()), tariffZone));
-        }
-
-        importedNetexStopPlaces.stream()
-                .filter(stopPlace -> stopPlace.getTariffZones() != null)
-                .flatMap(stopPlace -> stopPlace.getTariffZones().getTariffZoneRef().stream())
-                .filter(tariffZoneRef -> !tariffZoneMap.containsKey(key(tariffZoneRef.getRef(), tariffZoneRef.getVersion())))
-                .map(tariffZoneRef -> netexMapper.getFacade().map(tariffZoneRef, TariffZoneRef.class))
-                .peek(mappedTariffZoneRef -> logger.debug("Resolving ref: {}", mappedTariffZoneRef))
-                .map(mappedTariffZoneRef -> {
-                    Object tariffFareZone = referenceResolver.resolve(mappedTariffZoneRef);
-                    if(tariffFareZone instanceof org.rutebanken.tiamat.model.TariffZone) {
-                        return  (org.rutebanken.tiamat.model.TariffZone) tariffFareZone;
-                    }else if(tariffFareZone instanceof  org.rutebanken.tiamat.model.FareZone) {
-                        return (org.rutebanken.tiamat.model.FareZone) tariffFareZone;
-                    } else {
-                        logger.warn("Resolved tariff zone to null from reference: {}", mappedTariffZoneRef);
-                        return null;
-                    }
-                })
-                .filter(Objects::nonNull)
-                .peek(tiamatTariffZone -> logger.debug("Resolved tariffZone: {}", tiamatTariffZone))
-                .map(tiamatTariffZone -> {
-                    if (tiamatTariffZone instanceof org.rutebanken.tiamat.model.TariffZone) {
-                        return netexMapper.getFacade().map(tiamatTariffZone, TariffZone.class);
-                    } else {
-                        return netexMapper.getFacade().map(tiamatTariffZone, FareZone.class);
-                    }
-                })
-                .forEach(tariffZone -> {
-                    if (tariffZone instanceof TariffZone) {
-                        tariffZoneMap.put(key(tariffZone.getId(), tariffZone.getVersion()), new ObjectFactory().createTariffZone((TariffZone) tariffZone));
-                    } else {
-                        tariffZoneMap.put(key(tariffZone.getId(), tariffZone.getVersion()), new ObjectFactory().createFareZone((FareZone) tariffZone));
-                    }
-                });
-
-        if(tariffZoneMap.values().isEmpty()) {
-            logger.info("No relevant tariff zones to return");
-            responseSiteFrame.withTariffZones(null);
-        } else {
-            logger.info("Adding {} tariff zones", tariffZoneMap.values().size());
-            responseSiteFrame.withTariffZones(new TariffZonesInFrame_RelStructure().withTariffZone(tariffZoneMap.values()));
-        }
+//        TODO
+//        if(responseSiteFrame.getTariffZones() != null && responseSiteFrame.getTariffZones().getTariffZone() != null) {
+//            responseSiteFrame.getTariffZones().getTariffZone()
+//                    .forEach(tariffZone -> tariffZoneMap.put(key(tariffZone.getValue().getId(), tariffZone.getValue().getVersion()), tariffZone));
+//        }
+//
+//        importedNetexStopPlaces.stream()
+//                .filter(stopPlace -> stopPlace.getTariffZones() != null)
+//                .flatMap(stopPlace -> stopPlace.getTariffZones().getTariffZoneRef().stream())
+//                .filter(tariffZoneRef -> !tariffZoneMap.containsKey(key(tariffZoneRef.getRef(), tariffZoneRef.getVersion())))
+//                .map(tariffZoneRef -> netexMapper.getFacade().map(tariffZoneRef, TariffZoneRef.class))
+//                .peek(mappedTariffZoneRef -> logger.debug("Resolving ref: {}", mappedTariffZoneRef))
+//                .map(mappedTariffZoneRef -> {
+//                    Object tariffFareZone = referenceResolver.resolve(mappedTariffZoneRef);
+//                    if(tariffFareZone instanceof org.rutebanken.tiamat.model.TariffZone) {
+//                        return  (org.rutebanken.tiamat.model.TariffZone) tariffFareZone;
+//                    }else if(tariffFareZone instanceof  org.rutebanken.tiamat.model.FareZone) {
+//                        return (org.rutebanken.tiamat.model.FareZone) tariffFareZone;
+//                    } else {
+//                        logger.warn("Resolved tariff zone to null from reference: {}", mappedTariffZoneRef);
+//                        return null;
+//                    }
+//                })
+//                .filter(Objects::nonNull)
+//                .peek(tiamatTariffZone -> logger.debug("Resolved tariffZone: {}", tiamatTariffZone))
+//                .map(tiamatTariffZone -> {
+//                    if (tiamatTariffZone instanceof org.rutebanken.tiamat.model.TariffZone) {
+//                        return netexMapper.getFacade().map(tiamatTariffZone, TariffZone.class);
+//                    } else {
+//                        return netexMapper.getFacade().map(tiamatTariffZone, FareZone.class);
+//                    }
+//                })
+//                .forEach(tariffZone -> {
+//                    if (tariffZone instanceof TariffZone) {
+//                        tariffZoneMap.put(key(tariffZone.getId(), tariffZone.getVersion()), new ObjectFactory().createTariffZone((TariffZone) tariffZone));
+//                    } else {
+//                        tariffZoneMap.put(key(tariffZone.getId(), tariffZone.getVersion()), new ObjectFactory().createFareZone((FareZone) tariffZone));
+//                    }
+//                });
+//
+//        if(tariffZoneMap.values().isEmpty()) {
+//            logger.info("No relevant tariff zones to return");
+//            responseSiteFrame.withTariffZones(null);
+//        } else {
+//            logger.info("Adding {} tariff zones", tariffZoneMap.values().size());
+//            responseSiteFrame.withTariffZones(new TariffZonesInFrame_RelStructure().withTariffZone(tariffZoneMap.values()));
+//        }
     }
 
     private String key(String id, String version) {

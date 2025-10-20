@@ -42,7 +42,7 @@ public class StopPlaceRefsRelStructureConverter extends BidirectionalConverter<S
         if (!CollectionUtils.isEmpty(stopPlaceReferences)) {
 
             StopPlaceRefs_RelStructure stopPlaceRefs_relStructure = new StopPlaceRefs_RelStructure();
-            stopPlaceRefs_relStructure.withStopPlaceRef(mapperFacade.mapAsList(stopPlaceReferences, StopPlaceRefStructure.class));
+//            stopPlaceRefs_relStructure.withStopPlaceRef(mapperFacade.mapAsList(stopPlaceReferences, StopPlaceRefStructure.class)); TODO
             return stopPlaceRefs_relStructure;
         }
         return null;

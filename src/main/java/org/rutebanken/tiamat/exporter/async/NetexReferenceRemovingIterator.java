@@ -71,13 +71,13 @@ public class NetexReferenceRemovingIterator implements Iterator<StopPlace> {
     }
 
     private void removeTariffZoneRefsVersion(StopPlace stopPlace, String type) {
-        if(stopPlace.getTariffZones() != null && stopPlace.getTariffZones().getTariffZoneRef() != null) {
-            stopPlace.getTariffZones().getTariffZoneRef().forEach(tariffZoneRef -> {
-                if(tariffZoneRef.getRef().contains(type)) {
-                    tariffZoneRef.setVersion(null);
-                }
-            });
-        }
+//        if(stopPlace.getTariffZones() != null && stopPlace.getTariffZones().getTariffZoneRef() != null) { TODO
+//            stopPlace.getTariffZones().getTariffZoneRef().forEach(tariffZoneRef -> {
+//                if(tariffZoneRef.getRef().contains(type)) {
+//                    tariffZoneRef.setVersion(null);
+//                }
+//            });
+//        }
     }
 
     private void removeTopographicPlaceRef(StopPlace stopPlace) {

@@ -31,28 +31,28 @@ public class SetOfStopPlacesStopPlaceRefsConverter extends BidirectionalConverte
 
         if(stopPlaces != null && !stopPlaces.isEmpty()) {
             logger.debug("Mapping set of stop places to netex. stops: {}", stopPlaces.size());
-            return new StopPlaceRefs_RelStructure()
-                    .withStopPlaceRef(
-                        stopPlaces.stream().map(stopPlace -> {
-                            StopPlaceRefStructure stopPlaceRefStructure = new StopPlaceRefStructure();
-                            stopPlaceRefStructure.withVersion(String.valueOf(stopPlace.getVersion()));
-                            stopPlaceRefStructure.withRef(stopPlace.getNetexId());
-                            return stopPlaceRefStructure;
-                        })
-                        .collect(toList()));
+//            return new StopPlaceRefs_RelStructure() TODO
+//                    .withStopPlaceRef(
+//                        stopPlaces.stream().map(stopPlace -> {
+//                            StopPlaceRefStructure stopPlaceRefStructure = new StopPlaceRefStructure();
+//                            stopPlaceRefStructure.withVersion(String.valueOf(stopPlace.getVersion()));
+//                            stopPlaceRefStructure.withRef(stopPlace.getNetexId());
+//                            return stopPlaceRefStructure;
+//                        })
+//                        .collect(toList()));
         }
         return null;
     }
 
     @Override
     public Set<StopPlace> convertFrom(StopPlaceRefs_RelStructure stopPlaceRefs_relStructure, Type<Set<StopPlace>> type, MappingContext mappingContext) {
-        if(stopPlaceRefs_relStructure != null && stopPlaceRefs_relStructure.getStopPlaceRef() != null && !stopPlaceRefs_relStructure.getStopPlaceRef().isEmpty()) {
-            logger.debug("Mapping set stopPlaceRefs_relStructure from netex. stops {}", stopPlaceRefs_relStructure.getStopPlaceRef().size());
-            return stopPlaceRefs_relStructure.getStopPlaceRef()
-                    .stream()
-                    .map(stopPlaceRefStructure -> (StopPlace) referenceResolver.resolve(new VersionOfObjectRefStructure(stopPlaceRefStructure.getRef(), stopPlaceRefStructure.getVersion())))
-                    .collect(toSet());
-        }
+//        if(stopPlaceRefs_relStructure != null && stopPlaceRefs_relStructure.getStopPlaceRef() != null && !stopPlaceRefs_relStructure.getStopPlaceRef().isEmpty()) { //TODO
+//            logger.debug("Mapping set stopPlaceRefs_relStructure from netex. stops {}", stopPlaceRefs_relStructure.getStopPlaceRef().size());
+//            return stopPlaceRefs_relStructure.getStopPlaceRef()
+//                    .stream()
+//                    .map(stopPlaceRefStructure -> (StopPlace) referenceResolver.resolve(new VersionOfObjectRefStructure(stopPlaceRefStructure.getRef(), stopPlaceRefStructure.getVersion())))
+//                    .collect(toSet());
+//        }
 
         return null;
     }

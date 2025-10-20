@@ -50,13 +50,13 @@ public class PublicationDeliveryUnmarshaller {
         }
     }
 
-    private final NeTExValidator neTExValidator;
+    private NeTExValidator neTExValidator;
 
     @Value("${publicationDeliveryUnmarshaller.validateAgainstSchema:true}")
     private boolean validateAgainstSchema;
 
     public PublicationDeliveryUnmarshaller() throws IOException, SAXException {
-        this.neTExValidator = NeTExValidator.getNeTExValidator();
+        //TODO
     }
 
     public PublicationDeliveryStructure unmarshal(InputStream inputStream) throws JAXBException, IOException, SAXException {
@@ -72,6 +72,7 @@ public class PublicationDeliveryUnmarshaller {
         }
 
         if(validateAgainstSchema) {
+            this.neTExValidator = NeTExValidator.getNeTExValidator();
             jaxbUnmarshaller.setSchema(neTExValidator.getSchema());
         }
 

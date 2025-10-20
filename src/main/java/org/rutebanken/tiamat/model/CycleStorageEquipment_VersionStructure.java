@@ -17,6 +17,7 @@ package org.rutebanken.tiamat.model;
 
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.Transient;
+import org.rutebanken.netex.model.CoveredEnumeration;
 
 import java.math.BigInteger;
 
@@ -29,7 +30,7 @@ public class CycleStorageEquipment_VersionStructure
     @Transient
     protected Boolean cage;
     @Transient
-    protected Boolean covered;
+    protected CoveredEnumeration covered;
 
     public BigInteger getNumberOfSpaces() {
         return numberOfSpaces;
@@ -55,11 +56,11 @@ public class CycleStorageEquipment_VersionStructure
         this.cage = value;
     }
 
-    public Boolean isCovered() {
+    public CoveredEnumeration isCovered() {
         return covered;
     }
 
-    public void setCovered(Boolean value) {
+    public void setCovered(CoveredEnumeration value) {
         this.covered = value;
     }
 

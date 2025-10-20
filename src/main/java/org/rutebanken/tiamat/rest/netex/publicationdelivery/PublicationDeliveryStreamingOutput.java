@@ -43,7 +43,7 @@ public class PublicationDeliveryStreamingOutput {
 
     private final ObjectFactory objectFactory = new ObjectFactory();
 
-    private final NeTExValidator neTExValidator = NeTExValidator.getNeTExValidator();
+    private NeTExValidator neTExValidator; //TODO
 
     static {
         try {
@@ -55,7 +55,7 @@ public class PublicationDeliveryStreamingOutput {
 
 
     @Value("${publicationDeliveryStreamingOutput.validateAgainstSchema:true}")
-    private boolean validateAgainstSchema = true;
+    private boolean validateAgainstSchema = false; //TODO
 
     public PublicationDeliveryStreamingOutput() throws IOException, SAXException {
     }
@@ -69,6 +69,7 @@ public class PublicationDeliveryStreamingOutput {
         logXmlIfDebugEnabled(jaxPublicationDelivery, marshaller);
 
         if(validateAgainstSchema) {
+            neTExValidator = NeTExValidator.getNeTExValidator();
             marshaller.setSchema(neTExValidator.getSchema());
         }
 

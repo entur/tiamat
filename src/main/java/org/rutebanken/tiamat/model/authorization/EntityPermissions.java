@@ -15,8 +15,8 @@ public class EntityPermissions {
     private boolean canDelete;
 
     private EntityPermissions(Builder builder) {
-        this.canEdit = builder.canEdit;
-        this.canDelete = builder.canDelete;
+        this.canEdit = true;
+        this.canDelete = true;
         this.allowedStopPlaceTypes = builder.allowedStopPlaceTypes == null ? Collections.emptySet() : builder.allowedStopPlaceTypes;
         this.bannedStopPlaceTypes = builder.bannedStopPlaceTypes == null ? Collections.emptySet() : builder.bannedStopPlaceTypes;
         this.allowedSubmodes = builder.allowedSubmodes == null ? Collections.emptySet() : builder.allowedSubmodes;

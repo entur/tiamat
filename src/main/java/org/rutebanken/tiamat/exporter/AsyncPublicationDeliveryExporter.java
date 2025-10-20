@@ -70,12 +70,12 @@ public class AsyncPublicationDeliveryExporter {
     @Autowired
     public AsyncPublicationDeliveryExporter(ExportJobRepository exportJobRepository,
                                             BlobStoreService blobStoreService,
-                                            @Qualifier("asyncStreamingPublicationDelivery") StreamingPublicationDelivery streamingPublicationDelivery,
+//                                            @Qualifier("asyncStreamingPublicationDelivery") StreamingPublicationDelivery streamingPublicationDelivery,
                                             NetexXmlReferenceValidator netexXmlReferenceValidator, ExportTimeZone exportTimeZone,
                                             @Value("${async.export.path:/deployments/data/}") String localExportPath) {
         this.exportJobRepository = exportJobRepository;
         this.blobStoreService = blobStoreService;
-        this.streamingPublicationDelivery = streamingPublicationDelivery;
+        this.streamingPublicationDelivery = null; //streamingPublicationDelivery;
         this.netexXmlReferenceValidator = netexXmlReferenceValidator;
         this.exportTimeZone = exportTimeZone;
         this.localExportPath = localExportPath;

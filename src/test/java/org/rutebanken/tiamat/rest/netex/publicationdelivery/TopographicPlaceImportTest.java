@@ -72,7 +72,7 @@ public class TopographicPlaceImportTest extends TiamatIntegrationTest {
                 .withExterior(new AbstractRingPropertyType()
                     .withAbstractRing(openGisObjectFactory.createLinearRing(linearRing)));
 
-        MultilingualString nameDescriptor = new MultilingualString().withValue("Vestfold").withLang("nb");
+        MultilingualString nameDescriptor = new MultilingualString().withContent("Vestfold").withLang("nb");
 
         TopographicPlace topographicPlace = new TopographicPlace()
                 .withId("KVE:TopographicPlace:07")
@@ -103,7 +103,7 @@ public class TopographicPlaceImportTest extends TiamatIntegrationTest {
 
     @Test
     public void publicationDeliveryWithParentTopographicPlace() throws Exception {
-        MultilingualString countyName = new MultilingualString().withValue("Vestfold").withLang("nb");
+        MultilingualString countyName = new MultilingualString().withContent("Vestfold").withLang("nb");
 
         TopographicPlace county = new TopographicPlace()
                 .withId("KVE:TopographicPlace:07")
@@ -113,7 +113,7 @@ public class TopographicPlaceImportTest extends TiamatIntegrationTest {
                 .withTopographicPlaceType(TopographicPlaceTypeEnumeration.COUNTY)
                 .withCountryRef(new CountryRef().withValue("NO"));
 
-        MultilingualString municipalityName = new MultilingualString().withValue("Larvik").withLang("nb");
+        MultilingualString municipalityName = new MultilingualString().withContent("Larvik").withLang("nb");
 
         TopographicPlace municipality = new TopographicPlace()
                 .withId("KVE:TopographicPlace:08")
@@ -133,7 +133,7 @@ public class TopographicPlaceImportTest extends TiamatIntegrationTest {
 
     @Test
     public void publicationDeliveryWithParentTopographicPlaceValidReferences() throws Exception {
-        MultilingualString countyName = new MultilingualString().withValue("Vestfold").withLang("nb");
+        MultilingualString countyName = new MultilingualString().withContent("Vestfold").withLang("nb");
 
         TopographicPlace county = new TopographicPlace()
                 .withId("KVE:TopographicPlace:07")
@@ -143,7 +143,7 @@ public class TopographicPlaceImportTest extends TiamatIntegrationTest {
                 .withTopographicPlaceType(TopographicPlaceTypeEnumeration.COUNTY)
                 .withCountryRef(new CountryRef().withValue("NO"));
 
-        MultilingualString municipalityName = new MultilingualString().withValue("Larvik").withLang("nb");
+        MultilingualString municipalityName = new MultilingualString().withContent("Larvik").withLang("nb");
         TopographicPlace municipality = new TopographicPlace()
                 .withId("KVE:TopographicPlace:08")
                 .withName(municipalityName)
@@ -174,7 +174,7 @@ public class TopographicPlaceImportTest extends TiamatIntegrationTest {
 
     @Test
     public void reimportTopographicPlaceAndExpectVersionIncremented() throws Exception {
-        MultilingualString countyName = new MultilingualString().withValue("Vestfold").withLang("nb");
+        MultilingualString countyName = new MultilingualString().withContent("Vestfold").withLang("nb");
 
         TopographicPlace county = new TopographicPlace()
                 .withId("KVE:TopographicPlace:07")
@@ -202,7 +202,7 @@ public class TopographicPlaceImportTest extends TiamatIntegrationTest {
     @Test(expected = Exception.class)
     public void publicationDeliveryWithInvalidParentTopographicPlaceRef() throws Exception {
 
-        MultilingualString municipalityName = new MultilingualString().withValue("Larvik").withLang("nb");
+        MultilingualString municipalityName = new MultilingualString().withContent("Larvik").withLang("nb");
 
         TopographicPlace municipality = new TopographicPlace()
                 .withId("KVE:TopographicPlace:08")

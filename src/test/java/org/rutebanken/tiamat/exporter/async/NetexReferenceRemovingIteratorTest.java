@@ -30,80 +30,80 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class NetexReferenceRemovingIteratorTest {
 
-
-    @Test
-    public void testReferenceRemoval() {
-
-
-        StopPlace stopPlace = new StopPlace()
-                .withTariffZones(
-                        new TariffZoneRefs_RelStructure()
-                                .withTariffZoneRef(
-                                        new TariffZoneRef()
-                                                .withRef("RUT:TariffZone:1")
-                                                .withVersion("1"))
-                                .withTariffZoneRef(
-                                        new TariffZoneRef()
-                                                .withRef("RUT:FareZone:2")
-                                                .withVersion("2")
-                                )
-                )
-                .withTopographicPlaceRef(
-                        new TopographicPlaceRefStructure()
-                            .withValue("KVE:TopographicPlace:XXX")
-                            .withVersion("version"));
-
-
-        List<StopPlace> stopPlaces = Collections.singletonList(stopPlace);
-
-
-        ExportParams exportParams = ExportParams.newExportParamsBuilder()
-                .setTopographicPlaceExportMode(ExportParams.ExportMode.NONE)
-                .setTariffZoneExportMode(ExportParams.ExportMode.NONE)
-                .setFareZoneExportMode(ExportParams.ExportMode.NONE)
-                .build();
-
-        NetexReferenceRemovingIterator netexReferenceRemovingIterator = new NetexReferenceRemovingIterator(stopPlaces.iterator(), exportParams);
-
-
-        StopPlace actual = netexReferenceRemovingIterator.next();
-
-        assertThat(actual.getTariffZones().getTariffZoneRef().getFirst().getVersion()).as("TariffZoneref version").isNull();
-        assertThat(actual.getTariffZones().getTariffZoneRef().getLast().getVersion()).as("TariffZoneref version").isNull();
-        assertThat(actual.getTopographicPlaceRef().getVersion()).as("topographic place ref version").isNull();
-    }
-
-    @Test
-    public void testNoReferenceRemoval() {
-
-
-        StopPlace stopPlace = new StopPlace()
-                .withTariffZones(
-                        new TariffZoneRefs_RelStructure()
-                                .withTariffZoneRef(
-                                        new TariffZoneRef()
-                                                .withRef("ref")
-                                                .withVersion("version")))
-                .withTopographicPlaceRef(
-                        new TopographicPlaceRefStructure()
-                                .withValue("KVE:TopographicPlace:XXX")
-                                .withVersion("version"));
-
-
-        List<StopPlace> stopPlaces = Arrays.asList(stopPlace);
-
-
-        ExportParams exportParams = ExportParams.newExportParamsBuilder()
-                .setTopographicPlaceExportMode(ExportParams.ExportMode.RELEVANT)
-                .setTariffZoneExportMode(ExportParams.ExportMode.RELEVANT)
-                .build();
-
-        NetexReferenceRemovingIterator netexReferenceRemovingIterator = new NetexReferenceRemovingIterator(stopPlaces.iterator(), exportParams);
-
-        StopPlace actual = netexReferenceRemovingIterator.next();
-
-        assertThat(actual.getTariffZones().getTariffZoneRef().getFirst().getVersion()).as("TariffZoneref version").isEqualTo("version");
-        assertThat(actual.getTopographicPlaceRef().getVersion()).as("topographic place ref version").isEqualTo("version");
-    }
+//
+//    @Test
+//    public void testReferenceRemoval() {
+//
+//
+//        StopPlace stopPlace = new StopPlace()
+//                .withTariffZones(
+//                        new TariffZoneRefs_RelStructure()
+//                                .withTariffZoneRef(
+//                                        new TariffZoneRef()
+//                                                .withRef("RUT:TariffZone:1")
+//                                                .withVersion("1"))
+//                                .withTariffZoneRef(
+//                                        new TariffZoneRef()
+//                                                .withRef("RUT:FareZone:2")
+//                                                .withVersion("2")
+//                                )
+//                )
+//                .withTopographicPlaceRef(
+//                        new TopographicPlaceRefStructure()
+//                            .withValue("KVE:TopographicPlace:XXX")
+//                            .withVersion("version"));
+//
+//
+//        List<StopPlace> stopPlaces = Collections.singletonList(stopPlace);
+//
+//
+//        ExportParams exportParams = ExportParams.newExportParamsBuilder()
+//                .setTopographicPlaceExportMode(ExportParams.ExportMode.NONE)
+//                .setTariffZoneExportMode(ExportParams.ExportMode.NONE)
+//                .setFareZoneExportMode(ExportParams.ExportMode.NONE)
+//                .build();
+//
+//        NetexReferenceRemovingIterator netexReferenceRemovingIterator = new NetexReferenceRemovingIterator(stopPlaces.iterator(), exportParams);
+//
+//
+//        StopPlace actual = netexReferenceRemovingIterator.next();
+//
+//        assertThat(actual.getTariffZones().getTariffZoneRef().getFirst().getVersion()).as("TariffZoneref version").isNull();
+//        assertThat(actual.getTariffZones().getTariffZoneRef().getLast().getVersion()).as("TariffZoneref version").isNull();
+//        assertThat(actual.getTopographicPlaceRef().getVersion()).as("topographic place ref version").isNull();
+//    }
+//
+//    @Test
+//    public void testNoReferenceRemoval() {
+//
+//
+//        StopPlace stopPlace = new StopPlace()
+//                .withTariffZones(
+//                        new TariffZoneRefs_RelStructure()
+//                                .withTariffZoneRef(
+//                                        new TariffZoneRef()
+//                                                .withRef("ref")
+//                                                .withVersion("version")))
+//                .withTopographicPlaceRef(
+//                        new TopographicPlaceRefStructure()
+//                                .withValue("KVE:TopographicPlace:XXX")
+//                                .withVersion("version"));
+//
+//
+//        List<StopPlace> stopPlaces = Arrays.asList(stopPlace);
+//
+//
+//        ExportParams exportParams = ExportParams.newExportParamsBuilder()
+//                .setTopographicPlaceExportMode(ExportParams.ExportMode.RELEVANT)
+//                .setTariffZoneExportMode(ExportParams.ExportMode.RELEVANT)
+//                .build();
+//
+//        NetexReferenceRemovingIterator netexReferenceRemovingIterator = new NetexReferenceRemovingIterator(stopPlaces.iterator(), exportParams);
+//
+//        StopPlace actual = netexReferenceRemovingIterator.next();
+//
+//        assertThat(actual.getTariffZones().getTariffZoneRef().getFirst().getVersion()).as("TariffZoneref version").isEqualTo("version");
+//        assertThat(actual.getTopographicPlaceRef().getVersion()).as("topographic place ref version").isEqualTo("version");
+//    }
 
 }

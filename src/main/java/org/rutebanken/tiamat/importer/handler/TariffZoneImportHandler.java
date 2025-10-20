@@ -93,33 +93,35 @@ public class TariffZoneImportHandler {
     public void handleTariffZones(SiteFrame netexSiteFrame, ImportParams importParams, AtomicInteger tariffZoneImportedCounter, SiteFrame responseSiteframe) {
 
 
-        if (publicationDeliveryHelper.hasTariffZones(netexSiteFrame) && importParams.importType != ImportType.ID_MATCH) {
-            List<org.rutebanken.tiamat.model.TariffZone> tiamatTariffZones = netexSiteFrame.getTariffZones().getTariffZone().stream()
-                    .filter(this::isTariffZone)
-                    .map(jaxbElement -> (TariffZone) jaxbElement.getValue())
-                    .map(netexMapper::mapToTiamatModel)
-                    .collect(Collectors.toList());
-
-            List<org.rutebanken.tiamat.model.FareZone> tiamatFareZones = netexSiteFrame.getTariffZones().getTariffZone().stream()
-                    .filter(this::isFareZone)
-                    .map(jaxbElement -> (FareZone) jaxbElement.getValue())
-                    .map(netexMapper::mapToTiamatModel)
-                    .collect(Collectors.toList());
-
-            logger.debug("Mapped {} tariff zones from netex to internal model", tiamatTariffZones.size());
-            List<JAXBElement<? extends Zone_VersionStructure>> importedTariffZones = tariffZoneImporter.importTariffZones(tiamatTariffZones).stream()
-                    .map(tariffZone -> new ObjectFactory().createTariffZone(tariffZone)).collect(Collectors.toList());
-            logger.debug("Got {} imported tariffZones ", importedTariffZones.size());
-
-            List<JAXBElement<? extends Zone_VersionStructure>> importedFareZones = fareZoneImporter.importFareZones(tiamatFareZones).stream()
-                    .map(fareZone -> new ObjectFactory().createFareZone(fareZone)).collect(Collectors.toList());
-            if (!importedTariffZones.isEmpty()) {
-                responseSiteframe.withTariffZones(new TariffZonesInFrame_RelStructure().withTariffZone(importedTariffZones));
-            }
-            if (!importedFareZones.isEmpty()) {
-                responseSiteframe.withTariffZones(new TariffZonesInFrame_RelStructure().withTariffZone(importedFareZones));
-            }
-        }
+        //TODO
+//
+//        if (publicationDeliveryHelper.hasTariffZones(netexSiteFrame) && importParams.importType != ImportType.ID_MATCH) {
+//            List<org.rutebanken.tiamat.model.TariffZone> tiamatTariffZones = netexSiteFrame.getTariffZones().getTariffZone().stream()
+//                    .filter(this::isTariffZone)
+//                    .map(jaxbElement -> (TariffZone) jaxbElement.getValue())
+//                    .map(netexMapper::mapToTiamatModel)
+//                    .collect(Collectors.toList());
+//
+//            List<org.rutebanken.tiamat.model.FareZone> tiamatFareZones = netexSiteFrame.getTariffZones().getTariffZone().stream()
+//                    .filter(this::isFareZone)
+//                    .map(jaxbElement -> (FareZone) jaxbElement.getValue())
+//                    .map(netexMapper::mapToTiamatModel)
+//                    .collect(Collectors.toList());
+//
+//            logger.debug("Mapped {} tariff zones from netex to internal model", tiamatTariffZones.size());
+//            List<JAXBElement<? extends Zone_VersionStructure>> importedTariffZones = tariffZoneImporter.importTariffZones(tiamatTariffZones).stream()
+//                    .map(tariffZone -> new ObjectFactory().createTariffZone(tariffZone)).collect(Collectors.toList());
+//            logger.debug("Got {} imported tariffZones ", importedTariffZones.size());
+//
+//            List<JAXBElement<? extends Zone_VersionStructure>> importedFareZones = fareZoneImporter.importFareZones(tiamatFareZones).stream()
+//                    .map(fareZone -> new ObjectFactory().createFareZone(fareZone)).collect(Collectors.toList());
+//            if (!importedTariffZones.isEmpty()) {
+//                responseSiteframe.withTariffZones(new TariffZonesInFrame_RelStructure().withTariffZone(importedTariffZones));
+//            }
+//            if (!importedFareZones.isEmpty()) {
+//                responseSiteframe.withTariffZones(new TariffZonesInFrame_RelStructure().withTariffZone(importedFareZones));
+//            }
+//        }
     }
 
     private boolean isTariffZone(JAXBElement<? extends Zone_VersionStructure> jaxbElement) {

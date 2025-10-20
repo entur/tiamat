@@ -174,11 +174,12 @@ public class StopPlaceImportHandler {
 
             tariffZonesFromStopsExporter.resolveTariffZones(importedOrMatchedNetexStopPlaces, responseSiteframe);
 
-            if (responseSiteframe.getTariffZones() != null
-                    && responseSiteframe.getTariffZones().getTariffZone() != null
-                    && responseSiteframe.getTariffZones().getTariffZone().isEmpty()) {
-                responseSiteframe.setTariffZones(null);
-            }
+//            TODO
+//            if (responseSiteframe.getTariffZones() != null
+//                    && responseSiteframe.getTariffZones().getTariffZone() != null
+//                    && responseSiteframe.getTariffZones().getTariffZone().isEmpty()) {
+//                responseSiteframe.setTariffZones(null);
+//            }
 
             if (EXPORT_TOPOGRAPHIC_PLACES_FOR_STOPS) {
                 List<TopographicPlace> netexTopographicPlaces = topographicPlacesExporter.export(findTopographicPlaceRefsFromStops(tiamatStops));

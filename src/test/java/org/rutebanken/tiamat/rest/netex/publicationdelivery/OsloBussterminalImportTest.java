@@ -101,7 +101,7 @@ public class OsloBussterminalImportTest extends TiamatIntegrationTest {
 
         StopPlace actualStopPlace = publicationDeliveryTestHelper.findFirstStopPlace(publicationDeliveryResponse);
 
-        assertThat(actualStopPlace.getName().getValue()).isEqualTo("Oslo Bussterminal");
+        assertThat(actualStopPlace.getName().getContent()).isEqualTo("Oslo Bussterminal");
 
         List<Quay> actualQuays = publicationDeliveryTestHelper.extractQuays(actualStopPlace);
         assertThat(actualQuays).as("quays should not be null").isNotNull();
@@ -113,8 +113,8 @@ public class OsloBussterminalImportTest extends TiamatIntegrationTest {
 
         assertThat(actualQuays.stream()
                 .filter(quay -> quay.getDescription() != null)
-                .filter(quay -> quay.getDescription().getValue() != null)
-                .filter(quay -> quay.getDescription().getValue().equals("avstigning"))
+                .filter(quay -> quay.getDescription().getContent() != null)
+                .filter(quay -> quay.getDescription().getContent().equals("avstigning"))
                 .findAny()).describedAs("Quay should contain description").isPresent();
     }
 }

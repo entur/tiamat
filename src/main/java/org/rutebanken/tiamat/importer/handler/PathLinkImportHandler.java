@@ -45,7 +45,7 @@
 
 package org.rutebanken.tiamat.importer.handler;
 
-import org.rutebanken.netex.model.PathLinksInFrame_RelStructure;
+//import org.rutebanken.netex.model.PathLinksInFrame_RelStructure;
 import org.rutebanken.netex.model.SiteFrame;
 import org.rutebanken.tiamat.importer.ImportParams;
 import org.rutebanken.tiamat.importer.PathLinksImporter;
@@ -73,12 +73,12 @@ public class PathLinkImportHandler {
     }
 
     public void handlePathLinks(SiteFrame netexSiteFrame, ImportParams importParams, AtomicInteger pathLinkCounter, SiteFrame responseSiteframe) {
-        if (netexSiteFrame.getPathLinks() != null && netexSiteFrame.getPathLinks().getPathLink() != null) {
-            List<org.rutebanken.tiamat.model.PathLink> tiamatPathLinks = netexMapper.mapPathLinksToTiamatModel(netexSiteFrame.getPathLinks().getPathLink());
-            tiamatPathLinks.forEach(tiamatPathLink -> logger.debug("Received path link: {}", tiamatPathLink));
-
-            List<org.rutebanken.netex.model.PathLink> pathLinks = pathLinksImporter.importPathLinks(tiamatPathLinks, pathLinkCounter);
-            responseSiteframe.withPathLinks(new PathLinksInFrame_RelStructure().withPathLink(pathLinks));
+        if (netexSiteFrame.getPathLinks() != null) {// && netexSiteFrame.getPathLinks().getPathLink() != null) { TODO
+//            List<org.rutebanken.tiamat.model.PathLink> tiamatPathLinks = netexMapper.mapPathLinksToTiamatModel(netexSiteFrame.getPathLinks().getPathLink());
+//            tiamatPathLinks.forEach(tiamatPathLink -> logger.debug("Received path link: {}", tiamatPathLink));
+//
+//            List<org.rutebanken.netex.model.PathLink> pathLinks = pathLinksImporter.importPathLinks(tiamatPathLinks, pathLinkCounter);
+//            responseSiteframe.withPathLinks(new PathLinksInFrame_RelStructure().withPathLink(pathLinks));
         }
     }
 

@@ -70,7 +70,7 @@ public class PublicationDeliveryPartialUnmarshaller {
         }
     }
 
-    private final NeTExValidator neTExValidator;
+    private NeTExValidator neTExValidator;
 
     /**
      * Validating large incoming XMLs against schema often leads to StackOverFlowException.
@@ -83,7 +83,6 @@ public class PublicationDeliveryPartialUnmarshaller {
     @Autowired
     public PublicationDeliveryPartialUnmarshaller(PublicationDeliveryHelper publicationDeliveryHelper) throws IOException, SAXException {
         this.publicationDeliveryHelper = publicationDeliveryHelper;
-        this.neTExValidator = NeTExValidator.getNeTExValidator();
     }
 
     public UnmarshalResult unmarshal(InputStream inputStream) throws JAXBException, IOException, SAXException, XMLStreamException, InterruptedException, ParserConfigurationException {
@@ -100,6 +99,7 @@ public class PublicationDeliveryPartialUnmarshaller {
         }
 
         if (validateAgainstSchema) {
+            this.neTExValidator = NeTExValidator.getNeTExValidator();
             unmarshaller.setSchema(neTExValidator.getSchema());
         }
 

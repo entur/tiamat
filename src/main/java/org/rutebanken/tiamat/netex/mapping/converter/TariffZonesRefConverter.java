@@ -36,25 +36,27 @@ public class TariffZonesRefConverter extends BidirectionalConverter<Set<TariffZo
             return null;
         }
 
-        return new TariffZoneRefs_RelStructure()
-                .withTariffZoneRef(tariffZones.stream()
-                    .map(tariffZoneRef -> mapperFacade.map(tariffZoneRef, org.rutebanken.netex.model.TariffZoneRef.class))
-                        .collect(toList()));
+        return null; //TODO
+//        return new TariffZoneRefs_RelStructure()
+//                .withTariffZoneRef(tariffZones.stream()
+//                    .map(tariffZoneRef -> mapperFacade.map(tariffZoneRef, org.rutebanken.netex.model.TariffZoneRef.class))
+//                        .collect(toList()));
     }
 
     @Override
     public Set<TariffZoneRef> convertFrom(TariffZoneRefs_RelStructure tariffZoneRefs_relStructure, Type<Set<TariffZoneRef>> type, MappingContext mappingContext) {
-        if(tariffZoneRefs_relStructure == null
-                || tariffZoneRefs_relStructure.getTariffZoneRef() == null
-                || tariffZoneRefs_relStructure.getTariffZoneRef().isEmpty()) {
-            return null;
-        }
+        return null;
+        //        if(tariffZoneRefs_relStructure == null TODO
+//                || tariffZoneRefs_relStructure.getTariffZoneRef() == null
+//                || tariffZoneRefs_relStructure.getTariffZoneRef().isEmpty()) {
+//            return null;
+//        }
 
-        return tariffZoneRefs_relStructure
-                .getTariffZoneRef()
-                .stream()
-                .map(tariffZoneRef -> mapperFacade.map(tariffZoneRef, TariffZoneRef.class))
-                .collect(toSet());
+//        return tariffZoneRefs_relStructure
+//                .getTariffZoneRef()
+//                .stream()
+//                .map(tariffZoneRef -> mapperFacade.map(tariffZoneRef, TariffZoneRef.class))
+//                .collect(toSet());
 
     }
 }

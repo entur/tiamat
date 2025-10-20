@@ -85,31 +85,31 @@ public class GroupOfTariffZonesImportHandler {
 
     public void handleGroupOfTariffZones(SiteFrame netexSiteFrame, ImportParams importParams, SiteFrame responseSiteframe) {
 
-
-        if (publicationDeliveryHelper.hasTariffZones(netexSiteFrame) && publicationDeliveryHelper.hasGroupOfTariffZones(netexSiteFrame) && importParams.importType != ImportType.ID_MATCH) {
-            List<String> tariffZoneIds = netexSiteFrame.getTariffZones().getTariffZone().stream()
-                    .map(jaxbElement -> (FareZone) jaxbElement.getValue())
-                    .map(tz -> tz.getId())
-                    .collect(Collectors.toList());
-
-            List<org.rutebanken.tiamat.model.GroupOfTariffZones> tiamatGroupOfTariffZones = netexSiteFrame.getGroupsOfTariffZones().getGroupOfTariffZones().stream()
-                    .map(netexMapper::mapToTiamatModel)
-                    .collect(Collectors.toList());
-
-            //Checks if netex import file contains all the fare zones
-            validateMembers(tiamatGroupOfTariffZones,tariffZoneIds);
-
-            logger.debug("Mapped {} group tariff zones from netex to internal model", tiamatGroupOfTariffZones.size());
-            final List<GroupOfTariffZones> importedGroupOfTariffZones = groupOfTariffZonesImporter.importGroupOfTariffZones(tiamatGroupOfTariffZones);
-            
-            logger.debug("Got {} imported group of tariffZones ", importedGroupOfTariffZones.size());
-
-            if (!importedGroupOfTariffZones.isEmpty()) {
-                responseSiteframe.withGroupsOfTariffZones(new GroupsOfTariffZonesInFrame_RelStructure().withGroupOfTariffZones(importedGroupOfTariffZones));
-
-            }
-
-        }
+// TODO
+//        if (publicationDeliveryHelper.hasTariffZones(netexSiteFrame) && publicationDeliveryHelper.hasGroupOfTariffZones(netexSiteFrame) && importParams.importType != ImportType.ID_MATCH) {
+//            List<String> tariffZoneIds = netexSiteFrame.getTariffZones().getTariffZone().stream()
+//                    .map(jaxbElement -> (FareZone) jaxbElement.getValue())
+//                    .map(tz -> tz.getId())
+//                    .collect(Collectors.toList());
+//
+//            List<org.rutebanken.tiamat.model.GroupOfTariffZones> tiamatGroupOfTariffZones = netexSiteFrame.getGroupsOfTariffZones().getGroupOfTariffZones().stream()
+//                    .map(netexMapper::mapToTiamatModel)
+//                    .collect(Collectors.toList());
+//
+//            //Checks if netex import file contains all the fare zones
+//            validateMembers(tiamatGroupOfTariffZones,tariffZoneIds);
+//
+//            logger.debug("Mapped {} group tariff zones from netex to internal model", tiamatGroupOfTariffZones.size());
+//            final List<GroupOfTariffZones> importedGroupOfTariffZones = groupOfTariffZonesImporter.importGroupOfTariffZones(tiamatGroupOfTariffZones);
+//
+//            logger.debug("Got {} imported group of tariffZones ", importedGroupOfTariffZones.size());
+//
+//            if (!importedGroupOfTariffZones.isEmpty()) {
+//                responseSiteframe.withGroupsOfTariffZones(new GroupsOfTariffZonesInFrame_RelStructure().withGroupOfTariffZones(importedGroupOfTariffZones));
+//
+//            }
+//
+//        }
     }
 
 

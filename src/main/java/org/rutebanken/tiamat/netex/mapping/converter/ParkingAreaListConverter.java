@@ -42,24 +42,25 @@ public class ParkingAreaListConverter extends BidirectionalConverter<List<Parkin
 
         logger.debug("Mapping {} parkingAreas to netex", parkingAreas.size());
 
-        parkingAreas.forEach(parkingArea -> {
-            org.rutebanken.netex.model.ParkingArea netexParkingArea = mapperFacade.map(parkingArea, org.rutebanken.netex.model.ParkingArea.class);
-            parkingAreasRelStructure.getParkingAreaRefOrParkingArea().add(netexParkingArea);
-        });
+//        TODO
+//        parkingAreas.forEach(parkingArea -> {
+//            org.rutebanken.netex.model.ParkingArea netexParkingArea = mapperFacade.map(parkingArea, org.rutebanken.netex.model.ParkingArea.class);
+//            parkingAreasRelStructure.getParkingAreaRefOrParkingArea().add(netexParkingArea);
+//        });
         return parkingAreasRelStructure;
     }
 
     @Override
     public List<ParkingArea> convertFrom(ParkingAreas_RelStructure parkingAreasRelStructure, Type<List<ParkingArea>> destinationType, MappingContext mappingContext) {
-        logger.debug("Mapping {} quays to internal model", parkingAreasRelStructure != null ? parkingAreasRelStructure.getParkingAreaRefOrParkingArea().size() : 0);
+//        logger.debug("Mapping {} quays to internal model", parkingAreasRelStructure != null ? parkingAreasRelStructure.getParkingAreaRefOrParkingArea().size() : 0); TODO
         List<ParkingArea> parkingAreas = new ArrayList<>();
-        if(parkingAreasRelStructure != null && parkingAreasRelStructure.getParkingAreaRefOrParkingArea() != null) {
-            parkingAreasRelStructure.getParkingAreaRefOrParkingArea().stream()
-                    .filter(object -> object instanceof org.rutebanken.netex.model.ParkingArea)
-                    .map(object -> ((org.rutebanken.netex.model.ParkingArea) object))
-                    .map(netexParkingArea ->  mapperFacade.map(netexParkingArea, ParkingArea.class))
-                    .forEach(parkingAreas::add);
-        }
+//        if(parkingAreasRelStructure != null && parkingAreasRelStructure.getParkingAreaRefOrParkingArea() != null) { TODO
+//            parkingAreasRelStructure.getParkingAreaRefOrParkingArea().stream()
+//                    .filter(object -> object instanceof org.rutebanken.netex.model.ParkingArea)
+//                    .map(object -> ((org.rutebanken.netex.model.ParkingArea) object))
+//                    .map(netexParkingArea ->  mapperFacade.map(netexParkingArea, ParkingArea.class))
+//                    .forEach(parkingAreas::add);
+//        }
         return parkingAreas;
     }
 }

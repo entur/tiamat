@@ -162,7 +162,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         CycleStorageEquipment cycleStorageEquipment = new CycleStorageEquipment();
         cycleStorageEquipment.setNumberOfSpaces(BigInteger.valueOf(4));
         cycleStorageEquipment.setCycleStorageType(CycleStorageEnumeration.BARS);
-        cycleStorageEquipment.setCovered(true);
+//        cycleStorageEquipment.setCovered(true);
 
         installedEquipments.add(cycleStorageEquipment);
 

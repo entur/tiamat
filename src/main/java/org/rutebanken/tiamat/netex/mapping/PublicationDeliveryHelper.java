@@ -56,15 +56,15 @@ public class PublicationDeliveryHelper {
     }
 
     public boolean hasTariffZones(SiteFrame netexSiteFrame) {
-        return netexSiteFrame.getTariffZones() != null && netexSiteFrame.getTariffZones().getTariffZone() != null;
+        return netexSiteFrame.getTariffZones() != null;// TODO && netexSiteFrame.getTariffZones().getTariffZone() != null;
     }
 
     public boolean hasPathLinks(SiteFrame netexSiteFrame) {
-        return netexSiteFrame.getPathLinks() != null && netexSiteFrame.getPathLinks().getPathLink() != null;
+        return netexSiteFrame.getPathLinks() != null;//TODO && netexSiteFrame.getPathLinks().getPathLink() != null;
     }
 
     public boolean hasParkings(SiteFrame siteFrame) {
-        return siteFrame.getParkings() != null && siteFrame.getParkings().getParking() != null;
+        return siteFrame.getParkings() != null;//TODO && siteFrame.getParkings().getParking() != null;
     }
 
     public int numberOfStops(SiteFrame netexSiteFrame) {

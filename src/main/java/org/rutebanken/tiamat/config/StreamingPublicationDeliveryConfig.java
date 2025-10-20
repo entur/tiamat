@@ -15,22 +15,10 @@
 
 package org.rutebanken.tiamat.config;
 
-import org.rutebanken.tiamat.exporter.PublicationDeliveryCreator;
-import org.rutebanken.tiamat.exporter.StreamingPublicationDelivery;
-import org.rutebanken.tiamat.exporter.TiamatFareFrameExporter;
-import org.rutebanken.tiamat.exporter.TiamatResourceFrameExporter;
-import org.rutebanken.tiamat.exporter.TiamatServiceFrameExporter;
-import org.rutebanken.tiamat.exporter.TiamatSiteFrameExporter;
+import org.rutebanken.tiamat.exporter.*;
 import org.rutebanken.tiamat.netex.id.NetexIdHelper;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
-import org.rutebanken.tiamat.repository.FareZoneRepository;
-import org.rutebanken.tiamat.repository.GroupOfStopPlacesRepository;
-import org.rutebanken.tiamat.repository.GroupOfTariffZonesRepository;
-import org.rutebanken.tiamat.repository.ParkingRepository;
-import org.rutebanken.tiamat.repository.PurposeOfGroupingRepository;
-import org.rutebanken.tiamat.repository.StopPlaceRepository;
-import org.rutebanken.tiamat.repository.TariffZoneRepository;
-import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
+import org.rutebanken.tiamat.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -49,6 +37,15 @@ public class StreamingPublicationDeliveryConfig {
     private ParkingRepository parkingRepository;
 
     @Autowired
+    private VehicleRepository vehicleRepository;
+
+    @Autowired
+    private VehicleTypeRepository vehicleTypeRepository;
+
+    @Autowired
+    private VehicleModelRepository vehicleModelRepository;
+
+    @Autowired
     private PublicationDeliveryCreator publicationDeliveryCreator;
 
     @Autowired
@@ -62,6 +59,9 @@ public class StreamingPublicationDeliveryConfig {
 
     @Autowired
     private TiamatResourceFrameExporter tiamatResourceFrameExporter;
+
+    @Autowired
+    private TiamatComositeFrameExporter tiamatComositeFrameExporter;
 
     @Autowired
     private NetexMapper netexMapper;
@@ -93,10 +93,10 @@ public class StreamingPublicationDeliveryConfig {
     @Value("${syncNetexExport.validateAgainstSchema:true}")
     private boolean validateSyncExport;
 
-    @Bean("asyncStreamingPublicationDelivery")
-    public StreamingPublicationDelivery asyncStreamingPublicationDelivery() throws IOException, SAXException {
-        return createStreamingPublicationDelivery(validateAsyncExport);
-    }
+//    @Bean("asyncStreamingPublicationDelivery") TODO
+//    public StreamingPublicationDelivery asyncStreamingPublicationDelivery() throws IOException, SAXException {
+//        return createStreamingPublicationDelivery(validateAsyncExport);
+//    }
 
     @Bean("syncStreamingPublicationDelivery")
     public StreamingPublicationDelivery syncStreamingPublicationDelivery() throws IOException, SAXException {
@@ -104,8 +104,8 @@ public class StreamingPublicationDeliveryConfig {
     }
 
     private StreamingPublicationDelivery createStreamingPublicationDelivery(boolean validate) throws IOException, SAXException {
-        return new StreamingPublicationDelivery(stopPlaceRepository, parkingRepository, publicationDeliveryCreator,
-                tiamatSiteFrameExporter,tiamatServiceFrameExporter,tiamatFareFrameExporter,tiamatResourceFrameExporter, netexMapper, tariffZoneRepository, fareZoneRepository, topographicPlaceRepository,
-                groupOfStopPlacesRepository,groupOfTariffZonesRepository, netexIdHelper, validate, purposeOfGroupingRepository);
+        return new StreamingPublicationDelivery(stopPlaceRepository, parkingRepository, vehicleRepository, vehicleTypeRepository, vehicleModelRepository, publicationDeliveryCreator,
+                tiamatSiteFrameExporter,tiamatServiceFrameExporter,tiamatFareFrameExporter,tiamatResourceFrameExporter, tiamatComositeFrameExporter, netexMapper, tariffZoneRepository, fareZoneRepository, topographicPlaceRepository,
+                groupOfStopPlacesRepository,groupOfTariffZonesRepository, netexIdHelper, /* TODO validate,*/ purposeOfGroupingRepository);
     }
 }

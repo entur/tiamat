@@ -42,10 +42,10 @@ public class QuayListConverter extends BidirectionalConverter<Set<Quay>, Quays_R
 
         logger.debug("Mapping {} quays to netex", quays.size());
 
-        quays.forEach(quay -> {
-            org.rutebanken.netex.model.Quay netexQuay = mapperFacade.map(quay, org.rutebanken.netex.model.Quay.class);
-            quays_relStructure.getQuayRefOrQuay().add(netexQuay);
-        });
+//        quays.forEach(quay -> { TODO
+//            org.rutebanken.netex.model.Quay netexQuay = mapperFacade.map(quay, org.rutebanken.netex.model.Quay.class);
+//            quays_relStructure.getQuayRefOrQuay().add(netexQuay);
+//        });
         return quays_relStructure;
     }
 
@@ -54,14 +54,14 @@ public class QuayListConverter extends BidirectionalConverter<Set<Quay>, Quays_R
         logger.debug("Mapping {} quays to internal model", quays_relStructure != null ? quays_relStructure.getQuayRefOrQuay().size() : 0);
         Set<Quay> quays = new HashSet<>();
         if(quays_relStructure != null && quays_relStructure.getQuayRefOrQuay() != null) {
-            quays_relStructure.getQuayRefOrQuay().stream()
-                    .filter(object -> object instanceof org.rutebanken.netex.model.Quay)
-                    .map(object -> ((org.rutebanken.netex.model.Quay) object))
-                    .map(netexQuay -> {
-                        Quay tiamatQuay = mapperFacade.map(netexQuay, Quay.class);
-                        return tiamatQuay;
-                    })
-                    .forEach(quay -> quays.add(quay));
+//            quays_relStructure.getQuayRefOrQuay().stream() TODO
+//                    .filter(object -> object instanceof org.rutebanken.netex.model.Quay)
+//                    .map(object -> ((org.rutebanken.netex.model.Quay) object))
+//                    .map(netexQuay -> {
+//                        Quay tiamatQuay = mapperFacade.map(netexQuay, Quay.class);
+//                        return tiamatQuay;
+//                    })
+//                    .forEach(quay -> quays.add(quay));
         }
         
         return quays;

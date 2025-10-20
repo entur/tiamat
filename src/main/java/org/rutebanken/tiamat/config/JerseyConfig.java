@@ -31,6 +31,7 @@ import org.rutebanken.tiamat.rest.health.HealthResource;
 import org.rutebanken.tiamat.rest.netex.publicationdelivery.AsyncExportResource;
 import org.rutebanken.tiamat.rest.netex.publicationdelivery.ExportResource;
 import org.rutebanken.tiamat.rest.netex.publicationdelivery.ImportResource;
+import org.rutebanken.tiamat.rest.netex.publicationdelivery.VehicleExportResource;
 import org.rutebanken.tiamat.rest.promethouse.PrometheusResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -202,5 +203,26 @@ public class JerseyConfig {
         return registration;
     }
 
+    @Bean
+    public ServletRegistrationBean vehiclesJersey() {
+        Set<Class<?>> vehicleResources = new HashSet<>();
+        vehicleResources.add(VehicleExportResource.class);
 
+        vehicleResources.add(GeneralExceptionMapper.class);
+        vehicleResources.add(ErrorResponseEntityMessageBodyWriter.class);
+
+        ResourceConfig resourceConfig = new ResourceConfig(vehicleResources);
+        ServletRegistrationBean vehiclesServicesJersey = new ServletRegistrationBean(new ServletContainer(resourceConfig));
+
+        vehiclesServicesJersey.addUrlMappings("/services/vehicles/*");
+
+        vehiclesServicesJersey.setName("VehiclesJersey");
+        vehiclesServicesJersey.setLoadOnStartup(0);
+
+        vehiclesServicesJersey.getInitParameters().put("swagger.scanner.id", "vehicles-scanner");
+        vehiclesServicesJersey.getInitParameters().put("swagger.config.id", "vehicles-swagger-doc");
+        vehiclesServicesJersey.getInitParameters().put("jersey.config.server.provider.packages", "org.rutebanken.tiamat");
+
+        return vehiclesServicesJersey;
+    }
 }

@@ -21,10 +21,12 @@ import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBElement;
 import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Marshaller;
+import ma.glasnost.orika.MapperFactory;
 import org.hibernate.internal.SessionImpl;
 import org.rutebanken.netex.model.DataManagedObjectStructure;
 import org.rutebanken.netex.model.FareZone;
 import org.rutebanken.netex.model.FareZonesInFrame_RelStructure;
+import org.rutebanken.netex.model.Frames_RelStructure;
 import org.rutebanken.netex.model.GroupsOfStopPlacesInFrame_RelStructure;
 import org.rutebanken.netex.model.GroupsOfTariffZonesInFrame_RelStructure;
 import org.rutebanken.netex.model.MultilingualString;
@@ -33,7 +35,6 @@ import org.rutebanken.netex.model.Parking;
 import org.rutebanken.netex.model.ParkingsInFrame_RelStructure;
 import org.rutebanken.netex.model.PassengerStopAssignment;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
-import org.rutebanken.netex.model.QuayRefStructure;
 import org.rutebanken.netex.model.ScheduledStopPoint;
 import org.rutebanken.netex.model.ScheduledStopPointRefStructure;
 import org.rutebanken.netex.model.ScheduledStopPointsInFrame_RelStructure;
@@ -41,12 +42,14 @@ import org.rutebanken.netex.model.SiteFrame;
 import org.rutebanken.netex.model.StopAssignment_VersionStructure;
 import org.rutebanken.netex.model.StopAssignmentsInFrame_RelStructure;
 import org.rutebanken.netex.model.StopPlace;
-import org.rutebanken.netex.model.StopPlaceRefStructure;
 import org.rutebanken.netex.model.StopPlacesInFrame_RelStructure;
 import org.rutebanken.netex.model.TariffZone;
 import org.rutebanken.netex.model.TariffZonesInFrame_RelStructure;
 import org.rutebanken.netex.model.TopographicPlacesInFrame_RelStructure;
 import org.rutebanken.netex.model.ValidBetween;
+import org.rutebanken.netex.model.VehicleModelsInFrame_RelStructure;
+import org.rutebanken.netex.model.VehicleTypesInFrame_RelStructure;
+import org.rutebanken.netex.model.VehiclesInFrame_RelStructure;
 import org.rutebanken.netex.model.Zone_VersionStructure;
 import org.rutebanken.netex.validation.NeTExValidator;
 import org.rutebanken.tiamat.exporter.async.NetexMappingIterator;
@@ -65,6 +68,10 @@ import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.ResourceFrame;
 import org.rutebanken.tiamat.model.ServiceFrame;
 import org.rutebanken.tiamat.model.TopographicPlace;
+import org.rutebanken.tiamat.model.vehicle.CompositeFrame;
+import org.rutebanken.tiamat.model.vehicle.Vehicle;
+import org.rutebanken.tiamat.model.vehicle.VehicleModel;
+import org.rutebanken.tiamat.model.vehicle.VehicleType;
 import org.rutebanken.tiamat.netex.id.NetexIdHelper;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.repository.FareZoneRepository;
@@ -75,10 +82,12 @@ import org.rutebanken.tiamat.repository.PurposeOfGroupingRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.repository.TariffZoneRepository;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
+import org.rutebanken.tiamat.repository.VehicleModelRepository;
+import org.rutebanken.tiamat.repository.VehicleRepository;
+import org.rutebanken.tiamat.repository.VehicleTypeRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.xml.sax.SAXException;
@@ -114,6 +123,9 @@ public class StreamingPublicationDelivery {
 
     private final StopPlaceRepository stopPlaceRepository;
     private final ParkingRepository parkingRepository;
+    private final VehicleRepository vehicleRepository;
+    private final VehicleTypeRepository vehicleTypeRepository;
+    private final VehicleModelRepository vehicleModelRepository;
     private final PublicationDeliveryCreator publicationDeliveryCreator;
     private final TiamatSiteFrameExporter tiamatSiteFrameExporter;
     private final TiamatServiceFrameExporter tiamatServiceFrameExporter;
@@ -126,7 +138,8 @@ public class StreamingPublicationDelivery {
     private final TopographicPlaceRepository topographicPlaceRepository;
     private final GroupOfStopPlacesRepository groupOfStopPlacesRepository;
     private final GroupOfTariffZonesRepository groupOfTariffZonesRepository;
-    private final NeTExValidator neTExValidator = NeTExValidator.getNeTExValidator();
+    private final TiamatComositeFrameExporter tiamatComositeFrameExporter;
+    private NeTExValidator neTExValidator; //TODO
     private final NetexIdHelper netexIdHelper;
     /**
      * Validate against netex schema using the {@link NeTExValidator}
@@ -141,11 +154,15 @@ public class StreamingPublicationDelivery {
     @Autowired
     public StreamingPublicationDelivery(StopPlaceRepository stopPlaceRepository,
                                         ParkingRepository parkingRepository,
+                                        VehicleRepository vehicleRepository,
+                                        VehicleTypeRepository vehicleTypeRepository,
+                                        VehicleModelRepository vehicleModelRepository,
                                         PublicationDeliveryCreator publicationDeliveryCreator,
                                         TiamatSiteFrameExporter tiamatSiteFrameExporter,
                                         TiamatServiceFrameExporter tiamatServiceFrameExporter,
                                         TiamatFareFrameExporter tiamatFareFrameExporter,
                                         TiamatResourceFrameExporter tiamatResourceFrameExporter,
+                                        TiamatComositeFrameExporter tiamatComositeFrameExporter,
                                         NetexMapper netexMapper,
                                         TariffZoneRepository tariffZoneRepository,
                                         FareZoneRepository fareZoneRepository,
@@ -153,15 +170,19 @@ public class StreamingPublicationDelivery {
                                         GroupOfStopPlacesRepository groupOfStopPlacesRepository,
                                         GroupOfTariffZonesRepository groupOfTariffZonesRepository,
                                         NetexIdHelper netexIdHelper,
-                                        @Value("${asyncNetexExport.validateAgainstSchema:false}") boolean validateAgainstSchema,
+//                          TODO              @Value("${asyncNetexExport.validateAgainstSchema:false}") boolean validateAgainstSchema,
                                         PurposeOfGroupingRepository purposeOfGroupingRepository) throws IOException, SAXException {
         this.stopPlaceRepository = stopPlaceRepository;
         this.parkingRepository = parkingRepository;
+        this.vehicleRepository = vehicleRepository;
+        this.vehicleTypeRepository = vehicleTypeRepository;
+        this.vehicleModelRepository = vehicleModelRepository;
         this.publicationDeliveryCreator = publicationDeliveryCreator;
         this.tiamatSiteFrameExporter = tiamatSiteFrameExporter;
         this.tiamatServiceFrameExporter = tiamatServiceFrameExporter;
         this.tiamatFareFrameExporter = tiamatFareFrameExporter;
         this.tiamatResourceFrameExporter = tiamatResourceFrameExporter;
+        this.tiamatComositeFrameExporter = tiamatComositeFrameExporter;
         this.netexMapper = netexMapper;
         this.tariffZoneRepository = tariffZoneRepository;
         this.fareZoneRepository = fareZoneRepository;
@@ -169,7 +190,7 @@ public class StreamingPublicationDelivery {
         this.groupOfStopPlacesRepository = groupOfStopPlacesRepository;
         this.groupOfTariffZonesRepository = groupOfTariffZonesRepository;
         this.netexIdHelper = netexIdHelper;
-        this.validateAgainstSchema = validateAgainstSchema;
+        this.validateAgainstSchema = false; //TODO  validateAgainstSchema;
         this.purposeOfGroupingRepository = purposeOfGroupingRepository;
     }
 
@@ -182,6 +203,151 @@ public class StreamingPublicationDelivery {
             String message = "Could not create instance of jaxb context for class " + clazz;
             logger.warn(message, e);
             throw new RuntimeException("Could not create instance of jaxb context for class " + clazz, e);
+        }
+    }
+
+    public void streamVehicles(ExportParams exportParams, OutputStream outputStream) throws JAXBException, XMLStreamException, IOException, InterruptedException, SAXException {
+
+        final CompositeFrame compositeFrame = tiamatComositeFrameExporter.createTiamatCompositeFrame("Composite frame " + exportParams);
+
+//        org.rutebanken.tiamat.model.SiteFrame siteFrame = tiamatSiteFrameExporter.createTiamatSiteFrame("Site frame " + exportParams);
+//        final ServiceFrame serviceFrame = tiamatServiceFrameExporter.createTiamatServiceFrame("Service frame " + exportParams);
+
+//        final FareFrame fareFrame = tiamatFareFrameExporter.createTiamatFareFrame("Fare frame " + exportParams);
+
+        final ResourceFrame resourceFrame = tiamatResourceFrameExporter.createTiamatResourceFrame("Resource frame"+ exportParams);
+
+        AtomicInteger mappedVehicleCount = new AtomicInteger();
+        AtomicInteger mappedVehicleTypeCount = new AtomicInteger();
+        AtomicInteger mappedVehicleModelCount = new AtomicInteger();
+        AtomicInteger mappedTrainCount = new AtomicInteger();
+
+        EntitiesEvictor entitiesEvictor = instantiateEvictor();
+
+        logger.info("Streaming export initiated. Export params: {}", exportParams);
+
+        // We need to know these IDs before marshalling begins.
+        // To avoid marshalling empty parking element and to be able to gather relevant topographic places
+        // The primary ID represents a stop place with a certain version
+
+//        final Set<Long> vehicleIds = vehicleRepository.getDatabaseIds(exportParams, false);
+//        logger.info("Got {} vehicle IDs from vehicle search", vehicleIds.size());
+
+//        tiamatSiteFrameExporter.addRelevantPathLinks(stopPlacePrimaryIds, siteFrame);
+
+
+        logger.info("Mapping composite frame to netex model");
+        org.rutebanken.netex.model.CompositeFrame netexCompositeFrame = netexMapper.mapToNetexModel(compositeFrame);
+//        logger.info("Mapping service frame to netex model");
+//        final org.rutebanken.netex.model.ServiceFrame netexServiceFrame = netexMapper.mapToNetexModel(serviceFrame);
+
+//        logger.info("Mapping fare frame to netex model");
+//        final org.rutebanken.netex.model.FareFrame netexFareFrame = netexMapper.mapToNetexModel(fareFrame);
+
+        logger.info("Mapping resource frame to netex model");
+        final org.rutebanken.netex.model.ResourceFrame netexResourceFrame = netexMapper.mapToNetexModel(resourceFrame);
+
+        Frames_RelStructure framesRelStructure = new Frames_RelStructure();
+        framesRelStructure.withCommonFrame(new ObjectFactory().createResourceFrame(netexResourceFrame));
+        netexCompositeFrame.withFrames(framesRelStructure);
+
+        logger.info("Preparing scrollable iterators");
+        prepareVehicleTypes(exportParams, Collections.emptySet(), mappedVehicleTypeCount, netexResourceFrame, entitiesEvictor);
+        prepareVehicleModels(exportParams, Collections.emptySet(), mappedVehicleModelCount, netexResourceFrame, entitiesEvictor);
+        prepareVehicles(exportParams, Collections.emptySet(), mappedVehicleCount, netexResourceFrame, entitiesEvictor);
+//        prepareStopPlaces(exportParams, stopPlacePrimaryIds, mappedStopPlaceCount, netexSiteFrame, entitiesEvictor);
+//        prepareTopographicPlaces(exportParams, stopPlacePrimaryIds, mappedTopographicPlacesCount, netexSiteFrame, entitiesEvictor);
+//        prepareTariffZones(exportParams, stopPlacePrimaryIds, mappedTariffZonesCount, netexSiteFrame, entitiesEvictor);
+//        prepareParkings(exportParams, stopPlacePrimaryIds, mappedParkingCount, netexSiteFrame, entitiesEvictor);
+//        prepareGroupOfStopPlaces(exportParams, stopPlacePrimaryIds, mappedGroupOfStopPlacesCount, netexSiteFrame,netexResourceFrame, entitiesEvictor);
+//        prepareFareZones(exportParams,stopPlacePrimaryIds,mappedFareZonesCount,mappedGroupOfTariffZonesCount,netexSiteFrame,netexFareFrame,entitiesEvictor);
+//        prepareScheduledStopPoints(stopPlacePrimaryIds, netexServiceFrame);
+
+
+        PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryCreator.createPublicationDelivery(netexCompositeFrame);
+//        if(!exportParams.getFareZoneExportMode().equals(ExportParams.ExportMode.NONE)) {
+//            if(exportParams.getGroupOfStopPlacesExportMode().equals(ExportParams.ExportMode.NONE)) {
+//                publicationDeliveryStructure = publicationDeliveryCreator.createPublicationDelivery(netexSiteFrame, netexServiceFrame, netexFareFrame);
+//            } else {
+//                publicationDeliveryStructure = publicationDeliveryCreator.createPublicationDelivery(netexSiteFrame, netexServiceFrame, netexFareFrame, netexResourceFrame);
+//            }
+//        } else {
+//            if(exportParams.getGroupOfStopPlacesExportMode().equals(ExportParams.ExportMode.NONE)) {
+//                publicationDeliveryStructure = publicationDeliveryCreator.createPublicationDelivery(netexSiteFrame, netexServiceFrame);
+//            } else {
+//                publicationDeliveryStructure = publicationDeliveryCreator.createPublicationDelivery(netexSiteFrame, netexServiceFrame, netexResourceFrame);
+//            }
+//        }
+
+
+        Marshaller marshaller = createMarshaller();
+
+        logger.info("Start marshalling publication delivery");
+        marshaller.marshal(netexObjectFactory.createPublicationDelivery(publicationDeliveryStructure), outputStream);
+        logger.info("Mapped {} vehicles, {} vehicleTypes, and {} trains to netex",
+                mappedVehicleCount.get(),
+                mappedVehicleTypeCount.get(),
+                mappedTrainCount.get());
+
+    }
+
+    private void prepareVehicles(ExportParams exportParams, Set<Long> vehicleIds, AtomicInteger mappedVehicleCount, org.rutebanken.netex.model.ResourceFrame resourceFrame, EntitiesEvictor evicter) {
+        // Override lists with custom iterator to be able to scroll database results on the fly.
+//        if (!vehicleIds.isEmpty()) {
+
+        List<Vehicle> vehiclesInDb = vehicleRepository.findAll();
+
+        if (!vehiclesInDb.isEmpty()) {
+            logger.info("There are vehicles to export");
+
+            VehiclesInFrame_RelStructure vehiclesInFrame_relStructure = new VehiclesInFrame_RelStructure();
+
+            List<org.rutebanken.netex.model.Vehicle> vehicles = new NetexMappingIteratorList<>(() -> new NetexMappingIterator<>(netexMapper, vehiclesInDb.iterator(),
+                    org.rutebanken.netex.model.Vehicle.class, mappedVehicleCount, evicter));
+
+            setField(VehiclesInFrame_RelStructure.class, "vehicle", vehiclesInFrame_relStructure, vehicles);
+            resourceFrame.setVehicles(vehiclesInFrame_relStructure);
+        } else {
+            logger.info("No vehicles to export");
+        }
+    }
+
+    private void prepareVehicleTypes(ExportParams exportParams, Set<Long> vehicleIds, AtomicInteger mappedVehicleTypeCount, org.rutebanken.netex.model.ResourceFrame resourceFrame, EntitiesEvictor evicter) {
+        // Override lists with custom iterator to be able to scroll database results on the fly.
+//        if (!vehicleIds.isEmpty()) {
+
+        List<VehicleType> vehicleTypesInDb = vehicleTypeRepository.findAll();
+
+        if (!vehicleTypesInDb.isEmpty()) {
+            logger.info("There are vehicle types to export");
+
+            VehicleTypesInFrame_RelStructure vehicleTypesInFrameRelStructure = new VehicleTypesInFrame_RelStructure();
+            List<org.rutebanken.netex.model.VehicleType> vehicleTypes = vehicleTypesInDb.stream().map(vt -> netexMapper.getFacade().map(vt, org.rutebanken.netex.model.VehicleType.class)).toList();
+
+            List<JAXBElement<org.rutebanken.netex.model.VehicleType>> jaxbVehicleTypes = vehicleTypes.stream().map(vt -> new ObjectFactory().createVehicleType(vt)).toList();
+            setField(VehicleTypesInFrame_RelStructure.class, "transportType_DummyType", vehicleTypesInFrameRelStructure, jaxbVehicleTypes);
+            resourceFrame.setVehicleTypes(vehicleTypesInFrameRelStructure);
+        } else {
+            logger.info("No vehicle types to export");
+        }
+    }
+
+    private void prepareVehicleModels(ExportParams exportParams, Set<Long> vehicleIds, AtomicInteger mappedVehicleModelCount, org.rutebanken.netex.model.ResourceFrame resourceFrame, EntitiesEvictor evicter) {
+        // Override lists with custom iterator to be able to scroll database results on the fly.
+//        if (!vehicleIds.isEmpty()) {
+
+        List<VehicleModel> vehicleModelsInDb = vehicleModelRepository.findAll();
+
+        if (!vehicleModelsInDb.isEmpty()) {
+            logger.info("There are vehicle models to export");
+
+            VehicleModelsInFrame_RelStructure vehicleModelsInFrameRelStructure = new VehicleModelsInFrame_RelStructure();
+            List<org.rutebanken.netex.model.VehicleModel> vehicleModels = vehicleModelsInDb.stream().map(vt -> netexMapper.getFacade().map(vt, org.rutebanken.netex.model.VehicleModel.class)).toList();
+
+            setField(VehicleModelsInFrame_RelStructure.class, "vehicleModel", vehicleModelsInFrameRelStructure, vehicleModels);
+            resourceFrame.setVehicleModels(vehicleModelsInFrameRelStructure);
+        } else {
+            logger.info("No vehicle models to export");
         }
     }
 
@@ -480,11 +646,12 @@ public class StreamingPublicationDelivery {
 
         ValidBetween validBetween = new ValidBetween().withFromDate(validFrom).withToDate(validTo);
         passengerStopAssignment.withValidBetween(validBetween);
-        if (isQuay) {
-            passengerStopAssignment.withQuayRef(new QuayRefStructure().withRef(netexId).withVersion(String.valueOf(version)));
-        } else {
-            passengerStopAssignment.withStopPlaceRef(new StopPlaceRefStructure().withRef(netexId).withVersion(String.valueOf(version)));
-        }
+        //TODO
+//        if (isQuay) {
+//            passengerStopAssignment.withQuayRef(new QuayRefStructure().withRef(netexId).withVersion(String.valueOf(version)));
+//        } else {
+//            passengerStopAssignment.withStopPlaceRef(new StopPlaceRefStructure().withRef(netexId).withVersion(String.valueOf(version)));
+//        }
         final JAXBElement<ScheduledStopPointRefStructure> scheduledStopPointRef = new ObjectFactory().createScheduledStopPointRef(new ScheduledStopPointRefStructure().withRef(scheduledStopPointNetexId).withVersionRef(String.valueOf(version)));
         passengerStopAssignment.withScheduledStopPointRef(scheduledStopPointRef);
 
@@ -496,7 +663,7 @@ public class StreamingPublicationDelivery {
         final org.rutebanken.netex.model.ScheduledStopPoint netexScheduledStopPoint = new org.rutebanken.netex.model.ScheduledStopPoint();
         netexScheduledStopPoint.setId(scheduledStopPointNetexId);
         netexScheduledStopPoint.setVersion(String.valueOf(version));
-        netexScheduledStopPoint.withName(new MultilingualString().withValue(stopPlaceName));
+        netexScheduledStopPoint.withName(new MultilingualString().withContent(stopPlaceName));
         ValidBetween validBetween = new ValidBetween().withFromDate(validFrom).withToDate(validTo);
 
         netexScheduledStopPoint.withValidBetween(validBetween);
@@ -643,6 +810,7 @@ public class StreamingPublicationDelivery {
         marshaller.setProperty(Marshaller.JAXB_SCHEMA_LOCATION, "");
 
         if (validateAgainstSchema) {
+            neTExValidator = NeTExValidator.getNeTExValidator();
             marshaller.setSchema(neTExValidator.getSchema());
         }
 

@@ -57,9 +57,9 @@ public class FareZoneMapper extends CustomMapper<FareZone, org.rutebanken.tiamat
     @Override
     public void mapBtoA(org.rutebanken.tiamat.model.FareZone tiamatFareZone, FareZone netexFareZone, MappingContext context) {
         super.mapBtoA(tiamatFareZone, netexFareZone, context);
-        if (tiamatFareZone.getTransportOrganisationRef() != null) {
-            final JAXBElement<AuthorityRefStructure> authorityRef = objectFactory.createAuthorityRef(new AuthorityRefStructure().withRef(tiamatFareZone.getTransportOrganisationRef()));
-            netexFareZone.withTransportOrganisationRef(authorityRef);
+        if (tiamatFareZone.getTransportOrganisationRef() != null) { //TODO
+//            final JAXBElement<AuthorityRefStructure> authorityRef = objectFactory.createAuthorityRef(new AuthorityRefStructure().withRef(tiamatFareZone.getTransportOrganisationRef()));
+//            netexFareZone.withTransportOrganisationRef(authorityRef);
         }
 
         if (!tiamatFareZone.getNeighbours().isEmpty()) {

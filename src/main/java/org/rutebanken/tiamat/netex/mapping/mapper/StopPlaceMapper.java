@@ -60,8 +60,8 @@ public class StopPlaceMapper extends CustomMapper<StopPlace, org.rutebanken.tiam
             for (AlternativeName netexAltName : netexAlternativeName) {
                 if (netexAltName != null
                         && netexAltName.getName() != null
-                        && netexAltName.getName().getValue() != null
-                        && !netexAltName.getName().getValue().isEmpty()) {
+                        && netexAltName.getName().getContent() != null
+                        && !netexAltName.getName().getContent().isEmpty()) {
                     //Only include non-empty alternative names
                     org.rutebanken.tiamat.model.AlternativeName tiamatAltName = new org.rutebanken.tiamat.model.AlternativeName();
                     mapperFacade.map(netexAltName, tiamatAltName);

@@ -19,41 +19,8 @@ import ma.glasnost.orika.Converter;
 import ma.glasnost.orika.MapperFacade;
 import ma.glasnost.orika.MapperFactory;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
-import org.rutebanken.netex.model.AccessibilityAssessment;
-import org.rutebanken.netex.model.CycleStorageEquipment;
-import org.rutebanken.netex.model.DataManagedObjectStructure;
-import org.rutebanken.netex.model.FareFrame;
-import org.rutebanken.netex.model.FareZone;
-import org.rutebanken.netex.model.GeneralSign;
-import org.rutebanken.netex.model.GroupOfStopPlaces;
-import org.rutebanken.netex.model.GroupOfTariffZones;
-import org.rutebanken.netex.model.InstalledEquipment_VersionStructure;
-import org.rutebanken.netex.model.Parking;
-import org.rutebanken.netex.model.PathLink;
-import org.rutebanken.netex.model.PathLinkEndStructure;
-import org.rutebanken.netex.model.PlaceEquipments_RelStructure;
-import org.rutebanken.netex.model.PurposeOfGrouping;
-import org.rutebanken.netex.model.Quay;
-import org.rutebanken.netex.model.ResourceFrame;
-import org.rutebanken.netex.model.SanitaryEquipment;
-import org.rutebanken.netex.model.ServiceFrame;
-import org.rutebanken.netex.model.ShelterEquipment;
-import org.rutebanken.netex.model.SiteFrame;
-import org.rutebanken.netex.model.StopPlace;
-import org.rutebanken.netex.model.TariffZone;
-import org.rutebanken.netex.model.TicketingEquipment;
-import org.rutebanken.netex.model.TopographicPlace;
-import org.rutebanken.netex.model.WaitingRoomEquipment;
-import org.rutebanken.tiamat.netex.mapping.mapper.AccessibilityAssessmentMapper;
-import org.rutebanken.tiamat.netex.mapping.mapper.DataManagedObjectStructureMapper;
-import org.rutebanken.tiamat.netex.mapping.mapper.FareZoneMapper;
-import org.rutebanken.tiamat.netex.mapping.mapper.GroupOfStopPlacesMapper;
-import org.rutebanken.tiamat.netex.mapping.mapper.GroupOfTariffZonesMapper;
-import org.rutebanken.tiamat.netex.mapping.mapper.KeyListToKeyValuesMapMapper;
-import org.rutebanken.tiamat.netex.mapping.mapper.ParkingMapper;
-import org.rutebanken.tiamat.netex.mapping.mapper.PlaceEquipmentMapper;
-import org.rutebanken.tiamat.netex.mapping.mapper.QuayMapper;
-import org.rutebanken.tiamat.netex.mapping.mapper.StopPlaceMapper;
+import org.rutebanken.netex.model.*;
+import org.rutebanken.tiamat.netex.mapping.mapper.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -155,6 +122,33 @@ public class NetexMapper {
                 .byDefault()
                 .register();
 
+        mapperFactory.classMap(Vehicle.class, org.rutebanken.tiamat.model.vehicle.Vehicle.class)
+//                .fieldBToA("netexId", "id")
+                .exclude("transportTypeRef")
+                .exclude("vehicleTypeRef")
+                .customize(new VehicleMapper())
+                .byDefault()
+                .register();
+
+        mapperFactory.classMap(VehicleType.class, org.rutebanken.tiamat.model.vehicle.VehicleType.class)
+//                .fieldBToA("netexId", "id")
+                .customize(new VehicleTypeMapper())
+                .byDefault()
+                .register();
+
+        mapperFactory.classMap(VehicleModel.class, org.rutebanken.tiamat.model.vehicle.VehicleModel.class)
+//                .fieldBToA("netexId", "id")
+                .exclude("transportTypeRef")
+                .customize(new VehicleModelMapper())
+                .byDefault()
+                .register();
+
+        mapperFactory.classMap(PassengerCapacity.class, org.rutebanken.tiamat.model.vehicle.PassengerCapacity.class)
+//                .fieldBToA("netexId", "id")
+                .customize(new PassengerCapacityMapper())
+                .byDefault()
+                .register();
+
         mapperFactory.classMap(PathLinkEndStructure.class, org.rutebanken.tiamat.model.PathLinkEnd.class)
                 .byDefault()
                 .register();
@@ -250,6 +244,10 @@ public class NetexMapper {
          return resourceFrame;
     }
 
+    public CompositeFrame mapToNetexModel(org.rutebanken.tiamat.model.vehicle.CompositeFrame tiamatCompositeFrame) {
+        return facade.map(tiamatCompositeFrame, CompositeFrame.class);
+    }
+
     public StopPlace mapToNetexModel(org.rutebanken.tiamat.model.StopPlace tiamatStopPlace) {
         return facade.map(tiamatStopPlace, StopPlace.class);
     }
@@ -257,6 +255,14 @@ public class NetexMapper {
 
     public Parking mapToNetexModel(org.rutebanken.tiamat.model.Parking tiamatParking) {
         return facade.map(tiamatParking, Parking.class);
+    }
+
+    public Vehicle mapToNetexModel(org.rutebanken.tiamat.model.vehicle.Vehicle tiamatVehicle) {
+        return facade.map(tiamatVehicle, Vehicle.class);
+    }
+
+    public VehicleType mapToNetexModel(org.rutebanken.tiamat.model.vehicle.VehicleType tiamatVehicleType) {
+        return facade.map(tiamatVehicleType, VehicleType.class);
     }
 
     public org.rutebanken.tiamat.model.TopographicPlace mapToTiamatModel(TopographicPlace topographicPlace) {

@@ -47,15 +47,15 @@ public class QuayMapper extends CustomMapper<Quay, org.rutebanken.tiamat.model.Q
             List<org.rutebanken.tiamat.model.AlternativeName> alternativeNames = new ArrayList<>();
 
             for (org.rutebanken.netex.model.AlternativeName netexAltName : netexAlternativeName) {
-                if (netexAltName != null
-                        && netexAltName.getName() != null
-                        && netexAltName.getName().getValue() != null
-                        && !netexAltName.getName().getValue().isEmpty()) {
-                    //Only include non-empty alternative names
-                    org.rutebanken.tiamat.model.AlternativeName tiamatAltName = new org.rutebanken.tiamat.model.AlternativeName();
-                    mapperFacade.map(netexAltName, tiamatAltName);
-                    alternativeNames.add(tiamatAltName);
-                }
+//                if (netexAltName != null TODO
+//                        && netexAltName.getName() != null
+//                        && netexAltName.getName().getValue() != null
+//                        && !netexAltName.getName().getValue().isEmpty()) {
+//                    //Only include non-empty alternative names
+//                    org.rutebanken.tiamat.model.AlternativeName tiamatAltName = new org.rutebanken.tiamat.model.AlternativeName();
+//                    mapperFacade.map(netexAltName, tiamatAltName);
+//                    alternativeNames.add(tiamatAltName);
+//                }
             }
 
             if (!alternativeNames.isEmpty()) {
@@ -70,12 +70,12 @@ public class QuayMapper extends CustomMapper<Quay, org.rutebanken.tiamat.model.Q
             List<BoardingPosition> tiamatBoardingPositions = new ArrayList<>();
             for (Object netexBoardingPosition : netexBoardingPositions) {
                 if (netexBoardingPosition instanceof org.rutebanken.netex.model.BoardingPosition boardingPosition) {
-                     if (boardingPosition.getPublicCode() != null
-                            && !boardingPosition.getPublicCode().isEmpty()) {
-                        final BoardingPosition tiamatBoardingPosition = new BoardingPosition();
-                        mapperFacade.map(boardingPosition,tiamatBoardingPosition);
-                        tiamatBoardingPositions.add(tiamatBoardingPosition);
-                    }
+//                     if (boardingPosition.getPublicCode() != null TODO
+//                            && !boardingPosition.getPublicCode().isEmpty()) {
+//                        final BoardingPosition tiamatBoardingPosition = new BoardingPosition();
+//                        mapperFacade.map(boardingPosition,tiamatBoardingPosition);
+//                        tiamatBoardingPositions.add(tiamatBoardingPosition);
+//                    }
                 }
             }
 
@@ -133,7 +133,7 @@ public class QuayMapper extends CustomMapper<Quay, org.rutebanken.tiamat.model.Q
                     final org.rutebanken.netex.model.BoardingPosition netexBoardingPosition = new org.rutebanken.netex.model.BoardingPosition();
                     mapperFacade.map(boardingPosition,netexBoardingPosition);
                     netexBoardingPosition.setId(boardingPosition.getNetexId());
-                    netexBoardingPosition.setPublicCode(boardingPosition.getPublicCode());
+//                    netexBoardingPosition.setPublicCode(boardingPosition.getPublicCode()); TODO
 
                     if (boardingPosition.getCentroid()!= null) {
                         SimplePoint_VersionStructure simplePoint = new SimplePoint_VersionStructure()

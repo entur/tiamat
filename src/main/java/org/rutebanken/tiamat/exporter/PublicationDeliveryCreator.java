@@ -38,6 +38,17 @@ public class PublicationDeliveryCreator {
                 .withParticipantRef(validPrefixList.getValidNetexPrefix());
     }
 
+    public PublicationDeliveryStructure createPublicationDelivery(org.rutebanken.netex.model.CompositeFrame compositeFrame) {
+        PublicationDeliveryStructure publicationDeliveryStructure = createPublicationDelivery();
+        publicationDeliveryStructure.withDataObjects(
+                new PublicationDeliveryStructure.DataObjects()
+                        .withCompositeFrameOrCommonFrame(new ObjectFactory().createCompositeFrame(compositeFrame))
+        );
+
+        logger.info("Returning publication delivery {} with composite frame", publicationDeliveryStructure);
+        return publicationDeliveryStructure;
+    }
+
     public PublicationDeliveryStructure createPublicationDelivery(org.rutebanken.netex.model.SiteFrame siteFrame) {
         PublicationDeliveryStructure publicationDeliveryStructure = createPublicationDelivery();
         publicationDeliveryStructure.withDataObjects(
@@ -126,7 +137,7 @@ public class PublicationDeliveryCreator {
 
     private ResourceFrame createResourceFrame() {
         List<JAXBElement<? extends DataManagedObjectStructure>> purposeOfGroupingList = new ArrayList<>();
-        final PurposeOfGrouping purposeOfGrouping = new ObjectFactory().createPurposeOfGrouping().withId("NSR:PurposeOfGrouping:3").withName(new MultilingualString().withValue("generalization")).withVersion("1");
+        final PurposeOfGrouping purposeOfGrouping = new ObjectFactory().createPurposeOfGrouping().withId("NSR:PurposeOfGrouping:3").withName(new MultilingualString().withContent("generalization")).withVersion("1");
         final JAXBElement<PurposeOfGrouping> purposeOfGroupingJAXBElement= new ObjectFactory().createPurposeOfGrouping(purposeOfGrouping);
         purposeOfGroupingList.add(purposeOfGroupingJAXBElement);
 

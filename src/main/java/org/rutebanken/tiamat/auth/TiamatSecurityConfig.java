@@ -61,8 +61,8 @@ public class TiamatSecurityConfig {
         logger.info("Configuring HttpSecurity");
         http.cors(withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(request -> request.anyRequest().permitAll())
-                .oauth2ResourceServer(configurer -> configurer.authenticationManagerResolver(multiIssuerAuthenticationManagerResolver));
+                .authorizeHttpRequests(request -> request.anyRequest().permitAll());
+//                .oauth2ResourceServer(configurer -> configurer.authenticationManagerResolver(multiIssuerAuthenticationManagerResolver));
         return http.build();
     }
 

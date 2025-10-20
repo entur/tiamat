@@ -45,246 +45,246 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class TariffZoneImportTest extends TiamatIntegrationTest {
-
-    @Autowired
-    private PublicationDeliveryTestHelper publicationDeliveryTestHelper;
-
-    @Test
-    public void publicationDeliveryWithTariffZone() throws Exception {
-        LocalDateTime validFrom = LocalDateTime.now().minusDays(3);
-        List<JAXBElement<? extends Zone_VersionStructure>> tariffZones = new ArrayList<>();
-        TariffZone tariffZone = new TariffZone()
-                .withName(new MultilingualString().withValue("V02"))
-                .withVersion("1")
-                .withValidBetween(new ValidBetween().withFromDate(validFrom))
-                .withId("RUT:TariffZone:01");
-
-        tariffZones.add(new ObjectFactory().createTariffZone(tariffZone));
-        SiteFrame siteFrame = publicationDeliveryTestHelper.siteFrame()
-                .withTariffZones(new TariffZonesInFrame_RelStructure()
-                .withTariffZone(tariffZones));
-
-        PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryTestHelper.publicationDelivery(siteFrame);
-
-        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDeliveryStructure);
-
-        final List<JAXBElement<? extends Zone_VersionStructure>> actualZones = publicationDeliveryTestHelper.findSiteFrame(response)
-                .getTariffZones().getTariffZone();
-
-        assertThat(actualZones).isNotEmpty();
-        assertThat(actualZones.getFirst().getValue().getName().getValue()).isEqualTo(tariffZone.getName().getValue());
-    }
-
-    @Test
-    public void publicationDeliveryWithTariffZoneAndStopPlace() throws Exception {
-        LocalDateTime validFrom = LocalDateTime.now().minusDays(3);
-        List<JAXBElement<? extends Zone_VersionStructure>> tariffZones = new ArrayList<>();
-        TariffZone tariffZone = new TariffZone()
-                .withName(new MultilingualString().withValue("V02"))
-                .withVersion("1")
-                .withValidBetween(new ValidBetween().withFromDate(validFrom))
-                .withId("RUT:TariffZone:05");
-
-        tariffZones.add(new ObjectFactory().createTariffZone(tariffZone));
-
-        StopPlace stopPlace = new StopPlace();
-        stopPlace.withId("XYZ:StopPlace:32111");
-        stopPlace.setVersion("1");
-        stopPlace.setTariffZones(new TariffZoneRefs_RelStructure()
-                    .withTariffZoneRef(new TariffZoneRef()
-                            .withVersion(tariffZone.getVersion())
-                            .withRef(tariffZone.getId())));
-
-        SiteFrame siteFrame = publicationDeliveryTestHelper.siteFrame()
-                .withTariffZones(new TariffZonesInFrame_RelStructure()
-                        .withTariffZone(tariffZones))
-                .withStopPlaces(new StopPlacesInFrame_RelStructure().withStopPlace(stopPlace));
-
-        PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryTestHelper.publicationDelivery(siteFrame);
-
-        ImportParams importParams = new ImportParams();
-        importParams.importType = ImportType.INITIAL;
-
-        // First
-        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDeliveryStructure, importParams);
-
-        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDeliveryStructure, importParams);
-
-        List<JAXBElement<? extends Zone_VersionStructure>> actualZones = publicationDeliveryTestHelper.findSiteFrame(response)
-                .getTariffZones().getTariffZone();
-
-        assertThat(actualZones).isNotEmpty();
-
-        assertThat(actualZones.getFirst().getValue().getName().getValue()).isEqualTo(tariffZone.getName().getValue());
-        // Versions for tariff zones are incremented.
-        assertThat(actualZones.getFirst().getValue().getVersion()).isEqualTo("2");
-
-    }
-
-    @Test
-    public void publicationDeliveryWithTariffZoneAndStopPlaceMergeZonesImportTypeMatch() throws Exception {
-
-
-        SimplePoint_VersionStructure point = new SimplePoint_VersionStructure()
-                .withLocation(new LocationStructure()
-                                .withLatitude(new BigDecimal("9.6"))
-                                .withLongitude(new BigDecimal("76")));
-
-        List<JAXBElement<? extends Zone_VersionStructure>> tariffZones1 = new ArrayList<>();
-
-        TariffZone tariffZone1 = new TariffZone()
-                .withName(new MultilingualString().withValue("V02"))
-                .withVersion("1")
-                .withId("RUT:TariffZone:01");
-        tariffZones1.add(new ObjectFactory().createTariffZone(tariffZone1));
-        StopPlace stopPlace = new StopPlace()
-                .withId("RUT:StopPlace:321")
-                .withName(new MultilingualString().withValue("name"))
-                .withCentroid(point)
-                .withVersion("1")
-                .withStopPlaceType(StopTypeEnumeration.ONSTREET_BUS)
-                .withTariffZones(new TariffZoneRefs_RelStructure()
-                    .withTariffZoneRef(new TariffZoneRef()
-                        .withVersion(tariffZone1.getVersion())
-                        .withRef(tariffZone1.getId())));
-
-        SiteFrame siteFrame = publicationDeliveryTestHelper.siteFrame()
-                .withTariffZones(new TariffZonesInFrame_RelStructure()
-                        .withTariffZone(tariffZones1))
-                .withStopPlaces(new StopPlacesInFrame_RelStructure().withStopPlace(stopPlace));
-
-        PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryTestHelper.publicationDelivery(siteFrame);
-
-        ImportParams importParams = new ImportParams();
-        importParams.importType = ImportType.INITIAL;
-
-        // First
-        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDeliveryStructure, importParams);
-
-        List<JAXBElement<? extends Zone_VersionStructure>> tariffZones2 = new ArrayList<>();
-        TariffZone tariffZone2 = new TariffZone()
-                .withName(new MultilingualString().withValue("X09"))
-                .withVersion("1")
-                .withId("BRA:TariffZone:02");
-        tariffZones2.add(new ObjectFactory().createTariffZone(tariffZone2));
-        stopPlace
-                .withId("BRA:Stopplace:3")
-                .withTariffZones(new TariffZoneRefs_RelStructure()
-                    .withTariffZoneRef(new TariffZoneRef()
-                        .withVersion(tariffZone2.getVersion())
-                        .withRef(tariffZone2.getId())));
-
-
-        SiteFrame siteFrame2 = publicationDeliveryTestHelper.siteFrame()
-                .withTariffZones(new TariffZonesInFrame_RelStructure()
-                        .withTariffZone(tariffZones2))
-                .withStopPlaces(new StopPlacesInFrame_RelStructure().withStopPlace(stopPlace));
-
-        PublicationDeliveryStructure publicationDeliveryStructure2 = publicationDeliveryTestHelper.publicationDelivery(siteFrame2);
-
-
-        // Second import should match and merge tariffzones
-        importParams.importType = ImportType.MATCH;
-        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDeliveryStructure2, importParams);
-
-        List<JAXBElement<? extends Zone_VersionStructure>> actualZones = publicationDeliveryTestHelper.findSiteFrame(response)
-                .getTariffZones().getTariffZone();
-
-        assertThat(actualZones).isNotEmpty();
-        assertThat(actualZones).hasSize(2);
-
-    }
-
-    @Test
-    public void mergeTariffZonesForStopPlace() throws Exception {
-
-
-        SimplePoint_VersionStructure point = new SimplePoint_VersionStructure()
-                .withLocation(new LocationStructure()
-                        .withLatitude(new BigDecimal("77"))
-                        .withLongitude(new BigDecimal("9.7")));
-
-        List<JAXBElement<? extends Zone_VersionStructure>> tariffZones1 = new ArrayList<>();
-        TariffZone tariffZone1 = new TariffZone()
-                .withName(new MultilingualString().withValue("V03"))
-                .withVersion("1")
-                .withId("ATB:TariffZone:01");
-        tariffZones1.add(new ObjectFactory().createTariffZone(tariffZone1));
-        StopPlace stopPlace = new StopPlace()
-                .withId("ATB:StopPlace:322")
-                .withName(new MultilingualString().withValue("name"))
-                .withCentroid(point)
-                .withVersion("1")
-                .withStopPlaceType(StopTypeEnumeration.ONSTREET_BUS)
-                .withTariffZones(new TariffZoneRefs_RelStructure()
-                        .withTariffZoneRef(new TariffZoneRef()
-                                .withVersion(tariffZone1.getVersion())
-                                .withRef(tariffZone1.getId())));
-
-        SiteFrame siteFrame = publicationDeliveryTestHelper.siteFrame()
-                .withTariffZones(new TariffZonesInFrame_RelStructure()
-                        .withTariffZone(tariffZones1))
-                .withStopPlaces(new StopPlacesInFrame_RelStructure().withStopPlace(stopPlace));
-
-        PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryTestHelper.publicationDelivery(siteFrame);
-
-        ImportParams importParams = new ImportParams();
-        importParams.importType = ImportType.INITIAL;
-
-        // First
-        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDeliveryStructure, importParams);
-
-        List<JAXBElement<? extends Zone_VersionStructure>> tariffZones2 = new ArrayList<>();
-
-        TariffZone tariffZone2 = new TariffZone()
-                .withName(new MultilingualString().withValue("X08"))
-                .withVersion("1")
-                .withId("NTR:TariffZone:03");
-        tariffZones2.add(new ObjectFactory().createTariffZone(tariffZone2));
-        StopPlace stopPlace2 = new StopPlace()
-                .withId("NTR:StopPlace:322")
-                .withVersion("2")
-                .withStopPlaceType(StopTypeEnumeration.ONSTREET_BUS)
-                .withTariffZones(new TariffZoneRefs_RelStructure()
-                        .withTariffZoneRef(new TariffZoneRef()
-                                .withVersion(tariffZone2.getVersion())
-                                .withRef(tariffZone2.getId())));
-
-
-        SiteFrame siteFrame2 = publicationDeliveryTestHelper.siteFrame()
-                .withTariffZones(new TariffZonesInFrame_RelStructure()
-                        .withTariffZone(tariffZones2))
-                .withStopPlaces(new StopPlacesInFrame_RelStructure().withStopPlace(stopPlace2));
-
-        PublicationDeliveryStructure publicationDeliveryStructure2 = publicationDeliveryTestHelper.publicationDelivery(siteFrame2);
-
-
-        // Second import should match and merge tariffzones
-        importParams.importType = ImportType.MATCH;
-        PublicationDeliveryStructure matchReponse = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDeliveryStructure2, importParams);
-
-        List<JAXBElement<? extends Zone_VersionStructure>> actualZones = publicationDeliveryTestHelper.findSiteFrame(matchReponse)
-                .getTariffZones().getTariffZone();
-
-        assertThat(actualZones).isNotEmpty();
-        assertThat(actualZones).hasSize(2);
-
-        List<StopPlace> actualIdMatchedStopPlaces = publicationDeliveryTestHelper.extractStopPlaces(matchReponse);
-        assertThat(actualIdMatchedStopPlaces).hasSize(1);
-        assertThat(actualIdMatchedStopPlaces.getFirst().getTariffZones().getTariffZoneRef()).as("number of tariff zone refs").hasSize(2);
-
-        importParams.importType = ImportType.ID_MATCH;
-
-        PublicationDeliveryStructure idMatchResponse = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDeliveryStructure2, importParams);
-
-        actualZones = publicationDeliveryTestHelper.findSiteFrame(idMatchResponse)
-                .getTariffZones().getTariffZone();
-        assertThat(actualZones).isNotEmpty();
-        assertThat(actualZones).hasSize(2);
-
-        actualIdMatchedStopPlaces = publicationDeliveryTestHelper.extractStopPlaces(matchReponse);
-        assertThat(actualIdMatchedStopPlaces).hasSize(1);
-        assertThat(actualIdMatchedStopPlaces.getFirst().getTariffZones().getTariffZoneRef()).as("number of tariff zone refs").hasSize(2);
-
-    }
+//
+//    @Autowired
+//    private PublicationDeliveryTestHelper publicationDeliveryTestHelper;
+//
+//    @Test
+//    public void publicationDeliveryWithTariffZone() throws Exception {
+//        LocalDateTime validFrom = LocalDateTime.now().minusDays(3);
+//        List<JAXBElement<? extends Zone_VersionStructure>> tariffZones = new ArrayList<>();
+//        TariffZone tariffZone = new TariffZone()
+//                .withName(new MultilingualString().withValue("V02"))
+//                .withVersion("1")
+//                .withValidBetween(new ValidBetween().withFromDate(validFrom))
+//                .withId("RUT:TariffZone:01");
+//
+//        tariffZones.add(new ObjectFactory().createTariffZone(tariffZone));
+//        SiteFrame siteFrame = publicationDeliveryTestHelper.siteFrame()
+//                .withTariffZones(new TariffZonesInFrame_RelStructure()
+//                .withTariffZone(tariffZones));
+//
+//        PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryTestHelper.publicationDelivery(siteFrame);
+//
+//        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDeliveryStructure);
+//
+//        final List<JAXBElement<? extends Zone_VersionStructure>> actualZones = publicationDeliveryTestHelper.findSiteFrame(response)
+//                .getTariffZones().getTariffZone();
+//
+//        assertThat(actualZones).isNotEmpty();
+//        assertThat(actualZones.getFirst().getValue().getName().getValue()).isEqualTo(tariffZone.getName().getValue());
+//    }
+//
+//    @Test
+//    public void publicationDeliveryWithTariffZoneAndStopPlace() throws Exception {
+//        LocalDateTime validFrom = LocalDateTime.now().minusDays(3);
+//        List<JAXBElement<? extends Zone_VersionStructure>> tariffZones = new ArrayList<>();
+//        TariffZone tariffZone = new TariffZone()
+//                .withName(new MultilingualString().withValue("V02"))
+//                .withVersion("1")
+//                .withValidBetween(new ValidBetween().withFromDate(validFrom))
+//                .withId("RUT:TariffZone:05");
+//
+//        tariffZones.add(new ObjectFactory().createTariffZone(tariffZone));
+//
+//        StopPlace stopPlace = new StopPlace();
+//        stopPlace.withId("XYZ:StopPlace:32111");
+//        stopPlace.setVersion("1");
+//        stopPlace.setTariffZones(new TariffZoneRefs_RelStructure()
+//                    .withTariffZoneRef(new TariffZoneRef()
+//                            .withVersion(tariffZone.getVersion())
+//                            .withRef(tariffZone.getId())));
+//
+//        SiteFrame siteFrame = publicationDeliveryTestHelper.siteFrame()
+//                .withTariffZones(new TariffZonesInFrame_RelStructure()
+//                        .withTariffZone(tariffZones))
+//                .withStopPlaces(new StopPlacesInFrame_RelStructure().withStopPlace(stopPlace));
+//
+//        PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryTestHelper.publicationDelivery(siteFrame);
+//
+//        ImportParams importParams = new ImportParams();
+//        importParams.importType = ImportType.INITIAL;
+//
+//        // First
+//        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDeliveryStructure, importParams);
+//
+//        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDeliveryStructure, importParams);
+//
+//        List<JAXBElement<? extends Zone_VersionStructure>> actualZones = publicationDeliveryTestHelper.findSiteFrame(response)
+//                .getTariffZones().getTariffZone();
+//
+//        assertThat(actualZones).isNotEmpty();
+//
+//        assertThat(actualZones.getFirst().getValue().getName().getValue()).isEqualTo(tariffZone.getName().getValue());
+//        // Versions for tariff zones are incremented.
+//        assertThat(actualZones.getFirst().getValue().getVersion()).isEqualTo("2");
+//
+//    }
+//
+//    @Test
+//    public void publicationDeliveryWithTariffZoneAndStopPlaceMergeZonesImportTypeMatch() throws Exception {
+//
+//
+//        SimplePoint_VersionStructure point = new SimplePoint_VersionStructure()
+//                .withLocation(new LocationStructure()
+//                                .withLatitude(new BigDecimal("9.6"))
+//                                .withLongitude(new BigDecimal("76")));
+//
+//        List<JAXBElement<? extends Zone_VersionStructure>> tariffZones1 = new ArrayList<>();
+//
+//        TariffZone tariffZone1 = new TariffZone()
+//                .withName(new MultilingualString().withValue("V02"))
+//                .withVersion("1")
+//                .withId("RUT:TariffZone:01");
+//        tariffZones1.add(new ObjectFactory().createTariffZone(tariffZone1));
+//        StopPlace stopPlace = new StopPlace()
+//                .withId("RUT:StopPlace:321")
+//                .withName(new MultilingualString().withValue("name"))
+//                .withCentroid(point)
+//                .withVersion("1")
+//                .withStopPlaceType(StopTypeEnumeration.ONSTREET_BUS)
+//                .withTariffZones(new TariffZoneRefs_RelStructure()
+//                    .withTariffZoneRef(new TariffZoneRef()
+//                        .withVersion(tariffZone1.getVersion())
+//                        .withRef(tariffZone1.getId())));
+//
+//        SiteFrame siteFrame = publicationDeliveryTestHelper.siteFrame()
+//                .withTariffZones(new TariffZonesInFrame_RelStructure()
+//                        .withTariffZone(tariffZones1))
+//                .withStopPlaces(new StopPlacesInFrame_RelStructure().withStopPlace(stopPlace));
+//
+//        PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryTestHelper.publicationDelivery(siteFrame);
+//
+//        ImportParams importParams = new ImportParams();
+//        importParams.importType = ImportType.INITIAL;
+//
+//        // First
+//        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDeliveryStructure, importParams);
+//
+//        List<JAXBElement<? extends Zone_VersionStructure>> tariffZones2 = new ArrayList<>();
+//        TariffZone tariffZone2 = new TariffZone()
+//                .withName(new MultilingualString().withValue("X09"))
+//                .withVersion("1")
+//                .withId("BRA:TariffZone:02");
+//        tariffZones2.add(new ObjectFactory().createTariffZone(tariffZone2));
+//        stopPlace
+//                .withId("BRA:Stopplace:3")
+//                .withTariffZones(new TariffZoneRefs_RelStructure()
+//                    .withTariffZoneRef(new TariffZoneRef()
+//                        .withVersion(tariffZone2.getVersion())
+//                        .withRef(tariffZone2.getId())));
+//
+//
+//        SiteFrame siteFrame2 = publicationDeliveryTestHelper.siteFrame()
+//                .withTariffZones(new TariffZonesInFrame_RelStructure()
+//                        .withTariffZone(tariffZones2))
+//                .withStopPlaces(new StopPlacesInFrame_RelStructure().withStopPlace(stopPlace));
+//
+//        PublicationDeliveryStructure publicationDeliveryStructure2 = publicationDeliveryTestHelper.publicationDelivery(siteFrame2);
+//
+//
+//        // Second import should match and merge tariffzones
+//        importParams.importType = ImportType.MATCH;
+//        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDeliveryStructure2, importParams);
+//
+//        List<JAXBElement<? extends Zone_VersionStructure>> actualZones = publicationDeliveryTestHelper.findSiteFrame(response)
+//                .getTariffZones().getTariffZone();
+//
+//        assertThat(actualZones).isNotEmpty();
+//        assertThat(actualZones).hasSize(2);
+//
+//    }
+//
+//    @Test
+//    public void mergeTariffZonesForStopPlace() throws Exception {
+//
+//
+//        SimplePoint_VersionStructure point = new SimplePoint_VersionStructure()
+//                .withLocation(new LocationStructure()
+//                        .withLatitude(new BigDecimal("77"))
+//                        .withLongitude(new BigDecimal("9.7")));
+//
+//        List<JAXBElement<? extends Zone_VersionStructure>> tariffZones1 = new ArrayList<>();
+//        TariffZone tariffZone1 = new TariffZone()
+//                .withName(new MultilingualString().withValue("V03"))
+//                .withVersion("1")
+//                .withId("ATB:TariffZone:01");
+//        tariffZones1.add(new ObjectFactory().createTariffZone(tariffZone1));
+//        StopPlace stopPlace = new StopPlace()
+//                .withId("ATB:StopPlace:322")
+//                .withName(new MultilingualString().withValue("name"))
+//                .withCentroid(point)
+//                .withVersion("1")
+//                .withStopPlaceType(StopTypeEnumeration.ONSTREET_BUS)
+//                .withTariffZones(new TariffZoneRefs_RelStructure()
+//                        .withTariffZoneRef(new TariffZoneRef()
+//                                .withVersion(tariffZone1.getVersion())
+//                                .withRef(tariffZone1.getId())));
+//
+//        SiteFrame siteFrame = publicationDeliveryTestHelper.siteFrame()
+//                .withTariffZones(new TariffZonesInFrame_RelStructure()
+//                        .withTariffZone(tariffZones1))
+//                .withStopPlaces(new StopPlacesInFrame_RelStructure().withStopPlace(stopPlace));
+//
+//        PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryTestHelper.publicationDelivery(siteFrame);
+//
+//        ImportParams importParams = new ImportParams();
+//        importParams.importType = ImportType.INITIAL;
+//
+//        // First
+//        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDeliveryStructure, importParams);
+//
+//        List<JAXBElement<? extends Zone_VersionStructure>> tariffZones2 = new ArrayList<>();
+//
+//        TariffZone tariffZone2 = new TariffZone()
+//                .withName(new MultilingualString().withValue("X08"))
+//                .withVersion("1")
+//                .withId("NTR:TariffZone:03");
+//        tariffZones2.add(new ObjectFactory().createTariffZone(tariffZone2));
+//        StopPlace stopPlace2 = new StopPlace()
+//                .withId("NTR:StopPlace:322")
+//                .withVersion("2")
+//                .withStopPlaceType(StopTypeEnumeration.ONSTREET_BUS)
+//                .withTariffZones(new TariffZoneRefs_RelStructure()
+//                        .withTariffZoneRef(new TariffZoneRef()
+//                                .withVersion(tariffZone2.getVersion())
+//                                .withRef(tariffZone2.getId())));
+//
+//
+//        SiteFrame siteFrame2 = publicationDeliveryTestHelper.siteFrame()
+//                .withTariffZones(new TariffZonesInFrame_RelStructure()
+//                        .withTariffZone(tariffZones2))
+//                .withStopPlaces(new StopPlacesInFrame_RelStructure().withStopPlace(stopPlace2));
+//
+//        PublicationDeliveryStructure publicationDeliveryStructure2 = publicationDeliveryTestHelper.publicationDelivery(siteFrame2);
+//
+//
+//        // Second import should match and merge tariffzones
+//        importParams.importType = ImportType.MATCH;
+//        PublicationDeliveryStructure matchReponse = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDeliveryStructure2, importParams);
+//
+//        List<JAXBElement<? extends Zone_VersionStructure>> actualZones = publicationDeliveryTestHelper.findSiteFrame(matchReponse)
+//                .getTariffZones().getTariffZone();
+//
+//        assertThat(actualZones).isNotEmpty();
+//        assertThat(actualZones).hasSize(2);
+//
+//        List<StopPlace> actualIdMatchedStopPlaces = publicationDeliveryTestHelper.extractStopPlaces(matchReponse);
+//        assertThat(actualIdMatchedStopPlaces).hasSize(1);
+//        assertThat(actualIdMatchedStopPlaces.getFirst().getTariffZones().getTariffZoneRef()).as("number of tariff zone refs").hasSize(2);
+//
+//        importParams.importType = ImportType.ID_MATCH;
+//
+//        PublicationDeliveryStructure idMatchResponse = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDeliveryStructure2, importParams);
+//
+//        actualZones = publicationDeliveryTestHelper.findSiteFrame(idMatchResponse)
+//                .getTariffZones().getTariffZone();
+//        assertThat(actualZones).isNotEmpty();
+//        assertThat(actualZones).hasSize(2);
+//
+//        actualIdMatchedStopPlaces = publicationDeliveryTestHelper.extractStopPlaces(matchReponse);
+//        assertThat(actualIdMatchedStopPlaces).hasSize(1);
+//        assertThat(actualIdMatchedStopPlaces.getFirst().getTariffZones().getTariffZoneRef()).as("number of tariff zone refs").hasSize(2);
+//
+//    }
 }

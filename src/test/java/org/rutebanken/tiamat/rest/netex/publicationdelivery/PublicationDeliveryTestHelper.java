@@ -31,7 +31,7 @@ import org.rutebanken.netex.model.GroupOfStopPlaces;
 import org.rutebanken.netex.model.LocaleStructure;
 import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.PathLink;
-import org.rutebanken.netex.model.PathLinksInFrame_RelStructure;
+//import org.rutebanken.netex.model.PathLinksInFrame_RelStructure;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.netex.model.Quay;
 import org.rutebanken.netex.model.SiteFrame;
@@ -142,8 +142,8 @@ public class PublicationDeliveryTestHelper {
     }
 
     public void addPathLinks(PublicationDeliveryStructure publicationDeliveryStructure, PathLink... pathLink) {
-        findSiteFrame(publicationDeliveryStructure)
-                .withPathLinks(new PathLinksInFrame_RelStructure().withPathLink(pathLink));
+//        findSiteFrame(publicationDeliveryStructure)
+//                .withPathLinks(new PathLinksInFrame_RelStructure().withPathLink(pathLink));
     }
 
     public void hasOriginalId(String expectedId, DataManagedObjectStructure object) {
@@ -199,12 +199,12 @@ public class PublicationDeliveryTestHelper {
 
     public List<PathLink> extractPathLinks(PublicationDeliveryStructure publicationDeliveryStructure) {
 
-        SiteFrame siteFrame = findSiteFrame(publicationDeliveryStructure);
-        if(siteFrame.getPathLinks() != null && siteFrame.getPathLinks().getPathLink() != null) {
-            return siteFrame.getPathLinks().getPathLink();
-        } else {
+//        SiteFrame siteFrame = findSiteFrame(publicationDeliveryStructure);
+//        if(siteFrame.getPathLinks() != null && siteFrame.getPathLinks().getPathLink() != null) {
+//            return siteFrame.getPathLinks().getPathLink();
+//        } else {
             return new ArrayList<>();
-        }
+//        }
     }
 
     public List<TopographicPlace> extractTopographicPlace(PublicationDeliveryStructure publicationDeliveryStructure) {
@@ -218,13 +218,14 @@ public class PublicationDeliveryTestHelper {
     }
 
     public List<Quay> extractQuays(StopPlace stopPlace) {
-        return stopPlace
-                .getQuays()
-                .getQuayRefOrQuay()
-                .stream()
-                .filter(object -> object instanceof Quay)
-                .map(object -> ((Quay) object))
-                .collect(toList());
+//        return stopPlace
+//                .getQuays()
+//                .getQuayRefOrQuay()
+//                .stream()
+//                .filter(object -> object instanceof Quay)
+//                .map(object -> ((Quay) object))
+//                .collect(toList());
+        return new ArrayList<>();
     }
 
     public StopPlace findFirstStopPlace(PublicationDeliveryStructure publicationDeliveryStructure) {

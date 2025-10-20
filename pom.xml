@@ -58,7 +58,7 @@
         <hazelcast-hibernate53.version>5.2.0</hazelcast-hibernate53.version>
         <hazelcast.version>5.2.5</hazelcast.version>
         <swagger-jersey2.version>2.2.38</swagger-jersey2.version>
-        <netex-java-model.version>2.0.14</netex-java-model.version>
+        <netex-java-model.version>2.0.16-SNAPSHOT</netex-java-model.version>
         <entur.helpers.version>5.47.0</entur.helpers.version>
         <jts-core.version>1.20.0</jts-core.version>
         <groovy-all.version>4.0.28</groovy-all.version>
@@ -74,6 +74,7 @@
         <metrics-graphite.version>4.2.37</metrics-graphite.version>
         <!-- There is breaking change in spring-boot 3.4/hibernate 6.6.5 -->
         <hibernate.version>6.5.3.Final</hibernate.version>
+        <lombok.version>1.18.42</lombok.version>
     </properties>
 
     <dependencies>
@@ -444,6 +445,13 @@
             <artifactId>aws-secretsmanager-jdbc</artifactId>
             <version>${aws-secretsmanager.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
+        </dependency>
+
     </dependencies>
     <repositories>
         <repository>
