@@ -16,11 +16,9 @@
 package org.rutebanken.tiamat.importer.initial;
 
 import org.rutebanken.tiamat.importer.StopPlaceTopographicPlaceReferenceUpdater;
-import org.rutebanken.tiamat.importer.handler.StopPlaceType;
 import org.rutebanken.tiamat.model.SiteRefStructure;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
-import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.versioning.save.StopPlaceVersionedSaverService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,11 +51,11 @@ public class ParallelInitialStopPlaceImporter {
     private boolean publishChangelog;
 
     @Autowired
-    private StopPlaceRepository stopPlaceRepository; // (fixme) access this through cache??
+    private StopPlaceParentUpdater parentUpdater;
 
     public List<org.rutebanken.netex.model.StopPlace> importStopPlaces(List<StopPlace> tiamatStops, AtomicInteger stopPlacesCreated) {
-        Map<String, Set<String>> parentsByChild = new HashMap<>();
-        Map<String, String> originalIdByNetexId = new HashMap<>();
+        Map<String, Set<String>> childrenByParent = new HashMap<>();
+        Map<String, String> netexIdByOriginalId = new HashMap<>();
 
         if (publishChangelog) {
             throw new IllegalStateException("Initial import not allowed with changelog publishing enabled! Set changelog.publish.enabled=false");
@@ -74,19 +72,17 @@ public class ParallelInitialStopPlaceImporter {
                 })
                 .peek(stopPlace -> stopPlaceTopographicPlaceReferenceUpdater.updateTopographicReference(stopPlace))
                 .map(stopPlace -> {
-                    StopPlaceType type = determineStopPlaceType(stopPlace);
-                    SiteRefStructure parentSiteRef;
-                    parentSiteRef = stopPlace.getParentSiteRef();
+                    SiteRefStructure parentSiteRef = stopPlace.getParentSiteRef();
                     stopPlace.setParentSiteRef(null);
                     StopPlace saved = stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
-                    if (type == StopPlaceType.CHILD) {
-                        parentsByChild
+                    if (isChild(stopPlace)) {
+                        childrenByParent
                                 .computeIfAbsent(parentSiteRef.getRef(), k -> new HashSet<>())
                                 .add(saved.getNetexId());
                     }
-                    if (type == StopPlaceType.PARENT) {
+                    if (isParent(stopPlace)) {
                         // (fixme) temporary "hack" to test conceptual solution.
-                        originalIdByNetexId.put(saved.getNetexId(), stopPlace.getOriginalIds().stream().filter(i -> i.contains("SAM")).findFirst().get());
+                        netexIdByOriginalId.put(saved.getNetexId(), stopPlace.getOriginalIds().stream().filter(i -> i.contains("SAM")).findFirst().get());
                     }
                     return saved;
                 })
@@ -94,37 +90,28 @@ public class ParallelInitialStopPlaceImporter {
                 .map(stopPlace -> netexMapper.mapToNetexModel(stopPlace))
                 .collect(toList());
 
-        originalIdByNetexId.forEach((key, value) -> {
-            StopPlace parent = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(key);
-            parent.setParentStopPlace(true);
-            List<StopPlace> children = parentsByChild.get(value).stream().map(id -> stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(id)).toList();
-            parent.getChildren().addAll(children);
-            stopPlaceVersionedSaverService.saveNewVersion(null, parent);
-        });
+        netexIdByOriginalId.forEach((netexId, originalId) ->
+                parentUpdater.updateParentWithChildren(netexId, childrenByParent.get(originalId))
+        );
 
         return stops;
     }
 
-    private StopPlaceType determineStopPlaceType(StopPlace stopPlace) {
-        boolean hasQuays = stopPlace.getQuays() != null && !stopPlace.getQuays().isEmpty();
+    private boolean isParent(StopPlace stopPlace) {
+        return stopPlace.isParentStopPlace() || (!hasQuays(stopPlace) && !hasParentSiteRef(stopPlace));
+    }
 
-        boolean hasParentRef = stopPlace.getParentSiteRef() != null
+    private boolean isChild(StopPlace stopPlace) {
+        return hasQuays(stopPlace) && hasParentSiteRef(stopPlace);
+    }
+
+    private boolean hasQuays(StopPlace stopPlace) {
+        return stopPlace.getQuays() != null && !stopPlace.getQuays().isEmpty();
+    }
+
+    private boolean hasParentSiteRef(StopPlace stopPlace) {
+        return stopPlace.getParentSiteRef() != null
                 && stopPlace.getParentSiteRef().getRef() != null
                 && !stopPlace.getParentSiteRef().getRef().isBlank();
-
-        boolean isExplicitParent = stopPlace.isParentStopPlace();
-
-        if (isExplicitParent || (!hasQuays && !hasParentRef)) {
-            return StopPlaceType.PARENT;
-        }
-        if (hasQuays && hasParentRef) {
-            return StopPlaceType.CHILD;
-        }
-        if (hasQuays) {
-            return StopPlaceType.MONOMODAL;
-        }
-
-        logger.info("StopPlace {} could not be classified (quays={}, parentRef={})", stopPlace.getId(), hasQuays, hasParentRef);
-        return StopPlaceType.UNKNOWN;
     }
 }
