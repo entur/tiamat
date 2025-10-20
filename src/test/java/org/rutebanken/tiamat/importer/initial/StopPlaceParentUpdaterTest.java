@@ -8,7 +8,6 @@ import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
-import org.rutebanken.tiamat.versioning.save.StopPlaceVersionedSaverService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,9 +23,6 @@ public class StopPlaceParentUpdaterTest extends TiamatIntegrationTest {
 
     @Autowired
     private StopPlaceRepository stopPlaceRepository;
-
-    @Autowired
-    private StopPlaceVersionedSaverService stopPlaceVersionedSaverService;
 
     @Autowired
     private StopPlaceParentUpdater parentUpdater;
