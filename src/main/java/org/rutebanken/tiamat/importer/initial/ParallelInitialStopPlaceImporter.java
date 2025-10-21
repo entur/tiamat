@@ -27,11 +27,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.stream.Collectors.toList;
@@ -58,8 +57,8 @@ public class ParallelInitialStopPlaceImporter {
     private StopPlaceParentUpdater parentUpdater;
 
     public List<org.rutebanken.netex.model.StopPlace> importStopPlaces(List<StopPlace> tiamatStops, AtomicInteger stopPlacesCreated) {
-        Map<String, Set<String>> childrenByParent = new HashMap<>();
-        Map<String, Set<String>> netexByImportedIds = new HashMap<>();
+        Map<String, Set<String>> childrenByParent = new ConcurrentHashMap<>();
+        Map<String, Set<String>> netexByImportedIds = new ConcurrentHashMap<>();
 
         if (publishChangelog) {
             throw new IllegalStateException("Initial import not allowed with changelog publishing enabled! Set changelog.publish.enabled=false");
@@ -82,11 +81,11 @@ public class ParallelInitialStopPlaceImporter {
                     StopPlace saved = stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
                     if (isChild(stopPlace, parentSiteRef)) {
                         childrenByParent
-                                .computeIfAbsent(parentSiteRef.getRef(), k -> new HashSet<>())
+                                .computeIfAbsent(parentSiteRef.getRef(), k -> ConcurrentHashMap.newKeySet())
                                 .add(saved.getNetexId());
                     } else if (isParent(stopPlace, parentSiteRef)) {
                         netexByImportedIds
-                                .computeIfAbsent(saved.getNetexId(), k -> new HashSet<>())
+                                .computeIfAbsent(saved.getNetexId(), k -> ConcurrentHashMap.newKeySet())
                                 .addAll(netexId != null ? List.of(netexId) : stopPlace.getOriginalIds());
                     }
                     return saved;
