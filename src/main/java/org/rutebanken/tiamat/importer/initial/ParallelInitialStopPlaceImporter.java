@@ -75,13 +75,11 @@ public class ParallelInitialStopPlaceImporter {
                     SiteRefStructure parentSiteRef = stopPlace.getParentSiteRef();
                     stopPlace.setParentSiteRef(null);
                     StopPlace saved = stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
-                    if (isChild(stopPlace)) {
+                    if (isChild(stopPlace, parentSiteRef)) {
                         childrenByParent
                                 .computeIfAbsent(parentSiteRef.getRef(), k -> new HashSet<>())
                                 .add(saved.getNetexId());
-                    }
-                    if (isParent(stopPlace)) {
-                        // (fixme) temporary "hack" to test conceptual solution.
+                    } else if (isParent(stopPlace, parentSiteRef)) {
                         netexIdByOriginalId.put(saved.getNetexId(), stopPlace.getOriginalIds().stream().filter(i -> i.contains("SAM")).findFirst().get());
                     }
                     return saved;
@@ -97,21 +95,16 @@ public class ParallelInitialStopPlaceImporter {
         return stops;
     }
 
-    private boolean isParent(StopPlace stopPlace) {
-        return stopPlace.isParentStopPlace() || (!hasQuays(stopPlace) && !hasParentSiteRef(stopPlace));
+    private boolean isParent(StopPlace stopPlace, SiteRefStructure parentSiteRef) {
+        return stopPlace.isParentStopPlace() || (!hasQuays(stopPlace) && parentSiteRef == null);
     }
 
-    private boolean isChild(StopPlace stopPlace) {
-        return hasQuays(stopPlace) && hasParentSiteRef(stopPlace);
+    private boolean isChild(StopPlace stopPlace, SiteRefStructure parentSiteRef) {
+        return hasQuays(stopPlace) && parentSiteRef != null;
     }
 
     private boolean hasQuays(StopPlace stopPlace) {
         return stopPlace.getQuays() != null && !stopPlace.getQuays().isEmpty();
     }
 
-    private boolean hasParentSiteRef(StopPlace stopPlace) {
-        return stopPlace.getParentSiteRef() != null
-                && stopPlace.getParentSiteRef().getRef() != null
-                && !stopPlace.getParentSiteRef().getRef().isBlank();
-    }
 }

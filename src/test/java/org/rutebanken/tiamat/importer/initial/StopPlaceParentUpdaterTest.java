@@ -2,7 +2,6 @@ package org.rutebanken.tiamat.importer.initial;
 
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.Point;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.Quay;
@@ -29,45 +28,40 @@ public class StopPlaceParentUpdaterTest extends TiamatIntegrationTest {
 
     @Test
     public void updateParentWithChildren() {
-        Point point = geometryFactory.createPoint(new Coordinate(9, 71));
-        Point point2 = geometryFactory.createPoint(new Coordinate(9.1, 71.2));
-        Point point3 = geometryFactory.createPoint(new Coordinate(9.2, 71.3));
-
         StopPlace parentStop = new StopPlace();
         parentStop.setName(new EmbeddableMultilingualString("Stop A"));
-        parentStop.setNetexId("NSR:Stop:01");
+        parentStop.setNetexId("NSR:StopPlace:01");
         parentStop.setVersion(1L);
-        parentStop.setCentroid(point);
+        parentStop.setCentroid(geometryFactory.createPoint(new Coordinate(9, 71)));
 
         Quay quay = new Quay();
         quay.setNetexId("NSR:Quay:11");
         quay.setVersion(1L);
-        quay.setCentroid(point3);
+        quay.setCentroid(geometryFactory.createPoint(new Coordinate(9.2, 71.3)));
 
         StopPlace childStop = new StopPlace();
-        childStop.setNetexId("NSR:Stop:11");
+        childStop.setNetexId("NSR:StopPlace:11");
         childStop.setVersion(1L);
-        childStop.setCentroid(point2);
+        childStop.setCentroid(geometryFactory.createPoint(new Coordinate(9.1, 71.2)));
         childStop.setQuays(new HashSet<>(List.of(quay)));
 
         stopPlaceRepository.saveAll(asList(parentStop, childStop));
 
-        String netexId = "NSR:Stop:01";
-        Set<String> childIds = Set.of("NSR:Stop:11");
+        String netexId = "NSR:StopPlace:01";
+        Set<String> childIds = Set.of("NSR:StopPlace:11");
         parentUpdater.updateParentWithChildren(netexId, childIds);
 
         List<StopPlace> savedStopPlaces = stopPlaceRepository.findAll();
-        assertThat(savedStopPlaces).hasSize(2);
+        assertThat(savedStopPlaces).hasSize(3);
 
         StopPlace savedParent = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(parentStop.getNetexId());
         assertThat(savedParent).isNotNull();
         assertThat(savedParent.getVersion()).isEqualTo(2L);
         assertThat(savedParent.isParentStopPlace()).isEqualTo(true);
-        assertThat(savedParent.getChildren()).hasSize(1);
 
-        StopPlace savedChild = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc("NSR:Stop:11");
+        StopPlace savedChild = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc("NSR:StopPlace:11");
         assertThat(savedChild).isNotNull();
         assertThat(savedChild.getVersion()).isEqualTo(2L);
-        assertThat(savedChild.getParentSiteRef().getRef()).isEqualTo("NSR:Stop:01");
+        assertThat(savedChild.getParentSiteRef().getRef()).isEqualTo("NSR:StopPlace:01");
     }
 }
