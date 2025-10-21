@@ -55,7 +55,7 @@ public class ParallelInitialStopPlaceImporter {
 
     public List<org.rutebanken.netex.model.StopPlace> importStopPlaces(List<StopPlace> tiamatStops, AtomicInteger stopPlacesCreated) {
         Map<String, Set<String>> childrenByParent = new HashMap<>();
-        Map<String, String> netexIdByOriginalId = new HashMap<>();
+        Map<String, Set<String>> netexByImportedIds = new HashMap<>();
 
         if (publishChangelog) {
             throw new IllegalStateException("Initial import not allowed with changelog publishing enabled! Set changelog.publish.enabled=false");
@@ -72,6 +72,7 @@ public class ParallelInitialStopPlaceImporter {
                 })
                 .peek(stopPlace -> stopPlaceTopographicPlaceReferenceUpdater.updateTopographicReference(stopPlace))
                 .map(stopPlace -> {
+                    String netexId = stopPlace.getNetexId();
                     SiteRefStructure parentSiteRef = stopPlace.getParentSiteRef();
                     stopPlace.setParentSiteRef(null);
                     StopPlace saved = stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
@@ -80,7 +81,9 @@ public class ParallelInitialStopPlaceImporter {
                                 .computeIfAbsent(parentSiteRef.getRef(), k -> new HashSet<>())
                                 .add(saved.getNetexId());
                     } else if (isParent(stopPlace, parentSiteRef)) {
-                        netexIdByOriginalId.put(saved.getNetexId(), stopPlace.getOriginalIds().stream().filter(i -> i.contains("SAM")).findFirst().get());
+                        netexByImportedIds
+                                .computeIfAbsent(saved.getNetexId(), k -> new HashSet<>())
+                                .addAll(netexId != null ? List.of(netexId) : stopPlace.getOriginalIds());
                     }
                     return saved;
                 })
@@ -88,9 +91,19 @@ public class ParallelInitialStopPlaceImporter {
                 .map(stopPlace -> netexMapper.mapToNetexModel(stopPlace))
                 .collect(toList());
 
-        netexIdByOriginalId.forEach((netexId, originalId) ->
-                parentUpdater.updateParentWithChildren(netexId, childrenByParent.get(originalId))
-        );
+        netexByImportedIds.forEach((netexId, originalIds) -> {
+            originalIds.stream()
+                    .filter(childrenByParent::containsKey)
+                    .findFirst()
+                    .ifPresent(matchingOriginalId -> {
+                        Set<String> childIds = childrenByParent.get(matchingOriginalId);
+                        if (childIds != null && !childIds.isEmpty()) {
+                            parentUpdater.updateParentWithChildren(netexId, childIds);
+                        } else {
+                            logger.warn("No children found for parent original id {}", matchingOriginalId);
+                        }
+                    });
+        });
 
         return stops;
     }
