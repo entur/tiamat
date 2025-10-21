@@ -88,6 +88,7 @@ public class ImportResourceTest extends TiamatIntegrationTest {
     public void setUp() {
         setUpSecurityContext();
     }
+
     @Test
     public void publicationDeliveriesWithDuplicateStopPlace() throws Exception {
 
@@ -1106,7 +1107,7 @@ public class ImportResourceTest extends TiamatIntegrationTest {
                   </SiteFrame>
                  </dataObjects>
                 </PublicationDelivery>
-
+                
                 """;
 
         InputStream stream = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8));
@@ -1284,6 +1285,20 @@ public class ImportResourceTest extends TiamatIntegrationTest {
         streamingOutput.write(byteArrayOutputStream);
         System.out.println(byteArrayOutputStream.toString());
     }
+
+    @Test
+    public void importParentChild() throws JAXBException, IOException, SAXException {
+        final FileInputStream fileInputStream = new FileInputStream("src/test/resources/org/rutebanken/tiamat/rest/netex/publicationdelivery/parent_child.xml");
+
+        Response response = importResource.importPublicationDelivery(fileInputStream);
+        assertThat(response.getStatus()).isEqualTo(200);
+
+        StreamingOutput streamingOutput = (StreamingOutput) response.getEntity();
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        streamingOutput.write(byteArrayOutputStream);
+        System.out.println(byteArrayOutputStream.toString());
+    }
+
     private void setUpSecurityContext() {
         // Create a Jwt with claims
         Map<String, Object> claims = new HashMap<>();
