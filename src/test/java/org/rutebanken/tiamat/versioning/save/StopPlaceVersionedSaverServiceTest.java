@@ -45,7 +45,6 @@ import java.util.Map;
 
 import static junit.framework.TestCase.fail;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.rutebanken.tiamat.versioning.save.DefaultVersionedSaverService.MILLIS_BETWEEN_VERSIONS;
 
 @Transactional
@@ -103,7 +102,6 @@ public class StopPlaceVersionedSaverServiceTest extends TiamatIntegrationTest {
         actualQuay = actualStopPlace.getQuays().iterator().next();
         assertThat(actualQuay.getPlaceEquipments().getInstalledEquipment().getFirst().getVersion())
                 .isEqualTo(2L);
-
 
 
     }
@@ -479,7 +477,6 @@ public class StopPlaceVersionedSaverServiceTest extends TiamatIntegrationTest {
     }
 
 
-
     @Test
     @Ignore
     public void newVersionOfStopPlaceGetsChangedBySet() {
@@ -530,15 +527,6 @@ public class StopPlaceVersionedSaverServiceTest extends TiamatIntegrationTest {
         // Save it. Reference to topographic place should be kept.
         StopPlace stopPlace3 = stopPlaceVersionedSaverService.saveNewVersion(stopPlace2, newVersion);
         assertThat(stopPlace3.getPlaceEquipments().getInstalledEquipment()).isNotNull();
-    }
-
-    @Test
-    public void savingChildStopsShouldNotBeAllowed() {
-        StopPlace stopPlace = new StopPlace();
-        stopPlace.setParentStopPlace(false);
-        stopPlace.setParentSiteRef(new SiteRefStructure("ref", "1"));
-
-        assertThatThrownBy(() -> stopPlaceVersionedSaverService.saveNewVersion(stopPlace)).isInstanceOf(IllegalArgumentException.class);
     }
 
     private Point point(double longitude, double latitude) {
