@@ -46,6 +46,9 @@ public class StreamingPublicationDeliveryConfig {
     private VehicleModelRepository vehicleModelRepository;
 
     @Autowired
+    private DeckPlanRepository deckPlanRepository;
+
+    @Autowired
     private PublicationDeliveryCreator publicationDeliveryCreator;
 
     @Autowired
@@ -104,7 +107,7 @@ public class StreamingPublicationDeliveryConfig {
     }
 
     private StreamingPublicationDelivery createStreamingPublicationDelivery(boolean validate) throws IOException, SAXException {
-        return new StreamingPublicationDelivery(stopPlaceRepository, parkingRepository, vehicleRepository, vehicleTypeRepository, vehicleModelRepository, publicationDeliveryCreator,
+        return new StreamingPublicationDelivery(stopPlaceRepository, parkingRepository, vehicleRepository, vehicleTypeRepository, vehicleModelRepository, deckPlanRepository, publicationDeliveryCreator,
                 tiamatSiteFrameExporter,tiamatServiceFrameExporter,tiamatFareFrameExporter,tiamatResourceFrameExporter, tiamatComositeFrameExporter, netexMapper, tariffZoneRepository, fareZoneRepository, topographicPlaceRepository,
                 groupOfStopPlacesRepository,groupOfTariffZonesRepository, netexIdHelper, /* TODO validate,*/ purposeOfGroupingRepository);
     }

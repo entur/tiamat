@@ -24,6 +24,7 @@ import jakarta.xml.bind.Marshaller;
 import ma.glasnost.orika.MapperFactory;
 import org.hibernate.internal.SessionImpl;
 import org.rutebanken.netex.model.DataManagedObjectStructure;
+import org.rutebanken.netex.model.DeckPlans_RelStructure;
 import org.rutebanken.netex.model.FareZone;
 import org.rutebanken.netex.model.FareZonesInFrame_RelStructure;
 import org.rutebanken.netex.model.Frames_RelStructure;
@@ -69,11 +70,13 @@ import org.rutebanken.tiamat.model.ResourceFrame;
 import org.rutebanken.tiamat.model.ServiceFrame;
 import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.model.vehicle.CompositeFrame;
+import org.rutebanken.tiamat.model.vehicle.DeckPlan;
 import org.rutebanken.tiamat.model.vehicle.Vehicle;
 import org.rutebanken.tiamat.model.vehicle.VehicleModel;
 import org.rutebanken.tiamat.model.vehicle.VehicleType;
 import org.rutebanken.tiamat.netex.id.NetexIdHelper;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
+import org.rutebanken.tiamat.repository.DeckPlanRepository;
 import org.rutebanken.tiamat.repository.FareZoneRepository;
 import org.rutebanken.tiamat.repository.GroupOfStopPlacesRepository;
 import org.rutebanken.tiamat.repository.GroupOfTariffZonesRepository;
@@ -126,6 +129,7 @@ public class StreamingPublicationDelivery {
     private final VehicleRepository vehicleRepository;
     private final VehicleTypeRepository vehicleTypeRepository;
     private final VehicleModelRepository vehicleModelRepository;
+    private final DeckPlanRepository deckPlanRepository;
     private final PublicationDeliveryCreator publicationDeliveryCreator;
     private final TiamatSiteFrameExporter tiamatSiteFrameExporter;
     private final TiamatServiceFrameExporter tiamatServiceFrameExporter;
@@ -157,6 +161,7 @@ public class StreamingPublicationDelivery {
                                         VehicleRepository vehicleRepository,
                                         VehicleTypeRepository vehicleTypeRepository,
                                         VehicleModelRepository vehicleModelRepository,
+                                        DeckPlanRepository deckPlanRepository,
                                         PublicationDeliveryCreator publicationDeliveryCreator,
                                         TiamatSiteFrameExporter tiamatSiteFrameExporter,
                                         TiamatServiceFrameExporter tiamatServiceFrameExporter,
@@ -177,6 +182,7 @@ public class StreamingPublicationDelivery {
         this.vehicleRepository = vehicleRepository;
         this.vehicleTypeRepository = vehicleTypeRepository;
         this.vehicleModelRepository = vehicleModelRepository;
+        this.deckPlanRepository = deckPlanRepository;
         this.publicationDeliveryCreator = publicationDeliveryCreator;
         this.tiamatSiteFrameExporter = tiamatSiteFrameExporter;
         this.tiamatServiceFrameExporter = tiamatServiceFrameExporter;
@@ -230,19 +236,9 @@ public class StreamingPublicationDelivery {
         // To avoid marshalling empty parking element and to be able to gather relevant topographic places
         // The primary ID represents a stop place with a certain version
 
-//        final Set<Long> vehicleIds = vehicleRepository.getDatabaseIds(exportParams, false);
-//        logger.info("Got {} vehicle IDs from vehicle search", vehicleIds.size());
-
-//        tiamatSiteFrameExporter.addRelevantPathLinks(stopPlacePrimaryIds, siteFrame);
-
 
         logger.info("Mapping composite frame to netex model");
         org.rutebanken.netex.model.CompositeFrame netexCompositeFrame = netexMapper.mapToNetexModel(compositeFrame);
-//        logger.info("Mapping service frame to netex model");
-//        final org.rutebanken.netex.model.ServiceFrame netexServiceFrame = netexMapper.mapToNetexModel(serviceFrame);
-
-//        logger.info("Mapping fare frame to netex model");
-//        final org.rutebanken.netex.model.FareFrame netexFareFrame = netexMapper.mapToNetexModel(fareFrame);
 
         logger.info("Mapping resource frame to netex model");
         final org.rutebanken.netex.model.ResourceFrame netexResourceFrame = netexMapper.mapToNetexModel(resourceFrame);
@@ -255,30 +251,9 @@ public class StreamingPublicationDelivery {
         prepareVehicleTypes(exportParams, Collections.emptySet(), mappedVehicleTypeCount, netexResourceFrame, entitiesEvictor);
         prepareVehicleModels(exportParams, Collections.emptySet(), mappedVehicleModelCount, netexResourceFrame, entitiesEvictor);
         prepareVehicles(exportParams, Collections.emptySet(), mappedVehicleCount, netexResourceFrame, entitiesEvictor);
-//        prepareStopPlaces(exportParams, stopPlacePrimaryIds, mappedStopPlaceCount, netexSiteFrame, entitiesEvictor);
-//        prepareTopographicPlaces(exportParams, stopPlacePrimaryIds, mappedTopographicPlacesCount, netexSiteFrame, entitiesEvictor);
-//        prepareTariffZones(exportParams, stopPlacePrimaryIds, mappedTariffZonesCount, netexSiteFrame, entitiesEvictor);
-//        prepareParkings(exportParams, stopPlacePrimaryIds, mappedParkingCount, netexSiteFrame, entitiesEvictor);
-//        prepareGroupOfStopPlaces(exportParams, stopPlacePrimaryIds, mappedGroupOfStopPlacesCount, netexSiteFrame,netexResourceFrame, entitiesEvictor);
-//        prepareFareZones(exportParams,stopPlacePrimaryIds,mappedFareZonesCount,mappedGroupOfTariffZonesCount,netexSiteFrame,netexFareFrame,entitiesEvictor);
-//        prepareScheduledStopPoints(stopPlacePrimaryIds, netexServiceFrame);
-
+        prepareDeckPlans(netexResourceFrame);
 
         PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryCreator.createPublicationDelivery(netexCompositeFrame);
-//        if(!exportParams.getFareZoneExportMode().equals(ExportParams.ExportMode.NONE)) {
-//            if(exportParams.getGroupOfStopPlacesExportMode().equals(ExportParams.ExportMode.NONE)) {
-//                publicationDeliveryStructure = publicationDeliveryCreator.createPublicationDelivery(netexSiteFrame, netexServiceFrame, netexFareFrame);
-//            } else {
-//                publicationDeliveryStructure = publicationDeliveryCreator.createPublicationDelivery(netexSiteFrame, netexServiceFrame, netexFareFrame, netexResourceFrame);
-//            }
-//        } else {
-//            if(exportParams.getGroupOfStopPlacesExportMode().equals(ExportParams.ExportMode.NONE)) {
-//                publicationDeliveryStructure = publicationDeliveryCreator.createPublicationDelivery(netexSiteFrame, netexServiceFrame);
-//            } else {
-//                publicationDeliveryStructure = publicationDeliveryCreator.createPublicationDelivery(netexSiteFrame, netexServiceFrame, netexResourceFrame);
-//            }
-//        }
-
 
         Marshaller marshaller = createMarshaller();
 
@@ -290,6 +265,8 @@ public class StreamingPublicationDelivery {
                 mappedTrainCount.get());
 
     }
+
+
 
     private void prepareVehicles(ExportParams exportParams, Set<Long> vehicleIds, AtomicInteger mappedVehicleCount, org.rutebanken.netex.model.ResourceFrame resourceFrame, EntitiesEvictor evicter) {
         // Override lists with custom iterator to be able to scroll database results on the fly.
@@ -348,6 +325,26 @@ public class StreamingPublicationDelivery {
             resourceFrame.setVehicleModels(vehicleModelsInFrameRelStructure);
         } else {
             logger.info("No vehicle models to export");
+        }
+    }
+
+    private void prepareDeckPlans(org.rutebanken.netex.model.ResourceFrame resourceFrame) {
+        // Override lists with custom iterator to be able to scroll database results on the fly.
+//        if (!vehicleIds.isEmpty()) {
+
+        List<DeckPlan> deckPlansInDb = deckPlanRepository.findAll();
+
+        if (!deckPlansInDb.isEmpty()) {
+            logger.info("There are deck plans to export");
+
+            DeckPlans_RelStructure deckPlansRelStructure = new DeckPlans_RelStructure();
+
+            List<org.rutebanken.netex.model.DeckPlan> deckPlans = deckPlansInDb.stream().map(vt -> netexMapper.getFacade().map(vt, org.rutebanken.netex.model.DeckPlan.class)).toList();
+
+            setField(DeckPlans_RelStructure.class, "deckPlan", deckPlansRelStructure, deckPlans);
+            resourceFrame.setDeckPlans(deckPlansRelStructure);
+        } else {
+            logger.info("No deck plans to export");
         }
     }
 

@@ -24,7 +24,7 @@ public class PublicationDeliveryCreator {
     private final String publicationDeliveryId;
     private final ValidPrefixList validPrefixList;
 
-    public PublicationDeliveryCreator(@Value("${netex.profile.version:1.12:NO-NeTEx-stops:1.4}") String publicationDeliveryId,
+    public PublicationDeliveryCreator(@Value("${netex.profile.version:1.12:NO-NeTEx-vehicle:1.4}") String publicationDeliveryId,
                                       ValidPrefixList validPrefixList) {
         this.publicationDeliveryId = publicationDeliveryId;
         this.validPrefixList = validPrefixList;
