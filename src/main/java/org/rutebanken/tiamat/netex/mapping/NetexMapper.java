@@ -176,6 +176,16 @@ public class NetexMapper {
                 .byDefault()
                 .register();
 
+        mapperFactory.classMap(VehicleEquipmentProfile.class, org.rutebanken.tiamat.model.vehicle.VehicleEquipmentProfile.class)
+                .byDefault()
+                .register();
+
+        mapperFactory.classMap(VehicleEquipmentProfileMember.class, org.rutebanken.tiamat.model.vehicle.VehicleEquipmentProfileMember.class)
+                .exclude("equipmentRef")
+                .customize(new VehicleEquipmentProfileMemberMapper())
+                .byDefault()
+                .register();
+
         mapperFactory.classMap(PathLinkEndStructure.class, org.rutebanken.tiamat.model.PathLinkEnd.class)
                 .byDefault()
                 .register();
@@ -186,6 +196,7 @@ public class NetexMapper {
 
         mapperFactory.classMap(InstalledEquipment_VersionStructure.class, org.rutebanken.tiamat.model.InstalledEquipment_VersionStructure.class)
                 .fieldBToA("netexId", "id")
+                .fieldAToB("id", "netexId")
                 .byDefault()
                 .register();
 
@@ -194,6 +205,8 @@ public class NetexMapper {
                 .register();
 
         mapperFactory.classMap(SanitaryEquipment.class, org.rutebanken.tiamat.model.SanitaryEquipment.class)
+                .fieldBToA("netexId", "id")
+                .fieldAToB("id", "netexId")
                 .byDefault()
                 .register();
 
