@@ -61,4 +61,8 @@ public class ImportParams {
     @Parameter(description = "Import only tariff zones, fare zones and group of tariff zones, ignore rest e.g. stop places, topographic places etc")
     @QueryParam(value = "importOnlyTariffZones")
     public boolean importOnlyTariffZones = false;
+
+    @Parameter(description = "Disable pre and post processing steps, import raw data as is")
+    @QueryParam(value = "disablePreAndPostProcessing")
+    public boolean disablePreAndPostProcessing = false;
 }
