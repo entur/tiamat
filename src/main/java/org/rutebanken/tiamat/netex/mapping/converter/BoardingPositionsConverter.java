@@ -19,20 +19,57 @@ import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;
 import org.rutebanken.netex.model.BoardingPositions_RelStructure;
+import org.rutebanken.netex.model.LocationStructure;
+import org.rutebanken.netex.model.SimplePoint_VersionStructure;
 import org.rutebanken.tiamat.model.BoardingPosition;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Component
-public class BoardingPositionsConverter extends BidirectionalConverter<List<BoardingPosition>, org.rutebanken.netex.model.BoardingPositions_RelStructure> {
+public class BoardingPositionsConverter extends BidirectionalConverter<Set<BoardingPosition>, org.rutebanken.netex.model.BoardingPositions_RelStructure> {
     @Override
-    public BoardingPositions_RelStructure convertTo(List<BoardingPosition> boardingPositions, Type<BoardingPositions_RelStructure> type, MappingContext mappingContext) {
+    public BoardingPositions_RelStructure convertTo(Set<BoardingPosition> boardingPositions, Type<BoardingPositions_RelStructure> type, MappingContext mappingContext) {
+        if (boardingPositions != null && !boardingPositions.isEmpty()) {
+            List<org.rutebanken.netex.model.BoardingPosition> netexBoardingPositions = new ArrayList<>();
+            for (BoardingPosition boardingPosition : boardingPositions) {
+                if (boardingPosition != null
+                        && boardingPosition.getPublicCode() != null
+                        && !boardingPosition.getPublicCode().isEmpty()) {
+                    // Only Include non-empty boarding-positions
+                    final org.rutebanken.netex.model.BoardingPosition netexBoardingPosition = new org.rutebanken.netex.model.BoardingPosition();
+                    mapperFacade.map(boardingPosition,netexBoardingPosition);
+                    netexBoardingPosition.setId(boardingPosition.getNetexId());
+                    netexBoardingPosition.setPublicCode(boardingPosition.getPublicCode());
+
+                    if (boardingPosition.getCentroid()!= null) {
+                        SimplePoint_VersionStructure simplePoint = new SimplePoint_VersionStructure()
+                                .withLocation(new LocationStructure()
+                                        .withLatitude(BigDecimal.valueOf(boardingPosition.getCentroid().getY()))
+                                        .withLongitude(BigDecimal.valueOf(boardingPosition.getCentroid().getX())));
+                        netexBoardingPosition.setCentroid(simplePoint);
+                    }
+
+
+                    netexBoardingPositions.add(netexBoardingPosition);
+
+                }
+            }
+            if (!netexBoardingPositions.isEmpty()) {
+                final BoardingPositions_RelStructure boardingPositionsRelStructure = new BoardingPositions_RelStructure();
+                boardingPositionsRelStructure.getBoardingPositionRefOrBoardingPosition().addAll(netexBoardingPositions);
+                return boardingPositionsRelStructure;
+            }
+
+        }
         return null;
     }
 
     @Override
-    public List<BoardingPosition> convertFrom(BoardingPositions_RelStructure boardingPositions_relStructure, Type<List<BoardingPosition>> type, MappingContext mappingContext) {
+    public Set<BoardingPosition> convertFrom(BoardingPositions_RelStructure boardingPositions_relStructure, Type<Set<BoardingPosition>> type, MappingContext mappingContext) {
         return null;
     }
 }

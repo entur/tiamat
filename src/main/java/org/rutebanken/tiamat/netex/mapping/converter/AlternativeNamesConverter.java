@@ -25,14 +25,13 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Component
-public class AlternativeNamesConverter extends BidirectionalConverter<List<AlternativeName>, AlternativeNames_RelStructure> {
+public class AlternativeNamesConverter extends BidirectionalConverter<Set<AlternativeName>, AlternativeNames_RelStructure> {
 
     @Override
-    public AlternativeNames_RelStructure convertTo(List<AlternativeName> alternativeNames, Type<AlternativeNames_RelStructure> type, MappingContext mappingContext) {
-
-
+    public AlternativeNames_RelStructure convertTo(Set<AlternativeName> alternativeNames, Type<AlternativeNames_RelStructure> type, MappingContext mappingContext) {
         if (!CollectionUtils.isEmpty(alternativeNames)) {
 
             List<org.rutebanken.netex.model.AlternativeName> netexAlternativeNames = new ArrayList<>();
@@ -61,7 +60,7 @@ public class AlternativeNamesConverter extends BidirectionalConverter<List<Alter
     }
 
     @Override
-    public List<AlternativeName> convertFrom(AlternativeNames_RelStructure alternativeNames_relStructure, Type<List<AlternativeName>> type, MappingContext mappingContext) {
+    public Set<AlternativeName> convertFrom(AlternativeNames_RelStructure alternativeNames_relStructure, Type<Set<AlternativeName>> type, MappingContext mappingContext) {
         return null;
     }
 }

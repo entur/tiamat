@@ -267,7 +267,7 @@ public class QuayTest extends TiamatIntegrationTest {
 
         Quay actualQuay = quayRepository.findFirstByNetexIdOrderByVersionDesc(quay.getNetexId());
         assertThat(actualQuay.getAlternativeNames()).isNotEmpty();
-        AlternativeName actualAlternativeName = actualQuay.getAlternativeNames().getFirst();
+        AlternativeName actualAlternativeName = actualQuay.getAlternativeNames().iterator().next();
         assertThat(actualAlternativeName.getNetexId()).isEqualTo(actualAlternativeName.getNetexId());
         assertThat(actualAlternativeName.getName().getValue()).isEqualTo(alternativeName.getName().getValue());
         assertThat(actualAlternativeName.getShortName().getValue()).isEqualTo(alternativeName.getShortName().getValue());

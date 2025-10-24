@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 
 public class StopPlaceMapper extends CustomMapper<StopPlace, org.rutebanken.tiamat.model.StopPlace> {
@@ -95,7 +96,7 @@ public class StopPlaceMapper extends CustomMapper<StopPlace, org.rutebanken.tiam
 
         if (stopPlace.getAlternativeNames() != null &&
                 !stopPlace.getAlternativeNames().isEmpty()) {
-            List<org.rutebanken.tiamat.model.AlternativeName> alternativeNames = stopPlace.getAlternativeNames();
+            Set<org.rutebanken.tiamat.model.AlternativeName> alternativeNames = stopPlace.getAlternativeNames();
             List<AlternativeName> netexAlternativeNames = new ArrayList<>();
 
             for (org.rutebanken.tiamat.model.AlternativeName alternativeName : alternativeNames) {

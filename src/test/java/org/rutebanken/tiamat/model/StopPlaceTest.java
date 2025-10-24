@@ -346,7 +346,7 @@ public class StopPlaceTest extends TiamatIntegrationTest {
         stopPlaceRepository.save(stopPlace);
         StopPlace actualStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId());
         assertThat(actualStopPlace.getAlternativeNames()).isNotEmpty();
-        assertThat(actualStopPlace.getAlternativeNames().getFirst().getShortName().getValue()).isEqualTo(alternativeName.getShortName().getValue());
+        assertThat(actualStopPlace.getAlternativeNames().iterator().next().getShortName().getValue()).isEqualTo(alternativeName.getShortName().getValue());
     }
 
     @Test
