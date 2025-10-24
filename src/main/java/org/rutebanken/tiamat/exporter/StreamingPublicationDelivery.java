@@ -395,7 +395,7 @@ public class StreamingPublicationDelivery {
         if (!stopPlacePrimaryIds.isEmpty()) {
             logger.info("There are stop places to export");
 
-            final Iterator<org.rutebanken.tiamat.model.StopPlace> stopPlaceIterator = stopPlaceRepository.scrollStopPlaces(stopPlacePrimaryIds);
+            final Iterator<org.rutebanken.tiamat.model.StopPlace> stopPlaceIterator = stopPlaceRepository.scrollSchedulesStopPlaces(stopPlacePrimaryIds);
 
             // Use Listening iterator to collect stop place IDs.
             ParentStopFetchingIterator parentStopFetchingIterator = new ParentStopFetchingIterator(stopPlaceIterator, stopPlaceRepository);

@@ -46,5 +46,8 @@ public interface StopPlaceRepository extends StopPlaceRepositoryCustom, EntityIn
 
     @Override
     Iterator<StopPlace> scrollStopPlaces(Set<Long> stopPlacePrimaryIds);
+
+    @Override
+    Iterator<StopPlace> scrollSchedulesStopPlaces(Set<Long> stopPlacePrimaryIds);
 }
 

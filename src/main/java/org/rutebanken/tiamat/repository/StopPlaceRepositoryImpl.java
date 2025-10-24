@@ -573,38 +573,77 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         Session session = entityManager.unwrap(Session.class);
 
         Pair<String, Map<String, Object>> queryWithParams = stopPlaceQueryFromSearchBuilder.buildQueryString(exportParams);
-        NativeQuery<StopPlace> sqlQuery = session.createNativeQuery(queryWithParams.getFirst(),StopPlace.class);
-        searchHelper.addParams(sqlQuery, queryWithParams.getSecond());
+        NativeQuery<StopPlace> query = session.createNativeQuery(queryWithParams.getFirst(),StopPlace.class);
+        searchHelper.addParams(query, queryWithParams.getSecond());
+        query.addEntity(StopPlace.class);
 
-        return scrollStopPlaces(sqlQuery, session);
+        return scrollStopPlaces(query, session);
+    }
+
+    @Override
+    public Iterator<StopPlace> scrollSchedulesStopPlaces(Set<Long> stopPlacePrimaryIds) {
+        // Load only relevant associations for scheduled stop places
+        Session session = entityManager.unwrap(Session.class);
+        String sqlSelectAll = """
+                SELECT DISTINCT sp FROM StopPlace sp 
+                LEFT JOIN FETCH sp.quays qs
+                LEFT JOIN FETCH sp.tariffZones
+                LEFT JOIN FETCH sp.adjacentSites
+                LEFT JOIN FETCH sp.keyValues spkvs
+                LEFT JOIN FETCH spkvs.items
+                LEFT JOIN FETCH qs.keyValues qskvs
+                LEFT JOIN FETCH qskvs.items
+                WHERE sp.id IN (
+                """;
+        String sql = generateStopPlaceQueryFromStopPlaceIds(sqlSelectAll, stopPlacePrimaryIds);
+        org.hibernate.query.Query<StopPlace> query = session.createQuery(sql, StopPlace.class);
+        logger.info("Scrolling {} scheduled stop places", stopPlacePrimaryIds.size());
+        return scrollStopPlaces(query, session);
     }
 
     @Override
     public Iterator<StopPlace> scrollStopPlaces(Set<Long> stopPlacePrimaryIds) {
         Session session = entityManager.unwrap(Session.class);
-
-        NativeQuery<StopPlace> sqlQuery = session.createNativeQuery(generateStopPlaceQueryFromStopPlaceIds(stopPlacePrimaryIds), StopPlace.class);
-
+        String sqlSelectAll = """
+                SELECT DISTINCT sp FROM StopPlace sp 
+                LEFT JOIN FETCH sp.tariffZones
+                LEFT JOIN FETCH sp.keyValues spkvs
+                LEFT JOIN FETCH spkvs.items
+                LEFT JOIN FETCH sp.alternativeNames
+                LEFT JOIN FETCH sp.polygon
+                LEFT JOIN FETCH sp.adjacentSites
+                LEFT JOIN FETCH sp.quays qs
+                LEFT JOIN FETCH qs.boardingPositions
+                LEFT JOIN FETCH qs.polygon
+                LEFT JOIN FETCH qs.keyValues qskvs
+                LEFT JOIN FETCH qskvs.items
+                LEFT JOIN FETCH qs.alternativeNames
+                LEFT JOIN FETCH sp.accessibilityAssessment spaa
+                LEFT JOIN FETCH spaa.limitations
+                WHERE sp.id IN (
+                """;
+        String sql = generateStopPlaceQueryFromStopPlaceIds(sqlSelectAll, stopPlacePrimaryIds);
+        org.hibernate.query.Query<StopPlace> query = session.createQuery(sql, StopPlace.class);
         logger.info("Scrolling {} stop places", stopPlacePrimaryIds.size());
-       return scrollStopPlaces(sqlQuery, session);
+       return scrollStopPlaces(query, session);
     }
 
-    public Iterator<StopPlace> scrollStopPlaces(NativeQuery<StopPlace> sqlQuery, Session session) {
-
-        sqlQuery.addEntity(StopPlace.class);
+    public Iterator<StopPlace> scrollStopPlaces(org.hibernate.query.Query<StopPlace> sqlQuery, Session session) {
         sqlQuery.setReadOnly(true);
         sqlQuery.setFetchSize(SCROLL_FETCH_SIZE);
         sqlQuery.setCacheable(false);
-        ScrollableResults results = sqlQuery.scroll(ScrollMode.FORWARD_ONLY);
+        ScrollableResults<StopPlace> results = sqlQuery.scroll(ScrollMode.FORWARD_ONLY);
 
         return new ScrollableResultIterator<>(results, SCROLL_FETCH_SIZE, session);
     }
 
-    private String generateStopPlaceQueryFromStopPlaceIds(Set<Long> stopPlacePrimaryIds) {
-
+    private String generateStopPlaceQueryFromStopPlaceIds(String sqlSelect, Set<Long> stopPlacePrimaryIds) {
+        // Overcome limitation of 65,535 parameters in a SQL query by joining the IDs into a string and using IN (...)
+        // Ids are long values, so no risk of SQL injection
         Set<String> stopPlacePrimaryIdStrings = stopPlacePrimaryIds.stream().map(lvalue -> String.valueOf(lvalue)).collect(Collectors.toSet());
         String joinedStopPlaceDbIds = String.join(",", stopPlacePrimaryIdStrings);
-        StringBuilder sql = new StringBuilder("SELECT s.* FROM stop_place s WHERE s.id IN(");
+
+        StringBuilder sql = new StringBuilder(sqlSelect);
         sql.append(joinedStopPlaceDbIds);
         sql.append(")");
         return sql.toString();
