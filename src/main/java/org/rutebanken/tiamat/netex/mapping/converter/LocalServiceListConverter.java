@@ -19,8 +19,6 @@ import java.util.List;
 @Component
 public class LocalServiceListConverter extends BidirectionalConverter<List<LocalService>, LocalServices_RelStructure>  {
     private static final Logger logger = LoggerFactory.getLogger(LocalServiceListConverter.class);
-
-    ObjectFactory netexObjectFactory = new ObjectFactory();
     final ObjectFactory objectFactory = new ObjectFactory();
 
     @Override
@@ -35,7 +33,6 @@ public class LocalServiceListConverter extends BidirectionalConverter<List<Local
 
         localServices.forEach(localService -> {
             org.rutebanken.netex.model.AssistanceService netexLocalService = mapperFacade.map(localService, AssistanceService.class);
-            netexLocalService.setId(localService.getNetexId());
             JAXBElement<AssistanceService> localServiceVersionStructureJAXBElement = objectFactory.createAssistanceService(netexLocalService);
             localServices_relStructure.getLocalServiceRefOrLocalService().add(localServiceVersionStructureJAXBElement);
         });
@@ -52,9 +49,7 @@ public class LocalServiceListConverter extends BidirectionalConverter<List<Local
                         return (LocalService_VersionStructure) object.getValue(); })
                     .filter(netexLocalService -> netexLocalService instanceof AssistanceService)
                     .map(netexLocalService -> {
-                        LocalService tiamatLocalService = mapperFacade.map(netexLocalService, LocalService.class);
-                        tiamatLocalService.setNetexId(netexLocalService.getId());
-                        return tiamatLocalService;
+                        return mapperFacade.map(netexLocalService, LocalService.class);
                     })
                     .forEach(localServices::add);
         }

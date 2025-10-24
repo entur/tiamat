@@ -199,11 +199,11 @@ public class NetexMapper {
                 .register();
 
         mapperFactory.classMap(LocalService_VersionStructure.class, org.rutebanken.tiamat.model.LocalService.class)
-                .fieldBToA("netexId", "id")
                 .byDefault()
                 .register();
 
         mapperFactory.classMap(AssistanceService.class, org.rutebanken.tiamat.model.AssistanceService.class)
+                .fieldBToA("netexId", "id")
                 .byDefault()
                 .register();
 
