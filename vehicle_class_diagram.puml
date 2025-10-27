@@ -1,0 +1,194 @@
+@startuml Vehicle_Model_ClassDiagram
+
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam classBackgroundColor #E1F5FF
+skinparam classBorderColor #01579B
+skinparam arrowColor #01579B
+
+package "org.rutebanken.tiamat.model.vehicle" {
+    
+    ' Main domain classes
+    class Vehicle {
+        -id: String
+        -version: Long
+        -name: String
+    }
+    
+    class VehicleType {
+        -id: String
+        -version: Long
+        -name: String
+        -description: String
+        -fuelType: FuelTypeEnumeration
+        -propulsionType: PropulsionTypeEnumeration
+    }
+    
+    class VehicleModel {
+        -id: String
+        -version: Long
+        -name: String
+    }
+    
+    class Train {
+        -id: String
+        -version: Long
+        -name: String
+    }
+    
+    class CompositeFrame {
+        -id: String
+        -version: Long
+        -name: String
+        -frames: Frames_RelStructure
+    }
+    
+    class DeckPlan {
+        -id: String
+        -version: Long
+        -name: String
+    }
+    
+    class Deck {
+        -id: String
+        -version: Long
+        -name: String
+        -deckNumber: Integer
+        -entranceType: DeckEntranceTypeEnumeration
+    }
+    
+    class PassengerSpace {
+        -id: String
+        -version: Long
+        -name: String
+        -spaceType: PassengerSpaceTypeEnumeration
+    }
+    
+    class PassengerEntrance {
+        -id: String
+        -version: Long
+        -name: String
+    }
+    
+    class PassengerSpot {
+        -id: String
+        -version: Long
+        -seatNumber: String
+    }
+    
+    class SpotRow {
+        -id: String
+        -version: Long
+        -name: String
+    }
+    
+    class PassengerCapacity {
+        -seatedCapacity: Integer
+        -standingCapacity: Integer
+        -totalCapacity: Integer
+        -wheelchairPlaces: Integer
+        -pramPlaces: Integer
+    }
+    
+    class VehicleEquipmentProfile {
+        -id: String
+        -version: Long
+        -name: String
+    }
+    
+    class VehicleEquipmentProfileMember {
+        -id: String
+        -version: Long
+    }
+    
+    class InstalledEquipment {
+        -id: String
+        -version: Long
+        -outOfService: Boolean
+    }
+    
+    ' Enumerations
+    enum FuelTypeEnumeration {
+        DIESEL
+        ELECTRIC
+        HYBRID
+        PETROL
+        BIO_GAS
+        OTHER
+    }
+    
+    enum PropulsionTypeEnumeration {
+        DIESEL
+        ELECTRIC
+        HYBRID
+        LPG
+        PETROL
+        OTHER
+    }
+    
+    enum TrainSizeEnumeration {
+        SMALL
+        MEDIUM
+        LARGE
+    }
+    
+    enum DeckEntranceTypeEnumeration {
+        LEVEL
+        DOOR
+        RAMP
+        STAIRS
+    }
+    
+    enum PassengerSpaceTypeEnumeration {
+        SEATING
+        STANDING
+        WHEELCHAIR
+        PRAM_SPACE
+    }
+    
+    enum VehicleOrientationEnumeration {
+        FORWARD
+        BACKWARD
+        SIDEWAYS
+    }
+    
+    enum VehicleSideEnumeration {
+        LEFT
+        RIGHT
+    }
+    
+    ' Support structures
+    class TrainSizeStructure {
+        -size: TrainSizeEnumeration
+        -numberOfCars: Integer
+    }
+
+    
+    ' Relationships
+    Vehicle "1" --> "1" VehicleType : transportTypeRef
+    Vehicle "1" --> "1" VehicleModel : vehicleModelRef
+    
+    VehicleModel "1" --> "1" VehicleType : transportTypeRef
+    
+    Train "1" --> "1" TrainSizeStructure : trainSize
+    
+    DeckPlan "1" o-> "0..*" Deck : decks
+    
+    Deck "1" o-> "0..*" PassengerSpace : deckSpaces
+    Deck "1" o-> "0..*" SpotRow : spotRows
+    
+    PassengerSpace "1" o-> "0..*" PassengerEntrance : deckEntrances
+    PassengerSpot "1" --> "1" SpotRow : spotRowRef
+    
+    PassengerSpace "1" o-> "0..*" PassengerSpot : passengerSpots
+    
+    VehicleEquipmentProfile "1" o-> "0..*" VehicleEquipmentProfileMember : vehicleEquipmentProfileMembers
+    
+    VehicleEquipmentProfileMember "1" --> "1" InstalledEquipment : equipmentRef
+    
+    VehicleType "1" o-> "0..*" PassengerCapacity : capacities
+    VehicleType "1" --> "1" DeckPlan : deckPlanRef
+    
+}
+
+@enduml

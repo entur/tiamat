@@ -123,7 +123,6 @@ public class NetexMapper {
                 .register();
 
         mapperFactory.classMap(Vehicle.class, org.rutebanken.tiamat.model.vehicle.Vehicle.class)
-//                .fieldBToA("netexId", "id")
                 .exclude("transportTypeRef")
                 .exclude("vehicleTypeRef")
                 .customize(new VehicleMapper())
@@ -131,21 +130,59 @@ public class NetexMapper {
                 .register();
 
         mapperFactory.classMap(VehicleType.class, org.rutebanken.tiamat.model.vehicle.VehicleType.class)
-//                .fieldBToA("netexId", "id")
                 .customize(new VehicleTypeMapper())
                 .byDefault()
                 .register();
 
         mapperFactory.classMap(VehicleModel.class, org.rutebanken.tiamat.model.vehicle.VehicleModel.class)
-//                .fieldBToA("netexId", "id")
                 .exclude("transportTypeRef")
                 .customize(new VehicleModelMapper())
                 .byDefault()
                 .register();
 
         mapperFactory.classMap(PassengerCapacity.class, org.rutebanken.tiamat.model.vehicle.PassengerCapacity.class)
-//                .fieldBToA("netexId", "id")
                 .customize(new PassengerCapacityMapper())
+                .byDefault()
+                .register();
+
+        mapperFactory.classMap(DeckPlan.class, org.rutebanken.tiamat.model.vehicle.DeckPlan.class)
+                .customize(new DeckPlanMapper())
+                .byDefault()
+                .register();
+
+        mapperFactory.classMap(Deck.class, org.rutebanken.tiamat.model.vehicle.Deck.class)
+                .customize(new DeckMapper())
+                .byDefault()
+                .register();
+
+        mapperFactory.classMap(PassengerSpace.class, org.rutebanken.tiamat.model.vehicle.PassengerSpace.class)
+                .customize(new PassengerSpaceMapper())
+                .byDefault()
+                .register();
+
+        mapperFactory.classMap(PassengerEntrance.class, org.rutebanken.tiamat.model.vehicle.PassengerEntrance.class)
+                .customize(new PassengerEntranceMapper())
+                .byDefault()
+                .register();
+
+        mapperFactory.classMap(PassengerSpot.class, org.rutebanken.tiamat.model.vehicle.PassengerSpot.class)
+                .exclude("spotRowRef")
+                .customize(new PassengerSpotMapper())
+                .byDefault()
+                .register();
+
+        mapperFactory.classMap(SpotRow.class, org.rutebanken.tiamat.model.vehicle.SpotRow.class)
+                .customize(new SpotRowMapper())
+                .byDefault()
+                .register();
+
+        mapperFactory.classMap(VehicleEquipmentProfile.class, org.rutebanken.tiamat.model.vehicle.VehicleEquipmentProfile.class)
+                .byDefault()
+                .register();
+
+        mapperFactory.classMap(VehicleEquipmentProfileMember.class, org.rutebanken.tiamat.model.vehicle.VehicleEquipmentProfileMember.class)
+                .exclude("equipmentRef")
+                .customize(new VehicleEquipmentProfileMemberMapper())
                 .byDefault()
                 .register();
 
@@ -159,6 +196,7 @@ public class NetexMapper {
 
         mapperFactory.classMap(InstalledEquipment_VersionStructure.class, org.rutebanken.tiamat.model.InstalledEquipment_VersionStructure.class)
                 .fieldBToA("netexId", "id")
+                .fieldAToB("id", "netexId")
                 .byDefault()
                 .register();
 
@@ -167,6 +205,8 @@ public class NetexMapper {
                 .register();
 
         mapperFactory.classMap(SanitaryEquipment.class, org.rutebanken.tiamat.model.SanitaryEquipment.class)
+                .fieldBToA("netexId", "id")
+                .fieldAToB("id", "netexId")
                 .byDefault()
                 .register();
 

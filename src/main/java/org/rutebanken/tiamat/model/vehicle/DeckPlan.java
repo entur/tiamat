@@ -10,23 +10,13 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Transient;
-import jakarta.xml.bind.annotation.XmlAccessType;
-import jakarta.xml.bind.annotation.XmlAccessorType;
-import jakarta.xml.bind.annotation.XmlElement;
-import jakarta.xml.bind.annotation.XmlSchemaType;
-import jakarta.xml.bind.annotation.XmlSeeAlso;
-import jakarta.xml.bind.annotation.XmlType;
-import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.rutebanken.netex.OmitNullsToStringStyle;
 import org.rutebanken.tiamat.model.DataManagedObjectStructure;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -56,7 +46,7 @@ public class DeckPlan extends DataManagedObjectStructure {
 //    private DeckLevels_RelStructure deckLevels;
 
     @OneToMany(cascade = CascadeType.ALL)
-    private Set<Deck> decks = new HashSet<>();
+    private List<Deck> decks = new ArrayList<>();
 
 
 }

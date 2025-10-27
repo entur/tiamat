@@ -1,16 +1,16 @@
 package org.rutebanken.tiamat.model.vehicle;
 
+import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.MappedSuperclass;
 import jakarta.xml.bind.JAXBElement;
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlSchemaType;
-import jakarta.xml.bind.annotation.XmlSeeAlso;
 import jakarta.xml.bind.annotation.XmlType;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.Collection;
 
@@ -21,18 +21,23 @@ import net.opengis.gml._3.PolygonType;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.rutebanken.netex.OmitNullsToStringStyle;
 
-@MappedSuperclass
+@Entity
 @Getter
 @Setter
-public class DeckComponent_VersionStructure extends OnboardSpace_VersionStructure {
-    private Boolean publicUse;
+public class PassengerEntrance extends DeckComponent_VersionStructure {
+    @Enumerated(EnumType.STRING)
+    private VehicleSideEnumeration vehicleSide;
+
+    private BigDecimal distanceFromFront;
+    private BigInteger sequenceFromFront;
+    private BigDecimal heightFromGround;
 
     @Enumerated(EnumType.STRING)
-    private FareClassEnumeration fareClass;
+    private DeckEntranceTypeEnumeration deckEntranceType;
+    private Boolean hasDoor;
+    private Boolean isAutomatic;
+    private Boolean isEmergencyExit;
 
-//    protected DeckLevelRefStructure deckLevelRef;
-//    protected ClassOfUseRef classOfUseRef;
-
-//    protected AccessibilityAssessment accessibilityAssessment;
-
+    //    private SensorsInEntrance_RelStructure sensorsInEntrance;
+//    private TypeOfDeckEntranceUsageRefStructure typeOfDeckEntranceUsageRef;
 }

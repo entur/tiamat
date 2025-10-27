@@ -7,12 +7,16 @@ import jakarta.persistence.Embedded;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.MappedSuperclass;
+import lombok.Getter;
+import lombok.Setter;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.Zone_VersionStructure;
 
 import java.math.BigDecimal;
 
 @MappedSuperclass
+@Getter
+@Setter
 public abstract class OnboardSpace_VersionStructure extends Zone_VersionStructure {
     @AttributeOverrides({
             @AttributeOverride(name = "value", column = @Column(name = "label_value")),
