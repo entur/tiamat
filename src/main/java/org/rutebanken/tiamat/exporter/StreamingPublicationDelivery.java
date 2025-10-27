@@ -241,7 +241,7 @@ public class StreamingPublicationDelivery {
         prepareParkings(exportParams, stopPlacePrimaryIds, mappedParkingCount, netexSiteFrame, entitiesEvictor);
         prepareGroupOfStopPlaces(exportParams, stopPlacePrimaryIds, mappedGroupOfStopPlacesCount, netexSiteFrame,netexResourceFrame, entitiesEvictor);
         prepareFareZones(exportParams,stopPlacePrimaryIds,mappedFareZonesCount,mappedGroupOfTariffZonesCount,netexSiteFrame,netexFareFrame,entitiesEvictor);
-        prepareScheduledStopPoints(stopPlacePrimaryIds, netexServiceFrame);
+        prepareScheduledStopPoints(stopPlacePrimaryIds, netexServiceFrame, entitiesEvictor);
 
 
         PublicationDeliveryStructure publicationDeliveryStructure;
@@ -391,7 +391,7 @@ public class StreamingPublicationDelivery {
         }
     }
 
-    private void prepareScheduledStopPoints(Set<Long> stopPlacePrimaryIds, org.rutebanken.netex.model.ServiceFrame netexServiceFrame) {
+    private void prepareScheduledStopPoints(Set<Long> stopPlacePrimaryIds, org.rutebanken.netex.model.ServiceFrame netexServiceFrame, EntitiesEvictor evicter) {
         if (!stopPlacePrimaryIds.isEmpty()) {
             logger.info("There are stop places to export");
 
@@ -408,7 +408,7 @@ public class StreamingPublicationDelivery {
             while (parentStopFetchingIterator.hasNext()) {
                 final org.rutebanken.tiamat.model.StopPlace stopPlace = parentStopFetchingIterator.next();
                 covertStopPlaceToScheduledStopPoint(netexScheduledStopPoints, stopAssignment, stopPlace);
-
+                evicter.evictKnownEntitiesFromSession(stopPlace);
             }
 
 
