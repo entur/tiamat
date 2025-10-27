@@ -81,21 +81,7 @@ import org.rutebanken.tiamat.rest.graphql.operations.TagOperationsBuilder;
 import org.rutebanken.tiamat.rest.graphql.resolvers.MutableTypeResolver;
 import org.rutebanken.tiamat.rest.graphql.scalars.DateScalar;
 import org.rutebanken.tiamat.rest.graphql.scalars.TransportModeScalar;
-import org.rutebanken.tiamat.rest.graphql.types.EntityRefObjectTypeCreator;
-import org.rutebanken.tiamat.rest.graphql.types.FareZoneObjectTypeCreator;
-import org.rutebanken.tiamat.rest.graphql.types.GroupOfStopPlacesObjectTypeCreator;
-import org.rutebanken.tiamat.rest.graphql.types.GroupOfTariffZonesObjectTypeCreator;
-import org.rutebanken.tiamat.rest.graphql.types.ParentStopPlaceInputObjectTypeCreator;
-import org.rutebanken.tiamat.rest.graphql.types.ParentStopPlaceObjectTypeCreator;
-import org.rutebanken.tiamat.rest.graphql.types.PathLinkEndObjectTypeCreator;
-import org.rutebanken.tiamat.rest.graphql.types.PathLinkObjectTypeCreator;
-import org.rutebanken.tiamat.rest.graphql.types.PurposeOfGroupingTypeCreator;
-import org.rutebanken.tiamat.rest.graphql.types.StopPlaceInterfaceCreator;
-import org.rutebanken.tiamat.rest.graphql.types.StopPlaceObjectTypeCreator;
-import org.rutebanken.tiamat.rest.graphql.types.TagObjectTypeCreator;
-import org.rutebanken.tiamat.rest.graphql.types.TariffZoneObjectTypeCreator;
-import org.rutebanken.tiamat.rest.graphql.types.TopographicPlaceObjectTypeCreator;
-import org.rutebanken.tiamat.rest.graphql.types.ZoneCommonFieldListCreator;
+import org.rutebanken.tiamat.rest.graphql.types.*;
 import org.rutebanken.tiamat.service.TagCreator;
 import org.rutebanken.tiamat.service.TagRemover;
 import org.rutebanken.tiamat.service.TariffZoneTerminator;
@@ -225,6 +211,10 @@ public class StopPlaceRegisterGraphQLSchema {
     private FareZoneObjectTypeCreator fareZoneObjectTypeCreator;
 
     @Autowired
+    private VehicleTypeObjectTypeCreator vehicleTypeObjectTypeCreator;
+
+
+    @Autowired
     private MultiModalityOperationsBuilder multiModalityOperationsBuilder;
 
     @Autowired
@@ -277,6 +267,9 @@ public class StopPlaceRegisterGraphQLSchema {
 
     @Autowired
     DataFetcher topographicPlaceFetcher;
+
+    @Autowired
+    DataFetcher vehicleTypeFetcher;
 
     @Autowired
     DataFetcher stopPlaceUpdater;
@@ -439,6 +432,8 @@ public class StopPlaceRegisterGraphQLSchema {
                         .build())
                 .build();
 
+        GraphQLObjectType vehicleTypeObjectType = vehicleTypeObjectTypeCreator.create();
+
         List<GraphQLFieldDefinition> zoneCommandFieldList = zoneCommonFieldListCreator.create(validBetweenObjectType);
 
         commonFieldsList.addAll(zoneCommandFieldList);
@@ -584,6 +579,12 @@ public class StopPlaceRegisterGraphQLSchema {
                         .description("Location permissions")
                         .type(entityPermissionObjectType)
                         .arguments(createLocationArguments()))
+                .field(newFieldDefinition()
+                        .name(VEHICLE_TYPES)
+                        .type(new GraphQLList(vehicleTypeObjectType))
+                        .description("Vehicle types")
+                        .arguments(createFindTopographicPlaceArguments(allVersionsArgument))
+                )
                 .build();
 
 
@@ -779,6 +780,8 @@ public class StopPlaceRegisterGraphQLSchema {
         registerDataFetcher(codeRegistryBuilder, STOPPLACES_REGISTER, TARIFF_ZONES, tariffZonesFetcher);
         registerDataFetcher(codeRegistryBuilder, STOPPLACES_REGISTER, FARE_ZONES, fareZonesFetcher);
         registerDataFetcher(codeRegistryBuilder, STOPPLACES_REGISTER, FARE_ZONES_AUTHORITIES, fareZoneAuthoritiesFetcher);
+
+        registerDataFetcher(codeRegistryBuilder, STOPPLACES_REGISTER, VEHICLE_TYPES, vehicleTypeFetcher);
 
 
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_GEO_JSON, TYPE, env -> {

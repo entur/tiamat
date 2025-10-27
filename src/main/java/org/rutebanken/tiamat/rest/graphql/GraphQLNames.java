@@ -446,6 +446,9 @@ public class GraphQLNames {
     public static final String FIND_PATH_LINK = "pathLink";
     public static final String FIND_PARKING = "parking";
 
+    public static final String VEHICLE_TYPES = "vehicleTypes";
+    public static final String VEHICLES = "vehicles";
+
     public static final String FIND_BY_STOP_PLACE_ID = "stopPlaceId";
     public static final String FIND_BY_GROUP_OF_STOP_PLACEs_ID = "groupOfStopPlacesId";
 
@@ -485,4 +488,7 @@ public class GraphQLNames {
     public static final String CREATE_MULTI_MODAL_STOPPLACE = "createMultiModalStopPlace";
     public static final String ADD_TO_MULTIMODAL_STOPPLACE = "addToMultiModalStopPlace";
     public static final String REMOVE_FROM_MULTIMODAL_STOPPLACE = "removeFromMultiModalStopPlace";
+
+    public static final String OUTPUT_TYPE_VEHICLE_TYPE = "VehicleType";
+
 }
