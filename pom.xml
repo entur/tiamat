@@ -452,6 +452,12 @@
             <version>${lombok.version}</version>
         </dependency>
 
+		<dependency>
+			<groupId>org.entur</groupId>
+			<artifactId>autosys</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+
     </dependencies>
     <repositories>
         <repository>
