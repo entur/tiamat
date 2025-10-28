@@ -1290,13 +1290,23 @@ public class ImportResourceTest extends TiamatIntegrationTest {
     public void importParentChild() throws JAXBException, IOException, SAXException {
         final FileInputStream fileInputStream = new FileInputStream("src/test/resources/org/rutebanken/tiamat/rest/netex/publicationdelivery/parent_child.xml");
 
-        Response response = importResource.importPublicationDelivery(fileInputStream);
+        ImportParams importParams = new ImportParams();
+        importParams.importType = ImportType.INITIAL;
+
+        Response response = importResource.importPublicationDelivery(fileInputStream, importParams);
         assertThat(response.getStatus()).isEqualTo(200);
 
         StreamingOutput streamingOutput = (StreamingOutput) response.getEntity();
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         streamingOutput.write(byteArrayOutputStream);
-        System.out.println(byteArrayOutputStream.toString());
+
+        String responseBody = byteArrayOutputStream.toString(StandardCharsets.UTF_8);
+        System.out.println(responseBody);
+
+        assertThat(responseBody)
+                .isNotEmpty()
+                .contains("PublicationDelivery")
+                .containsIgnoringCase("IS_PARENT_STOP_PLACE");
     }
 
     private void setUpSecurityContext() {

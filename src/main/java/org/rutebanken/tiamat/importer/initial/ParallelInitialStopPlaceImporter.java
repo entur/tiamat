@@ -33,7 +33,10 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static java.util.stream.Collectors.toList;
+import static java.util.concurrent.ConcurrentHashMap.newKeySet;
+import static java.util.stream.Stream.concat;
+import static java.util.stream.Stream.empty;
+import static java.util.stream.Stream.of;
 
 @Component
 @Transactional
@@ -54,61 +57,43 @@ public class ParallelInitialStopPlaceImporter {
     private boolean publishChangelog;
 
     @Autowired
-    private StopPlaceParentUpdater parentUpdater;
+    private StopPlaceParentCreator parentStopPlaceCreator;
 
     public List<org.rutebanken.netex.model.StopPlace> importStopPlaces(List<StopPlace> tiamatStops, AtomicInteger stopPlacesCreated) {
-        Map<String, Set<String>> childrenByParent = new ConcurrentHashMap<>();
-        Map<String, Set<String>> netexByImportedIds = new ConcurrentHashMap<>();
+        Map<String, Set<String>> childrenByParentSiteReference = new ConcurrentHashMap<>();
+        Set<StopPlace> parentStopPlaces = ConcurrentHashMap.newKeySet();
 
         if (publishChangelog) {
             throw new IllegalStateException("Initial import not allowed with changelog publishing enabled! Set changelog.publish.enabled=false");
         }
 
-        List<org.rutebanken.netex.model.StopPlace> stops = tiamatStops.parallelStream()
-                .map(stopPlace -> {
-
-                    if (stopPlace.getTariffZones() != null) {
-                        stopPlace.getTariffZones().forEach(tariffZoneRef -> tariffZoneRef.setVersion(null));
-                    }
-
-                    return stopPlace;
-                })
+        List<StopPlace> stops = tiamatStops.parallelStream()
+                .peek(this::resetTariffZoneReferenceVersion)
                 .peek(stopPlace -> stopPlaceTopographicPlaceReferenceUpdater.updateTopographicReference(stopPlace))
-                .map(stopPlace -> {
-                    String netexId = stopPlace.getNetexId();
+                .flatMap(stopPlace -> {
                     SiteRefStructure parentSiteRef = stopPlace.getParentSiteRef();
                     stopPlace.setParentSiteRef(null);
-                    StopPlace saved = stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
-                    if (isChild(stopPlace, parentSiteRef)) {
-                        childrenByParent
-                                .computeIfAbsent(parentSiteRef.getRef(), k -> ConcurrentHashMap.newKeySet())
-                                .add(saved.getNetexId());
-                    } else if (isParent(stopPlace, parentSiteRef)) {
-                        netexByImportedIds
-                                .computeIfAbsent(saved.getNetexId(), k -> ConcurrentHashMap.newKeySet())
-                                .addAll(netexId != null ? List.of(netexId) : stopPlace.getOriginalIds());
+
+                    if (isParent(stopPlace, parentSiteRef)) {
+                        parentStopPlaces.add(stopPlace);
+                        return empty();
                     }
-                    return saved;
-                })
-                .peek(stopPlace -> stopPlacesCreated.incrementAndGet())
-                .map(stopPlace -> netexMapper.mapToNetexModel(stopPlace))
-                .collect(toList());
 
-        netexByImportedIds.forEach((netexId, originalIds) -> {
-            originalIds.stream()
-                    .filter(childrenByParent::containsKey)
-                    .findFirst()
-                    .ifPresent(matchingOriginalId -> {
-                        Set<String> childIds = childrenByParent.get(matchingOriginalId);
-                        if (childIds != null && !childIds.isEmpty()) {
-                            parentUpdater.updateParentWithChildren(netexId, childIds);
-                        } else {
-                            logger.warn("No children found for parent original id {}", matchingOriginalId);
-                        }
-                    });
-        });
+                    StopPlace saved = stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+                    stopPlacesCreated.incrementAndGet();
+                    if (isChild(stopPlace, parentSiteRef)) {
+                        childrenByParentSiteReference
+                                .computeIfAbsent(parentSiteRef.getRef(), k -> newKeySet())
+                                .add(saved.getNetexId());
+                    }
+                    return of(saved);
+                }).toList();
 
-        return stops;
+        List<StopPlace> parents = resolveParents(parentStopPlaces, childrenByParentSiteReference, stopPlacesCreated);
+
+        return concat(stops.stream(), parents.stream())
+                .map(netexMapper::mapToNetexModel)
+                .toList();
     }
 
     private boolean isParent(StopPlace stopPlace, SiteRefStructure parentSiteRef) {
@@ -123,4 +108,31 @@ public class ParallelInitialStopPlaceImporter {
         return stopPlace.getQuays() != null && !stopPlace.getQuays().isEmpty();
     }
 
+    private void resetTariffZoneReferenceVersion(StopPlace stopPlace) {
+        if (stopPlace.getTariffZones() != null) {
+            stopPlace.getTariffZones().forEach(tariffZoneRef -> tariffZoneRef.setVersion(null));
+        }
+    }
+
+    private Set<String> getParentNetexIdOrOriginalIds(StopPlace parent) {
+        return parent.getNetexId() != null ? Set.of(parent.getNetexId()) : parent.getOriginalIds();
+    }
+
+    private List<StopPlace> resolveParents(Set<StopPlace> parentStopPlaces, Map<String,
+            Set<String>> childrenByParentSiteReference, AtomicInteger stopPlacesCreated) {
+        return parentStopPlaces.stream()
+                .flatMap(parent -> getParentNetexIdOrOriginalIds(parent).stream()
+                        .filter(childrenByParentSiteReference::containsKey)
+                        .flatMap(matchingId -> {
+                            Set<String> childIds = childrenByParentSiteReference.get(matchingId);
+                            if (childIds == null || childIds.isEmpty()) {
+                                logger.warn("No children found for parent id {}", matchingId);
+                                return empty();
+                            }
+                            StopPlace savedParent = parentStopPlaceCreator.createParentStopWithChildren(parent, childIds);
+                            stopPlacesCreated.incrementAndGet();
+                            return of(savedParent);
+                        })
+                ).toList();
+    }
 }

@@ -164,29 +164,27 @@ public class PublicationDeliveryImporterTest extends TiamatIntegrationTest {
         assertThat(response).isNotNull();
         List<org.rutebanken.tiamat.model.StopPlace> allStops = stopPlaceRepository.findAll();
 
-        assertThat(allStops).hasSize(7);
+        assertThat(allStops).hasSize(5);
 
         assertThat(allStops)
                 .extracting(s -> s.getName().getValue())
                 .containsOnly("ParentStop", "ChildStop A", "ChildStop B", "ParentStopB", "ChildStop C");
 
-        List<org.rutebanken.tiamat.model.StopPlace> parentStopVersions = stopPlaceRepository.findByNetexId("NSR:StopPlace:01");
-        assertThat(parentStopVersions).hasSize(2);
-        assertThat(parentStopVersions)
-                .extracting(org.rutebanken.tiamat.model.StopPlace::isParentStopPlace)
-                .containsExactlyInAnyOrder(true, false);
+        List<org.rutebanken.tiamat.model.StopPlace> savedParentStop = stopPlaceRepository.findByNetexId("NSR:StopPlace:01");
+        assertThat(savedParentStop).hasSize(1);
+        assertThat(savedParentStop.getFirst().isParentStopPlace()).isEqualTo(true);
+        assertThat(savedParentStop.getFirst().getChildren()).hasSize(2);
+        assertThat(savedParentStop.getFirst().getChildren())
+                .extracting(childStop -> childStop.getParentSiteRef().getRef())
+                .containsOnly("NSR:StopPlace:01");
 
-        org.rutebanken.tiamat.model.StopPlace parentStopLatestVersion = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc("NSR:StopPlace:01");
-        assertThat(parentStopLatestVersion.getChildren()).hasSize(2);
-
-        List<org.rutebanken.tiamat.model.StopPlace> parentStopBVersions = stopPlaceRepository.findByNetexId("NSR:StopPlace:02");
-        assertThat(parentStopBVersions).hasSize(2);
-        assertThat(parentStopBVersions)
-                .extracting(org.rutebanken.tiamat.model.StopPlace::isParentStopPlace)
-                .containsExactlyInAnyOrder(true, false);
-
-        org.rutebanken.tiamat.model.StopPlace parentStopBLatestVersion = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc("NSR:StopPlace:02");
-        assertThat(parentStopBLatestVersion.getChildren()).hasSize(1);
+        List<org.rutebanken.tiamat.model.StopPlace> savedParentStopB = stopPlaceRepository.findByNetexId("NSR:StopPlace:02");
+        assertThat(savedParentStopB).hasSize(1);
+        assertThat(savedParentStopB.getFirst().isParentStopPlace()).isEqualTo(true);
+        assertThat(savedParentStopB.getFirst().getChildren()).hasSize(1);
+        assertThat(savedParentStopB.getFirst().getChildren())
+                .extracting(childStop -> childStop.getParentSiteRef().getRef())
+                .containsOnly("NSR:StopPlace:02");
     }
 
     @SuppressWarnings("unchecked")
