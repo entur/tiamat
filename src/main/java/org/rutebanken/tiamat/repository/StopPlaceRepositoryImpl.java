@@ -581,7 +581,7 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
     }
 
     @Override
-    public Iterator<StopPlace> scrollSchedulesStopPlaces(Set<Long> stopPlacePrimaryIds) {
+    public Iterator<StopPlace> scrollScheduledStopPlaces(Set<Long> stopPlacePrimaryIds) {
         // Load only relevant associations for scheduled stop places
         Session session = entityManager.unwrap(Session.class);
         String sqlSelectAll = """
