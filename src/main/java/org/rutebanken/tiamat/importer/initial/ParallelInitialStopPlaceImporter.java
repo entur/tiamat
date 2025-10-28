@@ -76,13 +76,15 @@ public class ParallelInitialStopPlaceImporter {
                 })
                 .peek(stopPlace -> stopPlaceTopographicPlaceReferenceUpdater.updateTopographicReference(stopPlace))
                 .flatMap(stopPlace -> {
-
                     SiteRefStructure parentSiteRef = stopPlace.getParentSiteRef();
-                    stopPlace.setParentSiteRef(null);
 
                     if (isParent(stopPlace, parentSiteRef)) {
                         parentStopPlaces.add(stopPlace);
                         return empty();
+                    }
+
+                    if (isChild(stopPlace, parentSiteRef)) {
+                        stopPlace.setParentSiteRef(null);
                     }
 
                     StopPlace saved = stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
