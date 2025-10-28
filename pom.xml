@@ -50,7 +50,7 @@
 
     <properties>
         <java.version>21</java.version>
-        <spring-cloud-gcp.version>5.13.6</spring-cloud-gcp.version>
+        <spring-cloud-gcp.version>5.13.7</spring-cloud-gcp.version>
         <geotools.version>30.2</geotools.version>
         <orika-core.version>1.5.4</orika-core.version>
         <graphql-java.version>20.9</graphql-java.version>
