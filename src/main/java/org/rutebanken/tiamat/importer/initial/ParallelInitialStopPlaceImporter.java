@@ -68,9 +68,15 @@ public class ParallelInitialStopPlaceImporter {
         }
 
         List<StopPlace> stops = tiamatStops.parallelStream()
-                .peek(this::resetTariffZoneReferenceVersion)
+                .map(stopPlace -> {
+                    if (stopPlace.getTariffZones() != null) {
+                        stopPlace.getTariffZones().forEach(tariffZoneRef -> tariffZoneRef.setVersion(null));
+                    }
+                    return stopPlace;
+                })
                 .peek(stopPlace -> stopPlaceTopographicPlaceReferenceUpdater.updateTopographicReference(stopPlace))
                 .flatMap(stopPlace -> {
+
                     SiteRefStructure parentSiteRef = stopPlace.getParentSiteRef();
                     stopPlace.setParentSiteRef(null);
 
@@ -106,12 +112,6 @@ public class ParallelInitialStopPlaceImporter {
 
     private boolean hasQuays(StopPlace stopPlace) {
         return stopPlace.getQuays() != null && !stopPlace.getQuays().isEmpty();
-    }
-
-    private void resetTariffZoneReferenceVersion(StopPlace stopPlace) {
-        if (stopPlace.getTariffZones() != null) {
-            stopPlace.getTariffZones().forEach(tariffZoneRef -> tariffZoneRef.setVersion(null));
-        }
     }
 
     private Set<String> getParentNetexIdOrOriginalIds(StopPlace parent) {
