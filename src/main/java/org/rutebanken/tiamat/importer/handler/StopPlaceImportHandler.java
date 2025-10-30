@@ -115,7 +115,7 @@ public class StopPlaceImportHandler {
             }
 
             boolean isImportTypeIdMatch = importParams.importType != null && importParams.importType.equals(ImportType.ID_MATCH);
-            if (!isImportTypeIdMatch) {
+            if (!isImportTypeIdMatch && !importParams.disablePreAndPostProcessing) {
                 logger.info("Running stop place pre steps");
                 tiamatStops = stopPlacePreSteps.run(tiamatStops);
             }
@@ -132,7 +132,7 @@ public class StopPlaceImportHandler {
                 logger.info("Got {} stops (was {}) after filtering", tiamatStops.size(), numberOfStopBeforeFiltering);
             }
 
-            if (!isImportTypeIdMatch) {
+            if (!isImportTypeIdMatch && !importParams.disablePreAndPostProcessing) {
                 logger.info("Running stop place post filter steps");
                 tiamatStops = stopPlacePostFilterSteps.run(tiamatStops);
             }
