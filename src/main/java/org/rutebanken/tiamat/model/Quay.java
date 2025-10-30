@@ -25,9 +25,9 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @Entity
@@ -38,7 +38,7 @@ import java.util.Objects;
 public class Quay extends StopPlaceSpace_VersionStructure {
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    private final List<BoardingPosition> boardingPositions = new ArrayList<>();
+    private final Set<BoardingPosition> boardingPositions = new HashSet<>();
     protected String publicCode;
 
     /**
@@ -70,7 +70,7 @@ public class Quay extends StopPlaceSpace_VersionStructure {
         this.compassBearing = value;
     }
 
-    public List<BoardingPosition> getBoardingPositions() {
+    public Set<BoardingPosition> getBoardingPositions() {
         return boardingPositions;
     }
 
