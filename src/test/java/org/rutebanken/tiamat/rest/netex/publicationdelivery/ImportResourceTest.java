@@ -1204,6 +1204,10 @@ public class ImportResourceTest extends TiamatIntegrationTest {
                                   </TicketingEquipment>
                                </placeEquipments>
                                <localServices>
+                                  <AssistanceService id="NSB:AssistanceService:3" version="1">
+                                     <AssistanceFacilityList>personalAssistance boardingAssistance wheelchairAssistance</AssistanceFacilityList>
+                                     <AssistanceAvailability>availableIfBooked</AssistanceAvailability>
+                                  </AssistanceService>
                                   <LeftLuggageService id="NSB:LeftLuggageService:3" version="1">
                                      <SelfServiceLockers>true</SelfServiceLockers>
                                   </LeftLuggageService>
