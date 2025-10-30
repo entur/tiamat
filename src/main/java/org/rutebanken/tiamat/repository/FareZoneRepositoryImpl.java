@@ -43,6 +43,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -301,7 +302,7 @@ public class FareZoneRepositoryImpl implements FareZoneRepositoryCustom {
                 "        LEFT JOIN" +
                 "            STOP_PLACE PSP " +
                 "                ON SP.PARENT_SITE_REF = PSP.NETEX_ID " +
-                "                AND sp.parent_site_ref_version = CAST(psp.version as text)  " +
+                "                AND CAST(sp.parent_site_ref_version as bigint) = psp.version  " +
                 "        where" +
                 "            (" +
                 "                (" +
@@ -354,5 +355,101 @@ public class FareZoneRepositoryImpl implements FareZoneRepositoryCustom {
         Session session = entityManager.unwrap(Session.class);
         NativeQuery query = session.createNativeQuery(sql,String.class);
         return  query.getResultList();
+    }
+
+    @Override
+    public Map<Long, List<FareZone>> findFareZonesByStopPlaceIds(Set<Long> stopPlaceIds) {
+        if (stopPlaceIds == null || stopPlaceIds.isEmpty()) {
+            return new HashMap<>();
+        }
+
+        logger.debug("Batch loading fare zones for {} stop places", stopPlaceIds.size());
+
+        // Use a modified version of the existing query to get the mapping
+        String sql = """
+            SELECT sptz.stop_place_id, fz.*
+            FROM stop_place_tariff_zones sptz
+            INNER JOIN fare_zone fz ON fz.netex_id = sptz.ref
+            WHERE sptz.stop_place_id IN :stopPlaceIds
+              AND (
+                  (sptz.version IS NOT NULL AND CAST(fz.version AS text) = sptz.version)
+                  OR (sptz.version IS NULL AND fz.version = (
+                      SELECT MAX(fz2.version)
+                      FROM fare_zone fz2
+                      WHERE fz2.netex_id = fz.netex_id
+                        AND fz2.from_date < NOW()
+                  ))
+              )
+            """;
+
+        Query query = entityManager.createNativeQuery(sql);
+        query.setParameter("stopPlaceIds", stopPlaceIds);
+
+        @SuppressWarnings("unchecked")
+        List<Object[]> results = query.getResultList();
+
+        Map<Long, List<FareZone>> fareZonesByStopPlaceId = new HashMap<>();
+
+        // Parse the results - first column is stop_place_id, remaining columns are FareZone entity data
+        for (Object[] row : results) {
+            Long stopPlaceId = ((Number) row[0]).longValue();
+            
+            // We can't easily reconstruct the FareZone entity from native query results,
+            // so let's use a simpler approach - query the relationship table separately
+        }
+
+        // Alternative approach: Query the mapping table and then load fare zones individually
+        String mappingSql = """
+            SELECT DISTINCT sptz.stop_place_id, sptz.ref
+            FROM stop_place_tariff_zones sptz
+            WHERE sptz.stop_place_id IN :stopPlaceIds
+              AND EXISTS (
+                  SELECT 1 FROM fare_zone fz 
+                  WHERE fz.netex_id = sptz.ref
+              )
+            """;
+
+        Query mappingQuery = entityManager.createNativeQuery(mappingSql);
+        mappingQuery.setParameter("stopPlaceIds", stopPlaceIds);
+
+        @SuppressWarnings("unchecked")
+        List<Object[]> mappings = mappingQuery.getResultList();
+
+        // Get all fare zone netex IDs
+        Set<String> fareZoneNetexIds = new HashSet<>();
+        for (Object[] mapping : mappings) {
+            fareZoneNetexIds.add((String) mapping[1]);
+        }
+
+        // Load all fare zones for these netex IDs
+        List<FareZone> allFareZones = new ArrayList<>();
+        if (!fareZoneNetexIds.isEmpty()) {
+            allFareZones = findValidFareZones(new ArrayList<>(fareZoneNetexIds));
+        }
+
+        // Create lookup map
+        Map<String, FareZone> fareZonesByNetexId = new HashMap<>();
+        for (FareZone fz : allFareZones) {
+            fareZonesByNetexId.put(fz.getNetexId(), fz);
+        }
+
+        // Map fare zones to stop place IDs
+        for (Object[] mapping : mappings) {
+            Long stopPlaceId = ((Number) mapping[0]).longValue();
+            String netexId = (String) mapping[1];
+            FareZone fareZone = fareZonesByNetexId.get(netexId);
+            
+            if (fareZone != null) {
+                fareZonesByStopPlaceId.computeIfAbsent(stopPlaceId, k -> new ArrayList<>()).add(fareZone);
+            }
+        }
+
+        // Ensure all requested stop place IDs have entries (even if empty)
+        for (Long stopPlaceId : stopPlaceIds) {
+            fareZonesByStopPlaceId.putIfAbsent(stopPlaceId, new ArrayList<>());
+        }
+
+        logger.debug("Found fare zones for {} stop places", fareZonesByStopPlaceId.size());
+        return fareZonesByStopPlaceId;
     }
 }

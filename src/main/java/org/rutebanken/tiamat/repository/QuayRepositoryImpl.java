@@ -21,7 +21,11 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
 import org.rutebanken.tiamat.dtoassembling.dto.JbvCodeMappingDto;
+import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
+import org.rutebanken.tiamat.model.Value;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
@@ -30,8 +34,10 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.MERGED_ID_KEY;
@@ -42,6 +48,8 @@ import static org.rutebanken.tiamat.repository.StopPlaceRepositoryImpl.SQL_STOP_
 
 @Transactional
 public class QuayRepositoryImpl implements QuayRepositoryCustom {
+
+    private static final Logger logger = LoggerFactory.getLogger(QuayRepositoryImpl.class);
     public static final String JBV_CODE = "jbvCode";
 
     @PersistenceContext
@@ -206,6 +214,122 @@ public class QuayRepositoryImpl implements QuayRepositoryCustom {
         }
 
         return mappingResult;
+    }
+
+    @Override
+    public Map<Long, List<Quay>> findQuaysByStopPlaceIds(Set<Long> stopPlaceIds) {
+        Map<Long, List<Quay>> resultMap = new HashMap<>();
+
+        if (stopPlaceIds == null || stopPlaceIds.isEmpty()) {
+            return resultMap;
+        }
+
+        logger.debug("Batch loading quays for {} stop places", stopPlaceIds.size());
+
+        // Use JPQL to properly initialize Hibernate proxies with a single query
+        String jpql = "SELECT q, sp.id FROM Quay q JOIN StopPlace sp ON q MEMBER OF sp.quays WHERE sp.id IN :stopPlaceIds";
+
+        jakarta.persistence.TypedQuery<Object[]> query = entityManager.createQuery(jpql, Object[].class);
+        query.setParameter("stopPlaceIds", stopPlaceIds);
+
+        List<Object[]> results = query.getResultList();
+
+        // Group quays by stop place ID
+        for (Object[] row : results) {
+            Quay quay = (Quay) row[0];
+            Long stopPlaceId = (Long) row[1];
+
+            resultMap.computeIfAbsent(stopPlaceId, k -> new ArrayList<>()).add(quay);
+        }
+
+        // Ensure all requested stop place IDs have entries (even empty lists)
+        for (Long stopPlaceId : stopPlaceIds) {
+            resultMap.putIfAbsent(stopPlaceId, new ArrayList<>());
+        }
+
+        logger.debug("Found {} quays total for {} stop places",
+            resultMap.values().stream().mapToInt(List::size).sum(),
+            stopPlaceIds.size());
+
+        return resultMap;
+    }
+
+    @Override
+    public Map<Long, Map<String, Value>> findKeyValuesByIds(Set<Long> quayIds) {
+        Map<Long, Map<String, Value>> resultMap = new HashMap<>();
+
+        if (quayIds == null || quayIds.isEmpty()) {
+            return resultMap;
+        }
+
+        logger.debug("Batch loading keyValues for {} quays", quayIds.size());
+
+        // Query to get all keyValues for the requested quay IDs
+        String sql = "SELECT qkv.quay_id, qkv.key_values_key, qkv.key_values_id " +
+                     "FROM quay_key_values qkv " +
+                     "WHERE qkv.quay_id IN :quayIds";
+
+        Query query = entityManager.createNativeQuery(sql);
+        query.setParameter("quayIds", quayIds);
+
+        List<Object[]> results = query.getResultList();
+
+        // First get all value IDs
+        Set<Long> valueIds = new HashSet<>();
+        Map<Long, Map<String, Long>> quayKeyToValueId = new HashMap<>();
+
+        for (Object[] row : results) {
+            Long quayId = ((Number) row[0]).longValue();
+            String key = (String) row[1];
+            Long valueId = ((Number) row[2]).longValue();
+
+            valueIds.add(valueId);
+            quayKeyToValueId.computeIfAbsent(quayId, k -> new HashMap<>()).put(key, valueId);
+        }
+
+        // Now batch load all Value entities with their IDs
+        Map<Long, Value> valuesById = new HashMap<>();
+        if (!valueIds.isEmpty()) {
+            String jpql = "SELECT v.id, v FROM Value v WHERE v.id IN :valueIds";
+            jakarta.persistence.TypedQuery<Object[]> valueQuery = entityManager.createQuery(jpql, Object[].class);
+            valueQuery.setParameter("valueIds", valueIds);
+
+            List<Object[]> valueResults = valueQuery.getResultList();
+            for (Object[] row : valueResults) {
+                Long valueId = (Long) row[0];
+                Value value = (Value) row[1];
+                valuesById.put(valueId, value);
+            }
+        }
+
+        // Build the final result map
+        for (Map.Entry<Long, Map<String, Long>> quayEntry : quayKeyToValueId.entrySet()) {
+            Long quayId = quayEntry.getKey();
+            Map<String, Value> keyValuesForQuay = new HashMap<>();
+
+            for (Map.Entry<String, Long> keyValueEntry : quayEntry.getValue().entrySet()) {
+                String key = keyValueEntry.getKey();
+                Long valueId = keyValueEntry.getValue();
+                Value value = valuesById.get(valueId);
+
+                if (value != null) {
+                    keyValuesForQuay.put(key, value);
+                }
+            }
+
+            resultMap.put(quayId, keyValuesForQuay);
+        }
+
+        // Ensure all requested quay IDs have entries (even empty maps)
+        for (Long quayId : quayIds) {
+            resultMap.putIfAbsent(quayId, new HashMap<>());
+        }
+
+        logger.debug("Found keyValues for {}/{} quays",
+            resultMap.entrySet().stream().mapToInt(e -> e.getValue().size()).sum(),
+            quayIds.size());
+
+        return resultMap;
     }
 
 }
