@@ -16,6 +16,7 @@
 package org.rutebanken.tiamat.importer.initial;
 
 import org.rutebanken.tiamat.importer.StopPlaceTopographicPlaceReferenceUpdater;
+import org.rutebanken.tiamat.model.SiteRefStructure;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.versioning.save.StopPlaceVersionedSaverService;
@@ -27,9 +28,15 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static java.util.stream.Collectors.toList;
+import static java.util.concurrent.ConcurrentHashMap.newKeySet;
+import static java.util.stream.Stream.concat;
+import static java.util.stream.Stream.empty;
+import static java.util.stream.Stream.of;
 
 @Component
 @Transactional
@@ -49,26 +56,82 @@ public class ParallelInitialStopPlaceImporter {
     @Value("${changelog.publish.enabled:false}")
     private boolean publishChangelog;
 
-    public List<org.rutebanken.netex.model.StopPlace> importStopPlaces(List<StopPlace> tiamatStops, AtomicInteger stopPlacesCreated) {
+    @Autowired
+    private StopPlaceParentCreator parentStopPlaceCreator;
 
-        if (publishChangelog){
+    public List<org.rutebanken.netex.model.StopPlace> importStopPlaces(List<StopPlace> tiamatStops, AtomicInteger stopPlacesCreated) {
+        Map<String, Set<String>> childrenByParentSiteReference = new ConcurrentHashMap<>();
+        Set<StopPlace> parentStopPlaces = ConcurrentHashMap.newKeySet();
+
+        if (publishChangelog) {
             throw new IllegalStateException("Initial import not allowed with changelog publishing enabled! Set changelog.publish.enabled=false");
         }
 
-        return tiamatStops.parallelStream()
+        List<StopPlace> stops = tiamatStops.parallelStream()
                 .map(stopPlace -> {
-
-                    if(stopPlace.getTariffZones() != null) {
+                    if (stopPlace.getTariffZones() != null) {
                         stopPlace.getTariffZones().forEach(tariffZoneRef -> tariffZoneRef.setVersion(null));
                     }
-
                     return stopPlace;
                 })
                 .peek(stopPlace -> stopPlaceTopographicPlaceReferenceUpdater.updateTopographicReference(stopPlace))
-                .map(stopPlace -> stopPlaceVersionedSaverService.saveNewVersion(stopPlace))
-                .peek(stopPlace -> stopPlacesCreated.incrementAndGet())
-                .map(stopPlace -> netexMapper.mapToNetexModel(stopPlace))
-                .collect(toList());
+                .flatMap(stopPlace -> {
+                    SiteRefStructure parentSiteRef = stopPlace.getParentSiteRef();
+                    stopPlace.setParentSiteRef(null);
+
+                    if (isParent(stopPlace, parentSiteRef)) {
+                        parentStopPlaces.add(stopPlace);
+                        return empty();
+                    }
+
+                    StopPlace saved = stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+                    stopPlacesCreated.incrementAndGet();
+                    if (isChild(stopPlace, parentSiteRef)) {
+                        childrenByParentSiteReference
+                                .computeIfAbsent(parentSiteRef.getRef(), k -> newKeySet())
+                                .add(saved.getNetexId());
+                    }
+                    return of(saved);
+                }).toList();
+
+        List<StopPlace> parents = resolveParents(parentStopPlaces, childrenByParentSiteReference, stopPlacesCreated);
+
+        return concat(stops.stream(), parents.stream())
+                .map(netexMapper::mapToNetexModel)
+                .toList();
     }
 
+    private boolean isParent(StopPlace stopPlace, SiteRefStructure parentSiteRef) {
+        return stopPlace.isParentStopPlace() || (!hasQuays(stopPlace) && parentSiteRef == null);
+    }
+
+    private boolean isChild(StopPlace stopPlace, SiteRefStructure parentSiteRef) {
+        return hasQuays(stopPlace) && parentSiteRef != null;
+    }
+
+    private boolean hasQuays(StopPlace stopPlace) {
+        return stopPlace.getQuays() != null && !stopPlace.getQuays().isEmpty();
+    }
+
+    private Set<String> getParentNetexIdOrOriginalIds(StopPlace parent) {
+        return parent.getNetexId() != null ? Set.of(parent.getNetexId()) : parent.getOriginalIds();
+    }
+
+    private List<StopPlace> resolveParents(Set<StopPlace> parentStopPlaces, Map<String,
+            Set<String>> childrenByParentSiteReference, AtomicInteger stopPlacesCreated) {
+        return parentStopPlaces.stream()
+                .flatMap(parent -> getParentNetexIdOrOriginalIds(parent).stream()
+                        .filter(childrenByParentSiteReference::containsKey)
+                        .flatMap(matchingId -> {
+                            Set<String> childIds = childrenByParentSiteReference.get(matchingId);
+                            if (childIds == null || childIds.isEmpty()) {
+                                logger.warn("No children found for parent id {}", matchingId);
+                                return empty();
+                            }
+                            StopPlace savedParent = parentStopPlaceCreator.createParentStopWithChildren(parent, childIds);
+                            stopPlacesCreated.incrementAndGet();
+                            return of(savedParent);
+                        })
+                ).toList();
+    }
 }
