@@ -117,21 +117,26 @@ public class ParallelInitialStopPlaceImporter {
         return parent.getNetexId() != null ? Set.of(parent.getNetexId()) : parent.getOriginalIds();
     }
 
-    private List<StopPlace> resolveParents(Set<StopPlace> parentStopPlaces, Map<String,
-            Set<String>> childrenByParentSiteReference, AtomicInteger stopPlacesCreated) {
+    private List<StopPlace> resolveParents(Set<StopPlace> parentStopPlaces,
+                                           Map<String, Set<String>> childrenByParentSiteReference,
+                                           AtomicInteger stopPlacesCreated) {
         return parentStopPlaces.stream()
-                .flatMap(parent -> getParentNetexIdOrOriginalIds(parent).stream()
-                        .filter(childrenByParentSiteReference::containsKey)
-                        .flatMap(matchingId -> {
-                            Set<String> childIds = childrenByParentSiteReference.get(matchingId);
-                            if (childIds == null || childIds.isEmpty()) {
-                                logger.warn("No children found for parent id {}", matchingId);
-                                return empty();
+                .map(parent -> getParentNetexIdOrOriginalIds(parent).stream()
+                        .map(id -> {
+                            if (!childrenByParentSiteReference.containsKey(id)) {
+                                throw new IllegalStateException("Invalid stop place without quays or children " + id);
                             }
-                            StopPlace savedParent = parentStopPlaceCreator.createParentStopWithChildren(parent, childIds);
-                            stopPlacesCreated.incrementAndGet();
-                            return of(savedParent);
+                            Set<String> childIds = childrenByParentSiteReference.get(id);
+                            if (childIds == null || childIds.isEmpty()) {
+                                throw new IllegalStateException("Parent stop place " + id + " has no children");
+                            }
+                            return parentStopPlaceCreator.createParentStopWithChildren(parent, childIds);
                         })
-                ).toList();
+                        .peek(savedParent -> stopPlacesCreated.incrementAndGet())
+                        .findFirst()
+                        .orElseThrow(() ->
+                                new IllegalStateException("No valid children found for parent: " + parent.getNetexId()))
+                )
+                .toList();
     }
 }

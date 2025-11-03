@@ -88,7 +88,7 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
 
     /**
      * Incoming stop matches two stops with different modality. Choose the right one based on modality.
-     * <p>
+     *
      * https://rutebanken.atlassian.net/browse/NRP-1718
      *
      */
@@ -160,7 +160,7 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
      * Incoming stop matches two stops.
      * Incoming stop has two quays, where each quay matches in separate stop place.
      * Both stop places should be returned.
-     * <p>
+     *
      * https://rutebanken.atlassian.net/browse/NRP-1718
      */
     @Test
@@ -231,7 +231,7 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
 
     /**
      * See https://rutebanken.atlassian.net/browse/NRP-1601
-     * <p>
+     *
      * IDs might match incorrectly because of bad data.
      * Make sure if we got a ID match, the distance should be checked.
      * If the existing stop place and the incoming stop place is too far away from each other,

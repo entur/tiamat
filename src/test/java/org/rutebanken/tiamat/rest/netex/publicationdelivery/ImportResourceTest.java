@@ -1303,10 +1303,11 @@ public class ImportResourceTest extends TiamatIntegrationTest {
         String responseBody = byteArrayOutputStream.toString(StandardCharsets.UTF_8);
         System.out.println(responseBody);
 
-        assertThat(responseBody)
-                .isNotEmpty()
-                .contains("PublicationDelivery")
-                .containsIgnoringCase("IS_PARENT_STOP_PLACE");
+        PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryTestHelper.fromString(responseBody);
+        assertThat(publicationDeliveryStructure).isNotNull();
+
+        List<StopPlace> stopPlaces = publicationDeliveryTestHelper.extractStopPlaces(publicationDeliveryStructure);
+        assertThat(stopPlaces).hasSize(3);
     }
 
     private void setUpSecurityContext() {

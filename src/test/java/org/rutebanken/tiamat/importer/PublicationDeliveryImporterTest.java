@@ -50,6 +50,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
 
 @Transactional
@@ -67,6 +68,33 @@ public class PublicationDeliveryImporterTest extends TiamatIntegrationTest {
     @Before
     public void setUp() {
         setUpSecurityContext();
+    }
+
+    @Test
+    public void importPublicationDeliveryThrowsExceptionForStopPlaceWithoutQuaysOrChildren() {
+        StopPlace stopPlace = new StopPlace()
+                .withId("NSR:StopPlace:01")
+                .withVersion("1")
+                .withKeyList(new KeyListStructure()
+                        .withKeyValue(new KeyValueStructure()
+                                .withKey(ORIGINAL_ID_KEY)
+                                .withValue("RANDOM:ACB:01")))
+                .withName(new MultilingualString().withValue("StopPlaceName").withLang("nb"))
+                .withCentroid(new SimplePoint_VersionStructure()
+                        .withLocation(new LocationStructure()
+                                .withLatitude(new BigDecimal("9"))
+                                .withLongitude(new BigDecimal("71"))));
+
+        ImportParams importParams = new ImportParams();
+        importParams.importType = ImportType.INITIAL;
+
+        PublicationDeliveryStructure delivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace);
+
+        assertThatThrownBy(() -> {
+            publicationDeliveryImporter.importPublicationDelivery(delivery, importParams);
+        })
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("Invalid stop place without quays or children " + stopPlace.getId());
     }
 
     @Test
