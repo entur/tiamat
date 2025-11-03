@@ -16,7 +16,6 @@
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
 import jakarta.xml.bind.JAXBException;
-import org.junit.Before;
 import org.junit.Test;
 import org.rutebanken.netex.model.KeyListStructure;
 import org.rutebanken.netex.model.KeyValueStructure;
@@ -32,20 +31,11 @@ import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.importer.ImportParams;
 import org.rutebanken.tiamat.importer.ImportType;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AbstractAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.time.Instant;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
@@ -54,30 +44,6 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
 
     @Autowired
     private PublicationDeliveryTestHelper publicationDeliveryTestHelper;
-
-    @Before
-    public void setUp() {
-        setUpSecurityContext();
-    }
-
-    private void setUpSecurityContext() {
-        // Create a Jwt with claims
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("sub", "testuser");
-        claims.put("scope", "ROLE_USER");  // Or other relevant scopes/roles
-
-        // Create a Jwt instance
-        Jwt jwt = new Jwt(
-                "tokenValue",
-                Instant.now(),
-                Instant.now().plusSeconds(3600),
-                Map.of("alg", "none"),
-                claims
-        );
-
-        final AbstractAuthenticationToken authToken = new JwtAuthenticationToken(jwt, Collections.singleton(new SimpleGrantedAuthority("ROLE_EDIT_STOPS")));
-        SecurityContextHolder.getContext().setAuthentication(authToken);
-    }
 
     @Test
     public void matchImportedStopOnId() throws Exception {
@@ -122,7 +88,7 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
 
     /**
      * Incoming stop matches two stops with different modality. Choose the right one based on modality.
-     * <p>
+     *
      * https://rutebanken.atlassian.net/browse/NRP-1718
      *
      */
@@ -194,7 +160,7 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
      * Incoming stop matches two stops.
      * Incoming stop has two quays, where each quay matches in separate stop place.
      * Both stop places should be returned.
-     * <p>
+     *
      * https://rutebanken.atlassian.net/browse/NRP-1718
      */
     @Test
@@ -265,7 +231,7 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
 
     /**
      * See https://rutebanken.atlassian.net/browse/NRP-1601
-     * <p>
+     *
      * IDs might match incorrectly because of bad data.
      * Make sure if we got a ID match, the distance should be checked.
      * If the existing stop place and the incoming stop place is too far away from each other,
@@ -405,7 +371,7 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
                                 .withLongitude(new BigDecimal("76"))))
                 .withQuays(new Quays_RelStructure()
                         .withQuayRefOrQuay(new Quay()
-                                .withId("XYZ:01:02")
+                                .withId("XYZ:01:03")
                                 .withVersion("1")
                                 .withName(new MultilingualString().withValue("B"))
                                 .withCentroid(new SimplePoint_VersionStructure()
@@ -423,7 +389,7 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
         stopPlaceNotToBeMatched.setId("RUT:StopPlace:12345678910");
         stopPlaceNotToBeMatched.setQuays(new Quays_RelStructure()
                 .withQuayRefOrQuay(new Quay()
-                        .withId("XYZ:01:03")
+                        .withId("XYZ:01:04")
                         .withVersion("1")
                         .withName(new MultilingualString().withValue("B"))
                         .withCentroid(new SimplePoint_VersionStructure()
