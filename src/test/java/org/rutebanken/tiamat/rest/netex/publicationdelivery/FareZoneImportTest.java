@@ -101,6 +101,16 @@ public class FareZoneImportTest extends TiamatIntegrationTest {
                 .withTariffZoneRef(new TariffZoneRef()
                         .withVersion(fareZone.getVersion())
                         .withRef(fareZone.getId())));
+        stopPlace.setQuays(
+                new Quays_RelStructure()
+                        .withQuayRefOrQuay(new Quay()
+                                .withId("XYZ:01:02")
+                                .withVersion("1")
+                                .withName(new MultilingualString().withValue("B"))
+                                .withCentroid(new SimplePoint_VersionStructure()
+                                        .withLocation(new LocationStructure()
+                                                .withLatitude(new BigDecimal("9.6"))
+                                                .withLongitude(new BigDecimal("76"))))));
 
         SiteFrame siteFrame = publicationDeliveryTestHelper.siteFrame()
                 .withTariffZones(new TariffZonesInFrame_RelStructure()

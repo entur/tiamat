@@ -88,7 +88,7 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
 
     /**
      * Incoming stop matches two stops with different modality. Choose the right one based on modality.
-     *
+     * <p>
      * https://rutebanken.atlassian.net/browse/NRP-1718
      *
      */
@@ -160,7 +160,7 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
      * Incoming stop matches two stops.
      * Incoming stop has two quays, where each quay matches in separate stop place.
      * Both stop places should be returned.
-     *
+     * <p>
      * https://rutebanken.atlassian.net/browse/NRP-1718
      */
     @Test
@@ -231,7 +231,7 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
 
     /**
      * See https://rutebanken.atlassian.net/browse/NRP-1601
-     *
+     * <p>
      * IDs might match incorrectly because of bad data.
      * Make sure if we got a ID match, the distance should be checked.
      * If the existing stop place and the incoming stop place is too far away from each other,
@@ -368,7 +368,16 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
                 .withCentroid(new SimplePoint_VersionStructure()
                         .withLocation(new LocationStructure()
                                 .withLatitude(new BigDecimal("15"))
-                                .withLongitude(new BigDecimal("76"))));
+                                .withLongitude(new BigDecimal("76"))))
+                .withQuays(new Quays_RelStructure()
+                        .withQuayRefOrQuay(new Quay()
+                                .withId("XYZ:01:02")
+                                .withVersion("1")
+                                .withName(new MultilingualString().withValue("B"))
+                                .withCentroid(new SimplePoint_VersionStructure()
+                                        .withLocation(new LocationStructure()
+                                                .withLatitude(new BigDecimal("15"))
+                                                .withLongitude(new BigDecimal("76"))))));
 
 
         ImportParams importParams = new ImportParams();
@@ -410,7 +419,6 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
                                                 .withLatitude(new BigDecimal("11"))
                                                 .withLongitude(new BigDecimal("77"))))));
 
-
         ImportParams importParams = new ImportParams();
         importParams.importType = ImportType.INITIAL;
         PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlaceToBeMatched);
@@ -450,7 +458,6 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
                                         .withLocation(new LocationStructure()
                                                 .withLatitude(new BigDecimal("11"))
                                                 .withLongitude(new BigDecimal("77"))))));
-
 
         ImportParams importParams = new ImportParams();
         importParams.importType = ImportType.INITIAL;
