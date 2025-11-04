@@ -371,7 +371,7 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
                                 .withLongitude(new BigDecimal("76"))))
                 .withQuays(new Quays_RelStructure()
                         .withQuayRefOrQuay(new Quay()
-                                .withId("XYZ:01:03")
+                                .withId("XYZ:01:06")
                                 .withVersion("1")
                                 .withName(new MultilingualString().withValue("B"))
                                 .withCentroid(new SimplePoint_VersionStructure()
@@ -389,7 +389,7 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
         stopPlaceNotToBeMatched.setId("RUT:StopPlace:12345678910");
         stopPlaceNotToBeMatched.setQuays(new Quays_RelStructure()
                 .withQuayRefOrQuay(new Quay()
-                        .withId("XYZ:01:04")
+                        .withId("XYZ:01:07")
                         .withVersion("1")
                         .withName(new MultilingualString().withValue("B"))
                         .withCentroid(new SimplePoint_VersionStructure()
