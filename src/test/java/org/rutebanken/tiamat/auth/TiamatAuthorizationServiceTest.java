@@ -34,19 +34,10 @@ import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.model.WaterSubmodeEnumeration;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AbstractAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -179,7 +170,6 @@ public class TiamatAuthorizationServiceTest extends TiamatIntegrationTest {
 
     @Test
     public void authorizedGetAllowedStopPlaceTypesTest() {
-        setUpSecurityContext();
         final List<RoleAssignment> roleAssignments = roleAssignmentsForRailAndRailReplacementMocked(ROLE_EDIT_STOPS);
         mockedRoleAssignmentExtractor.setNextReturnedRoleAssignment(roleAssignments);
 
@@ -194,7 +184,6 @@ public class TiamatAuthorizationServiceTest extends TiamatIntegrationTest {
 
     @Test
     public void authorizedGetBannedStopPlaceTypesEntityFilterTest() {
-        setUpSecurityContext();
         final List<RoleAssignment> roleAssignments = roleAssignmentsMultipleRoles();
         mockedRoleAssignmentExtractor.setNextReturnedRoleAssignment(roleAssignments);
 
@@ -215,7 +204,6 @@ public class TiamatAuthorizationServiceTest extends TiamatIntegrationTest {
     @Test
     @Ignore
     public void authorizedGetBannedStopPlaceTypesTest() {
-        setUpSecurityContext();
         RoleAssignment roleAssignment = RoleAssignment.builder()
                 .withRole(ROLE_EDIT_STOPS)
                 .withOrganisation("OST")
@@ -352,7 +340,6 @@ public class TiamatAuthorizationServiceTest extends TiamatIntegrationTest {
      */
     @Test
     public void testUserWithMultipleRoles() {
-        setUpSecurityContext();
         final List<RoleAssignment> roleAssignments = roleAssignmentsMultipleRoles();
 
         Point point = geometryFactory.createPoint(new Coordinate(9.536819, 61.772281));
