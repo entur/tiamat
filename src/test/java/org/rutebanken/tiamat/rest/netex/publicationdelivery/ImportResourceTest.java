@@ -84,10 +84,6 @@ public class ImportResourceTest extends TiamatIntegrationTest {
      * When importing multiple stop places and those exists, make sure no Lazy Initialization Exception is thrown.
      */
 
-    @Before
-    public void setUp() {
-        setUpSecurityContext();
-    }
     @Test
     public void publicationDeliveriesWithDuplicateStopPlace() throws Exception {
 
@@ -1283,23 +1279,5 @@ public class ImportResourceTest extends TiamatIntegrationTest {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         streamingOutput.write(byteArrayOutputStream);
         System.out.println(byteArrayOutputStream.toString());
-    }
-    private void setUpSecurityContext() {
-        // Create a Jwt with claims
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("sub", "testuser");
-        claims.put("scope", "ROLE_USER");  // Or other relevant scopes/roles
-
-        // Create a Jwt instance
-        Jwt jwt = new Jwt(
-                "tokenValue",
-                Instant.now(),
-                Instant.now().plusSeconds(3600),
-                Map.of("alg", "none"),
-                claims
-        );
-
-        final AbstractAuthenticationToken authToken = new JwtAuthenticationToken(jwt, Collections.singleton(new SimpleGrantedAuthority("ROLE_EDIT_STOPS")));
-        SecurityContextHolder.getContext().setAuthentication(authToken);
     }
 }

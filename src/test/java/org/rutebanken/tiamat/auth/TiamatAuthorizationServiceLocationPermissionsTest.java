@@ -155,27 +155,6 @@ public class TiamatAuthorizationServiceLocationPermissionsTest extends TiamatInt
         return geometryFactory.createPolygon(linearRing, null);
     }
 
-    private void setUpSecurityContext() {
-        // Create a Jwt with claims
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("sub", "testuser");
-        claims.put("scope", "ROLE_USER");  // Or other relevant scopes/roles
-
-        // Create a Jwt instance
-        Jwt jwt = new Jwt(
-                "tokenValue",
-                Instant.now(),
-                Instant.now().plusSeconds(3600),
-                Map.of("alg", "none"),
-                claims
-        );
-
-        final AbstractAuthenticationToken authToken = new JwtAuthenticationToken(jwt, Collections.singleton(new SimpleGrantedAuthority("ROLE_EDIT_STOPS")));
-        SecurityContextHolder.getContext().setAuthentication(authToken);
-    }
-
-
-
 }
 
 
