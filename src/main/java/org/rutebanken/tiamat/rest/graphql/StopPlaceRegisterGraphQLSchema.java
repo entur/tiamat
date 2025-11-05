@@ -99,10 +99,16 @@ import org.rutebanken.tiamat.rest.graphql.types.TopographicPlaceObjectTypeCreato
 import org.rutebanken.tiamat.rest.graphql.types.ZoneCommonFieldListCreator;
 import org.rutebanken.tiamat.rest.graphql.factories.AddressablePlaceTypeFactory;
 import org.rutebanken.tiamat.rest.graphql.factories.CommonFieldsFactory;
+import org.rutebanken.tiamat.rest.graphql.factories.FareZoneTypeFactory;
 import org.rutebanken.tiamat.rest.graphql.factories.GroupOfStopPlacesInputTypeFactory;
+import org.rutebanken.tiamat.rest.graphql.factories.GroupOfStopPlacesTypeFactory;
+import org.rutebanken.tiamat.rest.graphql.factories.GroupOfTariffZonesTypeFactory;
 import org.rutebanken.tiamat.rest.graphql.factories.PurposeOfGroupingInputTypeFactory;
+import org.rutebanken.tiamat.rest.graphql.factories.PurposeOfGroupingTypeFactory;
 import org.rutebanken.tiamat.rest.graphql.factories.QuayTypeFactory;
 import org.rutebanken.tiamat.rest.graphql.factories.StopPlaceInputTypeFactory;
+import org.rutebanken.tiamat.rest.graphql.factories.TariffZoneTypeFactory;
+import org.rutebanken.tiamat.rest.graphql.factories.TopographicPlaceTypeFactory;
 import org.rutebanken.tiamat.rest.graphql.factories.ValidBetweenTypeFactory;
 import org.rutebanken.tiamat.service.TagCreator;
 import org.rutebanken.tiamat.service.TagRemover;
@@ -247,6 +253,24 @@ public class StopPlaceRegisterGraphQLSchema {
 
     @Autowired
     private PurposeOfGroupingInputTypeFactory purposeOfGroupingInputTypeFactory;
+
+    @Autowired
+    private TopographicPlaceTypeFactory topographicPlaceTypeFactory;
+
+    @Autowired
+    private TariffZoneTypeFactory tariffZoneTypeFactory;
+
+    @Autowired
+    private FareZoneTypeFactory fareZoneTypeFactory;
+
+    @Autowired
+    private PurposeOfGroupingTypeFactory purposeOfGroupingTypeFactory;
+
+    @Autowired
+    private GroupOfStopPlacesTypeFactory groupOfStopPlacesTypeFactory;
+
+    @Autowired
+    private GroupOfTariffZonesTypeFactory groupOfTariffZonesTypeFactory;
 
     @Autowired
     DataFetcher stopPlaceFetcher;
@@ -471,10 +495,12 @@ public class StopPlaceRegisterGraphQLSchema {
         GraphQLObjectType quayObjectType = (GraphQLObjectType) quayTypes.getFirst();
 
 
-        GraphQLObjectType topographicPlaceObjectType = topographicPlaceObjectTypeCreator.create();
+        // Get TopographicPlace type from factory
+        GraphQLObjectType topographicPlaceObjectType = (GraphQLObjectType) topographicPlaceTypeFactory.createTypes().getFirst();
 
-        GraphQLObjectType tariffZoneObjectType = tariffZoneObjectTypeCreator.create(zoneCommandFieldList);
-        GraphQLObjectType fareZoneObjectType = fareZoneObjectTypeCreator.create(zoneCommandFieldList);
+        // Get TariffZone and FareZone types from factories with zone common fields
+        GraphQLObjectType tariffZoneObjectType = tariffZoneTypeFactory.createTariffZoneType(zoneCommandFieldList);
+        GraphQLObjectType fareZoneObjectType = fareZoneTypeFactory.createFareZoneType(zoneCommandFieldList);
 
         MutableTypeResolver stopPlaceTypeResolver = new MutableTypeResolver();
 
@@ -495,9 +521,10 @@ public class StopPlaceRegisterGraphQLSchema {
             throw new IllegalArgumentException("StopPlaceTypeResolver cannot resolve type of Object " + object + ". Was expecting StopPlace");
         });
 
-        GraphQLObjectType purposeOfGroupingType =purposeOfGroupingTypeCreator.create();
-        GraphQLObjectType groupOfStopPlacesObjectType = groupOfStopPlaceObjectTypeCreator.create(stopPlaceInterface, purposeOfGroupingType, entityPermissionObjectType);
-        GraphQLObjectType groupOfTariffZonesObjectType = groupOfTariffZonesObjectTypeCreator.create();
+        // Get PurposeOfGrouping, GroupOfStopPlaces, and GroupOfTariffZones types from factories
+        GraphQLObjectType purposeOfGroupingType = (GraphQLObjectType) purposeOfGroupingTypeFactory.createTypes().getFirst();
+        GraphQLObjectType groupOfStopPlacesObjectType = groupOfStopPlacesTypeFactory.createGroupOfStopPlacesType(stopPlaceInterface, purposeOfGroupingType, entityPermissionObjectType);
+        GraphQLObjectType groupOfTariffZonesObjectType = (GraphQLObjectType) groupOfTariffZonesTypeFactory.createTypes().getFirst();
 
         // Get AddressablePlace object type from factory with merged commonFieldsList
         GraphQLObjectType addressablePlaceObjectType = addressablePlaceTypeFactory.createAddressablePlaceType(commonFieldsList);
@@ -842,13 +869,15 @@ public class StopPlaceRegisterGraphQLSchema {
         registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_ENTITY_REF,ADDRESSABLE_PLACE,referenceFetcher);
 
         registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_FARE_ZONE,FARE_ZONES_AUTHORITY_REF,env -> env.getSource() instanceof FareZone fareZone ? fareZone.getTransportOrganisationRef() : null);
-        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_FARE_ZONE,FARE_ZONES_NEIGHBOURS,env -> fareZoneObjectTypeCreator.fareZoneNeighboursType(env));
-        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_FARE_ZONE,FARE_ZONES_MEMBERS,env -> fareZoneObjectTypeCreator.fareZoneMemberType(env));
+        // Use factory for FareZone data fetchers
+        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_FARE_ZONE,FARE_ZONES_NEIGHBOURS,env -> fareZoneTypeFactory.fareZoneNeighboursType(env));
+        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_FARE_ZONE,FARE_ZONES_MEMBERS,env -> fareZoneTypeFactory.fareZoneMemberType(env));
 
         registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_GROUP_OF_STOPPLACES,PURPOSE_OF_GROUPING,groupOfStopPlacesPurposeOfGroupingFetcher);
         registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_GROUP_OF_STOPPLACES,GROUP_OF_STOP_PLACES_MEMBERS,groupOfStopPlacesMembersFetcher);
 
-        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_GROUP_OF_TARIFF_ZONES,GROUP_OF_TARIFF_ZONES_MEMBERS,env -> groupOfTariffZonesObjectTypeCreator.groupOfTariffZoneMembersType(env));
+        // Use factory for GroupOfTariffZones data fetchers
+        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_GROUP_OF_TARIFF_ZONES,GROUP_OF_TARIFF_ZONES_MEMBERS,env -> groupOfTariffZonesTypeFactory.groupOfTariffZoneMembersType(env));
         registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_GROUP_OF_TARIFF_ZONES,ID,getNetexIdFetcher());
 
         //path link data fetchers
