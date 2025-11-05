@@ -82,31 +82,24 @@ import org.rutebanken.tiamat.rest.graphql.operations.TagOperationsBuilder;
 import org.rutebanken.tiamat.rest.graphql.resolvers.MutableTypeResolver;
 import org.rutebanken.tiamat.rest.graphql.scalars.DateScalar;
 import org.rutebanken.tiamat.rest.graphql.scalars.TransportModeScalar;
-import org.rutebanken.tiamat.rest.graphql.types.EntityRefObjectTypeCreator;
-import org.rutebanken.tiamat.rest.graphql.types.FareZoneObjectTypeCreator;
-import org.rutebanken.tiamat.rest.graphql.types.GroupOfStopPlacesObjectTypeCreator;
-import org.rutebanken.tiamat.rest.graphql.types.GroupOfTariffZonesObjectTypeCreator;
 import org.rutebanken.tiamat.rest.graphql.types.ParentStopPlaceInputObjectTypeCreator;
 import org.rutebanken.tiamat.rest.graphql.types.ParentStopPlaceObjectTypeCreator;
-import org.rutebanken.tiamat.rest.graphql.types.PathLinkEndObjectTypeCreator;
-import org.rutebanken.tiamat.rest.graphql.types.PathLinkObjectTypeCreator;
-import org.rutebanken.tiamat.rest.graphql.types.PurposeOfGroupingTypeCreator;
 import org.rutebanken.tiamat.rest.graphql.types.StopPlaceInterfaceCreator;
 import org.rutebanken.tiamat.rest.graphql.types.StopPlaceObjectTypeCreator;
-import org.rutebanken.tiamat.rest.graphql.types.TagObjectTypeCreator;
-import org.rutebanken.tiamat.rest.graphql.types.TariffZoneObjectTypeCreator;
-import org.rutebanken.tiamat.rest.graphql.types.TopographicPlaceObjectTypeCreator;
 import org.rutebanken.tiamat.rest.graphql.types.ZoneCommonFieldListCreator;
 import org.rutebanken.tiamat.rest.graphql.factories.AddressablePlaceTypeFactory;
 import org.rutebanken.tiamat.rest.graphql.factories.CommonFieldsFactory;
+import org.rutebanken.tiamat.rest.graphql.factories.EntityRefTypeFactory;
 import org.rutebanken.tiamat.rest.graphql.factories.FareZoneTypeFactory;
 import org.rutebanken.tiamat.rest.graphql.factories.GroupOfStopPlacesInputTypeFactory;
 import org.rutebanken.tiamat.rest.graphql.factories.GroupOfStopPlacesTypeFactory;
 import org.rutebanken.tiamat.rest.graphql.factories.GroupOfTariffZonesTypeFactory;
+import org.rutebanken.tiamat.rest.graphql.factories.PathLinkEndTypeFactory;
+import org.rutebanken.tiamat.rest.graphql.factories.PathLinkTypeFactory;
 import org.rutebanken.tiamat.rest.graphql.factories.PurposeOfGroupingInputTypeFactory;
 import org.rutebanken.tiamat.rest.graphql.factories.PurposeOfGroupingTypeFactory;
 import org.rutebanken.tiamat.rest.graphql.factories.QuayTypeFactory;
-import org.rutebanken.tiamat.rest.graphql.factories.StopPlaceInputTypeFactory;
+import org.rutebanken.tiamat.rest.graphql.factories.TagTypeFactory;
 import org.rutebanken.tiamat.rest.graphql.factories.TariffZoneTypeFactory;
 import org.rutebanken.tiamat.rest.graphql.factories.TopographicPlaceTypeFactory;
 import org.rutebanken.tiamat.rest.graphql.factories.ValidBetweenTypeFactory;
@@ -174,18 +167,6 @@ public class StopPlaceRegisterGraphQLSchema {
     public GraphQLSchema stopPlaceRegisterSchema;
 
     @Autowired
-    private PathLinkEndObjectTypeCreator pathLinkEndObjectTypeCreator;
-
-    @Autowired
-    private PathLinkObjectTypeCreator pathLinkObjectTypeCreator;
-
-    @Autowired
-    private EntityRefObjectTypeCreator entityRefObjectTypeCreator;
-
-    @Autowired
-    private TopographicPlaceObjectTypeCreator topographicPlaceObjectTypeCreator;
-
-    @Autowired
     private StopPlaceOperationsBuilder stopPlaceOperationsBuilder;
 
     @Autowired
@@ -196,14 +177,6 @@ public class StopPlaceRegisterGraphQLSchema {
 
     @Autowired
     private StopPlaceObjectTypeCreator stopPlaceObjectTypeCreator;
-
-    @Autowired
-    private GroupOfStopPlacesObjectTypeCreator groupOfStopPlaceObjectTypeCreator;
-
-    @Autowired
-    private GroupOfTariffZonesObjectTypeCreator groupOfTariffZonesObjectTypeCreator;
-    @Autowired
-    private PurposeOfGroupingTypeCreator purposeOfGroupingTypeCreator;
 
     @Autowired
     private ParentStopPlaceObjectTypeCreator parentStopPlaceObjectTypeCreator;
@@ -218,16 +191,8 @@ public class StopPlaceRegisterGraphQLSchema {
     private TagOperationsBuilder tagOperationsBuilder;
 
     @Autowired
-    private TagObjectTypeCreator tagObjectTypeCreator;
-
-    @Autowired
     private TagFetcher tagFetcher;
 
-    @Autowired
-    private TariffZoneObjectTypeCreator tariffZoneObjectTypeCreator;
-
-    @Autowired
-    private FareZoneObjectTypeCreator fareZoneObjectTypeCreator;
 
     @Autowired
     private MultiModalityOperationsBuilder multiModalityOperationsBuilder;
@@ -244,9 +209,6 @@ public class StopPlaceRegisterGraphQLSchema {
 
     @Autowired
     private AddressablePlaceTypeFactory addressablePlaceTypeFactory;
-
-    @Autowired
-    private StopPlaceInputTypeFactory stopPlaceInputTypeFactory;
 
     @Autowired
     private GroupOfStopPlacesInputTypeFactory groupOfStopPlacesInputTypeFactory;
@@ -271,6 +233,18 @@ public class StopPlaceRegisterGraphQLSchema {
 
     @Autowired
     private GroupOfTariffZonesTypeFactory groupOfTariffZonesTypeFactory;
+
+    @Autowired
+    private EntityRefTypeFactory entityRefTypeFactory;
+
+    @Autowired
+    private PathLinkEndTypeFactory pathLinkEndTypeFactory;
+
+    @Autowired
+    private PathLinkTypeFactory pathLinkTypeFactory;
+
+    @Autowired
+    private TagTypeFactory tagTypeFactory;
 
     @Autowired
     DataFetcher stopPlaceFetcher;
@@ -529,11 +503,10 @@ public class StopPlaceRegisterGraphQLSchema {
         // Get AddressablePlace object type from factory with merged commonFieldsList
         GraphQLObjectType addressablePlaceObjectType = addressablePlaceTypeFactory.createAddressablePlaceType(commonFieldsList);
 
-        GraphQLObjectType entityRefObjectType = entityRefObjectTypeCreator.create(addressablePlaceObjectType);
-
-        GraphQLObjectType pathLinkEndObjectType = pathLinkEndObjectTypeCreator.create(entityRefObjectType, netexIdFieldDefinition);
-
-        GraphQLObjectType pathLinkObjectType = pathLinkObjectTypeCreator.create(pathLinkEndObjectType, netexIdFieldDefinition, geometryFieldDefinition);
+        // Get EntityRef, PathLinkEnd, and PathLink types from factories
+        GraphQLObjectType entityRefObjectType = entityRefTypeFactory.createEntityRefType(addressablePlaceObjectType);
+        GraphQLObjectType pathLinkEndObjectType = pathLinkEndTypeFactory.createPathLinkEndType(entityRefObjectType, netexIdFieldDefinition);
+        GraphQLObjectType pathLinkObjectType = pathLinkTypeFactory.createPathLinkType(pathLinkEndObjectType, netexIdFieldDefinition, geometryFieldDefinition);
 
         GraphQLObjectType parkingObjectType = createParkingObjectType(validBetweenObjectType);
 
@@ -584,7 +557,7 @@ public class StopPlaceRegisterGraphQLSchema {
                         .description("List all valid Transportmode/Submode-combinations."))
                 .field(newFieldDefinition()
                         .name(TAGS)
-                        .type(new GraphQLList(tagObjectTypeCreator.create()))
+                        .type(new GraphQLList(tagTypeFactory.createTypes().getFirst()))
                         .description(TAGS_DESCRIPTION)
                         .argument(GraphQLArgument.newArgument()
                             .name(TAG_NAME)
@@ -880,11 +853,11 @@ public class StopPlaceRegisterGraphQLSchema {
         registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_GROUP_OF_TARIFF_ZONES,GROUP_OF_TARIFF_ZONES_MEMBERS,env -> groupOfTariffZonesTypeFactory.groupOfTariffZoneMembersType(env));
         registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_GROUP_OF_TARIFF_ZONES,ID,getNetexIdFetcher());
 
-        //path link data fetchers
-        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_TRANSFER_DURATION,DEFAULT_DURATION,pathLinkObjectTypeCreator.durationSecondsFetcher());
-        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_TRANSFER_DURATION,FREQUENT_TRAVELLER_DURATION,pathLinkObjectTypeCreator.durationSecondsFetcher());
-        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_TRANSFER_DURATION,OCCASIONAL_TRAVELLER_DURATION,pathLinkObjectTypeCreator.durationSecondsFetcher());
-        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_TRANSFER_DURATION,MOBILITY_RESTRICTED_TRAVELLER_DURATION,pathLinkObjectTypeCreator.durationSecondsFetcher());
+        // Use factory for PathLink data fetchers
+        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_TRANSFER_DURATION,DEFAULT_DURATION,pathLinkTypeFactory.durationSecondsFetcher());
+        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_TRANSFER_DURATION,FREQUENT_TRAVELLER_DURATION,pathLinkTypeFactory.durationSecondsFetcher());
+        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_TRANSFER_DURATION,OCCASIONAL_TRAVELLER_DURATION,pathLinkTypeFactory.durationSecondsFetcher());
+        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_TRANSFER_DURATION,MOBILITY_RESTRICTED_TRAVELLER_DURATION,pathLinkTypeFactory.durationSecondsFetcher());
 
         // topographic place data fetchers
         registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_TOPOGRAPHIC_PLACE,ID,env -> {
