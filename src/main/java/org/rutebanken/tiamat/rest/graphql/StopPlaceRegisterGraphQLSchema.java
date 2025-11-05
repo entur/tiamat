@@ -82,10 +82,7 @@ import org.rutebanken.tiamat.rest.graphql.operations.TagOperationsBuilder;
 import org.rutebanken.tiamat.rest.graphql.resolvers.MutableTypeResolver;
 import org.rutebanken.tiamat.rest.graphql.scalars.DateScalar;
 import org.rutebanken.tiamat.rest.graphql.scalars.TransportModeScalar;
-import org.rutebanken.tiamat.rest.graphql.types.ParentStopPlaceInputObjectTypeCreator;
-import org.rutebanken.tiamat.rest.graphql.types.ParentStopPlaceObjectTypeCreator;
 import org.rutebanken.tiamat.rest.graphql.types.StopPlaceInterfaceCreator;
-import org.rutebanken.tiamat.rest.graphql.types.StopPlaceObjectTypeCreator;
 import org.rutebanken.tiamat.rest.graphql.types.ZoneCommonFieldListCreator;
 import org.rutebanken.tiamat.rest.graphql.factories.AddressablePlaceTypeFactory;
 import org.rutebanken.tiamat.rest.graphql.factories.CommonFieldsFactory;
@@ -94,11 +91,14 @@ import org.rutebanken.tiamat.rest.graphql.factories.FareZoneTypeFactory;
 import org.rutebanken.tiamat.rest.graphql.factories.GroupOfStopPlacesInputTypeFactory;
 import org.rutebanken.tiamat.rest.graphql.factories.GroupOfStopPlacesTypeFactory;
 import org.rutebanken.tiamat.rest.graphql.factories.GroupOfTariffZonesTypeFactory;
+import org.rutebanken.tiamat.rest.graphql.factories.ParentStopPlaceInputTypeFactory;
+import org.rutebanken.tiamat.rest.graphql.factories.ParentStopPlaceTypeFactory;
 import org.rutebanken.tiamat.rest.graphql.factories.PathLinkEndTypeFactory;
 import org.rutebanken.tiamat.rest.graphql.factories.PathLinkTypeFactory;
 import org.rutebanken.tiamat.rest.graphql.factories.PurposeOfGroupingInputTypeFactory;
 import org.rutebanken.tiamat.rest.graphql.factories.PurposeOfGroupingTypeFactory;
 import org.rutebanken.tiamat.rest.graphql.factories.QuayTypeFactory;
+import org.rutebanken.tiamat.rest.graphql.factories.StopPlaceTypeFactory;
 import org.rutebanken.tiamat.rest.graphql.factories.TagTypeFactory;
 import org.rutebanken.tiamat.rest.graphql.factories.TariffZoneTypeFactory;
 import org.rutebanken.tiamat.rest.graphql.factories.TopographicPlaceTypeFactory;
@@ -176,16 +176,7 @@ public class StopPlaceRegisterGraphQLSchema {
     private ZoneCommonFieldListCreator zoneCommonFieldListCreator;
 
     @Autowired
-    private StopPlaceObjectTypeCreator stopPlaceObjectTypeCreator;
-
-    @Autowired
-    private ParentStopPlaceObjectTypeCreator parentStopPlaceObjectTypeCreator;
-
-    @Autowired
     private StopPlaceInterfaceCreator stopPlaceInterfaceCreator;
-
-    @Autowired
-    private ParentStopPlaceInputObjectTypeCreator parentStopPlaceInputObjectTypeCreator;
 
     @Autowired
     private TagOperationsBuilder tagOperationsBuilder;
@@ -245,6 +236,15 @@ public class StopPlaceRegisterGraphQLSchema {
 
     @Autowired
     private TagTypeFactory tagTypeFactory;
+
+    @Autowired
+    private StopPlaceTypeFactory stopPlaceTypeFactory;
+
+    @Autowired
+    private ParentStopPlaceTypeFactory parentStopPlaceTypeFactory;
+
+    @Autowired
+    private ParentStopPlaceInputTypeFactory parentStopPlaceInputTypeFactory;
 
     @Autowired
     DataFetcher stopPlaceFetcher;
@@ -481,8 +481,8 @@ public class StopPlaceRegisterGraphQLSchema {
         List<GraphQLFieldDefinition> stopPlaceInterfaceFields = stopPlaceInterfaceCreator.createCommonInterfaceFields(tariffZoneObjectType,fareZoneObjectType, topographicPlaceObjectType, validBetweenObjectType, entityPermissionObjectType);
         GraphQLInterfaceType stopPlaceInterface = stopPlaceInterfaceCreator.createInterface(stopPlaceInterfaceFields, commonFieldsList);
 
-        GraphQLObjectType stopPlaceObjectType = stopPlaceObjectTypeCreator.create(stopPlaceInterface, stopPlaceInterfaceFields, commonFieldsList, quayObjectType);
-        GraphQLObjectType parentStopPlaceObjectType = parentStopPlaceObjectTypeCreator.create(stopPlaceInterface, stopPlaceInterfaceFields, commonFieldsList, stopPlaceObjectType);
+        GraphQLObjectType stopPlaceObjectType = stopPlaceTypeFactory.createStopPlaceType(stopPlaceInterface, stopPlaceInterfaceFields, commonFieldsList, quayObjectType);
+        GraphQLObjectType parentStopPlaceObjectType = parentStopPlaceTypeFactory.createParentStopPlaceType(stopPlaceInterface, stopPlaceInterfaceFields, commonFieldsList, stopPlaceObjectType);
 
         stopPlaceTypeResolver.setResolveFunction(object -> {
             if(object instanceof StopPlace stopPlace) {
@@ -625,7 +625,7 @@ public class StopPlaceRegisterGraphQLSchema {
         GraphQLInputObjectType stopPlaceInputObjectType = createStopPlaceInputObjectType(commonInputFieldList,
                 topographicPlaceInputObjectType, quayInputObjectType, validBetweenInputObjectType);
 
-        GraphQLInputObjectType parentStopPlaceInputObjectType = parentStopPlaceInputObjectTypeCreator.create(commonInputFieldList, validBetweenInputObjectType, stopPlaceInputObjectType);
+        GraphQLInputObjectType parentStopPlaceInputObjectType = parentStopPlaceInputTypeFactory.createParentStopPlaceInputType(commonInputFieldList, validBetweenInputObjectType, stopPlaceInputObjectType);
 
         GraphQLInputObjectType parkingInputObjectType = createParkingInputObjectType(validBetweenInputObjectType);
 
@@ -715,7 +715,6 @@ public class StopPlaceRegisterGraphQLSchema {
                 .build();
     }
 
-
     public GraphQLCodeRegistry buildCodeRegistry(TypeResolver stopPlaceTypeResolver) {
         GraphQLCodeRegistry.Builder codeRegistryBuilder = GraphQLCodeRegistry.newCodeRegistry();
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_STOPPLACE, IMPORTED_ID, getOriginalIdsFetcher());
@@ -748,8 +747,6 @@ public class StopPlaceRegisterGraphQLSchema {
         registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_ACCESSIBILITY_LIMITATIONS , ID, getNetexIdFetcher());
         registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_ACCESSIBILITY_LIMITATIONS , ID, getNetexIdFetcher());
         registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_PURPOSE_OF_GROUPING , ID, getNetexIdFetcher());
-
-
 
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_STOPPLACE, TAGS, tagFetcher);
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_PARENT_STOPPLACE, TAGS, tagFetcher);
@@ -889,8 +886,6 @@ public class StopPlaceRegisterGraphQLSchema {
 
         registerDataFetcher(codeRegistryBuilder,STOPPLACES_REGISTER,USER_PERMISSIONS,userPermissionsFetcher);
         registerDataFetcher(codeRegistryBuilder,STOPPLACES_REGISTER,LOCATION_PERMISSIONS,locationPermissionsFetcher);
-
-
 
 
         //mutation
@@ -1435,7 +1430,4 @@ public class StopPlaceRegisterGraphQLSchema {
                         .type(GraphQLString).build())
                 .build();
     }
-
-
 }
-

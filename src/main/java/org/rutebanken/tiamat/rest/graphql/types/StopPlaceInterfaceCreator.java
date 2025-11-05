@@ -21,6 +21,7 @@ import graphql.schema.GraphQLInterfaceType;
 import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLTypeReference;
+import org.rutebanken.tiamat.rest.graphql.factories.TagTypeFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -48,10 +49,8 @@ import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.altern
 @Component
 public class StopPlaceInterfaceCreator {
 
-
-
     @Autowired
-    private TagObjectTypeCreator tagObjectTypeCreator;
+    private TagTypeFactory tagTypeFactory;
 
 
 
@@ -90,7 +89,7 @@ public class StopPlaceInterfaceCreator {
                 .build());
         stopPlaceInterfaceFields.add(newFieldDefinition()
                 .name(TAGS)
-                .type(new GraphQLList(tagObjectTypeCreator.create()))
+                .type(new GraphQLList((graphql.schema.GraphQLOutputType) tagTypeFactory.createTypes().getFirst()))
                 .build());
         stopPlaceInterfaceFields.add(newFieldDefinition()
                 .name(STOP_PLACE_GROUPS)

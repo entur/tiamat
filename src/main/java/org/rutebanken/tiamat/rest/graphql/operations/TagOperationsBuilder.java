@@ -18,7 +18,7 @@ package org.rutebanken.tiamat.rest.graphql.operations;
 import graphql.schema.GraphQLArgument;
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLNonNull;
-import org.rutebanken.tiamat.rest.graphql.types.TagObjectTypeCreator;
+import org.rutebanken.tiamat.rest.graphql.factories.TagTypeFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -41,7 +41,7 @@ import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.TAG_NAME_DESCRIPTI
 public class TagOperationsBuilder {
 
     @Autowired
-    private TagObjectTypeCreator tagObjectTypeCreator;
+    private TagTypeFactory tagTypeFactory;
 
     public List<GraphQLFieldDefinition> getTagOperations() {
 
@@ -66,13 +66,13 @@ public class TagOperationsBuilder {
 
         return Arrays.asList(
                 newFieldDefinition()
-                        .type(tagObjectTypeCreator.create())
+                        .type((graphql.schema.GraphQLOutputType) tagTypeFactory.createTypes().getFirst())
                         .name(REMOVE_TAG)
                         .description("Remove tag from referenced entity")
                         .arguments(createAndRemoveArguments)
                         .build(),
                 newFieldDefinition()
-                        .type(tagObjectTypeCreator.create())
+                        .type((graphql.schema.GraphQLOutputType) tagTypeFactory.createTypes().getFirst())
                         .name(CREATE_TAG)
                         .description("Create tag for referenced entity.")
                         .arguments(createAndRemoveArguments)
