@@ -29,6 +29,7 @@ import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLNonNull;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLSchema;
+import graphql.schema.GraphQLType;
 import graphql.schema.TypeResolver;
 import jakarta.annotation.PostConstruct;
 import org.locationtech.jts.geom.Geometry;
@@ -96,6 +97,13 @@ import org.rutebanken.tiamat.rest.graphql.types.TagObjectTypeCreator;
 import org.rutebanken.tiamat.rest.graphql.types.TariffZoneObjectTypeCreator;
 import org.rutebanken.tiamat.rest.graphql.types.TopographicPlaceObjectTypeCreator;
 import org.rutebanken.tiamat.rest.graphql.types.ZoneCommonFieldListCreator;
+import org.rutebanken.tiamat.rest.graphql.factories.AddressablePlaceTypeFactory;
+import org.rutebanken.tiamat.rest.graphql.factories.CommonFieldsFactory;
+import org.rutebanken.tiamat.rest.graphql.factories.GroupOfStopPlacesInputTypeFactory;
+import org.rutebanken.tiamat.rest.graphql.factories.PurposeOfGroupingInputTypeFactory;
+import org.rutebanken.tiamat.rest.graphql.factories.QuayTypeFactory;
+import org.rutebanken.tiamat.rest.graphql.factories.StopPlaceInputTypeFactory;
+import org.rutebanken.tiamat.rest.graphql.factories.ValidBetweenTypeFactory;
 import org.rutebanken.tiamat.service.TagCreator;
 import org.rutebanken.tiamat.service.TagRemover;
 import org.rutebanken.tiamat.service.TariffZoneTerminator;
@@ -129,27 +137,18 @@ import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 import static org.rutebanken.tiamat.rest.graphql.mappers.EmbeddableMultilingualStringMapper.getEmbeddableString;
 import static org.rutebanken.tiamat.rest.graphql.operations.MultiModalityOperationsBuilder.ADD_TO_MULTI_MODAL_STOP_PLACE_INPUT;
 import static org.rutebanken.tiamat.rest.graphql.scalars.TransportModeScalar.getValidSubmodes;
-import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.accessibilityAssessmentInputObjectType;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.accessibilityAssessmentObjectType;
-import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.alternativeNameInputObjectType;
-import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.alternativeNameObjectType;
-import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.boardingPositionsInputObjectType;
-import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.boardingPositionsObjectType;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.createParkingInputObjectType;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.createParkingObjectType;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.embeddableMultiLingualStringInputObjectType;
-import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.equipmentInputType;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.equipmentType;
-import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.geoJsonInputType;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.geometryFieldDefinition;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.getEquipmentOfType;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.interchangeWeightingEnum;
-import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.keyValuesObjectInputType;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.modificationEnumerationType;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.netexIdFieldDefinition;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.pathLinkObjectInputType;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.privateCodeFieldDefinition;
-import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.privateCodeInputType;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.scopingMethodEnumType;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.stopPlaceTypeEnum;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.submodeEnum;
@@ -226,6 +225,28 @@ public class StopPlaceRegisterGraphQLSchema {
 
     @Autowired
     private MultiModalityOperationsBuilder multiModalityOperationsBuilder;
+
+    // Type factories for modular type creation
+    @Autowired
+    private ValidBetweenTypeFactory validBetweenTypeFactory;
+
+    @Autowired
+    private CommonFieldsFactory commonFieldsFactory;
+
+    @Autowired
+    private QuayTypeFactory quayTypeFactory;
+
+    @Autowired
+    private AddressablePlaceTypeFactory addressablePlaceTypeFactory;
+
+    @Autowired
+    private StopPlaceInputTypeFactory stopPlaceInputTypeFactory;
+
+    @Autowired
+    private GroupOfStopPlacesInputTypeFactory groupOfStopPlacesInputTypeFactory;
+
+    @Autowired
+    private PurposeOfGroupingInputTypeFactory purposeOfGroupingInputTypeFactory;
 
     @Autowired
     DataFetcher stopPlaceFetcher;
@@ -393,7 +414,9 @@ public class StopPlaceRegisterGraphQLSchema {
                         .build()
         );
 
-        GraphQLObjectType validBetweenObjectType = createValidBetweenObjectType();
+        // Get ValidBetween types from factory - returns [objectType, inputType]
+        List<GraphQLType> validBetweenTypes = validBetweenTypeFactory.createTypes();
+        GraphQLObjectType validBetweenObjectType = (GraphQLObjectType) validBetweenTypes.getFirst();
         GraphQLObjectType userPermissionsObjectType = newObject()
                 .name(OUTPUT_TYPE_USER_PERMISSIONS)
                 .field(newFieldDefinition()
@@ -443,7 +466,9 @@ public class StopPlaceRegisterGraphQLSchema {
 
         commonFieldsList.addAll(zoneCommandFieldList);
 
-        GraphQLObjectType quayObjectType = createQuayObjectType(commonFieldsList);
+        // Get Quay object type from factory with merged commonFieldsList (includes zone fields)
+        List<GraphQLType> quayTypes = quayTypeFactory.createQuayTypes(commonFieldsList);
+        GraphQLObjectType quayObjectType = (GraphQLObjectType) quayTypes.getFirst();
 
 
         GraphQLObjectType topographicPlaceObjectType = topographicPlaceObjectTypeCreator.create();
@@ -474,7 +499,8 @@ public class StopPlaceRegisterGraphQLSchema {
         GraphQLObjectType groupOfStopPlacesObjectType = groupOfStopPlaceObjectTypeCreator.create(stopPlaceInterface, purposeOfGroupingType, entityPermissionObjectType);
         GraphQLObjectType groupOfTariffZonesObjectType = groupOfTariffZonesObjectTypeCreator.create();
 
-        GraphQLObjectType addressablePlaceObjectType = createAddressablePlaceObjectType(commonFieldsList);
+        // Get AddressablePlace object type from factory with merged commonFieldsList
+        GraphQLObjectType addressablePlaceObjectType = addressablePlaceTypeFactory.createAddressablePlaceType(commonFieldsList);
 
         GraphQLObjectType entityRefObjectType = entityRefObjectTypeCreator.create(addressablePlaceObjectType);
 
@@ -587,11 +613,14 @@ public class StopPlaceRegisterGraphQLSchema {
                 .build();
 
 
-        List<GraphQLInputObjectField> commonInputFieldList = createCommonInputFieldList(embeddableMultiLingualStringInputObjectType);
+        // Get common input fields from factory
+        List<GraphQLInputObjectField> commonInputFieldList = commonFieldsFactory.createCommonInputFieldList(embeddableMultiLingualStringInputObjectType);
 
-        GraphQLInputObjectType quayInputObjectType = createQuayInputObjectType(commonInputFieldList);
+        // Get Quay input type from factory (second element in list)
+        GraphQLInputObjectType quayInputObjectType = (GraphQLInputObjectType) quayTypes.get(1);
 
-        GraphQLInputObjectType validBetweenInputObjectType = createValidBetweenInputObjectType();
+        // Get ValidBetween input type from factory (second element in list)
+        GraphQLInputObjectType validBetweenInputObjectType = (GraphQLInputObjectType) validBetweenTypes.get(1);
 
         GraphQLInputObjectType stopPlaceInputObjectType = createStopPlaceInputObjectType(commonInputFieldList,
                 topographicPlaceInputObjectType, quayInputObjectType, validBetweenInputObjectType);
@@ -600,9 +629,11 @@ public class StopPlaceRegisterGraphQLSchema {
 
         GraphQLInputObjectType parkingInputObjectType = createParkingInputObjectType(validBetweenInputObjectType);
 
-        GraphQLInputObjectType groupOfStopPlacesInputObjectType = createGroupOfStopPlacesInputObjectType();
+        // Get GroupOfStopPlaces input type from factory
+        GraphQLInputObjectType groupOfStopPlacesInputObjectType = (GraphQLInputObjectType) groupOfStopPlacesInputTypeFactory.createTypes().getFirst();
 
-        GraphQLInputObjectType purposeOfGroupingInputObjectType =createPurposeOfGroupingInputObjectType();
+        // Get PurposeOfGrouping input type from factory
+        GraphQLInputObjectType purposeOfGroupingInputObjectType = (GraphQLInputObjectType) purposeOfGroupingInputTypeFactory.createTypes().getFirst();
 
         GraphQLObjectType stopPlaceRegisterMutation = newObject()
                 .name(STOPPLACES_MUTATION)
@@ -1024,13 +1055,6 @@ public class StopPlaceRegisterGraphQLSchema {
         codeRegistryBuilder.dataFetcher(coordinates, dataFetcher);
     }
 
-    private GraphQLObjectType createAddressablePlaceObjectType(List<GraphQLFieldDefinition> commonFieldsList) {
-        return newObject()
-                .name(OUTPUT_TYPE_ADDRESSABLE_PLACE)
-                .fields(commonFieldsList)
-                .build();
-    }
-
     private List<GraphQLArgument> createFindPathLinkArguments(GraphQLArgument allVersionsArgument) {
         List<GraphQLArgument> arguments = new ArrayList<>();
         arguments.add(GraphQLArgument.newArgument()
@@ -1366,51 +1390,6 @@ public class StopPlaceRegisterGraphQLSchema {
         return arguments;
     }
 
-    private GraphQLObjectType createQuayObjectType(List<GraphQLFieldDefinition> commonFieldsList) {
-        return newObject()
-                    .name(OUTPUT_TYPE_QUAY)
-                    .fields(commonFieldsList)
-                    .field(newFieldDefinition()
-                            .name(COMPASS_BEARING)
-                            .type(GraphQLBigDecimal))
-                    .field(newFieldDefinition()
-                            .name(ALTERNATIVE_NAMES)
-                            .type(new GraphQLList(alternativeNameObjectType)))
-                    .field(newFieldDefinition()
-                            .name(BOARDING_POSITIONS)
-                            .type(new GraphQLList(boardingPositionsObjectType))
-                    )
-                    .build();
-    }
-
-    private GraphQLObjectType createValidBetweenObjectType() {
-        return newObject()
-                .name(OUTPUT_TYPE_VALID_BETWEEN)
-                .field(newFieldDefinition()
-                        .name(VALID_BETWEEN_FROM_DATE)
-                        .type(dateScalar.getGraphQLDateScalar())
-                        .description(DATE_SCALAR_DESCRIPTION))
-                .field(newFieldDefinition()
-                        .name(VALID_BETWEEN_TO_DATE)
-                        .type(dateScalar.getGraphQLDateScalar())
-                        .description(DATE_SCALAR_DESCRIPTION))
-                .build();
-    }
-
-    private GraphQLInputObjectType createValidBetweenInputObjectType() {
-        return newInputObject()
-                .name(INPUT_TYPE_VALID_BETWEEN)
-                .field(newInputObjectField()
-                        .name(VALID_BETWEEN_FROM_DATE)
-                        .type(new GraphQLNonNull(dateScalar.getGraphQLDateScalar()))
-                        .description("When the new version is valid from"))
-                .field(newInputObjectField()
-                        .name(VALID_BETWEEN_TO_DATE)
-                        .type(dateScalar.getGraphQLDateScalar())
-                        .description("When the version is no longer valid"))
-                .build();
-    }
-
 
     private GraphQLInputObjectType createStopPlaceInputObjectType(List<GraphQLInputObjectField> commonInputFieldsList,
                                                                   GraphQLInputObjectType topographicPlaceInputObjectType,
@@ -1455,70 +1434,6 @@ public class StopPlaceRegisterGraphQLSchema {
                 .build();
     }
 
-    private GraphQLInputObjectType createGroupOfStopPlacesInputObjectType() {
-        return newInputObject()
-                .name(INPUT_TYPE_GROUP_OF_STOPPLACES)
-                .field(newInputObjectField().name(ID).type(GraphQLString).description("Ignore ID when creating new"))
-                .field(newInputObjectField().name(NAME).type(new GraphQLNonNull(embeddableMultiLingualStringInputObjectType)))
-                .field(newInputObjectField().name(SHORT_NAME).type(embeddableMultiLingualStringInputObjectType))
-                .field(newInputObjectField().name(DESCRIPTION).type(embeddableMultiLingualStringInputObjectType))
-                .field(newInputObjectField().name(ALTERNATIVE_NAMES).type(new GraphQLList(alternativeNameInputObjectType)))
-                .field(newInputObjectField().name(VERSION_COMMENT).type(GraphQLString))
-                .field(newInputObjectField().name(PURPOSE_OF_GROUPING).type(versionLessRefInputObjectType).description("References to purpose of grouping"))
-                .field(newInputObjectField()
-                        .name(GROUP_OF_STOP_PLACES_MEMBERS)
-                        .description("References to group of stop places members. Stop place IDs.")
-                        .type(new GraphQLList(versionLessRefInputObjectType)))
-                .build();
-    }
-
-    private GraphQLInputObjectType createPurposeOfGroupingInputObjectType() {
-        return newInputObject()
-                .name(INPUT_TYPE_PURPOSE_OF_GROUPING)
-                .field(newInputObjectField().name(ID).type(GraphQLString).description("Ignore ID when creating new"))
-                .field(newInputObjectField().name(NAME).type(new GraphQLNonNull(embeddableMultiLingualStringInputObjectType)))
-                .field(newInputObjectField().name(DESCRIPTION).type(embeddableMultiLingualStringInputObjectType))
-                .field(newInputObjectField().name(VERSION_COMMENT).type(GraphQLString))
-                .build();
-
-    }
-
-    private List<GraphQLInputObjectField> createCommonInputFieldList(GraphQLInputObjectType embeddableMultiLingualStringInputObjectType) {
-
-        List<GraphQLInputObjectField> commonInputFieldsList = new ArrayList<>();
-        commonInputFieldsList.add(newInputObjectField().name(ID).type(GraphQLString).description("Ignore when creating new").build());
-        commonInputFieldsList.add(newInputObjectField().name(NAME).type(embeddableMultiLingualStringInputObjectType).build());
-        commonInputFieldsList.add(newInputObjectField().name(SHORT_NAME).type(embeddableMultiLingualStringInputObjectType).build());
-        commonInputFieldsList.add(newInputObjectField().name(PUBLIC_CODE).type(GraphQLString).build());
-        commonInputFieldsList.add(newInputObjectField().name(PRIVATE_CODE).type(privateCodeInputType).build());
-        commonInputFieldsList.add(newInputObjectField().name(DESCRIPTION).type(embeddableMultiLingualStringInputObjectType).build());
-        commonInputFieldsList.add(newInputObjectField().name(GEOMETRY).type(geoJsonInputType).build());
-        commonInputFieldsList.add(newInputObjectField().name(ALTERNATIVE_NAMES).type(new GraphQLList(alternativeNameInputObjectType)).build());
-        commonInputFieldsList.add(newInputObjectField().name(PLACE_EQUIPMENTS).type(equipmentInputType).build());
-        commonInputFieldsList.add(newInputObjectField().name(KEY_VALUES).type(new GraphQLList(keyValuesObjectInputType)).build());
-        commonInputFieldsList.add(
-                newInputObjectField()
-                        .name(ACCESSIBILITY_ASSESSMENT)
-                        .description("This field is set either on StopPlace (i.e. all Quays are equal), or on every Quay.")
-                        .type(accessibilityAssessmentInputObjectType)
-                        .build()
-        );
-        return commonInputFieldsList;
-    }
-
-
-    private GraphQLInputObjectType createQuayInputObjectType(List<GraphQLInputObjectField> graphQLCommonInputObjectFieldsList) {
-        return newInputObject()
-                .name(INPUT_TYPE_QUAY)
-                .fields(graphQLCommonInputObjectFieldsList)
-                .field(newInputObjectField()
-                        .name(COMPASS_BEARING)
-                        .type(GraphQLBigDecimal))
-                .field(newInputObjectField()
-                .name(BOARDING_POSITIONS)
-                .type(new GraphQLList(boardingPositionsInputObjectType)))
-                .build();
-    }
 
 }
 
