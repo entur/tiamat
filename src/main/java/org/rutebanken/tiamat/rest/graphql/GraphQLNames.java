@@ -22,8 +22,8 @@ import java.util.List;
 
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.MERGED_ID_KEY;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
-import static org.rutebanken.tiamat.rest.graphql.StopPlaceRegisterGraphQLSchema.DEFAULT_PAGE_VALUE;
-import static org.rutebanken.tiamat.rest.graphql.StopPlaceRegisterGraphQLSchema.DEFAULT_SIZE_VALUE;
+import static org.rutebanken.tiamat.rest.graphql.argumentbuilders.GraphQLArgumentsFactory.DEFAULT_PAGE_VALUE;
+import static org.rutebanken.tiamat.rest.graphql.argumentbuilders.GraphQLArgumentsFactory.DEFAULT_SIZE_VALUE;
 import static org.rutebanken.tiamat.rest.graphql.scalars.DateScalar.DATE_TIME_PATTERN;
 import static org.rutebanken.tiamat.rest.graphql.scalars.DateScalar.EXAMPLE_DATE_TIME;
 

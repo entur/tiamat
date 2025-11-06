@@ -15,9 +15,8 @@
 
 package org.rutebanken.tiamat.rest.graphql;
 
-import graphql.language.BooleanValue;
-import graphql.language.IntValue;
 import graphql.schema.DataFetcher;
+import graphql.schema.DataFetchingEnvironment;
 import graphql.schema.FieldCoordinates;
 import graphql.schema.GraphQLArgument;
 import graphql.schema.GraphQLCodeRegistry;
@@ -26,7 +25,6 @@ import graphql.schema.GraphQLInputObjectField;
 import graphql.schema.GraphQLInputObjectType;
 import graphql.schema.GraphQLInterfaceType;
 import graphql.schema.GraphQLList;
-import graphql.schema.GraphQLNonNull;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.GraphQLType;
@@ -58,7 +56,6 @@ import org.rutebanken.tiamat.model.WaitingRoomEquipment;
 import org.rutebanken.tiamat.model.Zone_VersionStructure;
 import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
 import org.rutebanken.tiamat.rest.graphql.registry.GraphQLDataFetcherRegistry;
-import org.rutebanken.tiamat.rest.graphql.registry.GraphQLOperationsRegistry;
 import org.rutebanken.tiamat.rest.graphql.registry.GraphQLServicesRegistry;
 import org.rutebanken.tiamat.rest.graphql.registry.GraphQLTypeRegistry;
 import org.rutebanken.tiamat.rest.graphql.resolvers.MutableTypeResolver;
@@ -72,54 +69,34 @@ import java.util.List;
 import java.util.Map;
 
 import static graphql.Scalars.GraphQLBoolean;
-import static graphql.Scalars.GraphQLInt;
 import static graphql.Scalars.GraphQLString;
-import static graphql.scalars.ExtendedScalars.GraphQLBigDecimal;
-import static graphql.schema.GraphQLArgument.newArgument;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
-import static graphql.schema.GraphQLInputObjectField.newInputObjectField;
-import static graphql.schema.GraphQLInputObjectType.newInputObject;
 import static graphql.schema.GraphQLObjectType.newObject;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 import static org.rutebanken.tiamat.rest.graphql.mappers.EmbeddableMultilingualStringMapper.getEmbeddableString;
 import static org.rutebanken.tiamat.rest.graphql.operations.MultiModalityOperationsBuilder.ADD_TO_MULTI_MODAL_STOP_PLACE_INPUT;
 import static org.rutebanken.tiamat.rest.graphql.scalars.TransportModeScalar.getValidSubmodes;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.accessibilityAssessmentObjectType;
-import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.createParkingInputObjectType;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.createParkingObjectType;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.embeddableMultiLingualStringInputObjectType;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.equipmentType;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.geometryFieldDefinition;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.getEquipmentOfType;
-import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.interchangeWeightingEnum;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.modificationEnumerationType;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.netexIdFieldDefinition;
-import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.pathLinkObjectInputType;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.privateCodeFieldDefinition;
-import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.scopingMethodEnumType;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.stopPlaceTypeEnum;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.submodeEnum;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.topographicPlaceInputObjectType;
-import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.topographicPlaceTypeEnum;
-import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.transportModeSubmodeObjectType;
-import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.versionLessRefInputObjectType;
-import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.versionValidityEnumType;
-import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.zoneTopologyEnumType;
 
 @Component
 public class StopPlaceRegisterGraphQLSchema {
-
-    public final static int DEFAULT_PAGE_VALUE = 0;
-    public final static int DEFAULT_SIZE_VALUE = 20;
 
     public GraphQLSchema stopPlaceRegisterSchema;
 
     // Registries that consolidate related dependencies
     @Autowired
     private GraphQLTypeRegistry typeRegistry;
-
-    @Autowired
-    private GraphQLOperationsRegistry operationsRegistry;
 
     @Autowired
     private GraphQLDataFetcherRegistry dataFetcherRegistry;
@@ -138,12 +115,120 @@ public class StopPlaceRegisterGraphQLSchema {
     private AuthorizationService authorizationService;
 
     @Autowired
+    private org.rutebanken.tiamat.rest.graphql.schemabuilders.GraphQLInputTypesBuilder inputTypesBuilder;
+
+    @Autowired
+    private org.rutebanken.tiamat.rest.graphql.schemabuilders.GraphQLQuerySchemaBuilder querySchemaBuilder;
+
+    @Autowired
+    private org.rutebanken.tiamat.rest.graphql.schemabuilders.GraphQLMutationSchemaBuilder mutationSchemaBuilder;
+
+    @Autowired
     @PostConstruct
     public void init() {
+        // Build common field definitions
+        List<GraphQLFieldDefinition> commonFieldsList = buildCommonFieldsList();
 
-        /**
-         * Common field list for quays, stop places and addressable place.
-         */
+        // Create ValidBetween, permission, and zone types
+        List<GraphQLType> validBetweenTypes = typeRegistry.getValidBetweenTypeFactory().createTypes();
+        GraphQLObjectType validBetweenObjectType = (GraphQLObjectType) validBetweenTypes.getFirst();
+        GraphQLInputObjectType validBetweenInputObjectType = (GraphQLInputObjectType) validBetweenTypes.get(1);
+
+        GraphQLObjectType userPermissionsObjectType = buildUserPermissionsObjectType();
+        GraphQLObjectType entityPermissionObjectType = buildEntityPermissionObjectType();
+
+        // Create zone fields and add to common fields
+        List<GraphQLFieldDefinition> zoneCommandFieldList = zoneCommonFieldListCreator.create(validBetweenObjectType);
+        commonFieldsList.addAll(zoneCommandFieldList);
+
+        // Build all object types via type factories
+        List<GraphQLType> quayTypes = typeRegistry.getQuayTypeFactory().createQuayTypes(commonFieldsList);
+        GraphQLObjectType quayObjectType = (GraphQLObjectType) quayTypes.getFirst();
+        GraphQLInputObjectType quayInputObjectType = (GraphQLInputObjectType) quayTypes.get(1);
+
+        List<GraphQLType> topographicPlaceTypes = typeRegistry.getTopographicPlaceTypeFactory().createTypes();
+        GraphQLObjectType topographicPlaceObjectType = (GraphQLObjectType) topographicPlaceTypes.getFirst();
+
+        GraphQLObjectType tariffZoneObjectType = typeRegistry.getTariffZoneTypeFactory().createTariffZoneType(zoneCommandFieldList);
+        GraphQLObjectType fareZoneObjectType = typeRegistry.getFareZoneTypeFactory().createFareZoneType(zoneCommandFieldList);
+
+        // Build StopPlace interface and types
+        MutableTypeResolver stopPlaceTypeResolver = new MutableTypeResolver();
+        List<GraphQLFieldDefinition> stopPlaceInterfaceFields = stopPlaceInterfaceCreator.createCommonInterfaceFields(
+                tariffZoneObjectType, fareZoneObjectType, topographicPlaceObjectType, validBetweenObjectType, entityPermissionObjectType);
+        GraphQLInterfaceType stopPlaceInterface = stopPlaceInterfaceCreator.createInterface(stopPlaceInterfaceFields, commonFieldsList);
+
+        GraphQLObjectType stopPlaceObjectType = typeRegistry.getStopPlaceTypeFactory().createStopPlaceType(
+                stopPlaceInterface, stopPlaceInterfaceFields, commonFieldsList, quayObjectType);
+        GraphQLObjectType parentStopPlaceObjectType = typeRegistry.getParentStopPlaceTypeFactory().createParentStopPlaceType(
+                stopPlaceInterface, stopPlaceInterfaceFields, commonFieldsList, stopPlaceObjectType);
+
+        stopPlaceTypeResolver.setResolveFunction(object -> {
+            if (object instanceof StopPlace stopPlace) {
+                return stopPlace.isParentStopPlace() ? parentStopPlaceObjectType : stopPlaceObjectType;
+            }
+            throw new IllegalArgumentException("StopPlaceTypeResolver cannot resolve type of Object " + object + ". Was expecting StopPlace");
+        });
+
+        // Build grouping and zone types
+        GraphQLObjectType purposeOfGroupingType = (GraphQLObjectType) typeRegistry.getPurposeOfGroupingTypeFactory().createTypes().getFirst();
+        GraphQLObjectType groupOfStopPlacesObjectType = typeRegistry.getGroupOfStopPlacesTypeFactory().createGroupOfStopPlacesType(
+                stopPlaceInterface, purposeOfGroupingType, entityPermissionObjectType);
+        GraphQLObjectType groupOfTariffZonesObjectType = (GraphQLObjectType) typeRegistry.getGroupOfTariffZonesTypeFactory().createTypes().getFirst();
+
+        // Build path link and related types
+        GraphQLObjectType addressablePlaceObjectType = typeRegistry.getAddressablePlaceTypeFactory().createAddressablePlaceType(commonFieldsList);
+        GraphQLObjectType entityRefObjectType = typeRegistry.getEntityRefTypeFactory().createEntityRefType(addressablePlaceObjectType);
+        GraphQLObjectType pathLinkEndObjectType = typeRegistry.getPathLinkEndTypeFactory().createPathLinkEndType(
+                entityRefObjectType, netexIdFieldDefinition);
+        GraphQLObjectType pathLinkObjectType = typeRegistry.getPathLinkTypeFactory().createPathLinkType(
+                pathLinkEndObjectType, netexIdFieldDefinition, geometryFieldDefinition);
+
+        GraphQLObjectType parkingObjectType = createParkingObjectType(validBetweenObjectType);
+
+        // Create allVersions argument
+        GraphQLArgument allVersionsArgument = GraphQLArgument.newArgument()
+                .name(ALL_VERSIONS)
+                .type(GraphQLBoolean)
+                .description(ALL_VERSIONS_ARG_DESCRIPTION)
+                .build();
+
+        // Build input types via input types builder
+        List<GraphQLInputObjectField> commonInputFieldList = typeRegistry.getCommonFieldsFactory()
+                .createCommonInputFieldList(embeddableMultiLingualStringInputObjectType);
+        Map<String, GraphQLInputObjectType> inputTypes = inputTypesBuilder.buildInputTypes(
+                commonInputFieldList, topographicPlaceInputObjectType, quayInputObjectType, validBetweenInputObjectType);
+
+        // Build query schema
+        GraphQLObjectType stopPlaceRegisterQuery = querySchemaBuilder.buildQueryType(
+                stopPlaceInterface, topographicPlaceObjectType, pathLinkObjectType, parkingObjectType,
+                groupOfStopPlacesObjectType, purposeOfGroupingType, groupOfTariffZonesObjectType,
+                tariffZoneObjectType, fareZoneObjectType, userPermissionsObjectType,
+                entityPermissionObjectType, allVersionsArgument);
+
+        // Build mutation schema
+        GraphQLObjectType stopPlaceRegisterMutation = mutationSchemaBuilder.buildMutationType(
+                stopPlaceInterface, stopPlaceObjectType, parentStopPlaceObjectType, groupOfStopPlacesObjectType,
+                purposeOfGroupingType, pathLinkObjectType, parkingObjectType, tariffZoneObjectType,
+                inputTypes.get(INPUT_TYPE_STOPPLACE), inputTypes.get(INPUT_TYPE_PARENT_STOPPLACE),
+                inputTypes.get(INPUT_TYPE_GROUP_OF_STOPPLACES), inputTypes.get(INPUT_TYPE_PURPOSE_OF_GROUPING),
+                inputTypes.get(INPUT_TYPE_PARKING), validBetweenInputObjectType);
+
+        // Build final GraphQL schema
+        stopPlaceRegisterSchema = GraphQLSchema.newSchema()
+                .query(stopPlaceRegisterQuery)
+                .mutation(stopPlaceRegisterMutation)
+                .codeRegistry(buildCodeRegistry(stopPlaceTypeResolver))
+                .build();
+    }
+
+    /**
+     * Builds common field definitions for stop places, quays, and addressable places.
+     * Includes place equipments, accessibility assessment, public/private codes, and modification enumeration.
+     *
+     * @return List of common field definitions
+     */
+    private List<GraphQLFieldDefinition> buildCommonFieldsList() {
         List<GraphQLFieldDefinition> commonFieldsList = new ArrayList<>();
         commonFieldsList.add(newFieldDefinition()
                 .name(PLACE_EQUIPMENTS)
@@ -153,24 +238,26 @@ public class StopPlaceRegisterGraphQLSchema {
                 .name(ACCESSIBILITY_ASSESSMENT)
                 .description("This field is set either on StopPlace (i.e. all Quays are equal), or on every Quay.")
                 .type(accessibilityAssessmentObjectType)
-                .build()
-        );
-
+                .build());
         commonFieldsList.add(newFieldDefinition()
-                        .name(PUBLIC_CODE)
-                        .type(GraphQLString).build());
+                .name(PUBLIC_CODE)
+                .type(GraphQLString)
+                .build());
         commonFieldsList.add(privateCodeFieldDefinition);
-        commonFieldsList.add(
-                newFieldDefinition()
-                        .name(MODIFICATION_ENUMERATION)
-                        .type(modificationEnumerationType)
-                        .build()
-        );
+        commonFieldsList.add(newFieldDefinition()
+                .name(MODIFICATION_ENUMERATION)
+                .type(modificationEnumerationType)
+                .build());
+        return commonFieldsList;
+    }
 
-        // Get ValidBetween types from factory - returns [objectType, inputType]
-        List<GraphQLType> validBetweenTypes = typeRegistry.getValidBetweenTypeFactory().createTypes();
-        GraphQLObjectType validBetweenObjectType = (GraphQLObjectType) validBetweenTypes.getFirst();
-        GraphQLObjectType userPermissionsObjectType = newObject()
+    /**
+     * Builds the UserPermissions object type.
+     *
+     * @return UserPermissions GraphQL object type
+     */
+    private GraphQLObjectType buildUserPermissionsObjectType() {
+        return newObject()
                 .name(OUTPUT_TYPE_USER_PERMISSIONS)
                 .field(newFieldDefinition()
                         .name("isGuest")
@@ -185,8 +272,15 @@ public class StopPlaceRegisterGraphQLSchema {
                         .type(GraphQLString)
                         .build())
                 .build();
+    }
 
-        GraphQLObjectType entityPermissionObjectType = newObject()
+    /**
+     * Builds the EntityPermission object type.
+     *
+     * @return EntityPermission GraphQL object type
+     */
+    private GraphQLObjectType buildEntityPermissionObjectType() {
+        return newObject()
                 .name(OUTPUT_TYPE_ENTITY_PERMISSIONS)
                 .field(newFieldDefinition()
                         .name("canEdit")
@@ -196,7 +290,6 @@ public class StopPlaceRegisterGraphQLSchema {
                         .name("canDelete")
                         .type(GraphQLBoolean)
                         .build())
-
                 .field(newFieldDefinition()
                         .name("allowedStopPlaceTypes")
                         .type(new GraphQLList(stopPlaceTypeEnum))
@@ -214,517 +307,496 @@ public class StopPlaceRegisterGraphQLSchema {
                         .type(new GraphQLList(submodeEnum))
                         .build())
                 .build();
-
-        List<GraphQLFieldDefinition> zoneCommandFieldList = zoneCommonFieldListCreator.create(validBetweenObjectType);
-
-        commonFieldsList.addAll(zoneCommandFieldList);
-
-        // Get Quay object type from factory with merged commonFieldsList (includes zone fields)
-        List<GraphQLType> quayTypes = typeRegistry.getQuayTypeFactory().createQuayTypes(commonFieldsList);
-        GraphQLObjectType quayObjectType = (GraphQLObjectType) quayTypes.getFirst();
-
-
-        // Get TopographicPlace type from factory
-        GraphQLObjectType topographicPlaceObjectType = (GraphQLObjectType) typeRegistry.getTopographicPlaceTypeFactory().createTypes().getFirst();
-
-        // Get TariffZone and FareZone types from factories with zone common fields
-        GraphQLObjectType tariffZoneObjectType = typeRegistry.getTariffZoneTypeFactory().createTariffZoneType(zoneCommandFieldList);
-        GraphQLObjectType fareZoneObjectType = typeRegistry.getFareZoneTypeFactory().createFareZoneType(zoneCommandFieldList);
-
-        MutableTypeResolver stopPlaceTypeResolver = new MutableTypeResolver();
-
-        List<GraphQLFieldDefinition> stopPlaceInterfaceFields = stopPlaceInterfaceCreator.createCommonInterfaceFields(tariffZoneObjectType,fareZoneObjectType, topographicPlaceObjectType, validBetweenObjectType, entityPermissionObjectType);
-        GraphQLInterfaceType stopPlaceInterface = stopPlaceInterfaceCreator.createInterface(stopPlaceInterfaceFields, commonFieldsList);
-
-        GraphQLObjectType stopPlaceObjectType = typeRegistry.getStopPlaceTypeFactory().createStopPlaceType(stopPlaceInterface, stopPlaceInterfaceFields, commonFieldsList, quayObjectType);
-        GraphQLObjectType parentStopPlaceObjectType = typeRegistry.getParentStopPlaceTypeFactory().createParentStopPlaceType(stopPlaceInterface, stopPlaceInterfaceFields, commonFieldsList, stopPlaceObjectType);
-
-        stopPlaceTypeResolver.setResolveFunction(object -> {
-            if(object instanceof StopPlace stopPlace) {
-                if(stopPlace.isParentStopPlace()) {
-                    return parentStopPlaceObjectType;
-                } else {
-                    return stopPlaceObjectType;
-                }
-            }
-            throw new IllegalArgumentException("StopPlaceTypeResolver cannot resolve type of Object " + object + ". Was expecting StopPlace");
-        });
-
-        // Get PurposeOfGrouping, GroupOfStopPlaces, and GroupOfTariffZones types from factories
-        GraphQLObjectType purposeOfGroupingType = (GraphQLObjectType) typeRegistry.getPurposeOfGroupingTypeFactory().createTypes().getFirst();
-        GraphQLObjectType groupOfStopPlacesObjectType = typeRegistry.getGroupOfStopPlacesTypeFactory().createGroupOfStopPlacesType(stopPlaceInterface, purposeOfGroupingType, entityPermissionObjectType);
-        GraphQLObjectType groupOfTariffZonesObjectType = (GraphQLObjectType) typeRegistry.getGroupOfTariffZonesTypeFactory().createTypes().getFirst();
-
-        // Get AddressablePlace object type from factory with merged commonFieldsList
-        GraphQLObjectType addressablePlaceObjectType = typeRegistry.getAddressablePlaceTypeFactory().createAddressablePlaceType(commonFieldsList);
-
-        // Get EntityRef, PathLinkEnd, and PathLink types from factories
-        GraphQLObjectType entityRefObjectType = typeRegistry.getEntityRefTypeFactory().createEntityRefType(addressablePlaceObjectType);
-        GraphQLObjectType pathLinkEndObjectType = typeRegistry.getPathLinkEndTypeFactory().createPathLinkEndType(entityRefObjectType, netexIdFieldDefinition);
-        GraphQLObjectType pathLinkObjectType = typeRegistry.getPathLinkTypeFactory().createPathLinkType(pathLinkEndObjectType, netexIdFieldDefinition, geometryFieldDefinition);
-
-        GraphQLObjectType parkingObjectType = createParkingObjectType(validBetweenObjectType);
-
-        GraphQLArgument allVersionsArgument = GraphQLArgument.newArgument()
-                .name(ALL_VERSIONS)
-                .type(GraphQLBoolean)
-                .description(ALL_VERSIONS_ARG_DESCRIPTION)
-                .build();
-
-
-        GraphQLObjectType stopPlaceRegisterQuery = newObject()
-                .name(STOPPLACES_REGISTER)
-                .description("Query and search for data")
-                .field(newFieldDefinition()
-                        .type(new GraphQLList(stopPlaceInterface))
-                        .name(FIND_STOPPLACE)
-                        .description("Search for StopPlaces")
-                        .arguments(createFindStopPlaceArguments(allVersionsArgument))
-                       )
-                        //Search by BoundingBox
-                .field(newFieldDefinition()
-                        .type(new GraphQLList(stopPlaceInterface))
-                        .name(FIND_STOPPLACE_BY_BBOX)
-                        .description("Find StopPlaces within given BoundingBox.")
-                        .arguments(createBboxArguments())
-                        )
-                .field(newFieldDefinition()
-                        .name(FIND_TOPOGRAPHIC_PLACE)
-                        .type(new GraphQLList(topographicPlaceObjectType))
-                        .description("Find topographic places")
-                        .arguments(createFindTopographicPlaceArguments(allVersionsArgument))
-                        )
-                .field(newFieldDefinition()
-                        .name(FIND_PATH_LINK)
-                        .type(new GraphQLList(pathLinkObjectType))
-                        .description("Find path links")
-                        .arguments(createFindPathLinkArguments(allVersionsArgument))
-                        )
-                .field(newFieldDefinition()
-                        .name(FIND_PARKING)
-                        .type(new GraphQLList(parkingObjectType))
-                        .description("Find parking")
-                        .arguments(createFindParkingArguments(allVersionsArgument))
-                        )
-                .field(newFieldDefinition()
-                        .name(VALID_TRANSPORT_MODES)
-                        .type(new GraphQLList(transportModeSubmodeObjectType))
-                        .description("List all valid Transportmode/Submode-combinations."))
-                .field(newFieldDefinition()
-                        .name(TAGS)
-                        .type(new GraphQLList(typeRegistry.getTagTypeFactory().createTypes().getFirst()))
-                        .description(TAGS_DESCRIPTION)
-                        .argument(GraphQLArgument.newArgument()
-                            .name(TAG_NAME)
-                            .description(TAG_NAME_DESCRIPTION)
-                            .type(new GraphQLNonNull(GraphQLString)))
-                        .build())
-                .field(newFieldDefinition()
-                        .name(GROUP_OF_STOP_PLACES)
-                        .type(new GraphQLList(groupOfStopPlacesObjectType))
-                        .description("Group of stop places")
-                        .arguments(createFindGroupOfStopPlacesArguments())
-                        .build())
-                .field(newFieldDefinition()
-                        .name(PURPOSE_OF_GROUPING)
-                        .type(new GraphQLList(purposeOfGroupingType))
-                        .description("List all purpose of grouping")
-                        .arguments(createFindPurposeOfGroupingArguments()))
-
-                .field(newFieldDefinition()
-                        .name(GROUP_OF_TARIFF_ZONES)
-                        .type(new GraphQLList(groupOfTariffZonesObjectType))
-                        .description("Group of tariff zones")
-                        .arguments(createFindGroupOfTariffZonesArguments())
-                        .build())
-                .field(newFieldDefinition()
-                        .name(TARIFF_ZONES)
-                        .type(new GraphQLList(tariffZoneObjectType))
-                        .description("Tariff zones")
-                        .arguments(createFindTariffZonesArguments())
-                        .build())
-                .field(newFieldDefinition()
-                        .name(FARE_ZONES)
-                        .type(new GraphQLList(fareZoneObjectType))
-                        .description("Fare zones")
-                        .arguments(createFindFareZonesArguments())
-                        .build())
-                .field(newFieldDefinition()
-                        .name(FARE_ZONES_AUTHORITIES)
-                        .type(new GraphQLList(GraphQLString))
-                        .description("List all fare zone authorities.")
-                        .build())
-                .field(newFieldDefinition()
-                                        .name(USER_PERMISSIONS)
-                                        .description("User permissions")
-                                        .type(userPermissionsObjectType)
-
-                        .build())
-                .field(newFieldDefinition()
-                        .name(LOCATION_PERMISSIONS)
-                        .description("Location permissions")
-                        .type(entityPermissionObjectType)
-                        .arguments(createLocationArguments()))
-                .build();
-
-
-        // Get common input fields from factory
-        List<GraphQLInputObjectField> commonInputFieldList = typeRegistry.getCommonFieldsFactory().createCommonInputFieldList(embeddableMultiLingualStringInputObjectType);
-
-        // Get Quay input type from factory (second element in list)
-        GraphQLInputObjectType quayInputObjectType = (GraphQLInputObjectType) quayTypes.get(1);
-
-        // Get ValidBetween input type from factory (second element in list)
-        GraphQLInputObjectType validBetweenInputObjectType = (GraphQLInputObjectType) validBetweenTypes.get(1);
-
-        GraphQLInputObjectType stopPlaceInputObjectType = createStopPlaceInputObjectType(commonInputFieldList,
-                topographicPlaceInputObjectType, quayInputObjectType, validBetweenInputObjectType);
-
-        GraphQLInputObjectType parentStopPlaceInputObjectType = typeRegistry.getParentStopPlaceInputTypeFactory().createParentStopPlaceInputType(commonInputFieldList, validBetweenInputObjectType, stopPlaceInputObjectType);
-
-        GraphQLInputObjectType parkingInputObjectType = createParkingInputObjectType(validBetweenInputObjectType);
-
-        // Get GroupOfStopPlaces input type from factory
-        GraphQLInputObjectType groupOfStopPlacesInputObjectType = (GraphQLInputObjectType) typeRegistry.getGroupOfStopPlacesInputTypeFactory().createTypes().getFirst();
-
-        // Get PurposeOfGrouping input type from factory
-        GraphQLInputObjectType purposeOfGroupingInputObjectType = (GraphQLInputObjectType) typeRegistry.getPurposeOfGroupingInputTypeFactory().createTypes().getFirst();
-
-        GraphQLObjectType stopPlaceRegisterMutation = newObject()
-                .name(STOPPLACES_MUTATION)
-                .description("Create and edit stopplaces")
-                .field(newFieldDefinition()
-                        .type(new GraphQLList(stopPlaceObjectType))
-                        .name(MUTATE_STOPPLACE)
-                        .description("Create new or update existing StopPlace")
-                        .argument(GraphQLArgument.newArgument()
-                                .name(OUTPUT_TYPE_STOPPLACE)
-                                .type(stopPlaceInputObjectType))
-                        )
-                .field(newFieldDefinition()
-                        .type(new GraphQLList(parentStopPlaceObjectType))
-                        .name(MUTATE_PARENT_STOPPLACE)
-                        .description("Update existing Parent StopPlace")
-                        .argument(GraphQLArgument.newArgument()
-                                .name(OUTPUT_TYPE_PARENT_STOPPLACE)
-                                .type(parentStopPlaceInputObjectType))
-                        )
-                .field(newFieldDefinition()
-                        .name(MUTATE_GROUP_OF_STOP_PLACES)
-                        .type(groupOfStopPlacesObjectType)
-                        .description("Mutate group of stop places")
-                        .argument(GraphQLArgument.newArgument()
-                                .name(OUTPUT_TYPE_GROUP_OF_STOPPLACES)
-                                .type(groupOfStopPlacesInputObjectType))
-                        )
-                .field(newFieldDefinition()
-                        .name(MUTATE_PURPOSE_OF_GROUPING)
-                        .type(purposeOfGroupingType)
-                        .description("Mutate purpose of grouping")
-                        .argument(GraphQLArgument.newArgument().
-                                name(OUTPUT_TYPE_PURPOSE_OF_GROUPING)
-                                .type(purposeOfGroupingInputObjectType))
-                        )
-                .field(newFieldDefinition()
-                        .type(new GraphQLList(pathLinkObjectType))
-                        .name(MUTATE_PATH_LINK)
-                        .description("Create new or update existing PathLink")
-                        .argument(GraphQLArgument.newArgument()
-                                .name(OUTPUT_TYPE_PATH_LINK)
-                                .type(new GraphQLList(pathLinkObjectInputType)))
-                        .description("Create new or update existing " + OUTPUT_TYPE_PATH_LINK)
-                        )
-                .field(newFieldDefinition()
-                        .type(new GraphQLList(parkingObjectType))
-                        .name(MUTATE_PARKING)
-                        .argument(GraphQLArgument.newArgument()
-                                .name(OUTPUT_TYPE_PARKING)
-                                .type(new GraphQLList(parkingInputObjectType)))
-                        .description("Create new or update existing " + OUTPUT_TYPE_PARKING))
-                .field(newFieldDefinition()
-                        .type(tariffZoneObjectType)
-                        .name(TERMINATE_TARIFF_ZONE)
-                        .description("TariffZone will be terminated and no longer be active after the given date.")
-                        .argument(newArgument().name(TARIFF_ZONE_ID).type(new GraphQLNonNull(GraphQLString)))
-                        .argument(newArgument().name(VALID_BETWEEN_TO_DATE).type(new GraphQLNonNull(servicesRegistry.getDateScalar().getGraphQLDateScalar())))
-                        .argument(newArgument().name(VERSION_COMMENT).type(GraphQLString))
-                        )
-                .fields(operationsRegistry.getTagOperationsBuilder().getTagOperations())
-                .fields(operationsRegistry.getStopPlaceOperationsBuilder().getStopPlaceOperations(stopPlaceInterface))
-                .fields(operationsRegistry.getParkingOperationsBuilder().getParkingOperations())
-                .fields(operationsRegistry.getMultiModalityOperationsBuilder().getMultiModalityOperations(parentStopPlaceObjectType, validBetweenInputObjectType))
-                .field(newFieldDefinition()
-                        .type(GraphQLBoolean)
-                        .name(DELETE_GROUP_OF_STOPPLACES)
-                        .argument(GraphQLArgument.newArgument()
-                                .name(ID)
-                                .type(new GraphQLNonNull(GraphQLString)))
-                        .description("Hard delete group of stop places by ID")
-                        )
-                .build();
-
-        stopPlaceRegisterSchema = GraphQLSchema.newSchema()
-                .query(stopPlaceRegisterQuery)
-                .mutation(stopPlaceRegisterMutation)
-                .codeRegistry(buildCodeRegistry(stopPlaceTypeResolver))
-                .build();
     }
 
-    public GraphQLCodeRegistry buildCodeRegistry(TypeResolver stopPlaceTypeResolver) {
-        GraphQLCodeRegistry.Builder codeRegistryBuilder = GraphQLCodeRegistry.newCodeRegistry();
-        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_STOPPLACE, IMPORTED_ID, getOriginalIdsFetcher());
+    /**
+     * Data fetcher for creating a multi-modal parent stop place.
+     * Validates input and delegates to MultiModalStopPlaceEditor.
+     *
+     * @param environment GraphQL environment containing input arguments
+     * @return Created parent stop place
+     * @throws IllegalArgumentException if input validation fails
+     */
+    private StopPlace createMultiModalStopPlaceFetcher(DataFetchingEnvironment environment) {
+        Map input = environment.getArgument("input");
 
-        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_STOPPLACE, CHANGED_BY, getChangedByFetcher(authorizationService));
-        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_PARENT_STOPPLACE, CHANGED_BY, getChangedByFetcher(authorizationService));
+        if (input == null) {
+            throw new IllegalArgumentException("input is not specified");
+        }
 
-        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_PARENT_STOPPLACE, IMPORTED_ID, getOriginalIdsFetcher());
-        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_QUAY, IMPORTED_ID, getOriginalIdsFetcher());
-        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_STOPPLACE, ID, getNetexIdFetcher());
+        ValidBetween validBetween = servicesRegistry.getValidBetweenMapper().map((Map) input.get(VALID_BETWEEN));
+        String versionComment = (String) input.get(VERSION_COMMENT);
+        Point geoJsonPoint = servicesRegistry.getGeometryMapper().createGeoJsonPoint((Map) input.get(GEOMETRY));
+        EmbeddableMultilingualString name = getEmbeddableString((Map) input.get(NAME));
 
-        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_STOPPLACE, PERMISSIONS, dataFetcherRegistry.getEntityPermissionsFetcher());
-        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_PARENT_STOPPLACE, PERMISSIONS, dataFetcherRegistry.getEntityPermissionsFetcher());
-        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_GROUP_OF_STOPPLACES, PERMISSIONS, dataFetcherRegistry.getEntityPermissionsFetcher());
+        @SuppressWarnings("unchecked")
+        List<String> stopPlaceIds = (List<String>) input.get(STOP_PLACE_IDS);
 
-        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_STOPPLACE, TARIFF_ZONES, dataFetcherRegistry.getStopPlaceTariffZoneFetcher());
-        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_PARENT_STOPPLACE, TARIFF_ZONES, dataFetcherRegistry.getStopPlaceTariffZoneFetcher());
+        return servicesRegistry.getParentStopPlaceEditor().createMultiModalParentStopPlace(stopPlaceIds, name, validBetween, versionComment, geoJsonPoint);
+    }
 
-        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_ACCESSIBILITY_ASSESSMENT, ID, getNetexIdFetcher());
-        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_ACCESSIBILITY_ASSESSMENT , LIMITATIONS,
-                env -> {
-                    List<AccessibilityLimitation> limitations = ((AccessibilityAssessment) env.getSource()).getLimitations();
-                    if (limitations != null && !limitations.isEmpty()) {
-                        return limitations.getFirst();
-                    }
-                    return null;
-                }
-                );
+    /**
+     * Data fetcher for adding stop places to an existing multi-modal parent.
+     * Validates input and delegates to MultiModalStopPlaceEditor.
+     *
+     * @param environment GraphQL environment containing input arguments
+     * @return Updated parent stop place
+     * @throws IllegalArgumentException if input validation fails
+     */
+    private StopPlace addToMultiModalStopPlaceFetcher(DataFetchingEnvironment environment) {
+        Map input = environment.getArgument("input");
 
-        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_ACCESSIBILITY_LIMITATIONS , ID, getNetexIdFetcher());
-        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_ACCESSIBILITY_LIMITATIONS , ID, getNetexIdFetcher());
-        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_PURPOSE_OF_GROUPING , ID, getNetexIdFetcher());
+        if (input == null) {
+            throw new IllegalArgumentException("input is not specified");
+        }
 
-        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_STOPPLACE, TAGS, dataFetcherRegistry.getTagFetcher());
-        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_PARENT_STOPPLACE, TAGS, dataFetcherRegistry.getTagFetcher());
+        if (input.get(PARENT_SITE_REF) == null) {
+            throw new IllegalArgumentException("Parent site ref cannot be null for this operation: " + ADD_TO_MULTI_MODAL_STOP_PLACE_INPUT);
+        }
 
-        dataFetcherGeometry(codeRegistryBuilder, OUTPUT_TYPE_STOPPLACE);
-        dataFetcherGeometry(codeRegistryBuilder, OUTPUT_TYPE_PARENT_STOPPLACE);
-        dataFetcherGeometry(codeRegistryBuilder, OUTPUT_TYPE_QUAY);
-        dataFetcherGeometry(codeRegistryBuilder, OUTPUT_TYPE_PARKING);
-        dataFetcherGeometry(codeRegistryBuilder, OUTPUT_TYPE_TARIFF_ZONE);
-        dataFetcherGeometry(codeRegistryBuilder, OUTPUT_TYPE_FARE_ZONE);
-        dataFetcherGeometry(codeRegistryBuilder, OUTPUT_TYPE_BOARDING_POSITION);
+        String parentSiteRef = (String) input.get(PARENT_SITE_REF);
+        ValidBetween validBetween = servicesRegistry.getValidBetweenMapper().map((Map) input.get(VALID_BETWEEN));
+        String versionComment = (String) input.get(VERSION_COMMENT);
 
+        if (input.get(STOP_PLACE_IDS) == null) {
+            throw new IllegalArgumentException("List of " + STOP_PLACE_IDS + " cannot be null");
+        }
 
-        dataFetcherPlaceEquipments(codeRegistryBuilder, OUTPUT_TYPE_STOPPLACE);
-        dataFetcherPlaceEquipments(codeRegistryBuilder, OUTPUT_TYPE_PARENT_STOPPLACE);
-        dataFetcherPlaceEquipments(codeRegistryBuilder, OUTPUT_TYPE_QUAY);
+        @SuppressWarnings("unchecked")
+        List<String> stopPlaceIds = (List<String>) input.get(STOP_PLACE_IDS);
 
+        return servicesRegistry.getParentStopPlaceEditor().addToMultiModalParentStopPlace(parentSiteRef, stopPlaceIds, validBetween, versionComment);
+    }
 
-        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_STOPPLACE, STOP_PLACE_GROUPS, dataFetcherRegistry.getStopPlaceGroupsFetcher());
-        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_PARENT_STOPPLACE, STOP_PLACE_GROUPS, dataFetcherRegistry.getStopPlaceGroupsFetcher());
+    /**
+     * Fetches the first accessibility limitation from an AccessibilityAssessment.
+     * Returns null if no limitations exist.
+     *
+     * @return DataFetcher for accessibility limitations
+     */
+    private static DataFetcher<AccessibilityLimitation> getAccessibilityLimitationsFetcher() {
+        return env -> {
+            List<AccessibilityLimitation> limitations = ((AccessibilityAssessment) env.getSource()).getLimitations();
+            if (limitations != null && !limitations.isEmpty()) {
+                return limitations.getFirst();
+            }
+            return null;
+        };
+    }
 
-
-        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_STOPPLACE, FARE_ZONES, dataFetcherRegistry.getStopPlaceFareZoneFetcher());
-        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_PARENT_STOPPLACE, FARE_ZONES, dataFetcherRegistry.getStopPlaceFareZoneFetcher());
-
-        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_PARENT_STOPPLACE, ID, getNetexIdFetcher());
-        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_QUAY, ID, getNetexIdFetcher());
-        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_GROUP_OF_STOPPLACES,ID,getNetexIdFetcher());
-
-        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_TARIFF_ZONE,ID,getNetexIdFetcher());
-        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_FARE_ZONE,ID,getNetexIdFetcher());
-
-        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_PARKING,ID,getNetexIdFetcher());
-
-        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_STOPPLACE, KEY_VALUES, dataFetcherRegistry.getKeyValuesDataFetcher());
-        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_PARENT_STOPPLACE, KEY_VALUES, dataFetcherRegistry.getKeyValuesDataFetcher());
-        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_TARIFF_ZONE, KEY_VALUES, dataFetcherRegistry.getKeyValuesDataFetcher());
-        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_FARE_ZONE, KEY_VALUES, dataFetcherRegistry.getKeyValuesDataFetcher());
-        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_QUAY, KEY_VALUES, dataFetcherRegistry.getKeyValuesDataFetcher());
-
-        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_STOPPLACE, POLYGON, dataFetcherRegistry.getPolygonFetcher());
-        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_PARENT_STOPPLACE, POLYGON, dataFetcherRegistry.getPolygonFetcher());
-        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_TARIFF_ZONE, POLYGON, dataFetcherRegistry.getPolygonFetcher());
-        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_FARE_ZONE, POLYGON, dataFetcherRegistry.getPolygonFetcher());
-        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_QUAY, POLYGON, dataFetcherRegistry.getPolygonFetcher());
-
-        registerDataFetcher(codeRegistryBuilder, STOPPLACES_REGISTER, VALID_TRANSPORT_MODES, env -> servicesRegistry.getTransportModeScalar().getConfiguredTransportModes().keySet());
-
-        registerDataFetcher(codeRegistryBuilder, STOPPLACES_REGISTER, FIND_STOPPLACE, dataFetcherRegistry.getStopPlaceFetcher());
-        registerDataFetcher(codeRegistryBuilder, STOPPLACES_REGISTER, FIND_STOPPLACE_BY_BBOX, dataFetcherRegistry.getStopPlaceFetcher());
-        registerDataFetcher(codeRegistryBuilder, STOPPLACES_REGISTER, FIND_TOPOGRAPHIC_PLACE, dataFetcherRegistry.getTopographicPlaceFetcher());
-        registerDataFetcher(codeRegistryBuilder, STOPPLACES_REGISTER, FIND_PATH_LINK, dataFetcherRegistry.getPathLinkFetcher());
-        registerDataFetcher(codeRegistryBuilder, STOPPLACES_REGISTER, FIND_PARKING, dataFetcherRegistry.getParkingFetcher());
-        registerDataFetcher(codeRegistryBuilder, STOPPLACES_REGISTER, TAGS, dataFetcherRegistry.getTagFetcher());
-        registerDataFetcher(codeRegistryBuilder, STOPPLACES_REGISTER, GROUP_OF_STOP_PLACES, dataFetcherRegistry.getGroupOfStopPlacesFetcher());
-        registerDataFetcher(codeRegistryBuilder, STOPPLACES_REGISTER, PURPOSE_OF_GROUPING, dataFetcherRegistry.getPurposeOfGroupingFetcher());
-        registerDataFetcher(codeRegistryBuilder, STOPPLACES_REGISTER, GROUP_OF_TARIFF_ZONES, dataFetcherRegistry.getGroupOfTariffZonesFetcher());
-        registerDataFetcher(codeRegistryBuilder, STOPPLACES_REGISTER, TARIFF_ZONES, dataFetcherRegistry.getTariffZonesFetcher());
-        registerDataFetcher(codeRegistryBuilder, STOPPLACES_REGISTER, FARE_ZONES, dataFetcherRegistry.getFareZonesFetcher());
-        registerDataFetcher(codeRegistryBuilder, STOPPLACES_REGISTER, FARE_ZONES_AUTHORITIES, dataFetcherRegistry.getFareZoneAuthoritiesFetcher());
-
-
-        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_GEO_JSON, TYPE, env -> {
+    /**
+     * Fetches the geometry type name for GeoJSON output.
+     * Returns the simple class name of the Geometry subclass.
+     *
+     * @return DataFetcher for GeoJSON type
+     */
+    private static DataFetcher<String> getGeoJsonTypeFetcher() {
+        return env -> {
             if (env.getSource() instanceof Geometry geometry) {
                 return geometry.getClass().getSimpleName();
             }
             return null;
-        });
+        };
+    }
 
-        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_PLACE_EQUIPMENTS,ID,getNetexIdFetcher());
-        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_PLACE_EQUIPMENTS,WAITING_ROOM_EQUIPMENT,env -> getEquipmentOfType(WaitingRoomEquipment.class, env));
-        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_PLACE_EQUIPMENTS,SANITARY_EQUIPMENT,env -> getEquipmentOfType(SanitaryEquipment.class, env));
-        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_PLACE_EQUIPMENTS,TICKETING_EQUIPMENT,env -> getEquipmentOfType(TicketingEquipment.class, env));
-        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_PLACE_EQUIPMENTS,SHELTER_EQUIPMENT,env -> getEquipmentOfType(ShelterEquipment.class, env));
-        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_PLACE_EQUIPMENTS,CYCLE_STORAGE_EQUIPMENT,env -> getEquipmentOfType(CycleStorageEquipment.class, env));
-        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_PLACE_EQUIPMENTS,GENERAL_SIGN,env -> getEquipmentOfType(GeneralSign.class, env));
-        registerDataFetcher(codeRegistryBuilder,"TransportModes","transportMode",env -> env.getSource());
-        registerDataFetcher(codeRegistryBuilder,"TransportModes","submode",env ->getValidSubmodes(env.getSource()));
-        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_PARKING,PARENT_SITE_REF,env -> {
+    /**
+     * Fetches the parent site reference string from a Parking entity.
+     * Returns null if parentSiteRef is not set.
+     *
+     * @return DataFetcher for parking parent site reference
+     */
+    private static DataFetcher<String> getParkingParentSiteRefFetcher() {
+        return env -> {
             SiteRefStructure parentSiteRef = ((Parking) env.getSource()).getParentSiteRef();
             if (parentSiteRef != null) {
                 return parentSiteRef.getRef();
             }
             return null;
-        });
+        };
+    }
 
-        mapNetexId(codeRegistryBuilder, OUTPUT_TYPE_SHELTER_EQUIPMENT, OUTPUT_TYPE_SANITARY_EQUIPMENT, OUTPUT_TYPE_CYCLE_STORAGE_EQUIPMENT, OUTPUT_TYPE_GENERAL_SIGN_EQUIPMENT, OUTPUT_TYPE_TICKETING_EQUIPMENT, OUTPUT_TYPE_WAITING_ROOM_EQUIPMENT);
-        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_BOARDING_POSITION,ID,getNetexIdFetcher());
-
-        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_ENTITY_REF,ADDRESSABLE_PLACE,dataFetcherRegistry.getReferenceFetcher());
-
-        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_FARE_ZONE,FARE_ZONES_AUTHORITY_REF,env -> env.getSource() instanceof FareZone fareZone ? fareZone.getTransportOrganisationRef() : null);
-        // Use factory for FareZone data fetchers
-        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_FARE_ZONE,FARE_ZONES_NEIGHBOURS,env -> typeRegistry.getFareZoneTypeFactory().fareZoneNeighboursType(env));
-        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_FARE_ZONE,FARE_ZONES_MEMBERS,env -> typeRegistry.getFareZoneTypeFactory().fareZoneMemberType(env));
-
-        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_GROUP_OF_STOPPLACES,PURPOSE_OF_GROUPING,dataFetcherRegistry.getGroupOfStopPlacesPurposeOfGroupingFetcher());
-        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_GROUP_OF_STOPPLACES,GROUP_OF_STOP_PLACES_MEMBERS,dataFetcherRegistry.getGroupOfStopPlacesMembersFetcher());
-
-        // Use factory for GroupOfTariffZones data fetchers
-        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_GROUP_OF_TARIFF_ZONES,GROUP_OF_TARIFF_ZONES_MEMBERS,env -> typeRegistry.getGroupOfTariffZonesTypeFactory().groupOfTariffZoneMembersType(env));
-        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_GROUP_OF_TARIFF_ZONES,ID,getNetexIdFetcher());
-
-        // Use factory for PathLink data fetchers
-        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_TRANSFER_DURATION,DEFAULT_DURATION,typeRegistry.getPathLinkTypeFactory().durationSecondsFetcher());
-        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_TRANSFER_DURATION,FREQUENT_TRAVELLER_DURATION,typeRegistry.getPathLinkTypeFactory().durationSecondsFetcher());
-        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_TRANSFER_DURATION,OCCASIONAL_TRAVELLER_DURATION,typeRegistry.getPathLinkTypeFactory().durationSecondsFetcher());
-        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_TRANSFER_DURATION,MOBILITY_RESTRICTED_TRAVELLER_DURATION,typeRegistry.getPathLinkTypeFactory().durationSecondsFetcher());
-
-        // topographic place data fetchers
-        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_TOPOGRAPHIC_PLACE,ID,env -> {
+    /**
+     * Fetches the NetEx ID from a TopographicPlace entity.
+     * Returns null if source is not a TopographicPlace.
+     *
+     * @return DataFetcher for topographic place ID
+     */
+    private static DataFetcher<String> getTopographicPlaceIdFetcher() {
+        return env -> {
             TopographicPlace topographicPlace = (TopographicPlace) env.getSource();
             if (topographicPlace != null) {
                 return topographicPlace.getNetexId();
             } else {
                 return null;
             }
-        });
-        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_TOPOGRAPHIC_PLACE,PARENT_TOPOGRAPHIC_PLACE,env -> {
-            if(env.getSource() instanceof  TopographicPlace topographicPlace) {
-                if(topographicPlace.getParentTopographicPlaceRef() != null) {
-                    return servicesRegistry.getTopographicPlaceRepository().findFirstByNetexIdAndVersion(topographicPlace.getParentTopographicPlaceRef().getRef(), Long.parseLong(topographicPlace.getParentTopographicPlaceRef().getVersion()));
+        };
+    }
+
+    /**
+     * Fetches the parent topographic place from a TopographicPlace entity.
+     * Looks up parent by reference if parentTopographicPlaceRef is set.
+     *
+     * @return DataFetcher for parent topographic place
+     */
+    private DataFetcher<TopographicPlace> getParentTopographicPlaceFetcher() {
+        return env -> {
+            if (env.getSource() instanceof TopographicPlace topographicPlace) {
+                if (topographicPlace.getParentTopographicPlaceRef() != null) {
+                    return servicesRegistry.getTopographicPlaceRepository().findFirstByNetexIdAndVersion(
+                            topographicPlace.getParentTopographicPlaceRef().getRef(),
+                            Long.parseLong(topographicPlace.getParentTopographicPlaceRef().getVersion())
+                    );
                 }
             }
             return null;
-        });
-        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_TOPOGRAPHIC_PLACE,POLYGON,dataFetcherRegistry.getPolygonFetcher());
+        };
+    }
 
-        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_STOPPLACE,SUBMODE,env -> servicesRegistry.getTransportModeScalar().resolveSubmode(env));
-        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_STOPPLACE,PARENT_SITE_REF,env -> {
+    /**
+     * Fetches the parent site reference string from a StopPlace entity.
+     * Returns null if parentSiteRef is not set.
+     *
+     * @return DataFetcher for stop place parent site reference
+     */
+    private static DataFetcher<String> getStopPlaceParentSiteRefFetcher() {
+        return env -> {
             SiteRefStructure parentSiteRef = ((StopPlace) env.getSource()).getParentSiteRef();
             if (parentSiteRef != null) {
                 return parentSiteRef.getRef();
             }
             return null;
-        });
+        };
+    }
 
-        registerDataFetcher(codeRegistryBuilder,STOPPLACES_REGISTER,USER_PERMISSIONS,dataFetcherRegistry.getUserPermissionsFetcher());
-        registerDataFetcher(codeRegistryBuilder,STOPPLACES_REGISTER,LOCATION_PERMISSIONS,dataFetcherRegistry.getLocationPermissionsFetcher());
+    /**
+     * Registers data fetchers for common entity fields shared across multiple types.
+     * Includes: ID, importedId, changedBy, permissions fields.
+     *
+     * @param builder The code registry builder to register fetchers on
+     */
+    private void registerEntityCommonFields(GraphQLCodeRegistry.Builder builder) {
+        // ID fields for main entity types
+        registerDataFetcher(builder, OUTPUT_TYPE_STOPPLACE, ID, getNetexIdFetcher());
+        registerDataFetcher(builder, OUTPUT_TYPE_PARENT_STOPPLACE, ID, getNetexIdFetcher());
+        registerDataFetcher(builder, OUTPUT_TYPE_QUAY, ID, getNetexIdFetcher());
+        registerDataFetcher(builder, OUTPUT_TYPE_GROUP_OF_STOPPLACES, ID, getNetexIdFetcher());
+        registerDataFetcher(builder, OUTPUT_TYPE_TARIFF_ZONE, ID, getNetexIdFetcher());
+        registerDataFetcher(builder, OUTPUT_TYPE_FARE_ZONE, ID, getNetexIdFetcher());
+        registerDataFetcher(builder, OUTPUT_TYPE_PARKING, ID, getNetexIdFetcher());
+        registerDataFetcher(builder, OUTPUT_TYPE_BOARDING_POSITION, ID, getNetexIdFetcher());
 
+        // ImportedId fields
+        registerDataFetcher(builder, OUTPUT_TYPE_STOPPLACE, IMPORTED_ID, getOriginalIdsFetcher());
+        registerDataFetcher(builder, OUTPUT_TYPE_PARENT_STOPPLACE, IMPORTED_ID, getOriginalIdsFetcher());
+        registerDataFetcher(builder, OUTPUT_TYPE_QUAY, IMPORTED_ID, getOriginalIdsFetcher());
 
-        //mutation
+        // ChangedBy fields
+        registerDataFetcher(builder, OUTPUT_TYPE_STOPPLACE, CHANGED_BY, getChangedByFetcher(authorizationService));
+        registerDataFetcher(builder, OUTPUT_TYPE_PARENT_STOPPLACE, CHANGED_BY, getChangedByFetcher(authorizationService));
 
-        registerDataFetcher(codeRegistryBuilder,STOPPLACES_MUTATION,MUTATE_PARKING,dataFetcherRegistry.getParkingUpdater());
-        registerDataFetcher(codeRegistryBuilder,STOPPLACES_MUTATION,MUTATE_STOPPLACE,dataFetcherRegistry.getStopPlaceUpdater());
-        registerDataFetcher(codeRegistryBuilder,STOPPLACES_MUTATION,MUTATE_PARENT_STOPPLACE,dataFetcherRegistry.getStopPlaceUpdater());
-        registerDataFetcher(codeRegistryBuilder,STOPPLACES_MUTATION,MUTATE_GROUP_OF_STOP_PLACES,dataFetcherRegistry.getGroupOfStopPlacesUpdater());
-        registerDataFetcher(codeRegistryBuilder,STOPPLACES_MUTATION,MUTATE_PURPOSE_OF_GROUPING,dataFetcherRegistry.getPurposeOfGroupingUpdater());
-        registerDataFetcher(codeRegistryBuilder,STOPPLACES_MUTATION,MUTATE_PATH_LINK,dataFetcherRegistry.getPathLinkUpdater());
-        registerDataFetcher(codeRegistryBuilder,STOPPLACES_MUTATION,TERMINATE_TARIFF_ZONE, env -> servicesRegistry.getTariffZoneTerminator().terminateTariffZone(env.getArgument(TARIFF_ZONE_ID), env.getArgument(VALID_BETWEEN_TO_DATE), env.getArgument(VERSION_COMMENT)));
-        registerDataFetcher(codeRegistryBuilder,STOPPLACES_MUTATION,DELETE_GROUP_OF_STOPPLACES,dataFetcherRegistry.getGroupOfStopPlacesDeleterFetcher());
-        registerDataFetcher(codeRegistryBuilder,STOPPLACES_MUTATION,CREATE_MULTI_MODAL_STOPPLACE,
-                environment -> {
-                    Map input = environment.getArgument("input");
+        // Permissions fields
+        registerDataFetcher(builder, OUTPUT_TYPE_STOPPLACE, PERMISSIONS, dataFetcherRegistry.getEntityPermissionsFetcher());
+        registerDataFetcher(builder, OUTPUT_TYPE_PARENT_STOPPLACE, PERMISSIONS, dataFetcherRegistry.getEntityPermissionsFetcher());
+        registerDataFetcher(builder, OUTPUT_TYPE_GROUP_OF_STOPPLACES, PERMISSIONS, dataFetcherRegistry.getEntityPermissionsFetcher());
 
-                    if(input == null) {
-                        throw new IllegalArgumentException("input is not specified");
-                    }
+        // Accessibility fields
+        registerDataFetcher(builder, OUTPUT_TYPE_ACCESSIBILITY_ASSESSMENT, ID, getNetexIdFetcher());
+        registerDataFetcher(builder, OUTPUT_TYPE_ACCESSIBILITY_ASSESSMENT, LIMITATIONS, getAccessibilityLimitationsFetcher());
+        registerDataFetcher(builder, OUTPUT_TYPE_ACCESSIBILITY_LIMITATIONS, ID, getNetexIdFetcher());
+        registerDataFetcher(builder, OUTPUT_TYPE_PURPOSE_OF_GROUPING, ID, getNetexIdFetcher());
+    }
 
-                    ValidBetween validBetween = servicesRegistry.getValidBetweenMapper().map((Map) input.get(VALID_BETWEEN));
-                    String versionComment = (String) input.get(VERSION_COMMENT);
-                    Point geoJsonPoint = servicesRegistry.getGeometryMapper().createGeoJsonPoint((Map) input.get(GEOMETRY));
-                    EmbeddableMultilingualString name = getEmbeddableString((Map) input.get(NAME));
+    /**
+     * Registers data fetchers for entity-specific fields.
+     * Includes: tags, geometry, placeEquipments, tariffZones, fareZones, stopPlaceGroups, keyValues, polygon.
+     *
+     * @param builder The code registry builder to register fetchers on
+     */
+    private void registerEntitySpecificFields(GraphQLCodeRegistry.Builder builder) {
+        // Tags
+        registerDataFetcher(builder, OUTPUT_TYPE_STOPPLACE, TAGS, dataFetcherRegistry.getTagFetcher());
+        registerDataFetcher(builder, OUTPUT_TYPE_PARENT_STOPPLACE, TAGS, dataFetcherRegistry.getTagFetcher());
 
-                    @SuppressWarnings("unchecked")
-                    List<String> stopPlaceIds = (List<String>) input.get(STOP_PLACE_IDS);
+        // Geometry
+        dataFetcherGeometry(builder, OUTPUT_TYPE_STOPPLACE);
+        dataFetcherGeometry(builder, OUTPUT_TYPE_PARENT_STOPPLACE);
+        dataFetcherGeometry(builder, OUTPUT_TYPE_QUAY);
+        dataFetcherGeometry(builder, OUTPUT_TYPE_PARKING);
+        dataFetcherGeometry(builder, OUTPUT_TYPE_TARIFF_ZONE);
+        dataFetcherGeometry(builder, OUTPUT_TYPE_FARE_ZONE);
+        dataFetcherGeometry(builder, OUTPUT_TYPE_BOARDING_POSITION);
 
-                    return servicesRegistry.getParentStopPlaceEditor().createMultiModalParentStopPlace(stopPlaceIds, name, validBetween, versionComment, geoJsonPoint);
-                }
-                    );
+        // Place equipments
+        dataFetcherPlaceEquipments(builder, OUTPUT_TYPE_STOPPLACE);
+        dataFetcherPlaceEquipments(builder, OUTPUT_TYPE_PARENT_STOPPLACE);
+        dataFetcherPlaceEquipments(builder, OUTPUT_TYPE_QUAY);
 
-        registerDataFetcher(codeRegistryBuilder,STOPPLACES_MUTATION,ADD_TO_MULTIMODAL_STOPPLACE,
-                environment -> {
-                    Map input = environment.getArgument("input");
+        // Tariff zones
+        registerDataFetcher(builder, OUTPUT_TYPE_STOPPLACE, TARIFF_ZONES, dataFetcherRegistry.getStopPlaceTariffZoneFetcher());
+        registerDataFetcher(builder, OUTPUT_TYPE_PARENT_STOPPLACE, TARIFF_ZONES, dataFetcherRegistry.getStopPlaceTariffZoneFetcher());
 
-                    if(input == null) {
-                        throw new IllegalArgumentException("input is not specified");
-                    }
+        // Fare zones
+        registerDataFetcher(builder, OUTPUT_TYPE_STOPPLACE, FARE_ZONES, dataFetcherRegistry.getStopPlaceFareZoneFetcher());
+        registerDataFetcher(builder, OUTPUT_TYPE_PARENT_STOPPLACE, FARE_ZONES, dataFetcherRegistry.getStopPlaceFareZoneFetcher());
 
-                    if(input.get(PARENT_SITE_REF) == null) {
-                        throw new IllegalArgumentException("Parent site ref cannot be null for this operation" + ADD_TO_MULTI_MODAL_STOP_PLACE_INPUT);
-                    }
+        // Stop place groups
+        registerDataFetcher(builder, OUTPUT_TYPE_STOPPLACE, STOP_PLACE_GROUPS, dataFetcherRegistry.getStopPlaceGroupsFetcher());
+        registerDataFetcher(builder, OUTPUT_TYPE_PARENT_STOPPLACE, STOP_PLACE_GROUPS, dataFetcherRegistry.getStopPlaceGroupsFetcher());
 
-                    String parentSiteRef = (String) input.get(PARENT_SITE_REF);
+        // Key values
+        registerDataFetcher(builder, OUTPUT_TYPE_STOPPLACE, KEY_VALUES, dataFetcherRegistry.getKeyValuesDataFetcher());
+        registerDataFetcher(builder, OUTPUT_TYPE_PARENT_STOPPLACE, KEY_VALUES, dataFetcherRegistry.getKeyValuesDataFetcher());
+        registerDataFetcher(builder, OUTPUT_TYPE_TARIFF_ZONE, KEY_VALUES, dataFetcherRegistry.getKeyValuesDataFetcher());
+        registerDataFetcher(builder, OUTPUT_TYPE_FARE_ZONE, KEY_VALUES, dataFetcherRegistry.getKeyValuesDataFetcher());
+        registerDataFetcher(builder, OUTPUT_TYPE_QUAY, KEY_VALUES, dataFetcherRegistry.getKeyValuesDataFetcher());
 
-                    ValidBetween validBetween = servicesRegistry.getValidBetweenMapper().map((Map) input.get(VALID_BETWEEN));
-                    String versionComment = (String) input.get(VERSION_COMMENT);
+        // Polygon
+        registerDataFetcher(builder, OUTPUT_TYPE_STOPPLACE, POLYGON, dataFetcherRegistry.getPolygonFetcher());
+        registerDataFetcher(builder, OUTPUT_TYPE_PARENT_STOPPLACE, POLYGON, dataFetcherRegistry.getPolygonFetcher());
+        registerDataFetcher(builder, OUTPUT_TYPE_TARIFF_ZONE, POLYGON, dataFetcherRegistry.getPolygonFetcher());
+        registerDataFetcher(builder, OUTPUT_TYPE_FARE_ZONE, POLYGON, dataFetcherRegistry.getPolygonFetcher());
+        registerDataFetcher(builder, OUTPUT_TYPE_QUAY, POLYGON, dataFetcherRegistry.getPolygonFetcher());
+    }
 
-                    if(input.get(STOP_PLACE_IDS) == null) {
-                        throw new IllegalArgumentException("List of " + STOP_PLACE_IDS + "cannot be null");
-                    }
-                    @SuppressWarnings("unchecked")
-                    List<String> stopPlaceIds = (List<String>) input.get(STOP_PLACE_IDS);
+    /**
+     * Registers data fetchers for root-level query operations.
+     * Includes: find operations for all entity types, permissions, transport modes.
+     *
+     * @param builder The code registry builder to register fetchers on
+     */
+    private void registerQueryOperations(GraphQLCodeRegistry.Builder builder) {
+        // Transport modes
+        registerDataFetcher(builder, STOPPLACES_REGISTER, VALID_TRANSPORT_MODES,
+                env -> servicesRegistry.getTransportModeScalar().getConfiguredTransportModes().keySet());
 
-                    return servicesRegistry.getParentStopPlaceEditor().addToMultiModalParentStopPlace(parentSiteRef, stopPlaceIds, validBetween, versionComment);
-                }
-        );
-        registerDataFetcher(codeRegistryBuilder,STOPPLACES_MUTATION,REMOVE_FROM_MULTIMODAL_STOPPLACE,
-                environment -> servicesRegistry.getParentStopPlaceEditor().removeFromMultiModalStopPlace(environment.getArgument(PARENT_SITE_REF), environment.getArgument(STOP_PLACE_ID))
-        );
+        // Find operations
+        registerDataFetcher(builder, STOPPLACES_REGISTER, FIND_STOPPLACE, dataFetcherRegistry.getStopPlaceFetcher());
+        registerDataFetcher(builder, STOPPLACES_REGISTER, FIND_STOPPLACE_BY_BBOX, dataFetcherRegistry.getStopPlaceFetcher());
+        registerDataFetcher(builder, STOPPLACES_REGISTER, FIND_TOPOGRAPHIC_PLACE, dataFetcherRegistry.getTopographicPlaceFetcher());
+        registerDataFetcher(builder, STOPPLACES_REGISTER, FIND_PATH_LINK, dataFetcherRegistry.getPathLinkFetcher());
+        registerDataFetcher(builder, STOPPLACES_REGISTER, FIND_PARKING, dataFetcherRegistry.getParkingFetcher());
+        registerDataFetcher(builder, STOPPLACES_REGISTER, TAGS, dataFetcherRegistry.getTagFetcher());
+        registerDataFetcher(builder, STOPPLACES_REGISTER, GROUP_OF_STOP_PLACES, dataFetcherRegistry.getGroupOfStopPlacesFetcher());
+        registerDataFetcher(builder, STOPPLACES_REGISTER, PURPOSE_OF_GROUPING, dataFetcherRegistry.getPurposeOfGroupingFetcher());
+        registerDataFetcher(builder, STOPPLACES_REGISTER, GROUP_OF_TARIFF_ZONES, dataFetcherRegistry.getGroupOfTariffZonesFetcher());
+        registerDataFetcher(builder, STOPPLACES_REGISTER, TARIFF_ZONES, dataFetcherRegistry.getTariffZonesFetcher());
+        registerDataFetcher(builder, STOPPLACES_REGISTER, FARE_ZONES, dataFetcherRegistry.getFareZonesFetcher());
+        registerDataFetcher(builder, STOPPLACES_REGISTER, FARE_ZONES_AUTHORITIES, dataFetcherRegistry.getFareZoneAuthoritiesFetcher());
 
+        // Permissions
+        registerDataFetcher(builder, STOPPLACES_REGISTER, USER_PERMISSIONS, dataFetcherRegistry.getUserPermissionsFetcher());
+        registerDataFetcher(builder, STOPPLACES_REGISTER, LOCATION_PERMISSIONS, dataFetcherRegistry.getLocationPermissionsFetcher());
+    }
 
-        registerDataFetcher(codeRegistryBuilder,STOPPLACES_MUTATION,DELETE_PARKING, environment -> servicesRegistry.getParkingDeleter().deleteParking(environment.getArgument(PARKING_ID)));
+    /**
+     * Registers data fetchers for specialized nested types.
+     * Includes: GeoJSON, equipment, transport modes, FareZone, GroupOfStopPlaces,
+     * GroupOfTariffZones, PathLink, TopographicPlace, StopPlace specific fields.
+     *
+     * @param builder The code registry builder to register fetchers on
+     */
+    private void registerSpecializedTypeFetchers(GraphQLCodeRegistry.Builder builder) {
+        // GeoJSON type
+        registerDataFetcher(builder, OUTPUT_TYPE_GEO_JSON, TYPE, getGeoJsonTypeFetcher());
+        registerDataFetcher(builder, OUTPUT_TYPE_GEO_JSON, LEGACY_COORDINATES, getLegacyCoordinates());
 
+        // PlaceEquipments
+        registerDataFetcher(builder, OUTPUT_TYPE_PLACE_EQUIPMENTS, ID, getNetexIdFetcher());
+        registerDataFetcher(builder, OUTPUT_TYPE_PLACE_EQUIPMENTS, WAITING_ROOM_EQUIPMENT,
+                env -> getEquipmentOfType(WaitingRoomEquipment.class, env));
+        registerDataFetcher(builder, OUTPUT_TYPE_PLACE_EQUIPMENTS, SANITARY_EQUIPMENT,
+                env -> getEquipmentOfType(SanitaryEquipment.class, env));
+        registerDataFetcher(builder, OUTPUT_TYPE_PLACE_EQUIPMENTS, TICKETING_EQUIPMENT,
+                env -> getEquipmentOfType(TicketingEquipment.class, env));
+        registerDataFetcher(builder, OUTPUT_TYPE_PLACE_EQUIPMENTS, SHELTER_EQUIPMENT,
+                env -> getEquipmentOfType(ShelterEquipment.class, env));
+        registerDataFetcher(builder, OUTPUT_TYPE_PLACE_EQUIPMENTS, CYCLE_STORAGE_EQUIPMENT,
+                env -> getEquipmentOfType(CycleStorageEquipment.class, env));
+        registerDataFetcher(builder, OUTPUT_TYPE_PLACE_EQUIPMENTS, GENERAL_SIGN,
+                env -> getEquipmentOfType(GeneralSign.class, env));
 
-        registerDataFetcher(codeRegistryBuilder,STOPPLACES_MUTATION,MERGE_STOP_PLACES,environment -> servicesRegistry.getStopPlaceMerger().mergeStopPlaces(environment.getArgument(FROM_STOP_PLACE_ID), environment.getArgument(TO_STOP_PLACE_ID), environment.getArgument(FROM_VERSION_COMMENT), environment.getArgument(TO_VERSION_COMMENT), environment.getArgument(DRY_RUN)));
-        registerDataFetcher(codeRegistryBuilder,STOPPLACES_MUTATION,MERGE_QUAYS,environment -> servicesRegistry.getStopPlaceQuayMerger().mergeQuays(environment.getArgument(STOP_PLACE_ID), environment.getArgument(FROM_QUAY_ID), environment.getArgument(TO_QUAY_ID), environment.getArgument(VERSION_COMMENT), environment.getArgument(DRY_RUN)));
-        registerDataFetcher(codeRegistryBuilder,STOPPLACES_MUTATION,MOVE_QUAYS_TO_STOP,environment -> servicesRegistry.getStopPlaceQuayMover().moveQuays(environment.getArgument(QUAY_IDS), environment.getArgument(TO_STOP_PLACE_ID), environment.getArgument(FROM_VERSION_COMMENT), environment.getArgument(TO_VERSION_COMMENT)));
-        registerDataFetcher(codeRegistryBuilder,STOPPLACES_MUTATION,DELETE_STOP_PLACE,environment -> servicesRegistry.getStopPlaceDeleter().deleteStopPlace(environment.getArgument(STOP_PLACE_ID)));
-        registerDataFetcher(codeRegistryBuilder,STOPPLACES_MUTATION,TERMINATE_STOP_PLACE,environment -> servicesRegistry.getStopPlaceTerminator().terminateStopPlace(environment.getArgument(STOP_PLACE_ID), environment.getArgument(VALID_BETWEEN_TO_DATE), environment.getArgument(VERSION_COMMENT) , environment.getArgument(MODIFICATION_ENUMERATION)));
-        registerDataFetcher(codeRegistryBuilder,STOPPLACES_MUTATION,REOPEN_STOP_PLACE,environment -> servicesRegistry.getStopPlaceReopener().reopenStopPlace(environment.getArgument(STOP_PLACE_ID), environment.getArgument(VERSION_COMMENT)));
-        registerDataFetcher(codeRegistryBuilder,STOPPLACES_MUTATION,DELETE_QUAY_FROM_STOP_PLACE,environment -> servicesRegistry.getStopPlaceQuayDeleter().deleteQuay(environment.getArgument(STOP_PLACE_ID), environment.getArgument(QUAY_ID), environment.getArgument(VERSION_COMMENT)));
+        // Equipment type ID mapping
+        mapNetexId(builder, OUTPUT_TYPE_SHELTER_EQUIPMENT, OUTPUT_TYPE_SANITARY_EQUIPMENT,
+                OUTPUT_TYPE_CYCLE_STORAGE_EQUIPMENT, OUTPUT_TYPE_GENERAL_SIGN_EQUIPMENT,
+                OUTPUT_TYPE_TICKETING_EQUIPMENT, OUTPUT_TYPE_WAITING_ROOM_EQUIPMENT);
 
-        registerDataFetcher(codeRegistryBuilder,STOPPLACES_MUTATION,REMOVE_TAG,environment -> servicesRegistry.getTagRemover().removeTag(environment.getArgument(TAG_NAME), environment.getArgument(TAG_ID_REFERENCE), environment.getArgument(TAG_COMMENT)));
-        registerDataFetcher(codeRegistryBuilder,STOPPLACES_MUTATION,CREATE_TAG,environment -> servicesRegistry.getTagCreator().createTag(environment.getArgument(TAG_NAME), environment.getArgument(TAG_ID_REFERENCE), environment.getArgument(TAG_COMMENT)));
+        // BoardingPosition
+        registerDataFetcher(builder, OUTPUT_TYPE_BOARDING_POSITION, ID, getNetexIdFetcher());
 
-        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_GEO_JSON, LEGACY_COORDINATES,getLegacyCoordinates());
+        // Transport modes
+        registerDataFetcher(builder, "TransportModes", "transportMode", env -> env.getSource());
+        registerDataFetcher(builder, "TransportModes", "submode", env -> getValidSubmodes(env.getSource()));
+        registerDataFetcher(builder, OUTPUT_TYPE_STOPPLACE, SUBMODE,
+                env -> servicesRegistry.getTransportModeScalar().resolveSubmode(env));
 
+        // Parking
+        registerDataFetcher(builder, OUTPUT_TYPE_PARKING, PARENT_SITE_REF, getParkingParentSiteRefFetcher());
+
+        // StopPlace
+        registerDataFetcher(builder, OUTPUT_TYPE_STOPPLACE, PARENT_SITE_REF, getStopPlaceParentSiteRefFetcher());
+
+        // EntityRef
+        registerDataFetcher(builder, OUTPUT_TYPE_ENTITY_REF, ADDRESSABLE_PLACE, dataFetcherRegistry.getReferenceFetcher());
+
+        // FareZone
+        registerDataFetcher(builder, OUTPUT_TYPE_FARE_ZONE, FARE_ZONES_AUTHORITY_REF,
+                env -> env.getSource() instanceof FareZone fareZone ? fareZone.getTransportOrganisationRef() : null);
+        registerDataFetcher(builder, OUTPUT_TYPE_FARE_ZONE, FARE_ZONES_NEIGHBOURS,
+                env -> typeRegistry.getFareZoneTypeFactory().fareZoneNeighboursType(env));
+        registerDataFetcher(builder, OUTPUT_TYPE_FARE_ZONE, FARE_ZONES_MEMBERS,
+                env -> typeRegistry.getFareZoneTypeFactory().fareZoneMemberType(env));
+
+        // GroupOfStopPlaces
+        registerDataFetcher(builder, OUTPUT_TYPE_GROUP_OF_STOPPLACES, PURPOSE_OF_GROUPING,
+                dataFetcherRegistry.getGroupOfStopPlacesPurposeOfGroupingFetcher());
+        registerDataFetcher(builder, OUTPUT_TYPE_GROUP_OF_STOPPLACES, GROUP_OF_STOP_PLACES_MEMBERS,
+                dataFetcherRegistry.getGroupOfStopPlacesMembersFetcher());
+
+        // GroupOfTariffZones
+        registerDataFetcher(builder, OUTPUT_TYPE_GROUP_OF_TARIFF_ZONES, GROUP_OF_TARIFF_ZONES_MEMBERS,
+                env -> typeRegistry.getGroupOfTariffZonesTypeFactory().groupOfTariffZoneMembersType(env));
+        registerDataFetcher(builder, OUTPUT_TYPE_GROUP_OF_TARIFF_ZONES, ID, getNetexIdFetcher());
+
+        // PathLink transfer durations
+        registerDataFetcher(builder, OUTPUT_TYPE_TRANSFER_DURATION, DEFAULT_DURATION,
+                typeRegistry.getPathLinkTypeFactory().durationSecondsFetcher());
+        registerDataFetcher(builder, OUTPUT_TYPE_TRANSFER_DURATION, FREQUENT_TRAVELLER_DURATION,
+                typeRegistry.getPathLinkTypeFactory().durationSecondsFetcher());
+        registerDataFetcher(builder, OUTPUT_TYPE_TRANSFER_DURATION, OCCASIONAL_TRAVELLER_DURATION,
+                typeRegistry.getPathLinkTypeFactory().durationSecondsFetcher());
+        registerDataFetcher(builder, OUTPUT_TYPE_TRANSFER_DURATION, MOBILITY_RESTRICTED_TRAVELLER_DURATION,
+                typeRegistry.getPathLinkTypeFactory().durationSecondsFetcher());
+
+        // TopographicPlace
+        registerDataFetcher(builder, OUTPUT_TYPE_TOPOGRAPHIC_PLACE, ID, getTopographicPlaceIdFetcher());
+        registerDataFetcher(builder, OUTPUT_TYPE_TOPOGRAPHIC_PLACE, PARENT_TOPOGRAPHIC_PLACE,
+                getParentTopographicPlaceFetcher());
+        registerDataFetcher(builder, OUTPUT_TYPE_TOPOGRAPHIC_PLACE, POLYGON, dataFetcherRegistry.getPolygonFetcher());
+    }
+
+    /**
+     * Registers data fetchers for mutation operations.
+     * Includes: create, update, delete, merge, terminate, reopen operations.
+     *
+     * @param builder The code registry builder to register fetchers on
+     */
+    private void registerMutationOperations(GraphQLCodeRegistry.Builder builder) {
+        // Entity mutations
+        registerDataFetcher(builder, STOPPLACES_MUTATION, MUTATE_PARKING, dataFetcherRegistry.getParkingUpdater());
+        registerDataFetcher(builder, STOPPLACES_MUTATION, MUTATE_STOPPLACE, dataFetcherRegistry.getStopPlaceUpdater());
+        registerDataFetcher(builder, STOPPLACES_MUTATION, MUTATE_PARENT_STOPPLACE, dataFetcherRegistry.getStopPlaceUpdater());
+        registerDataFetcher(builder, STOPPLACES_MUTATION, MUTATE_GROUP_OF_STOP_PLACES, dataFetcherRegistry.getGroupOfStopPlacesUpdater());
+        registerDataFetcher(builder, STOPPLACES_MUTATION, MUTATE_PURPOSE_OF_GROUPING, dataFetcherRegistry.getPurposeOfGroupingUpdater());
+        registerDataFetcher(builder, STOPPLACES_MUTATION, MUTATE_PATH_LINK, dataFetcherRegistry.getPathLinkUpdater());
+
+        // Terminate operations
+        registerDataFetcher(builder, STOPPLACES_MUTATION, TERMINATE_TARIFF_ZONE,
+                env -> servicesRegistry.getTariffZoneTerminator().terminateTariffZone(
+                        env.getArgument(TARIFF_ZONE_ID),
+                        env.getArgument(VALID_BETWEEN_TO_DATE),
+                        env.getArgument(VERSION_COMMENT)));
+        registerDataFetcher(builder, STOPPLACES_MUTATION, TERMINATE_STOP_PLACE,
+                env -> servicesRegistry.getStopPlaceTerminator().terminateStopPlace(
+                        env.getArgument(STOP_PLACE_ID),
+                        env.getArgument(VALID_BETWEEN_TO_DATE),
+                        env.getArgument(VERSION_COMMENT),
+                        env.getArgument(MODIFICATION_ENUMERATION)));
+
+        // Delete operations
+        registerDataFetcher(builder, STOPPLACES_MUTATION, DELETE_GROUP_OF_STOPPLACES, dataFetcherRegistry.getGroupOfStopPlacesDeleterFetcher());
+        registerDataFetcher(builder, STOPPLACES_MUTATION, DELETE_PARKING,
+                env -> servicesRegistry.getParkingDeleter().deleteParking(env.getArgument(PARKING_ID)));
+        registerDataFetcher(builder, STOPPLACES_MUTATION, DELETE_STOP_PLACE,
+                env -> servicesRegistry.getStopPlaceDeleter().deleteStopPlace(env.getArgument(STOP_PLACE_ID)));
+        registerDataFetcher(builder, STOPPLACES_MUTATION, DELETE_QUAY_FROM_STOP_PLACE,
+                env -> servicesRegistry.getStopPlaceQuayDeleter().deleteQuay(
+                        env.getArgument(STOP_PLACE_ID),
+                        env.getArgument(QUAY_ID),
+                        env.getArgument(VERSION_COMMENT)));
+
+        // Reopen operation
+        registerDataFetcher(builder, STOPPLACES_MUTATION, REOPEN_STOP_PLACE,
+                env -> servicesRegistry.getStopPlaceReopener().reopenStopPlace(
+                        env.getArgument(STOP_PLACE_ID),
+                        env.getArgument(VERSION_COMMENT)));
+
+        // Merge operations
+        registerDataFetcher(builder, STOPPLACES_MUTATION, MERGE_STOP_PLACES,
+                env -> servicesRegistry.getStopPlaceMerger().mergeStopPlaces(
+                        env.getArgument(FROM_STOP_PLACE_ID),
+                        env.getArgument(TO_STOP_PLACE_ID),
+                        env.getArgument(FROM_VERSION_COMMENT),
+                        env.getArgument(TO_VERSION_COMMENT),
+                        env.getArgument(DRY_RUN)));
+        registerDataFetcher(builder, STOPPLACES_MUTATION, MERGE_QUAYS,
+                env -> servicesRegistry.getStopPlaceQuayMerger().mergeQuays(
+                        env.getArgument(STOP_PLACE_ID),
+                        env.getArgument(FROM_QUAY_ID),
+                        env.getArgument(TO_QUAY_ID),
+                        env.getArgument(VERSION_COMMENT),
+                        env.getArgument(DRY_RUN)));
+
+        // Move operation
+        registerDataFetcher(builder, STOPPLACES_MUTATION, MOVE_QUAYS_TO_STOP,
+                env -> servicesRegistry.getStopPlaceQuayMover().moveQuays(
+                        env.getArgument(QUAY_IDS),
+                        env.getArgument(TO_STOP_PLACE_ID),
+                        env.getArgument(FROM_VERSION_COMMENT),
+                        env.getArgument(TO_VERSION_COMMENT)));
+
+        // Multi-modal operations
+        registerDataFetcher(builder, STOPPLACES_MUTATION, CREATE_MULTI_MODAL_STOPPLACE, this::createMultiModalStopPlaceFetcher);
+        registerDataFetcher(builder, STOPPLACES_MUTATION, ADD_TO_MULTIMODAL_STOPPLACE, this::addToMultiModalStopPlaceFetcher);
+        registerDataFetcher(builder, STOPPLACES_MUTATION, REMOVE_FROM_MULTIMODAL_STOPPLACE,
+                env -> servicesRegistry.getParentStopPlaceEditor().removeFromMultiModalStopPlace(
+                        env.getArgument(PARENT_SITE_REF),
+                        env.getArgument(STOP_PLACE_ID)));
+
+        // Tag operations
+        registerDataFetcher(builder, STOPPLACES_MUTATION, REMOVE_TAG,
+                env -> servicesRegistry.getTagRemover().removeTag(
+                        env.getArgument(TAG_NAME),
+                        env.getArgument(TAG_ID_REFERENCE),
+                        env.getArgument(TAG_COMMENT)));
+        registerDataFetcher(builder, STOPPLACES_MUTATION, CREATE_TAG,
+                env -> servicesRegistry.getTagCreator().createTag(
+                        env.getArgument(TAG_NAME),
+                        env.getArgument(TAG_ID_REFERENCE),
+                        env.getArgument(TAG_COMMENT)));
+    }
+
+    /**
+     * Builds the GraphQL code registry by registering all data fetchers for queries and mutations.
+     *
+     * The code registry maps GraphQL schema fields to their corresponding data fetchers,
+     * enabling field resolution during query execution.
+     *
+     * Organization:
+     * - Entity common fields (ID, importedId, changedBy, permissions)
+     * - Entity-specific fields (tags, geometry, equipment, zones, keyValues)
+     * - Query operations (find operations, permissions)
+     * - Specialized type fetchers (GeoJSON, equipment, zones, places)
+     * - Mutation operations (create, update, delete, merge, terminate)
+     * - Type resolver for StopPlace interface
+     *
+     * @param stopPlaceTypeResolver Resolver for determining concrete StopPlace types
+     * @return Fully configured GraphQL code registry
+     */
+    public GraphQLCodeRegistry buildCodeRegistry(TypeResolver stopPlaceTypeResolver) {
+        GraphQLCodeRegistry.Builder codeRegistryBuilder = GraphQLCodeRegistry.newCodeRegistry();
+
+        // Register data fetchers by category
+        registerEntityCommonFields(codeRegistryBuilder);
+        registerEntitySpecificFields(codeRegistryBuilder);
+        registerQueryOperations(codeRegistryBuilder);
+        registerSpecializedTypeFetchers(codeRegistryBuilder);
+        registerMutationOperations(codeRegistryBuilder);
+
+        // Register type resolver for StopPlace interface
         codeRegistryBuilder.typeResolver(OUTPUT_TYPE_STOPPLACE_INTERFACE, stopPlaceTypeResolver);
 
         return codeRegistryBuilder.build();
     }
-
     private void mapNetexId(GraphQLCodeRegistry.Builder codeRegistryBuilder, String outputTypeShelterEquipment, String outputTypeSanitaryEquipment, String outputTypeCycleStorageEquipment, String outputTypeGeneralSignEquipment, String outputTypeTicketingEquipment, String outputTypeWaitingRoomEquipment) {
         registerDataFetcher(codeRegistryBuilder, outputTypeShelterEquipment,ID,getNetexIdFetcher());
         registerDataFetcher(codeRegistryBuilder, outputTypeSanitaryEquipment,ID,getNetexIdFetcher());
@@ -805,384 +877,5 @@ public class StopPlaceRegisterGraphQLSchema {
     private void registerDataFetcher(GraphQLCodeRegistry.Builder codeRegistryBuilder, String parentType, String fieldName, DataFetcher<?> dataFetcher) {
         FieldCoordinates coordinates = FieldCoordinates.coordinates(parentType, fieldName);
         codeRegistryBuilder.dataFetcher(coordinates, dataFetcher);
-    }
-
-    private List<GraphQLArgument> createFindPathLinkArguments(GraphQLArgument allVersionsArgument) {
-        List<GraphQLArgument> arguments = new ArrayList<>();
-        arguments.add(GraphQLArgument.newArgument()
-                .name(ID)
-                .type(GraphQLString)
-                .build());
-        arguments.add(allVersionsArgument);
-        arguments.add(GraphQLArgument.newArgument()
-                .name(FIND_BY_STOP_PLACE_ID)
-                .type(GraphQLString)
-                .build());
-        return arguments;
-    }
-
-    private List<GraphQLArgument> createFindParkingArguments(GraphQLArgument allVersionsArgument) {
-        List<GraphQLArgument> arguments = createPageAndSizeArguments();
-        arguments.add(GraphQLArgument.newArgument()
-                .name(ID)
-                .type(GraphQLString)
-                .build());
-        arguments.add(GraphQLArgument.newArgument()
-                .name(VERSION)
-                .type(GraphQLInt)
-                .build());
-        arguments.add(GraphQLArgument.newArgument()
-                .name(FIND_BY_STOP_PLACE_ID)
-                .type(GraphQLString)
-                .build());
-        arguments.add(allVersionsArgument);
-        return arguments;
-    }
-
-    private List<GraphQLArgument> createFindGroupOfStopPlacesArguments() {
-        List<GraphQLArgument> arguments = createPageAndSizeArguments();
-        arguments.add(GraphQLArgument.newArgument()
-                .name(ID)
-                .type(GraphQLString)
-                .build());
-        arguments.add(GraphQLArgument.newArgument()
-                .name(QUERY)
-                .type(GraphQLString)
-                .build());
-        arguments.add(GraphQLArgument.newArgument()
-                .name(FIND_BY_STOP_PLACE_ID)
-                .type(GraphQLString)
-                .build());
-        return arguments;
-    }
-
-    private List<GraphQLArgument> createFindPurposeOfGroupingArguments(){
-        List<GraphQLArgument> arguments = createPageAndSizeArguments();
-        arguments.add(GraphQLArgument.newArgument()
-                .name(ID)
-                .type(GraphQLString)
-                .build());
-        arguments.add(GraphQLArgument.newArgument()
-                .name(QUERY)
-                .type(GraphQLString)
-                .build());
-        return arguments;
-    }
-
-    private List<GraphQLArgument> createFindGroupOfTariffZonesArguments() {
-        List<GraphQLArgument> arguments = createPageAndSizeArguments();
-        arguments.add(GraphQLArgument.newArgument()
-                .name(ID)
-                .type(GraphQLString)
-                .build());
-        arguments.add(GraphQLArgument.newArgument()
-                .name(QUERY)
-                .type(GraphQLString)
-                .build());
-        arguments.add(GraphQLArgument.newArgument()
-                .name(FIND_BY_TARIFF_ZONE_ID)
-                .type(GraphQLString)
-                .build());
-        return arguments;
-    }
-
-    private List<GraphQLArgument> createFindTariffZonesArguments() {
-        List<GraphQLArgument> arguments = createPageAndSizeArguments();
-        arguments.add(GraphQLArgument.newArgument()
-                .name(QUERY)
-                .type(GraphQLString)
-                .build());
-        arguments.add(GraphQLArgument.newArgument()
-                .name(IDS)
-                .type(new GraphQLList(GraphQLString))
-                .build());
-        return arguments;
-    }
-
-    private List<GraphQLArgument> createFindFareZonesArguments() {
-        List<GraphQLArgument> arguments = createPageAndSizeArguments();
-        arguments.add(GraphQLArgument.newArgument()
-                .name(QUERY)
-                .type(GraphQLString)
-                .build());
-        arguments.add(GraphQLArgument.newArgument()
-                .name(IDS)
-                .type(new GraphQLList(GraphQLString))
-                .build());
-
-        arguments.add(GraphQLArgument.newArgument()
-                .name(FARE_ZONES_AUTHORITY_REF)
-                .type(GraphQLString)
-                .build());
-
-        arguments.add(GraphQLArgument.newArgument()
-                .name(FARE_ZONES_SCOPING_METHOD)
-                .type(scopingMethodEnumType)
-                .build());
-        arguments.add(GraphQLArgument.newArgument()
-                .name(FARE_ZONES_ZONE_TOPOLOGY)
-                .type(zoneTopologyEnumType)
-                .build());
-
-        return arguments;
-    }
-
-    private List<GraphQLArgument> createFindTopographicPlaceArguments(GraphQLArgument allVersionsArgument) {
-        List<GraphQLArgument> arguments = new ArrayList<>();
-        arguments.add(GraphQLArgument.newArgument()
-                .name(ID)
-                .type(GraphQLString)
-                .build());
-        arguments.add(allVersionsArgument);
-        arguments.add(GraphQLArgument.newArgument()
-                .name(TOPOGRAPHIC_PLACE_TYPE)
-                .type(topographicPlaceTypeEnum)
-                .description("Limits results to specified placeType.")
-                .build());
-        arguments.add(GraphQLArgument.newArgument()
-                .name(QUERY)
-                .type(GraphQLString)
-                .description("Searches for TopographicPlaces by name.")
-                .build());
-        return arguments;
-    }
-
-    private List<GraphQLArgument> createFindStopPlaceArguments(GraphQLArgument allVersionsArgument) {
-        List<GraphQLArgument> arguments = createPageAndSizeArguments();
-        arguments.add(allVersionsArgument);
-                //Search
-        arguments.add(GraphQLArgument.newArgument()
-                .name(ID)
-                .type(GraphQLString)
-                .description(ID_ARG_DESCRIPTION)
-                .build());
-        arguments.add(GraphQLArgument.newArgument()
-                .name(VERSION)
-                .type(GraphQLInt)
-                .description(VERSION_ARG_DESCRIPTION)
-                .build());
-        arguments.add(GraphQLArgument.newArgument()
-                .type(versionValidityEnumType)
-                .name(VERSION_VALIDITY_ARG)
-                .description(VERSION_ARG_DESCRIPTION)
-                .build());
-        arguments.add(GraphQLArgument.newArgument()
-                .name(STOP_PLACE_TYPE)
-                .type(new GraphQLList(stopPlaceTypeEnum))
-                .description(STOP_PLACE_TYPE_ARG_DESCRIPTION)
-                .build());
-        arguments.add(GraphQLArgument.newArgument()
-                .name(COUNTY_REF)
-                .type(new GraphQLList(GraphQLString))
-                .description(COUNTY_REF_ARG_DESCRIPTION)
-                .build());
-        arguments.add(GraphQLArgument.newArgument()
-                .name(COUNTRY_REF)
-                .type(new GraphQLList(GraphQLString))
-                .description(COUNTRY_REF_ARG_DESCRIPTION)
-                .build());
-        arguments.add(GraphQLArgument.newArgument()
-                .name(TAGS)
-                .type(new GraphQLList(GraphQLString))
-                .description(TAGS_ARG_DESCRIPTION)
-                .build());
-        arguments.add(GraphQLArgument.newArgument()
-                .name(MUNICIPALITY_REF)
-                .type(new GraphQLList(GraphQLString))
-                .description(MUNICIPALITY_REF_ARG_DESCRIPTION)
-                .build());
-        arguments.add(GraphQLArgument.newArgument()
-                .name(QUERY)
-                .type(GraphQLString)
-                .description(QUERY_ARG_DESCRIPTION)
-                .build());
-        arguments.add(GraphQLArgument.newArgument()
-                .name(IMPORTED_ID_QUERY)
-                .type(GraphQLString)
-                .description(IMPORTED_ID_ARG_DESCRIPTION)
-                .build());
-        arguments.add(GraphQLArgument.newArgument()
-                .name(POINT_IN_TIME)
-                .type(servicesRegistry.getDateScalar().getGraphQLDateScalar())
-                .description(POINT_IN_TIME_ARG_DESCRIPTION)
-                .build());
-        arguments.add(GraphQLArgument.newArgument()
-                .name(KEY)
-                .type(GraphQLString)
-                .description(KEY_ARG_DESCRIPTION)
-                .build());
-        arguments.add(GraphQLArgument.newArgument()
-                .name(WITHOUT_LOCATION_ONLY)
-                .type(GraphQLBoolean)
-                .defaultValueLiteral(BooleanValue.of(false))
-                .description(WITHOUT_LOCATION_ONLY_ARG_DESCRIPTION)
-                .build());
-        arguments.add(GraphQLArgument.newArgument()
-                .name(WITHOUT_QUAYS_ONLY)
-                .type(GraphQLBoolean)
-                .defaultValueLiteral(BooleanValue.of(false))
-                .description(WITHOUT_QUAYS_ONLY_ARG_DESCRIPTION)
-                .build());
-        arguments.add(GraphQLArgument.newArgument()
-                .name(WITH_DUPLICATED_QUAY_IMPORTED_IDS)
-                .type(GraphQLBoolean)
-                .defaultValueLiteral(BooleanValue.of(false))
-                .description(WITH_DUPLICATED_QUAY_IMPORTED_IDS_ARG_DESCRIPTION)
-                .build());
-        arguments.add(GraphQLArgument.newArgument()
-                .name(WITH_NEARBY_SIMILAR_DUPLICATES)
-                .type(GraphQLBoolean)
-                .defaultValueLiteral(BooleanValue.of(false))
-                .description(WITH_NEARBY_SIMILAR_DUPLICATES_ARG_DESCRIPTION)
-                .build());
-        arguments.add(GraphQLArgument.newArgument()
-                .name(HAS_PARKING)
-                .type(GraphQLBoolean)
-                .defaultValueLiteral(BooleanValue.of(false))
-                .description(HAS_PARKING)
-                .build());
-        arguments.add(GraphQLArgument.newArgument()
-                .name(ONLY_MONOMODAL_STOPPLACES)
-                .type(GraphQLBoolean)
-                .defaultValueLiteral(BooleanValue.of(false))
-                .description(ONLY_MONOMODAL_STOPPLACES_DESCRIPTION)
-                .build());
-        arguments.add(GraphQLArgument.newArgument()
-                .name(VALUES)
-                .type(new GraphQLList(GraphQLString))
-                .description(VALUES_ARG_DESCRIPTION)
-                .build());
-        arguments.add(GraphQLArgument.newArgument()
-                .name(WITH_TAGS)
-                .type(GraphQLBoolean)
-                .defaultValueLiteral(BooleanValue.of(false))
-                .description(WITH_TAGS_ARG_DESCRIPTION)
-                .build());
-        arguments.add(GraphQLArgument.newArgument()
-                .name(SEARCH_WITH_CODE_SPACE)
-                .type(GraphQLString)
-                .description(SEARCH_WITH_CODE_SPACE_ARG_DESCRIPTION)
-                .build());
-        return arguments;
-    }
-
-    private List<GraphQLArgument> createLocationArguments() {
-        List<GraphQLArgument> arguments = new ArrayList<>();
-        arguments.add(GraphQLArgument.newArgument()
-                .name(LONGITUDE)
-                .description("longitude")
-                .type(new GraphQLNonNull(GraphQLBigDecimal))
-                .build());
-        arguments.add(GraphQLArgument.newArgument()
-                .name(LATITUDE)
-                .description("latitude")
-                .type(new GraphQLNonNull(GraphQLBigDecimal))
-                .build());
-
-        return arguments;
-
-    }
-
-    private List<GraphQLArgument> createBboxArguments() {
-        List<GraphQLArgument> arguments = createPageAndSizeArguments();
-                //BoundingBox
-        arguments.add(GraphQLArgument.newArgument()
-                .name(LONGITUDE_MIN)
-                .description("Bottom left longitude (xMin).")
-                .type(new GraphQLNonNull(GraphQLBigDecimal))
-                .build());
-        arguments.add(GraphQLArgument.newArgument()
-                .name(LATITUDE_MIN)
-                .description("Bottom left latitude (yMin).")
-                .type(new GraphQLNonNull(GraphQLBigDecimal))
-                .build());
-        arguments.add(GraphQLArgument.newArgument()
-                .name(LONGITUDE_MAX)
-                .description("Top right longitude (xMax).")
-                .type(new GraphQLNonNull(GraphQLBigDecimal))
-                .build());
-        arguments.add(GraphQLArgument.newArgument()
-                .name(LATITUDE_MAX)
-                .description("Top right longitude (yMax).")
-                .type(new GraphQLNonNull(GraphQLBigDecimal))
-                .build());
-        arguments.add(GraphQLArgument.newArgument()
-                .name(IGNORE_STOPPLACE_ID)
-                .type(GraphQLString)
-                .description("ID of StopPlace to excluded from result.")
-                .build());
-        arguments.add(GraphQLArgument.newArgument()
-                .name(INCLUDE_EXPIRED)
-                .type(GraphQLBoolean)
-                .defaultValueLiteral(BooleanValue.of(false))
-                .description("Set to true if expired StopPlaces should be returned, default is 'false'.")
-                .build());
-        arguments.add(GraphQLArgument.newArgument()
-                .name(POINT_IN_TIME)
-                .type(servicesRegistry.getDateScalar().getGraphQLDateScalar())
-                .description(POINT_IN_TIME_ARG_DESCRIPTION)
-                .build());
-        return arguments;
-    }
-
-    private List<GraphQLArgument> createPageAndSizeArguments() {
-        List<GraphQLArgument> arguments = new ArrayList<>();
-        arguments.add(GraphQLArgument.newArgument()
-                .name(PAGE)
-                .type(GraphQLInt)
-                .defaultValueLiteral(IntValue.of(DEFAULT_PAGE_VALUE))
-                .description(PAGE_ARG_DESCRIPTION)
-                .build());
-        arguments.add(GraphQLArgument.newArgument()
-                .name(SIZE)
-                .type(GraphQLInt)
-                .defaultValueLiteral(IntValue.of(DEFAULT_SIZE_VALUE))
-                .description(SIZE_ARG_DESCRIPTION)
-                .build());
-        return arguments;
-    }
-
-
-    private GraphQLInputObjectType createStopPlaceInputObjectType(List<GraphQLInputObjectField> commonInputFieldsList,
-                                                                  GraphQLInputObjectType topographicPlaceInputObjectType,
-                                                                  GraphQLInputObjectType quayObjectInputType,
-                                                                  GraphQLInputObjectType validBetweenInputObjectType) {
-        return newInputObject()
-                .name(INPUT_TYPE_STOPPLACE)
-                .fields(commonInputFieldsList)
-                .fields(servicesRegistry.getTransportModeScalar().createTransportModeInputFieldsList())
-                .field(newInputObjectField()
-                        .name(STOP_PLACE_TYPE)
-                        .type(stopPlaceTypeEnum))
-                .field(newInputObjectField()
-                        .name(TOPOGRAPHIC_PLACE)
-                        .type(topographicPlaceInputObjectType))
-                .field(newInputObjectField()
-                        .name(WEIGHTING)
-                        .type(interchangeWeightingEnum))
-                .field(newInputObjectField()
-                        .name(PARENT_SITE_REF)
-                        .type(GraphQLString))
-                .field(newInputObjectField()
-                        .name(VERSION_COMMENT)
-                        .type(GraphQLString))
-                .field(newInputObjectField()
-                        .name(QUAYS)
-                        .type(new GraphQLList(quayObjectInputType)))
-                .field(newInputObjectField()
-                        .name(VALID_BETWEEN)
-                        .type(validBetweenInputObjectType))
-                .field(newInputObjectField()
-                        .name(TARIFF_ZONES)
-                        .description("List of tariff zone references without version")
-                        .type(new GraphQLList(versionLessRefInputObjectType)))
-                .field(newInputObjectField()
-                        .name(ADJACENT_SITES)
-                        .description(ADJACENT_SITES_DESCRIPTION)
-                        .type(new GraphQLList(versionLessRefInputObjectType)))
-                .field(newInputObjectField()
-                        .name(URL)
-                        .type(GraphQLString).build())
-                .build();
     }
 }
