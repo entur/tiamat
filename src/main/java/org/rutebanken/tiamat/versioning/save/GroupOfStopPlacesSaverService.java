@@ -36,7 +36,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -76,61 +77,147 @@ public class GroupOfStopPlacesSaverService {
 
     public GroupOfStopPlaces saveNewVersion(GroupOfStopPlaces newVersion) {
 
-        validateMembers(newVersion);
+        GroupOfStopPlaces existingGOSP = groupOfStopPlacesRepository.findFirstByNetexIdOrderByVersionDesc(newVersion.getNetexId());
+        boolean isNewGOSP = (existingGOSP == null);
 
-        GroupOfStopPlaces existing = groupOfStopPlacesRepository.findFirstByNetexIdOrderByVersionDesc(newVersion.getNetexId());
+        // Validate members and authorization based on whether this is a new gosp or update existing gosp
+        validateMembersWithAuthorization(newVersion, existingGOSP, isNewGOSP);
+
+        PurposeOfGrouping purposeOfGrouping = resolvePurposeOfGrouping(newVersion);
         String usernameForAuthenticatedUser = usernameFetcher.getUserNameForAuthenticatedUser();
-        final PurposeOfGrouping purposeOfGrouping;
-        if(newVersion.getPurposeOfGrouping() == null) {
-            purposeOfGrouping = null;
-        } else {
-            Preconditions.checkArgument(newVersion.getPurposeOfGrouping().getNetexId() != null,
-                    "Purpose of grouping must have a netex id when saving group of stop places " + newVersion);
-            purposeOfGrouping = purposeOfGroupingRepository.findFirstByNetexIdOrderByVersionDesc(newVersion.getPurposeOfGrouping().getNetexId());
-        }
 
-        GroupOfStopPlaces result;
-        if(existing != null) {
-            BeanUtils.copyProperties(newVersion, existing, "id", "created", "version");
-            existing.getMembers().clear();
-            existing.getMembers().addAll(newVersion.getMembers());
-            existing.setChanged(Instant.now());
-            if(purposeOfGrouping != null){
-                existing.setPurposeOfGrouping(purposeOfGrouping);
-            }
-            result = existing;
+        GroupOfStopPlaces groupOfStopPlaces = isNewGOSP ?
+            prepareNewGOSP(newVersion) :
+            updateExistingGOSP(newVersion, existingGOSP, purposeOfGrouping);
 
-        } else {
-            newVersion.setCreated(Instant.now());
-            result = newVersion;
-        }
-        result.setValidBetween(null);
-        result.setChangedBy(usernameForAuthenticatedUser);
-        Optional<Point> point = groupOfStopPlacesCentroidComputer.compute(result);
-        if(point.isPresent()) {
-            logger.info("Setting centroid for group of stop place {} to {}", result.getNetexId(), point.get());
-            result.setCentroid(point.get());
-        }
+        finalizeGOSP(groupOfStopPlaces, usernameForAuthenticatedUser);
+        groupOfStopPlaces = groupOfStopPlacesRepository.save(groupOfStopPlaces);
 
-        versionIncrementor.incrementVersion(result);
-        result = groupOfStopPlacesRepository.save(result);
+        prometheusMetricsService.registerEntitySaved(newVersion.getClass(), 1L);
+        logger.info("Saved {}", groupOfStopPlaces);
 
-        prometheusMetricsService.registerEntitySaved(newVersion.getClass(),1L);
-        logger.info("Saved {}", result);
-
-        return result;
+        return groupOfStopPlaces;
     }
 
-    private void validateMembers(GroupOfStopPlaces groupOfStopPlaces) {
-        groupOfStopPlaces.getMembers().forEach(member -> {
-            StopPlace resolvedMember = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(member.getRef());
-            Preconditions.checkArgument(resolvedMember != null,
-                    "Member with reference " + member.getRef() + " does not exist when saving group of stop places " + groupOfStopPlaces);
-            Preconditions.checkArgument(resolvedMember.getParentSiteRef() == null,
-                    "Member with reference " + member.getRef() + " Has a parent site ref. Use parent ref instead. " + groupOfStopPlaces);
+    /**
+     * Validates members and verifies authorization.
+     * For new groups, requires at least one member to ensure authorization is checked.
+     * For updates where all members are removed, verifies authorization on existing members.
+     *
+     * @param newVersion The group being saved
+     * @param existing The existing group (null if creating new)
+     * @param isNewGOSP Whether this is a new group or update
+     * @throws IllegalArgumentException if validation fails
+     * @throws org.springframework.security.access.AccessDeniedException if authorization fails
+     */
+    private void validateMembersWithAuthorization(GroupOfStopPlaces newVersion,
+                                                   GroupOfStopPlaces existing,
+                                                   boolean isNewGOSP) {
+        boolean hasMembers = newVersion.getMembers() != null && !newVersion.getMembers().isEmpty();
 
-            authorizationService.verifyCanEditEntities(Arrays.asList(resolvedMember));
+        if (isNewGOSP) {
+            // New groups must have at least one member to ensure authorization check
+            if (!hasMembers) {
+                throw new IllegalArgumentException(
+                    "Cannot create a new GroupOfStopPlaces without members. " +
+                    "At least one member is required to verify authorization.");
+            }
+            validateAndAuthorizeMembers(newVersion.getMembers());
+        } else {
+            // Updating existing group
+            if (hasMembers) {
+                // Normal update with members - validate and authorize new members
+                validateAndAuthorizeMembers(newVersion.getMembers());
+            } else {
+                // Removing all members - authorize based on existing members
+                logger.info("Removing all members from GroupOfStopPlaces {}", existing.getNetexId());
+                validateAuthorizationForMemberRemoval(existing);
+            }
+        }
+    }
+
+    /**
+     * Validates that each member exists, is valid, and user has authorization to edit it.
+     */
+    private void validateAndAuthorizeMembers(Collection<? extends org.rutebanken.tiamat.model.SiteRefStructure> members) {
+        members.forEach(member -> {
+            String memberRef = member.getRef();
+            StopPlace resolvedMember = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(memberRef);
+
+            Preconditions.checkArgument(resolvedMember != null,
+                    "Member with reference " + memberRef + " does not exist");
+            Preconditions.checkArgument(resolvedMember.getParentSiteRef() == null,
+                    "Member with reference " + memberRef + " already has a parent site ref. Use parent ref instead.");
+
+            authorizationService.verifyCanEditEntities(List.of(resolvedMember));
         });
+    }
+
+    /**
+     * When removing all members from an existing group, verify user has permission
+     * by checking authorization on the current members being removed.
+     */
+    private void validateAuthorizationForMemberRemoval(GroupOfStopPlaces existingGroup) {
+        if (existingGroup.getMembers() == null || existingGroup.getMembers().isEmpty()) {
+            // Group already has no members, allow the update
+            logger.debug("Group {} already has no members", existingGroup.getNetexId());
+            return;
+        }
+
+        logger.info("Validating authorization for removing {} members from GroupOfStopPlaces {}",
+                   existingGroup.getMembers().size(), existingGroup.getNetexId());
+
+        existingGroup.getMembers().forEach(member -> {
+            StopPlace resolvedMember = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(member.getRef());
+            if (resolvedMember != null) {
+                authorizationService.verifyCanEditEntities(List.of(resolvedMember));
+            }
+        });
+    }
+
+    private PurposeOfGrouping resolvePurposeOfGrouping(GroupOfStopPlaces newVersion) {
+        if (newVersion.getPurposeOfGrouping() == null) {
+            return null;
+        }
+
+        Preconditions.checkArgument(newVersion.getPurposeOfGrouping().getNetexId() != null,
+                "Purpose of grouping must have a netex id when saving group of stop places " + newVersion);
+
+        return purposeOfGroupingRepository.findFirstByNetexIdOrderByVersionDesc(
+                newVersion.getPurposeOfGrouping().getNetexId());
+    }
+
+    private GroupOfStopPlaces prepareNewGOSP(GroupOfStopPlaces newVersion) {
+        newVersion.setCreated(Instant.now());
+        return newVersion;
+    }
+
+    private GroupOfStopPlaces updateExistingGOSP(GroupOfStopPlaces newVersion,
+                                                 GroupOfStopPlaces existing,
+                                                 PurposeOfGrouping purposeOfGrouping) {
+        BeanUtils.copyProperties(newVersion, existing, "id", "created", "version");
+        existing.getMembers().clear();
+        if (newVersion.getMembers() != null) {
+            existing.getMembers().addAll(newVersion.getMembers());
+        }
+        existing.setChanged(Instant.now());
+        if (purposeOfGrouping != null) {
+            existing.setPurposeOfGrouping(purposeOfGrouping);
+        }
+        return existing;
+    }
+
+    private void finalizeGOSP(GroupOfStopPlaces groupOfStopPlaces, String username) {
+        groupOfStopPlaces.setValidBetween(null);
+        groupOfStopPlaces.setChangedBy(username);
+
+        Optional<Point> centroid = groupOfStopPlacesCentroidComputer.compute(groupOfStopPlaces);
+        if (centroid.isPresent()) {
+            logger.info("Setting centroid for group of stop place {} to {}", groupOfStopPlaces.getNetexId(), centroid.get());
+            groupOfStopPlaces.setCentroid(centroid.get());
+        }
+
+        versionIncrementor.incrementVersion(groupOfStopPlaces);
     }
 
 
