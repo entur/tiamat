@@ -15,7 +15,6 @@
 
 package org.rutebanken.tiamat.importer;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.rutebanken.netex.model.CompositeFrame;
 import org.rutebanken.netex.model.Frames_RelStructure;
@@ -35,19 +34,10 @@ import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.netex.mapping.PublicationDeliveryHelper;
 import org.rutebanken.tiamat.rest.netex.publicationdelivery.PublicationDeliveryTestHelper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AbstractAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.Instant;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -64,11 +54,6 @@ public class PublicationDeliveryImporterTest extends TiamatIntegrationTest {
 
     @Autowired
     private PublicationDeliveryImporter publicationDeliveryImporter;
-
-    @Before
-    public void setUp() {
-        setUpSecurityContext();
-    }
 
     @Test
     public void importPublicationDeliveryThrowsExceptionForStopPlaceWithoutQuaysOrChildren() {
@@ -247,24 +232,4 @@ public class PublicationDeliveryImporterTest extends TiamatIntegrationTest {
         SiteFrame siteFrame = publicationDeliveryHelper.findSiteFrame(publicationDeliveryStructure);
         assertThat(siteFrame).isNotNull();
     }
-
-    private void setUpSecurityContext() {
-        // Create a Jwt with claims
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("sub", "testuser");
-        claims.put("scope", "ROLE_USER");  // Or other relevant scopes/roles
-
-        // Create a Jwt instance
-        Jwt jwt = new Jwt(
-                "tokenValue",
-                Instant.now(),
-                Instant.now().plusSeconds(3600),
-                Map.of("alg", "none"),
-                claims
-        );
-
-        final AbstractAuthenticationToken authToken = new JwtAuthenticationToken(jwt, Collections.singleton(new SimpleGrantedAuthority("ROLE_EDIT_STOPS")));
-        SecurityContextHolder.getContext().setAuthentication(authToken);
-    }
-
 }
