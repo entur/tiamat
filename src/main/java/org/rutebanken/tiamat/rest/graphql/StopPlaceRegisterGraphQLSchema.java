@@ -38,6 +38,7 @@ import org.locationtech.jts.geom.Polygon;
 import org.rutebanken.tiamat.auth.AuthorizationService;
 import org.rutebanken.tiamat.model.AccessibilityAssessment;
 import org.rutebanken.tiamat.model.AccessibilityLimitation;
+import org.rutebanken.tiamat.model.AssistanceService;
 import org.rutebanken.tiamat.model.CycleStorageEquipment;
 import org.rutebanken.tiamat.model.DataManagedObjectStructure;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
@@ -143,8 +144,11 @@ import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.equipm
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.geoJsonInputType;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.geometryFieldDefinition;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.getEquipmentOfType;
+import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.getLocalServiceOfType;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.interchangeWeightingEnum;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.keyValuesObjectInputType;
+import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.localServiceInputType;
+import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.localServiceType;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.modificationEnumerationType;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.netexIdFieldDefinition;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.pathLinkObjectInputType;
@@ -381,6 +385,10 @@ public class StopPlaceRegisterGraphQLSchema {
                 .type(accessibilityAssessmentObjectType)
                 .build()
         );
+        commonFieldsList.add(newFieldDefinition()
+                .name(LOCAL_SERVICES)
+                .type(localServiceType)
+                .build());
 
         commonFieldsList.add(newFieldDefinition()
                         .name(PUBLIC_CODE)
@@ -857,7 +865,9 @@ public class StopPlaceRegisterGraphQLSchema {
         registerDataFetcher(codeRegistryBuilder,STOPPLACES_REGISTER,USER_PERMISSIONS,userPermissionsFetcher);
         registerDataFetcher(codeRegistryBuilder,STOPPLACES_REGISTER,LOCATION_PERMISSIONS,locationPermissionsFetcher);
 
-
+        // Local services, assistance service
+        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_LOCAL_SERVICES,ASSISTANCE_SERVICE,env -> getLocalServiceOfType(AssistanceService.class, env));
+        mapNetexId(codeRegistryBuilder, OUTPUT_TYPE_ASSISTANCE_SERVICE);
 
 
         //mutation
@@ -960,6 +970,10 @@ public class StopPlaceRegisterGraphQLSchema {
             }
             return null;
         });
+    }
+
+    private void mapNetexId(GraphQLCodeRegistry.Builder codeRegistryBuilder, String outputTypeAssistanceService) {
+        registerDataFetcher(codeRegistryBuilder, outputTypeAssistanceService,ID,getNetexIdFetcher());
     }
 
     private void dataFetcherGeometry(GraphQLCodeRegistry.Builder codeRegistryBuilder, String parentType) {
@@ -1495,6 +1509,7 @@ public class StopPlaceRegisterGraphQLSchema {
         commonInputFieldsList.add(newInputObjectField().name(GEOMETRY).type(geoJsonInputType).build());
         commonInputFieldsList.add(newInputObjectField().name(ALTERNATIVE_NAMES).type(new GraphQLList(alternativeNameInputObjectType)).build());
         commonInputFieldsList.add(newInputObjectField().name(PLACE_EQUIPMENTS).type(equipmentInputType).build());
+        commonInputFieldsList.add(newInputObjectField().name(LOCAL_SERVICES).type(localServiceInputType).build());
         commonInputFieldsList.add(newInputObjectField().name(KEY_VALUES).type(new GraphQLList(keyValuesObjectInputType)).build());
         commonInputFieldsList.add(
                 newInputObjectField()
