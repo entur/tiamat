@@ -20,7 +20,6 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.StreamingOutput;
 import jakarta.xml.bind.JAXBException;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.rutebanken.netex.model.KeyValueStructure;
 import org.rutebanken.netex.model.LocationStructure;
@@ -38,11 +37,6 @@ import org.rutebanken.tiamat.importer.ImportParams;
 import org.rutebanken.tiamat.importer.ImportType;
 import org.rutebanken.tiamat.netex.mapping.PublicationDeliveryHelper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AbstractAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.xml.sax.SAXException;
 
 import java.io.ByteArrayInputStream;
@@ -52,14 +46,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -83,11 +73,6 @@ public class ImportResourceTest extends TiamatIntegrationTest {
      * When sending a stop place with the same ID twice, the same stop place must be returned.
      * When importing multiple stop places and those exists, make sure no Lazy Initialization Exception is thrown.
      */
-
-    @Before
-    public void setUp() {
-        setUpSecurityContext();
-    }
 
     @Test
     public void publicationDeliveriesWithDuplicateStopPlace() throws Exception {
@@ -1107,7 +1092,7 @@ public class ImportResourceTest extends TiamatIntegrationTest {
                   </SiteFrame>
                  </dataObjects>
                 </PublicationDelivery>
-                
+
                 """;
 
         InputStream stream = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8));
@@ -1308,24 +1293,5 @@ public class ImportResourceTest extends TiamatIntegrationTest {
 
         List<StopPlace> stopPlaces = publicationDeliveryTestHelper.extractStopPlaces(publicationDeliveryStructure);
         assertThat(stopPlaces).hasSize(3);
-    }
-
-    private void setUpSecurityContext() {
-        // Create a Jwt with claims
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("sub", "testuser");
-        claims.put("scope", "ROLE_USER");  // Or other relevant scopes/roles
-
-        // Create a Jwt instance
-        Jwt jwt = new Jwt(
-                "tokenValue",
-                Instant.now(),
-                Instant.now().plusSeconds(3600),
-                Map.of("alg", "none"),
-                claims
-        );
-
-        final AbstractAuthenticationToken authToken = new JwtAuthenticationToken(jwt, Collections.singleton(new SimpleGrantedAuthority("ROLE_EDIT_STOPS")));
-        SecurityContextHolder.getContext().setAuthentication(authToken);
     }
 }
