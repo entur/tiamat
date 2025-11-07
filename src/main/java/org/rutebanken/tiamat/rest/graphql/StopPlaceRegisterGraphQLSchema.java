@@ -782,6 +782,7 @@ public class StopPlaceRegisterGraphQLSchema {
         registerDataFetcher(codeRegistryBuilder, STOPPLACES_REGISTER, FARE_ZONES_AUTHORITIES, fareZoneAuthoritiesFetcher);
 
         registerDataFetcher(codeRegistryBuilder, STOPPLACES_REGISTER, VEHICLE_TYPES, vehicleTypeFetcher);
+        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_VEHICLE_TYPE, ID, getNetexIdFetcher());
 
 
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_GEO_JSON, TYPE, env -> {
