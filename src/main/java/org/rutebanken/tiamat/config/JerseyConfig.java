@@ -28,10 +28,7 @@ import org.rutebanken.tiamat.rest.exception.ErrorResponseEntityMessageBodyWriter
 import org.rutebanken.tiamat.rest.exception.GeneralExceptionMapper;
 import org.rutebanken.tiamat.rest.graphql.GraphQLResource;
 import org.rutebanken.tiamat.rest.health.HealthResource;
-import org.rutebanken.tiamat.rest.netex.publicationdelivery.AsyncExportResource;
-import org.rutebanken.tiamat.rest.netex.publicationdelivery.ExportResource;
-import org.rutebanken.tiamat.rest.netex.publicationdelivery.ImportResource;
-import org.rutebanken.tiamat.rest.netex.publicationdelivery.VehicleExportResource;
+import org.rutebanken.tiamat.rest.netex.publicationdelivery.*;
 import org.rutebanken.tiamat.rest.promethouse.PrometheusResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -83,7 +80,8 @@ public class JerseyConfig {
         Set<Class<?>> publicResources = new HashSet<>();
         publicResources.add(DtoStopPlaceResource.class);
         publicResources.add(DtoQuayResource.class);
-        publicResources.add(ImportResource.class);
+        publicResources.add(VehicleImportResource.class);
+        publicResources.add(AutosysAPIResource.class);
         publicResources.add(AsyncExportResource.class);
         publicResources.add(ExportResource.class);
         publicResources.add(GraphQLResource.class);

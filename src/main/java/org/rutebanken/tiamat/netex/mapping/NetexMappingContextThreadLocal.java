@@ -15,13 +15,13 @@
 
 package org.rutebanken.tiamat.netex.mapping;
 
-import org.rutebanken.netex.model.LocaleStructure;
-import org.rutebanken.netex.model.SiteFrame;
-import org.rutebanken.netex.model.VersionFrameDefaultsStructure;
+import jakarta.xml.bind.JAXBElement;
+import org.rutebanken.netex.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.ZoneId;
+import java.util.List;
 import java.util.Optional;
 
 public class NetexMappingContextThreadLocal {
@@ -45,6 +45,32 @@ public class NetexMappingContextThreadLocal {
                 .map(VersionFrameDefaultsStructure::getDefaultLocale)
                 .map(LocaleStructure::getTimeZone)
                 .orElseThrow(() -> new NetexMappingException("Cannot resolve time zone from FrameDefaults in site frame " + netexSiteFrame.getId()));
+
+        NetexMappingContext netexMappingContext = new NetexMappingContext();
+        netexMappingContext.defaultTimeZone = ZoneId.of(timeZoneString);
+        NetexMappingContextThreadLocal.set(netexMappingContext);
+        logger.info("Setting default time zone for netex mapping context to {}", NetexMappingContextThreadLocal.get().defaultTimeZone);
+    }
+
+    public static void updateMappingContext(PublicationDeliveryStructure publicationDeliveryStructure) {
+        // Check what kind of frame we find
+        List<JAXBElement<? extends Common_VersionFrameStructure>> compositeFrameOrCommonFrame = publicationDeliveryStructure.getDataObjects().getCompositeFrameOrCommonFrame();
+
+        VersionFrameDefaultsStructure defaults = compositeFrameOrCommonFrame.getFirst().getValue().getFrameDefaults();
+
+        try {
+            if (defaults == null) {
+                defaults = ((CompositeFrame) compositeFrameOrCommonFrame.getFirst().getValue()).getFrames().getCommonFrame().getFirst().getValue().getFrameDefaults();
+            }
+        } catch (Exception e) {
+            throw new NetexMappingException("Cannot resolve time zone from FrameDefaults in frame " + compositeFrameOrCommonFrame.getFirst().getValue().getId());
+        }
+
+        if(defaults == null) {
+            throw new NetexMappingException("Cannot resolve time zone from FrameDefaults in frame " + compositeFrameOrCommonFrame.getFirst().getValue().getId());
+        }
+
+        String timeZoneString = defaults.getDefaultLocale().getTimeZone();
 
         NetexMappingContext netexMappingContext = new NetexMappingContext();
         netexMappingContext.defaultTimeZone = ZoneId.of(timeZoneString);

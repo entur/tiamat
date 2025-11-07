@@ -53,7 +53,7 @@ class VehicleTypeFetcher implements DataFetcher {
                 return Arrays.asList(vehicleTypeRepository.findFirstByNetexIdOrderByVersionDesc(netexId));
             }
         }
-        return vehicleTypeRepository.findAll();
+        return vehicleTypeRepository.findAllCurrent();
 
     }
 }

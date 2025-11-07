@@ -154,4 +154,7 @@ public class EntityInVersionStructure extends EntityStructure {
         this.derivedFromObjectRef = value;
     }
 
+    public void mergeWithExistingVersion(EntityInVersionStructure existingVersion) {
+        // By default, do nothing
+    }
 }

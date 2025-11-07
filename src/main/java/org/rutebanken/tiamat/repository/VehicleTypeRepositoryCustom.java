@@ -17,7 +17,10 @@ package org.rutebanken.tiamat.repository;
 
 import org.rutebanken.tiamat.model.vehicle.VehicleType;
 
-public interface VehicleTypeRepository extends VehicleTypeRepositoryCustom, EntityInVersionRepository<VehicleType> {
+import java.util.List;
 
+public interface VehicleTypeRepositoryCustom extends DataManagedObjectStructureRepository<VehicleType> {
+
+    List<VehicleType> findAllCurrent();
 }
 

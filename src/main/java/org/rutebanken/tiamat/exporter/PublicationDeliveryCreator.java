@@ -134,6 +134,23 @@ public class PublicationDeliveryCreator {
     }
 
 
+    public PublicationDeliveryStructure createPublicationDelivery(org.rutebanken.netex.model.SiteFrame siteFrame,
+                                                                  org.rutebanken.netex.model.ResourceFrame resourceFrame
+    ) {
+        PublicationDeliveryStructure publicationDeliveryStructure = createPublicationDelivery();
+
+        publicationDeliveryStructure.withDataObjects
+                (
+                        new PublicationDeliveryStructure.DataObjects()
+                                .withCompositeFrameOrCommonFrame(new ObjectFactory().createResourceFrame(resourceFrame))
+                                .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(siteFrame))
+                );
+
+        logger.info("Returning publication delivery {} with site frame and  resource frame", publicationDeliveryStructure);
+        return publicationDeliveryStructure;
+    }
+
+
 
     private ResourceFrame createResourceFrame() {
         List<JAXBElement<? extends DataManagedObjectStructure>> purposeOfGroupingList = new ArrayList<>();

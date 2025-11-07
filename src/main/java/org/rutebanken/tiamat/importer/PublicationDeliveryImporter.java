@@ -16,15 +16,11 @@
 package org.rutebanken.tiamat.importer;
 
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
+import org.rutebanken.netex.model.ResourceFrame;
 import org.rutebanken.netex.model.SiteFrame;
 import org.rutebanken.tiamat.auth.AuthorizationService;
 import org.rutebanken.tiamat.exporter.PublicationDeliveryCreator;
-import org.rutebanken.tiamat.importer.handler.GroupOfTariffZonesImportHandler;
-import org.rutebanken.tiamat.importer.handler.ParkingsImportHandler;
-import org.rutebanken.tiamat.importer.handler.PathLinkImportHandler;
-import org.rutebanken.tiamat.importer.handler.StopPlaceImportHandler;
-import org.rutebanken.tiamat.importer.handler.TariffZoneImportHandler;
-import org.rutebanken.tiamat.importer.handler.TopographicPlaceImportHandler;
+import org.rutebanken.tiamat.importer.handler.*;
 import org.rutebanken.tiamat.importer.log.ImportLogger;
 import org.rutebanken.tiamat.importer.log.ImportLoggerTask;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
@@ -58,6 +54,10 @@ public class PublicationDeliveryImporter {
     private final GroupOfTariffZonesImportHandler groupOfTariffZonesImportHandler;
     private final StopPlaceImportHandler stopPlaceImportHandler;
     private final ParkingsImportHandler parkingsImportHandler;
+    private final VehicleImportHandler vehicleImportHandler;
+    private final VehicleTypeImportHandler vehicleTypeImportHandler;
+    private final DeckPlanImportHandler deckPlanImportHandler;
+    private final VehicleModelImportHandler vehicleModelImportHandler;
     private final TopographicPlaceImportHandler topographicPlaceImportHandler;
     private final BackgroundJobs backgroundJobs;
     private final AuthorizationService authorizationService;
@@ -72,6 +72,7 @@ public class PublicationDeliveryImporter {
                                        GroupOfTariffZonesImportHandler groupOfTariffZonesImportHandler,
                                        StopPlaceImportHandler stopPlaceImportHandler,
                                        ParkingsImportHandler parkingsImportHandler,
+                                       VehicleImportHandler vehicleImportHandler, VehicleTypeImportHandler vehicleTypeImportHandler, DeckPlanImportHandler deckPlanImportHandler, VehicleModelImportHandler vehicleModelImportHandler,
                                        BackgroundJobs backgroundJobs,
                                        AuthorizationService authorizationService,
                                        @Value("${authorization.enabled:true}") boolean authorizationEnabled) {
@@ -83,6 +84,10 @@ public class PublicationDeliveryImporter {
         this.tariffZoneImportHandler = tariffZoneImportHandler;
         this.groupOfTariffZonesImportHandler = groupOfTariffZonesImportHandler;
         this.stopPlaceImportHandler = stopPlaceImportHandler;
+        this.vehicleImportHandler = vehicleImportHandler;
+        this.vehicleTypeImportHandler = vehicleTypeImportHandler;
+        this.deckPlanImportHandler = deckPlanImportHandler;
+        this.vehicleModelImportHandler = vehicleModelImportHandler;
         this.backgroundJobs = backgroundJobs;
         this.authorizationService = authorizationService;
         this.authorizationEnabled = authorizationEnabled;
@@ -121,39 +126,74 @@ public class PublicationDeliveryImporter {
         AtomicInteger topographicPlaceCounter = new AtomicInteger(0);
         AtomicInteger tariffZoneCounter = new AtomicInteger(0);
         AtomicInteger pathLinkCounter = new AtomicInteger(0);
+        AtomicInteger vehicleCounter = new AtomicInteger(0);
+        AtomicInteger vehicleTypeCounter = new AtomicInteger(0);
+        AtomicInteger vehicleModelCounter = new AtomicInteger(0);
+        AtomicInteger deckPlanCounter = new AtomicInteger(0);
 
         // Currently only supporting one site frame per publication delivery
         SiteFrame netexSiteFrame = publicationDeliveryHelper.findSiteFrame(incomingPublicationDelivery);
+        ResourceFrame netexResourceFrame = publicationDeliveryHelper.findResourceFrame(incomingPublicationDelivery);
 
-        String requestId = netexSiteFrame.getId();
+        updateMappingContext(incomingPublicationDelivery);
 
-        updateMappingContext(netexSiteFrame);
+        SiteFrame responseSiteFrame = null;
+        ResourceFrame responseResourceFrame = null;
+        if(netexSiteFrame != null) {
+            String requestId = netexSiteFrame.getId();
 
-        Timer loggerTimer = new ImportLogger(new ImportLoggerTask(stopPlaceCounter, publicationDeliveryHelper.numberOfStops(netexSiteFrame), topographicPlaceCounter, netexSiteFrame.getId()));
+            Timer loggerTimer = new ImportLogger(new ImportLoggerTask(stopPlaceCounter, publicationDeliveryHelper.numberOfStops(netexSiteFrame), topographicPlaceCounter, netexSiteFrame.getId()));
 
-        try {
-            SiteFrame responseSiteFrame = new SiteFrame();
+            try {
+                responseSiteFrame = new SiteFrame();
 
-            MDC.put(IMPORT_CORRELATION_ID, requestId);
-            logger.info("Publication delivery contains site frame created at {}", netexSiteFrame.getCreated());
+                MDC.put(IMPORT_CORRELATION_ID, requestId);
+                logger.info("Publication delivery contains site frame created at {}", netexSiteFrame.getCreated());
 
-            responseSiteFrame.withId(requestId + "-response").withVersion("1");
+                responseSiteFrame.withId(requestId + "-response").withVersion("1");
 
-            topographicPlaceImportHandler.handleTopographicPlaces(netexSiteFrame, importParams, topographicPlaceCounter ,responseSiteFrame);
-            tariffZoneImportHandler.handleTariffZones(netexSiteFrame, importParams, tariffZoneCounter, responseSiteFrame);
-            groupOfTariffZonesImportHandler.handleGroupOfTariffZones(netexSiteFrame,importParams,responseSiteFrame);
-            stopPlaceImportHandler.handleStops(netexSiteFrame, importParams, stopPlaceCounter, responseSiteFrame);
-            parkingsImportHandler.handleParkings(netexSiteFrame, importParams, parkingCounter, responseSiteFrame);
-            pathLinkImportHandler.handlePathLinks(netexSiteFrame, importParams, pathLinkCounter, responseSiteFrame);
-
-            if(responseSiteFrame.getTariffZones() != null || responseSiteFrame.getTopographicPlaces() != null) {
-                backgroundJobs.triggerStopPlaceUpdate();
+                topographicPlaceImportHandler.handleTopographicPlaces(netexSiteFrame, importParams, topographicPlaceCounter, responseSiteFrame);
+                tariffZoneImportHandler.handleTariffZones(netexSiteFrame, importParams, tariffZoneCounter, responseSiteFrame);
+                groupOfTariffZonesImportHandler.handleGroupOfTariffZones(netexSiteFrame, importParams, responseSiteFrame);
+                stopPlaceImportHandler.handleStops(netexSiteFrame, importParams, stopPlaceCounter, responseSiteFrame);
+                parkingsImportHandler.handleParkings(netexSiteFrame, importParams, parkingCounter, responseSiteFrame);
+                pathLinkImportHandler.handlePathLinks(netexSiteFrame, importParams, pathLinkCounter, responseSiteFrame);
+                if (responseSiteFrame.getTariffZones() != null || responseSiteFrame.getTopographicPlaces() != null) {
+                    backgroundJobs.triggerStopPlaceUpdate();
+                }
+            } finally {
+                MDC.remove(IMPORT_CORRELATION_ID);
+                loggerTimer.cancel();
             }
-            return publicationDeliveryCreator.createPublicationDelivery(responseSiteFrame);
-        } finally {
-            MDC.remove(IMPORT_CORRELATION_ID);
-            loggerTimer.cancel();
         }
+        if(netexResourceFrame != null) {
+            String requestId = netexResourceFrame.getId();
+            Timer loggerTimer = new ImportLogger(new ImportLoggerTask(vehicleCounter, publicationDeliveryHelper.numberOfVehicles(netexResourceFrame), vehicleTypeCounter, netexResourceFrame.getId()));
+            try {
+                responseResourceFrame = new ResourceFrame();
+
+                MDC.put(IMPORT_CORRELATION_ID, requestId);
+                logger.info("Publication delivery contains resource frame created at {}", netexResourceFrame.getCreated());
+
+                responseResourceFrame.withId(requestId + "-response").withVersion("1");
+                if(netexResourceFrame.getVehicleModels() != null) {
+                    vehicleModelImportHandler.handleVehicleModels(netexResourceFrame, importParams, vehicleModelCounter, responseResourceFrame);
+                }
+                if(netexResourceFrame.getDeckPlans() != null) {
+                    deckPlanImportHandler.handleDeckPlans(netexResourceFrame, importParams, deckPlanCounter, responseResourceFrame);
+                }
+                if(netexResourceFrame.getVehicleTypes() != null) {
+                    vehicleTypeImportHandler.handleVehicleTypes(netexResourceFrame, importParams, vehicleTypeCounter, responseResourceFrame);
+                }
+                if(netexResourceFrame.getVehicles() != null) {
+                    vehicleImportHandler.handleVehicles(netexResourceFrame, importParams, vehicleCounter, responseResourceFrame);
+                }
+            } finally {
+                MDC.remove(IMPORT_CORRELATION_ID);
+                loggerTimer.cancel();
+            }
+        }
+        return publicationDeliveryCreator.createPublicationDelivery(responseSiteFrame, responseResourceFrame);
     }
 
 

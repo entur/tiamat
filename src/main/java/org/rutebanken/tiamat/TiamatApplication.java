@@ -15,12 +15,15 @@
 
 package org.rutebanken.tiamat;
 
+import org.rutebanken.tiamat.auth.TiamatSecurityConfig;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 @SpringBootApplication
@@ -28,6 +31,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableTransactionManagement
 @EnableCaching
 @EntityScan(basePackageClasses = {StopPlace.class, Jsr310JpaConverters.class})
+@ComponentScan(basePackages = { "org.entur", "org.rutebanken.tiamat"})
 public class TiamatApplication {
 
     public static void main(String[] args) {

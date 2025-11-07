@@ -13,11 +13,24 @@
  * limitations under the Licence.
  */
 
-package org.rutebanken.tiamat.repository;
+package org.rutebanken.tiamat.versioning.save;
 
-import org.rutebanken.tiamat.model.vehicle.VehicleType;
 
-public interface VehicleTypeRepository extends VehicleTypeRepositoryCustom, EntityInVersionRepository<VehicleType> {
+import org.rutebanken.tiamat.model.vehicle.Vehicle;
+import org.rutebanken.tiamat.repository.VehicleRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+@Component
+public class VehicleVersionedSaverService {
+
+    @Autowired
+    private VehicleRepository vehicleRepository;
+
+    @Autowired
+    private DefaultVersionedSaverService defaultVersionedSaverService;
+
+    public Vehicle saveNewVersion(Vehicle newVersion) {
+        return defaultVersionedSaverService.saveNewVersion(newVersion, vehicleRepository);
+    }
 }
-

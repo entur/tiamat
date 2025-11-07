@@ -16,12 +16,7 @@
 package org.rutebanken.tiamat.netex.mapping;
 
 import jakarta.xml.bind.JAXBElement;
-import org.rutebanken.netex.model.Common_VersionFrameStructure;
-import org.rutebanken.netex.model.CompositeFrame;
-import org.rutebanken.netex.model.DataManagedObjectStructure;
-import org.rutebanken.netex.model.PublicationDeliveryStructure;
-import org.rutebanken.netex.model.SiteFrame;
-import org.rutebanken.netex.model.TopographicPlace;
+import org.rutebanken.netex.model.*;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -85,7 +80,7 @@ public class PublicationDeliveryHelper {
             return optionalSiteframe.get();
         }
 
-        return compositeFrameOrCommonFrame
+        optionalSiteframe =  compositeFrameOrCommonFrame
                 .stream()
                 .filter(element -> element.getValue() instanceof CompositeFrame)
                 .map(element -> (CompositeFrame) element.getValue())
@@ -93,7 +88,9 @@ public class PublicationDeliveryHelper {
                 .flatMap(frames -> frames.getCommonFrame().stream())
                 .filter(jaxbElement -> jaxbElement.getValue() instanceof SiteFrame)
                 .map(jaxbElement -> (SiteFrame) jaxbElement.getValue())
-                .findAny().get();
+                .findAny();
+
+        return optionalSiteframe.orElse(null);
     }
 
     public Set<String> getImportedIds(DataManagedObjectStructure dataManagedObject) {
@@ -125,5 +122,56 @@ public class PublicationDeliveryHelper {
     public boolean hasGroupOfTariffZones(SiteFrame netexSiteFrame) {
         return netexSiteFrame.getGroupsOfTariffZones() != null
                 && netexSiteFrame.getGroupsOfTariffZones().getGroupOfTariffZones() != null;
+    }
+
+    public ResourceFrame findResourceFrame(PublicationDeliveryStructure incomingPublicationDelivery) {
+        List<JAXBElement<? extends Common_VersionFrameStructure>> compositeFrameOrCommonFrame = incomingPublicationDelivery.getDataObjects().getCompositeFrameOrCommonFrame();
+
+        Optional<ResourceFrame> optionalResourceFrame = compositeFrameOrCommonFrame
+                .stream()
+                .filter(element -> element.getValue() instanceof ResourceFrame)
+                .map(element -> (ResourceFrame) element.getValue())
+                .findFirst();
+
+        if (optionalResourceFrame.isPresent()) {
+            return optionalResourceFrame.get();
+        }
+
+        optionalResourceFrame = compositeFrameOrCommonFrame
+                .stream()
+                .filter(element -> element.getValue() instanceof CompositeFrame)
+                .map(element -> (CompositeFrame) element.getValue())
+                .map(compositeFrame -> compositeFrame.getFrames())
+                .flatMap(frames -> frames.getCommonFrame().stream())
+                .filter(jaxbElement -> jaxbElement.getValue() instanceof ResourceFrame)
+                .map(jaxbElement -> (ResourceFrame) jaxbElement.getValue())
+                .findAny();
+
+        return optionalResourceFrame.orElse(null);
+
+    }
+
+    public boolean hasVehicles(ResourceFrame netexResourceFrame) {
+        return netexResourceFrame.getVehicles() != null
+                && netexResourceFrame.getVehicles().getVehicle() != null;
+    }
+
+    public int numberOfVehicles(ResourceFrame netexResourceFrame) {
+        return hasVehicles(netexResourceFrame) ? netexResourceFrame.getVehicles().getVehicle().size() : 0;
+    }
+
+    public boolean hasVehicleTypes(ResourceFrame netexResourceFrame) {
+        return netexResourceFrame.getVehicleTypes() != null
+                && netexResourceFrame.getVehicleTypes().getTransportType_DummyType() != null;
+    }
+
+    public boolean hasVehicleModels(ResourceFrame netexResourceFrame) {
+        return netexResourceFrame.getVehicleModels() != null
+                && netexResourceFrame.getVehicleModels().getVehicleModel() != null;
+    }
+
+    public boolean hasDeckPlans(ResourceFrame netexResourceFrame) {
+        return netexResourceFrame.getDeckPlans() != null
+                && netexResourceFrame.getDeckPlans().getDeckPlan() != null;
     }
 }

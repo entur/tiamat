@@ -140,6 +140,10 @@ public class NetexMapper {
                 .byDefault()
                 .register();
 
+        mapperFactory.classMap(CompositeFrame.class, org.rutebanken.tiamat.model.vehicle.CompositeFrame.class)
+                .byDefault()
+                .register();
+
         mapperFactory.classMap(PassengerCapacity.class, org.rutebanken.tiamat.model.vehicle.PassengerCapacity.class)
                 .customize(new PassengerCapacityMapper())
                 .byDefault()
@@ -305,6 +309,10 @@ public class NetexMapper {
         return facade.map(tiamatVehicleType, VehicleType.class);
     }
 
+    public org.rutebanken.tiamat.model.vehicle.VehicleType mapToTiamatModel(VehicleType netexVehicleType) {
+        return facade.map(netexVehicleType, org.rutebanken.tiamat.model.vehicle.VehicleType.class);
+    }
+
     public org.rutebanken.tiamat.model.TopographicPlace mapToTiamatModel(TopographicPlace topographicPlace) {
         return facade.map(topographicPlace, org.rutebanken.tiamat.model.TopographicPlace.class);
     }
@@ -353,6 +361,14 @@ public class NetexMapper {
 
     public PathLink mapToNetexModel(org.rutebanken.tiamat.model.PathLink pathLink) {
         return facade.map(pathLink, PathLink.class);
+    }
+
+    public DeckPlan mapToNetexModel(org.rutebanken.tiamat.model.vehicle.DeckPlan deckPlan) {
+        return facade.map(deckPlan, DeckPlan.class);
+    }
+
+    public VehicleModel mapToNetexModel(org.rutebanken.tiamat.model.vehicle.VehicleModel vehicleModel) {
+        return facade.map(vehicleModel, VehicleModel.class);
     }
 
     public MapperFacade getFacade() {
