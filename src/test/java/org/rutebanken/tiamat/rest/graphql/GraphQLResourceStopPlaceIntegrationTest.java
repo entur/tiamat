@@ -1487,7 +1487,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
     public void testGetValidTransportModes() throws Exception {
 
         String graphQlJsonQuery = """
-                { 
+                {
                   validTransportModes {
                     transportMode
                     submode
@@ -1500,6 +1500,85 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                 .body("data.validTransportModes", notNullValue())
                 .body("data.validTransportModes[0].transportMode", notNullValue())
                 .body("data.validTransportModes[0].submode", notNullValue());
+    }
+
+    @Test
+    public void testMutationCreateStopPlaceWithCityTramSubmode() throws Exception {
+
+        String stopPlaceName = "City Tram Stop";
+        String transportMode = VehicleModeEnumeration.TRAM.value();
+        String submode = TramSubmodeEnumeration.CITY_TRAM.value();
+        String stopPlaceType = StopTypeEnumeration.ONSTREET_TRAM.value();
+
+        String graphQlJsonQuery = """
+                mutation {
+                    stopPlace: mutateStopPlace (StopPlace: {
+                        name: { value: "%s" }
+                        transportMode: %s
+                        submode: %s
+                        stopPlaceType: %s
+                    }) {
+                        id
+                        name { value }
+                        transportMode
+                        submode
+                        stopPlaceType
+                    }
+                }
+                """.formatted(stopPlaceName, transportMode, submode, stopPlaceType);
+
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
+                .rootPath("data.stopPlace[0]")
+                .body("id", notNullValue())
+                .body("name.value", equalTo(stopPlaceName))
+                .body("transportMode", equalTo(transportMode))
+                .body("submode", equalTo(submode))
+                .body("stopPlaceType", equalTo(stopPlaceType));
+    }
+
+    @Test
+    public void testMutationUpdateStopPlaceToCityTramSubmode() throws Exception {
+
+        StopPlace stopPlace = createStopPlace("Bus Stop");
+        stopPlace.setTransportMode(VehicleModeEnumeration.BUS);
+        stopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
+        stopPlace.setBusSubmode(BusSubmodeEnumeration.LOCAL_BUS);
+        stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(10, 59)));
+
+        stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+
+        String newTransportMode = VehicleModeEnumeration.TRAM.value();
+        String newSubmode = TramSubmodeEnumeration.CITY_TRAM.value();
+        String graphQlJsonQuery = """
+                mutation {
+                    stopPlace: mutateStopPlace (StopPlace: {
+                        id: "%s"
+                        transportMode: %s
+                        submode: %s
+                    }) {
+                        id
+                        transportMode
+                        submode
+                    }
+                }
+                """.formatted(stopPlace.getNetexId(), newTransportMode, newSubmode);
+
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
+                .rootPath("data.stopPlace[0]")
+                .body("id", equalTo(stopPlace.getNetexId()))
+                .body("transportMode", equalTo(newTransportMode))
+                .body("submode", equalTo(newSubmode));
+
+        var stopPlaces = stopPlaceRepository.findAll();
+        for(StopPlace stopPlaceVersion : stopPlaces) {
+            if(stopPlaceVersion.getVersion() == 1) {
+                assertThat(stopPlaceVersion.getBusSubmode()).as("version 1").isNotNull().isEqualTo(BusSubmodeEnumeration.LOCAL_BUS);
+                assertThat(stopPlaceVersion.getTramSubmode()).as("version 1").isNull();
+            } else if (stopPlaceVersion.getVersion() == 2) {
+                assertThat(stopPlaceVersion.getBusSubmode()).as("version 2").isNull();
+                assertThat(stopPlaceVersion.getTramSubmode()).as("version 2").isNotNull().isEqualTo(TramSubmodeEnumeration.CITY_TRAM);
+            }
+        }
     }
 
 
