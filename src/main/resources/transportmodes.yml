@@ -10,6 +10,7 @@ bus:
   - sightseeingBus
 tram:
   - localTram
+  - cityTram
 rail:
   - internationalRail
   - interregionalRail
