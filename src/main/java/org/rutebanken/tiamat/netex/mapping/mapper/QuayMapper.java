@@ -28,6 +28,7 @@ import org.rutebanken.tiamat.model.BoardingPosition;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class QuayMapper extends CustomMapper<Quay, org.rutebanken.tiamat.model.Quay> {
     @Override
@@ -93,67 +94,6 @@ public class QuayMapper extends CustomMapper<Quay, org.rutebanken.tiamat.model.Q
                 quay.getPlaceEquipments().getInstalledEquipment().isEmpty()) {
             quay.setPlaceEquipments(null);
             quay2.setPlaceEquipments(null);
-        }
-
-        if (quay.getAlternativeNames() != null &&
-                !quay.getAlternativeNames().isEmpty()) {
-            List<AlternativeName> alternativeNames = quay.getAlternativeNames();
-            List<org.rutebanken.netex.model.AlternativeName> netexAlternativeNames = new ArrayList<>();
-
-            for (org.rutebanken.tiamat.model.AlternativeName alternativeName : alternativeNames) {
-                if (alternativeName != null
-                        && alternativeName.getName() != null
-                        && alternativeName.getName().getValue() != null
-                        && !alternativeName.getName().getValue().isEmpty()) {
-                    //Only include non-empty alternative names
-                    org.rutebanken.netex.model.AlternativeName netexAltName = new org.rutebanken.netex.model.AlternativeName();
-                    mapperFacade.map(alternativeName, netexAltName);
-                    netexAltName.setId(alternativeName.getNetexId());
-                    netexAlternativeNames.add(netexAltName);
-                }
-            }
-
-            if (!netexAlternativeNames.isEmpty()) {
-                AlternativeNames_RelStructure altName = new AlternativeNames_RelStructure();
-                altName.getAlternativeName().addAll(netexAlternativeNames);
-                quay2.setAlternativeNames(altName);
-            }
-        } else {
-            quay2.setAlternativeNames(null);
-        }
-
-        if (quay.getBoardingPositions() != null && !quay.getBoardingPositions().isEmpty()) {
-            final List<BoardingPosition> boardingPositions = quay.getBoardingPositions();
-            List<org.rutebanken.netex.model.BoardingPosition> netexBoardingPositions = new ArrayList<>();
-            for (BoardingPosition boardingPosition : boardingPositions) {
-                if (boardingPosition != null
-                        && boardingPosition.getPublicCode() != null
-                        && !boardingPosition.getPublicCode().isEmpty()) {
-                    // Only Include non-empty boarding-positions
-                    final org.rutebanken.netex.model.BoardingPosition netexBoardingPosition = new org.rutebanken.netex.model.BoardingPosition();
-                    mapperFacade.map(boardingPosition,netexBoardingPosition);
-                    netexBoardingPosition.setId(boardingPosition.getNetexId());
-                    netexBoardingPosition.setPublicCode(boardingPosition.getPublicCode());
-
-                    if (boardingPosition.getCentroid()!= null) {
-                        SimplePoint_VersionStructure simplePoint = new SimplePoint_VersionStructure()
-                                .withLocation(new LocationStructure()
-                                        .withLatitude(BigDecimal.valueOf(boardingPosition.getCentroid().getY()))
-                                        .withLongitude(BigDecimal.valueOf(boardingPosition.getCentroid().getX())));
-                        netexBoardingPosition.setCentroid(simplePoint);
-                    }
-
-
-                    netexBoardingPositions.add(netexBoardingPosition);
-
-                }
-            }
-            if (!netexBoardingPositions.isEmpty()) {
-                final BoardingPositions_RelStructure boardingPositionsRelStructure = new BoardingPositions_RelStructure();
-                boardingPositionsRelStructure.getBoardingPositionRefOrBoardingPosition().addAll(netexBoardingPositions);
-                quay2.setBoardingPositions(boardingPositionsRelStructure);
-            }
-
         }
     }
 }
