@@ -54,7 +54,7 @@ public abstract class SiteComponent_VersionStructure
     @OneToOne(cascade = CascadeType.ALL)
     protected PlaceEquipment placeEquipments;
     @OneToMany(cascade = CascadeType.ALL)
-    private List<LocalService> localServices = new ArrayList<>();
+    private List<LocalService> localServices;
 
     @OneToMany(cascade = CascadeType.ALL)
     private List<CheckConstraint> checkConstraints;

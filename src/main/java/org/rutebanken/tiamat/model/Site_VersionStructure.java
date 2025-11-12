@@ -77,7 +77,7 @@ public abstract class Site_VersionStructure
     private List<EquipmentPlace> equipmentPlaces;
 
     @OneToMany(cascade = CascadeType.ALL)
-    private List<LocalService> localServices = new ArrayList<>();
+    private List<LocalService> localServices;
 
     public Site_VersionStructure(EmbeddableMultilingualString name) {
         super(name);

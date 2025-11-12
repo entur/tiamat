@@ -1254,6 +1254,48 @@ public class ImportResourceTest extends TiamatIntegrationTest {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         streamingOutput.write(byteArrayOutputStream);
         System.out.println(byteArrayOutputStream.toString());
+
+        final List<StopPlace> stopPlaces = publicationDeliveryTestHelper.extractStopPlaces(response);
+        assertThat(stopPlaces).hasSize(1);
+
+        StopPlace stopPlace = stopPlaces.getFirst();
+        assertThat(stopPlace.getLocalServices())
+                .as("Stop place should have local services")
+                .isNotNull();
+        assertThat(stopPlace.getLocalServices().getLocalServiceRefOrLocalService())
+                .as("Stop place should have local service list")
+                .isNotNull()
+                .hasSize(1);
+
+        Object localServiceObj = stopPlace.getLocalServices().getLocalServiceRefOrLocalService().getFirst();
+        assertThat(localServiceObj)
+                .as("Local service element should be a JAXBElement")
+                .isInstanceOf(jakarta.xml.bind.JAXBElement.class);
+
+        jakarta.xml.bind.JAXBElement<?> localServiceElement = (jakarta.xml.bind.JAXBElement<?>) localServiceObj;
+        assertThat(localServiceElement.getValue())
+                .as("Local service should be an AssistanceService")
+                .isInstanceOf(org.rutebanken.netex.model.AssistanceService.class);
+
+        org.rutebanken.netex.model.AssistanceService assistanceService =
+                (org.rutebanken.netex.model.AssistanceService) localServiceElement.getValue();
+
+        assertThat(assistanceService.getAssistanceAvailability())
+                .as("Assistance availability should be AVAILABLE_IF_BOOKED")
+                .isEqualTo(org.rutebanken.netex.model.AssistanceAvailabilityEnumeration.AVAILABLE_IF_BOOKED);
+
+        assertThat(assistanceService.getAssistanceFacilityList())
+                .as("Assistance facility list should contain 3 facilities")
+                .hasSize(3)
+                .contains(
+                        org.rutebanken.netex.model.AssistanceFacilityEnumeration.PERSONAL_ASSISTANCE,
+                        org.rutebanken.netex.model.AssistanceFacilityEnumeration.BOARDING_ASSISTANCE,
+                        org.rutebanken.netex.model.AssistanceFacilityEnumeration.WHEELCHAIR_ASSISTANCE
+                );
+
+        assertThat(assistanceService.getId())
+                .as("AssistanceService should have been assigned an NSR ID")
+                .startsWith("NSR:");
     }
 
     @Test
