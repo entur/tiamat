@@ -23,6 +23,7 @@ import graphql.schema.GraphQLInputType;
 import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLNonNull;
 import graphql.schema.GraphQLObjectType;
+import org.geolatte.geom.V;
 import org.rutebanken.tiamat.diff.generic.SubmodeEnumuration;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.model.AirSubmodeEnumeration;
@@ -35,6 +36,7 @@ import org.rutebanken.tiamat.model.InstalledEquipment_VersionStructure;
 import org.rutebanken.tiamat.model.InterchangeWeightingEnumeration;
 import org.rutebanken.tiamat.model.LimitationStatusEnumeration;
 import org.rutebanken.tiamat.model.MetroSubmodeEnumeration;
+import org.rutebanken.tiamat.model.MobilityFacilityEnumeration;
 import org.rutebanken.tiamat.model.ModificationEnumeration;
 import org.rutebanken.tiamat.model.NameTypeEnumeration;
 import org.rutebanken.tiamat.model.ParkingLayoutEnumeration;
@@ -123,6 +125,7 @@ public class CustomGraphQLTypes {
     public static GraphQLEnumType modificationEnumerationType = createCustomEnumType("ModificationEnumerationType", ModificationEnumeration.class);
     public static GraphQLEnumType scopingMethodEnumType = createCustomEnumType("ScopingMethodEnumerationType", ScopingMethodEnumeration.class);
     public static GraphQLEnumType zoneTopologyEnumType = createCustomEnumType("ZoneTopologyEnumerationType", ZoneTopologyEnumeration.class);
+    public static GraphQLEnumType mobilityFacilityListEnum = createCustomEnumType("MobilityFacilityEnumerationInputType", MobilityFacilityEnumeration.class);
 
 
     public static GraphQLEnumType createCustomEnumType(String name, Class c) {
@@ -640,6 +643,33 @@ public class CustomGraphQLTypes {
             .field(geometryFieldDefinition)
             .build();
 
+    public static GraphQLObjectType siteFacilitySetObjectType = GraphQLObjectType.newObject()
+            .name(OUTPUT_TYPE_SITE_FACILITY_SET)
+            .field(newFieldDefinition()
+                    .name(ID)
+                    .type(GraphQLString)
+            )
+            .field(newFieldDefinition()
+                    .name(VERSION)
+                    .type(GraphQLString))
+            .field(newFieldDefinition()
+                    .name(MOBILITY_FACILITY_LIST)
+                    .type(new GraphQLList(mobilityFacilityListEnum)))
+            .build();
+
+    public static GraphQLInputObjectType siteFacilitySetInputObjectType = GraphQLInputObjectType.newInputObject()
+            .name(INPUT_TYPE_SITE_FACILITY_SET)
+            .field(newInputObjectField()
+                    .name(ID)
+                    .type(GraphQLString)
+            )
+            .field(newInputObjectField()
+                    .name(VERSION)
+                    .type(GraphQLString))
+            .field(newInputObjectField()
+                    .name(MOBILITY_FACILITY_LIST)
+                    .type(new GraphQLList(mobilityFacilityListEnum)))
+            .build();
 
     public static GraphQLInputObjectType boardingPositionsInputObjectType = GraphQLInputObjectType.newInputObject()
             .name(INPUT_TYPE_BOARDING_POSITION)
