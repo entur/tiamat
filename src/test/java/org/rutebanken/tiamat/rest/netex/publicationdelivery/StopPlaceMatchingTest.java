@@ -56,7 +56,16 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
                 .withCentroid(new SimplePoint_VersionStructure()
                         .withLocation(new LocationStructure()
                                 .withLatitude(new BigDecimal("10"))
-                                .withLongitude(new BigDecimal("74"))));
+                                .withLongitude(new BigDecimal("74"))))
+                .withQuays(new Quays_RelStructure()
+                        .withQuayRefOrQuay(new Quay()
+                                .withId("XYZ:01:02")
+                                .withVersion("1")
+                                .withName(new MultilingualString().withValue("B"))
+                                .withCentroid(new SimplePoint_VersionStructure()
+                                        .withLocation(new LocationStructure()
+                                                .withLatitude(new BigDecimal("10"))
+                                                .withLongitude(new BigDecimal("74"))))));
 
 
         ImportParams importParams = new ImportParams();
@@ -94,7 +103,16 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
                 .withCentroid(new SimplePoint_VersionStructure()
                         .withLocation(new LocationStructure()
                                 .withLatitude(new BigDecimal("10"))
-                                .withLongitude(new BigDecimal("74"))));
+                                .withLongitude(new BigDecimal("74"))))
+                .withQuays(new Quays_RelStructure()
+                        .withQuayRefOrQuay(new Quay()
+                                .withId("XYZ:01:02")
+                                .withVersion("1")
+                                .withName(new MultilingualString().withValue("B"))
+                                .withCentroid(new SimplePoint_VersionStructure()
+                                        .withLocation(new LocationStructure()
+                                                .withLatitude(new BigDecimal("10"))
+                                                .withLongitude(new BigDecimal("74"))))));
 
         ImportParams importParams = new ImportParams();
         importParams.importType = ImportType.INITIAL;
@@ -110,7 +128,16 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
                 .withCentroid(new SimplePoint_VersionStructure()
                         .withLocation(new LocationStructure()
                                 .withLatitude(new BigDecimal("10"))
-                                .withLongitude(new BigDecimal("74"))));
+                                .withLongitude(new BigDecimal("74"))))
+                .withQuays(new Quays_RelStructure()
+                        .withQuayRefOrQuay(new Quay()
+                                .withId("XYZ:01:02")
+                                .withVersion("1")
+                                .withName(new MultilingualString().withValue("B"))
+                                .withCentroid(new SimplePoint_VersionStructure()
+                                        .withLocation(new LocationStructure()
+                                                .withLatitude(new BigDecimal("10"))
+                                                .withLongitude(new BigDecimal("74"))))));
 
 
         importParams.importType = ImportType.INITIAL;
@@ -150,8 +177,8 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
                                 .withLongitude(new BigDecimal("74"))))
                 .withQuays(new Quays_RelStructure()
                         .withQuayRefOrQuay(new Quay()
-                            .withId("NTR:Quay:11")
-                            .withVersion("1")));
+                                .withId("NTR:Quay:11")
+                                .withVersion("1")));
 
         ImportParams importParams = new ImportParams();
         importParams.importType = ImportType.INITIAL;
@@ -221,7 +248,16 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
                 .withCentroid(new SimplePoint_VersionStructure()
                         .withLocation(new LocationStructure()
                                 .withLatitude(new BigDecimal("74"))
-                                .withLongitude(new BigDecimal("10"))));
+                                .withLongitude(new BigDecimal("10"))))
+                .withQuays(new Quays_RelStructure()
+                        .withQuayRefOrQuay(new Quay()
+                                .withId("XYZ:01:02")
+                                .withVersion("1")
+                                .withName(new MultilingualString().withValue("B"))
+                                .withCentroid(new SimplePoint_VersionStructure()
+                                        .withLocation(new LocationStructure()
+                                                .withLatitude(new BigDecimal("74"))
+                                                .withLongitude(new BigDecimal("10"))))));
 
         StopPlace nearbyStopPlace = new StopPlace()
                 .withId("CBS:StopPlace:321")
@@ -231,7 +267,15 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
                 .withCentroid(new SimplePoint_VersionStructure()
                         .withLocation(new LocationStructure()
                                 .withLatitude(new BigDecimal("74.2"))
-                                .withLongitude(new BigDecimal("10.2"))));
+                                .withLongitude(new BigDecimal("10.2"))))
+                .withQuays(new Quays_RelStructure()
+                        .withQuayRefOrQuay(new Quay()
+                                .withId("XYZ:01:03")
+                                .withVersion("1")
+                                .withCentroid(new SimplePoint_VersionStructure()
+                                        .withLocation(new LocationStructure()
+                                                .withLatitude(new BigDecimal("74.2"))
+                                                .withLongitude(new BigDecimal("10.2"))))));
 
         ImportParams importParams = new ImportParams();
         importParams.importType = ImportType.INITIAL;
@@ -246,7 +290,16 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
                 .withCentroid(new SimplePoint_VersionStructure()
                         .withLocation(new LocationStructure()
                                 .withLatitude(new BigDecimal("74.2002"))
-                                .withLongitude(new BigDecimal("10.20001"))));
+                                .withLongitude(new BigDecimal("10.20001"))))
+                .withQuays(new Quays_RelStructure()
+                        .withQuayRefOrQuay(new Quay()
+                                .withId("XYZ:01:02")
+                                .withVersion("1")
+                                .withName(new MultilingualString().withValue("B"))
+                                .withCentroid(new SimplePoint_VersionStructure()
+                                        .withLocation(new LocationStructure()
+                                                .withLatitude(new BigDecimal("74.2002"))
+                                                .withLongitude(new BigDecimal("10.20001"))))));
 
         PublicationDeliveryStructure publicationDelivery2 = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlaceToBeMerged);
         importParams.importType = ImportType.MERGE;
@@ -274,7 +327,16 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
                 .withCentroid(new SimplePoint_VersionStructure()
                         .withLocation(new LocationStructure()
                                 .withLatitude(new BigDecimal("14"))
-                                .withLongitude(new BigDecimal("75"))));
+                                .withLongitude(new BigDecimal("75"))))
+                .withQuays(new Quays_RelStructure()
+                        .withQuayRefOrQuay(new Quay()
+                                .withId("XYZ:01:02")
+                                .withVersion("1")
+                                .withName(new MultilingualString().withValue("B"))
+                                .withCentroid(new SimplePoint_VersionStructure()
+                                        .withLocation(new LocationStructure()
+                                                .withLatitude(new BigDecimal("14"))
+                                                .withLongitude(new BigDecimal("75"))))));
 
 
         ImportParams importParams = new ImportParams();
@@ -306,7 +368,16 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
                 .withCentroid(new SimplePoint_VersionStructure()
                         .withLocation(new LocationStructure()
                                 .withLatitude(new BigDecimal("15"))
-                                .withLongitude(new BigDecimal("76"))));
+                                .withLongitude(new BigDecimal("76"))))
+                .withQuays(new Quays_RelStructure()
+                        .withQuayRefOrQuay(new Quay()
+                                .withId("XYZ:01:06")
+                                .withVersion("1")
+                                .withName(new MultilingualString().withValue("B"))
+                                .withCentroid(new SimplePoint_VersionStructure()
+                                        .withLocation(new LocationStructure()
+                                                .withLatitude(new BigDecimal("15"))
+                                                .withLongitude(new BigDecimal("76"))))));
 
 
         ImportParams importParams = new ImportParams();
@@ -316,6 +387,15 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
 
         // ID is similar, but does not start with 2
         stopPlaceNotToBeMatched.setId("RUT:StopPlace:12345678910");
+        stopPlaceNotToBeMatched.setQuays(new Quays_RelStructure()
+                .withQuayRefOrQuay(new Quay()
+                        .withId("XYZ:01:07")
+                        .withVersion("1")
+                        .withName(new MultilingualString().withValue("B"))
+                        .withCentroid(new SimplePoint_VersionStructure()
+                                .withLocation(new LocationStructure()
+                                        .withLatitude(new BigDecimal("15"))
+                                        .withLongitude(new BigDecimal("76"))))));
 
         PublicationDeliveryStructure publicationDelivery2 = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlaceNotToBeMatched);
         importParams.importType = ImportType.ID_MATCH;
@@ -337,8 +417,16 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
                 .withCentroid(new SimplePoint_VersionStructure()
                         .withLocation(new LocationStructure()
                                 .withLatitude(new BigDecimal("11"))
-                                .withLongitude(new BigDecimal("77"))));
-
+                                .withLongitude(new BigDecimal("77"))))
+                .withQuays(new Quays_RelStructure()
+                        .withQuayRefOrQuay(new Quay()
+                                .withId("XYZ:01:02")
+                                .withVersion("1")
+                                .withName(new MultilingualString().withValue("B"))
+                                .withCentroid(new SimplePoint_VersionStructure()
+                                        .withLocation(new LocationStructure()
+                                                .withLatitude(new BigDecimal("11"))
+                                                .withLongitude(new BigDecimal("77"))))));
 
         ImportParams importParams = new ImportParams();
         importParams.importType = ImportType.INITIAL;
@@ -369,8 +457,16 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
                 .withCentroid(new SimplePoint_VersionStructure()
                         .withLocation(new LocationStructure()
                                 .withLatitude(new BigDecimal("11"))
-                                .withLongitude(new BigDecimal("77"))));
-
+                                .withLongitude(new BigDecimal("77"))))
+                .withQuays(new Quays_RelStructure()
+                        .withQuayRefOrQuay(new Quay()
+                                .withId("XYZ:01:02")
+                                .withVersion("1")
+                                .withName(new MultilingualString().withValue("B"))
+                                .withCentroid(new SimplePoint_VersionStructure()
+                                        .withLocation(new LocationStructure()
+                                                .withLatitude(new BigDecimal("11"))
+                                                .withLongitude(new BigDecimal("77"))))));
 
         ImportParams importParams = new ImportParams();
         importParams.importType = ImportType.INITIAL;
@@ -398,7 +494,6 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
     @Test
     public void avoidDuplicatesInOutput() throws Exception {
 
-
         StopPlace stopPlace1 = new StopPlace()
                 .withId("RUT:StopPlace:321")
                 .withKeyList(
@@ -415,7 +510,16 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
                 .withCentroid(new SimplePoint_VersionStructure()
                         .withLocation(new LocationStructure()
                                 .withLatitude(new BigDecimal("9"))
-                                .withLongitude(new BigDecimal("71"))));
+                                .withLongitude(new BigDecimal("71"))))
+                .withQuays(new Quays_RelStructure()
+                        .withQuayRefOrQuay(new Quay()
+                                .withId("XYZ:01:02")
+                                .withVersion("1")
+                                .withName(new MultilingualString().withValue("B"))
+                                .withCentroid(new SimplePoint_VersionStructure()
+                                        .withLocation(new LocationStructure()
+                                                .withLatitude(new BigDecimal("9"))
+                                                .withLongitude(new BigDecimal("71"))))));
 
         StopPlace stopPlace2 = new StopPlace()
                 .withId("RUT:StopPlace:325")
@@ -433,7 +537,16 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
                 .withCentroid(new SimplePoint_VersionStructure()
                         .withLocation(new LocationStructure()
                                 .withLatitude(new BigDecimal("9"))
-                                .withLongitude(new BigDecimal("71"))));
+                                .withLongitude(new BigDecimal("71"))))
+                .withQuays(new Quays_RelStructure()
+                        .withQuayRefOrQuay(new Quay()
+                                .withId("XYZ:01:03")
+                                .withVersion("1")
+                                .withName(new MultilingualString().withValue("B"))
+                                .withCentroid(new SimplePoint_VersionStructure()
+                                        .withLocation(new LocationStructure()
+                                                .withLatitude(new BigDecimal("9"))
+                                                .withLongitude(new BigDecimal("71"))))));
 
 
         ImportParams importParams = new ImportParams();
