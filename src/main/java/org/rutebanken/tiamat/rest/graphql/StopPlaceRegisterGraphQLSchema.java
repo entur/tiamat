@@ -61,17 +61,7 @@ import org.rutebanken.tiamat.model.WaitingRoomEquipment;
 import org.rutebanken.tiamat.model.Zone_VersionStructure;
 import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
-import org.rutebanken.tiamat.rest.graphql.fetchers.EntityPermissionsFetcher;
-import org.rutebanken.tiamat.rest.graphql.fetchers.FareZoneAuthoritiesFetcher;
-import org.rutebanken.tiamat.rest.graphql.fetchers.GroupOfStopPlacesMembersFetcher;
-import org.rutebanken.tiamat.rest.graphql.fetchers.GroupOfStopPlacesPurposeOfGroupingFetcher;
-import org.rutebanken.tiamat.rest.graphql.fetchers.KeyValuesDataFetcher;
-import org.rutebanken.tiamat.rest.graphql.fetchers.LocationPermissionsFetcher;
-import org.rutebanken.tiamat.rest.graphql.fetchers.PolygonFetcher;
-import org.rutebanken.tiamat.rest.graphql.fetchers.StopPlaceFareZoneFetcher;
-import org.rutebanken.tiamat.rest.graphql.fetchers.StopPlaceTariffZoneFetcher;
-import org.rutebanken.tiamat.rest.graphql.fetchers.TagFetcher;
-import org.rutebanken.tiamat.rest.graphql.fetchers.UserPermissionsFetcher;
+import org.rutebanken.tiamat.rest.graphql.fetchers.*;
 import org.rutebanken.tiamat.rest.graphql.mappers.GeometryMapper;
 import org.rutebanken.tiamat.rest.graphql.mappers.ValidBetweenMapper;
 import org.rutebanken.tiamat.rest.graphql.operations.MultiModalityOperationsBuilder;
@@ -212,6 +202,8 @@ public class StopPlaceRegisterGraphQLSchema {
 
     @Autowired
     private VehicleTypeObjectTypeCreator vehicleTypeObjectTypeCreator;
+    @Autowired
+    private DeckPlanObjectTypeCreator deckPlanObjectTypeCreator;
 
 
     @Autowired
@@ -270,6 +262,9 @@ public class StopPlaceRegisterGraphQLSchema {
 
     @Autowired
     DataFetcher vehicleTypeFetcher;
+    @Autowired
+    private VehicleTypeDeckPlanFetcher vehicleTypeDeckPlanFetcher;
+
 
     @Autowired
     DataFetcher stopPlaceUpdater;
@@ -432,7 +427,8 @@ public class StopPlaceRegisterGraphQLSchema {
                         .build())
                 .build();
 
-        GraphQLObjectType vehicleTypeObjectType = vehicleTypeObjectTypeCreator.create();
+        GraphQLObjectType deckPlanObjectType = deckPlanObjectTypeCreator.create();
+        GraphQLObjectType vehicleTypeObjectType = vehicleTypeObjectTypeCreator.create(deckPlanObjectType);
 
         List<GraphQLFieldDefinition> zoneCommandFieldList = zoneCommonFieldListCreator.create(validBetweenObjectType);
 
@@ -696,6 +692,7 @@ public class StopPlaceRegisterGraphQLSchema {
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_PARENT_STOPPLACE, IMPORTED_ID, getOriginalIdsFetcher());
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_QUAY, IMPORTED_ID, getOriginalIdsFetcher());
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_STOPPLACE, ID, getNetexIdFetcher());
+        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_DECK_PLAN, ID, getNetexIdFetcher());
 
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_STOPPLACE, PERMISSIONS, entityPermissionsFetcher);
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_PARENT_STOPPLACE, PERMISSIONS, entityPermissionsFetcher);
@@ -759,6 +756,7 @@ public class StopPlaceRegisterGraphQLSchema {
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_TARIFF_ZONE, KEY_VALUES, keyValuesDataFetcher);
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_FARE_ZONE, KEY_VALUES, keyValuesDataFetcher);
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_QUAY, KEY_VALUES, keyValuesDataFetcher);
+        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_VEHICLE_TYPE, KEY_VALUES, keyValuesDataFetcher);
 
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_STOPPLACE, POLYGON, polygonFetcher);
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_PARENT_STOPPLACE, POLYGON, polygonFetcher);
@@ -783,6 +781,7 @@ public class StopPlaceRegisterGraphQLSchema {
 
         registerDataFetcher(codeRegistryBuilder, STOPPLACES_REGISTER, VEHICLE_TYPES, vehicleTypeFetcher);
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_VEHICLE_TYPE, ID, getNetexIdFetcher());
+        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_VEHICLE_TYPE, VEHICLE_TYPE_DECK_PLAN, vehicleTypeDeckPlanFetcher);
 
 
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_GEO_JSON, TYPE, env -> {

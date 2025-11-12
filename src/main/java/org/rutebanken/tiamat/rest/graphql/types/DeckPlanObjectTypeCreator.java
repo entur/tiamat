@@ -15,9 +15,7 @@
 
 package org.rutebanken.tiamat.rest.graphql.types;
 
-import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLObjectType;
-import graphql.schema.GraphQLTypeReference;
 import org.springframework.stereotype.Component;
 
 import static graphql.Scalars.GraphQLInt;
@@ -25,35 +23,26 @@ import static graphql.Scalars.GraphQLString;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLObjectType.newObject;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
-import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.*;
+import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.embeddableMultilingualStringObjectType;
 
 @Component
-public class VehicleTypeObjectTypeCreator {
+public class DeckPlanObjectTypeCreator {
 
-    public GraphQLObjectType create(GraphQLObjectType deckPlanObjectType) {
+    public GraphQLObjectType create() {
         return newObject()
-                .name(OUTPUT_TYPE_VEHICLE_TYPE)
+                .name(OUTPUT_TYPE_DECK_PLAN)
                 .field(newFieldDefinition()
                         .name(ID)
+                        .type(GraphQLString))
+                .field(newFieldDefinition()
+                        .name(DESCRIPTION)
                         .type(GraphQLString))
                 .field(newFieldDefinition()
                         .name(NAME)
                         .type(embeddableMultilingualStringObjectType))
                 .field(newFieldDefinition()
-                        .name("length")
-                        .type(GraphQLInt))
-                .field(newFieldDefinition()
-                        .name("width")
-                        .type(GraphQLInt))
-                .field(newFieldDefinition()
-                        .name("height")
-                        .type(GraphQLInt))
-                .field(newFieldDefinition()
                         .name(VERSION)
                         .type(GraphQLInt))
-                .field(newFieldDefinition()
-                    .name("deckPlan")
-                    .type(deckPlanObjectType))
                 .build();
     }
 

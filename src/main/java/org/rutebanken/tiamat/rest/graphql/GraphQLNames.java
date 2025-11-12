@@ -448,7 +448,11 @@ public class GraphQLNames {
 
     public static final String VEHICLE_TYPES = "vehicleTypes";
     public static final String OUTPUT_TYPE_VEHICLE_TYPE = "VehicleType";
+    public static final String VEHICLE_TYPE_DECK_PLAN = "deckPlan";
+
     public static final String VEHICLES = "vehicles";
+    public static final String OUTPUT_TYPE_VEHICLE = "Vehicle";
+    public static final String OUTPUT_TYPE_DECK_PLAN = "DeckPlan";
 
     public static final String FIND_BY_STOP_PLACE_ID = "stopPlaceId";
     public static final String FIND_BY_GROUP_OF_STOP_PLACEs_ID = "groupOfStopPlacesId";
