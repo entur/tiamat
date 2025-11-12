@@ -14,6 +14,8 @@ import lombok.Getter;
 import lombok.Setter;
 import org.rutebanken.tiamat.model.DataManagedObjectStructure;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
+import org.rutebanken.tiamat.model.EntityInVersionStructure;
+import org.rutebanken.tiamat.model.Value;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,5 +50,14 @@ public class DeckPlan extends DataManagedObjectStructure {
     @OneToMany(cascade = CascadeType.ALL)
     private List<Deck> decks = new ArrayList<>();
 
-
+    @Override
+    public void mergeWithExistingVersion(EntityInVersionStructure existingVersion) {
+        if(existingVersion instanceof DeckPlan) {
+            if (((DeckPlan) existingVersion).getKeyValues() != null) {
+                ((DeckPlan) existingVersion).getKeyValues().forEach((key, value) -> {
+                    this.getKeyValues().put(key, new Value(value.getItems().stream().toList()));
+                });
+            }
+        }
+    }
 }

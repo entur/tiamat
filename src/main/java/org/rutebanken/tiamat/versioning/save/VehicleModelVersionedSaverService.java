@@ -24,11 +24,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class VehicleModelVersionedSaverService {
 
-    @Autowired
-    private VehicleModelRepository vehicleModelRepository;
+    private final VehicleModelRepository vehicleModelRepository;
+    private final DefaultMergingVersionedSaverService defaultVersionedSaverService;
 
-    @Autowired
-    private DefaultVersionedSaverService defaultVersionedSaverService;
+    public VehicleModelVersionedSaverService(VehicleModelRepository vehicleModelRepository, DefaultMergingVersionedSaverService defaultVersionedSaverService) {
+        this.vehicleModelRepository = vehicleModelRepository;
+        this.defaultVersionedSaverService = defaultVersionedSaverService;
+    }
 
     public VehicleModel saveNewVersion(VehicleModel newVersion) {
         return defaultVersionedSaverService.saveNewVersion(newVersion, vehicleModelRepository);

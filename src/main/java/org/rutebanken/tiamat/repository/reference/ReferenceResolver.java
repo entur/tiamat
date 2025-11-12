@@ -53,6 +53,39 @@ public class ReferenceResolver {
     @Autowired
     private NetexIdHelper netexIdHelper;
 
+    public <T extends DataManagedObjectStructure> T resolve(VersionOfObjectRefStructure versionOfObjectRefStructure, Class<T> clazz) {
+
+        logger.debug("Received reference: {}", versionOfObjectRefStructure);
+
+        assertNotNull(versionOfObjectRefStructure, "ref", versionOfObjectRefStructure.getRef());
+
+        String ref = versionOfObjectRefStructure.getRef();
+        if (StringUtils.countMatches(ref, ":") != 2) {
+            throw new IllegalArgumentException("Expected two number of colons in ref. Got: '" + ref + "'");
+
+        }
+        String memberClass = netexIdHelper.extractIdType(ref);
+
+        String prefix = netexIdHelper.extractIdPrefix(ref);
+
+        final String netexId;
+        if (!validPrefixList.isValidPrefixForType(prefix, memberClass)) {
+            logger.debug("Detected ID without valid prefix: {} and type {}. Will try to find it from original ID: {}.", prefix, memberClass, ref);
+            Set<String> valuesArgument = Sets.newHashSet(ref);
+            netexId = genericEntityInVersionRepository.findByKeyValue(NetexIdMapper.ORIGINAL_ID_KEY, valuesArgument, clazz);
+        } else {
+            netexId = ref;
+        }
+
+        if (versionOfObjectRefStructure.getVersion() == null) {
+            return genericEntityInVersionRepository.findFirstByNetexIdOrderByVersionDesc(netexId, clazz);
+        } else {
+            long version = Long.valueOf(versionOfObjectRefStructure.getVersion());
+            return genericEntityInVersionRepository.findFirstByNetexIdAndVersion(netexId, version, clazz);
+        }
+
+    }
+
     public <T extends DataManagedObjectStructure> T resolve(VersionOfObjectRefStructure versionOfObjectRefStructure) {
 
         logger.debug("Received reference: {}", versionOfObjectRefStructure);

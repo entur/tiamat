@@ -3,10 +3,7 @@ package org.rutebanken.tiamat.model.vehicle;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import org.rutebanken.tiamat.model.DataManagedObjectStructure;
-import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
-import org.rutebanken.tiamat.model.MultilingualStringEntity;
-import org.rutebanken.tiamat.model.PrivateCodeStructure;
+import org.rutebanken.tiamat.model.*;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -55,5 +52,8 @@ public class TransportType_VersionStructure extends DataManagedObjectStructure {
     private AllPublicTransportModesEnumeration transportMode;
     @Transient
     private DeckPlanRefStructure deckPlanRef;
+    @ManyToOne
+    private org.rutebanken.tiamat.model.vehicle.DeckPlan deckPlan;
+
 
 }

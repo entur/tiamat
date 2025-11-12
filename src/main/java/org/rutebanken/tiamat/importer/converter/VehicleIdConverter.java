@@ -13,25 +13,23 @@
  * limitations under the Licence.
  */
 
-package org.rutebanken.tiamat.versioning.save;
-
+package org.rutebanken.tiamat.importer.converter;
 
 import org.rutebanken.tiamat.model.vehicle.Vehicle;
-import org.rutebanken.tiamat.repository.VehicleRepository;
+import org.rutebanken.tiamat.netex.id.NetexIdHelper;
+import org.rutebanken.tiamat.netex.id.ValidPrefixList;
+import org.rutebanken.tiamat.repository.generic.GenericEntityInVersionRepository;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Matches stops from nsr ID or imported/original ID
+ */
+@Transactional
 @Component
-public class VehicleVersionedSaverService {
+public class VehicleIdConverter extends GenericIdConverter<org.rutebanken.netex.model.Vehicle> {
 
-    private final VehicleRepository vehicleRepository;
-    private final DefaultMergingVersionedSaverService defaultVersionedSaverService;
-
-    public VehicleVersionedSaverService(VehicleRepository vehicleRepository, DefaultMergingVersionedSaverService defaultVersionedSaverService) {
-        this.vehicleRepository = vehicleRepository;
-        this.defaultVersionedSaverService = defaultVersionedSaverService;
-    }
-
-    public Vehicle saveNewVersion(Vehicle newVersion) {
-        return defaultVersionedSaverService.saveNewVersion(newVersion, vehicleRepository);
+    public VehicleIdConverter(ValidPrefixList validPrefixList, NetexIdHelper netexIdHelper, GenericEntityInVersionRepository genericEntityInVersionRepository) {
+        super(validPrefixList, netexIdHelper, genericEntityInVersionRepository, Vehicle.class);
     }
 }

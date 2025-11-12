@@ -25,19 +25,10 @@ public class DeckPlanMapper extends CustomMapper<DeckPlan, org.rutebanken.tiamat
     @Override
     public void mapAtoB(DeckPlan deckPlan, org.rutebanken.tiamat.model.vehicle.DeckPlan deckPlan2, MappingContext context) {
         super.mapAtoB(deckPlan, deckPlan2, context);
-
     }
 
     @Override
     public void mapBtoA(org.rutebanken.tiamat.model.vehicle.DeckPlan tiamatDeckPlan, DeckPlan netexDeckPlan, MappingContext context) {
         super.mapBtoA(tiamatDeckPlan, netexDeckPlan, context);
-
-        if (tiamatDeckPlan.getName() != null) {
-            netexDeckPlan.getName().withContent(tiamatDeckPlan.getName().getValue());
-        }
-
-        if (tiamatDeckPlan.getDescription() != null) {
-            netexDeckPlan.getDescription().withContent(tiamatDeckPlan.getDescription().getValue());
-        }
     }
 }

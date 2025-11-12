@@ -17,7 +17,6 @@ package org.rutebanken.tiamat.importer;
 
 import org.rutebanken.tiamat.model.vehicle.VehicleType;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
-import org.rutebanken.tiamat.repository.VehicleTypeRepository;
 import org.rutebanken.tiamat.versioning.save.VehicleTypeVersionedSaverService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,14 +38,11 @@ public class VehicleTypeImporter {
 
     private final NetexMapper netexMapper;
 
-    private final VehicleTypeRepository vehicleTypeRepository;
-
     private final VehicleTypeVersionedSaverService vehicleTypeVersionedSaverService;
 
     @Autowired
-    public VehicleTypeImporter(NetexMapper netexMapper, VehicleTypeRepository vehicleTypeRepository, VehicleTypeVersionedSaverService vehicleTypeVersionedSaverService) {
+    public VehicleTypeImporter(NetexMapper netexMapper, VehicleTypeVersionedSaverService vehicleTypeVersionedSaverService) {
         this.netexMapper = netexMapper;
-        this.vehicleTypeRepository = vehicleTypeRepository;
         this.vehicleTypeVersionedSaverService = vehicleTypeVersionedSaverService;
     }
 

@@ -28,31 +28,27 @@ public class VehicleMapper extends CustomMapper<Vehicle, org.rutebanken.tiamat.m
     public void mapAtoB(Vehicle vehicle, org.rutebanken.tiamat.model.vehicle.Vehicle vehicle2, MappingContext context) {
         super.mapAtoB(vehicle, vehicle2, context);
 
+        if(vehicle.getVehicleModelRef() != null) {
+            vehicle2.setVehicleModel(mapperFacade.map(vehicle.getVehicleModelRef(), org.rutebanken.tiamat.model.vehicle.VehicleModel.class, context));
+        }
+
+        if(vehicle.getTransportTypeRef() != null) {
+            TransportTypeRefStructure transportTypeRefStructure = vehicle.getTransportTypeRef().getValue();
+            vehicle2.setTransportType(mapperFacade.map(transportTypeRefStructure, org.rutebanken.tiamat.model.vehicle.VehicleType.class, context));
+        }
+
     }
 
     @Override
     public void mapBtoA(org.rutebanken.tiamat.model.vehicle.Vehicle tiamatVehicle, Vehicle netexVehicle, MappingContext context) {
         super.mapBtoA(tiamatVehicle, netexVehicle, context);
-
-        if (tiamatVehicle.getName() != null) {
-            netexVehicle.getName().withContent(tiamatVehicle.getName().getValue());
-        }
-
-        if (tiamatVehicle.getShortName() != null) {
-            netexVehicle.getShortName().withContent(tiamatVehicle.getShortName().getValue());
-        }
-
-        if (tiamatVehicle.getDescription() != null) {
-            netexVehicle.getDescription().withContent(tiamatVehicle.getDescription().getValue());
-        }
-
-        if (tiamatVehicle.getTransportTypeRef() != null) {
-            JAXBElement<TransportTypeRefStructure> transportTypeRef = objectFactory.createTransportTypeRef(new TransportTypeRefStructure().withRef(tiamatVehicle.getTransportTypeRef()));
+        if (tiamatVehicle.getTransportType() != null) {
+            JAXBElement<TransportTypeRefStructure> transportTypeRef = objectFactory.createTransportTypeRef(mapperFacade.map(tiamatVehicle.getTransportType(), TransportTypeRefStructure.class, context));
             netexVehicle.withTransportTypeRef(transportTypeRef);
         }
 
-        if (tiamatVehicle.getVehicleModelRef() != null) {
-            netexVehicle.withVehicleModelRef(new VehicleModelRefStructure().withRef(tiamatVehicle.getVehicleModelRef()));
+        if (tiamatVehicle.getVehicleModel() != null) {
+            netexVehicle.withVehicleModelRef(mapperFacade.map(tiamatVehicle.getVehicleModel(), VehicleModelRefStructure.class, context));
         }
 
     }

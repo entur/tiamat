@@ -17,18 +17,18 @@ package org.rutebanken.tiamat.netex.mapping.mapper;
 
 import ma.glasnost.orika.CustomMapper;
 import ma.glasnost.orika.MappingContext;
-import org.rutebanken.netex.model.PassengerCapacity;
+import org.rutebanken.netex.model.PassengerCapacityStructure;
 
-public class PassengerCapacityMapper extends CustomMapper<PassengerCapacity, org.rutebanken.tiamat.model.vehicle.PassengerCapacity> {
+public class PassengerCapacityStructureMapper extends CustomMapper<PassengerCapacityStructure, org.rutebanken.tiamat.model.vehicle.PassengerCapacity> {
 
     @Override
-    public void mapAtoB(PassengerCapacity passengerCapacity, org.rutebanken.tiamat.model.vehicle.PassengerCapacity passengerCapacity2, MappingContext context) {
+    public void mapAtoB(PassengerCapacityStructure passengerCapacity, org.rutebanken.tiamat.model.vehicle.PassengerCapacity passengerCapacity2, MappingContext context) {
         super.mapAtoB(passengerCapacity, passengerCapacity2, context);
 
     }
 
     @Override
-    public void mapBtoA(org.rutebanken.tiamat.model.vehicle.PassengerCapacity tiamatPassengerCapacity, PassengerCapacity netexPassengerCapacity, MappingContext context) {
+    public void mapBtoA(org.rutebanken.tiamat.model.vehicle.PassengerCapacity tiamatPassengerCapacity, PassengerCapacityStructure netexPassengerCapacity, MappingContext context) {
             super.mapBtoA(tiamatPassengerCapacity, netexPassengerCapacity, context);
     }
 }

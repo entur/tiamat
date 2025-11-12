@@ -26,6 +26,7 @@ public class VehicleType_VersionStructure extends TransportType_VersionStructure
     private Boolean monitored;
     @Transient
     private VehicleTypeRefStructure includedIn;
+
     @Transient
     private VehicleModelRefStructure classifiedAsRef;
     @Transient

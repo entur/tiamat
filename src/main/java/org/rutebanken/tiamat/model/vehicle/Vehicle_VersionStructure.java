@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.xml.bind.JAXBElement;
 import lombok.Getter;
 import lombok.Setter;
+import org.rutebanken.netex.model.TransportType;
 import org.rutebanken.tiamat.model.*;
 
 import java.time.Instant;
@@ -41,8 +42,17 @@ public class Vehicle_VersionStructure extends DataManagedObjectStructure {
     private JAXBElement<? extends TransportOrganisationRefStructure> transportOrganisationRef;
     @Transient
     private ContactRefStructure contactRef;
-    private String transportTypeRef;
-    private String vehicleModelRef;
+
+    @ManyToOne
+    private VehicleType transportType;
+    @Transient
+    private TransportTypeRefStructure transportTypeRef;
+
+    @ManyToOne
+    private VehicleModel vehicleModel;
+    @Transient
+    private VehicleModelRefStructure vehicleModelRef;
+
     @Transient
     private VehicleEquipmentProfileRefs_RelStructure equipmentProfiles;
     @Transient

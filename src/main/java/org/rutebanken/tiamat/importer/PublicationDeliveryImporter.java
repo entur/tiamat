@@ -176,11 +176,11 @@ public class PublicationDeliveryImporter {
                 logger.info("Publication delivery contains resource frame created at {}", netexResourceFrame.getCreated());
 
                 responseResourceFrame.withId(requestId + "-response").withVersion("1");
-                if(netexResourceFrame.getVehicleModels() != null) {
-                    vehicleModelImportHandler.handleVehicleModels(netexResourceFrame, importParams, vehicleModelCounter, responseResourceFrame);
-                }
                 if(netexResourceFrame.getDeckPlans() != null) {
                     deckPlanImportHandler.handleDeckPlans(netexResourceFrame, importParams, deckPlanCounter, responseResourceFrame);
+                }
+                if(netexResourceFrame.getVehicleModels() != null) {
+                    vehicleModelImportHandler.handleVehicleModels(netexResourceFrame, importParams, vehicleModelCounter, responseResourceFrame);
                 }
                 if(netexResourceFrame.getVehicleTypes() != null) {
                     vehicleTypeImportHandler.handleVehicleTypes(netexResourceFrame, importParams, vehicleTypeCounter, responseResourceFrame);

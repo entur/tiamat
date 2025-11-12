@@ -37,18 +37,6 @@ public class VehicleModelMapper extends CustomMapper<VehicleModel, org.rutebanke
     public void mapBtoA(org.rutebanken.tiamat.model.vehicle.VehicleModel tiamatVehicleModel, VehicleModel netexVehicleModel, MappingContext context) {
         super.mapBtoA(tiamatVehicleModel, netexVehicleModel, context);
 
-        if (tiamatVehicleModel.getName() != null) {
-            netexVehicleModel.getName().withContent(tiamatVehicleModel.getName().getValue());
-        }
-
-        if (tiamatVehicleModel.getDescription() != null) {
-            netexVehicleModel.getDescription().withContent(tiamatVehicleModel.getDescription().getValue());
-        }
-
-        if (tiamatVehicleModel.getManufacturer() != null) {
-            netexVehicleModel.getManufacturer().withContent(tiamatVehicleModel.getManufacturer().getValue());
-        }
-
         if (tiamatVehicleModel.getTransportTypeRef() != null) {
             JAXBElement<TransportTypeRefStructure> transportTypeRef = objectFactory.createTransportTypeRef(new TransportTypeRefStructure().withRef(tiamatVehicleModel.getTransportTypeRef()));
             netexVehicleModel.withTransportTypeRef(transportTypeRef);

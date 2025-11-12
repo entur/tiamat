@@ -24,11 +24,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class DeckPlanVersionedSaverService {
 
-    @Autowired
-    private DeckPlanRepository deckPlanRepository;
+    private final DeckPlanRepository deckPlanRepository;
+    private final DefaultMergingVersionedSaverService defaultVersionedSaverService;
 
-    @Autowired
-    private DefaultVersionedSaverService defaultVersionedSaverService;
+    public DeckPlanVersionedSaverService(DeckPlanRepository deckPlanRepository, DefaultMergingVersionedSaverService defaultVersionedSaverService) {
+        this.deckPlanRepository = deckPlanRepository;
+        this.defaultVersionedSaverService = defaultVersionedSaverService;
+    }
+
 
     public DeckPlan saveNewVersion(DeckPlan newVersion) {
         return defaultVersionedSaverService.saveNewVersion(newVersion, deckPlanRepository);

@@ -20,6 +20,7 @@ import org.rutebanken.netex.model.*;
 import org.rutebanken.tiamat.importer.ImportParams;
 import org.rutebanken.tiamat.importer.VehicleImporter;
 import org.rutebanken.tiamat.importer.VehicleTypeImporter;
+import org.rutebanken.tiamat.importer.converter.VehicleIdConverter;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.netex.mapping.PublicationDeliveryHelper;
 import org.slf4j.Logger;
@@ -40,30 +41,31 @@ public class VehicleImportHandler {
      */
     private static final String VEHICLE_IMPORT_LOCK_KEY = "VEHICLE_IMPORT_LOCK_KEY";
 
-
-    @Autowired
-    private PublicationDeliveryHelper publicationDeliveryHelper;
-
-    @Autowired
-    private NetexMapper netexMapper;
-
-    @Autowired
-    private HazelcastInstance hazelcastInstance;
-
-    @Autowired
+    private final PublicationDeliveryHelper publicationDeliveryHelper;
+    private final NetexMapper netexMapper;
     private final VehicleImporter vehicleImporter;
+    private final VehicleIdConverter vehicleIdConverter;
 
-    public VehicleImportHandler(VehicleImporter vehicleImporter) {
+    public VehicleImportHandler(PublicationDeliveryHelper publicationDeliveryHelper, NetexMapper netexMapper, VehicleImporter vehicleImporter, VehicleIdConverter vehicleIdConverter) {
+        this.publicationDeliveryHelper = publicationDeliveryHelper;
+        this.netexMapper = netexMapper;
         this.vehicleImporter = vehicleImporter;
+        this.vehicleIdConverter = vehicleIdConverter;
     }
 
     public void handleVehicles(ResourceFrame netexResourceFrame, ImportParams importParams, AtomicInteger vehiclesCounter, ResourceFrame responseResourceFrame) {
         if (publicationDeliveryHelper.hasVehicles(netexResourceFrame)) {
-            logger.info("Publication delivery contains {} vehicles for import.", netexResourceFrame.getVehicles().getVehicle().size());
+            var originalVehicles = netexResourceFrame.getVehicles().getVehicle();
+            logger.info("Publication delivery contains {} vehicles for import.", originalVehicles.size());
+
+            logger.info("About to check if incoming vehicles have previously been imported with the same id");
+            var originalWithMappedIds = originalVehicles.stream()
+                    .map(vehicleIdConverter::convertIncomingId)
+                    .toList();
 
             logger.info("About to map {} vehicles to internal model", netexResourceFrame.getVehicles().getVehicle().size());
             List<org.rutebanken.tiamat.model.vehicle.Vehicle> mappedVehicles = netexMapper.getFacade()
-                    .mapAsList(netexResourceFrame.getVehicles().getVehicle(),
+                    .mapAsList(originalWithMappedIds,
                             org.rutebanken.tiamat.model.vehicle.Vehicle.class);
             logger.info("Mapped {} vehicles to internal model", mappedVehicles.size());
             List<Vehicle> importedVehicles = vehicleImporter.importVehicles(mappedVehicles, vehiclesCounter);

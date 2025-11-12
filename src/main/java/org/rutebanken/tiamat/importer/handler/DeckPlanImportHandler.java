@@ -30,11 +30,10 @@
 
 package org.rutebanken.tiamat.importer.handler;
 
-import jakarta.xml.bind.JAXBElement;
 import org.rutebanken.netex.model.*;
 import org.rutebanken.tiamat.importer.DeckPlanImporter;
 import org.rutebanken.tiamat.importer.ImportParams;
-import org.rutebanken.tiamat.importer.DeckPlanImporter;
+import org.rutebanken.tiamat.importer.converter.DeckPlanIdConverter;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.netex.mapping.PublicationDeliveryHelper;
 import org.slf4j.Logger;
@@ -54,23 +53,31 @@ public class DeckPlanImportHandler {
     private final NetexMapper netexMapper;
 
     private final DeckPlanImporter deckPlanImporter;
+    private final DeckPlanIdConverter deckPlanIdConverter;
 
     public DeckPlanImportHandler(PublicationDeliveryHelper publicationDeliveryHelper,
                                  NetexMapper netexMapper,
-                                 DeckPlanImporter deckPlanImporter) {
+                                 DeckPlanImporter deckPlanImporter, DeckPlanIdConverter deckPlanIdConverter) {
         this.publicationDeliveryHelper = publicationDeliveryHelper;
         this.netexMapper = netexMapper;
         this.deckPlanImporter = deckPlanImporter;
+        this.deckPlanIdConverter = deckPlanIdConverter;
     }
 
     public void handleDeckPlans(ResourceFrame netexResourceFrame, ImportParams importParams, AtomicInteger deckPlansCounter, ResourceFrame responseResourceframe) {
 
         if (publicationDeliveryHelper.hasDeckPlans(netexResourceFrame)) {
-            logger.info("Publication delivery contains {} deck plans for import.", netexResourceFrame.getDeckPlans().getDeckPlan().size());
+            var originalDeckPlans = netexResourceFrame.getDeckPlans().getDeckPlan();
+            logger.info("Publication delivery contains {} deck plans for import.", originalDeckPlans.size());
+
+            logger.info("About to check if incoming deck plans have previously been imported with the same id");
+            var originalWithMappedIds = originalDeckPlans.stream()
+                    .map(deckPlanIdConverter::convertIncomingId)
+                    .toList();
 
             logger.info("About to map {} deck plans to internal model", netexResourceFrame.getDeckPlans().getDeckPlan().size());
             List<org.rutebanken.tiamat.model.vehicle.DeckPlan> mappedDeckPlans = netexMapper.getFacade()
-                    .mapAsList(netexResourceFrame.getDeckPlans().getDeckPlan(),
+                    .mapAsList(originalWithMappedIds,
                             org.rutebanken.tiamat.model.vehicle.DeckPlan.class);
             logger.info("Mapped {} deck plans to internal model", mappedDeckPlans.size());
             List<DeckPlan> importedDeckPlans = deckPlanImporter.importDeckPlans(mappedDeckPlans, deckPlansCounter);

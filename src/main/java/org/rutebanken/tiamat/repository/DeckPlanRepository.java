@@ -17,7 +17,7 @@ package org.rutebanken.tiamat.repository;
 
 import org.rutebanken.tiamat.model.vehicle.DeckPlan;
 
-public interface DeckPlanRepository extends EntityInVersionRepository<DeckPlan> {
+public interface DeckPlanRepository extends DeckPlanRepositoryCustom, EntityInVersionRepository<DeckPlan> {
 
 }
 

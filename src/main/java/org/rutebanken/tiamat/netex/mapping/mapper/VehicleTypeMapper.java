@@ -25,22 +25,21 @@ public class VehicleTypeMapper extends CustomMapper<VehicleType, org.rutebanken.
     public void mapAtoB(VehicleType vehicleType, org.rutebanken.tiamat.model.vehicle.VehicleType vehicleType2, MappingContext context) {
         super.mapAtoB(vehicleType, vehicleType2, context);
 
+        if(vehicleType.getDeckPlanRef() != null) {
+            vehicleType2.setDeckPlan(mapperFacade.map(vehicleType.getDeckPlanRef(), org.rutebanken.tiamat.model.vehicle.DeckPlan.class, context));
+        }
     }
 
     @Override
     public void mapBtoA(org.rutebanken.tiamat.model.vehicle.VehicleType tiamatVehicleType, VehicleType netexVehicleType, MappingContext context) {
         super.mapBtoA(tiamatVehicleType, netexVehicleType, context);
 
-        if (tiamatVehicleType.getName() != null) {
-            netexVehicleType.getName().withContent(tiamatVehicleType.getName().getValue());
+        if(tiamatVehicleType.getPassengerCapacity() != null) {
+            netexVehicleType.withPassengerCapacity(mapperFacade.map(tiamatVehicleType.getPassengerCapacity(), org.rutebanken.netex.model.PassengerCapacityStructure.class, context));
         }
 
-        if (tiamatVehicleType.getShortName() != null) {
-            netexVehicleType.getShortName().withContent(tiamatVehicleType.getShortName().getValue());
-        }
-
-        if (tiamatVehicleType.getDescription() != null) {
-            netexVehicleType.getDescription().withContent(tiamatVehicleType.getDescription().getValue());
+        if(tiamatVehicleType.getDeckPlan() != null) {
+            netexVehicleType.withDeckPlanRef(mapperFacade.map(tiamatVehicleType.getDeckPlan(), org.rutebanken.netex.model.DeckPlanRefStructure.class, context));
         }
     }
 }

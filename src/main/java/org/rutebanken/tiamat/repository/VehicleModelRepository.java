@@ -17,7 +17,7 @@ package org.rutebanken.tiamat.repository;
 
 import org.rutebanken.tiamat.model.vehicle.VehicleModel;
 
-public interface VehicleModelRepository extends EntityInVersionRepository<VehicleModel> {
+public interface VehicleModelRepository extends VehicleModelRepositoryCustom, EntityInVersionRepository<VehicleModel> {
 
 }
 
