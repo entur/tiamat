@@ -76,6 +76,9 @@ public abstract class Site_VersionStructure
     @OneToMany(cascade = CascadeType.ALL)
     private List<EquipmentPlace> equipmentPlaces;
 
+    @OneToMany(cascade = CascadeType.ALL)
+    private List<LocalService> localServices;
+
     public Site_VersionStructure(EmbeddableMultilingualString name) {
         super(name);
     }
@@ -163,5 +166,13 @@ public abstract class Site_VersionStructure
 
     public void setEquipmentPlaces(List<EquipmentPlace> equipmentPlaces) {
         this.equipmentPlaces = equipmentPlaces;
+    }
+
+    public List<LocalService> getLocalServices() {
+        return localServices;
+    }
+
+    public void setLocalServices(List<LocalService> localServices) {
+        this.localServices = localServices;
     }
 }
