@@ -19,7 +19,9 @@ import ma.glasnost.orika.Converter;
 import ma.glasnost.orika.MapperFacade;
 import ma.glasnost.orika.MapperFactory;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
+import ma.glasnost.orika.metadata.ClassMapBuilder;
 import org.rutebanken.netex.model.AccessibilityAssessment;
+import org.rutebanken.netex.model.AccessibilityLimitation;
 import org.rutebanken.netex.model.CycleStorageEquipment;
 import org.rutebanken.netex.model.DataManagedObjectStructure;
 import org.rutebanken.netex.model.FareFrame;
@@ -65,6 +67,16 @@ import java.util.List;
 public class NetexMapper {
     private static final Logger logger = LoggerFactory.getLogger(NetexMapper.class);
     private final MapperFacade facade;
+    private final MapperFactory mapperFactory = new DefaultMapperFactory.Builder().build();
+
+    /**
+     * Ensures that exported id-s contain a "netexId" kind of value instead of a plain number
+     */
+    <A, B> ClassMapBuilder<A, B> defaultMapperFactoryClassBuilder(Class<A> var1, Class<B> var2) {
+       return mapperFactory.classMap(var1, var2)
+               .byDefault()
+               .fieldBToA("netexId", "id");
+    }
 
     @Autowired
     public NetexMapper(List<Converter> converters, KeyListToKeyValuesMapMapper keyListToKeyValuesMapMapper,
@@ -73,9 +85,6 @@ public class NetexMapper {
                        AccessibilityAssessmentMapper accessibilityAssessmentMapper) {
 
         logger.info("Setting up netexMapper with DI");
-
-        MapperFactory mapperFactory = new DefaultMapperFactory.Builder().build();
-
         logger.info("Creating netex mapperFacade with {} converters ", converters.size());
 
         if(logger.isDebugEnabled()) {
@@ -91,24 +100,21 @@ public class NetexMapper {
                 .byDefault()
                 .register();
 
-        mapperFactory.classMap(TopographicPlace.class, org.rutebanken.tiamat.model.TopographicPlace.class)
+        defaultMapperFactoryClassBuilder(TopographicPlace.class, org.rutebanken.tiamat.model.TopographicPlace.class)
                 .fieldBToA("name", "descriptor.name")
-                .byDefault()
                 .register();
 
-        mapperFactory.classMap(GroupOfStopPlaces.class, org.rutebanken.tiamat.model.GroupOfStopPlaces.class)
-                .byDefault()
+        defaultMapperFactoryClassBuilder(GroupOfStopPlaces.class, org.rutebanken.tiamat.model.GroupOfStopPlaces.class)
                 .fieldBToA("purposeOfGrouping", "purposeOfGroupingRef")
                 .fieldAToB("purposeOfGroupingRef.ref", "purposeOfGrouping.name")
                 .customize(new GroupOfStopPlacesMapper())
                 .register();
 
-        mapperFactory.classMap(PurposeOfGrouping.class, org.rutebanken.tiamat.model.PurposeOfGrouping.class)
+        defaultMapperFactoryClassBuilder(PurposeOfGrouping.class, org.rutebanken.tiamat.model.PurposeOfGrouping.class)
                 .byDefault()
                 .register();
 
-        mapperFactory.classMap(GroupOfTariffZones.class, org.rutebanken.tiamat.model.GroupOfTariffZones.class)
-                .byDefault()
+        defaultMapperFactoryClassBuilder(GroupOfTariffZones.class, org.rutebanken.tiamat.model.GroupOfTariffZones.class)
                 .customize(new GroupOfTariffZonesMapper())
                 .register();
 
@@ -132,76 +138,64 @@ public class NetexMapper {
                 .byDefault()
                 .register();
 
-        mapperFactory.classMap(TariffZone.class, org.rutebanken.tiamat.model.TariffZone.class)
-                .byDefault()
+        defaultMapperFactoryClassBuilder(TariffZone.class, org.rutebanken.tiamat.model.TariffZone.class)
                 .register();
 
-        mapperFactory.classMap(FareZone.class, org.rutebanken.tiamat.model.FareZone.class)
+        defaultMapperFactoryClassBuilder(FareZone.class, org.rutebanken.tiamat.model.FareZone.class)
                 .exclude("transportOrganisationRef")
                 .exclude("neighbours")
                 .exclude("members")
                 .customize(new FareZoneMapper())
-                .byDefault()
                 .register();
 
 
-        mapperFactory.classMap(Parking.class, org.rutebanken.tiamat.model.Parking.class)
+        defaultMapperFactoryClassBuilder(Parking.class, org.rutebanken.tiamat.model.Parking.class)
                 .exclude("paymentMethods")
                 .exclude("cardsAccepted")
                 .exclude("currenciesAccepted")
                 .exclude("accessModes")
-                .fieldBToA("netexId", "id")
                 .customize(new ParkingMapper())
-                .byDefault()
                 .register();
 
         mapperFactory.classMap(PathLinkEndStructure.class, org.rutebanken.tiamat.model.PathLinkEnd.class)
                 .byDefault()
                 .register();
 
-        mapperFactory.classMap(PathLink.class, org.rutebanken.tiamat.model.PathLink.class)
-                .byDefault()
+        defaultMapperFactoryClassBuilder(PathLink.class, org.rutebanken.tiamat.model.PathLink.class)
                 .register();
 
-        mapperFactory.classMap(InstalledEquipment_VersionStructure.class, org.rutebanken.tiamat.model.InstalledEquipment_VersionStructure.class)
-                .fieldBToA("netexId", "id")
-                .byDefault()
+        defaultMapperFactoryClassBuilder(InstalledEquipment_VersionStructure.class, org.rutebanken.tiamat.model.InstalledEquipment_VersionStructure.class)
                 .register();
 
-        mapperFactory.classMap(WaitingRoomEquipment.class, org.rutebanken.tiamat.model.WaitingRoomEquipment.class)
-                .byDefault()
+        defaultMapperFactoryClassBuilder(WaitingRoomEquipment.class, org.rutebanken.tiamat.model.WaitingRoomEquipment.class)
                 .register();
 
-        mapperFactory.classMap(SanitaryEquipment.class, org.rutebanken.tiamat.model.SanitaryEquipment.class)
-                .byDefault()
+        defaultMapperFactoryClassBuilder(SanitaryEquipment.class, org.rutebanken.tiamat.model.SanitaryEquipment.class)
                 .register();
 
-        mapperFactory.classMap(TicketingEquipment.class, org.rutebanken.tiamat.model.TicketingEquipment.class)
-                .byDefault()
+        defaultMapperFactoryClassBuilder(TicketingEquipment.class, org.rutebanken.tiamat.model.TicketingEquipment.class)
                 .register();
 
-        mapperFactory.classMap(ShelterEquipment.class, org.rutebanken.tiamat.model.ShelterEquipment.class)
-                .byDefault()
+        defaultMapperFactoryClassBuilder(ShelterEquipment.class, org.rutebanken.tiamat.model.ShelterEquipment.class)
                 .register();
 
-        mapperFactory.classMap(CycleStorageEquipment.class, org.rutebanken.tiamat.model.CycleStorageEquipment.class)
-                .byDefault()
+        defaultMapperFactoryClassBuilder(CycleStorageEquipment.class, org.rutebanken.tiamat.model.CycleStorageEquipment.class)
                 .register();
 
-        mapperFactory.classMap(GeneralSign.class, org.rutebanken.tiamat.model.GeneralSign.class)
-                .byDefault()
+        defaultMapperFactoryClassBuilder(GeneralSign.class, org.rutebanken.tiamat.model.GeneralSign.class)
                 .register();
 
-        mapperFactory.classMap(PlaceEquipments_RelStructure.class, org.rutebanken.tiamat.model.PlaceEquipment.class)
-                .fieldBToA("netexId", "id")
+        defaultMapperFactoryClassBuilder(PlaceEquipments_RelStructure.class, org.rutebanken.tiamat.model.PlaceEquipment.class)
                 .customize(new PlaceEquipmentMapper())
-                .byDefault()
                 .register();
 
         mapperFactory.classMap(AccessibilityAssessment.class, org.rutebanken.tiamat.model.AccessibilityAssessment.class)
                 .customize(accessibilityAssessmentMapper)
                 .exclude("id")
                 .byDefault()
+                .register();
+
+        defaultMapperFactoryClassBuilder(AccessibilityLimitation.class, org.rutebanken.tiamat.model.AccessibilityLimitation.class)
                 .register();
 
         mapperFactory.classMap(DataManagedObjectStructure.class, org.rutebanken.tiamat.model.DataManagedObjectStructure.class)
@@ -246,8 +240,8 @@ public class NetexMapper {
     }
 
     public ResourceFrame mapToNetexModel(org.rutebanken.tiamat.model.ResourceFrame tiamatResourceFrame){
-         ResourceFrame resourceFrame = facade.map(tiamatResourceFrame, ResourceFrame.class);
-         return resourceFrame;
+        ResourceFrame resourceFrame = facade.map(tiamatResourceFrame, ResourceFrame.class);
+        return resourceFrame;
     }
 
     public StopPlace mapToNetexModel(org.rutebanken.tiamat.model.StopPlace tiamatStopPlace) {
