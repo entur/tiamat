@@ -34,7 +34,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [ tests ]
     env:
-      CONTAINER_REPO: docker.io/entur/tiamat
+      CONTAINER_REPO: docker.io/entur/sobek
       CONTAINER_REGISTRY_USER: ${{ secrets.DOCKERHUB_LOGIN }}
       CONTAINER_REGISTRY_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
     steps:
