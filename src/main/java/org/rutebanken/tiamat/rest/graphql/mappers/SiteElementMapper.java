@@ -130,10 +130,10 @@ public class SiteElementMapper {
         Optional<PlaceEquipment> placeEquipment = placeEquipmentMapper.map(input);
 
         if (placeEquipment.isPresent()) {
-            if (siteElement instanceof Site_VersionStructure) {
-                ((Site_VersionStructure) siteElement).setPlaceEquipments(placeEquipment.get());
-            } else if (siteElement instanceof SiteComponent_VersionStructure) {
-                ((SiteComponent_VersionStructure) siteElement).setPlaceEquipments(placeEquipment.get());
+            if (siteElement instanceof Site_VersionStructure siteVersionStructure) {
+                siteVersionStructure.setPlaceEquipments(placeEquipment.get());
+            } else if (siteElement instanceof SiteComponent_VersionStructure siteVersionStructure) {
+                siteVersionStructure.setPlaceEquipments(placeEquipment.get());
             } else {
                 logger.warn("Cannot set place equipment for site element. Cannot detect type: {}", siteElement.getClass().getSimpleName());
             }
@@ -143,10 +143,10 @@ public class SiteElementMapper {
 
         Optional<List<LocalService>> localServices = localServicesMapper.map(input);
         if(localServices.isPresent()) {
-            if (siteElement instanceof Site_VersionStructure) {
-                ((Site_VersionStructure) siteElement).setLocalServices(localServices.get());
-            } else if (siteElement instanceof SiteComponent_VersionStructure) {
-                ((SiteComponent_VersionStructure) siteElement).setLocalServices(localServices.get());
+            if(siteElement instanceof Site_VersionStructure siteVersionStructure) {
+                siteVersionStructure.setLocalServices(localServices.get());
+            } else if (siteElement instanceof SiteComponent_VersionStructure siteComponentVersionStructure) {
+                siteComponentVersionStructure.setLocalServices(localServices.get());
             } else {
                 logger.warn("Cannot set local services for site element. Cannot detect type: {}", siteElement.getClass().getSimpleName());
             }

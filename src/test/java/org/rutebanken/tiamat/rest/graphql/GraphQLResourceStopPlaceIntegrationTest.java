@@ -25,6 +25,9 @@ import org.rutebanken.tiamat.changelog.EntityChangedJMSListener;
 import org.rutebanken.tiamat.model.AccessibilityAssessment;
 import org.rutebanken.tiamat.model.AccessibilityLimitation;
 import org.rutebanken.tiamat.model.AlternativeName;
+import org.rutebanken.tiamat.model.AssistanceAvailabilityEnumeration;
+import org.rutebanken.tiamat.model.AssistanceFacilityEnumeration;
+import org.rutebanken.tiamat.model.AssistanceService;
 import org.rutebanken.tiamat.model.BusSubmodeEnumeration;
 import org.rutebanken.tiamat.model.CycleStorageEnumeration;
 import org.rutebanken.tiamat.model.CycleStorageEquipment;
@@ -33,6 +36,7 @@ import org.rutebanken.tiamat.model.GenderLimitationEnumeration;
 import org.rutebanken.tiamat.model.GeneralSign;
 import org.rutebanken.tiamat.model.InterchangeWeightingEnumeration;
 import org.rutebanken.tiamat.model.LimitationStatusEnumeration;
+import org.rutebanken.tiamat.model.LocalService;
 import org.rutebanken.tiamat.model.NameTypeEnumeration;
 import org.rutebanken.tiamat.model.PlaceEquipment;
 import org.rutebanken.tiamat.model.PrivateCodeStructure;
@@ -64,13 +68,17 @@ import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.comparesEqualTo;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -136,6 +144,49 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                 .body("data.stopPlace[0].name.value", equalTo(stopPlaceName))
                 .body("data.stopPlace[0].quays.name.value", hasItems(firstQuayName, secondQuayName))
                 .body("data.stopPlace[0].quays.id", hasItems(quay.getNetexId(), secondQuay.getNetexId()));
+    }
+
+    @Test
+    public void retrieveStopPlaceWithLocalServices() throws Exception {
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("StopPlace"));
+        stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(5, 60)));
+
+        List<LocalService> localServices = new ArrayList<>();
+        AssistanceService assistanceService = new AssistanceService();
+        assistanceService.setAssistanceFacilityList(Arrays.asList(AssistanceFacilityEnumeration.PERSONAL_ASSISTANCE, AssistanceFacilityEnumeration.BOARDING_ASSISTANCE));
+        assistanceService.setAssistanceAvailability(AssistanceAvailabilityEnumeration.AVAILABLE_IF_BOOKED);
+        localServices.add(assistanceService);
+
+        stopPlace.setLocalServices(localServices);
+        stopPlaceRepository.save(stopPlace);
+
+        String graphQlJsonQuery = """
+                  {
+                  stopPlace:  stopPlace (query:"StopPlace", allVersions:true) {
+                            id
+                            name { value }
+                            localServices {
+                                assistanceService {
+                                    id
+                                    assistanceFacilityList
+                                    assistanceAvailability
+                                }
+                            }
+                        }
+                    }""";
+
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
+                .rootPath("data.stopPlace[0]")
+                .body("id", equalTo(stopPlace.getNetexId()))
+                .body("name.value", equalTo("StopPlace"))
+                .body("localServices", notNullValue())
+
+                // assistance service
+                .body("localServices.assistanceService[0].id", equalTo(assistanceService.getNetexId()))
+                .body("localServices.assistanceService[0].assistanceFacilityList", hasSize(2))
+                .body("localServices.assistanceService[0].assistanceFacilityList", hasItem(assistanceService.getAssistanceFacilityList().getFirst().value()))
+                .body("localServices.assistanceService[0].assistanceFacilityList", hasItem(assistanceService.getAssistanceFacilityList().getLast().value()))
+                .body("localServices.assistanceService[0].assistanceAvailability", equalTo(assistanceService.getAssistanceAvailability().value()));
     }
 
     @Test
