@@ -122,7 +122,7 @@ public class NetexMapper {
                 .byDefault()
                 .register();
 
-        mapperFactory.classMap(StopPlace.class, org.rutebanken.tiamat.model.StopPlace.class)
+        mapperFactoryWithNetexIdClassBuilder(StopPlace.class, org.rutebanken.tiamat.model.StopPlace.class)
                 .fieldBToA("topographicPlace", "topographicPlaceRef")
                 .fieldAToB("topographicPlaceRef.ref", "topographicPlace.netexId")
                 .fieldAToB("topographicPlaceRef.version", "topographicPlace.version")
@@ -132,7 +132,7 @@ public class NetexMapper {
                 .byDefault()
                 .register();
 
-        mapperFactory.classMap(Quay.class, org.rutebanken.tiamat.model.Quay.class)
+        mapperFactoryWithNetexIdClassBuilder(Quay.class, org.rutebanken.tiamat.model.Quay.class)
                 .exclude("postalAddress")
                 .exclude("roadAddress")
                 .customize(new QuayMapper())
@@ -143,7 +143,7 @@ public class NetexMapper {
                 .byDefault()
                 .register();
 
-        mapperFactory.classMap(FareZone.class, org.rutebanken.tiamat.model.FareZone.class)
+        mapperFactoryWithNetexIdClassBuilder(FareZone.class, org.rutebanken.tiamat.model.FareZone.class)
                 .exclude("transportOrganisationRef")
                 .exclude("neighbours")
                 .exclude("members")
@@ -202,12 +202,11 @@ public class NetexMapper {
                 .byDefault()
                 .register();
 
-        mapperFactory.classMap(LocalService_VersionStructure.class, org.rutebanken.tiamat.model.LocalService.class)
+        mapperFactoryWithNetexIdClassBuilder(LocalService_VersionStructure.class, org.rutebanken.tiamat.model.LocalService.class)
                 .byDefault()
                 .register();
 
-        mapperFactory.classMap(AssistanceService.class, org.rutebanken.tiamat.model.AssistanceService.class)
-                .fieldBToA("netexId", "id")
+        mapperFactoryWithNetexIdClassBuilder(AssistanceService.class, org.rutebanken.tiamat.model.AssistanceService.class)
                 .byDefault()
                 .register();
 
