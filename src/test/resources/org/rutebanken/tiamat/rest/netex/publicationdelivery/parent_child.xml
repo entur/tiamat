@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PublicationDelivery xmlns="http://www.netex.org.uk/netex" version="1.5">
+    <PublicationTimestamp>2025-10-02T14:49:14</PublicationTimestamp>
+    <ParticipantRef>NSR</ParticipantRef>
+    <Description>Generated for test</Description>
+    <dataObjects>
+        <SiteFrame version="1" id="NSR:SiteFrame:1">
+            <FrameDefaults>
+                <DefaultLocale>
+                    <TimeZone>Europe/Oslo</TimeZone>
+                    <DefaultLanguage>nor</DefaultLanguage>
+                </DefaultLocale>
+            </FrameDefaults>
+            <stopPlaces>
+                <StopPlace version="1" id="NSR:StopPlace:1">
+                    <ValidBetween>
+                        <FromDate>2025-10-09T09:20:13</FromDate>
+                    </ValidBetween>
+                    <keyList>
+                        <KeyValue>
+                            <Key>imported-id</Key>
+                            <Value>
+                                003:9021003191303000,003:9021003191709000,001:9021001005011000,001:9021001005300000,020:9021020899005000,074:9021074000010000,172:9021172055861000,137:9021137000001000,128:9021128000001000,180:9021001000001000,112:9021112000001000,100:9021100000001000,174:9021174000001000,050:StopPlace:1
+                            </Value>
+                        </KeyValue>
+                        <KeyValue>
+                            <Key>owner</Key>
+                            <Value>001</Value>
+                        </KeyValue>
+                        <KeyValue>
+                            <Key>data-from</Key>
+                            <Value>001</Value>
+                        </KeyValue>
+                    </keyList>
+                    <Name>Parent Stop</Name>
+                    <PrivateCode>1</PrivateCode>
+                    <Centroid>
+                        <Location>
+                            <Longitude>18.054943</Longitude>
+                            <Latitude>59.331537</Latitude>
+                        </Location>
+                    </Centroid>
+                </StopPlace>
+                <StopPlace version="1" id="NSR:StopPlace:2">
+                    <ValidBetween>
+                        <FromDate>2025-10-09T09:20:13</FromDate>
+                    </ValidBetween>
+                    <keyList>
+                        <KeyValue>
+                            <Key>imported-id</Key>
+                            <Value>
+                                003:9021003191303000,003:9021003191709000,001:9021001005011000,001:9021001005300000,020:9021020899005000,074:9021074000010000,172:9021172055861000,137:9021137000001000,128:9021128000001000,180:9021001000001000,112:9021112000001000,100:9021100000001000,174:9021174000001000,050:StopPlace:1_1
+                            </Value>
+                        </KeyValue>
+                        <KeyValue>
+                            <Key>owner</Key>
+                            <Value>001</Value>
+                        </KeyValue>
+                        <KeyValue>
+                            <Key>data-from</Key>
+                            <Value>001</Value>
+                        </KeyValue>
+                        <KeyValue>
+                            <Key>parentsiteref</Key>
+                            <Value>NSR:StopPlace:1</Value>
+                        </KeyValue>
+                    </keyList>
+                    <Name>Child 1</Name>
+                    <PrivateCode>1</PrivateCode>
+                    <Centroid>
+                        <Location>
+                            <Longitude>18.054943</Longitude>
+                            <Latitude>59.331537</Latitude>
+                        </Location>
+                    </Centroid>
+                    <ParentSiteRef ref="NSR:StopPlace:1" version="1"/>
+                    <TransportMode>bus</TransportMode>
+                    <StopPlaceType>onstreetBus</StopPlaceType>
+                    <Weighting>interchangeAllowed</Weighting>
+                    <quays>
+                        <Quay version="1" id="NSR:Quay:5021">
+                            <keyList>
+                                <KeyValue>
+                                    <Key>imported-id</Key>
+                                    <Value>003:9022003191303001,050:Quay:5021</Value>
+                                </KeyValue>
+                            </keyList>
+                            <PrivateCode>1</PrivateCode>
+                            <Centroid>
+                                <Location>
+                                    <Longitude>18.059323</Longitude>
+                                    <Latitude>59.330532</Latitude>
+                                </Location>
+                            </Centroid>
+                            <PublicCode>A</PublicCode>
+                        </Quay>
+                        <Quay version="1" id="NSR:Quay:143093">
+                            <keyList>
+                                <KeyValue>
+                                    <Key>imported-id</Key>
+                                    <Value>100:9022100000001001,174:9022174000001001,050:Quay:143093</Value>
+                                </KeyValue>
+                            </keyList>
+                            <PrivateCode>41</PrivateCode>
+                            <Centroid>
+                                <Location>
+                                    <Longitude>18.058235</Longitude>
+                                    <Latitude>59.330146</Latitude>
+                                </Location>
+                            </Centroid>
+                            <PublicCode/>
+                        </Quay>
+                    </quays>
+                </StopPlace>
+                <StopPlace version="1" id="NSR:StopPlace:3">
+                    <keyList>
+                        <KeyValue>
+                            <Key>imported-id</Key>
+                            <Value>
+                                003:9021003191303000,003:9021003191709000,001:9021001005011000,001:9021001005300000,020:9021020899005000,074:9021074000010000,172:9021172055861000,137:9021137000001000,128:9021128000001000,180:9021001000001000,112:9021112000001000,100:9021100000001000,174:9021174000001000,050:StopPlace:1_2
+                            </Value>
+                        </KeyValue>
+                        <KeyValue>
+                            <Key>owner</Key>
+                            <Value>001</Value>
+                        </KeyValue>
+                        <KeyValue>
+                            <Key>data-from</Key>
+                            <Value>001</Value>
+                        </KeyValue>
+                        <KeyValue>
+                            <Key>parentsiteref</Key>
+                            <Value>NSR:StopPlace:1</Value>
+                        </KeyValue>
+                    </keyList>
+                    <Name>Child 2</Name>
+                    <PrivateCode>1</PrivateCode>
+                    <Centroid>
+                        <Location>
+                            <Longitude>18.054943</Longitude>
+                            <Latitude>59.331537</Latitude>
+                        </Location>
+                    </Centroid>
+                    <ParentSiteRef ref="NSR:StopPlace:1" version="1"/>
+                    <TransportMode>rail</TransportMode>
+                    <StopPlaceType>railStation</StopPlaceType>
+                    <Weighting>interchangeAllowed</Weighting>
+                    <quays>
+                        <Quay version="1" id="NSR:Quay:5104">
+                            <keyList>
+                                <KeyValue>
+                                    <Key>imported-id</Key>
+                                    <Value>003:9022003191709001,074:9022074000010010,050:Quay:5104</Value>
+                                </KeyValue>
+                            </keyList>
+                            <PrivateCode>2</PrivateCode>
+                            <Centroid>
+                                <Location>
+                                    <Longitude>18.056426</Longitude>
+                                    <Latitude>59.330313</Latitude>
+                                </Location>
+                            </Centroid>
+                            <PublicCode>1</PublicCode>
+                        </Quay>
+                        <Quay version="1" id="NSR:Quay:5105">
+                            <keyList>
+                                <KeyValue>
+                                    <Key>imported-id</Key>
+                                    <Value>003:9022003191709002,074:9022074000010020,050:Quay:5105</Value>
+                                </KeyValue>
+                            </keyList>
+                            <PrivateCode>3</PrivateCode>
+                            <Centroid>
+                                <Location>
+                                    <Longitude>18.056426</Longitude>
+                                    <Latitude>59.330313</Latitude>
+                                </Location>
+                            </Centroid>
+                            <PublicCode>2</PublicCode>
+                        </Quay>
+                    </quays>
+                </StopPlace>
+            </stopPlaces>
+        </SiteFrame>
+    </dataObjects>
+</PublicationDelivery>
