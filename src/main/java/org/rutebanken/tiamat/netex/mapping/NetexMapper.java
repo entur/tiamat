@@ -70,7 +70,8 @@ public class NetexMapper {
     private final MapperFactory mapperFactory = new DefaultMapperFactory.Builder().build();
 
     /**
-     * Ensures that exported id-s contain a "netexId" kind of value instead of a plain number
+     * Ensures that exported id-s contain a "netexId" kind of value instead of a plain number;
+     * To be used with caution (or, perhaps, not at all) when an .exclude or custom mapper involved
      */
     <A, B> ClassMapBuilder<A, B> defaultMapperFactoryClassBuilder(Class<A> var1, Class<B> var2) {
        return mapperFactory.classMap(var1, var2)
@@ -141,11 +142,12 @@ public class NetexMapper {
         defaultMapperFactoryClassBuilder(TariffZone.class, org.rutebanken.tiamat.model.TariffZone.class)
                 .register();
 
-        defaultMapperFactoryClassBuilder(FareZone.class, org.rutebanken.tiamat.model.FareZone.class)
+        mapperFactory.classMap(FareZone.class, org.rutebanken.tiamat.model.FareZone.class)
                 .exclude("transportOrganisationRef")
                 .exclude("neighbours")
                 .exclude("members")
                 .customize(new FareZoneMapper())
+                .byDefault()
                 .register();
 
 
