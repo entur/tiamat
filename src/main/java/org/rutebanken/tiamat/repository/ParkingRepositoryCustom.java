@@ -45,5 +45,12 @@ public interface ParkingRepositoryCustom extends DataManagedObjectStructureRepos
      * @return list of parkings referencing to stopPlace
      */
     List<String> findByStopPlaceNetexId(String netexStopPlaceId);
+
+    /**
+     * Find parking entities that belong to StopPlace (optimized version that returns entities directly)
+     * @param netexStopPlaceId
+     * @return list of parking entities referencing to stopPlace
+     */
+    List<Parking> findParkingEntitiesByStopPlaceNetexId(String netexStopPlaceId);
 }
 
