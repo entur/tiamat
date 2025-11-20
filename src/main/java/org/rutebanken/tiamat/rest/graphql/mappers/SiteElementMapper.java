@@ -19,6 +19,7 @@ import org.rutebanken.tiamat.model.AccessibilityAssessment;
 import org.rutebanken.tiamat.model.AccessibilityLimitation;
 import org.rutebanken.tiamat.model.AlternativeName;
 import org.rutebanken.tiamat.model.LimitationStatusEnumeration;
+import org.rutebanken.tiamat.model.LocalService;
 import org.rutebanken.tiamat.model.PlaceEquipment;
 import org.rutebanken.tiamat.model.SiteComponent_VersionStructure;
 import org.rutebanken.tiamat.model.SiteElement;
@@ -54,6 +55,9 @@ public class SiteElementMapper {
 
     @Autowired
     private PlaceEquipmentMapper placeEquipmentMapper;
+
+    @Autowired
+    private LocalServicesMapper localServicesMapper;
 
     @Autowired
     private GeometryMapper geometryMapper;
@@ -126,12 +130,25 @@ public class SiteElementMapper {
         Optional<PlaceEquipment> placeEquipment = placeEquipmentMapper.map(input);
 
         if (placeEquipment.isPresent()) {
-            if (siteElement instanceof Site_VersionStructure) {
-                ((Site_VersionStructure) siteElement).setPlaceEquipments(placeEquipment.get());
-            } else if (siteElement instanceof SiteComponent_VersionStructure) {
-                ((SiteComponent_VersionStructure) siteElement).setPlaceEquipments(placeEquipment.get());
+            if (siteElement instanceof Site_VersionStructure siteVersionStructure) {
+                siteVersionStructure.setPlaceEquipments(placeEquipment.get());
+            } else if (siteElement instanceof SiteComponent_VersionStructure siteVersionStructure) {
+                siteVersionStructure.setPlaceEquipments(placeEquipment.get());
             } else {
                 logger.warn("Cannot set place equipment for site element. Cannot detect type: {}", siteElement.getClass().getSimpleName());
+            }
+
+            isUpdated = true;
+        }
+
+        Optional<List<LocalService>> localServices = localServicesMapper.map(input);
+        if(localServices.isPresent()) {
+            if(siteElement instanceof Site_VersionStructure siteVersionStructure) {
+                siteVersionStructure.setLocalServices(localServices.get());
+            } else if (siteElement instanceof SiteComponent_VersionStructure siteComponentVersionStructure) {
+                siteComponentVersionStructure.setLocalServices(localServices.get());
+            } else {
+                logger.warn("Cannot set local services for site element. Cannot detect type: {}", siteElement.getClass().getSimpleName());
             }
 
             isUpdated = true;

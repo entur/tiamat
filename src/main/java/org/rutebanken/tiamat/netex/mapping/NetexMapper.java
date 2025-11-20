@@ -22,6 +22,7 @@ import ma.glasnost.orika.impl.DefaultMapperFactory;
 import ma.glasnost.orika.metadata.ClassMapBuilder;
 import org.rutebanken.netex.model.AccessibilityAssessment;
 import org.rutebanken.netex.model.AccessibilityLimitation;
+import org.rutebanken.netex.model.AssistanceService;
 import org.rutebanken.netex.model.CycleStorageEquipment;
 import org.rutebanken.netex.model.DataManagedObjectStructure;
 import org.rutebanken.netex.model.FareFrame;
@@ -43,6 +44,7 @@ import org.rutebanken.netex.model.ShelterEquipment;
 import org.rutebanken.netex.model.SiteFrame;
 import org.rutebanken.netex.model.StopPlace;
 import org.rutebanken.netex.model.TariffZone;
+import org.rutebanken.netex.model.LocalService_VersionStructure;
 import org.rutebanken.netex.model.TicketingEquipment;
 import org.rutebanken.netex.model.TopographicPlace;
 import org.rutebanken.netex.model.WaitingRoomEquipment;
@@ -124,7 +126,6 @@ public class NetexMapper {
                 .fieldBToA("topographicPlace", "topographicPlaceRef")
                 .fieldAToB("topographicPlaceRef.ref", "topographicPlace.netexId")
                 .fieldAToB("topographicPlaceRef.version", "topographicPlace.version")
-                .exclude("localServices")
                 .exclude("postalAddress")
                 .exclude("roadAddress")
                 .customize(new StopPlaceMapper(publicationDeliveryHelper))
@@ -132,7 +133,6 @@ public class NetexMapper {
                 .register();
 
         mapperFactory.classMap(Quay.class, org.rutebanken.tiamat.model.Quay.class)
-                .exclude("localServices")
                 .exclude("postalAddress")
                 .exclude("roadAddress")
                 .customize(new QuayMapper())
@@ -199,6 +199,15 @@ public class NetexMapper {
 
         mapperFactoryWithNetexIdClassBuilder(PlaceEquipments_RelStructure.class, org.rutebanken.tiamat.model.PlaceEquipment.class)
                 .customize(new PlaceEquipmentMapper())
+                .byDefault()
+                .register();
+
+        mapperFactory.classMap(LocalService_VersionStructure.class, org.rutebanken.tiamat.model.LocalService.class)
+                .byDefault()
+                .register();
+
+        mapperFactory.classMap(AssistanceService.class, org.rutebanken.tiamat.model.AssistanceService.class)
+                .fieldBToA("netexId", "id")
                 .byDefault()
                 .register();
 
