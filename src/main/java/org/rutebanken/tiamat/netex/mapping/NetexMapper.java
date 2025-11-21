@@ -39,6 +39,7 @@ import org.rutebanken.netex.model.ResourceFrame;
 import org.rutebanken.netex.model.SanitaryEquipment;
 import org.rutebanken.netex.model.ServiceFrame;
 import org.rutebanken.netex.model.ShelterEquipment;
+import org.rutebanken.netex.model.SiteFacilitySet;
 import org.rutebanken.netex.model.SiteFrame;
 import org.rutebanken.netex.model.StopPlace;
 import org.rutebanken.netex.model.TariffZone;
@@ -189,6 +190,11 @@ public class NetexMapper {
                 .register();
 
         mapperFactory.classMap(GeneralSign.class, org.rutebanken.tiamat.model.GeneralSign.class)
+                .byDefault()
+                .register();
+
+        mapperFactory.classMap(SiteFacilitySet.class, org.rutebanken.tiamat.model.SiteFacilitySet.class)
+                .fieldBToA("netexId", "id")
                 .byDefault()
                 .register();
 

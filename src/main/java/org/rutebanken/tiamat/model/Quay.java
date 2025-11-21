@@ -26,8 +26,10 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @Entity
@@ -39,6 +41,10 @@ public class Quay extends StopPlaceSpace_VersionStructure {
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<BoardingPosition> boardingPositions = new ArrayList<>();
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<SiteFacilitySet> facilities = new HashSet<>();
+
     protected String publicCode;
 
     /**
@@ -72,6 +78,14 @@ public class Quay extends StopPlaceSpace_VersionStructure {
 
     public List<BoardingPosition> getBoardingPositions() {
         return boardingPositions;
+    }
+
+    public Set<SiteFacilitySet> getFacilities() {
+        return facilities;
+    }
+
+    public void setFacilities(Set<SiteFacilitySet> facilities) {
+       this.facilities = facilities;
     }
 
     @Override

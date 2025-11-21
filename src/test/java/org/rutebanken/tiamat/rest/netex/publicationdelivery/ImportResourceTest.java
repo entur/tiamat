@@ -29,6 +29,7 @@ import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.netex.model.Quay;
 import org.rutebanken.netex.model.Quays_RelStructure;
 import org.rutebanken.netex.model.SimplePoint_VersionStructure;
+import org.rutebanken.netex.model.SiteFacilitySets_RelStructure;
 import org.rutebanken.netex.model.StopPlace;
 import org.rutebanken.netex.model.StopTypeEnumeration;
 import org.rutebanken.netex.model.ValidBetween;
@@ -387,7 +388,15 @@ public class ImportResourceTest extends TiamatIntegrationTest {
                                 .withCentroid(new SimplePoint_VersionStructure()
                                         .withLocation(new LocationStructure()
                                                 .withLatitude(new BigDecimal("9.1"))
-                                                .withLongitude(new BigDecimal("71.2"))))));
+                                                .withLongitude(new BigDecimal("71.2"))))
+                                .withFacilities(new SiteFacilitySets_RelStructure().withSiteFacilitySetRefOrSiteFacilitySet(
+                                        new org.rutebanken.netex.model.SiteFacilitySet()
+                                                .withId("XYZ:SiteFacilitySet:1")
+                                                .withVersion("1")
+                                                .withMobilityFacilityList(
+                                                        org.rutebanken.netex.model.MobilityFacilityEnumeration.TACTILE_GUIDING_STRIPS,
+                                                        org.rutebanken.netex.model.MobilityFacilityEnumeration.TACTILE_PLATFORM_EDGES)
+                                ))));
 
         PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace);
 
@@ -409,7 +418,7 @@ public class ImportResourceTest extends TiamatIntegrationTest {
         assertThat(quay.getId()).isNotNull();
         assertThat(quay.getPrivateCode().getValue()).isEqualTo("B02");
         assertThat(quay.getPrivateCode().getType()).isEqualTo("type");
-
+        assertThat(quay.getFacilities().getSiteFacilitySetRefOrSiteFacilitySet().size()).isEqualTo(1);
     }
 
     /**
