@@ -115,6 +115,9 @@ public class GraphQLNames {
     public static final String OUTPUT_TYPE_BOARDING_POSITION = "BoardingPosition";
     public static final String INPUT_TYPE_BOARDING_POSITION = OUTPUT_TYPE_BOARDING_POSITION + INPUT_TYPE_POSTFIX;
 
+    public static final String OUTPUT_TYPE_SITE_FACILITY_SET = "SiteFacilitySet";
+    public static final String INPUT_TYPE_SITE_FACILITY_SET = OUTPUT_TYPE_SITE_FACILITY_SET + INPUT_TYPE_POSTFIX;
+
     public static final String OUTPUT_TYPE_PLACE_EQUIPMENTS = "PlaceEquipments";
     public static final String INPUT_TYPE_PLACE_EQUIPMENTS = OUTPUT_TYPE_PLACE_EQUIPMENTS + INPUT_TYPE_POSTFIX;
 
@@ -388,6 +391,8 @@ public class GraphQLNames {
     public static final String QUAYS = "quays";
     public static final String COMPASS_BEARING = "compassBearing";
     public static final String BOARDING_POSITIONS = "boardingPositions";
+    public static final String FACILITIES = "facilities";
+    public static final String MOBILITY_FACILITY_LIST = "mobilityFacilityList";
     public static final String VALID_BETWEEN = "validBetween";
     public static final String ADDRESSABLE_PLACE = "addressablePlace";
     public static final String PLACE_REF = "placeRef";

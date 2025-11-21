@@ -19,6 +19,7 @@ import com.google.api.client.util.Preconditions;
 import org.rutebanken.tiamat.model.BoardingPosition;
 import org.rutebanken.tiamat.model.PrivateCodeStructure;
 import org.rutebanken.tiamat.model.Quay;
+import org.rutebanken.tiamat.model.SiteFacilitySet;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.service.BoardingPositionUpdater;
 import org.slf4j.Logger;
@@ -31,9 +32,11 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.BOARDING_POSITIONS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.COMPASS_BEARING;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.FACILITIES;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ID;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PRIVATE_CODE;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PUBLIC_CODE;
@@ -53,6 +56,9 @@ public class QuayMapper {
 
     @Autowired
     private BoardingPositionUpdater boardingPositionUpdater;
+
+    @Autowired
+    private FacilitiesMapper facilitiesMapper;
 
     public boolean populateQuayFromInput(StopPlace stopPlace, Map quayInputMap) {
         Quay quay;
@@ -112,7 +118,17 @@ public class QuayMapper {
                 stopPlace.getQuays().add(quay);
             }
         }
+
+        isQuayUpdated = isQuayUpdated | setFacilities(quay, quayInputMap.get(FACILITIES));
         return isQuayUpdated;
     }
 
+    private boolean setFacilities(Quay quay, Object facilitiesListObject) {
+        Set<SiteFacilitySet> facilities = facilitiesMapper.mapFacilities((List) facilitiesListObject);
+        if (quay.getFacilities() == null && facilities == null) {
+            return false;
+        }
+        quay.setFacilities(facilities);
+        return true;
+    }
 }
