@@ -117,26 +117,36 @@ public class ParallelInitialStopPlaceImporter {
         return parent.getNetexId() != null ? Set.of(parent.getNetexId()) : parent.getOriginalIds();
     }
 
-    private List<StopPlace> resolveParents(Set<StopPlace> parentStopPlaces,
-                                           Map<String, Set<String>> childrenByParentSiteReference,
-                                           AtomicInteger stopPlacesCreated) {
+    private List<StopPlace> resolveParents(
+            Set<StopPlace> parentStopPlaces,
+            Map<String, Set<String>> childrenByParentSiteReference,
+            AtomicInteger stopPlacesCreated) {
+
         return parentStopPlaces.stream()
-                .map(parent -> getParentNetexIdOrOriginalIds(parent).stream()
-                        .map(id -> {
-                            if (!childrenByParentSiteReference.containsKey(id)) {
-                                throw new IllegalStateException("Invalid stop place without quays or children " + id);
-                            }
-                            Set<String> childIds = childrenByParentSiteReference.get(id);
-                            if (childIds == null || childIds.isEmpty()) {
-                                throw new IllegalStateException("Parent stop place " + id + " has no children");
-                            }
-                            return parentStopPlaceCreator.createParentStopWithChildren(parent, childIds);
-                        })
-                        .peek(savedParent -> stopPlacesCreated.incrementAndGet())
-                        .findFirst()
-                        .orElseThrow(() ->
-                                new IllegalStateException("No valid children found for parent: " + parent.getNetexId()))
-                )
-                .toList();
+                .flatMap(parent -> {
+                    Set<String> parentIds = getParentNetexIdOrOriginalIds(parent);
+                    checkParentStopHasChildren(parent, parentIds, childrenByParentSiteReference);
+
+                    return parentIds.stream()
+                            .filter(childrenByParentSiteReference::containsKey)
+                            .flatMap(matchingId -> {
+                                Set<String> childIds = childrenByParentSiteReference.get(matchingId);
+                                if (childIds == null || childIds.isEmpty()) {
+                                    throw new IllegalStateException("No children found for matching parent id: " + matchingId);
+                                }
+
+                                StopPlace savedParent = parentStopPlaceCreator.createParentStopWithChildren(parent, childIds);
+                                stopPlacesCreated.incrementAndGet();
+                                return of(savedParent);
+                            });
+                }).toList();
+    }
+
+    private void checkParentStopHasChildren(StopPlace parent, Set<String> parentIds, Map<String, Set<String>> childrenByParentSiteReference) {
+        boolean hasMatch = parentIds.stream().anyMatch(childrenByParentSiteReference::containsKey);
+
+        if (!hasMatch) {
+            throw new IllegalStateException("Invalid stop place without quays or children " + parent.getNetexId());
+        }
     }
 }
