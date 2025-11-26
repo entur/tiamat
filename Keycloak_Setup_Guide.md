@@ -173,9 +173,7 @@ You need to configure your application to use Keycloak for authentication.
 ```properties
 authorization.enabled = true
 # Keycloak Configuration
-tiamat.oauth2.resourceserver.auth0.ror.jwt.issuer-uri=http://localhost:8082/realms/entur
-tiamat.oauth2.resourceserver.auth0.ror.jwt.audience=abzu
-tiamat.oauth2.resourceserver.auth0.ror.claim.namespace=role_assignments
+spring.security.oauth2.resourceserver.jwt.issuer-uri=http://localhost:8082/realms/entur
 ```
 
 #### Configure Abzu

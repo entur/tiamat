@@ -11,14 +11,13 @@ configMap:
   gcsBucketName: ror-tiamat-gcp2-dev
 
 auth0:
-  ror:
-    url: https://ror-entur-dev.eu.auth0.com/
-    audience: https://ror.api.dev.entur.io
   entur:
     internal:
       url: https://internal.dev.entur.org/
+      audience: https://api.dev.entur.io,https://ror.api.dev.entur.io
     partner:
       url: https://partner.dev.entur.org/
+      audience: https://ror.api.dev.entur.io,https://api.dev.entur.io
   client:
       id: Yd0qVrMoFE9qXT4zJvsTCOw6UT4Wi2WF
       url: https://internal.dev.entur.org/oauth/token

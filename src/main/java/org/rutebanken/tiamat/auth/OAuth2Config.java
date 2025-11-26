@@ -17,6 +17,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.util.Arrays;
+import java.util.List;
+
 @Configuration
 public class OAuth2Config {
 
@@ -78,29 +81,27 @@ public class OAuth2Config {
     @Profile("!test")
     public MultiIssuerAuthenticationManagerResolver multiIssuerAuthenticationManagerResolver(
             @Value("${tiamat.oauth2.resourceserver.auth0.entur.internal.jwt.audience:}")
-            String enturInternalAuth0Audience,
+            String enturInternalAuth0Audiences,
             @Value("${tiamat.oauth2.resourceserver.auth0.entur.internal.jwt.issuer-uri:}")
             String enturInternalAuth0Issuer,
             @Value("${tiamat.oauth2.resourceserver.auth0.entur.partner.jwt.audience:}")
-            String enturPartnerAuth0Audience,
+            String enturPartnerAuth0Audiences,
             @Value("${tiamat.oauth2.resourceserver.auth0.entur.partner.jwt.issuer-uri:}")
-            String enturPartnerAuth0Issuer,
-            @Value("${tiamat.oauth2.resourceserver.auth0.ror.jwt.audience:}")
-            String rorAuth0Audience,
-            @Value("${tiamat.oauth2.resourceserver.auth0.ror.jwt.issuer-uri:}")
-            String rorAuth0Issuer,
-            @Value("${tiamat.oauth2.resourceserver.auth0.ror.claim.namespace:}")
-            String rorAuth0ClaimNamespace) {
+            String enturPartnerAuth0Issuer) {
 
         return new MultiIssuerAuthenticationManagerResolverBuilder()
                 .withEnturInternalAuth0Issuer(enturInternalAuth0Issuer)
-                .withEnturInternalAuth0Audience(enturInternalAuth0Audience)
+                .withEnturInternalAuth0Audiences(parseAudiences(enturInternalAuth0Audiences))
                 .withEnturPartnerAuth0Issuer(enturPartnerAuth0Issuer)
-                .withEnturPartnerAuth0Audience(enturPartnerAuth0Audience)
-                .withRorAuth0Issuer(rorAuth0Issuer)
-                .withRorAuth0Audience(rorAuth0Audience)
-                .withRorAuth0ClaimNamespace(rorAuth0ClaimNamespace)
+                .withEnturPartnerAuth0Audiences(parseAudiences(enturPartnerAuth0Audiences))
                 .build();
+    }
+
+    private List<String> parseAudiences(String audiences) {
+        if (audiences == null || audiences.trim().isEmpty()) {
+            return List.of();
+        }
+        return Arrays.asList(audiences.split(","));
     }
 
     /**
