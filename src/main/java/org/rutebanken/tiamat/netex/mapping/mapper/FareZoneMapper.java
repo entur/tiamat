@@ -62,15 +62,15 @@ public class FareZoneMapper extends CustomMapper<FareZone, org.rutebanken.tiamat
             netexFareZone.withTransportOrganisationRef(authorityRef);
         }
 
-        if (!tiamatFareZone.getNeighbours().isEmpty()) {
+        if (tiamatFareZone.getNeighbours() != null && !tiamatFareZone.getNeighbours().isEmpty()) {
             final List<FareZoneRefStructure> fareZoneRefs = tiamatFareZone.getNeighbours().stream()
                     .map(tariffZoneRef -> new FareZoneRefStructure().withRef(tariffZoneRef.getRef()))
-                    .collect(Collectors.toList());
+                    .toList();
             final FareZoneRefs_RelStructure fareZoneRefsRelStructure = new FareZoneRefs_RelStructure().withFareZoneRef(fareZoneRefs);
             netexFareZone.withNeighbours(fareZoneRefsRelStructure);
         }
 
-        if (!tiamatFareZone.getFareZoneMembers().isEmpty()) {
+        if (tiamatFareZone.getFareZoneMembers() != null && !tiamatFareZone.getFareZoneMembers().isEmpty()) {
             List<JAXBElement<? extends PointRefStructure>> fareZoneMember = tiamatFareZone.getFareZoneMembers().stream()
                     .map(members -> convertStopPlaceRefToScheduledStopPointRef(members.getRef()))
                     .filter(Objects::nonNull)
