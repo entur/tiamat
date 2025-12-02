@@ -25,6 +25,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Transient;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -52,6 +53,8 @@ public abstract class SiteComponent_VersionStructure
     protected List<EquipmentPlace> equipmentPlaces;
     @OneToOne(cascade = CascadeType.ALL)
     protected PlaceEquipment placeEquipments;
+    @OneToMany(cascade = CascadeType.ALL)
+    private List<LocalService> localServices;
 
     @OneToMany(cascade = CascadeType.ALL)
     private List<CheckConstraint> checkConstraints;
@@ -118,5 +121,13 @@ public abstract class SiteComponent_VersionStructure
 
     public void setCheckConstraints(List<CheckConstraint> checkConstraints) {
         this.checkConstraints = checkConstraints;
+    }
+
+    public List<LocalService> getLocalServices() {
+        return localServices;
+    }
+
+    public void setLocalServices(List<LocalService> localServices) {
+        this.localServices = localServices;
     }
 }

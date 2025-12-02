@@ -11,14 +11,13 @@ configMap:
   gcsBucketName: ror-tiamat-gcp2-tst
 
 auth0:
-  ror:
-    url: https://ror-entur-staging.eu.auth0.com/
-    audience: https://ror.api.staging.entur.io
   entur:
     internal:
       url: https://internal.staging.entur.org/
+      audience: https://api.staging.entur.io,https://ror.api.staging.entur.io
     partner:
       url: https://partner.staging.entur.org/
+      audience: https://api.staging.entur.io,https://ror.api.staging.entur.io
   client:
     id: 9x7HiPyzNWLZuHIaeTzI5QgGBv5hI9w7
     url: https://internal.staging.entur.org/oauth/token

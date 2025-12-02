@@ -133,6 +133,85 @@ public class GroupOfStopPlacesSaverServiceTest extends TiamatIntegrationTest {
 
     }
 
+    @Test
+    public void shouldRejectNewGOSPWithNoMembers() {
+        // Verify that creating a new group without members is rejected
+        GroupOfStopPlaces groupOfStopPlaces = new GroupOfStopPlaces();
+        groupOfStopPlaces.setName(new EmbeddableMultilingualString("empty group"));
+        groupOfStopPlaces.setPurposeOfGrouping(purposeOfGrouping());
+        // Deliberately not adding any members
+
+        assertThatThrownBy(() -> groupOfStopPlacesSaverService.saveNewVersion(groupOfStopPlaces))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Cannot create a new GroupOfStopPlaces without members");
+    }
+
+    @Test
+    public void shouldAllowRemovingAllMembersFromExistingGroup() {
+        // Create a group with a member first
+        StopPlace stopPlace = new StopPlace();
+        stopPlaceRepository.save(stopPlace);
+
+        GroupOfStopPlaces groupOfStopPlaces = new GroupOfStopPlaces();
+        groupOfStopPlaces.setName(new EmbeddableMultilingualString("group with member"));
+        groupOfStopPlaces.getMembers().add(new StopPlaceReference(stopPlace.getNetexId()));
+        groupOfStopPlaces.setPurposeOfGrouping(purposeOfGrouping());
+
+        GroupOfStopPlaces saved = groupOfStopPlacesSaverService.saveNewVersion(groupOfStopPlaces);
+        assertThat(saved.getMembers()).hasSize(1);
+
+        // Now remove all members - this should be allowed if user has authorization
+        GroupOfStopPlaces updated = new GroupOfStopPlaces();
+        updated.setNetexId(saved.getNetexId());
+        updated.setName(new EmbeddableMultilingualString("group with no members"));
+        updated.setPurposeOfGrouping(saved.getPurposeOfGrouping());
+        // Not adding any members - removing all
+
+        GroupOfStopPlaces result = groupOfStopPlacesSaverService.saveNewVersion(updated);
+        assertThat(result.getMembers()).isEmpty();
+        assertThat(result.getVersion()).isEqualTo(2L);
+    }
+
+    @Test
+    public void shouldIncrementVersionWhenRemovingSomeMembers() {
+        // Create a group with multiple members
+        StopPlace stopPlace1 = new StopPlace();
+        stopPlaceRepository.save(stopPlace1);
+
+        StopPlace stopPlace2 = new StopPlace();
+        stopPlaceRepository.save(stopPlace2);
+
+        StopPlace stopPlace3 = new StopPlace();
+        stopPlaceRepository.save(stopPlace3);
+
+        GroupOfStopPlaces groupOfStopPlaces = new GroupOfStopPlaces();
+        groupOfStopPlaces.setName(new EmbeddableMultilingualString("group with three members"));
+        groupOfStopPlaces.getMembers().add(new StopPlaceReference(stopPlace1.getNetexId()));
+        groupOfStopPlaces.getMembers().add(new StopPlaceReference(stopPlace2.getNetexId()));
+        groupOfStopPlaces.getMembers().add(new StopPlaceReference(stopPlace3.getNetexId()));
+        groupOfStopPlaces.setPurposeOfGrouping(purposeOfGrouping());
+
+        GroupOfStopPlaces saved = groupOfStopPlacesSaverService.saveNewVersion(groupOfStopPlaces);
+        assertThat(saved.getMembers()).hasSize(3);
+        assertThat(saved.getVersion()).isEqualTo(1L);
+
+        // Remove one member, keep two
+        GroupOfStopPlaces updated = new GroupOfStopPlaces();
+        updated.setNetexId(saved.getNetexId());
+        updated.setName(new EmbeddableMultilingualString("group with two members"));
+        updated.getMembers().add(new StopPlaceReference(stopPlace1.getNetexId()));
+        updated.getMembers().add(new StopPlaceReference(stopPlace2.getNetexId()));
+        updated.setPurposeOfGrouping(saved.getPurposeOfGrouping());
+
+        GroupOfStopPlaces result = groupOfStopPlacesSaverService.saveNewVersion(updated);
+        assertThat(result.getMembers()).hasSize(2);
+        assertThat(result.getVersion()).isEqualTo(2L);
+        assertThat(result.getMembers())
+                .extracting(StopPlaceReference::getRef)
+                .contains(stopPlace1.getNetexId(), stopPlace2.getNetexId())
+                .doesNotContain(stopPlace3.getNetexId());
+    }
+
     private PurposeOfGrouping purposeOfGrouping() {
         PurposeOfGrouping purposeOfGrouping = new PurposeOfGrouping();
         purposeOfGrouping.setName(new EmbeddableMultilingualString("generalization"));

@@ -15,10 +15,7 @@
 
 package org.rutebanken.tiamat.rest.graphql;
 
-import org.rutebanken.netex.model.SanitaryFacilityEnumeration;
 import org.rutebanken.tiamat.rest.graphql.scalars.DateScalar;
-
-import java.util.List;
 
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.MERGED_ID_KEY;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
@@ -139,6 +136,12 @@ public class GraphQLNames {
     public static final String OUTPUT_TYPE_GENERAL_SIGN_EQUIPMENT = "GeneralSign";
     public static final String INPUT_TYPE_GENERAL_SIGN_EQUIPMENT = OUTPUT_TYPE_GENERAL_SIGN_EQUIPMENT + INPUT_TYPE_POSTFIX;
 
+    public static final String OUTPUT_TYPE_LOCAL_SERVICES = "LocalServices";
+    public static final String INPUT_TYPE_LOCAL_SERVICES = OUTPUT_TYPE_LOCAL_SERVICES + INPUT_TYPE_POSTFIX;
+
+    public static final String OUTPUT_TYPE_ASSISTANCE_SERVICE = "AssistanceService";
+    public static final String INPUT_TYPE_ASSISTANCE_SERVICE = OUTPUT_TYPE_ASSISTANCE_SERVICE + INPUT_TYPE_POSTFIX;
+
     public static final String OUTPUT_TYPE_KEY_VALUES = "KeyValues";
     public static final String INPUT_TYPE_KEY_VALUES = OUTPUT_TYPE_KEY_VALUES + INPUT_TYPE_POSTFIX;
 
@@ -248,7 +251,7 @@ public class GraphQLNames {
     public static final String SHORT_NAME = "shortName";
     public static final String DESCRIPTION = "description";
 
-    public static  final  String PURPOSE_OF_GROUPING = "purposeOfGrouping";
+    public static  final String PURPOSE_OF_GROUPING = "purposeOfGrouping";
     public static final String ACCESSIBILITY_ASSESSMENT = "accessibilityAssessment";
     public static final String LIMITATIONS = "limitations";
     public static final String MOBILITY_IMPAIRED_ACCESS = "mobilityImpairedAccess";
@@ -297,6 +300,13 @@ public class GraphQLNames {
     public static final String NUMBER_OF_SPACES = "numberOfSpaces";
     public static final String CYCLE_STORAGE_TYPE = "cycleStorageType";
     //GeneralSign
+
+    public static final String LOCAL_SERVICES = "localServices";
+    public static final String ASSISTANCE_SERVICE = "assistanceService";
+    public static final String ASSISTANCE_FACILITY_LIST = "assistanceFacilityList";
+    public static final String ASSISTANCE_AVAILABILITY = "assistanceAvailability";
+    public static final String ASSISTANCE_FACILITY_TYPE = "assistanceFacilityType";
+    public static final String ASSISTANCE_AVAILABILITY_TYPE = "assistanceAvailabilityType";
 
     public static final String NUMBER_OF_SPACES_WITH_RECHARGE_POINT = "numberOfSpacesWithRechargePoint";
 

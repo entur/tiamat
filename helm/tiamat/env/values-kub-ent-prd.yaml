@@ -11,14 +11,13 @@ configMap:
   gcsBucketName: ror-tiamat-gcp2-prd
 
 auth0:
-  ror:
-    url: https://auth2.entur.org/
-    audience: https://ror.api.entur.io
   entur:
     internal:
       url: https://internal.entur.org/
+      audience: https://api.entur.io,https://ror.api.entur.io
     partner:
       url: https://partner.entur.org/
+      audience: https://api.entur.io,https://ror.api.entur.io
   client:
     id: ga01hAU7XrM8cPOSuYXOocFoM8c1wB42
     url: https://internal.entur.org/oauth/token

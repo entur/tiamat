@@ -25,6 +25,9 @@ import org.rutebanken.tiamat.changelog.EntityChangedJMSListener;
 import org.rutebanken.tiamat.model.AccessibilityAssessment;
 import org.rutebanken.tiamat.model.AccessibilityLimitation;
 import org.rutebanken.tiamat.model.AlternativeName;
+import org.rutebanken.tiamat.model.AssistanceAvailabilityEnumeration;
+import org.rutebanken.tiamat.model.AssistanceFacilityEnumeration;
+import org.rutebanken.tiamat.model.AssistanceService;
 import org.rutebanken.tiamat.model.BusSubmodeEnumeration;
 import org.rutebanken.tiamat.model.CycleStorageEnumeration;
 import org.rutebanken.tiamat.model.CycleStorageEquipment;
@@ -33,6 +36,7 @@ import org.rutebanken.tiamat.model.GenderLimitationEnumeration;
 import org.rutebanken.tiamat.model.GeneralSign;
 import org.rutebanken.tiamat.model.InterchangeWeightingEnumeration;
 import org.rutebanken.tiamat.model.LimitationStatusEnumeration;
+import org.rutebanken.tiamat.model.LocalService;
 import org.rutebanken.tiamat.model.NameTypeEnumeration;
 import org.rutebanken.tiamat.model.PlaceEquipment;
 import org.rutebanken.tiamat.model.PrivateCodeStructure;
@@ -64,13 +68,17 @@ import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.comparesEqualTo;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -136,6 +144,49 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                 .body("data.stopPlace[0].name.value", equalTo(stopPlaceName))
                 .body("data.stopPlace[0].quays.name.value", hasItems(firstQuayName, secondQuayName))
                 .body("data.stopPlace[0].quays.id", hasItems(quay.getNetexId(), secondQuay.getNetexId()));
+    }
+
+    @Test
+    public void retrieveStopPlaceWithLocalServices() throws Exception {
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("StopPlace"));
+        stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(5, 60)));
+
+        List<LocalService> localServices = new ArrayList<>();
+        AssistanceService assistanceService = new AssistanceService();
+        assistanceService.setAssistanceFacilityList(Arrays.asList(AssistanceFacilityEnumeration.PERSONAL_ASSISTANCE, AssistanceFacilityEnumeration.BOARDING_ASSISTANCE));
+        assistanceService.setAssistanceAvailability(AssistanceAvailabilityEnumeration.AVAILABLE_IF_BOOKED);
+        localServices.add(assistanceService);
+
+        stopPlace.setLocalServices(localServices);
+        stopPlaceRepository.save(stopPlace);
+
+        String graphQlJsonQuery = """
+                  {
+                  stopPlace:  stopPlace (query:"StopPlace", allVersions:true) {
+                            id
+                            name { value }
+                            localServices {
+                                assistanceService {
+                                    id
+                                    assistanceFacilityList
+                                    assistanceAvailability
+                                }
+                            }
+                        }
+                    }""";
+
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
+                .rootPath("data.stopPlace[0]")
+                .body("id", equalTo(stopPlace.getNetexId()))
+                .body("name.value", equalTo("StopPlace"))
+                .body("localServices", notNullValue())
+
+                // assistance service
+                .body("localServices.assistanceService[0].id", equalTo(assistanceService.getNetexId()))
+                .body("localServices.assistanceService[0].assistanceFacilityList", hasSize(2))
+                .body("localServices.assistanceService[0].assistanceFacilityList", hasItem(assistanceService.getAssistanceFacilityList().getFirst().value()))
+                .body("localServices.assistanceService[0].assistanceFacilityList", hasItem(assistanceService.getAssistanceFacilityList().getLast().value()))
+                .body("localServices.assistanceService[0].assistanceAvailability", equalTo(assistanceService.getAssistanceAvailability().value()));
     }
 
     @Test
@@ -1487,7 +1538,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
     public void testGetValidTransportModes() throws Exception {
 
         String graphQlJsonQuery = """
-                { 
+                {
                   validTransportModes {
                     transportMode
                     submode
@@ -1500,6 +1551,85 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                 .body("data.validTransportModes", notNullValue())
                 .body("data.validTransportModes[0].transportMode", notNullValue())
                 .body("data.validTransportModes[0].submode", notNullValue());
+    }
+
+    @Test
+    public void testMutationCreateStopPlaceWithCityTramSubmode() throws Exception {
+
+        String stopPlaceName = "City Tram Stop";
+        String transportMode = VehicleModeEnumeration.TRAM.value();
+        String submode = TramSubmodeEnumeration.CITY_TRAM.value();
+        String stopPlaceType = StopTypeEnumeration.ONSTREET_TRAM.value();
+
+        String graphQlJsonQuery = """
+                mutation {
+                    stopPlace: mutateStopPlace (StopPlace: {
+                        name: { value: "%s" }
+                        transportMode: %s
+                        submode: %s
+                        stopPlaceType: %s
+                    }) {
+                        id
+                        name { value }
+                        transportMode
+                        submode
+                        stopPlaceType
+                    }
+                }
+                """.formatted(stopPlaceName, transportMode, submode, stopPlaceType);
+
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
+                .rootPath("data.stopPlace[0]")
+                .body("id", notNullValue())
+                .body("name.value", equalTo(stopPlaceName))
+                .body("transportMode", equalTo(transportMode))
+                .body("submode", equalTo(submode))
+                .body("stopPlaceType", equalTo(stopPlaceType));
+    }
+
+    @Test
+    public void testMutationUpdateStopPlaceToCityTramSubmode() throws Exception {
+
+        StopPlace stopPlace = createStopPlace("Bus Stop");
+        stopPlace.setTransportMode(VehicleModeEnumeration.BUS);
+        stopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
+        stopPlace.setBusSubmode(BusSubmodeEnumeration.LOCAL_BUS);
+        stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(10, 59)));
+
+        stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+
+        String newTransportMode = VehicleModeEnumeration.TRAM.value();
+        String newSubmode = TramSubmodeEnumeration.CITY_TRAM.value();
+        String graphQlJsonQuery = """
+                mutation {
+                    stopPlace: mutateStopPlace (StopPlace: {
+                        id: "%s"
+                        transportMode: %s
+                        submode: %s
+                    }) {
+                        id
+                        transportMode
+                        submode
+                    }
+                }
+                """.formatted(stopPlace.getNetexId(), newTransportMode, newSubmode);
+
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
+                .rootPath("data.stopPlace[0]")
+                .body("id", equalTo(stopPlace.getNetexId()))
+                .body("transportMode", equalTo(newTransportMode))
+                .body("submode", equalTo(newSubmode));
+
+        var stopPlaces = stopPlaceRepository.findAll();
+        for(StopPlace stopPlaceVersion : stopPlaces) {
+            if(stopPlaceVersion.getVersion() == 1) {
+                assertThat(stopPlaceVersion.getBusSubmode()).as("version 1").isNotNull().isEqualTo(BusSubmodeEnumeration.LOCAL_BUS);
+                assertThat(stopPlaceVersion.getTramSubmode()).as("version 1").isNull();
+            } else if (stopPlaceVersion.getVersion() == 2) {
+                assertThat(stopPlaceVersion.getBusSubmode()).as("version 2").isNull();
+                assertThat(stopPlaceVersion.getTramSubmode()).as("version 2").isNotNull().isEqualTo(TramSubmodeEnumeration.CITY_TRAM);
+            }
+        }
     }
 
 

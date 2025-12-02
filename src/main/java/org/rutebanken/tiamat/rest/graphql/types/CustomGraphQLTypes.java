@@ -26,6 +26,8 @@ import graphql.schema.GraphQLObjectType;
 import org.rutebanken.tiamat.diff.generic.SubmodeEnumuration;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.model.AirSubmodeEnumeration;
+import org.rutebanken.tiamat.model.AssistanceAvailabilityEnumeration;
+import org.rutebanken.tiamat.model.AssistanceFacilityEnumeration;
 import org.rutebanken.tiamat.model.BoardingPositionTypeEnumeration;
 import org.rutebanken.tiamat.model.BusSubmodeEnumeration;
 import org.rutebanken.tiamat.model.CycleStorageEnumeration;
@@ -34,6 +36,7 @@ import org.rutebanken.tiamat.model.GenderLimitationEnumeration;
 import org.rutebanken.tiamat.model.InstalledEquipment_VersionStructure;
 import org.rutebanken.tiamat.model.InterchangeWeightingEnumeration;
 import org.rutebanken.tiamat.model.LimitationStatusEnumeration;
+import org.rutebanken.tiamat.model.LocalService;
 import org.rutebanken.tiamat.model.MetroSubmodeEnumeration;
 import org.rutebanken.tiamat.model.ModificationEnumeration;
 import org.rutebanken.tiamat.model.NameTypeEnumeration;
@@ -123,7 +126,8 @@ public class CustomGraphQLTypes {
     public static GraphQLEnumType modificationEnumerationType = createCustomEnumType("ModificationEnumerationType", ModificationEnumeration.class);
     public static GraphQLEnumType scopingMethodEnumType = createCustomEnumType("ScopingMethodEnumerationType", ScopingMethodEnumeration.class);
     public static GraphQLEnumType zoneTopologyEnumType = createCustomEnumType("ZoneTopologyEnumerationType", ZoneTopologyEnumeration.class);
-
+    public static GraphQLEnumType assistanceFacilityEnumType = createCustomEnumType(ASSISTANCE_FACILITY_TYPE, AssistanceFacilityEnumeration.class);
+    public static GraphQLEnumType assistanceAvailabilityEnumType = createCustomEnumType(ASSISTANCE_AVAILABILITY_TYPE, AssistanceAvailabilityEnumeration.class);
 
     public static GraphQLEnumType createCustomEnumType(String name, Class c) {
 
@@ -523,6 +527,58 @@ public class CustomGraphQLTypes {
                     .name(GENERAL_SIGN)
                     .type(new GraphQLList(generalSignEquipmentInputType)))
             .build();
+
+
+    public static GraphQLInputObjectType assistanceServiceInputType = GraphQLInputObjectType.newInputObject()
+            .name(INPUT_TYPE_ASSISTANCE_SERVICE)
+            .field(newInputObjectField()
+                    .name(ASSISTANCE_FACILITY_LIST)
+                    .type(new GraphQLList(assistanceFacilityEnumType)))
+            .field(newInputObjectField()
+                    .name(ASSISTANCE_AVAILABILITY)
+                    .type(assistanceAvailabilityEnumType))
+            .build();
+
+    public static GraphQLInputObjectType localServiceInputType = GraphQLInputObjectType.newInputObject()
+            .name(INPUT_TYPE_LOCAL_SERVICES)
+            .field(newInputObjectField()
+                    .name(ASSISTANCE_SERVICE)
+                    .type(new GraphQLList(assistanceServiceInputType)))
+            .build();
+
+    public static GraphQLObjectType assistanceServiceOutputType = newObject()
+            .name(OUTPUT_TYPE_ASSISTANCE_SERVICE)
+            .field(netexIdFieldDefinition)
+            .field(newFieldDefinition()
+                    .name(ASSISTANCE_FACILITY_LIST)
+                    .type(new GraphQLList(assistanceFacilityEnumType)))
+            .field(newFieldDefinition()
+                    .name(ASSISTANCE_AVAILABILITY)
+                    .type(assistanceAvailabilityEnumType))
+            .build();
+
+    public static GraphQLObjectType localServiceType = newObject()
+            .name(OUTPUT_TYPE_LOCAL_SERVICES)
+            .field(newFieldDefinition()
+                    .name(ASSISTANCE_SERVICE)
+                    .type(new GraphQLList(assistanceServiceOutputType))
+            )
+            .build();
+
+    public static List getLocalServiceOfType(Class clazz, DataFetchingEnvironment env) {
+        List<LocalService> localServices = env.getSource();
+        List localServicesOfType = new ArrayList<>();
+        for (LocalService ls : localServices) {
+            if (clazz.isInstance(ls)) {
+                localServicesOfType.add(ls);
+            }
+        }
+
+        if (!localServicesOfType.isEmpty()) {
+            return localServicesOfType;
+        }
+        return null;
+    }
 
     public static GraphQLObjectType accessibilityLimitationsObjectType = newObject()
             .name(OUTPUT_TYPE_ACCESSIBILITY_LIMITATIONS)

@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.entur.ror</groupId>
         <artifactId>superpom</artifactId>
-        <version>4.9.0</version>
+        <version>4.10.0</version>
     </parent>
     <groupId>org.rutebanken</groupId>
     <artifactId>tiamat</artifactId>
@@ -57,9 +57,9 @@
         <graphql-java-extended-scalars.version>20.2</graphql-java-extended-scalars.version>
         <hazelcast-hibernate53.version>5.2.0</hazelcast-hibernate53.version>
         <hazelcast.version>5.2.5</hazelcast.version>
-        <swagger-jersey2.version>2.2.40</swagger-jersey2.version>
+        <swagger-jersey2.version>2.2.41</swagger-jersey2.version>
         <netex-java-model.version>2.0.14</netex-java-model.version>
-        <entur.helpers.version>5.47.0</entur.helpers.version>
+        <entur.helpers.version>5.50.0</entur.helpers.version>
         <jts-core.version>1.20.0</jts-core.version>
         <groovy-all.version>4.0.29</groovy-all.version>
         <rest-assured.version>5.5.6</rest-assured.version>
@@ -549,7 +549,7 @@
             <plugin>
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
-                <version>3.4.6</version>
+                <version>3.5.1</version>
                 <dependencies>
                     <!-- Include jib-spring-boot-extension-maven to prevent spring-boot-devtools from being packaged.-->
                     <dependency>

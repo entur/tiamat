@@ -287,8 +287,6 @@ spring.datasource.password=tiamat
 
 #OAuth2 Resource Server
 spring.security.oauth2.resourceserver.jwt.issuer-uri=https:http://localhost:8082/realms/entur
-tiamat.oauth2.resourceserver.auth0.ror.jwt.audience=abzu
-tiamat.oauth2.resourceserver.auth0.ror.claim.namespace=role_assignments
 
 spring.cloud.gcp.pubsub.enabled=false
 
