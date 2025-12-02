@@ -23,7 +23,6 @@ import graphql.schema.GraphQLInputType;
 import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLNonNull;
 import graphql.schema.GraphQLObjectType;
-import org.geolatte.geom.V;
 import org.rutebanken.tiamat.diff.generic.SubmodeEnumuration;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.model.AirSubmodeEnumeration;

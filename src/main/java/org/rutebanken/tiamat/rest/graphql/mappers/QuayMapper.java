@@ -31,6 +31,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -125,7 +126,7 @@ public class QuayMapper {
 
     private boolean setFacilities(Quay quay, Object facilitiesListObject) {
         Set<SiteFacilitySet> facilities = facilitiesMapper.mapFacilities((List) facilitiesListObject);
-        if (quay.getFacilities() == null && facilities == null) {
+        if (Objects.equals(quay.getFacilities(), facilities)) {
             return false;
         }
         quay.setFacilities(facilities);

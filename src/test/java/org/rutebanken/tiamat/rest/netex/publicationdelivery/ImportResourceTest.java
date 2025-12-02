@@ -23,12 +23,14 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.rutebanken.netex.model.KeyValueStructure;
 import org.rutebanken.netex.model.LocationStructure;
+import org.rutebanken.netex.model.MobilityFacilityEnumeration;
 import org.rutebanken.netex.model.MultilingualString;
 import org.rutebanken.netex.model.PrivateCodeStructure;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.netex.model.Quay;
 import org.rutebanken.netex.model.Quays_RelStructure;
 import org.rutebanken.netex.model.SimplePoint_VersionStructure;
+import org.rutebanken.netex.model.SiteFacilitySet;
 import org.rutebanken.netex.model.SiteFacilitySets_RelStructure;
 import org.rutebanken.netex.model.StopPlace;
 import org.rutebanken.netex.model.StopTypeEnumeration;
@@ -1229,6 +1231,11 @@ public class ImportResourceTest extends TiamatIntegrationTest {
                                            <Latitude>58.465256</Latitude>
                                         </Location>
                                      </Centroid>
+                                     <facilities>
+                                        <SiteFacilitySet modification="new" version="1" id="NSB:SiteFacilitySet:16">
+                                            <MobilityFacilityList>tactilePlatformEdges tactileGuidingStrips</MobilityFacilityList>
+                                        </SiteFacilitySet>
+                                     </facilities>
                                      <PublicCode>1</PublicCode>
                                   </Quay>
                                </quays>
@@ -1291,6 +1298,12 @@ public class ImportResourceTest extends TiamatIntegrationTest {
         assertThat(assistanceService.getId())
                 .as("AssistanceService should have been assigned an NSR ID")
                 .startsWith("NSR:");
+
+        assertThat(stopPlace.getQuays().getQuayRefOrQuay()).hasSize(1);
+        Quay quay = (Quay) stopPlace.getQuays().getQuayRefOrQuay().getFirst();
+        SiteFacilitySet siteFacilitySet = (SiteFacilitySet) quay.getFacilities().getSiteFacilitySetRefOrSiteFacilitySet().getFirst();
+        List<MobilityFacilityEnumeration> mobilityFacilityList = siteFacilitySet.getMobilityFacilityList();
+        assertThat(mobilityFacilityList).hasSize(2);
     }
 
     @Test
