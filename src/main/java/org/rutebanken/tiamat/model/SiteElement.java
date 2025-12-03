@@ -24,15 +24,15 @@ import jakarta.persistence.Transient;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @MappedSuperclass
 public abstract class SiteElement extends AddressablePlace {
 
     @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    private final List<AlternativeName> alternativeNames = new ArrayList<>();
+    private final Set<AlternativeName> alternativeNames = new HashSet<>();
 
     @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
@@ -85,7 +85,7 @@ public abstract class SiteElement extends AddressablePlace {
         this.nameSuffix = value;
     }
 
-    public List<AlternativeName> getAlternativeNames() {
+    public Set<AlternativeName> getAlternativeNames() {
         return alternativeNames;
     }
 

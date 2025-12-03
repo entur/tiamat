@@ -26,16 +26,14 @@ import jakarta.persistence.OneToOne;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.locationtech.jts.geom.Point;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Entity
 public class GroupOfStopPlaces extends GroupOfEntities_VersionStructure {
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    private final List<AlternativeName> alternativeNames = new ArrayList<>();
+    private final Set<AlternativeName> alternativeNames = new HashSet<>();
     @ElementCollection(targetClass = StopPlaceReference.class, fetch = FetchType.EAGER)
     @CollectionTable(
             name = "group_of_stop_places_members"
@@ -66,7 +64,7 @@ public class GroupOfStopPlaces extends GroupOfEntities_VersionStructure {
         return members;
     }
 
-    public List<AlternativeName> getAlternativeNames() {
+    public Set<AlternativeName> getAlternativeNames() {
         return alternativeNames;
     }
 
