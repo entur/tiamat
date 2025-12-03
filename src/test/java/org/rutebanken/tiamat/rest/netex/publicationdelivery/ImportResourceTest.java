@@ -23,12 +23,15 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.rutebanken.netex.model.KeyValueStructure;
 import org.rutebanken.netex.model.LocationStructure;
+import org.rutebanken.netex.model.MobilityFacilityEnumeration;
 import org.rutebanken.netex.model.MultilingualString;
 import org.rutebanken.netex.model.PrivateCodeStructure;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.netex.model.Quay;
 import org.rutebanken.netex.model.Quays_RelStructure;
 import org.rutebanken.netex.model.SimplePoint_VersionStructure;
+import org.rutebanken.netex.model.SiteFacilitySet;
+import org.rutebanken.netex.model.SiteFacilitySets_RelStructure;
 import org.rutebanken.netex.model.StopPlace;
 import org.rutebanken.netex.model.StopTypeEnumeration;
 import org.rutebanken.netex.model.ValidBetween;
@@ -387,7 +390,15 @@ public class ImportResourceTest extends TiamatIntegrationTest {
                                 .withCentroid(new SimplePoint_VersionStructure()
                                         .withLocation(new LocationStructure()
                                                 .withLatitude(new BigDecimal("9.1"))
-                                                .withLongitude(new BigDecimal("71.2"))))));
+                                                .withLongitude(new BigDecimal("71.2"))))
+                                .withFacilities(new SiteFacilitySets_RelStructure().withSiteFacilitySetRefOrSiteFacilitySet(
+                                        new org.rutebanken.netex.model.SiteFacilitySet()
+                                                .withId("XYZ:SiteFacilitySet:1")
+                                                .withVersion("1")
+                                                .withMobilityFacilityList(
+                                                        org.rutebanken.netex.model.MobilityFacilityEnumeration.TACTILE_GUIDING_STRIPS,
+                                                        org.rutebanken.netex.model.MobilityFacilityEnumeration.TACTILE_PLATFORM_EDGES)
+                                ))));
 
         PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace);
 
@@ -409,7 +420,7 @@ public class ImportResourceTest extends TiamatIntegrationTest {
         assertThat(quay.getId()).isNotNull();
         assertThat(quay.getPrivateCode().getValue()).isEqualTo("B02");
         assertThat(quay.getPrivateCode().getType()).isEqualTo("type");
-
+        assertThat(quay.getFacilities().getSiteFacilitySetRefOrSiteFacilitySet().size()).isEqualTo(1);
     }
 
     /**
@@ -1220,6 +1231,11 @@ public class ImportResourceTest extends TiamatIntegrationTest {
                                            <Latitude>58.465256</Latitude>
                                         </Location>
                                      </Centroid>
+                                     <facilities>
+                                        <SiteFacilitySet modification="new" version="1" id="NSB:SiteFacilitySet:16">
+                                            <MobilityFacilityList>tactilePlatformEdges tactileGuidingStrips</MobilityFacilityList>
+                                        </SiteFacilitySet>
+                                     </facilities>
                                      <PublicCode>1</PublicCode>
                                   </Quay>
                                </quays>
@@ -1282,6 +1298,12 @@ public class ImportResourceTest extends TiamatIntegrationTest {
         assertThat(assistanceService.getId())
                 .as("AssistanceService should have been assigned an NSR ID")
                 .startsWith("NSR:");
+
+        assertThat(stopPlace.getQuays().getQuayRefOrQuay()).hasSize(1);
+        Quay quay = (Quay) stopPlace.getQuays().getQuayRefOrQuay().getFirst();
+        SiteFacilitySet siteFacilitySet = (SiteFacilitySet) quay.getFacilities().getSiteFacilitySetRefOrSiteFacilitySet().getFirst();
+        List<MobilityFacilityEnumeration> mobilityFacilityList = siteFacilitySet.getMobilityFacilityList();
+        assertThat(mobilityFacilityList).hasSize(2);
     }
 
     @Test
