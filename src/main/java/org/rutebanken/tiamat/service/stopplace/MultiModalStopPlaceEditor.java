@@ -19,6 +19,7 @@ import org.locationtech.jts.geom.Point;
 import org.rutebanken.tiamat.auth.AuthorizationService;
 import org.rutebanken.tiamat.lock.MutateLock;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
+import org.rutebanken.tiamat.model.PostalAddress;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.ValidBetween;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -61,10 +62,10 @@ public class MultiModalStopPlaceEditor {
     private VersionCreator versionCreator;
 
     public StopPlace createMultiModalParentStopPlace(List<String> childStopPlaceIds, EmbeddableMultilingualString name) {
-        return createMultiModalParentStopPlace(childStopPlaceIds, name, null, null, null);
+        return createMultiModalParentStopPlace(childStopPlaceIds, name, null, null, null, null, null);
     }
 
-    public StopPlace createMultiModalParentStopPlace(List<String> childStopPlaceIds, EmbeddableMultilingualString name, ValidBetween validBetween, String versionComment, Point geoJsonPoint) {
+    public StopPlace createMultiModalParentStopPlace(List<String> childStopPlaceIds, EmbeddableMultilingualString name, ValidBetween validBetween, String versionComment, Point geoJsonPoint, PostalAddress postalAddress, String url) {
 
         return mutateLock.executeInLock(() -> {
 
@@ -85,6 +86,8 @@ public class MultiModalStopPlaceEditor {
             parentStopPlace.setValidBetween(validBetween);
             parentStopPlace.setVersionComment(versionComment);
             parentStopPlace.setCentroid(geoJsonPoint);
+            parentStopPlace.setPostalAddress(postalAddress);
+            parentStopPlace.setUrl(url);
 
             Set<StopPlace> childCopies = validateAndCopyPotentionalChildren(futureChildStopPlaces, parentStopPlace, fromDate);
             parentStopPlace.getChildren().addAll(childCopies);

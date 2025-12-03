@@ -19,6 +19,7 @@ import com.google.common.collect.Sets;
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
+import org.rutebanken.tiamat.model.PostalAddress;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.ValidBetween;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -147,10 +148,30 @@ public class MultiModalStopPlaceEditorTest extends TiamatIntegrationTest {
         String parentStopPlaceName = "Super Duper StopPlace";
         String versionComment = "version comment";
         StopPlace result = multiModalStopPlaceEditor.createMultiModalParentStopPlace(Arrays.asList(child.getNetexId()),
-                new EmbeddableMultilingualString(parentStopPlaceName), new ValidBetween(futureTime), versionComment, null);
+                new EmbeddableMultilingualString(parentStopPlaceName), new ValidBetween(futureTime), versionComment, null, null, null);
 
         assertThat(result.getValidBetween().getFromDate()).isEqualTo(futureTime);
 
+        assertThatChildsAreReferencingParent(Arrays.asList(child.getNetexId()), result);
+        verifyChildValidBetween(result);
+    }
+
+    @Test
+    public void testCreateMultiModalParentStopPlaceWithPostalAddressAndUrl() {
+        StopPlace child = stopPlaceRepository.save(createStopPlace("StopPlace - 1"));
+        String parentStopPlaceName = "Parent StopPlace with Postal Address and URL";
+        String versionComment = "Version comment";
+        PostalAddress postalAddress = new PostalAddress();
+        postalAddress.setAddressLine1(new EmbeddableMultilingualString("Address line 1"));
+        postalAddress.setTown(new EmbeddableMultilingualString("Town"));
+        postalAddress.setPostCode("1234");
+        postalAddress.setVersion(1L);
+        String url = "http://example.com/stopplace-info";
+        StopPlace result = multiModalStopPlaceEditor.createMultiModalParentStopPlace(Arrays.asList(child.getNetexId()),
+                new EmbeddableMultilingualString(parentStopPlaceName), null, versionComment, null, postalAddress, url);
+
+        assertThat(result.getUrl()).isEqualTo(url);
+        assertThat(result.getPostalAddress()).isEqualTo(postalAddress);
         assertThatChildsAreReferencingParent(Arrays.asList(child.getNetexId()), result);
         verifyChildValidBetween(result);
     }
