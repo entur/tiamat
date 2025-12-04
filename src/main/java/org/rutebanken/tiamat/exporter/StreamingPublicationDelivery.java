@@ -127,12 +127,12 @@ public class StreamingPublicationDelivery {
     private final GroupOfStopPlacesRepository groupOfStopPlacesRepository;
     private final GroupOfTariffZonesRepository groupOfTariffZonesRepository;
     private final NeTExValidator neTExValidator = NeTExValidator.getNeTExValidator();
-    private final NetexIdHelper netexIdHelper;
     /**
      * Validate against netex schema using the {@link NeTExValidator}
      * Enabling this for large xml files can lead to high memory consumption and/or massive performance impact.
      */
     private final boolean validateAgainstSchema;
+    private final ServiceFrameElementCreator serviceFrameElementCreator;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -152,9 +152,9 @@ public class StreamingPublicationDelivery {
                                         TopographicPlaceRepository topographicPlaceRepository,
                                         GroupOfStopPlacesRepository groupOfStopPlacesRepository,
                                         GroupOfTariffZonesRepository groupOfTariffZonesRepository,
-                                        NetexIdHelper netexIdHelper,
                                         @Value("${asyncNetexExport.validateAgainstSchema:false}") boolean validateAgainstSchema,
-                                        PurposeOfGroupingRepository purposeOfGroupingRepository) throws IOException, SAXException {
+                                        PurposeOfGroupingRepository purposeOfGroupingRepository,
+                                        ServiceFrameElementCreator serviceFrameElementCreator) throws IOException, SAXException {
         this.stopPlaceRepository = stopPlaceRepository;
         this.parkingRepository = parkingRepository;
         this.publicationDeliveryCreator = publicationDeliveryCreator;
@@ -168,9 +168,9 @@ public class StreamingPublicationDelivery {
         this.topographicPlaceRepository = topographicPlaceRepository;
         this.groupOfStopPlacesRepository = groupOfStopPlacesRepository;
         this.groupOfTariffZonesRepository = groupOfTariffZonesRepository;
-        this.netexIdHelper = netexIdHelper;
         this.validateAgainstSchema = validateAgainstSchema;
         this.purposeOfGroupingRepository = purposeOfGroupingRepository;
+        this.serviceFrameElementCreator = serviceFrameElementCreator;
     }
 
     private static JAXBContext createContext(Class clazz) {
@@ -401,107 +401,25 @@ public class StreamingPublicationDelivery {
             ParentStopFetchingIterator parentStopFetchingIterator = new ParentStopFetchingIterator(stopPlaceIterator, stopPlaceRepository);
 
             List<ScheduledStopPoint> netexScheduledStopPoints = new ArrayList<>();
-
-            List<JAXBElement<? extends StopAssignment_VersionStructure>> stopAssignment = new ArrayList<>();
-
+            List<PassengerStopAssignment> netexStopAssignments = new ArrayList<>();
 
             while (parentStopFetchingIterator.hasNext()) {
                 final org.rutebanken.tiamat.model.StopPlace stopPlace = parentStopFetchingIterator.next();
-                covertStopPlaceToScheduledStopPoint(netexScheduledStopPoints, stopAssignment, stopPlace);
-
+                this.serviceFrameElementCreator.createServiceFrameElements(stopPlace, netexScheduledStopPoints, netexStopAssignments, null);
             }
 
+            List<JAXBElement<PassengerStopAssignment>> stopAssignments = netexStopAssignments.stream().map(s -> new ObjectFactory().createPassengerStopAssignment(s)).toList();
 
             if (!netexScheduledStopPoints.isEmpty()) {
                 final ScheduledStopPointsInFrame_RelStructure scheduledStopPointsInFrame_relStructure = new ScheduledStopPointsInFrame_RelStructure();
                 setField(ScheduledStopPointsInFrame_RelStructure.class, "scheduledStopPoint", scheduledStopPointsInFrame_relStructure, netexScheduledStopPoints);
                 netexServiceFrame.setScheduledStopPoints(scheduledStopPointsInFrame_relStructure);
 
-
                 StopAssignmentsInFrame_RelStructure stopAssignmentsInFrame_RelStructure = new StopAssignmentsInFrame_RelStructure();
-                setField(StopAssignmentsInFrame_RelStructure.class, "stopAssignment", stopAssignmentsInFrame_RelStructure, stopAssignment);
+                setField(StopAssignmentsInFrame_RelStructure.class, "stopAssignment", stopAssignmentsInFrame_RelStructure, stopAssignments);
                 netexServiceFrame.setStopAssignments(stopAssignmentsInFrame_RelStructure);
             }
-
         }
-    }
-
-    private void covertStopPlaceToScheduledStopPoint(List<ScheduledStopPoint> scheduledStopPoints, List<JAXBElement<? extends StopAssignment_VersionStructure>> netexPassengerStopAssignment, org.rutebanken.tiamat.model.StopPlace stopPlace) {
-
-        // Add stop place
-
-        final String netexId = stopPlace.getNetexId();
-        String stopPlaceName = null;
-        if (stopPlace.getName() != null) {
-            stopPlaceName = stopPlace.getName().getValue();
-        }
-        final long version = stopPlace.getVersion();
-        var stopPlaceNetexId = netexIdHelper.extractIdPostfix(netexId);
-        var idPrefix = netexIdHelper.extractIdPrefix(netexId);
-        var scheduledStopPointNetexId = idPrefix + ":ScheduledStopPoint:S" + stopPlaceNetexId;
-
-        LocalDateTime validFrom = null;
-        LocalDateTime validTo = null;
-        if (stopPlace.getValidBetween() != null) {
-            if (stopPlace.getValidBetween().getFromDate() != null) {
-                validFrom = LocalDateTime.ofInstant(stopPlace.getValidBetween().getFromDate(), ZoneId.systemDefault());
-            }
-            if (stopPlace.getValidBetween().getToDate() != null) {
-                validTo = LocalDateTime.ofInstant(stopPlace.getValidBetween().getToDate(), ZoneId.systemDefault());
-            }
-        }
-
-
-        scheduledStopPoints.add(createNetexScheduledStopPoint(scheduledStopPointNetexId, stopPlaceName, version, validFrom, validTo));
-
-        netexPassengerStopAssignment.add(createPassengerStopAssignment(netexId, version, scheduledStopPointNetexId, netexPassengerStopAssignment.size() + 1, validFrom, validTo, false));
-
-        // Add quays
-        final Set<Quay> quays = stopPlace.getQuays();
-        for (Quay quay : quays) {
-            var quayNetexId = netexIdHelper.extractIdPostfix(quay.getNetexId());
-            var quayUdPrefix = netexIdHelper.extractIdPrefix(quay.getNetexId());
-            var quayScheduledStopPointNetexId = quayUdPrefix + ":ScheduledStopPoint:Q" + quayNetexId;
-            scheduledStopPoints.add(createNetexScheduledStopPoint(quayScheduledStopPointNetexId, stopPlaceName, quay.getVersion(), validFrom, validTo));
-            netexPassengerStopAssignment.add(createPassengerStopAssignment(quay.getNetexId(), quay.getVersion(), quayScheduledStopPointNetexId, netexPassengerStopAssignment.size() + 1, validFrom, validTo, true));
-
-        }
-
-    }
-
-    private JAXBElement<? extends StopAssignment_VersionStructure> createPassengerStopAssignment(String netexId, long version, String scheduledStopPointNetexId, int passengerStopAssignmentOrder, LocalDateTime validFrom, LocalDateTime validTo, boolean isQuay) {
-
-        var passengerStopAssignmentId = netexIdHelper.extractIdPostfix(scheduledStopPointNetexId);
-        var idPrefix= netexIdHelper.extractIdPrefix(scheduledStopPointNetexId);
-        final PassengerStopAssignment passengerStopAssignment = new PassengerStopAssignment();
-        passengerStopAssignment.withId(idPrefix + ":PassengerStopAssignment:P" + passengerStopAssignmentId);
-        passengerStopAssignment.withVersion(String.valueOf(version));
-        passengerStopAssignment.withOrder(BigInteger.valueOf(passengerStopAssignmentOrder));
-
-        ValidBetween validBetween = new ValidBetween().withFromDate(validFrom).withToDate(validTo);
-        passengerStopAssignment.withValidBetween(validBetween);
-        if (isQuay) {
-            passengerStopAssignment.withQuayRef(new QuayRefStructure().withRef(netexId).withVersion(String.valueOf(version)));
-        } else {
-            passengerStopAssignment.withStopPlaceRef(new StopPlaceRefStructure().withRef(netexId).withVersion(String.valueOf(version)));
-        }
-        final JAXBElement<ScheduledStopPointRefStructure> scheduledStopPointRef = new ObjectFactory().createScheduledStopPointRef(new ScheduledStopPointRefStructure().withRef(scheduledStopPointNetexId).withVersionRef(String.valueOf(version)));
-        passengerStopAssignment.withScheduledStopPointRef(scheduledStopPointRef);
-
-        return new ObjectFactory().createPassengerStopAssignment(passengerStopAssignment);
-
-    }
-
-    private ScheduledStopPoint createNetexScheduledStopPoint(String scheduledStopPointNetexId, String stopPlaceName, long version, LocalDateTime validFrom, LocalDateTime validTo) {
-        final org.rutebanken.netex.model.ScheduledStopPoint netexScheduledStopPoint = new org.rutebanken.netex.model.ScheduledStopPoint();
-        netexScheduledStopPoint.setId(scheduledStopPointNetexId);
-        netexScheduledStopPoint.setVersion(String.valueOf(version));
-        netexScheduledStopPoint.withName(new MultilingualString().withValue(stopPlaceName));
-        ValidBetween validBetween = new ValidBetween().withFromDate(validFrom).withToDate(validTo);
-
-        netexScheduledStopPoint.withValidBetween(validBetween);
-
-        return netexScheduledStopPoint;
     }
 
     private void prepareTopographicPlaces(ExportParams exportParams, Set<Long> stopPlacePrimaryIds, AtomicInteger mappedTopographicPlacesCount, SiteFrame netexSiteFrame, EntitiesEvictor evicter) {
