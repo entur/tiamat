@@ -155,6 +155,8 @@ import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.pathLi
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.privateCodeFieldDefinition;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.privateCodeInputType;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.scopingMethodEnumType;
+import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.siteFacilitySetInputObjectType;
+import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.siteFacilitySetObjectType;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.stopPlaceTypeEnum;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.submodeEnum;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.topographicPlaceInputObjectType;
@@ -1392,8 +1394,10 @@ public class StopPlaceRegisterGraphQLSchema {
                             .type(new GraphQLList(alternativeNameObjectType)))
                     .field(newFieldDefinition()
                             .name(BOARDING_POSITIONS)
-                            .type(new GraphQLList(boardingPositionsObjectType))
-                    )
+                            .type(new GraphQLList(boardingPositionsObjectType)))
+                    .field(newFieldDefinition()
+                            .name(FACILITIES)
+                            .type(new GraphQLList(siteFacilitySetObjectType)))
                     .build();
     }
 
@@ -1532,6 +1536,9 @@ public class StopPlaceRegisterGraphQLSchema {
                 .field(newInputObjectField()
                 .name(BOARDING_POSITIONS)
                 .type(new GraphQLList(boardingPositionsInputObjectType)))
+                .field(newInputObjectField()
+                        .name(FACILITIES)
+                        .type(new GraphQLList(siteFacilitySetInputObjectType)))
                 .build();
     }
 

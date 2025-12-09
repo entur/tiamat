@@ -37,6 +37,7 @@ import org.rutebanken.tiamat.model.GeneralSign;
 import org.rutebanken.tiamat.model.InterchangeWeightingEnumeration;
 import org.rutebanken.tiamat.model.LimitationStatusEnumeration;
 import org.rutebanken.tiamat.model.LocalService;
+import org.rutebanken.tiamat.model.MobilityFacilityEnumeration;
 import org.rutebanken.tiamat.model.NameTypeEnumeration;
 import org.rutebanken.tiamat.model.PlaceEquipment;
 import org.rutebanken.tiamat.model.PrivateCodeStructure;
@@ -69,13 +70,11 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.comparesEqualTo;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
@@ -2341,6 +2340,53 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                 .body("generalSign[0].privateCode.type", comparesEqualTo(type))
                 .body("generalSign[0].privateCode.value", comparesEqualTo(value));
 
+    }
+
+    @Test
+    public void mutateStopPlaceWithFacilitiesOnQuay() {
+
+        var quay = new Quay();
+        var firstQuayName = "quay to add facilities on";
+        quay.setName(new EmbeddableMultilingualString(firstQuayName));
+
+        var stopPlaceName = "StopPlace";
+        var stopPlace = new StopPlace(new EmbeddableMultilingualString(stopPlaceName));
+
+        stopPlace.setQuays(new HashSet<>());
+        stopPlace.getQuays().add(quay);
+
+        stopPlaceRepository.save(stopPlace);
+
+        var graphqlQuery = """
+            mutation {
+              stopPlace: mutateStopPlace(
+                StopPlace: {id: "%s", quays: [{id: "%s", facilities: {mobilityFacilityList: [%s, %s]}}]}) {
+                id
+                quays {
+                  id
+                  facilities {
+                    mobilityFacilityList
+                  }
+                }
+              }
+            }
+            """.formatted(
+                    stopPlace.getNetexId(),
+                    quay.getNetexId(),
+                    MobilityFacilityEnumeration.TACTILE_GUIDING_STRIPS.value(),
+                    MobilityFacilityEnumeration.TACTILE_PLATFORM_EDGES.value()
+                );
+
+        List<String> expectedMobilityFacilities = List.of(
+            MobilityFacilityEnumeration.TACTILE_GUIDING_STRIPS.value(),
+            MobilityFacilityEnumeration.TACTILE_PLATFORM_EDGES.value()
+        );
+
+        executeGraphqQLQueryOnly(graphqlQuery)
+                .rootPath("data.stopPlace[0].quays[0]")
+                .body("facilities", notNullValue())
+                .rootPath("data.stopPlace[0].quays[0].facilities[0]")
+                .body("mobilityFacilityList", equalTo(expectedMobilityFacilities));
     }
 
 

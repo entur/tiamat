@@ -41,6 +41,7 @@ import org.rutebanken.netex.model.ResourceFrame;
 import org.rutebanken.netex.model.SanitaryEquipment;
 import org.rutebanken.netex.model.ServiceFrame;
 import org.rutebanken.netex.model.ShelterEquipment;
+import org.rutebanken.netex.model.SiteFacilitySet;
 import org.rutebanken.netex.model.SiteFrame;
 import org.rutebanken.netex.model.StopPlace;
 import org.rutebanken.netex.model.TariffZone;
@@ -197,7 +198,12 @@ public class NetexMapper {
                 .byDefault()
                 .register();
 
+        mapperFactoryWithNetexIdClassBuilder(SiteFacilitySet.class, org.rutebanken.tiamat.model.SiteFacilitySet.class)
+                .byDefault()
+                .register();
+
         mapperFactoryWithNetexIdClassBuilder(PlaceEquipments_RelStructure.class, org.rutebanken.tiamat.model.PlaceEquipment.class)
+
                 .customize(new PlaceEquipmentMapper())
                 .byDefault()
                 .register();
