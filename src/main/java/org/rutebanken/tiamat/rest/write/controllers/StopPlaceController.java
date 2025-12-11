@@ -67,10 +67,65 @@ interface StopPlaceController {
                     schema = @Schema(implementation = StopPlaceJobDto.class)
                 )
             ),
+            @ApiResponse(responseCode = "400", description = "Malformed input"),
         }
     )
     Response createStopPlace(StopPlacesDto stopPlacesDto);
 
+    @Operation(
+        summary = "Updates a stop place from a Netex XML representation",
+        description = """
+        Accepts a StopPlacesDto containing a NeTEx StopPlace XML.
+        Only a single mono-modal stop place is allowed.
+        Returns a job representing the asynchronous creation process.
+
+        The version must be incremented by 1 for updates.
+        """,
+        requestBody = @RequestBody(
+            required = true,
+            content = @Content(
+                mediaType = "application/xml",
+                examples = {
+                    @ExampleObject(
+                        name = "Update StopPlace Example",
+                        value = """
+                                                <stopPlaces xmlns="http://www.netex.org.uk/netex">
+                                                  <StopPlace id="MES:StopPlace:1" version="2">
+                                                    <Name lang="akk">Bīt Mīt Uruk</Name>
+                                                    <PrivateCode>1</PrivateCode>
+                                                    <Centroid>
+                                                      <Location>
+                                                        <Longitude>45.638803</Longitude>
+                                                        <Latitude>31.324350</Latitude>
+                                                      </Location>
+                                                    </Centroid>
+                                                    <TransportMode>rail</TransportMode>
+                                                    <StopPlaceType>railStation</StopPlaceType>
+                                                    <Weighting>interchangeAllowed</Weighting>
+                                                    <keyList>
+                                                      <KeyValue>
+                                                        <Key>owner</Key>
+                                                        <Value>1</Value>
+                                                      </KeyValue>
+                                                    </keyList>
+                                                  </StopPlace>
+                                                </stopPlaces>
+                        """
+                    ),
+                }
+            )
+        ),
+        responses = {
+            @ApiResponse(
+                responseCode = "202",
+                description = "Update job submitted",
+                content = @Content(
+                    schema = @Schema(implementation = StopPlaceJobDto.class)
+                )
+            ),
+            @ApiResponse(responseCode = "400", description = "Malformed input"),
+        }
+    )
     Response updateStopPlace(StopPlacesDto stopPlacesDto);
 
     @Operation(
