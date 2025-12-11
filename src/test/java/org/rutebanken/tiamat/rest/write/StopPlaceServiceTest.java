@@ -30,12 +30,12 @@ class StopPlaceServiceTest {
         StopPlace stopPlace = new StopPlace();
         StopPlace saved = new StopPlace();
 
-        when(saverService.saveNewVersion(null, stopPlace)).thenReturn(saved);
+        when(saverService.saveNewVersion(stopPlace)).thenReturn(saved);
 
         StopPlace returned = service.createStopPlace(stopPlace);
 
         assertEquals(saved, returned);
-        verify(saverService).saveNewVersion(null, stopPlace);
+        verify(saverService).saveNewVersion(stopPlace);
         verifyNoMoreInteractions(saverService);
         verifyNoInteractions(terminator);
     }
