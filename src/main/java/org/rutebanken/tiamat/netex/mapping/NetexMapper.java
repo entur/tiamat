@@ -35,6 +35,7 @@ import org.rutebanken.netex.model.Parking;
 import org.rutebanken.netex.model.PathLink;
 import org.rutebanken.netex.model.PathLinkEndStructure;
 import org.rutebanken.netex.model.PlaceEquipments_RelStructure;
+import org.rutebanken.netex.model.PostalAddress;
 import org.rutebanken.netex.model.PurposeOfGrouping;
 import org.rutebanken.netex.model.Quay;
 import org.rutebanken.netex.model.ResourceFrame;
@@ -127,7 +128,6 @@ public class NetexMapper {
                 .fieldBToA("topographicPlace", "topographicPlaceRef")
                 .fieldAToB("topographicPlaceRef.ref", "topographicPlace.netexId")
                 .fieldAToB("topographicPlaceRef.version", "topographicPlace.version")
-                .exclude("postalAddress")
                 .exclude("roadAddress")
                 .customize(new StopPlaceMapper(publicationDeliveryHelper))
                 .byDefault()
@@ -223,6 +223,10 @@ public class NetexMapper {
                 .register();
 
         mapperFactoryWithNetexIdClassBuilder(AccessibilityLimitation.class, org.rutebanken.tiamat.model.AccessibilityLimitation.class)
+                .byDefault()
+                .register();
+
+        mapperFactoryWithNetexIdClassBuilder(PostalAddress.class, org.rutebanken.tiamat.model.PostalAddress.class)
                 .byDefault()
                 .register();
 

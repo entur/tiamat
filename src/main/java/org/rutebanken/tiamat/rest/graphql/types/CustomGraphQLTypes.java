@@ -922,6 +922,32 @@ public class CustomGraphQLTypes {
                     .type(parkingPropertiesInputObjectType))
             .build();
 
+    public static GraphQLObjectType postalAddressObjectType = GraphQLObjectType.newObject()
+            .name(OUTPUT_TYPE_POSTAL_ADDRESS)
+            .field(newFieldDefinition()
+                    .name(POSTAL_ADDRESS_ADDRESS_LINE1)
+                    .type(embeddableMultilingualStringObjectType))
+            .field(newFieldDefinition()
+                    .name(POSTAL_ADDRESS_TOWN)
+                    .type(embeddableMultilingualStringObjectType))
+            .field(newFieldDefinition()
+                    .name(POSTAL_ADDRESS_POST_CODE)
+                    .type(GraphQLString))
+            .build();
+
+    public static GraphQLInputObjectType postalAddressInputObjectType = GraphQLInputObjectType.newInputObject()
+            .name(INPUT_TYPE_POSTAL_ADDRESS)
+            .field(newInputObjectField()
+                    .name(POSTAL_ADDRESS_ADDRESS_LINE1)
+                    .type(embeddableMultiLingualStringInputObjectType))
+            .field(newInputObjectField()
+                    .name(POSTAL_ADDRESS_TOWN)
+                    .type(embeddableMultiLingualStringInputObjectType))
+            .field(newInputObjectField()
+                    .name(POSTAL_ADDRESS_POST_CODE)
+                    .type(GraphQLString))
+            .build();
+
     public static GraphQLObjectType transportModeSubmodeObjectType = newObject()
             .name("TransportModes")
             .field(newFieldDefinition()

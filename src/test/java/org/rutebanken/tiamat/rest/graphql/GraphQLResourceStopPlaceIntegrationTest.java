@@ -40,11 +40,13 @@ import org.rutebanken.tiamat.model.LocalService;
 import org.rutebanken.tiamat.model.MobilityFacilityEnumeration;
 import org.rutebanken.tiamat.model.NameTypeEnumeration;
 import org.rutebanken.tiamat.model.PlaceEquipment;
+import org.rutebanken.tiamat.model.PostalAddress;
 import org.rutebanken.tiamat.model.PrivateCodeStructure;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.SanitaryEquipment;
 import org.rutebanken.tiamat.model.ShelterEquipment;
 import org.rutebanken.tiamat.model.SignContentEnumeration;
+import org.rutebanken.tiamat.model.SiteRefStructure;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.rutebanken.tiamat.model.TariffZone;
@@ -1022,12 +1024,14 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
     }
 
     @Test
-    public void testSimpleMutationCreateStopPlace() throws Exception {
-
+    public void testSimpleMutationCreateStopPlace() {
         String name = "Testing name";
         String shortName = "Testing shortname";
         String description = "Testing description";
         String url = "https://example.com/test-stop-place-mutation";
+        String postalAddressAddressLine1 = "Address line 1";
+        String postalAddressTown = "Test town";
+        String postalAddressPostCode = "1234";
 
         Float lon =  Float.valueOf("10.11111");
         Float lat = Float.valueOf("59.11111");
@@ -1044,6 +1048,11 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                                                  coordinates: [%s,%s]
                                                }
                                                url:"%s"
+                                               postalAddress: {
+                                                 addressLine1: { value: "%s" }
+                                                 town: { value: "%s" }
+                                                 postCode: "%s"
+                                               }
                                        }) {
                                   id
                                   weighting
@@ -1053,9 +1062,25 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                                   stopPlaceType
                                   geometry { type coordinates }
                                   url
+                                  postalAddress {
+                                    addressLine1 { value }
+                                    town { value }
+                                    postCode
+                                  }
                                  }
                                 }
-                """.formatted(GraphQLNames.MUTATE_STOPPLACE,name, shortName, description,StopTypeEnumeration.TRAM_STATION.value(), lon, lat, url);
+                """.formatted(
+                        GraphQLNames.MUTATE_STOPPLACE,
+                        name,
+                        shortName,
+                        description,
+                        StopTypeEnumeration.TRAM_STATION.value(),
+                        lon,
+                        lat,
+                        url,
+                        postalAddressAddressLine1,
+                        postalAddressTown,
+                        postalAddressPostCode);
 
         executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .rootPath("data.stopPlace[0]")
@@ -1068,7 +1093,71 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                     .body("geometry.coordinates[0]", comparesEqualTo(lon))
                     .body("geometry.coordinates[1]", comparesEqualTo(lat))
                     .body("weighting", comparesEqualTo(InterchangeWeightingEnumeration.INTERCHANGE_ALLOWED.value()))
-                    .body("url", comparesEqualTo(url));
+                    .body("url", comparesEqualTo(url))
+                    .body("postalAddress.addressLine1.value", equalTo(postalAddressAddressLine1))
+                    .body("postalAddress.town.value", equalTo(postalAddressTown))
+                    .body("postalAddress.postCode", equalTo(postalAddressPostCode));
+
+        // for unit test we don't have a real JMS listener, so we need to check the event manually
+        assertThat(entityChangedJMSListener.hasReceivedEvent(null, 1L, EntityChangedEvent.CrudAction.CREATE, null)).isFalse();
+    }
+
+    @Test
+    public void testSimpleMutationMutateStopPlace() {
+        StopPlace sp = createStopPlace("Original name");
+        sp.setStopPlaceType(StopTypeEnumeration.TRAM_STATION);
+        PostalAddress postalAddress = new PostalAddress();
+        postalAddress.setAddressLine1(new EmbeddableMultilingualString("Original address line 1"));
+        postalAddress.setTown(new EmbeddableMultilingualString("Original town"));
+        postalAddress.setPostCode("0000");
+        sp.setPostalAddress(postalAddress);
+
+        sp.setDescription(new EmbeddableMultilingualString("Original description"));
+        stopPlaceRepository.save(sp);
+
+        String name = "Testing name";
+        String shortName = "Testing shortname";
+        String description = "Testing description";
+
+        String graphQlJsonQuery = """
+                                     mutation {
+                                     stopPlace: %s(StopPlace: {
+                                               id: "%s"
+                                               name: { value:"%s" }
+                                               shortName:{ value:"%s" }
+                                               description:{ value:"%s" }
+                                               postalAddress: null
+                                       }) {
+                                  id
+                                  weighting
+                                  name { value }
+                                  shortName { value }
+                                  description { value }
+                                  stopPlaceType
+                                  postalAddress {
+                                    addressLine1 { value }
+                                    town { value }
+                                    postCode
+                                  }
+                                 }
+                                }
+                """.formatted(
+                GraphQLNames.MUTATE_STOPPLACE,
+                sp.getNetexId(),
+                name,
+                shortName,
+                description,
+                StopTypeEnumeration.TRAM_STATION.value());
+
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
+                .rootPath("data.stopPlace[0]")
+                .body("id", notNullValue())
+                .body("name.value", equalTo(name))
+                .body("shortName.value", equalTo(shortName))
+                .body("description.value", equalTo(description))
+                .body("stopPlaceType", equalTo(StopTypeEnumeration.TRAM_STATION.value()))
+                .body("weighting", comparesEqualTo(InterchangeWeightingEnumeration.INTERCHANGE_ALLOWED.value()))
+                .body("postalAddress", equalTo(null));
 
         // for unit test we don't have a real JMS listener, so we need to check the event manually
         assertThat(entityChangedJMSListener.hasReceivedEvent(null, 1L, EntityChangedEvent.CrudAction.CREATE, null)).isFalse();
@@ -1194,6 +1283,74 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                 .body("name", nullValue())
                 .body("stopPlaceType", equalTo(StopTypeEnumeration.BUS_STATION.value()))
                 .body("version", equalTo(String.valueOf(bus.getVersion()+1)));
+    }
+
+    @Test
+    public void mutateParentStopPlace() {
+        var parent = new StopPlace(new EmbeddableMultilingualString("Parent stop place"));
+        parent.setStopPlaceType(StopTypeEnumeration.BUS_STATION);
+        parent.setUrl("https://example.com/old-url");
+        parent.setParentStopPlace(true);
+        var parentOldPostalAddress = new PostalAddress();
+        parentOldPostalAddress.setAddressLine1(new EmbeddableMultilingualString("Old postal addressLine1"));
+        parentOldPostalAddress.setTown(new EmbeddableMultilingualString("Old postal town"));
+        parentOldPostalAddress.setPostCode("0000");
+        parent.setPostalAddress(parentOldPostalAddress);
+        parent.setVersion(1L);
+        stopPlaceRepository.save(parent);
+
+        var child = new StopPlace(new EmbeddableMultilingualString("Child stop place"));
+        child.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
+        child.setParentStopPlace(false);
+        child.setParentSiteRef(new SiteRefStructure(parent.getNetexId(), String.valueOf(parent.getVersion())));
+        child.setVersion(1L);
+        stopPlaceRepository.save(child);
+
+        var newParentName = "Updated parent stop place name";
+        var newParentUrl = "https://example.com/new-url";
+        var newPostalAddressLine1 = "New postal addressLine1";
+        var newPostalTown = "New postal town";
+        var newPostalPostCode = "1111";
+
+        var graphQlJsonQuery = """
+                 mutation {
+                 stopPlace: mutateParentStopPlace (ParentStopPlace: {
+                          id: "%s"
+                          name: { value: "%s" }
+                          url: "%s"
+                          postalAddress: {
+                            addressLine1: { value: "%s" }
+                            town: { value: "%s" }
+                            postCode: "%s"
+                          }
+                       }) {
+                            id
+                            name { value }
+                            version
+                            url
+                            postalAddress {
+                                addressLine1 { value }
+                                town { value }
+                                postCode
+                            }
+                       }
+                  }""".formatted(
+                            parent.getNetexId(),
+                            newParentName,
+                            newParentUrl,
+                            newPostalAddressLine1,
+                            newPostalTown,
+                            newPostalPostCode
+
+        );
+
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
+                .body("data.stopPlace[0].name.value", equalTo(newParentName))
+                .body("data.stopPlace[0].url", equalTo(newParentUrl))
+                .body("data.stopPlace[0].postalAddress.addressLine1.value", equalTo(newPostalAddressLine1))
+                .body("data.stopPlace[0].postalAddress.town.value", equalTo(newPostalTown))
+                .body("data.stopPlace[0].postalAddress.postCode", equalTo(newPostalPostCode))
+                .body("data.stopPlace[0].version", equalTo("2"));
     }
 
 
