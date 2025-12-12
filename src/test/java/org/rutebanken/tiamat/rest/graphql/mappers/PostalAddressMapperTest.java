@@ -19,6 +19,7 @@ import org.junit.Test;
 import org.rutebanken.tiamat.model.PostalAddress;
 import org.rutebanken.tiamat.model.StopPlace;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -107,6 +108,62 @@ public class PostalAddressMapperTest {
         assertThat(stopPlace.getPostalAddress().getTown().getValue()).isEqualTo("Old Town");
         assertThat(stopPlace.getPostalAddress().getPostCode()).isEqualTo("0000");
         assertThat(stopPlace.getPostalAddress().getVersion()).isEqualTo(1L);
+    }
+
+    @Test
+    public void testStopPlacePostalAddressUpdatedToNull() {
+        StopPlace stopPlace = createStopPlaceWithPostalAddress("Old Address", "Old Town", "0000");
+        Map<String, Object> input = Map.of(
+                POSTAL_ADDRESS_ADDRESS_LINE1, Map.of("value", " "),
+                POSTAL_ADDRESS_TOWN, Map.of("value", ""),
+                POSTAL_ADDRESS_POST_CODE, ""
+        );
+        boolean updated = postalAddressMapper.populatePostalAddressFromInput(stopPlace, input);
+        assertThat(updated).isTrue();
+        assertThat(stopPlace.getPostalAddress()).isNull();
+    }
+
+    @Test
+    public void testPostalAddressMappingWithBlankFields() {
+        Map<String, Object> input = Map.of(
+                POSTAL_ADDRESS_ADDRESS_LINE1, Map.of("value", "   "),
+                POSTAL_ADDRESS_TOWN, Map.of("value", ""),
+                POSTAL_ADDRESS_POST_CODE, "   "
+        );
+        PostalAddress postalAddress = postalAddressMapper.map(input);
+        assertThat(postalAddress).isNull();
+    }
+
+    @Test
+    public void testPostalAddressMappingWithPartiallyEmptyInput() {
+        Map<String, Object> input = Map.of(
+                POSTAL_ADDRESS_ADDRESS_LINE1, Map.of("value", "Address 1"),
+                POSTAL_ADDRESS_TOWN, Map.of("value", "   "),
+                POSTAL_ADDRESS_POST_CODE, "0000"
+        );
+
+        PostalAddress postalAddress = postalAddressMapper.map(input);
+        assertThat(postalAddress).isNotNull();
+        assertThat(postalAddress.getAddressLine1().getValue()).isEqualTo("Address 1");
+        assertThat(postalAddress.getTown()).isNull();
+        assertThat(postalAddress.getPostCode()).isEqualTo("0000");
+    }
+
+    @Test
+    public void testPostalAddressMappingWithNullFields() {
+        HashMap<String, Object> addressLine1 = new HashMap<>();
+        addressLine1.put("value", null);
+
+        HashMap<String, Object> town = new HashMap<>();
+        town.put("value", null);
+
+        HashMap<String, Object> input = new HashMap<>();
+        input.put(POSTAL_ADDRESS_ADDRESS_LINE1, addressLine1);
+        input.put(POSTAL_ADDRESS_TOWN, town);
+        input.put(POSTAL_ADDRESS_POST_CODE, null);
+
+        PostalAddress postalAddress = postalAddressMapper.map(input);
+        assertThat(postalAddress).isNull();
     }
 }
 

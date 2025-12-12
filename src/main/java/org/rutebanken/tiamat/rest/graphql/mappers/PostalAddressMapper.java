@@ -15,6 +15,7 @@
 
 package org.rutebanken.tiamat.rest.graphql.mappers;
 
+import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.PostalAddress;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.springframework.stereotype.Component;
@@ -74,18 +75,32 @@ public class PostalAddressMapper {
         PostalAddress postalAddress = new PostalAddress();
         postalAddress.setVersion(1L);
 
+        boolean hasContent = false;
+
         if (input.get(POSTAL_ADDRESS_ADDRESS_LINE1) != null) {
-            postalAddress.setAddressLine1(getEmbeddableString((Map) input.get(POSTAL_ADDRESS_ADDRESS_LINE1)));
+            EmbeddableMultilingualString addressLine1 = getEmbeddableString((Map) input.get(POSTAL_ADDRESS_ADDRESS_LINE1));
+            if (addressLine1 != null && addressLine1.getValue() != null && !addressLine1.getValue().isBlank()) {
+                postalAddress.setAddressLine1(addressLine1);
+                hasContent = true;
+            }
         }
 
         if (input.get(POSTAL_ADDRESS_TOWN) != null) {
-            postalAddress.setTown(getEmbeddableString((Map) input.get(POSTAL_ADDRESS_TOWN)));
+            EmbeddableMultilingualString town = getEmbeddableString((Map) input.get(POSTAL_ADDRESS_TOWN));
+            if (town != null && town.getValue() != null && !town.getValue().isBlank()) {
+                postalAddress.setTown(town);
+                hasContent = true;
+            }
         }
 
         if (input.get(POSTAL_ADDRESS_POST_CODE) != null) {
-            postalAddress.setPostCode((String) input.get(POSTAL_ADDRESS_POST_CODE));
+            String postCode = (String) input.get(POSTAL_ADDRESS_POST_CODE);
+            if (postCode != null && !postCode.isBlank()) {
+                postalAddress.setPostCode(postCode);
+                hasContent = true;
+            }
         }
 
-        return postalAddress;
+        return hasContent ? postalAddress : null;
     }
 }
