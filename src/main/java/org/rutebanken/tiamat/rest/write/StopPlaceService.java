@@ -25,7 +25,7 @@ public class StopPlaceService {
 
     @Transactional
     public StopPlace createStopPlace(StopPlace stopPlace) {
-        return stopPlaceVersionedSaverService.saveNewVersion(null, stopPlace);
+        return stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
     }
 
     @Transactional
