@@ -80,4 +80,9 @@ public class PostalAddress extends EntityInVersionStructure {
                 && Objects.equals(this.postCode, other.postCode)
                 && Objects.equals(this.created, other.created);
     }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(addressLine1, town, postCode, created);
+    }
 }
