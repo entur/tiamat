@@ -76,24 +76,8 @@ public class ParallelInitialStopPlaceImporter {
                     return stopPlace;
                 })
                 .peek(stopPlace -> stopPlaceTopographicPlaceReferenceUpdater.updateTopographicReference(stopPlace))
-                .flatMap(stopPlace -> {
-                    SiteRefStructure parentSiteRef = stopPlace.getParentSiteRef();
-                    stopPlace.setParentSiteRef(null);
-
-                    if (isParent(stopPlace, parentSiteRef)) {
-                        parentStopPlaces.add(stopPlace);
-                        return empty();
-                    }
-
-                    StopPlace saved = stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
-                    stopPlacesCreated.incrementAndGet();
-                    if (isChild(stopPlace, parentSiteRef)) {
-                        parentRefToChildIds
-                                .computeIfAbsent(parentSiteRef.getRef(), k -> newKeySet())
-                                .add(saved.getNetexId());
-                    }
-                    return of(saved);
-                }).toList();
+                .flatMap(stopPlace -> processStopPlace(stopPlace, parentStopPlaces, parentRefToChildIds, stopPlacesCreated))
+                .toList();
 
         List<StopPlace> parents = createAndSaveParentStopPlaces(parentStopPlaces, parentRefToChildIds, stopPlacesCreated);
 
@@ -116,6 +100,58 @@ public class ParallelInitialStopPlaceImporter {
 
     private Set<String> getNetexIdOrOriginalIds(StopPlace stopPlace) {
         return stopPlace.getNetexId() != null ? Set.of(stopPlace.getNetexId()) : stopPlace.getOriginalIds();
+    }
+
+    /**
+     * Processes a stop place during initial import, classifying and handling it appropriately.
+     *
+     * <p>Implements a deferred processing strategy for parent-child relationships:</p>
+     * <ul>
+     *   <li>Parent stop places are deferred until all child stop places are saved,
+     *       as parents need to reference their children's persisted IDs</li>
+     *   <li>Child and standalone stop places are saved immediately</li>
+     * </ul>
+     *
+     * <h3>Processing Steps:</h3>
+     * <ol>
+     *   <li>Extract and clear the parent reference</li>
+     *   <li>Classify the stop place as parent, child, or standalone</li>
+     *   <li>If parent stop: add to collection and exclude from stream</li>
+     *   <li>If child/standalone stop: save immediately and store parent-child relations</li>
+     * </ol>
+     *
+     * @param stopPlace The stop place to process
+     * @param parentStopPlaces Set for collecting parent stop places
+     * @param parentRefToChildIds Map tracking parent-child relations
+     * @param stopPlacesCreated Counter for tracking total stop places created
+     * @return Stream containing the saved stop place
+     */
+    private Stream<StopPlace> processStopPlace(
+            StopPlace stopPlace,
+            Set<StopPlace> parentStopPlaces,
+            Map<String, Set<String>> parentRefToChildIds,
+            AtomicInteger stopPlacesCreated) {
+
+        // Extract parent reference before clearing (needed for classification)
+        SiteRefStructure parentSiteRef = stopPlace.getParentSiteRef();
+        stopPlace.setParentSiteRef(null);
+
+        // Defer parent stop places until all children are saved
+        if (isParent(stopPlace, parentSiteRef)) {
+            parentStopPlaces.add(stopPlace);
+            return empty();
+        }
+
+        // Save child and standalone stop places
+        StopPlace savedStopPlace = stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+        stopPlacesCreated.incrementAndGet();
+
+        // Track parent-child relations for later parent stop creation
+        if (isChild(stopPlace, parentSiteRef)) {
+            trackChildUnderParent(savedStopPlace, parentSiteRef, parentRefToChildIds);
+        }
+
+        return of(savedStopPlace);
     }
 
     /**
@@ -201,6 +237,27 @@ public class ParallelInitialStopPlaceImporter {
         StopPlace savedParent = parentStopPlaceCreator.createParentStopWithChildren(parent, childIds);
         stopPlacesCreated.incrementAndGet();
         return savedParent;
+    }
+
+    /**
+     * Tracks the parent-child relationship between a saved child stop place and its parent.
+     *
+     * <p>This method populates the parentRefToChildIds map which is used later to create
+     * parent stop places with their associated children. The map is thread-safe for use
+     * in parallel streams.</p>
+     *
+     * @param savedChild The saved child stop place
+     * @param parentRef The parent site reference from the child
+     * @param parentRefToChildIds Map tracking which children belong to which parent
+     */
+    private void trackChildUnderParent(
+            StopPlace savedChild,
+            SiteRefStructure parentRef,
+            Map<String, Set<String>> parentRefToChildIds) {
+
+        parentRefToChildIds
+                .computeIfAbsent(parentRef.getRef(), k -> newKeySet())
+                .add(savedChild.getNetexId());
     }
 
     private void verifyParentStopPlaceHasChildren(StopPlace parent, Set<String> parentIds, Map<String, Set<String>> parentRefToChildIds) {
