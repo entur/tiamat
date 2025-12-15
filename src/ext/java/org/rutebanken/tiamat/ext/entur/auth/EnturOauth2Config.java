@@ -54,7 +54,7 @@ public class EnturOauth2Config {
 
   @Bean
   @Profile("!test")
-  public AuthenticationManagerResolver<HttpServletRequest> multiIssuerAuthenticationManagerResolver(
+  public AuthenticationManagerResolver<HttpServletRequest> authenticationManagerResolver(
           @Value("${tiamat.oauth2.resourceserver.auth0.entur.internal.jwt.audience:}")
           String enturInternalAuth0Audiences,
           @Value("${tiamat.oauth2.resourceserver.auth0.entur.internal.jwt.issuer-uri:}")
