@@ -1,7 +1,7 @@
 package org.rutebanken.tiamat.ext.entur.auth;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.entur.oauth2.AuthorizedWebClientBuilder;
-import org.entur.oauth2.multiissuer.MultiIssuerAuthenticationManagerResolver;
 import org.entur.oauth2.multiissuer.MultiIssuerAuthenticationManagerResolverBuilder;
 import org.entur.ror.permission.RemoteBabaRoleAssignmentExtractor;
 import org.entur.ror.permission.RemoteBabaUserInfoExtractor;
@@ -13,6 +13,7 @@ import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2Clien
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.security.authentication.AuthenticationManagerResolver;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.Arrays;
@@ -46,14 +47,14 @@ public class EnturOauth2Config {
           havingValue = "baba"
   )
   @Bean
-  public RoleAssignmentExtractor babaRoleAssignmentExtractor(WebClient webClient ,
+  public RoleAssignmentExtractor babaRoleAssignmentExtractor(WebClient babaWebClient,
                                                              @Value("${tiamat.user.permission.rest.service.url}") String url) {
-    return new RemoteBabaRoleAssignmentExtractor(webClient, url);
+    return new RemoteBabaRoleAssignmentExtractor(babaWebClient, url);
   }
 
   @Bean
   @Profile("!test")
-  public MultiIssuerAuthenticationManagerResolver multiIssuerAuthenticationManagerResolver(
+  public AuthenticationManagerResolver<HttpServletRequest> multiIssuerAuthenticationManagerResolver(
           @Value("${tiamat.oauth2.resourceserver.auth0.entur.internal.jwt.audience:}")
           String enturInternalAuth0Audiences,
           @Value("${tiamat.oauth2.resourceserver.auth0.entur.internal.jwt.issuer-uri:}")
@@ -93,7 +94,7 @@ public class EnturOauth2Config {
           value = "tiamat.security.role.assignment.extractor",
           havingValue = "baba"
   )
-  WebClient webClient(
+  WebClient babaWebClient(
           WebClient.Builder webClientBuilder,
           OAuth2ClientProperties properties,
           @Value("${tiamat.oauth2.client.audience}") String audience
