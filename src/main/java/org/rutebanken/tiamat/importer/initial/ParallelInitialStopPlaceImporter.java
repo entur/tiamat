@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 
 import static java.util.concurrent.ConcurrentHashMap.newKeySet;
 import static java.util.stream.Stream.concat;
@@ -60,7 +61,7 @@ public class ParallelInitialStopPlaceImporter {
     private StopPlaceParentCreator parentStopPlaceCreator;
 
     public List<org.rutebanken.netex.model.StopPlace> importStopPlaces(List<StopPlace> tiamatStops, AtomicInteger stopPlacesCreated) {
-        Map<String, Set<String>> childrenByParentSiteReference = new ConcurrentHashMap<>();
+        Map<String, Set<String>> parentRefToChildIds = new ConcurrentHashMap<>();
         Set<StopPlace> parentStopPlaces = ConcurrentHashMap.newKeySet();
 
         if (publishChangelog) {
@@ -87,14 +88,14 @@ public class ParallelInitialStopPlaceImporter {
                     StopPlace saved = stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
                     stopPlacesCreated.incrementAndGet();
                     if (isChild(stopPlace, parentSiteRef)) {
-                        childrenByParentSiteReference
+                        parentRefToChildIds
                                 .computeIfAbsent(parentSiteRef.getRef(), k -> newKeySet())
                                 .add(saved.getNetexId());
                     }
                     return of(saved);
                 }).toList();
 
-        List<StopPlace> parents = resolveParents(parentStopPlaces, childrenByParentSiteReference, stopPlacesCreated);
+        List<StopPlace> parents = createAndSaveParentStopPlaces(parentStopPlaces, parentRefToChildIds, stopPlacesCreated);
 
         return concat(stops.stream(), parents.stream())
                 .map(netexMapper::mapToNetexModel)
@@ -113,37 +114,97 @@ public class ParallelInitialStopPlaceImporter {
         return stopPlace.getQuays() != null && !stopPlace.getQuays().isEmpty();
     }
 
-    private Set<String> getParentNetexIdOrOriginalIds(StopPlace parent) {
-        return parent.getNetexId() != null ? Set.of(parent.getNetexId()) : parent.getOriginalIds();
+    private Set<String> getNetexIdOrOriginalIds(StopPlace stopPlace) {
+        return stopPlace.getNetexId() != null ? Set.of(stopPlace.getNetexId()) : stopPlace.getOriginalIds();
     }
 
-    private List<StopPlace> resolveParents(
+    /**
+     * Creates and persists parent stop places with their associated children.
+     *
+     * <p>Process parent stop places that were identified during the initial
+     * processing phase. For each parent stop place:</p>
+     * <ol>
+     *   <li>Retrieves the parent's identifiers (NetexId or originalIds)</li>
+     *   <li>Finds matching children that reference this parent</li>
+     *   <li>Creates the parent stop place entity with children linked</li>
+     *   <li>Persists the parent and updates the counter</li>
+     * </ol>
+     *
+     * @param parentStopPlaces Set of parent stop places identified during processing
+     * @param parentRefToChildIds Map of parent references to sets of child stop place IDs
+     * @param stopPlacesCreated Counter for tracking total stop places created
+     * @return List of saved parent stop places
+     * @throws IllegalStateException if a parent has no matching children
+     */
+    private List<StopPlace> createAndSaveParentStopPlaces(
             Set<StopPlace> parentStopPlaces,
-            Map<String, Set<String>> childrenByParentSiteReference,
+            Map<String, Set<String>> parentRefToChildIds,
             AtomicInteger stopPlacesCreated) {
 
         return parentStopPlaces.stream()
-                .flatMap(parent -> {
-                    Set<String> parentIds = getParentNetexIdOrOriginalIds(parent);
-                    checkParentStopHasChildren(parent, parentIds, childrenByParentSiteReference);
-
-                    return parentIds.stream()
-                            .filter(childrenByParentSiteReference::containsKey)
-                            .flatMap(matchingId -> {
-                                Set<String> childIds = childrenByParentSiteReference.get(matchingId);
-                                if (childIds == null || childIds.isEmpty()) {
-                                    throw new IllegalStateException("No children found for matching parent id: " + matchingId);
-                                }
-
-                                StopPlace savedParent = parentStopPlaceCreator.createParentStopWithChildren(parent, childIds);
-                                stopPlacesCreated.incrementAndGet();
-                                return of(savedParent);
-                            });
-                }).toList();
+                .flatMap(parent -> processParentStopPlace(parent, parentRefToChildIds, stopPlacesCreated))
+                .toList();
     }
 
-    private void checkParentStopHasChildren(StopPlace parent, Set<String> parentIds, Map<String, Set<String>> childrenByParentSiteReference) {
-        boolean hasMatch = parentIds.stream().anyMatch(childrenByParentSiteReference::containsKey);
+    /**
+     * Processes a single parent stop place by finding its children and creating parent entities.
+     *
+     * @param parent The parent stop place to process
+     * @param parentRefToChildIds Map of parent references to child stop place IDs
+     * @param stopPlacesCreated Counter for tracking created stop places
+     * @return Stream of saved parent stop places
+     * @throws IllegalStateException if the parent has no children associated with any of its identifiers
+     */
+    private Stream<StopPlace> processParentStopPlace(
+            StopPlace parent,
+            Map<String, Set<String>> parentRefToChildIds,
+            AtomicInteger stopPlacesCreated) {
+
+        Set<String> parentIds = getNetexIdOrOriginalIds(parent);
+        verifyParentStopPlaceHasChildren(parent, parentIds, parentRefToChildIds);
+
+        return parentIds.stream()
+                .filter(parentRefToChildIds::containsKey)
+                .map(parentRefId -> createAndSaveParentWithMatchingChildren(
+                        parent,
+                        parentRefId,
+                        parentRefToChildIds,
+                        stopPlacesCreated
+                ));
+    }
+
+    /**
+     * Creates and saves a parent stop place with its matching children.
+     *
+     * <p>Retrieves the children associated with the given parent reference ID,
+     * creates the parent stop place entity with those children linked, and persists it
+     * to the database.</p>
+     *
+     * @param parent The parent stop place to create
+     * @param parentRefId The parent reference ID that children use to link to this parent
+     * @param parentRefToChildIds Map of parent references to child stop place IDs
+     * @param stopPlacesCreated Counter to increment upon successful creation
+     * @return The saved parent stop place
+     * @throws IllegalStateException if no children are found for the given parent reference ID
+     */
+    private StopPlace createAndSaveParentWithMatchingChildren(
+            StopPlace parent,
+            String parentRefId,
+            Map<String, Set<String>> parentRefToChildIds,
+            AtomicInteger stopPlacesCreated) {
+
+        Set<String> childIds = parentRefToChildIds.get(parentRefId);
+        if (childIds == null || childIds.isEmpty()) {
+            throw new IllegalStateException("No children found for matching parent id: " + parentRefId);
+        }
+
+        StopPlace savedParent = parentStopPlaceCreator.createParentStopWithChildren(parent, childIds);
+        stopPlacesCreated.incrementAndGet();
+        return savedParent;
+    }
+
+    private void verifyParentStopPlaceHasChildren(StopPlace parent, Set<String> parentIds, Map<String, Set<String>> parentRefToChildIds) {
+        boolean hasMatch = parentIds.stream().anyMatch(parentRefToChildIds::containsKey);
 
         if (!hasMatch) {
             throw new IllegalStateException("Invalid stop place without quays or children " + parent.getNetexId());
