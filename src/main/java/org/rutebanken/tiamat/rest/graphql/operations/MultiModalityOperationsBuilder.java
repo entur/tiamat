@@ -37,13 +37,16 @@ import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.DESCRIPTION;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.GEOMETRY;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.NAME;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PARENT_SITE_REF;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.POSTAL_ADDRESS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.REMOVE_FROM_MULTIMODAL_STOPPLACE;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.STOP_PLACE_ID;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.STOP_PLACE_IDS;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.URL;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.VALID_BETWEEN;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.VERSION_COMMENT;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.embeddableMultiLingualStringInputObjectType;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.geoJsonInputType;
+import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.postalAddressInputObjectType;
 
 @Component
 public class MultiModalityOperationsBuilder {
@@ -66,6 +69,8 @@ public class MultiModalityOperationsBuilder {
         createMultiModalStopPlaceFields.add(newInputObjectField().name(GEOMETRY).type(geoJsonInputType).build());
         createMultiModalStopPlaceFields.add(newInputObjectField().name(VALID_BETWEEN).type(validBetweenInputObjectType).build());
         createMultiModalStopPlaceFields.add(newInputObjectField().name(STOP_PLACE_IDS).type(new GraphQLNonNull(new GraphQLList(GraphQLString))).build());
+        createMultiModalStopPlaceFields.add(newInputObjectField().name(URL).type(GraphQLString).build());
+        createMultiModalStopPlaceFields.add(newInputObjectField().name(POSTAL_ADDRESS).type(postalAddressInputObjectType).build());
 
         operations.add(newFieldDefinition()
                 .type(parentStopPlaceObjectType)

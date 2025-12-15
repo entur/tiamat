@@ -48,6 +48,7 @@ import org.rutebanken.tiamat.model.GroupOfStopPlaces;
 import org.rutebanken.tiamat.model.GroupOfTariffZones;
 import org.rutebanken.tiamat.model.Link;
 import org.rutebanken.tiamat.model.Parking;
+import org.rutebanken.tiamat.model.PostalAddress;
 import org.rutebanken.tiamat.model.PurposeOfGrouping;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.SanitaryEquipment;
@@ -74,6 +75,7 @@ import org.rutebanken.tiamat.rest.graphql.fetchers.StopPlaceTariffZoneFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.TagFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.UserPermissionsFetcher;
 import org.rutebanken.tiamat.rest.graphql.mappers.GeometryMapper;
+import org.rutebanken.tiamat.rest.graphql.mappers.PostalAddressMapper;
 import org.rutebanken.tiamat.rest.graphql.mappers.ValidBetweenMapper;
 import org.rutebanken.tiamat.rest.graphql.operations.MultiModalityOperationsBuilder;
 import org.rutebanken.tiamat.rest.graphql.operations.ParkingOperationsBuilder;
@@ -152,9 +154,12 @@ import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.localS
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.modificationEnumerationType;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.netexIdFieldDefinition;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.pathLinkObjectInputType;
+import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.postalAddressInputObjectType;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.privateCodeFieldDefinition;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.privateCodeInputType;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.scopingMethodEnumType;
+import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.siteFacilitySetInputObjectType;
+import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.siteFacilitySetObjectType;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.stopPlaceTypeEnum;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.submodeEnum;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.topographicPlaceInputObjectType;
@@ -366,6 +371,9 @@ public class StopPlaceRegisterGraphQLSchema {
 
     @Autowired
     private AuthorizationService authorizationService;
+
+    @Autowired
+    private PostalAddressMapper postalAddressMapper;
 
     @Autowired
     @PostConstruct
@@ -892,11 +900,13 @@ public class StopPlaceRegisterGraphQLSchema {
                     String versionComment = (String) input.get(VERSION_COMMENT);
                     Point geoJsonPoint = geometryMapper.createGeoJsonPoint((Map) input.get(GEOMETRY));
                     EmbeddableMultilingualString name = getEmbeddableString((Map) input.get(NAME));
+                    PostalAddress postalAddress = postalAddressMapper.map((Map) input.get(POSTAL_ADDRESS));
+                    String url = (String) input.get(URL);
 
                     @SuppressWarnings("unchecked")
                     List<String> stopPlaceIds = (List<String>) input.get(STOP_PLACE_IDS);
 
-                    return parentStopPlaceEditor.createMultiModalParentStopPlace(stopPlaceIds, name, validBetween, versionComment, geoJsonPoint);
+                    return parentStopPlaceEditor.createMultiModalParentStopPlace(stopPlaceIds, name, validBetween, versionComment, geoJsonPoint, postalAddress, url);
                 }
                     );
 
@@ -1392,8 +1402,10 @@ public class StopPlaceRegisterGraphQLSchema {
                             .type(new GraphQLList(alternativeNameObjectType)))
                     .field(newFieldDefinition()
                             .name(BOARDING_POSITIONS)
-                            .type(new GraphQLList(boardingPositionsObjectType))
-                    )
+                            .type(new GraphQLList(boardingPositionsObjectType)))
+                    .field(newFieldDefinition()
+                            .name(FACILITIES)
+                            .type(new GraphQLList(siteFacilitySetObjectType)))
                     .build();
     }
 
@@ -1466,6 +1478,9 @@ public class StopPlaceRegisterGraphQLSchema {
                 .field(newInputObjectField()
                         .name(URL)
                         .type(GraphQLString).build())
+                .field(newInputObjectField()
+                        .name(POSTAL_ADDRESS)
+                        .type(postalAddressInputObjectType).build())
                 .build();
     }
 
@@ -1532,6 +1547,9 @@ public class StopPlaceRegisterGraphQLSchema {
                 .field(newInputObjectField()
                 .name(BOARDING_POSITIONS)
                 .type(new GraphQLList(boardingPositionsInputObjectType)))
+                .field(newInputObjectField()
+                        .name(FACILITIES)
+                        .type(new GraphQLList(siteFacilitySetInputObjectType)))
                 .build();
     }
 

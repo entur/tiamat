@@ -29,9 +29,11 @@ import static graphql.schema.GraphQLInputObjectField.newInputObjectField;
 import static graphql.schema.GraphQLInputObjectType.newInputObject;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.CHILDREN;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.INPUT_TYPE_PARENT_STOPPLACE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.POSTAL_ADDRESS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.URL;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.VALID_BETWEEN;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.VERSION_COMMENT;
+import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.postalAddressInputObjectType;
 
 @Component
 public class ParentStopPlaceInputObjectTypeCreator {
@@ -55,6 +57,9 @@ public class ParentStopPlaceInputObjectTypeCreator {
                 .field(newInputObjectField()
                         .name(URL)
                         .type(GraphQLString))
+                .field(newInputObjectField()
+                        .name(POSTAL_ADDRESS)
+                        .type(postalAddressInputObjectType))
                 .field(newInputObjectField()
                         .name(CHILDREN)
                         .type(new GraphQLList(stopPlaceInputObjectType)))

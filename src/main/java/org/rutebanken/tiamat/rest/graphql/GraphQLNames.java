@@ -115,6 +115,9 @@ public class GraphQLNames {
     public static final String OUTPUT_TYPE_BOARDING_POSITION = "BoardingPosition";
     public static final String INPUT_TYPE_BOARDING_POSITION = OUTPUT_TYPE_BOARDING_POSITION + INPUT_TYPE_POSTFIX;
 
+    public static final String OUTPUT_TYPE_SITE_FACILITY_SET = "SiteFacilitySet";
+    public static final String INPUT_TYPE_SITE_FACILITY_SET = OUTPUT_TYPE_SITE_FACILITY_SET + INPUT_TYPE_POSTFIX;
+
     public static final String OUTPUT_TYPE_PLACE_EQUIPMENTS = "PlaceEquipments";
     public static final String INPUT_TYPE_PLACE_EQUIPMENTS = OUTPUT_TYPE_PLACE_EQUIPMENTS + INPUT_TYPE_POSTFIX;
 
@@ -336,6 +339,14 @@ public class GraphQLNames {
     public static final String WEIGHTING = "weighting";
     public static final String URL = "url";
 
+    // Postal address fields
+    public static final String OUTPUT_TYPE_POSTAL_ADDRESS = "PostalAddress";
+    public static final String INPUT_TYPE_POSTAL_ADDRESS = "PostalAddress" + INPUT_TYPE_POSTFIX;
+    public static final String POSTAL_ADDRESS = "postalAddress";
+    public static final String POSTAL_ADDRESS_TOWN = "town";
+    public static final String POSTAL_ADDRESS_POST_CODE = "postCode";
+    public static final String POSTAL_ADDRESS_ADDRESS_LINE1 = "addressLine1";
+
     public static final String IMPORTED_ID_QUERY = "importedId";
     public static final String IMPORTED_ID_ARG_DESCRIPTION = "Searches for StopPlace by importedId.";
     public static final String COUNTY_REF = "countyReference";
@@ -388,6 +399,8 @@ public class GraphQLNames {
     public static final String QUAYS = "quays";
     public static final String COMPASS_BEARING = "compassBearing";
     public static final String BOARDING_POSITIONS = "boardingPositions";
+    public static final String FACILITIES = "facilities";
+    public static final String MOBILITY_FACILITY_LIST = "mobilityFacilityList";
     public static final String VALID_BETWEEN = "validBetween";
     public static final String ADDRESSABLE_PLACE = "addressablePlace";
     public static final String PLACE_REF = "placeRef";

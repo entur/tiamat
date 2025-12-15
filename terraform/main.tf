@@ -6,9 +6,6 @@ terraform {
 provider "google" {
   version = "~> 4.84.0"
 }
-provider "kubernetes" {
-  version = ">= 2.13.1"
-}
 # Create bucket
 resource "google_storage_bucket" "storage_bucket" {
   name               = "${var.bucket_instance_prefix}-${var.bucket_instance_suffix}"

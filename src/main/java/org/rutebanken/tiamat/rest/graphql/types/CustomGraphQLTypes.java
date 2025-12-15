@@ -38,6 +38,7 @@ import org.rutebanken.tiamat.model.InterchangeWeightingEnumeration;
 import org.rutebanken.tiamat.model.LimitationStatusEnumeration;
 import org.rutebanken.tiamat.model.LocalService;
 import org.rutebanken.tiamat.model.MetroSubmodeEnumeration;
+import org.rutebanken.tiamat.model.MobilityFacilityEnumeration;
 import org.rutebanken.tiamat.model.ModificationEnumeration;
 import org.rutebanken.tiamat.model.NameTypeEnumeration;
 import org.rutebanken.tiamat.model.ParkingLayoutEnumeration;
@@ -128,6 +129,7 @@ public class CustomGraphQLTypes {
     public static GraphQLEnumType zoneTopologyEnumType = createCustomEnumType("ZoneTopologyEnumerationType", ZoneTopologyEnumeration.class);
     public static GraphQLEnumType assistanceFacilityEnumType = createCustomEnumType(ASSISTANCE_FACILITY_TYPE, AssistanceFacilityEnumeration.class);
     public static GraphQLEnumType assistanceAvailabilityEnumType = createCustomEnumType(ASSISTANCE_AVAILABILITY_TYPE, AssistanceAvailabilityEnumeration.class);
+    public static GraphQLEnumType mobilityFacilityListEnum = createCustomEnumType("MobilityFacilityEnumerationInputType", MobilityFacilityEnumeration.class);
 
     public static GraphQLEnumType createCustomEnumType(String name, Class c) {
 
@@ -696,6 +698,33 @@ public class CustomGraphQLTypes {
             .field(geometryFieldDefinition)
             .build();
 
+    public static GraphQLObjectType siteFacilitySetObjectType = GraphQLObjectType.newObject()
+            .name(OUTPUT_TYPE_SITE_FACILITY_SET)
+            .field(newFieldDefinition()
+                    .name(ID)
+                    .type(GraphQLString)
+            )
+            .field(newFieldDefinition()
+                    .name(VERSION)
+                    .type(GraphQLString))
+            .field(newFieldDefinition()
+                    .name(MOBILITY_FACILITY_LIST)
+                    .type(new GraphQLList(mobilityFacilityListEnum)))
+            .build();
+
+    public static GraphQLInputObjectType siteFacilitySetInputObjectType = GraphQLInputObjectType.newInputObject()
+            .name(INPUT_TYPE_SITE_FACILITY_SET)
+            .field(newInputObjectField()
+                    .name(ID)
+                    .type(GraphQLString)
+            )
+            .field(newInputObjectField()
+                    .name(VERSION)
+                    .type(GraphQLString))
+            .field(newInputObjectField()
+                    .name(MOBILITY_FACILITY_LIST)
+                    .type(new GraphQLList(mobilityFacilityListEnum)))
+            .build();
 
     public static GraphQLInputObjectType boardingPositionsInputObjectType = GraphQLInputObjectType.newInputObject()
             .name(INPUT_TYPE_BOARDING_POSITION)
@@ -891,6 +920,32 @@ public class CustomGraphQLTypes {
             .field(newInputObjectField()
                     .name(PARKING_PROPERTIES)
                     .type(parkingPropertiesInputObjectType))
+            .build();
+
+    public static GraphQLObjectType postalAddressObjectType = GraphQLObjectType.newObject()
+            .name(OUTPUT_TYPE_POSTAL_ADDRESS)
+            .field(newFieldDefinition()
+                    .name(POSTAL_ADDRESS_ADDRESS_LINE1)
+                    .type(embeddableMultilingualStringObjectType))
+            .field(newFieldDefinition()
+                    .name(POSTAL_ADDRESS_TOWN)
+                    .type(embeddableMultilingualStringObjectType))
+            .field(newFieldDefinition()
+                    .name(POSTAL_ADDRESS_POST_CODE)
+                    .type(GraphQLString))
+            .build();
+
+    public static GraphQLInputObjectType postalAddressInputObjectType = GraphQLInputObjectType.newInputObject()
+            .name(INPUT_TYPE_POSTAL_ADDRESS)
+            .field(newInputObjectField()
+                    .name(POSTAL_ADDRESS_ADDRESS_LINE1)
+                    .type(embeddableMultiLingualStringInputObjectType))
+            .field(newInputObjectField()
+                    .name(POSTAL_ADDRESS_TOWN)
+                    .type(embeddableMultiLingualStringInputObjectType))
+            .field(newInputObjectField()
+                    .name(POSTAL_ADDRESS_POST_CODE)
+                    .type(GraphQLString))
             .build();
 
     public static GraphQLObjectType transportModeSubmodeObjectType = newObject()

@@ -110,6 +110,9 @@ public class StopPlace
     @Enumerated(EnumType.STRING)
     private ModificationEnumeration modificationEnumeration;
 
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private PostalAddress postalAddress;
+
     public StopPlace(EmbeddableMultilingualString name) {
         super(name);
     }
@@ -304,6 +307,14 @@ public class StopPlace
 
     public void setModificationEnumeration(ModificationEnumeration modificationEnumeration) {
         this.modificationEnumeration = modificationEnumeration;
+    }
+
+    public PostalAddress getPostalAddress() {
+        return postalAddress;
+    }
+
+    public void setPostalAddress(PostalAddress postalAddress) {
+        this.postalAddress = postalAddress;
     }
 
     @Override
