@@ -60,13 +60,8 @@ public class ParallelInitialStopPlaceImporter {
         );
 
         List<StopPlace> stops = tiamatStops.parallelStream()
-                .map(stopPlace -> {
-                    if (stopPlace.getTariffZones() != null) {
-                        stopPlace.getTariffZones().forEach(tariffZoneRef -> tariffZoneRef.setVersion(null));
-                    }
-                    return stopPlace;
-                })
-                .peek(stopPlaceTopographicPlaceReferenceUpdater::updateTopographicReference)
+                .map(this::clearTariffZoneVersions)
+                .map(stopPlaceTopographicPlaceReferenceUpdater::updateTopographicReference)
                 .flatMap(processor::processStopPlace)
                 .toList();
 
@@ -75,6 +70,13 @@ public class ParallelInitialStopPlaceImporter {
         return concat(stops.stream(), parents.stream())
                 .map(netexMapper::mapToNetexModel)
                 .toList();
+    }
+
+    private StopPlace clearTariffZoneVersions(StopPlace stopPlace) {
+        if (stopPlace.getTariffZones() != null) {
+            stopPlace.getTariffZones().forEach(tariffZoneRef -> tariffZoneRef.setVersion(null));
+        }
+        return stopPlace;
     }
 
 }
