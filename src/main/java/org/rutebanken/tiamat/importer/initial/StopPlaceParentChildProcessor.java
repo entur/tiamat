@@ -31,15 +31,16 @@ public class StopPlaceParentChildProcessor {
 
     private final StopPlaceVersionedSaverService stopPlaceVersionedSaverService;
     private final StopPlaceParentCreator parentStopPlaceCreator;
-
     private final Map<String, Set<String>> parentRefToChildIds = new ConcurrentHashMap<>();
     private final Set<StopPlace> parentStopPlaces = ConcurrentHashMap.newKeySet();
+    private final AtomicInteger stopPlacesCreated;
 
     public StopPlaceParentChildProcessor(
             StopPlaceVersionedSaverService stopPlaceVersionedSaverService,
-            StopPlaceParentCreator parentStopPlaceCreator) {
+            StopPlaceParentCreator parentStopPlaceCreator, AtomicInteger stopPlacesCreated) {
         this.stopPlaceVersionedSaverService = stopPlaceVersionedSaverService;
         this.parentStopPlaceCreator = parentStopPlaceCreator;
+        this.stopPlacesCreated = stopPlacesCreated;
     }
 
     /**
@@ -60,11 +61,10 @@ public class StopPlaceParentChildProcessor {
      *   <li>If child/standalone stop: save immediately and store parent-child relations</li>
      * </ol>
      *
-     * @param stopPlace         The stop place to process
-     * @param stopPlacesCreated Counter for tracking total stop places created
+     * @param stopPlace The stop place to process
      * @return Stream containing the saved stop place
      */
-    public Stream<StopPlace> processStopPlace(StopPlace stopPlace, AtomicInteger stopPlacesCreated) {
+    public Stream<StopPlace> processStopPlace(StopPlace stopPlace) {
         SiteRefStructure parentSiteRef = stopPlace.getParentSiteRef();
         stopPlace.setParentSiteRef(null);
 
@@ -95,25 +95,23 @@ public class StopPlaceParentChildProcessor {
      *   <li>Persists the parent and updates the counter</li>
      * </ol>
      *
-     * @param stopPlacesCreated Counter for tracking total stop places created
      * @return List of saved parent stop places
      * @throws IllegalStateException if a parent has no matching children
      */
-    public List<StopPlace> createAndSaveParentStopPlaces(AtomicInteger stopPlacesCreated) {
+    public List<StopPlace> createAndSaveParentStopPlaces() {
         return parentStopPlaces.stream()
-                .flatMap(parent -> processParentStopPlace(parent, stopPlacesCreated))
+                .flatMap(this::processParentStopPlace)
                 .toList();
     }
 
     /**
      * Processes a single parent stop place by finding its children and creating parent entities.
      *
-     * @param parent            The parent stop place to process
-     * @param stopPlacesCreated Counter for tracking created stop places
+     * @param parent The parent stop place to process
      * @return Stream of saved parent stop places
      * @throws IllegalStateException if the parent has no children associated with any of its identifiers
      */
-    private Stream<StopPlace> processParentStopPlace(StopPlace parent, AtomicInteger stopPlacesCreated) {
+    private Stream<StopPlace> processParentStopPlace(StopPlace parent) {
         Set<String> parentIds = getNetexIdOrOriginalIds(parent);
         verifyParentStopPlaceHasChildren(parent, parentIds);
 
@@ -121,8 +119,7 @@ public class StopPlaceParentChildProcessor {
                 .filter(parentRefToChildIds::containsKey)
                 .map(parentRefId -> createAndSaveParentWithMatchingChildren(
                         parent,
-                        parentRefId,
-                        stopPlacesCreated
+                        parentRefId
                 ));
     }
 
@@ -133,16 +130,14 @@ public class StopPlaceParentChildProcessor {
      * creates the parent stop place with those children linked, and persists it
      * to the database.</p>
      *
-     * @param parent            The parent stop place to create
-     * @param parentRefId       The parent reference ID that children use to link to this parent
-     * @param stopPlacesCreated Counter to increment upon successful creation
+     * @param parent      The parent stop place to create
+     * @param parentRefId The parent reference ID that children use to link to this parent
      * @return The saved parent stop place
      * @throws IllegalStateException if no children are found for the given parent reference ID
      */
     private StopPlace createAndSaveParentWithMatchingChildren(
             StopPlace parent,
-            String parentRefId,
-            AtomicInteger stopPlacesCreated) {
+            String parentRefId) {
 
         Set<String> childIds = parentRefToChildIds.get(parentRefId);
         if (childIds == null || childIds.isEmpty()) {

@@ -32,11 +32,11 @@ class StopPlaceParentChildProcessorTest {
 
     @BeforeEach
     void setUp() {
+        stopPlacesCreated = new AtomicInteger(0);
         processor = new StopPlaceParentChildProcessor(
                 stopPlaceVersionedSaverService,
-                parentStopPlaceCreator
-        );
-        stopPlacesCreated = new AtomicInteger(0);
+                parentStopPlaceCreator,
+                stopPlacesCreated);
     }
 
     @Test
@@ -45,7 +45,7 @@ class StopPlaceParentChildProcessorTest {
         parentStop.setNetexId("NSR:StopPlace:1");
         parentStop.setName(new EmbeddableMultilingualString("Parent Stop", "no"));
 
-        Stream<StopPlace> result = processor.processStopPlace(parentStop, stopPlacesCreated);
+        Stream<StopPlace> result = processor.processStopPlace(parentStop);
 
         assertThat(result).isEmpty();
         verify(stopPlaceVersionedSaverService, never()).saveNewVersion(any());
@@ -70,7 +70,7 @@ class StopPlaceParentChildProcessorTest {
         savedChild.setNetexId("NSR:StopPlace:2");
         when(stopPlaceVersionedSaverService.saveNewVersion(childStop)).thenReturn(savedChild);
 
-        Stream<StopPlace> result = processor.processStopPlace(childStop, stopPlacesCreated);
+        Stream<StopPlace> result = processor.processStopPlace(childStop);
 
         assertThat(result).containsExactly(savedChild);
         assertThat(stopPlacesCreated.get()).isEqualTo(1);
@@ -91,7 +91,7 @@ class StopPlaceParentChildProcessorTest {
         savedStandalone.setNetexId("NSR:StopPlace:3");
         when(stopPlaceVersionedSaverService.saveNewVersion(standaloneStop)).thenReturn(savedStandalone);
 
-        Stream<StopPlace> result = processor.processStopPlace(standaloneStop, stopPlacesCreated);
+        Stream<StopPlace> result = processor.processStopPlace(standaloneStop);
 
         assertThat(result).containsExactly(savedStandalone);
         assertThat(stopPlacesCreated.get()).isEqualTo(1);
@@ -115,15 +115,15 @@ class StopPlaceParentChildProcessorTest {
         when(stopPlaceVersionedSaverService.saveNewVersion(childA)).thenReturn(savedChildA);
         when(stopPlaceVersionedSaverService.saveNewVersion(childB)).thenReturn(savedChildB);
 
-        processor.processStopPlace(childA, stopPlacesCreated);
-        processor.processStopPlace(childB, stopPlacesCreated);
+        processor.processStopPlace(childA);
+        processor.processStopPlace(childB);
 
         StopPlace parentStop = new StopPlace();
         parentStop.setNetexId(null);
         parentStop.getOriginalIds().add("ORIGINAL:Parent:1");
         parentStop.setName(new EmbeddableMultilingualString("Parent Stop", "no"));
 
-        processor.processStopPlace(parentStop, stopPlacesCreated);
+        processor.processStopPlace(parentStop);
 
         StopPlace savedParent = new StopPlace();
         savedParent.setNetexId("NSR:StopPlace:100");
@@ -131,7 +131,7 @@ class StopPlaceParentChildProcessorTest {
         when(parentStopPlaceCreator.createParentStopWithChildren(eq(parentStop), any()))
                 .thenReturn(savedParent);
 
-        List<StopPlace> parents = processor.createAndSaveParentStopPlaces(stopPlacesCreated);
+        List<StopPlace> parents = processor.createAndSaveParentStopPlaces();
 
         assertThat(parents).hasSize(1);
         assertThat(parents.getFirst()).isEqualTo(savedParent);
@@ -145,9 +145,9 @@ class StopPlaceParentChildProcessorTest {
         parentStop.getOriginalIds().add("ORIGINAL:Parent:999");
         parentStop.setName(new EmbeddableMultilingualString("Orphan parent", "no"));
 
-        processor.processStopPlace(parentStop, stopPlacesCreated);
+        processor.processStopPlace(parentStop);
 
-        assertThatThrownBy(() -> processor.createAndSaveParentStopPlaces(stopPlacesCreated))
+        assertThatThrownBy(() -> processor.createAndSaveParentStopPlaces())
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("Invalid stop place without quays or children")
                 .hasMessageContaining("NSR:StopPlace:999");

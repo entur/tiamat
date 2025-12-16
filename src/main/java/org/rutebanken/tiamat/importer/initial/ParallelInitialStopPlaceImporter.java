@@ -55,7 +55,8 @@ public class ParallelInitialStopPlaceImporter {
 
         StopPlaceParentChildProcessor processor = new StopPlaceParentChildProcessor(
                 stopPlaceVersionedSaverService,
-                parentStopPlaceCreator
+                parentStopPlaceCreator,
+                stopPlacesCreated
         );
 
         List<StopPlace> stops = tiamatStops.parallelStream()
@@ -65,11 +66,11 @@ public class ParallelInitialStopPlaceImporter {
                     }
                     return stopPlace;
                 })
-                .peek(stopPlace -> stopPlaceTopographicPlaceReferenceUpdater.updateTopographicReference(stopPlace))
-                .flatMap(stopPlace -> processor.processStopPlace(stopPlace, stopPlacesCreated))
+                .peek(stopPlaceTopographicPlaceReferenceUpdater::updateTopographicReference)
+                .flatMap(processor::processStopPlace)
                 .toList();
 
-        List<StopPlace> parents = processor.createAndSaveParentStopPlaces(stopPlacesCreated);
+        List<StopPlace> parents = processor.createAndSaveParentStopPlaces();
 
         return concat(stops.stream(), parents.stream())
                 .map(netexMapper::mapToNetexModel)
