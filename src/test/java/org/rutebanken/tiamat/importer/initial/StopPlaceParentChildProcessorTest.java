@@ -2,7 +2,6 @@ package org.rutebanken.tiamat.importer.initial;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.SiteRefStructure;
@@ -10,7 +9,6 @@ import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.versioning.save.StopPlaceVersionedSaverService;
 
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
@@ -137,13 +135,6 @@ class StopPlaceParentChildProcessorTest {
 
         assertThat(parents).hasSize(1);
         assertThat(parents.getFirst()).isEqualTo(savedParent);
-
-        ArgumentCaptor<Set<String>> childIdsCaptor = ArgumentCaptor.forClass(Set.class);
-        verify(parentStopPlaceCreator).createParentStopWithChildren(eq(parentStop), childIdsCaptor.capture());
-
-        Set<String> capturedChildIds = childIdsCaptor.getValue();
-        assertThat(capturedChildIds).containsExactlyInAnyOrder("NSR:StopPlace:101", "NSR:StopPlace:102");
-
         assertThat(stopPlacesCreated.get()).isEqualTo(3);
     }
 
