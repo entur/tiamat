@@ -30,6 +30,19 @@
                             <Latitude>57.709531</Latitude>
                         </Location>
                     </Centroid>
+                    <AccessibilityAssessment modification="new" version="0" id="FSR:AccessibilityAssessment:1">
+                        <MobilityImpairedAccess>unknown</MobilityImpairedAccess>
+                        <limitations>
+                            <AccessibilityLimitation modification="new" version="0" id="FSR:AccessibilityLimitation:6">
+                                <WheelchairAccess>unknown</WheelchairAccess>
+                                <StepFreeAccess>false</StepFreeAccess>
+                                <EscalatorFreeAccess>unknown</EscalatorFreeAccess>
+                                <LiftFreeAccess>unknown</LiftFreeAccess>
+                                <AudibleSignalsAvailable>unknown</AudibleSignalsAvailable>
+                                <VisualSignsAvailable>unknown</VisualSignsAvailable>
+                            </AccessibilityLimitation>
+                        </limitations>
+                    </AccessibilityAssessment>
                     <Covered>outdoors</Covered>
                     <ParentSiteRef ref="NSR:StopPlace:408"/>
                     <ParkingVehicleTypes>pedalCycle</ParkingVehicleTypes>
