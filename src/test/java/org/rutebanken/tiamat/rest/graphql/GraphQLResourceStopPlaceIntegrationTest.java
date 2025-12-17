@@ -234,6 +234,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         ticketingEquipment.setTactileInterfaceAvailable(false);
         ticketingEquipment.setLowCounterAccess(false);
         ticketingEquipment.setInductionLoops(false);
+        ticketingEquipment.setWheelchairSuitable(false);
 
         installedEquipments.add(ticketingEquipment);
 
@@ -293,6 +294,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                                     tactileInterfaceAvailable
                                     inductionLoops
                                     lowCounterAccess
+                                    wheelchairSuitable
                                 }
                                 generalSign {
                                     id
@@ -326,6 +328,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                 .body("placeEquipments.ticketingEquipment[0].ticketCounter", equalTo(ticketingEquipment.isTicketCounter()))
                 .body("placeEquipments.ticketingEquipment[0].inductionLoops", equalTo(ticketingEquipment.isInductionLoops()))
                 .body("placeEquipments.ticketingEquipment[0].lowCounterAccess", equalTo(ticketingEquipment.isLowCounterAccess()))
+                .body("placeEquipments.ticketingEquipment[0].wheelchairSuitable", equalTo(ticketingEquipment.isWheelchairSuitable()))
                 //waitingRoomEquipment
                 .body("placeEquipments.waitingRoomEquipment[0].id", equalTo(waitingRoomEquipment.getNetexId()))
                 .body("placeEquipments.waitingRoomEquipment[0].seats", equalTo(waitingRoomEquipment.getSeats().intValue()))
@@ -2149,6 +2152,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         ticketingEquipment.setAudioInterfaceAvailable(false);
         ticketingEquipment.setInductionLoops(false);
         ticketingEquipment.setLowCounterAccess(false);
+        ticketingEquipment.setWheelchairSuitable(false);
 
         PlaceEquipment placeEquipment = new PlaceEquipment();
 

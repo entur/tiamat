@@ -58,6 +58,7 @@ import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.TICKETING_EQUIPMEN
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.TICKET_MACHINES;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.TICKET_OFFICE;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.WAITING_ROOM_EQUIPMENT;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.WHEELCHAIR_SUITABLE;
 import static org.rutebanken.tiamat.rest.graphql.mappers.EmbeddableMultilingualStringMapper.getEmbeddableString;
 import static org.rutebanken.tiamat.rest.graphql.mappers.PrivateCodeMapper.getPrivateCodeStructure;
 
@@ -135,6 +136,7 @@ public class PlaceEquipmentMapper {
                     billettAutomat.setTicketCounter((Boolean) ticketingEquipment.get(TICKET_COUNTER));
                     billettAutomat.setInductionLoops((Boolean) ticketingEquipment.get(INDUCTION_LOOPS));
                     billettAutomat.setLowCounterAccess((Boolean) ticketingEquipment.get(LOW_COUNTER_ACCESS));
+                    billettAutomat.setWheelchairSuitable((Boolean) ticketingEquipment.get(WHEELCHAIR_SUITABLE));
                     equipments.getInstalledEquipment().add(billettAutomat);
                 }
             }

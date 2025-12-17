@@ -305,6 +305,9 @@ public class CustomGraphQLTypes {
             .field(newFieldDefinition()
                     .name(LOW_COUNTER_ACCESS)
                     .type(GraphQLBoolean))
+            .field(newFieldDefinition()
+                    .name(WHEELCHAIR_SUITABLE)
+                    .type(GraphQLBoolean))
             .build();
 
 
@@ -333,6 +336,9 @@ public class CustomGraphQLTypes {
                     .type(GraphQLBoolean))
             .field(newInputObjectField()
                     .name(LOW_COUNTER_ACCESS)
+                    .type(GraphQLBoolean))
+            .field(newInputObjectField()
+                    .name(WHEELCHAIR_SUITABLE)
                     .type(GraphQLBoolean))
             .build();
 

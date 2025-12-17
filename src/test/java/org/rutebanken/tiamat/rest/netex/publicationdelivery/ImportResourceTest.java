@@ -1198,6 +1198,12 @@ public class ImportResourceTest extends TiamatIntegrationTest {
                                   </SanitaryEquipment>
                                   <TicketingEquipment id="NSB:TicketingEquipment:3" version="1">
                                      <NumberOfMachines>1</NumberOfMachines>
+                                     <TicketOffice>true</TicketOffice>
+                                     <LowCounterAccess>true</LowCounterAccess>
+                                     <InductionLoops>true</InductionLoops>
+                                     <TactileInterfaceAvailable>false</TactileInterfaceAvailable>
+                                     <AudioInterfaceAvailable>false</AudioInterfaceAvailable>
+                                     <WheelchairSuitable>false</WheelchairSuitable>
                                   </TicketingEquipment>
                                </placeEquipments>
                                <localServices>
