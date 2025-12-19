@@ -50,6 +50,7 @@ import org.rutebanken.tiamat.model.ParkingUserEnumeration;
 import org.rutebanken.tiamat.model.ParkingVehicleEnumeration;
 import org.rutebanken.tiamat.model.PlaceEquipment;
 import org.rutebanken.tiamat.model.RailSubmodeEnumeration;
+import org.rutebanken.tiamat.model.SanitaryFacilityEnumeration;
 import org.rutebanken.tiamat.model.ScopingMethodEnumeration;
 import org.rutebanken.tiamat.model.SignContentEnumeration;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
@@ -130,6 +131,7 @@ public class CustomGraphQLTypes {
     public static GraphQLEnumType assistanceFacilityEnumType = createCustomEnumType(ASSISTANCE_FACILITY_TYPE, AssistanceFacilityEnumeration.class);
     public static GraphQLEnumType assistanceAvailabilityEnumType = createCustomEnumType(ASSISTANCE_AVAILABILITY_TYPE, AssistanceAvailabilityEnumeration.class);
     public static GraphQLEnumType mobilityFacilityListEnum = createCustomEnumType("MobilityFacilityEnumerationInputType", MobilityFacilityEnumeration.class);
+    public static GraphQLEnumType sanitaryFacilityEnumType = createCustomEnumType("SanitaryFacilityEnumeration", SanitaryFacilityEnumeration.class);
 
     public static GraphQLEnumType createCustomEnumType(String name, Class c) {
 
@@ -450,6 +452,9 @@ public class CustomGraphQLTypes {
             .field(newFieldDefinition()
                     .name(GENDER)
                     .type(genderTypeEnum))
+            .field(newFieldDefinition()
+                    .name(SANITARY_FACILITY_LIST)
+                    .type(new GraphQLList(sanitaryFacilityEnumType)))
             .build();
 
 
@@ -461,6 +466,9 @@ public class CustomGraphQLTypes {
             .field(newInputObjectField()
                     .name(GENDER)
                     .type(genderTypeEnum))
+            .field(newInputObjectField()
+                    .name(SANITARY_FACILITY_LIST)
+                    .type(new GraphQLList(sanitaryFacilityEnumType)))
             .build();
 
 

@@ -21,6 +21,7 @@ import org.rutebanken.tiamat.model.GenderLimitationEnumeration;
 import org.rutebanken.tiamat.model.GeneralSign;
 import org.rutebanken.tiamat.model.PlaceEquipment;
 import org.rutebanken.tiamat.model.SanitaryEquipment;
+import org.rutebanken.tiamat.model.SanitaryFacilityEnumeration;
 import org.rutebanken.tiamat.model.ShelterEquipment;
 import org.rutebanken.tiamat.model.SignContentEnumeration;
 import org.rutebanken.tiamat.model.TicketingEquipment;
@@ -40,6 +41,7 @@ import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ENCLOSED;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.GENDER;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.GENERAL_SIGN;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.HEATED;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.SANITARY_FACILITY_LIST;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.TICKET_COUNTER;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.INDUCTION_LOOPS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.LOW_COUNTER_ACCESS;
@@ -79,6 +81,7 @@ public class PlaceEquipmentMapper {
                     SanitaryEquipment toalett = new SanitaryEquipment();
                     toalett.setNumberOfToilets((BigInteger) sanitaryEquipment.get(NUMBER_OF_TOILETS));
                     toalett.setGender((GenderLimitationEnumeration) sanitaryEquipment.get(GENDER));
+                    toalett.setSanitaryFacilityList((List<SanitaryFacilityEnumeration>) sanitaryEquipment.get(SANITARY_FACILITY_LIST));
                     equipments.getInstalledEquipment().add(toalett);
                 }
             }
