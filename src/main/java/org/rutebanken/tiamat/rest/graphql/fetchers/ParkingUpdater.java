@@ -354,7 +354,6 @@ class ParkingUpdater implements DataFetcher {
 
     private AccessibilityAssessment resolveAccessibilityAssessment(AccessibilityLimitation limitationFromInput) {
         AccessibilityAssessment accessibilityAssessment =  new AccessibilityAssessment();
-        List<AccessibilityLimitation> limitations = new ArrayList<>();
         AccessibilityLimitation limitation = new AccessibilityLimitation();
 
         limitation.setWheelchairAccess(limitationFromInput.getWheelchairAccess());
@@ -363,9 +362,7 @@ class ParkingUpdater implements DataFetcher {
         limitation.setStepFreeAccess(limitationFromInput.getStepFreeAccess());
         limitation.setLiftFreeAccess(limitationFromInput.getLiftFreeAccess());
         limitation.setEscalatorFreeAccess(limitationFromInput.getEscalatorFreeAccess());
-
-        limitations.add(limitation);
-        accessibilityAssessment.setLimitations(limitations);
+        accessibilityAssessment.setLimitations(List.of(limitation));
 
         return accessibilityAssessment;
     }

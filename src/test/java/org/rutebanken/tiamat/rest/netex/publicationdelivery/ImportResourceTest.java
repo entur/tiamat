@@ -21,10 +21,14 @@ import jakarta.ws.rs.core.StreamingOutput;
 import jakarta.xml.bind.JAXBException;
 import org.junit.Assert;
 import org.junit.Test;
+import org.rutebanken.netex.model.AccessibilityLimitation;
+import org.rutebanken.netex.model.AccessibilityLimitations_RelStructure;
 import org.rutebanken.netex.model.KeyValueStructure;
+import org.rutebanken.netex.model.LimitationStatusEnumeration;
 import org.rutebanken.netex.model.LocationStructure;
 import org.rutebanken.netex.model.MobilityFacilityEnumeration;
 import org.rutebanken.netex.model.MultilingualString;
+import org.rutebanken.netex.model.Parking;
 import org.rutebanken.netex.model.PrivateCodeStructure;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.netex.model.Quay;
@@ -1337,5 +1341,15 @@ public class ImportResourceTest extends TiamatIntegrationTest {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         streamingOutput.write(byteArrayOutputStream);
         System.out.println(byteArrayOutputStream.toString());
+
+        List<Parking> parkings = publicationDeliveryTestHelper.extractParkings(response);
+        assertThat(parkings).hasSize(2);
+
+        Parking parking = parkings.get(0);
+        assertThat(parking.getAccessibilityAssessment()).isNotNull();
+        AccessibilityLimitation limitations = parking.getAccessibilityAssessment().getLimitations().getAccessibilityLimitation();
+        assertThat(limitations).isNotNull();
+        assertThat(limitations.getStepFreeAccess()).isEqualTo(LimitationStatusEnumeration.TRUE);
+        assertThat(limitations.getWheelchairAccess()).isEqualTo(LimitationStatusEnumeration.UNKNOWN);
     }
 }

@@ -35,7 +35,7 @@
                         <limitations>
                             <AccessibilityLimitation modification="new" version="0" id="FSR:AccessibilityLimitation:6">
                                 <WheelchairAccess>unknown</WheelchairAccess>
-                                <StepFreeAccess>false</StepFreeAccess>
+                                <StepFreeAccess>true</StepFreeAccess>
                                 <EscalatorFreeAccess>unknown</EscalatorFreeAccess>
                                 <LiftFreeAccess>unknown</LiftFreeAccess>
                                 <AudibleSignalsAvailable>unknown</AudibleSignalsAvailable>
@@ -66,6 +66,19 @@
                             <Value>11111</Value>
                         </KeyValue>
                     </keyList>
+                    <AccessibilityAssessment modification="new" version="0" id="FSR:AccessibilityAssessment:2">
+                        <MobilityImpairedAccess>unknown</MobilityImpairedAccess>
+                        <limitations>
+                            <AccessibilityLimitation modification="new" version="0" id="FSR:AccessibilityLimitation:6">
+                                <WheelchairAccess>unknown</WheelchairAccess>
+                                <StepFreeAccess>true</StepFreeAccess>
+                                <EscalatorFreeAccess>unknown</EscalatorFreeAccess>
+                                <LiftFreeAccess>unknown</LiftFreeAccess>
+                                <AudibleSignalsAvailable>unknown</AudibleSignalsAvailable>
+                                <VisualSignsAvailable>unknown</VisualSignsAvailable>
+                            </AccessibilityLimitation>
+                        </limitations>
+                    </AccessibilityAssessment>
                     <ParentSiteRef ref="NSR:StopPlace:408"/>
                     <ParkingVehicleTypes>car</ParkingVehicleTypes>
                     <ParkingLayout>openSpace</ParkingLayout>
