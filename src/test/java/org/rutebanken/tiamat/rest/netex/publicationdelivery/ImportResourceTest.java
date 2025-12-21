@@ -18,6 +18,7 @@ package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 import com.google.common.collect.Sets;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.StreamingOutput;
+import jakarta.xml.bind.JAXBElement;
 import jakarta.xml.bind.JAXBException;
 import org.junit.Assert;
 import org.junit.Test;
@@ -34,6 +35,7 @@ import org.rutebanken.netex.model.SiteFacilitySet;
 import org.rutebanken.netex.model.SiteFacilitySets_RelStructure;
 import org.rutebanken.netex.model.StopPlace;
 import org.rutebanken.netex.model.StopTypeEnumeration;
+import org.rutebanken.netex.model.TicketingEquipment;
 import org.rutebanken.netex.model.ValidBetween;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.importer.ImportParams;
@@ -1198,6 +1200,12 @@ public class ImportResourceTest extends TiamatIntegrationTest {
                                   </SanitaryEquipment>
                                   <TicketingEquipment id="NSB:TicketingEquipment:3" version="1">
                                      <NumberOfMachines>1</NumberOfMachines>
+                                     <TicketOffice>true</TicketOffice>
+                                     <LowCounterAccess>true</LowCounterAccess>
+                                     <InductionLoops>true</InductionLoops>
+                                     <TactileInterfaceAvailable>false</TactileInterfaceAvailable>
+                                     <AudioInterfaceAvailable>false</AudioInterfaceAvailable>
+                                     <WheelchairSuitable>true</WheelchairSuitable>
                                   </TicketingEquipment>
                                </placeEquipments>
                                <localServices>
@@ -1304,6 +1312,14 @@ public class ImportResourceTest extends TiamatIntegrationTest {
         SiteFacilitySet siteFacilitySet = (SiteFacilitySet) quay.getFacilities().getSiteFacilitySetRefOrSiteFacilitySet().getFirst();
         List<MobilityFacilityEnumeration> mobilityFacilityList = siteFacilitySet.getMobilityFacilityList();
         assertThat(mobilityFacilityList).hasSize(2);
+
+        Object placeEquipmentObj = stopPlace.getPlaceEquipments().getInstalledEquipmentRefOrInstalledEquipment().get(2);
+        assertThat(placeEquipmentObj)
+                .as("Place equipment element should be a JAXBElement")
+                .isInstanceOf(jakarta.xml.bind.JAXBElement.class);
+        JAXBElement equipmentElement = (JAXBElement) placeEquipmentObj;
+        TicketingEquipment ticketingEquipment = (TicketingEquipment) equipmentElement.getValue();
+        assertThat(ticketingEquipment.isWheelchairSuitable()).isTrue();
     }
 
     @Test
