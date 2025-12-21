@@ -1029,6 +1029,9 @@ public class CustomGraphQLTypes {
                         .name(PARKING_AREAS)
                         .type(new GraphQLList(parkingAreaObjectType)))
                 .field(geometryFieldDefinition)
+                .field(newFieldDefinition()
+                        .name(ACCESSIBILITY_ASSESSMENT)
+                        .type(accessibilityAssessmentObjectType))
                 .build();
     }
 
@@ -1097,6 +1100,9 @@ public class CustomGraphQLTypes {
                 .field(newInputObjectField()
                         .name(VALID_BETWEEN)
                         .type(validBetweenInputObjectType))
+                .field(newInputObjectField()
+                        .name(ACCESSIBILITY_ASSESSMENT)
+                        .type(accessibilityAssessmentInputObjectType))
                 .build();
     }
 }
