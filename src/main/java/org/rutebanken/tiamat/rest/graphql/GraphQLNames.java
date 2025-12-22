@@ -299,6 +299,7 @@ public class GraphQLNames {
     public static final String TACTILE_INTERFACE_AVAILABLE = "tactileInterfaceAvailable";
     public static final String INDUCTION_LOOPS = "inductionLoops";
     public static final String LOW_COUNTER_ACCESS = "lowCounterAccess";
+    public static final String WHEELCHAIR_SUITABLE = "wheelchairSuitable";
 
     //CycleStorageEquipment
     public static final String NUMBER_OF_SPACES = "numberOfSpaces";
