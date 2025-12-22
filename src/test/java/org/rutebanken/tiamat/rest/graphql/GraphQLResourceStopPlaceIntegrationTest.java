@@ -44,6 +44,7 @@ import org.rutebanken.tiamat.model.PostalAddress;
 import org.rutebanken.tiamat.model.PrivateCodeStructure;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.SanitaryEquipment;
+import org.rutebanken.tiamat.model.SanitaryFacilityEnumeration;
 import org.rutebanken.tiamat.model.ShelterEquipment;
 import org.rutebanken.tiamat.model.SignContentEnumeration;
 import org.rutebanken.tiamat.model.SiteRefStructure;
@@ -201,6 +202,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         SanitaryEquipment toalett = new SanitaryEquipment();
         toalett.setNumberOfToilets(BigInteger.valueOf(2));
         toalett.setGender(GenderLimitationEnumeration.BOTH);
+        toalett.setSanitaryFacilityList(List.of(SanitaryFacilityEnumeration.WHEEL_CHAIR_ACCESS_TOILET));
 
         installedEquipments.add(toalett);
 
@@ -272,6 +274,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                                 sanitaryEquipment {
                                     id
                                     numberOfToilets
+                                    sanitaryFacilityList
                                 }
                                 cycleStorageEquipment {
                                     id
@@ -342,6 +345,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                 //sanitaryEquipment
                 .body("placeEquipments.sanitaryEquipment[0].numberOfToilets", equalTo(toalett.getNumberOfToilets().intValue()))
                 .body("placeEquipments.sanitaryEquipment[0].id", equalTo(toalett.getNetexId()))
+                .body("placeEquipments.sanitaryEquipment[0].sanitaryFacilityList[0]", equalTo(toalett.getSanitaryFacilityList().getFirst().value()))
                 //cycleStorageEquipment
                 .body("placeEquipments.cycleStorageEquipment[0].id", equalTo(cycleStorageEquipment.getNetexId()))
                 .body("placeEquipments.cycleStorageEquipment[0].numberOfSpaces", equalTo(cycleStorageEquipment.getNumberOfSpaces().intValue()));

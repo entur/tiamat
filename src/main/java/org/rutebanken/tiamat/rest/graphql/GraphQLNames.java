@@ -279,6 +279,7 @@ public class GraphQLNames {
     // SanitaryEquipment
     public static final String NUMBER_OF_TOILETS = "numberOfToilets";
     public static final String GENDER = "gender";
+    public static final String SANITARY_FACILITY_LIST = "sanitaryFacilityList";
 
     // WaitingRoomEquipment
     public static final String SEATS = "seats";

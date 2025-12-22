@@ -34,6 +34,8 @@ import org.rutebanken.netex.model.PrivateCodeStructure;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.netex.model.Quay;
 import org.rutebanken.netex.model.Quays_RelStructure;
+import org.rutebanken.netex.model.SanitaryEquipment;
+import org.rutebanken.netex.model.SanitaryFacilityEnumeration;
 import org.rutebanken.netex.model.SimplePoint_VersionStructure;
 import org.rutebanken.netex.model.SiteFacilitySet;
 import org.rutebanken.netex.model.SiteFacilitySets_RelStructure;
@@ -1317,13 +1319,22 @@ public class ImportResourceTest extends TiamatIntegrationTest {
         List<MobilityFacilityEnumeration> mobilityFacilityList = siteFacilitySet.getMobilityFacilityList();
         assertThat(mobilityFacilityList).hasSize(2);
 
-        Object placeEquipmentObj = stopPlace.getPlaceEquipments().getInstalledEquipmentRefOrInstalledEquipment().get(2);
-        assertThat(placeEquipmentObj)
+        Object ticketingEquipmentObj = stopPlace.getPlaceEquipments().getInstalledEquipmentRefOrInstalledEquipment().get(2);
+        assertThat(ticketingEquipmentObj)
                 .as("Place equipment element should be a JAXBElement")
                 .isInstanceOf(jakarta.xml.bind.JAXBElement.class);
-        JAXBElement equipmentElement = (JAXBElement) placeEquipmentObj;
+        JAXBElement equipmentElement = (JAXBElement) ticketingEquipmentObj;
         TicketingEquipment ticketingEquipment = (TicketingEquipment) equipmentElement.getValue();
         assertThat(ticketingEquipment.isWheelchairSuitable()).isTrue();
+
+        Object sanitaryEquipmentObj = stopPlace.getPlaceEquipments().getInstalledEquipmentRefOrInstalledEquipment().get(1);
+        assertThat(sanitaryEquipmentObj)
+                .as("Place equipment element should be a JAXBElement")
+                .isInstanceOf(jakarta.xml.bind.JAXBElement.class);
+        equipmentElement = (JAXBElement) sanitaryEquipmentObj;
+        SanitaryEquipment sanitaryEquipment = (SanitaryEquipment) equipmentElement.getValue();
+        assertThat(sanitaryEquipment.getSanitaryFacilityList()).hasSize(2);
+        assertThat(sanitaryEquipment.getSanitaryFacilityList().get(1)).isEqualTo(SanitaryFacilityEnumeration.WHEEL_CHAIR_ACCESS_TOILET);
     }
 
     @Test
