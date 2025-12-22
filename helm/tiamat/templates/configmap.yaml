@@ -93,7 +93,8 @@ data:
     logging.level.org.rutebanken.helper.organisation.ReflectionAuthorizationService=ERROR
 
     #Profile
-    spring.profiles.active=gcs-blobstore,google-pubsub
+    spring.profiles.active=gcs-blobstore,google-pubsub,entur
+    spring.main.allow-bean-definition-overriding=true
 
     # pubsub
     spring.cloud.gcp.project-id={{ .Values.configMap.pubsubProjectId }}
