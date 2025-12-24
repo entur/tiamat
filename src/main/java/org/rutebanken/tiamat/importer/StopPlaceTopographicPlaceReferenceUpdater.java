@@ -37,12 +37,13 @@ public class StopPlaceTopographicPlaceReferenceUpdater {
     private TopographicPlaceRepository topographicPlaceRepository;
 
 
-    public void updateTopographicReference(StopPlace stopPlace) {
-        if(stopPlace.getTopographicPlace() != null) {
+    public StopPlace updateTopographicReference(StopPlace stopPlace) {
+        if (stopPlace.getTopographicPlace() != null) {
             String netexId = stopPlace.getTopographicPlace().getNetexId();
             Long version = stopPlace.getTopographicPlace().getVersion();
             stopPlace.setTopographicPlace(topographicPlaceRepository.findFirstByNetexIdAndVersion(netexId, version));
             logger.trace("Resolved topographic place from {}:{} for stop place {}:{}", netexId, version, stopPlace.getNetexId(), stopPlace.getVersion());
         }
+        return stopPlace;
     }
 }
