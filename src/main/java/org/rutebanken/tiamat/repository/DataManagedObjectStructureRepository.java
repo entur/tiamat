@@ -16,7 +16,9 @@
 package org.rutebanken.tiamat.repository;
 
 import org.rutebanken.tiamat.model.DataManagedObjectStructure;
+import org.rutebanken.tiamat.model.Value;
 
+import java.util.Map;
 import java.util.Set;
 
 public interface DataManagedObjectStructureRepository<T extends DataManagedObjectStructure> {
