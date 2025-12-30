@@ -393,6 +393,8 @@ public class GraphQLNames {
     public static final String BOARDING_POSITIONS = "boardingPositions";
     public static final String FACILITIES = "facilities";
     public static final String MOBILITY_FACILITY_LIST = "mobilityFacilityList";
+    public static final String PASSENGER_INFORMATION_FACILITY_LIST = "passengerInformationFacilityList";
+    public static final String PASSENGER_INFORMATION_EQUIPMENT_LIST = "passengerInformationEquipmentList";
     public static final String VALID_BETWEEN = "validBetween";
     public static final String ADDRESSABLE_PLACE = "addressablePlace";
     public static final String PLACE_REF = "placeRef";
