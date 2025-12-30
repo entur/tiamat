@@ -21,6 +21,8 @@ import ma.glasnost.orika.metadata.TypeBuilder;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.rutebanken.netex.model.MobilityFacilityEnumeration;
+import org.rutebanken.netex.model.PassengerInformationEquipmentEnumeration;
+import org.rutebanken.netex.model.PassengerInformationFacilityEnumeration;
 import org.rutebanken.netex.model.SiteFacilitySets_RelStructure;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.SiteFacilitySet;
@@ -56,6 +58,8 @@ public class FacilitiesConverterTest extends TiamatIntegrationTest {
         SiteFacilitySets_RelStructure relStructure = new SiteFacilitySets_RelStructure();
         org.rutebanken.netex.model.SiteFacilitySet netexFacility1 = new org.rutebanken.netex.model.SiteFacilitySet();
         netexFacility1.withMobilityFacilityList(MobilityFacilityEnumeration.TACTILE_GUIDING_STRIPS, MobilityFacilityEnumeration.TACTILE_PLATFORM_EDGES);
+        netexFacility1.withPassengerInformationFacilityList(PassengerInformationFacilityEnumeration.PASSENGER_INFORMATION_DISPLAY);
+        netexFacility1.withPassengerInformationEquipmentList(PassengerInformationEquipmentEnumeration.INFORMATION_DESK);
         org.rutebanken.netex.model.SiteFacilitySet netexFacility2 = new org.rutebanken.netex.model.SiteFacilitySet();
         netexFacility2.withMobilityFacilityList(MobilityFacilityEnumeration.UNKNOWN);
         relStructure.withSiteFacilitySetRefOrSiteFacilitySet(Arrays.asList(netexFacility1, netexFacility2).toArray());
@@ -67,6 +71,14 @@ public class FacilitiesConverterTest extends TiamatIntegrationTest {
         boolean hasFacilityWithTactiles = facilities.stream()
                 .anyMatch(facility -> facility.getMobilityFacilityList().contains(org.rutebanken.tiamat.model.MobilityFacilityEnumeration.TACTILE_GUIDING_STRIPS) && facility.getMobilityFacilityList().contains(org.rutebanken.tiamat.model.MobilityFacilityEnumeration.TACTILE_PLATFORM_EDGES));
         assertThat(hasFacilityWithTactiles).isTrue();
+
+        boolean hasFacilityWithPassengerDisplay= facilities.stream()
+                .anyMatch(facility -> facility.getPassengerInformationFacilityList().contains(org.rutebanken.tiamat.model.PassengerInformationFacilityEnumeration.PASSENGER_INFORMATION_DISPLAY));
+        assertThat(hasFacilityWithPassengerDisplay).isTrue();
+
+        boolean hasFacilityWithInformationDesk= facilities.stream()
+                .anyMatch(facility -> facility.getPassengerInformationEquipmentList().contains(org.rutebanken.tiamat.model.PassengerInformationEquipmentEnumeration.INFORMATION_DESK));
+        assertThat(hasFacilityWithInformationDesk).isTrue();
 
         boolean hasFacilityWithUnknown = facilities.stream()
                 .anyMatch(facility -> facility.getMobilityFacilityList().contains(org.rutebanken.tiamat.model.MobilityFacilityEnumeration.UNKNOWN));

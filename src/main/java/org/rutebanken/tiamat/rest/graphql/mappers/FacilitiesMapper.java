@@ -48,15 +48,14 @@ public class FacilitiesMapper {
             passengerInformationFacilityList.add(passengerInformationFacilityVal);
         }
 
-        List passengerInformationEquipmentInput = (List) facilityMap.get(PASSENGER_INFORMATION_FACILITY_LIST);
+        List passengerInformationEquipmentInput = (List) facilityMap.get(PASSENGER_INFORMATION_EQUIPMENT_LIST);
         List<PassengerInformationEquipmentEnumeration> passengerEquipmentFacilityList  = new ArrayList<>();
         for (Object passengerEquipmentFacilityObject : passengerInformationEquipmentInput) {
             PassengerInformationEquipmentEnumeration passengerEquipmentFacilityVal = (PassengerInformationEquipmentEnumeration) passengerEquipmentFacilityObject;
             passengerEquipmentFacilityList.add(passengerEquipmentFacilityVal);
         }
-        PassengerInformationEquipmentEnumeration passengerInformationEquipment = (PassengerInformationEquipmentEnumeration) facilityMap.get(PASSENGER_INFORMATION_EQUIPMENT_LIST);
 
-        if (!mobilityFacilityListInput.isEmpty() || !passengerInformationFacilityList.isEmpty() || passengerInformationEquipment != null) {
+        if (!mobilityFacilityListInput.isEmpty() || !passengerInformationFacilityList.isEmpty() || passengerEquipmentFacilityList.isEmpty()) {
             SiteFacilitySet facilitySet = new SiteFacilitySet();
             facilitySet.setMobilityFacilityList(mobilityFacilityList);
             facilitySet.setPassengerInformationFacilityList(passengerInformationFacilityList);
