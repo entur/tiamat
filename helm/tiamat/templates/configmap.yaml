@@ -61,16 +61,11 @@ data:
 
     # OAuth2 Resource Server for Entur Partner tenant
     tiamat.oauth2.resourceserver.auth0.entur.partner.jwt.issuer-uri={{ .Values.auth0.entur.partner.url }}
-    tiamat.oauth2.resourceserver.auth0.entur.partner.jwt.audience={{ .Values.auth0.ror.audience }}
+    tiamat.oauth2.resourceserver.auth0.entur.partner.jwt.audience={{ .Values.auth0.entur.partner.audience }}
 
     # OAuth2 Resource Server for Entur internal tenant
     tiamat.oauth2.resourceserver.auth0.entur.internal.jwt.issuer-uri={{ .Values.auth0.entur.internal.url }}
-    tiamat.oauth2.resourceserver.auth0.entur.internal.jwt.audience={{ .Values.auth0.ror.audience }}
-
-    # OAuth2 Resource Server for RoR tenant
-    tiamat.oauth2.resourceserver.auth0.ror.jwt.issuer-uri={{ .Values.auth0.ror.url }}
-    tiamat.oauth2.resourceserver.auth0.ror.jwt.audience={{ .Values.auth0.ror.audience }}
-    tiamat.oauth2.resourceserver.auth0.ror.claim.namespace=https://ror.entur.io/
+    tiamat.oauth2.resourceserver.auth0.entur.internal.jwt.audience={{ .Values.auth0.entur.internal.audience }}
 
     # OAuth Entur Internal client
     spring.security.oauth2.client.registration.internal.authorization-grant-type=client_credentials

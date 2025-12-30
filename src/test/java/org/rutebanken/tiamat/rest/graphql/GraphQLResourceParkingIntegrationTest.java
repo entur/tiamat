@@ -159,6 +159,16 @@ public class GraphQLResourceParkingIntegrationTest extends AbstractGraphQLResour
                 "            }]" +
                 "      }" +
                 "      }]" +
+                "    accessibilityAssessment: {" +
+                "          limitations: {" +
+                "            wheelchairAccess:UNKNOWN," +
+                "            stepFreeAccess:TRUE," +
+                "            escalatorFreeAccess:UNKNOWN," +
+                "            liftFreeAccess:UNKNOWN," +
+                "            audibleSignalsAvailable:UNKNOWN," +
+                "            visualSignsAvailable:UNKNOWN" +
+                "          }," +
+                "     }," +
                 "}) {" +
                 "    id, " +
                 "    version, " +
@@ -202,6 +212,16 @@ public class GraphQLResourceParkingIntegrationTest extends AbstractGraphQLResour
                 "      type," +
                 "      coordinates" +
                 "    }" +
+                "    accessibilityAssessment { " +
+                "       limitations {" +
+                "        wheelchairAccess" +
+                "        stepFreeAccess" +
+                "        escalatorFreeAccess" +
+                "        liftFreeAccess" +
+                "        audibleSignalsAvailable" +
+                "        visualSignsAvailable" +
+                "      }" +
+                "    }"+
                 "  }" +
                 "}\",\"variables\": \"\"}";
         executeGraphQL(graphQlQuery)
@@ -231,8 +251,10 @@ public class GraphQLResourceParkingIntegrationTest extends AbstractGraphQLResour
                     .body("parkingAreas", notNullValue())
                     .body("parkingAreas.label.value", notNullValue())
                     .body("parkingAreas.totalCapacity", notNullValue())
-                    .body("parkingAreas.parkingProperties", notNullValue());
-
+                    .body("parkingAreas.parkingProperties", notNullValue())
+                    .body("accessibilityAssessment", notNullValue())
+                    .body("accessibilityAssessment.limitations.stepFreeAccess", equalTo("TRUE"))
+                    .body("accessibilityAssessment.limitations.wheelchairAccess", equalTo("UNKNOWN"));;
     }
 
 
@@ -292,6 +314,16 @@ public class GraphQLResourceParkingIntegrationTest extends AbstractGraphQLResour
                 "            }]" +
                 "      }" +
                 "      }]" +
+                "    accessibilityAssessment: {" +
+                "          limitations: {" +
+                "            wheelchairAccess:UNKNOWN," +
+                "            stepFreeAccess:TRUE," +
+                "            escalatorFreeAccess:UNKNOWN," +
+                "            liftFreeAccess:UNKNOWN," +
+                "            audibleSignalsAvailable:UNKNOWN," +
+                "            visualSignsAvailable:UNKNOWN" +
+                "          }," +
+                "     }," +
                 "}) {" +
                 "    id, " +
                 "    version, " +
@@ -335,6 +367,16 @@ public class GraphQLResourceParkingIntegrationTest extends AbstractGraphQLResour
                 "      type," +
                 "      coordinates" +
                 "    }" +
+                "    accessibilityAssessment { " +
+                "       limitations {" +
+                "        wheelchairAccess" +
+                "        stepFreeAccess" +
+                "        escalatorFreeAccess" +
+                "        liftFreeAccess" +
+                "        audibleSignalsAvailable" +
+                "        visualSignsAvailable" +
+                "      }" +
+                "    }"+
                 "  }" +
                 "}\",\"variables\": \"\"}";
         executeGraphQL(graphQlQuery)
@@ -365,8 +407,10 @@ public class GraphQLResourceParkingIntegrationTest extends AbstractGraphQLResour
                     .body("parkingAreas", notNullValue())
                     .body("parkingAreas.label.value", notNullValue())
                     .body("totalCapacity", equalTo(223))
-                    .body("parkingAreas.parkingProperties", notNullValue());
-
+                    .body("parkingAreas.parkingProperties", notNullValue())
+                    .body("accessibilityAssessment", notNullValue())
+                    .body("accessibilityAssessment.limitations.stepFreeAccess", equalTo("TRUE"))
+                    .body("accessibilityAssessment.limitations.wheelchairAccess", equalTo("UNKNOWN"));
     }
 
 

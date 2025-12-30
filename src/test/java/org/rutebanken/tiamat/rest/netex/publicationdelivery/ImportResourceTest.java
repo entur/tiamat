@@ -18,22 +18,30 @@ package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 import com.google.common.collect.Sets;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.StreamingOutput;
+import jakarta.xml.bind.JAXBElement;
 import jakarta.xml.bind.JAXBException;
 import org.junit.Assert;
 import org.junit.Test;
+import org.rutebanken.netex.model.AccessibilityLimitation;
+import org.rutebanken.netex.model.AccessibilityLimitations_RelStructure;
 import org.rutebanken.netex.model.KeyValueStructure;
+import org.rutebanken.netex.model.LimitationStatusEnumeration;
 import org.rutebanken.netex.model.LocationStructure;
 import org.rutebanken.netex.model.MobilityFacilityEnumeration;
 import org.rutebanken.netex.model.MultilingualString;
+import org.rutebanken.netex.model.Parking;
 import org.rutebanken.netex.model.PrivateCodeStructure;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.netex.model.Quay;
 import org.rutebanken.netex.model.Quays_RelStructure;
+import org.rutebanken.netex.model.SanitaryEquipment;
+import org.rutebanken.netex.model.SanitaryFacilityEnumeration;
 import org.rutebanken.netex.model.SimplePoint_VersionStructure;
 import org.rutebanken.netex.model.SiteFacilitySet;
 import org.rutebanken.netex.model.SiteFacilitySets_RelStructure;
 import org.rutebanken.netex.model.StopPlace;
 import org.rutebanken.netex.model.StopTypeEnumeration;
+import org.rutebanken.netex.model.TicketingEquipment;
 import org.rutebanken.netex.model.ValidBetween;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.importer.ImportParams;
@@ -1198,6 +1206,12 @@ public class ImportResourceTest extends TiamatIntegrationTest {
                                   </SanitaryEquipment>
                                   <TicketingEquipment id="NSB:TicketingEquipment:3" version="1">
                                      <NumberOfMachines>1</NumberOfMachines>
+                                     <TicketOffice>true</TicketOffice>
+                                     <LowCounterAccess>true</LowCounterAccess>
+                                     <InductionLoops>true</InductionLoops>
+                                     <TactileInterfaceAvailable>false</TactileInterfaceAvailable>
+                                     <AudioInterfaceAvailable>false</AudioInterfaceAvailable>
+                                     <WheelchairSuitable>true</WheelchairSuitable>
                                   </TicketingEquipment>
                                </placeEquipments>
                                <localServices>
@@ -1304,6 +1318,23 @@ public class ImportResourceTest extends TiamatIntegrationTest {
         SiteFacilitySet siteFacilitySet = (SiteFacilitySet) quay.getFacilities().getSiteFacilitySetRefOrSiteFacilitySet().getFirst();
         List<MobilityFacilityEnumeration> mobilityFacilityList = siteFacilitySet.getMobilityFacilityList();
         assertThat(mobilityFacilityList).hasSize(2);
+
+        Object ticketingEquipmentObj = stopPlace.getPlaceEquipments().getInstalledEquipmentRefOrInstalledEquipment().get(2);
+        assertThat(ticketingEquipmentObj)
+                .as("Place equipment element should be a JAXBElement")
+                .isInstanceOf(jakarta.xml.bind.JAXBElement.class);
+        JAXBElement equipmentElement = (JAXBElement) ticketingEquipmentObj;
+        TicketingEquipment ticketingEquipment = (TicketingEquipment) equipmentElement.getValue();
+        assertThat(ticketingEquipment.isWheelchairSuitable()).isTrue();
+
+        Object sanitaryEquipmentObj = stopPlace.getPlaceEquipments().getInstalledEquipmentRefOrInstalledEquipment().get(1);
+        assertThat(sanitaryEquipmentObj)
+                .as("Place equipment element should be a JAXBElement")
+                .isInstanceOf(jakarta.xml.bind.JAXBElement.class);
+        equipmentElement = (JAXBElement) sanitaryEquipmentObj;
+        SanitaryEquipment sanitaryEquipment = (SanitaryEquipment) equipmentElement.getValue();
+        assertThat(sanitaryEquipment.getSanitaryFacilityList()).hasSize(2);
+        assertThat(sanitaryEquipment.getSanitaryFacilityList().get(1)).isEqualTo(SanitaryFacilityEnumeration.WHEEL_CHAIR_ACCESS_TOILET);
     }
 
     @Test
@@ -1337,5 +1368,15 @@ public class ImportResourceTest extends TiamatIntegrationTest {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         streamingOutput.write(byteArrayOutputStream);
         System.out.println(byteArrayOutputStream.toString());
+
+        List<Parking> parkings = publicationDeliveryTestHelper.extractParkings(response);
+        assertThat(parkings).hasSize(2);
+
+        Parking parking = parkings.get(0);
+        assertThat(parking.getAccessibilityAssessment()).isNotNull();
+        AccessibilityLimitation limitations = parking.getAccessibilityAssessment().getLimitations().getAccessibilityLimitation();
+        assertThat(limitations).isNotNull();
+        assertThat(limitations.getStepFreeAccess()).isEqualTo(LimitationStatusEnumeration.TRUE);
+        assertThat(limitations.getWheelchairAccess()).isEqualTo(LimitationStatusEnumeration.UNKNOWN);
     }
 }

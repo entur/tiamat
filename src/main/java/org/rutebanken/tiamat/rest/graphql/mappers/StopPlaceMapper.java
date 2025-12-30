@@ -21,6 +21,7 @@ import org.rutebanken.tiamat.model.BusSubmodeEnumeration;
 import org.rutebanken.tiamat.model.FunicularSubmodeEnumeration;
 import org.rutebanken.tiamat.model.InterchangeWeightingEnumeration;
 import org.rutebanken.tiamat.model.MetroSubmodeEnumeration;
+import org.rutebanken.tiamat.model.PostalAddress;
 import org.rutebanken.tiamat.model.PrivateCodeStructure;
 import org.rutebanken.tiamat.model.RailSubmodeEnumeration;
 import org.rutebanken.tiamat.model.SiteFacilitySet;
@@ -46,6 +47,7 @@ import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ADJACENT_SITES;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ENTITY_REF_REF;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.FACILITIES;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PARENT_SITE_REF;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.POSTAL_ADDRESS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PRIVATE_CODE;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PUBLIC_CODE;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.QUAYS;
@@ -77,6 +79,9 @@ public class StopPlaceMapper {
 
     @Autowired
     private FacilitiesMapper facilitiesMapper;
+
+    @Autowired
+    private PostalAddressMapper postalAddressMapper;
 
     /**
      * @param input
@@ -137,6 +142,10 @@ public class StopPlaceMapper {
         if (input.get(URL) != null) {
             stopPlace.setUrl((String) input.get(URL));
             isUpdated = true;
+        }
+
+        if (input.containsKey(POSTAL_ADDRESS)) {
+            isUpdated = postalAddressMapper.populatePostalAddressFromInput(stopPlace, (Map) input.get(POSTAL_ADDRESS));
         }
 
         isUpdated |= stopPlaceTariffZoneRefsMapper.populate(input, stopPlace);

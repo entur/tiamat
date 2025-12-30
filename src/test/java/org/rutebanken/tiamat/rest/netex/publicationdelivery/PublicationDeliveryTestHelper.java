@@ -30,6 +30,7 @@ import org.rutebanken.netex.model.FareFrame;
 import org.rutebanken.netex.model.GroupOfStopPlaces;
 import org.rutebanken.netex.model.LocaleStructure;
 import org.rutebanken.netex.model.ObjectFactory;
+import org.rutebanken.netex.model.Parking;
 import org.rutebanken.netex.model.PathLink;
 import org.rutebanken.netex.model.PathLinksInFrame_RelStructure;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
@@ -212,6 +213,17 @@ public class PublicationDeliveryTestHelper {
         SiteFrame siteFrame = findSiteFrame(publicationDeliveryStructure);
         if(siteFrame.getTopographicPlaces() != null && siteFrame.getTopographicPlaces().getTopographicPlace() != null) {
             return siteFrame.getTopographicPlaces().getTopographicPlace();
+        } else {
+            return new ArrayList<>();
+        }
+    }
+
+    public List<Parking> extractParkings(Response response) throws JAXBException, IOException {
+        PublicationDeliveryStructure publicationDeliveryStructure = fromResponse(response);
+
+        SiteFrame siteFrame = findSiteFrame(publicationDeliveryStructure);
+        if(siteFrame.getParkings() != null && siteFrame.getParkings().getParking() != null) {
+            return siteFrame.getParkings().getParking();
         } else {
             return new ArrayList<>();
         }
