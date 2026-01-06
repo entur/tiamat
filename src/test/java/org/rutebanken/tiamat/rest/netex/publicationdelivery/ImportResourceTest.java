@@ -1379,4 +1379,28 @@ public class ImportResourceTest extends TiamatIntegrationTest {
         assertThat(limitations.getStepFreeAccess()).isEqualTo(LimitationStatusEnumeration.TRUE);
         assertThat(limitations.getWheelchairAccess()).isEqualTo(LimitationStatusEnumeration.UNKNOWN);
     }
+
+    @Test
+    public void importParentChild() throws JAXBException, IOException, SAXException {
+        final FileInputStream fileInputStream = new FileInputStream("src/test/resources/org/rutebanken/tiamat/rest/netex/publicationdelivery/parent_child.xml");
+
+        ImportParams importParams = new ImportParams();
+        importParams.importType = ImportType.INITIAL;
+
+        Response response = importResource.importPublicationDelivery(fileInputStream, importParams);
+        assertThat(response.getStatus()).isEqualTo(200);
+
+        StreamingOutput streamingOutput = (StreamingOutput) response.getEntity();
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        streamingOutput.write(byteArrayOutputStream);
+
+        String responseBody = byteArrayOutputStream.toString(StandardCharsets.UTF_8);
+        System.out.println(responseBody);
+
+        PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryTestHelper.fromString(responseBody);
+        assertThat(publicationDeliveryStructure).isNotNull();
+
+        List<StopPlace> stopPlaces = publicationDeliveryTestHelper.extractStopPlaces(publicationDeliveryStructure);
+        assertThat(stopPlaces).hasSize(3);
+    }
 }

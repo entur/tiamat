@@ -19,8 +19,6 @@ import org.rutebanken.tiamat.importer.StopPlaceTopographicPlaceReferenceUpdater;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.versioning.save.StopPlaceVersionedSaverService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -29,13 +27,11 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static java.util.stream.Collectors.toList;
+import static java.util.stream.Stream.concat;
 
 @Component
 @Transactional
 public class ParallelInitialStopPlaceImporter {
-
-    private static final Logger logger = LoggerFactory.getLogger(ParallelInitialStopPlaceImporter.class);
 
     @Autowired
     private StopPlaceVersionedSaverService stopPlaceVersionedSaverService;
@@ -49,26 +45,38 @@ public class ParallelInitialStopPlaceImporter {
     @Value("${changelog.publish.enabled:false}")
     private boolean publishChangelog;
 
-    public List<org.rutebanken.netex.model.StopPlace> importStopPlaces(List<StopPlace> tiamatStops, AtomicInteger stopPlacesCreated) {
+    @Autowired
+    private StopPlaceParentCreator parentStopPlaceCreator;
 
-        if (publishChangelog){
+    public List<org.rutebanken.netex.model.StopPlace> importStopPlaces(List<StopPlace> tiamatStops, AtomicInteger stopPlacesCreated) {
+        if (publishChangelog) {
             throw new IllegalStateException("Initial import not allowed with changelog publishing enabled! Set changelog.publish.enabled=false");
         }
 
-        return tiamatStops.parallelStream()
-                .map(stopPlace -> {
+        StopPlaceParentChildProcessor processor = new StopPlaceParentChildProcessor(
+                stopPlaceVersionedSaverService,
+                parentStopPlaceCreator,
+                stopPlacesCreated
+        );
 
-                    if(stopPlace.getTariffZones() != null) {
-                        stopPlace.getTariffZones().forEach(tariffZoneRef -> tariffZoneRef.setVersion(null));
-                    }
+        List<StopPlace> stops = tiamatStops.parallelStream()
+                .map(this::clearTariffZoneVersions)
+                .map(stopPlaceTopographicPlaceReferenceUpdater::updateTopographicReference)
+                .flatMap(processor::processStopPlace)
+                .toList();
 
-                    return stopPlace;
-                })
-                .peek(stopPlace -> stopPlaceTopographicPlaceReferenceUpdater.updateTopographicReference(stopPlace))
-                .map(stopPlace -> stopPlaceVersionedSaverService.saveNewVersion(stopPlace))
-                .peek(stopPlace -> stopPlacesCreated.incrementAndGet())
-                .map(stopPlace -> netexMapper.mapToNetexModel(stopPlace))
-                .collect(toList());
+        List<StopPlace> parents = processor.createAndSaveParentStopPlaces();
+
+        return concat(stops.stream(), parents.stream())
+                .map(netexMapper::mapToNetexModel)
+                .toList();
+    }
+
+    private StopPlace clearTariffZoneVersions(StopPlace stopPlace) {
+        if (stopPlace.getTariffZones() != null) {
+            stopPlace.getTariffZones().forEach(tariffZoneRef -> tariffZoneRef.setVersion(null));
+        }
+        return stopPlace;
     }
 
 }
