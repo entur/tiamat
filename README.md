@@ -498,6 +498,41 @@ This can be done setting env variable :
 
 If not, the application may complain about user not being authenticated if Spring tries to check authorization in a spawned process
 
+### Importing Fare Zones from FareFrame
+
+Tiamat supports importing fare zones from both SiteFrame (legacy) and FareFrame (proper NeTEx structure). Use the `fareZoneFrameSource` parameter to control the import source:
+
+**Available modes:**
+- `SITE_FRAME` (default) - Import fare zones from SiteFrame/tariffZones (backward compatible)
+- `FARE_FRAME` - Import fare zones from FareFrame/fareZones only
+- `BOTH` - Import from both SiteFrame and FareFrame simultaneously
+
+**Examples:**
+
+```shell
+# Default mode (SITE_FRAME) - backward compatible
+curl -XPOST -H"Content-Type: application/xml" \
+  -d@my-netex-file.xml \
+  http://localhost:1888/services/stop_places/netex
+
+# Import from FareFrame only
+curl -XPOST -H"Content-Type: application/xml" \
+  -d@fareframe-data.xml \
+  "http://localhost:1888/services/stop_places/netex?fareZoneFrameSource=FARE_FRAME"
+
+# Import from both SiteFrame and FareFrame
+curl -XPOST -H"Content-Type: application/xml" \
+  -d@both-frames-data.xml \
+  "http://localhost:1888/services/stop_places/netex?fareZoneFrameSource=BOTH"
+```
+
+**Response structure:**
+- `SITE_FRAME` mode returns SiteFrame with tariffZones (existing behavior)
+- `FARE_FRAME` mode returns FareFrame with fareZones only
+- `BOTH` mode returns both SiteFrame and FareFrame in the response
+
+**Note:** When using `FARE_FRAME` or `BOTH` modes, ensure your input XML has the correct NeTEx structure with FrameDefaults before ValidBetween elements.
+
 ## GraphQL
 GraphQL endpoint is available on
 ```

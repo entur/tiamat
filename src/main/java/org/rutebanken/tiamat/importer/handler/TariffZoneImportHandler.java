@@ -46,7 +46,9 @@
 package org.rutebanken.tiamat.importer.handler;
 
 import jakarta.xml.bind.JAXBElement;
+import org.rutebanken.netex.model.FareFrame;
 import org.rutebanken.netex.model.FareZone;
+import org.rutebanken.netex.model.FareZonesInFrame_RelStructure;
 import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.SiteFrame;
 import org.rutebanken.netex.model.TariffZone;
@@ -119,6 +121,60 @@ public class TariffZoneImportHandler {
             if (!importedFareZones.isEmpty()) {
                 responseSiteframe.withTariffZones(new TariffZonesInFrame_RelStructure().withTariffZone(importedFareZones));
             }
+        }
+    }
+
+    /**
+     * Handle fare zones from FareFrame.
+     * Extracts and imports FareZones from FareFrame, populating the response FareFrame.
+     *
+     * @param netexFareFrame Input FareFrame containing fare zones to import
+     * @param importParams Import parameters
+     * @param tariffZoneImportedCounter Counter for imported zones
+     * @param responseFareFrame Response FareFrame to populate with imported zones
+     */
+    public void handleFareZonesFromFareFrame(
+            FareFrame netexFareFrame,
+            ImportParams importParams,
+            AtomicInteger tariffZoneImportedCounter,
+            FareFrame responseFareFrame) {
+
+        if (!publicationDeliveryHelper.hasFareZonesInFareFrame(netexFareFrame)) {
+            logger.debug("No fare zones found in FareFrame");
+            return;
+        }
+
+        if (importParams.importType == ImportType.ID_MATCH) {
+            logger.debug("Skipping fare zone import for ID_MATCH import type");
+            return;
+        }
+
+        logger.info("Processing {} fare zones from FareFrame",
+                netexFareFrame.getFareZones().getFareZone().size());
+
+        // Extract FareZone objects from the frame
+        List<org.rutebanken.tiamat.model.FareZone> tiamatFareZones = netexFareFrame
+                .getFareZones()
+                .getFareZone()
+                .stream()
+                .map(netexMapper::mapToTiamatModel)
+                .collect(Collectors.toList());
+
+        logger.debug("Mapped {} fare zones from NeTEx to internal model", tiamatFareZones.size());
+
+        // Import using the existing FareZoneImporter
+        List<FareZone> importedFareZones = fareZoneImporter.importFareZones(tiamatFareZones);
+
+        logger.debug("Imported {} fare zones", importedFareZones.size());
+
+        // Update counter
+        tariffZoneImportedCounter.addAndGet(importedFareZones.size());
+
+        // Populate response FareFrame if there are imported zones
+        if (!importedFareZones.isEmpty()) {
+            FareZonesInFrame_RelStructure fareZonesInFrame = new FareZonesInFrame_RelStructure();
+            fareZonesInFrame.getFareZone().addAll(importedFareZones);
+            responseFareFrame.setFareZones(fareZonesInFrame);
         }
     }
 

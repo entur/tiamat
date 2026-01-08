@@ -18,7 +18,9 @@ package org.rutebanken.tiamat.netex.mapping;
 import jakarta.xml.bind.JAXBElement;
 import org.rutebanken.netex.model.Common_VersionFrameStructure;
 import org.rutebanken.netex.model.CompositeFrame;
+import org.rutebanken.netex.model.Composite_VersionFrameStructure;
 import org.rutebanken.netex.model.DataManagedObjectStructure;
+import org.rutebanken.netex.model.FareFrame;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.netex.model.SiteFrame;
 import org.rutebanken.netex.model.TopographicPlace;
@@ -81,19 +83,46 @@ public class PublicationDeliveryHelper {
                 .map(element -> (SiteFrame) element.getValue())
                 .findFirst();
 
-        if (optionalSiteframe.isPresent()) {
-            return optionalSiteframe.get();
-        }
-
-        return compositeFrameOrCommonFrame
+        return optionalSiteframe.orElseGet(() -> compositeFrameOrCommonFrame
                 .stream()
                 .filter(element -> element.getValue() instanceof CompositeFrame)
                 .map(element -> (CompositeFrame) element.getValue())
-                .map(compositeFrame -> compositeFrame.getFrames())
+                .map(Composite_VersionFrameStructure::getFrames)
                 .flatMap(frames -> frames.getCommonFrame().stream())
                 .filter(jaxbElement -> jaxbElement.getValue() instanceof SiteFrame)
                 .map(jaxbElement -> (SiteFrame) jaxbElement.getValue())
-                .findAny().get();
+                .findAny().get());
+
+    }
+
+    public FareFrame findFareFrame(PublicationDeliveryStructure incomingPublicationDelivery) {
+
+        List<JAXBElement<? extends Common_VersionFrameStructure>> compositeFrameOrCommonFrame = incomingPublicationDelivery.getDataObjects().getCompositeFrameOrCommonFrame();
+
+        Optional<FareFrame> optionalFareFrame = compositeFrameOrCommonFrame
+                .stream()
+                .filter(element -> element.getValue() instanceof FareFrame)
+                .map(element -> (FareFrame) element.getValue())
+                .findFirst();
+
+        return optionalFareFrame.orElseGet(() -> compositeFrameOrCommonFrame
+                .stream()
+                .filter(element -> element.getValue() instanceof CompositeFrame)
+                .map(element -> (CompositeFrame) element.getValue())
+                .map(Composite_VersionFrameStructure::getFrames)
+                .flatMap(frames -> frames.getCommonFrame().stream())
+                .filter(jaxbElement -> jaxbElement.getValue() instanceof FareFrame)
+                .map(jaxbElement -> (FareFrame) jaxbElement.getValue())
+                .findAny()
+                .orElse(null));
+
+    }
+
+    public boolean hasFareZonesInFareFrame(FareFrame fareFrame) {
+        return fareFrame != null
+                && fareFrame.getFareZones() != null
+                && fareFrame.getFareZones().getFareZone() != null
+                && !fareFrame.getFareZones().getFareZone().isEmpty();
     }
 
     public Set<String> getImportedIds(DataManagedObjectStructure dataManagedObject) {

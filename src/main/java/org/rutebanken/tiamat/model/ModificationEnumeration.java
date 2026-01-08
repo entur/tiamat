@@ -23,6 +23,7 @@ public enum ModificationEnumeration {
     DELETE("delete"),
 
     REVISE("revise"),
+    UNCHANGED("unchanged"),
     DELTA("delta");
     private final String value;
 

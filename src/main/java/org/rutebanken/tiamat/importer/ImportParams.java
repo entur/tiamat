@@ -62,6 +62,10 @@ public class ImportParams {
     @QueryParam(value = "importOnlyTariffZones")
     public boolean importOnlyTariffZones = false;
 
+    @Parameter(description = "Specify which frame to use for fare zone import: SITE_FRAME (default), FARE_FRAME, or BOTH")
+    @QueryParam(value = "fareZoneFrameSource")
+    public FareZoneFrameSource fareZoneFrameSource = FareZoneFrameSource.SITE_FRAME;
+
     @Parameter(description = "Disable pre and post processing steps, import raw data as is")
     @QueryParam(value = "disablePreAndPostProcessing")
     public boolean disablePreAndPostProcessing = false;
