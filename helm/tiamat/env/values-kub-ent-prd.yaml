@@ -14,14 +14,14 @@ auth0:
   entur:
     internal:
       url: https://internal.entur.org/
-      audience: https://api.entur.io,https://ror.api.entur.io
+      audience: https://api.entur.io
     partner:
       url: https://partner.entur.org/
-      audience: https://api.entur.io,https://ror.api.entur.io
+      audience: https://api.entur.io
   client:
     id: ga01hAU7XrM8cPOSuYXOocFoM8c1wB42
     url: https://internal.entur.org/oauth/token
-    audience: https://ror.api.entur.io
+    audience: https://api.entur.io
 
 organisation:
   service: http://baba.prd.entur.internal
