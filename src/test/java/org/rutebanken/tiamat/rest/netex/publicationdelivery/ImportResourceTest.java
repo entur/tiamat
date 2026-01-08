@@ -30,6 +30,8 @@ import org.rutebanken.netex.model.LocationStructure;
 import org.rutebanken.netex.model.MobilityFacilityEnumeration;
 import org.rutebanken.netex.model.MultilingualString;
 import org.rutebanken.netex.model.Parking;
+import org.rutebanken.netex.model.PassengerInformationEquipmentEnumeration;
+import org.rutebanken.netex.model.PassengerInformationFacilityEnumeration;
 import org.rutebanken.netex.model.PrivateCodeStructure;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.netex.model.Quay;
@@ -406,6 +408,8 @@ public class ImportResourceTest extends TiamatIntegrationTest {
                                                 .withMobilityFacilityList(
                                                         org.rutebanken.netex.model.MobilityFacilityEnumeration.TACTILE_GUIDING_STRIPS,
                                                         org.rutebanken.netex.model.MobilityFacilityEnumeration.TACTILE_PLATFORM_EDGES)
+                                                .withPassengerInformationFacilityList(PassengerInformationFacilityEnumeration.PASSENGER_INFORMATION_DISPLAY)
+                                                .withPassengerInformationEquipmentList(PassengerInformationEquipmentEnumeration.INFORMATION_DESK)
                                 ))));
 
         PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace);
@@ -1248,6 +1252,8 @@ public class ImportResourceTest extends TiamatIntegrationTest {
                                      <facilities>
                                         <SiteFacilitySet modification="new" version="1" id="NSB:SiteFacilitySet:16">
                                             <MobilityFacilityList>tactilePlatformEdges tactileGuidingStrips</MobilityFacilityList>
+                                            <PassengerInformationEquipmentList>informationDesk</PassengerInformationEquipmentList>
+                                            <PassengerInformationFacilityList>passengerInformationDisplay</PassengerInformationFacilityList>
                                         </SiteFacilitySet>
                                      </facilities>
                                      <PublicCode>1</PublicCode>
