@@ -2,6 +2,10 @@ package org.rutebanken.tiamat.ext.fintraffic.api.repository;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.rutebanken.netex.model.EntityInVersionStructure;
+import org.rutebanken.netex.model.Parking;
+import org.rutebanken.netex.model.PassengerStopAssignment;
+import org.rutebanken.netex.model.ScheduledStopPoint;
 import org.rutebanken.netex.model.StopPlace;
 import org.rutebanken.tiamat.ext.fintraffic.api.model.ReadApiEntityInRecord;
 import org.slf4j.Logger;
@@ -166,5 +170,36 @@ public abstract class AbstractNetexRepository implements NetexRepository {
             }
             DataSourceUtils.releaseConnection(conn, dataSource);
         }
+    }
+
+    @Override
+    public void checkDatabaseConsistency() {
+        checkDatabaseConsistency(StopPlace.class);
+        checkDatabaseConsistency(Parking.class);
+        checkDatabaseConsistency(ScheduledStopPoint.class);
+        checkDatabaseConsistency(PassengerStopAssignment.class);
+    }
+
+    private <T extends EntityInVersionStructure> void checkDatabaseConsistency(Class<T> entityClass) {
+        String sql = ReadApiDbConsistency.getDbConsistencySql(entityClass);
+        int maxIssues = 10;
+        jdbc.query(sql, rs -> {
+            int issueCount = 0;
+            StringBuilder firstIssues = new StringBuilder();
+            while (rs.next()) {
+                issueCount++;
+                if (issueCount <= maxIssues) {
+                    String netexId = rs.getString("netex_id");
+                    int version = rs.getInt("version");
+                    String issue = rs.getString("issue");
+                    firstIssues.append(String.format("Issue: %s, StopPlace ID: %s, Version: %d%n", issue, netexId, version));
+                }
+            }
+            if (issueCount > 0) {
+                logger.warn("StopPlace drift check found {} issues. First {} issues:\n{}", issueCount, Math.min(maxIssues, issueCount), firstIssues);
+            } else {
+                logger.info("StopPlace drift check found no issues.");
+            }
+        });
     }
 }

@@ -9,5 +9,6 @@ import java.util.stream.Stream;
 
 public interface NetexRepository {
     void upsertEntities(Collection<ReadApiEntityInRecord> entityRecords);
+    void checkDatabaseConsistency();
     Stream<ReadApiEntityOutRecord> streamStopPlaces(ReadApiSearchKey searchKey);
 }
