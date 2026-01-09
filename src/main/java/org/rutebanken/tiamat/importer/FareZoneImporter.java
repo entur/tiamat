@@ -16,6 +16,7 @@
 package org.rutebanken.tiamat.importer;
 
 import org.rutebanken.netex.model.FareZone;
+import org.rutebanken.tiamat.config.FareZoneConfig;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.versioning.save.FareZoneSaverService;
 import org.slf4j.Logger;
@@ -24,7 +25,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static java.util.stream.Collectors.toList;
 
@@ -40,17 +43,39 @@ public class FareZoneImporter {
     @Autowired
     private FareZoneSaverService fareZoneSaverService;
 
+    @Autowired
+    private FareZoneConfig fareZoneConfig;
 
-    public List<FareZone> importFareZones(List<org.rutebanken.tiamat.model.FareZone> fareZones) {
 
-        return fareZones
+    public FareZoneImportResult importFareZones(List<org.rutebanken.tiamat.model.FareZone> fareZones) {
+        Set<String> importedNetexIds = new HashSet<>();
+
+        List<FareZone> importedFareZones = fareZones
                 .stream()
                 .peek(incomingFareZone -> logger.info("Importing fare zone {}, version {}, name {}. Has polygon? {}",
                         incomingFareZone.getNetexId(), incomingFareZone.getVersion(),
                         incomingFareZone.getName(), incomingFareZone.getPolygon() != null && incomingFareZone.getPolygon().getExteriorRing() != null))
-                .map(incomingFareZone -> fareZoneSaverService.saveNewVersion(incomingFareZone))
+                .map(incomingFareZone -> {
+                    org.rutebanken.tiamat.model.FareZone saved;
+
+                    if (fareZoneConfig.isExternalVersioning()) {
+                        saved = fareZoneSaverService.saveWithExternalVersioning(incomingFareZone);
+                        logger.debug("Saved FareZone {} with external versioning", saved.getNetexId());
+                    } else {
+                        saved = fareZoneSaverService.saveNewVersion(incomingFareZone);
+                        logger.debug("Saved FareZone {} with default versioning", saved.getNetexId());
+                    }
+
+                    if (saved.getNetexId() != null) {
+                        importedNetexIds.add(saved.getNetexId());
+                    }
+
+                    return saved;
+                })
                 .map(savedFareZone -> netexMapper.getFacade().map(savedFareZone, FareZone.class))
                 .collect(toList());
+
+        return new FareZoneImportResult(importedFareZones, importedNetexIds);
     }
 
 }

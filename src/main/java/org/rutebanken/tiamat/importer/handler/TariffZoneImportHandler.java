@@ -113,7 +113,7 @@ public class TariffZoneImportHandler {
                     .map(tariffZone -> new ObjectFactory().createTariffZone(tariffZone)).collect(Collectors.toList());
             logger.debug("Got {} imported tariffZones ", importedTariffZones.size());
 
-            List<JAXBElement<? extends Zone_VersionStructure>> importedFareZones = fareZoneImporter.importFareZones(tiamatFareZones).stream()
+            List<JAXBElement<? extends Zone_VersionStructure>> importedFareZones = fareZoneImporter.importFareZones(tiamatFareZones).getImportedFareZones().stream()
                     .map(fareZone -> new ObjectFactory().createFareZone(fareZone)).collect(Collectors.toList());
             if (!importedTariffZones.isEmpty()) {
                 responseSiteframe.withTariffZones(new TariffZonesInFrame_RelStructure().withTariffZone(importedTariffZones));
@@ -132,8 +132,9 @@ public class TariffZoneImportHandler {
      * @param importParams Import parameters
      * @param tariffZoneImportedCounter Counter for imported zones
      * @param responseFareFrame Response FareFrame to populate with imported zones
+     * @return Set of imported FareZone netexIds (for external versioning cleanup)
      */
-    public void handleFareZonesFromFareFrame(
+    public java.util.Set<String> handleFareZonesFromFareFrame(
             FareFrame netexFareFrame,
             ImportParams importParams,
             AtomicInteger tariffZoneImportedCounter,
@@ -141,12 +142,12 @@ public class TariffZoneImportHandler {
 
         if (!publicationDeliveryHelper.hasFareZonesInFareFrame(netexFareFrame)) {
             logger.debug("No fare zones found in FareFrame");
-            return;
+            return java.util.Collections.emptySet();
         }
 
         if (importParams.importType == ImportType.ID_MATCH) {
             logger.debug("Skipping fare zone import for ID_MATCH import type");
-            return;
+            return java.util.Collections.emptySet();
         }
 
         logger.info("Processing {} fare zones from FareFrame",
@@ -162,20 +163,22 @@ public class TariffZoneImportHandler {
 
         logger.debug("Mapped {} fare zones from NeTEx to internal model", tiamatFareZones.size());
 
-        // Import using the existing FareZoneImporter
-        List<FareZone> importedFareZones = fareZoneImporter.importFareZones(tiamatFareZones);
+        // Import using the existing FareZoneImporter - now returns ImportResult
+        org.rutebanken.tiamat.importer.FareZoneImportResult importResult = fareZoneImporter.importFareZones(tiamatFareZones);
 
-        logger.debug("Imported {} fare zones", importedFareZones.size());
+        logger.debug("Imported {} fare zones", importResult.getImportedFareZones().size());
 
         // Update counter
-        tariffZoneImportedCounter.addAndGet(importedFareZones.size());
+        tariffZoneImportedCounter.addAndGet(importResult.getImportedFareZones().size());
 
         // Populate response FareFrame if there are imported zones
-        if (!importedFareZones.isEmpty()) {
+        if (!importResult.getImportedFareZones().isEmpty()) {
             FareZonesInFrame_RelStructure fareZonesInFrame = new FareZonesInFrame_RelStructure();
-            fareZonesInFrame.getFareZone().addAll(importedFareZones);
+            fareZonesInFrame.getFareZone().addAll(importResult.getImportedFareZones());
             responseFareFrame.setFareZones(fareZonesInFrame);
         }
+
+        return importResult.getImportedNetexIds();
     }
 
     private boolean isTariffZone(JAXBElement<? extends Zone_VersionStructure> jaxbElement) {
