@@ -31,6 +31,8 @@ import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.model.TopographicPlaceTypeEnumeration;
 import org.rutebanken.tiamat.repository.iterator.ScrollableResultIterator;
 import org.rutebanken.tiamat.repository.search.TopographicPlaceQueryFromSearchBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Repository;
@@ -48,6 +50,8 @@ import java.util.stream.Collectors;
 @Repository
 @Transactional
 public class TopographicPlaceRepositoryImpl implements TopographicPlaceRepositoryCustom {
+
+	private static final Logger logger = LoggerFactory.getLogger(TopographicPlaceRepositoryImpl.class);
 
 	@PersistenceContext
 	private EntityManager entityManager;
@@ -166,5 +170,66 @@ public class TopographicPlaceRepositoryImpl implements TopographicPlaceRepositor
 				") tp1 " +
 				"JOIN topographic_place tp ON tp.id = tp1.id");
 		return sql.toString();
+	}
+
+	@Override
+	public Map<String, Map<Long, TopographicPlace>> findByNetexIdsAndVersions(Map<String, Set<Long>> netexIdToVersions) {
+		Map<String, Map<Long, TopographicPlace>> resultMap = new HashMap<>();
+		
+		if (netexIdToVersions.isEmpty()) {
+			return resultMap;
+		}
+
+		logger.debug("Batch loading topographic places for {} unique netexIds", netexIdToVersions.size());
+
+		try {
+			// Build list of exact (netexId, version) pairs to query for
+			List<String> whereClauses = new ArrayList<>();
+			Map<String, Object> parameters = new HashMap<>();
+			int paramIndex = 0;
+			
+			for (Map.Entry<String, Set<Long>> entry : netexIdToVersions.entrySet()) {
+				String netexId = entry.getKey();
+				Set<Long> versions = entry.getValue();
+				
+				for (Long version : versions) {
+					String netexIdParam = "netexId" + paramIndex;
+					String versionParam = "version" + paramIndex;
+					
+					whereClauses.add("(tp.netexId = :" + netexIdParam + " AND tp.version = :" + versionParam + ")");
+					parameters.put(netexIdParam, netexId);
+					parameters.put(versionParam, version);
+					paramIndex++;
+				}
+			}
+			
+			// Create optimized query that hits the composite index directly
+			String jpql = "SELECT tp FROM TopographicPlace tp WHERE " + String.join(" OR ", whereClauses);
+			jakarta.persistence.TypedQuery<TopographicPlace> query = entityManager.createQuery(jpql, TopographicPlace.class);
+			
+			// Set all parameters
+			for (Map.Entry<String, Object> param : parameters.entrySet()) {
+				query.setParameter(param.getKey(), param.getValue());
+			}
+
+			List<TopographicPlace> topographicPlaces = query.getResultList();
+			
+			// Organize results by netexId and version - no filtering needed since we queried exact pairs
+			for (TopographicPlace topographicPlace : topographicPlaces) {
+				String netexId = topographicPlace.getNetexId();
+				Long version = topographicPlace.getVersion();
+				resultMap.computeIfAbsent(netexId, k -> new HashMap<>()).put(version, topographicPlace);
+			}
+			
+			logger.debug("Successfully loaded topographic places for {}/{} requested netexId/version combinations", 
+				resultMap.values().stream().mapToInt(Map::size).sum(), 
+				netexIdToVersions.values().stream().mapToInt(Set::size).sum());
+				
+		} catch (Exception e) {
+			logger.error("Batch query failed for findByNetexIdsAndVersions", e);
+			throw e;
+		}
+
+		return resultMap;
 	}
 }
