@@ -23,6 +23,7 @@ import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nonnull;
 import java.time.Duration;
@@ -34,6 +35,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
+@Transactional(readOnly = true)
 @Service
 public class FintrafficSearchKeyService implements SearchKeyService {
     private final Logger logger = LoggerFactory.getLogger(FintrafficSearchKeyService.class);
@@ -173,6 +175,7 @@ public class FintrafficSearchKeyService implements SearchKeyService {
                 .versionValidity(ExportParams.VersionValidity.CURRENT).build();
 
         List<TopographicPlace> topographicPlaces = topographicPlaceRepository.findTopographicPlace(search);
+        logger.info("Loaded {} topographic places for administrative zones", topographicPlaces.size());
         return topographicPlaces.stream()
                 .filter(tp -> tp.getTopographicPlaceType().equals(TopographicPlaceTypeEnumeration.REGION))
                 .filter(tp -> tp.getKeyValues().containsKey(CODESPACE_KEY))

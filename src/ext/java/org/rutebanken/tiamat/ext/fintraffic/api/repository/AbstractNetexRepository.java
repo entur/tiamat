@@ -19,6 +19,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public abstract class AbstractNetexRepository implements NetexRepository {
@@ -60,29 +61,19 @@ public abstract class AbstractNetexRepository implements NetexRepository {
         if (entityRecords.isEmpty()) {
             return;
         }
-
         String stopPlaceVersionInfoJson = this.getStopPlaceVersionInfoJson(entityRecords);
 
-        Connection conn = DataSourceUtils.getConnection(dataSource);
-        boolean previousAutoCommit = false;
-
-        try {
-            previousAutoCommit = conn.getAutoCommit();
-
-            // Disable auto-commit and set isolation level
-            conn.setAutoCommit(false);
-            conn.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
-
-            // Disable JIT for this transaction
-            // Time spent in JIT compilation is larger than the time saved by JIT
-            try (PreparedStatement jitStmt = conn.prepareStatement("SET LOCAL jit = off")) {
+        runWithIsolation((conn) -> {
+            try {
+                // Disable JIT for this transaction
+                // Time spent in JIT compilation is larger than the time saved by JIT
+                PreparedStatement jitStmt = conn.prepareStatement("SET LOCAL jit = off");
                 jitStmt.execute();
-            }
 
-            // Mark dependant entities as DELETED based on parent StopPlace version and changed timestamp
-            // 1. For ScheduledStopPoint and PassengerStopAssignment entities, mark as DELETED if their parent StopPlace has a lower version and changed timestamp.
-            // 2. For Parking entities, remove references to DELETED parent StopPlaces and mark as DELETED if no parent references remain
-            String markPossibleDependantDeletedSql = """
+                // Mark dependant entities as DELETED based on parent StopPlace version and changed timestamp
+                // 1. For ScheduledStopPoint and PassengerStopAssignment entities, mark as DELETED if their parent StopPlace has a lower version and changed timestamp.
+                // 2. For Parking entities, remove references to DELETED parent StopPlaces and mark as DELETED if no parent references remain
+                String markPossibleDependantDeletedSql = """
                     UPDATE ext_fintraffic_netex_entity e
                     SET
                         parent_refs = CASE
@@ -116,13 +107,13 @@ public abstract class AbstractNetexRepository implements NetexRepository {
                         )
                     """;
 
-            try (PreparedStatement updateStmt = conn.prepareStatement(markPossibleDependantDeletedSql)) {
-                updateStmt.setString(1, stopPlaceVersionInfoJson);
-                updateStmt.executeUpdate();
-            }
+                try (PreparedStatement updateStmt = conn.prepareStatement(markPossibleDependantDeletedSql)) {
+                    updateStmt.setString(1, stopPlaceVersionInfoJson);
+                    updateStmt.executeUpdate();
+                }
 
-            // Insert new entities or update existing ones based on version and changed timestamp
-            String sql = """
+                // Insert new entities or update existing ones based on version and changed timestamp
+                String sql = """
                     INSERT INTO ext_fintraffic_netex_entity (id, type, search_key, xml, version, changed, status, parent_refs)
                     VALUES (?, ?, ?::jsonb, ?, ?, ?, ?, ?)
                     ON CONFLICT (id) DO UPDATE SET
@@ -134,25 +125,74 @@ public abstract class AbstractNetexRepository implements NetexRepository {
                         status = EXCLUDED.status,
                         updated_at = CURRENT_TIMESTAMP,
                         parent_refs = EXCLUDED.parent_refs
-                     WHERE (EXCLUDED.status = 'DELETED' AND EXCLUDED.type = 'Parking') OR (ext_fintraffic_netex_entity.version < EXCLUDED.version AND ext_fintraffic_netex_entity.changed < EXCLUDED.changed)
+                     WHERE (EXCLUDED.status = 'DELETED' AND EXCLUDED.type = 'Parking') OR (ext_fintraffic_netex_entity.version <= EXCLUDED.version AND ext_fintraffic_netex_entity.changed <= EXCLUDED.changed)
                     """;
 
-            try (PreparedStatement insertStmt = conn.prepareStatement(sql)) {
-                for (ReadApiEntityInRecord entityRecord : entityRecords) {
-                    insertStmt.setString(1, entityRecord.id());
-                    insertStmt.setString(2, entityRecord.type());
-                    insertStmt.setString(3, entityRecord.searchKey());
-                    insertStmt.setString(4, entityRecord.xml());
-                    insertStmt.setLong(5, entityRecord.version());
-                    insertStmt.setLong(6, entityRecord.changed());
-                    insertStmt.setString(7, entityRecord.status().name());
-                    insertStmt.setArray(8, conn.createArrayOf("text", entityRecord.parentRefs()));
-                    insertStmt.addBatch();
+                try (PreparedStatement insertStmt = conn.prepareStatement(sql)) {
+                    for (ReadApiEntityInRecord entityRecord : entityRecords) {
+                        insertStmt.setString(1, entityRecord.id());
+                        insertStmt.setString(2, entityRecord.type());
+                        insertStmt.setString(3, entityRecord.searchKey());
+                        insertStmt.setString(4, entityRecord.xml());
+                        insertStmt.setLong(5, entityRecord.version());
+                        insertStmt.setLong(6, entityRecord.changed());
+                        insertStmt.setString(7, entityRecord.status().name());
+                        insertStmt.setArray(8, conn.createArrayOf("text", entityRecord.parentRefs()));
+                        insertStmt.addBatch();
+                    }
+                    insertStmt.executeBatch();
                 }
-                insertStmt.executeBatch();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
             }
+            return null;
+        });
+    }
 
+    @Override
+    public int markAllEntitiesAsStale() {
+        return runWithIsolation((conn) -> {
+            String sql = """
+            UPDATE ext_fintraffic_netex_entity
+            SET status = 'STALE', updated_at = CURRENT_TIMESTAMP
+            WHERE status = 'CURRENT'
+            """;
+
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                return stmt.executeUpdate();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+    @Override
+    public int removeStaleEntities() {
+        return runWithIsolation((conn) -> {
+            String sql = """
+            DELETE FROM ext_fintraffic_netex_entity
+            WHERE status = 'STALE'
+            """;
+
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                return stmt.executeUpdate();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+    public <T> T runWithIsolation(Function<Connection, T> function) {
+        Connection conn = DataSourceUtils.getConnection(dataSource);
+        boolean previousAutoCommit = false;
+        try {
+            previousAutoCommit = conn.getAutoCommit();
+            conn.setAutoCommit(false);
+            conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+
+            T response = function.apply(conn);
             conn.commit();
+            return response;
         } catch (SQLException e) {
             try {
                 conn.rollback();
@@ -160,7 +200,7 @@ public abstract class AbstractNetexRepository implements NetexRepository {
             } catch (SQLException rollbackEx) {
                 logger.error("Failed to rollback transaction", rollbackEx);
             }
-            throw new RuntimeException("Failed to upsert entities", e);
+            throw new RuntimeException("Failed to run with isolation", e);
         } finally {
             try {
                 // Restore original auto-commit state

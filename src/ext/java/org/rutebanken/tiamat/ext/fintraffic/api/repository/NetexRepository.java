@@ -11,4 +11,6 @@ public interface NetexRepository {
     void upsertEntities(Collection<ReadApiEntityInRecord> entityRecords);
     void checkDatabaseConsistency();
     Stream<ReadApiEntityOutRecord> streamStopPlaces(ReadApiSearchKey searchKey);
+    int markAllEntitiesAsStale();
+    int removeStaleEntities();
 }

@@ -84,7 +84,7 @@ public class ReadApiNetexMarshallingService {
         logger.error("All attempts to process entity change for entity id: {} have failed", entity.getId());
     }
 
-    private Collection<ReadApiEntityInRecord> createEntityRecords(EntityInVersionStructure entity, ReadApiEntityStatus status) {
+    public Collection<ReadApiEntityInRecord> createEntityRecords(EntityInVersionStructure entity, ReadApiEntityStatus status) {
         String searchKey = searchKeyService.generateSearchKeyJSON(entity);
         if (entity instanceof StopPlace stopPlace) {
             ArrayList<ReadApiEntityInRecord> records = new ArrayList<>(this.createServiceFrameEntityRecords(stopPlace, status, searchKey));
