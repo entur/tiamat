@@ -35,25 +35,13 @@ import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PASSENGER_INFORMAT
 public class FacilitiesMapper {
     private SiteFacilitySet mapFacility(Map facilityMap) {
         List mobilityFacilityListInput = (List) facilityMap.get(MOBILITY_FACILITY_LIST);
-        List<MobilityFacilityEnumeration> mobilityFacilityList = new ArrayList<>();
-        for (Object mobilityFacilityObject : mobilityFacilityListInput) {
-            MobilityFacilityEnumeration mobilityFacilityVal = (MobilityFacilityEnumeration) mobilityFacilityObject;
-            mobilityFacilityList.add(mobilityFacilityVal);
-        }
+        List<MobilityFacilityEnumeration> mobilityFacilityList = getMobilityFacilityList(mobilityFacilityListInput);
 
         List passengerInformationFacilityListInput = (List) facilityMap.get(PASSENGER_INFORMATION_FACILITY_LIST);
-        List<PassengerInformationFacilityEnumeration> passengerInformationFacilityList  = new ArrayList<>();
-        for (Object passengerInformationFacilityObject : passengerInformationFacilityListInput) {
-            PassengerInformationFacilityEnumeration passengerInformationFacilityVal = (PassengerInformationFacilityEnumeration) passengerInformationFacilityObject;
-            passengerInformationFacilityList.add(passengerInformationFacilityVal);
-        }
+        List<PassengerInformationFacilityEnumeration> passengerInformationFacilityList = getPassengerInformationFacilityEnumerationList(passengerInformationFacilityListInput);
 
         List passengerInformationEquipmentInput = (List) facilityMap.get(PASSENGER_INFORMATION_EQUIPMENT_LIST);
-        List<PassengerInformationEquipmentEnumeration> passengerEquipmentFacilityList  = new ArrayList<>();
-        for (Object passengerEquipmentFacilityObject : passengerInformationEquipmentInput) {
-            PassengerInformationEquipmentEnumeration passengerEquipmentFacilityVal = (PassengerInformationEquipmentEnumeration) passengerEquipmentFacilityObject;
-            passengerEquipmentFacilityList.add(passengerEquipmentFacilityVal);
-        }
+        List<PassengerInformationEquipmentEnumeration> passengerEquipmentFacilityList  = getPassengerInformationEquipmentEnumerationList(passengerInformationEquipmentInput);
 
         if (!mobilityFacilityListInput.isEmpty() || !passengerInformationFacilityList.isEmpty() || passengerEquipmentFacilityList.isEmpty()) {
             SiteFacilitySet facilitySet = new SiteFacilitySet();
@@ -81,5 +69,39 @@ public class FacilitiesMapper {
             return tiamatFacilities;
         }
         return null;
+    }
+
+    private List<MobilityFacilityEnumeration> getMobilityFacilityList(List mobilityFacilityListInput) {
+        List<MobilityFacilityEnumeration> mobilityFacilityList = new ArrayList<>();
+        if (mobilityFacilityListInput != null) {
+            for (Object mobilityFacilityObject : mobilityFacilityListInput) {
+                MobilityFacilityEnumeration mobilityFacilityVal = (MobilityFacilityEnumeration) mobilityFacilityObject;
+                mobilityFacilityList.add(mobilityFacilityVal);
+            }
+        }
+
+        return mobilityFacilityList;
+    }
+
+    private List<PassengerInformationFacilityEnumeration> getPassengerInformationFacilityEnumerationList(List passengerInformationFacilityListInput) {
+        List<PassengerInformationFacilityEnumeration> passengerInformationFacilityList  = new ArrayList<>();
+        if (passengerInformationFacilityListInput != null) {
+            for (Object passengerInformationFacilityObject : passengerInformationFacilityListInput) {
+                PassengerInformationFacilityEnumeration passengerInformationFacilityVal = (PassengerInformationFacilityEnumeration) passengerInformationFacilityObject;
+                passengerInformationFacilityList.add(passengerInformationFacilityVal);
+            }
+        }
+        return passengerInformationFacilityList;
+    }
+
+    private List<PassengerInformationEquipmentEnumeration> getPassengerInformationEquipmentEnumerationList(List passengerInformationEquipmentInput) {
+        List<PassengerInformationEquipmentEnumeration> passengerEquipmentFacilityList  = new ArrayList<>();
+        if (passengerInformationEquipmentInput != null) {
+            for (Object passengerEquipmentFacilityObject : passengerInformationEquipmentInput) {
+                PassengerInformationEquipmentEnumeration passengerEquipmentFacilityVal = (PassengerInformationEquipmentEnumeration) passengerEquipmentFacilityObject;
+                passengerEquipmentFacilityList.add(passengerEquipmentFacilityVal);
+            }
+        }
+        return passengerInformationEquipmentInput;
     }
 }

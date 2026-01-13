@@ -62,6 +62,7 @@ public class FacilitiesConverterTest extends TiamatIntegrationTest {
         netexFacility1.withPassengerInformationEquipmentList(PassengerInformationEquipmentEnumeration.INFORMATION_DESK);
         org.rutebanken.netex.model.SiteFacilitySet netexFacility2 = new org.rutebanken.netex.model.SiteFacilitySet();
         netexFacility2.withMobilityFacilityList(MobilityFacilityEnumeration.UNKNOWN);
+        netexFacility2.withPassengerInformationEquipmentList(PassengerInformationEquipmentEnumeration.INFORMATION_DESK);
         relStructure.withSiteFacilitySetRefOrSiteFacilitySet(Arrays.asList(netexFacility1, netexFacility2).toArray());
 
         Set<SiteFacilitySet> facilities = facilitiesConverter.convertFrom(relStructure, facilitiesType, mappingContext);
