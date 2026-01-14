@@ -1,0 +1,2 @@
+create table sanitary_equipment_sanitary_facility_list (sanitary_equipment_id bigint not null, sanitary_facility_list varchar(255) check (sanitary_facility_list in ('NONE','TOILET','WHEEL_CHAIR_ACCESS_TOILET','SHOWER','WASHING_AND_CHANGE_FACILITIES','BABY_CHANGE','WHEELCHAIR_BABY_CHANGE','SHOE_SHINER','OTHER')));
+alter table if exists sanitary_equipment_sanitary_facility_list add constraint FKoakie9r68j0offpebnb6r4ouo foreign key (sanitary_equipment_id) references installed_equipment_version_structure;

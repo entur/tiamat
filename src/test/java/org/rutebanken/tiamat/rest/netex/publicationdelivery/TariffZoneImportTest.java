@@ -21,6 +21,8 @@ import org.rutebanken.netex.model.LocationStructure;
 import org.rutebanken.netex.model.MultilingualString;
 import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
+import org.rutebanken.netex.model.Quay;
+import org.rutebanken.netex.model.Quays_RelStructure;
 import org.rutebanken.netex.model.SimplePoint_VersionStructure;
 import org.rutebanken.netex.model.SiteFrame;
 import org.rutebanken.netex.model.StopPlace;
@@ -62,7 +64,7 @@ public class TariffZoneImportTest extends TiamatIntegrationTest {
         tariffZones.add(new ObjectFactory().createTariffZone(tariffZone));
         SiteFrame siteFrame = publicationDeliveryTestHelper.siteFrame()
                 .withTariffZones(new TariffZonesInFrame_RelStructure()
-                .withTariffZone(tariffZones));
+                        .withTariffZone(tariffZones));
 
         PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryTestHelper.publicationDelivery(siteFrame);
 
@@ -91,9 +93,19 @@ public class TariffZoneImportTest extends TiamatIntegrationTest {
         stopPlace.withId("XYZ:StopPlace:32111");
         stopPlace.setVersion("1");
         stopPlace.setTariffZones(new TariffZoneRefs_RelStructure()
-                    .withTariffZoneRef(new TariffZoneRef()
-                            .withVersion(tariffZone.getVersion())
-                            .withRef(tariffZone.getId())));
+                .withTariffZoneRef(new TariffZoneRef()
+                        .withVersion(tariffZone.getVersion())
+                        .withRef(tariffZone.getId())));
+        stopPlace.setQuays(
+                new Quays_RelStructure()
+                        .withQuayRefOrQuay(new Quay()
+                                .withId("XYZ:01:02")
+                                .withVersion("1")
+                                .withName(new MultilingualString().withValue("B"))
+                                .withCentroid(new SimplePoint_VersionStructure()
+                                        .withLocation(new LocationStructure()
+                                                .withLatitude(new BigDecimal("9.6"))
+                                                .withLongitude(new BigDecimal("76"))))));
 
         SiteFrame siteFrame = publicationDeliveryTestHelper.siteFrame()
                 .withTariffZones(new TariffZonesInFrame_RelStructure()
@@ -123,12 +135,10 @@ public class TariffZoneImportTest extends TiamatIntegrationTest {
 
     @Test
     public void publicationDeliveryWithTariffZoneAndStopPlaceMergeZonesImportTypeMatch() throws Exception {
-
-
         SimplePoint_VersionStructure point = new SimplePoint_VersionStructure()
                 .withLocation(new LocationStructure()
-                                .withLatitude(new BigDecimal("9.6"))
-                                .withLongitude(new BigDecimal("76")));
+                        .withLatitude(new BigDecimal("9.6"))
+                        .withLongitude(new BigDecimal("76")));
 
         List<JAXBElement<? extends Zone_VersionStructure>> tariffZones1 = new ArrayList<>();
 
@@ -142,11 +152,20 @@ public class TariffZoneImportTest extends TiamatIntegrationTest {
                 .withName(new MultilingualString().withValue("name"))
                 .withCentroid(point)
                 .withVersion("1")
+                .withQuays(new Quays_RelStructure()
+                        .withQuayRefOrQuay(new Quay()
+                                .withId("XYZ:01:02")
+                                .withVersion("1")
+                                .withName(new MultilingualString().withValue("B"))
+                                .withCentroid(new SimplePoint_VersionStructure()
+                                        .withLocation(new LocationStructure()
+                                                .withLatitude(new BigDecimal("9.6"))
+                                                .withLongitude(new BigDecimal("76"))))))
                 .withStopPlaceType(StopTypeEnumeration.ONSTREET_BUS)
                 .withTariffZones(new TariffZoneRefs_RelStructure()
-                    .withTariffZoneRef(new TariffZoneRef()
-                        .withVersion(tariffZone1.getVersion())
-                        .withRef(tariffZone1.getId())));
+                        .withTariffZoneRef(new TariffZoneRef()
+                                .withVersion(tariffZone1.getVersion())
+                                .withRef(tariffZone1.getId())));
 
         SiteFrame siteFrame = publicationDeliveryTestHelper.siteFrame()
                 .withTariffZones(new TariffZonesInFrame_RelStructure()
@@ -170,9 +189,9 @@ public class TariffZoneImportTest extends TiamatIntegrationTest {
         stopPlace
                 .withId("BRA:Stopplace:3")
                 .withTariffZones(new TariffZoneRefs_RelStructure()
-                    .withTariffZoneRef(new TariffZoneRef()
-                        .withVersion(tariffZone2.getVersion())
-                        .withRef(tariffZone2.getId())));
+                        .withTariffZoneRef(new TariffZoneRef()
+                                .withVersion(tariffZone2.getVersion())
+                                .withRef(tariffZone2.getId())));
 
 
         SiteFrame siteFrame2 = publicationDeliveryTestHelper.siteFrame()
@@ -216,6 +235,15 @@ public class TariffZoneImportTest extends TiamatIntegrationTest {
                 .withCentroid(point)
                 .withVersion("1")
                 .withStopPlaceType(StopTypeEnumeration.ONSTREET_BUS)
+                .withQuays(new Quays_RelStructure()
+                        .withQuayRefOrQuay(new Quay()
+                                .withId("XYZ:01:02")
+                                .withVersion("1")
+                                .withName(new MultilingualString().withValue("B"))
+                                .withCentroid(new SimplePoint_VersionStructure()
+                                        .withLocation(new LocationStructure()
+                                                .withLatitude(new BigDecimal("77"))
+                                                .withLongitude(new BigDecimal("9.7"))))))
                 .withTariffZones(new TariffZoneRefs_RelStructure()
                         .withTariffZoneRef(new TariffZoneRef()
                                 .withVersion(tariffZone1.getVersion())
@@ -245,6 +273,15 @@ public class TariffZoneImportTest extends TiamatIntegrationTest {
                 .withId("NTR:StopPlace:322")
                 .withVersion("2")
                 .withStopPlaceType(StopTypeEnumeration.ONSTREET_BUS)
+                .withQuays(new Quays_RelStructure()
+                        .withQuayRefOrQuay(new Quay()
+                                .withId("XYZ:01:02")
+                                .withVersion("1")
+                                .withName(new MultilingualString().withValue("B"))
+                                .withCentroid(new SimplePoint_VersionStructure()
+                                        .withLocation(new LocationStructure()
+                                                .withLatitude(new BigDecimal("77"))
+                                                .withLongitude(new BigDecimal("9.7"))))))
                 .withTariffZones(new TariffZoneRefs_RelStructure()
                         .withTariffZoneRef(new TariffZoneRef()
                                 .withVersion(tariffZone2.getVersion())

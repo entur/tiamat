@@ -36,6 +36,7 @@ import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.FARE_ZONES;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.OUTPUT_TYPE_GROUP_OF_STOPPLACES;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.OUTPUT_TYPE_STOPPLACE_INTERFACE;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PERMISSIONS;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.POSTAL_ADDRESS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.STOP_PLACE_GROUPS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.TAGS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.TARIFF_ZONES;
@@ -44,6 +45,7 @@ import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.URL;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.VALID_BETWEEN;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.VERSION_COMMENT;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.alternativeNameObjectType;
+import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.postalAddressObjectType;
 
 @Component
 public class StopPlaceInterfaceCreator {
@@ -103,6 +105,10 @@ public class StopPlaceInterfaceCreator {
         stopPlaceInterfaceFields.add(newFieldDefinition()
                 .name(URL)
                 .type(GraphQLString)
+                .build());
+        stopPlaceInterfaceFields.add(newFieldDefinition()
+                .name(POSTAL_ADDRESS)
+                .type(postalAddressObjectType)
                 .build());
         return stopPlaceInterfaceFields;
     }

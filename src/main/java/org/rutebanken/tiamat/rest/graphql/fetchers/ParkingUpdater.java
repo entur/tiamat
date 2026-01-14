@@ -20,7 +20,10 @@ import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import org.locationtech.jts.geom.Point;
 import org.rutebanken.tiamat.auth.AuthorizationService;
+import org.rutebanken.tiamat.model.AccessibilityAssessment;
+import org.rutebanken.tiamat.model.AccessibilityLimitation;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
+import org.rutebanken.tiamat.model.LimitationStatusEnumeration;
 import org.rutebanken.tiamat.model.Parking;
 import org.rutebanken.tiamat.model.ParkingArea;
 import org.rutebanken.tiamat.model.ParkingCapacity;
@@ -34,6 +37,7 @@ import org.rutebanken.tiamat.model.ParkingUserEnumeration;
 import org.rutebanken.tiamat.model.ParkingVehicleEnumeration;
 import org.rutebanken.tiamat.model.SiteRefStructure;
 import org.rutebanken.tiamat.repository.ParkingRepository;
+import org.rutebanken.tiamat.rest.graphql.mappers.AccessibilityLimitationMapper;
 import org.rutebanken.tiamat.rest.graphql.mappers.GeometryMapper;
 import org.rutebanken.tiamat.rest.graphql.mappers.ValidBetweenMapper;
 import org.rutebanken.tiamat.versioning.VersionCreator;
@@ -53,6 +57,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ACCESSIBILITY_ASSESSMENT;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.BOOKING_URL;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.FREE_PARKING_OUT_OF_HOURS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.GEOMETRY;
@@ -107,6 +112,8 @@ class ParkingUpdater implements DataFetcher {
     @Autowired
     private VersionCreator versionCreator;
 
+    @Autowired
+    private AccessibilityLimitationMapper accessibilityLimitationMapper;
 
     @Override
     public Object get(DataFetchingEnvironment environment) {
@@ -279,6 +286,18 @@ class ParkingUpdater implements DataFetcher {
             isUpdated = true;
             updatedParking.setParkingAreas(parkingAreasList);
         }
+
+        if (input.get(ACCESSIBILITY_ASSESSMENT) != null) {
+            Map<String, Object> accessibilityAssessmentInput = (Map) input.get(ACCESSIBILITY_ASSESSMENT);
+            AccessibilityLimitation limitationFromInput = accessibilityLimitationMapper.map((Map<String, LimitationStatusEnumeration>) accessibilityAssessmentInput.get("limitations"));
+
+            if (limitationFromInput != null) {
+                AccessibilityAssessment accessibilityAssessment = resolveAccessibilityAssessment(limitationFromInput);
+                isUpdated = true;
+                updatedParking.setAccessibilityAssessment(accessibilityAssessment);
+            }
+        }
+
         return isUpdated;
     }
 
@@ -331,5 +350,20 @@ class ParkingUpdater implements DataFetcher {
         area.setTotalCapacity((BigInteger) input.get(TOTAL_CAPACITY));
         area.setParkingProperties(resolveSingleParkingProperties((Map) input.get(PARKING_PROPERTIES)));
         return area;
+    }
+
+    private AccessibilityAssessment resolveAccessibilityAssessment(AccessibilityLimitation limitationFromInput) {
+        AccessibilityAssessment accessibilityAssessment =  new AccessibilityAssessment();
+        AccessibilityLimitation limitation = new AccessibilityLimitation();
+
+        limitation.setWheelchairAccess(limitationFromInput.getWheelchairAccess());
+        limitation.setAudibleSignalsAvailable(limitationFromInput.getAudibleSignalsAvailable());
+        limitation.setVisualSignsAvailable(limitationFromInput.getVisualSignsAvailable());
+        limitation.setStepFreeAccess(limitationFromInput.getStepFreeAccess());
+        limitation.setLiftFreeAccess(limitationFromInput.getLiftFreeAccess());
+        limitation.setEscalatorFreeAccess(limitationFromInput.getEscalatorFreeAccess());
+        accessibilityAssessment.setLimitations(List.of(limitation));
+
+        return accessibilityAssessment;
     }
 }

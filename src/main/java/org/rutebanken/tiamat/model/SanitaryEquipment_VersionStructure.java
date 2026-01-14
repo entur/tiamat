@@ -15,8 +15,13 @@
 
 package org.rutebanken.tiamat.model;
 
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.Transient;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -30,10 +35,13 @@ public class SanitaryEquipment_VersionStructure
     protected GenderLimitationEnumeration gender;
     protected BigInteger numberOfToilets;
 
+    @ElementCollection(targetClass = SanitaryFacilityEnumeration.class)
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @Enumerated(EnumType.STRING)
+    protected List<SanitaryFacilityEnumeration> sanitaryFacilityList;
+
     @Transient
     protected AccessibilityAssessment accessibilityAssessment;
-    @Transient
-    protected List<SanitaryFacilityEnumeration> sanitaryFacilityList;
     @Transient
     protected Boolean freeToUse;
     @Transient
@@ -72,6 +80,10 @@ public class SanitaryEquipment_VersionStructure
             sanitaryFacilityList = new ArrayList<>();
         }
         return this.sanitaryFacilityList;
+    }
+
+    public void setSanitaryFacilityList(List<SanitaryFacilityEnumeration> sanitaryFacilityList) {
+        this.sanitaryFacilityList = sanitaryFacilityList;
     }
 
     public BigInteger getNumberOfToilets() {

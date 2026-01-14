@@ -59,8 +59,8 @@ public class TransactionalMergingStopPlacesImporter {
                 .map(stopPlace -> {
                     org.rutebanken.netex.model.StopPlace importedStop = null;
                     try {
-                        topographicPlaceReferenceUpdater.updateTopographicReference(stopPlace);
-                        importedStop = mergingStopPlaceImporter.importStopPlace(stopPlace);
+                        StopPlace updated = topographicPlaceReferenceUpdater.updateTopographicReference(stopPlace);
+                        importedStop = mergingStopPlaceImporter.importStopPlace(updated);
                     } catch (Exception e) {
                         throw new RuntimeException("Could not import stop place " + stopPlace, e);
                     }

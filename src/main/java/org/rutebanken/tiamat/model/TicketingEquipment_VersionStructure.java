@@ -36,6 +36,7 @@ public class TicketingEquipment_VersionStructure
     protected Boolean ticketCounter;
     protected Boolean lowCounterAccess;
     protected Boolean inductionLoops;
+    protected Boolean wheelchairSuitable;
 
     @Transient
     protected List<VehicleModeEnumeration> vehicleModes;
@@ -199,5 +200,13 @@ public class TicketingEquipment_VersionStructure
 
     public void setTactileInterfaceAvailable(Boolean value) {
         this.tactileInterfaceAvailable = value;
+    }
+
+    public Boolean isWheelchairSuitable() {
+        return wheelchairSuitable;
+    }
+
+    public void setWheelchairSuitable(Boolean wheelchairSuitable) {
+        this.wheelchairSuitable = wheelchairSuitable;
     }
 }

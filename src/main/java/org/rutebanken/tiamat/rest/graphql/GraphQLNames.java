@@ -279,6 +279,7 @@ public class GraphQLNames {
     // SanitaryEquipment
     public static final String NUMBER_OF_TOILETS = "numberOfToilets";
     public static final String GENDER = "gender";
+    public static final String SANITARY_FACILITY_LIST = "sanitaryFacilityList";
 
     // WaitingRoomEquipment
     public static final String SEATS = "seats";
@@ -298,6 +299,7 @@ public class GraphQLNames {
     public static final String TACTILE_INTERFACE_AVAILABLE = "tactileInterfaceAvailable";
     public static final String INDUCTION_LOOPS = "inductionLoops";
     public static final String LOW_COUNTER_ACCESS = "lowCounterAccess";
+    public static final String WHEELCHAIR_SUITABLE = "wheelchairSuitable";
 
     //CycleStorageEquipment
     public static final String NUMBER_OF_SPACES = "numberOfSpaces";
@@ -338,6 +340,14 @@ public class GraphQLNames {
     public static final String PUBLIC_CODE = "publicCode";
     public static final String WEIGHTING = "weighting";
     public static final String URL = "url";
+
+    // Postal address fields
+    public static final String OUTPUT_TYPE_POSTAL_ADDRESS = "PostalAddress";
+    public static final String INPUT_TYPE_POSTAL_ADDRESS = "PostalAddress" + INPUT_TYPE_POSTFIX;
+    public static final String POSTAL_ADDRESS = "postalAddress";
+    public static final String POSTAL_ADDRESS_TOWN = "town";
+    public static final String POSTAL_ADDRESS_POST_CODE = "postCode";
+    public static final String POSTAL_ADDRESS_ADDRESS_LINE1 = "addressLine1";
 
     public static final String IMPORTED_ID_QUERY = "importedId";
     public static final String IMPORTED_ID_ARG_DESCRIPTION = "Searches for StopPlace by importedId.";
