@@ -39,8 +39,6 @@ import static org.rutebanken.tiamat.ext.fintraffic.auth.TrivorePermission.MANAGE
 public class FintrafficAuthorizationService implements AuthorizationService {
     private static final Set<StopTypeEnumeration> ALL_STOP_PLACE_TYPES = EnumSet.allOf(StopTypeEnumeration.class);
 
-    private static final Set<SubmodeEnumuration> ALL_SUBMODES = EnumSet.allOf(SubmodeEnumuration.class);
-
     private final Logger logger = LoggerFactory.getLogger(FintrafficAuthorizationService.class);
 
     private final TrivoreAuthorizations trivoreAuthorizations;
@@ -201,13 +199,13 @@ public class FintrafficAuthorizationService implements AuthorizationService {
     @Override
     public Set<SubmodeEnumuration> getAllowedSubmodes(EntityStructure entity) {
         logger.trace("FintrafficAuthorizationService.getAllowedSubmodes({}, {})", entity.getId(), entity.getNetexId());
-        return ALL_SUBMODES;
+        return Set.of();
     }
 
     @Override
     public Set<SubmodeEnumuration> getLocationAllowedSubmodes(boolean canEdit, Point point) {
         logger.trace("FintrafficAuthorizationService.getLocationAllowedSubmodes({}, {})", canEdit, point);
-        return ALL_SUBMODES;
+        return Set.of();
     }
 
     @Override
