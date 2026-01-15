@@ -29,6 +29,10 @@ public class StopPlaceDomainService {
         this.differ = differ;
     }
 
+    public StopPlace getStopPlace(String stopPlaceId) {
+        return stopPlaceService.getStopPlace(stopPlaceId);
+    }
+
     public StopPlace createStopPlace(StopPlace stopPlace) {
         validator.validateStopPlaceName(stopPlace);
         return stopPlaceService.createStopPlace(stopPlace);

@@ -19,6 +19,24 @@ import org.rutebanken.tiamat.rest.write.dto.StopPlacesDto;
 )
 interface StopPlaceController {
     @Operation(
+            summary = "Gets a stop place by ID",
+            description = """
+        Gets a mono-modal StopPlace by its ID.
+        """,
+            responses = {
+                    @ApiResponse(
+                            responseCode = "202",
+                            description = "Creation job submitted",
+                            content = @Content(
+                                    schema = @Schema(implementation = StopPlaceJobDto.class)
+                            )
+                    ),
+                    @ApiResponse(responseCode = "400", description = "Malformed input"),
+            }
+    )
+    Response getStopPlace(String stopPlaceId);
+
+    @Operation(
         summary = "Creates a stop place from a Netex XML representation",
         description = """
         Accepts a StopPlacesDto containing a NeTEx StopPlace XML.

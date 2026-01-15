@@ -3,6 +3,7 @@ package org.rutebanken.tiamat.rest.write;
 import jakarta.transaction.Transactional;
 import org.rutebanken.tiamat.model.ModificationEnumeration;
 import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.service.stopplace.StopPlaceTerminator;
 import org.rutebanken.tiamat.versioning.save.StopPlaceVersionedSaverService;
 import org.springframework.stereotype.Service;
@@ -14,13 +15,20 @@ public class StopPlaceService {
 
     private final StopPlaceVersionedSaverService stopPlaceVersionedSaverService;
     private final StopPlaceTerminator stopPlaceTerminator;
+    private final StopPlaceRepository stopPlaceRepository;
 
     public StopPlaceService(
         StopPlaceVersionedSaverService stopPlaceVersionedSaverService,
-        StopPlaceTerminator stopPlaceTerminator
+        StopPlaceTerminator stopPlaceTerminator,
+        StopPlaceRepository stopPlaceRepository
     ) {
         this.stopPlaceVersionedSaverService = stopPlaceVersionedSaverService;
         this.stopPlaceTerminator = stopPlaceTerminator;
+        this.stopPlaceRepository = stopPlaceRepository;
+    }
+
+    public StopPlace getStopPlace(String stopPlaceId) {
+        return stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlaceId);
     }
 
     @Transactional

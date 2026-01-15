@@ -21,6 +21,12 @@ public class StopPlaceControllerImpl implements StopPlaceController {
     }
 
     @Override
+    @GET
+    public Response getStopPlace(String stopPlaceId) {
+        return Response.ok(stopPlaceFacade.getStopPlace(stopPlaceId)).build();
+    }
+
+    @Override
     @POST
     @Consumes(
         {

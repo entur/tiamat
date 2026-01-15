@@ -6,6 +6,7 @@ import org.rutebanken.netex.model.SiteFrame;
 import org.rutebanken.netex.model.VersionFrameDefaultsStructure;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
+import org.rutebanken.tiamat.rest.write.dto.StopPlaceDto;
 import org.rutebanken.tiamat.rest.write.dto.StopPlaceJobDto;
 import org.rutebanken.tiamat.rest.write.dto.StopPlacesDto;
 import org.springframework.stereotype.Service;
@@ -18,15 +19,17 @@ public class StopPlaceFacade {
     private final NetexMapper netexMapper;
     private final JobService jobService;
     private final StopPlaceAsyncProcessor asyncProcessor;
+    private final StopPlaceDomainService stopPlaceDomainService;
 
     public StopPlaceFacade(
         NetexMapper netexMapper,
         JobService jobService,
-        StopPlaceAsyncProcessor asyncProcessor
-    ) {
+        StopPlaceAsyncProcessor asyncProcessor,
+        StopPlaceDomainService stopPlaceDomainService) {
         this.netexMapper = netexMapper;
         this.jobService = jobService;
         this.asyncProcessor = asyncProcessor;
+        this.stopPlaceDomainService = stopPlaceDomainService;
     }
 
     @PostConstruct
@@ -44,6 +47,11 @@ public class StopPlaceFacade {
                 )
             )
         );
+    }
+
+    public StopPlaceDto getStopPlace(String netexId) {
+        // TOOD: do not cast
+        return (StopPlaceDto) netexMapper.mapToNetexModel(stopPlaceDomainService.getStopPlace(netexId));
     }
 
     public StopPlaceJobDto createStopPlaces(StopPlacesDto dto) {
