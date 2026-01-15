@@ -64,7 +64,7 @@ public class ImportParams {
 
     @Parameter(description = "Specify which frame to use for fare zone import: SITE_FRAME (default) or FARE_FRAME")
     @QueryParam(value = "fareZoneFrameSource")
-    public FareZoneFrameSource fareZoneFrameSource = FareZoneFrameSource.SITE_FRAME;
+    public FareZoneFrameSource fareZoneFrameSource;
 
     @Parameter(description = "Disable pre and post processing steps, import raw data as is")
     @QueryParam(value = "disablePreAndPostProcessing")
