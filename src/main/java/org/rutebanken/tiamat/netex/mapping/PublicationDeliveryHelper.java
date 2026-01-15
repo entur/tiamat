@@ -91,7 +91,8 @@ public class PublicationDeliveryHelper {
                 .flatMap(frames -> frames.getCommonFrame().stream())
                 .filter(jaxbElement -> jaxbElement.getValue() instanceof SiteFrame)
                 .map(jaxbElement -> (SiteFrame) jaxbElement.getValue())
-                .findAny().get());
+                .findAny()
+                .orElseThrow(() -> new IllegalArgumentException("No SiteFrame found in PublicationDelivery. The delivery must contain either a direct SiteFrame or a SiteFrame within a CompositeFrame.")));
 
     }
 
