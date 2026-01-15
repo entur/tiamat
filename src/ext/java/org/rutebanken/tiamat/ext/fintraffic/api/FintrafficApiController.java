@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 
-@Profile("fintraffic")
+@Profile("fintraffic-read-api")
 @Controller
 public class FintrafficApiController {
     private final ReadApiNetexPublicationDeliveryService readApiNetexPublicationDeliveryService;

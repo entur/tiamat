@@ -14,7 +14,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
-@Profile("fintraffic")
+@Profile("fintraffic-read-api")
 @Service
 public class ReadApiBackgroundJobs {
     private static final Logger logger = LoggerFactory.getLogger(ReadApiBackgroundJobs.class);

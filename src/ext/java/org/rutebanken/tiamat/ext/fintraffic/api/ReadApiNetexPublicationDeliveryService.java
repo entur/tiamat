@@ -23,7 +23,7 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 @Service
-@Profile("fintraffic")
+@Profile("fintraffic-read-api")
 public class ReadApiNetexPublicationDeliveryService {
     // Predefined byte arrays for collection tags
     private static final byte[] START_TAG_SCHEDULED_STOP_POINTS = "<scheduledStopPoints>".getBytes(StandardCharsets.UTF_8);

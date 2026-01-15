@@ -14,7 +14,7 @@ import java.time.Instant;
 
 @Component
 @Transactional
-@Profile("fintraffic")
+@Profile("fintraffic-read-api")
 public class FintrafficEntityChangedPublisher extends EntityChangedEventPublisher implements EntityChangedListener {
     private static final Logger logger = org.slf4j.LoggerFactory.getLogger(FintrafficEntityChangedPublisher.class);
 
