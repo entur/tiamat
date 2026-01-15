@@ -19,6 +19,7 @@ package org.rutebanken.tiamat.versioning.save;
 import com.google.api.client.util.Preconditions;
 import org.rutebanken.tiamat.auth.AuthorizationService;
 import org.rutebanken.tiamat.auth.UsernameFetcher;
+import org.rutebanken.tiamat.changelog.EntityChangedListener;
 import org.rutebanken.tiamat.model.DataManagedObjectStructure;
 import org.rutebanken.tiamat.model.Parking;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -31,6 +32,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.time.Instant;
 import java.util.Arrays;
@@ -58,6 +61,9 @@ public class ParkingVersionedSaverService {
 
     @Autowired
     private AuthorizationService authorizationService;
+
+    @Autowired
+    private EntityChangedListener entityChangedListener;
 
     public Parking saveNewVersion(Parking newVersion) {
 
@@ -91,7 +97,20 @@ public class ParkingVersionedSaverService {
         logger.info("Saved parking {}, version {}, name {}", result.getNetexId(), result.getVersion(), result.getName());
 
         prometheusMetricsService.registerEntitySaved(newVersion.getClass(),1L);
+
+        sendToJMS(result);
         return result;
+    }
+
+    @Transactional
+    public void sendToJMS(Parking parking) {
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization(){
+            @Override
+            public void afterCommit(){
+                logger.debug(String.format("send pubsub message on change: %s", parking.toString()));
+                entityChangedListener.onChange(parking);
+            }
+        });
     }
 
     /**
