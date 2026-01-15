@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import jakarta.annotation.Nonnull;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygonal;
 import org.locationtech.jts.geom.prep.PreparedPolygon;
@@ -25,7 +26,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Nonnull;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -70,11 +70,14 @@ public class FintrafficSearchKeyService implements SearchKeyService {
                 });
     }
 
+    @Nonnull
+    @Override
     public String generateSearchKeyJSON(EntityInVersionStructure entity) {
         FintrafficReadApiSearchKey searchKey = this.extractSearchKey(entity);
         return createJSONString(searchKey);
     }
 
+    @Nonnull
     private FintrafficReadApiSearchKey extractSearchKey(EntityInVersionStructure entity) {
         Optional<StopPlace> parentStopPlace = fetchParentStopPlace(entity);
         Optional<FintrafficReadApiSearchKey> searchKeyFromParent = parentStopPlace.map(this::extractSearchKey);
@@ -99,9 +102,9 @@ public class FintrafficSearchKeyService implements SearchKeyService {
             }
         } else if (entity instanceof Parking) {
             // For Parking, use parent StopPlace search key if available
-            return searchKeyFromParent.orElse(null);
+            return searchKeyFromParent.orElse(FintrafficReadApiSearchKey.empty());
         } else {
-            return null;
+            return FintrafficReadApiSearchKey.empty();
         }
     }
 
@@ -149,7 +152,7 @@ public class FintrafficSearchKeyService implements SearchKeyService {
 
     private String createJSONString(ReadApiSearchKey searchKey) {
         try {
-            return searchKey != null ? objectMapper.writeValueAsString(searchKey) : null;
+            return objectMapper.writeValueAsString(searchKey);
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Failed to convert search key to JSON", e);
         }
