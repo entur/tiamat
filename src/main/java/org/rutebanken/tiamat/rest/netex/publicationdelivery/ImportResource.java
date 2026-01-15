@@ -128,7 +128,7 @@ public class ImportResource {
                         .importPublicationDelivery(incomingPublicationDelivery, importParams);
 
             } else {
-                // Default: Full import (may include BOTH mode for fare zones)
+                // Default: Full import from SiteFrame
                 logger.info("Importing from SiteFrame (frameSource: {})", frameSource);
                 responsePublicationDelivery = publicationDeliveryImporter
                         .importPublicationDelivery(incomingPublicationDelivery, importParams);

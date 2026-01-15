@@ -15,7 +15,6 @@
 
 package org.rutebanken.tiamat.importer;
 
-import org.rutebanken.netex.model.FareFrame;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.netex.model.SiteFrame;
 import org.rutebanken.tiamat.auth.AuthorizationService;
@@ -146,34 +145,6 @@ public class PublicationDeliveryImporter {
             stopPlaceImportHandler.handleStops(netexSiteFrame, importParams, stopPlaceCounter, responseSiteFrame);
             parkingsImportHandler.handleParkings(netexSiteFrame, importParams, parkingCounter, responseSiteFrame);
             pathLinkImportHandler.handlePathLinks(netexSiteFrame, importParams, pathLinkCounter, responseSiteFrame);
-
-            // Handle FareFrame if BOTH mode
-            if (importParams.fareZoneFrameSource == FareZoneFrameSource.BOTH) {
-                FareFrame netexFareFrame = publicationDeliveryHelper.findFareFrame(incomingPublicationDelivery);
-
-                if (netexFareFrame != null) {
-                    logger.info("Processing FareFrame in BOTH mode in addition to SiteFrame");
-                    FareFrame responseFareFrame = new FareFrame();
-                    responseFareFrame.withId(netexFareFrame.getId() + "-response").withVersion("1");
-
-                    tariffZoneImportHandler.handleFareZonesFromFareFrame(
-                            netexFareFrame,
-                            importParams,
-                            tariffZoneCounter,
-                            responseFareFrame
-                    );
-
-                    // Return with both SiteFrame and FareFrame
-                    if (responseFareFrame.getFareZones() != null && !responseFareFrame.getFareZones().getFareZone().isEmpty()) {
-                        if(responseSiteFrame.getTariffZones() != null || responseSiteFrame.getTopographicPlaces() != null) {
-                            backgroundJobs.triggerStopPlaceUpdate();
-                        }
-                        return publicationDeliveryCreator.createPublicationDelivery(responseSiteFrame, responseFareFrame);
-                    }
-                } else {
-                    logger.warn("BOTH mode requested but no FareFrame found in publication delivery");
-                }
-            }
 
             if(responseSiteFrame.getTariffZones() != null || responseSiteFrame.getTopographicPlaces() != null) {
                 backgroundJobs.triggerStopPlaceUpdate();

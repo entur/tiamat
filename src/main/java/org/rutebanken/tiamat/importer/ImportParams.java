@@ -62,7 +62,7 @@ public class ImportParams {
     @QueryParam(value = "importOnlyTariffZones")
     public boolean importOnlyTariffZones = false;
 
-    @Parameter(description = "Specify which frame to use for fare zone import: SITE_FRAME (default), FARE_FRAME, or BOTH")
+    @Parameter(description = "Specify which frame to use for fare zone import: SITE_FRAME (default) or FARE_FRAME")
     @QueryParam(value = "fareZoneFrameSource")
     public FareZoneFrameSource fareZoneFrameSource = FareZoneFrameSource.SITE_FRAME;
 

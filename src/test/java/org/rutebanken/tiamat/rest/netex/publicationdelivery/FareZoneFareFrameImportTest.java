@@ -15,18 +15,13 @@
 
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
-import jakarta.xml.bind.JAXBElement;
 import org.junit.Test;
 import org.rutebanken.netex.model.FareFrame;
 import org.rutebanken.netex.model.FareZone;
 import org.rutebanken.netex.model.FareZonesInFrame_RelStructure;
 import org.rutebanken.netex.model.MultilingualString;
-import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
-import org.rutebanken.netex.model.SiteFrame;
-import org.rutebanken.netex.model.TariffZonesInFrame_RelStructure;
 import org.rutebanken.netex.model.ValidBetween;
-import org.rutebanken.netex.model.Zone_VersionStructure;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.importer.FareZoneFrameSource;
 import org.rutebanken.tiamat.importer.ImportParams;
@@ -34,7 +29,6 @@ import org.rutebanken.tiamat.importer.ImportType;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -132,74 +126,6 @@ public class FareZoneFareFrameImportTest extends TiamatIntegrationTest {
                 .map(zone -> zone.getName().getValue())
                 .toList();
         assertThat(zoneNames).containsExactlyInAnyOrder("Zone A", "Zone B", "Zone C");
-    }
-
-    @Test
-    public void importFareZoneFromBothFrames() throws Exception {
-        // GIVEN: Both SiteFrame and FareFrame with different zones
-        LocalDateTime validFrom = LocalDateTime.now().minusDays(3);
-
-        List<JAXBElement<? extends Zone_VersionStructure>> tariffZones = new ArrayList<>();
-
-        FareZone fareZone = new FareZone()
-                .withName(new MultilingualString().withValue("V02"))
-                .withVersion("1")
-                .withValidBetween(new ValidBetween().withFromDate(validFrom))
-                .withId("RUT:FareZone:05");
-
-        tariffZones.add(new ObjectFactory().createFareZone(fareZone));
-
-        SiteFrame siteFrame = publicationDeliveryTestHelper.siteFrame()
-                .withTariffZones(new TariffZonesInFrame_RelStructure()
-                        .withTariffZone(tariffZones));
-
-        // FareFrame with fare zone
-        FareZone fareFrameFareZone = new FareZone()
-                .withName(new MultilingualString().withValue("Fare Zone 1"))
-                .withVersion("1")
-                .withValidBetween(new ValidBetween().withFromDate(validFrom))
-                .withId("RUT:FareZone:Fare01");
-
-        FareFrame fareFrame = publicationDeliveryTestHelper.fareFrame();
-        fareFrame.setFareZones(new FareZonesInFrame_RelStructure());
-        fareFrame.getFareZones().getFareZone().add(fareFrameFareZone);
-
-        // Create publication delivery with both frames
-        PublicationDeliveryStructure publicationDelivery = new PublicationDeliveryStructure()
-                .withPublicationTimestamp(LocalDateTime.now())
-                .withVersion("1")
-                .withParticipantRef("test")
-                .withDataObjects(new PublicationDeliveryStructure.DataObjects()
-                        .withCompositeFrameOrCommonFrame(
-                                new org.rutebanken.netex.model.ObjectFactory().createSiteFrame(siteFrame),
-                                new org.rutebanken.netex.model.ObjectFactory().createFareFrame(fareFrame)
-                        ));
-
-        // WHEN: Import with BOTH mode
-        ImportParams importParams = new ImportParams();
-        importParams.fareZoneFrameSource = FareZoneFrameSource.BOTH;
-        importParams.importType = ImportType.INITIAL;
-
-        PublicationDeliveryStructure response =
-                publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery, importParams);
-
-        // THEN: Both sets of zones are imported
-        // Response should contain both SiteFrame and FareFrame
-        SiteFrame responseSiteFrame = publicationDeliveryTestHelper.findSiteFrame(response);
-        FareFrame responseFareFrame = publicationDeliveryTestHelper.findFareFrame(response);
-
-        assertThat(responseSiteFrame).isNotNull();
-        assertThat(responseFareFrame).isNotNull();
-
-        // SiteFrame should have the site frame zone
-        assertThat(responseSiteFrame.getTariffZones()).isNotNull();
-        assertThat(responseSiteFrame.getTariffZones().getTariffZone()).hasSize(1);
-
-        // FareFrame should have the fare frame zone
-        assertThat(responseFareFrame.getFareZones()).isNotNull();
-        assertThat(responseFareFrame.getFareZones().getFareZone()).hasSize(1);
-        assertThat(responseFareFrame.getFareZones().getFareZone().get(0).getName().getValue())
-                .isEqualTo("Fare Zone 1");
     }
 
     @Test

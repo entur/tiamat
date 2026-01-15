@@ -17,9 +17,9 @@ package org.rutebanken.tiamat.importer;
 
 /**
  * Enum to control which frame to use for fare zone import.
+ * Either SiteFrame or FareFrame, but not both.
  */
 public enum FareZoneFrameSource {
     SITE_FRAME,      // Import from SiteFrame only (default, backward compatible)
-    FARE_FRAME,      // Import from FareFrame only
-    BOTH             // Import from both frames
+    FARE_FRAME       // Import from FareFrame only
 }
