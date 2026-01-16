@@ -85,7 +85,7 @@ public class FareZoneSaverService {
      * Used when Tiamat acts as a replica of a master FareZone register.
      *
      * @param incomingFareZone The fare zone to save/update
-     * @return The saved fare zone
+     * @return The saved fare zone, or null if validation fails
      */
     public FareZone saveWithExternalVersioning(FareZone incomingFareZone) {
         FareZone existingFareZone = null;
@@ -95,6 +95,13 @@ public class FareZoneSaverService {
         }
 
         authorizationService.verifyCanEditEntities(Arrays.asList(existingFareZone, incomingFareZone));
+
+        // Validate ValidBetween constraints
+        if (!validateValidBetween(incomingFareZone)) {
+            logger.warn("Ignoring FareZone {} version {} - invalid ValidBetween: fromDate is after toDate",
+                    incomingFareZone.getNetexId(), incomingFareZone.getVersion());
+            return null;
+        }
 
         String username = usernameFetcher.getUserNameForAuthenticatedUser();
         Instant now = Instant.now();
@@ -155,6 +162,31 @@ public class FareZoneSaverService {
     }
 
     /**
+     * Validate ValidBetween constraints for a FareZone.
+     * If both fromDate and toDate are present, fromDate must not be after toDate.
+     *
+     * @param fareZone The fare zone to validate
+     * @return true if validation passes, false if validation fails
+     */
+    private boolean validateValidBetween(FareZone fareZone) {
+        if (fareZone.getValidBetween() == null) {
+            return true; // No ValidBetween is acceptable
+        }
+
+        Instant fromDate = fareZone.getValidBetween().getFromDate();
+        Instant toDate = fareZone.getValidBetween().getToDate();
+
+        // If both dates are present, fromDate must not be after toDate
+        if (fromDate != null && toDate != null && fromDate.isAfter(toDate)) {
+            logger.warn("FareZone {} has invalid ValidBetween: fromDate {} is after toDate {}",
+                    fareZone.getNetexId(), fromDate, toDate);
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
      * Delete all FareZones NOT in the provided set of netexIds.
      * Used for cleanup after external versioning import to remove orphaned FareZones.
      * Respects user permissions and logs all deleted netexIds.
@@ -167,7 +199,7 @@ public class FareZoneSaverService {
 
         List<FareZone> toDelete = allFareZones.stream()
                 .filter(fz -> !netexIdsToKeep.contains(fz.getNetexId()))
-                .collect(Collectors.toList());
+                .toList();
 
         if (toDelete.isEmpty()) {
             logger.info("No orphaned FareZones to delete");

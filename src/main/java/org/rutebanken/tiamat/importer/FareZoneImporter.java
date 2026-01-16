@@ -27,9 +27,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
-import static java.util.stream.Collectors.toList;
 
 @Transactional
 @Component
@@ -60,20 +60,25 @@ public class FareZoneImporter {
 
                     if (fareZoneConfig.isExternalVersioning()) {
                         saved = fareZoneSaverService.saveWithExternalVersioning(incomingFareZone);
-                        logger.debug("Saved FareZone {} with external versioning", saved.getNetexId());
+                        if (saved != null) {
+                            logger.debug("Saved FareZone {} with external versioning", saved.getNetexId());
+                        } else {
+                            logger.warn("FareZone {} was not saved due to validation failure", incomingFareZone.getNetexId());
+                        }
                     } else {
                         saved = fareZoneSaverService.saveNewVersion(incomingFareZone);
                         logger.debug("Saved FareZone {} with default versioning", saved.getNetexId());
                     }
 
-                    if (saved.getNetexId() != null) {
+                    if (saved != null && saved.getNetexId() != null) {
                         importedNetexIds.add(saved.getNetexId());
                     }
 
                     return saved;
                 })
+                .filter(Objects::nonNull) // Filter out validation failures
                 .map(savedFareZone -> netexMapper.getFacade().map(savedFareZone, FareZone.class))
-                .collect(toList());
+                .toList();
 
         return new FareZoneImportResult(importedFareZones, importedNetexIds);
     }

@@ -27,11 +27,13 @@ import org.rutebanken.tiamat.config.FareZoneConfig;
 import org.rutebanken.tiamat.importer.FareZoneFrameSource;
 import org.rutebanken.tiamat.importer.ImportParams;
 import org.rutebanken.tiamat.importer.ImportType;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -407,4 +409,240 @@ public class FareZoneExternalVersioningTest extends TiamatIntegrationTest {
             ReflectionTestUtils.setField(fareZoneConfig, "externalVersioning", false);
         }
     }
+
+    /**
+     * Test ValidBetween with null toDate (open-ended validity) - should be accepted
+     */
+    @Test
+    public void validBetween_nullToDate_accepted() throws Exception {
+        ReflectionTestUtils.setField(fareZoneConfig, "externalVersioning", true);
+
+        try {
+            // GIVEN: FareZone with ValidBetween having null toDate
+            LocalDateTime fromDate = LocalDateTime.now().minusDays(1);
+
+            FareZone fareZone = new FareZone()
+                    .withName(new MultilingualString().withValue("Open Ended Zone"))
+                    .withVersion("1")
+                    .withId("NSR:FareZone:701")
+                    .withValidBetween(new ValidBetween()
+                            .withFromDate(fromDate)
+                            // toDate is null - open-ended validity
+                    );
+
+            FareFrame fareFrame = publicationDeliveryTestHelper.fareFrame();
+            fareFrame.setFareZones(new FareZonesInFrame_RelStructure());
+            fareFrame.getFareZones().getFareZone().add(fareZone);
+
+            ImportParams importParams = new ImportParams();
+            importParams.fareZoneFrameSource = FareZoneFrameSource.FARE_FRAME;
+            importParams.importType = ImportType.INITIAL;
+
+            // WHEN: Import FareZone with null toDate
+            PublicationDeliveryStructure response =
+                    publicationDeliveryTestHelper.postAndReturnPublicationDelivery(
+                            publicationDeliveryTestHelper.publicationDelivery(fareFrame), importParams);
+
+            // THEN: Import should succeed
+            FareFrame responseFareFrame = publicationDeliveryTestHelper.findFareFrame(response);
+            assertThat(responseFareFrame).isNotNull();
+            assertThat(responseFareFrame.getFareZones().getFareZone()).hasSize(1);
+
+            // Verify in database - toDate should be null
+            org.rutebanken.tiamat.model.FareZone savedZone = fareZoneRepository
+                    .findFirstByNetexIdOrderByVersionDesc("NSR:FareZone:701");
+            assertThat(savedZone).isNotNull();
+            assertThat(savedZone.getValidBetween()).isNotNull();
+            assertThat(savedZone.getValidBetween().getFromDate()).isNotNull();
+            assertThat(savedZone.getValidBetween().getToDate()).isNull(); // Open-ended
+
+        } finally {
+            ReflectionTestUtils.setField(fareZoneConfig, "externalVersioning", false);
+        }
+    }
+
+    /**
+     * Test ValidBetween with both fromDate and toDate set correctly
+     */
+    @Test
+    public void validBetween_validDateRange_accepted() throws Exception {
+        ReflectionTestUtils.setField(fareZoneConfig, "externalVersioning", true);
+
+        try {
+            // GIVEN: FareZone with valid date range (fromDate < toDate)
+            LocalDateTime fromDate = LocalDateTime.now().minusDays(10);
+            LocalDateTime toDate = LocalDateTime.now().plusDays(10);
+
+            FareZone fareZone = new FareZone()
+                    .withName(new MultilingualString().withValue("Time Limited Zone"))
+                    .withVersion("1")
+                    .withId("NSR:FareZone:702")
+                    .withValidBetween(new ValidBetween()
+                            .withFromDate(fromDate)
+                            .withToDate(toDate)
+                    );
+
+            FareFrame fareFrame = publicationDeliveryTestHelper.fareFrame();
+            fareFrame.setFareZones(new FareZonesInFrame_RelStructure());
+            fareFrame.getFareZones().getFareZone().add(fareZone);
+
+            ImportParams importParams = new ImportParams();
+            importParams.fareZoneFrameSource = FareZoneFrameSource.FARE_FRAME;
+            importParams.importType = ImportType.INITIAL;
+
+            // WHEN: Import FareZone with valid date range
+            PublicationDeliveryStructure response =
+                    publicationDeliveryTestHelper.postAndReturnPublicationDelivery(
+                            publicationDeliveryTestHelper.publicationDelivery(fareFrame), importParams);
+
+            // THEN: Import should succeed
+            FareFrame responseFareFrame = publicationDeliveryTestHelper.findFareFrame(response);
+            assertThat(responseFareFrame).isNotNull();
+            assertThat(responseFareFrame.getFareZones().getFareZone()).hasSize(1);
+
+            // Verify in database - both dates should be set
+            org.rutebanken.tiamat.model.FareZone savedZone = fareZoneRepository
+                    .findFirstByNetexIdOrderByVersionDesc("NSR:FareZone:702");
+            assertThat(savedZone).isNotNull();
+            assertThat(savedZone.getValidBetween()).isNotNull();
+            assertThat(savedZone.getValidBetween().getFromDate()).isNotNull();
+            assertThat(savedZone.getValidBetween().getToDate()).isNotNull();
+            assertThat(savedZone.getValidBetween().getFromDate())
+                    .isBefore(savedZone.getValidBetween().getToDate());
+
+        } finally {
+            ReflectionTestUtils.setField(fareZoneConfig, "externalVersioning", false);
+        }
+    }
+
+    /**
+     * Test ValidBetween with fromDate after toDate - should be rejected
+     */
+    @Test
+    public void validBetween_fromDateAfterToDate_rejected() throws Exception {
+        ReflectionTestUtils.setField(fareZoneConfig, "externalVersioning", true);
+
+        try {
+            // GIVEN: FareZone with invalid date range (fromDate > toDate)
+            LocalDateTime fromDate = LocalDateTime.now().plusDays(10);
+            LocalDateTime toDate = LocalDateTime.now().minusDays(10);
+
+            FareZone fareZone = new FareZone()
+                    .withName(new MultilingualString().withValue("Invalid Date Zone"))
+                    .withVersion("1")
+                    .withId("NSR:FareZone:703")
+                    .withValidBetween(new ValidBetween()
+                            .withFromDate(fromDate)
+                            .withToDate(toDate) // toDate is before fromDate - INVALID
+                    );
+
+            FareFrame fareFrame = publicationDeliveryTestHelper.fareFrame();
+            fareFrame.setFareZones(new FareZonesInFrame_RelStructure());
+            fareFrame.getFareZones().getFareZone().add(fareZone);
+
+            ImportParams importParams = new ImportParams();
+            importParams.fareZoneFrameSource = FareZoneFrameSource.FARE_FRAME;
+            importParams.importType = ImportType.INITIAL;
+
+            // WHEN: Import FareZone with invalid date range
+            PublicationDeliveryStructure response =
+                    publicationDeliveryTestHelper.postAndReturnPublicationDelivery(
+                            publicationDeliveryTestHelper.publicationDelivery(fareFrame), importParams);
+
+            // THEN: FareZone should be rejected and not saved
+            org.rutebanken.tiamat.model.FareZone savedZone = fareZoneRepository
+                    .findFirstByNetexIdOrderByVersionDesc("NSR:FareZone:703");
+
+            // Validation should reject this - zone should NOT be saved
+            assertThat(savedZone).isNull();
+
+            // Response should not include the invalid zone
+            FareFrame responseFareFrame = publicationDeliveryTestHelper.findFareFrame(response);
+            assertThat(responseFareFrame).isNotNull();
+            if (responseFareFrame.getFareZones() != null) {
+                assertThat(responseFareFrame.getFareZones().getFareZone()).isEmpty();
+            }
+
+        } finally {
+            ReflectionTestUtils.setField(fareZoneConfig, "externalVersioning", false);
+        }
+    }
+
+    /**
+     * Test FareZone with valid neighbour references
+     */
+    @Test
+    public void neighbours_validReferences_accepted() throws Exception {
+        ReflectionTestUtils.setField(fareZoneConfig, "externalVersioning", true);
+
+        try {
+            // GIVEN: Create neighbour FareZones first
+            FareZone neighbour1 = new FareZone()
+                    .withName(new MultilingualString().withValue("Neighbour Zone 1"))
+                    .withVersion("1")
+                    .withId("NSR:FareZone:801");
+
+            FareZone neighbour2 = new FareZone()
+                    .withName(new MultilingualString().withValue("Neighbour Zone 2"))
+                    .withVersion("1")
+                    .withId("NSR:FareZone:802");
+
+            FareFrame initialFrame = publicationDeliveryTestHelper.fareFrame();
+            initialFrame.setFareZones(new FareZonesInFrame_RelStructure());
+            initialFrame.getFareZones().getFareZone().add(neighbour1);
+            initialFrame.getFareZones().getFareZone().add(neighbour2);
+
+            ImportParams importParams = new ImportParams();
+            importParams.fareZoneFrameSource = FareZoneFrameSource.FARE_FRAME;
+            importParams.importType = ImportType.INITIAL;
+
+            publicationDeliveryTestHelper.postAndReturnPublicationDelivery(
+                    publicationDeliveryTestHelper.publicationDelivery(initialFrame), importParams);
+
+            // WHEN: Create FareZone with neighbour references
+            FareZone mainZone = new FareZone()
+                    .withName(new MultilingualString().withValue("Main Zone with Neighbours"))
+                    .withVersion("1")
+                    .withId("NSR:FareZone:800");
+
+            // Add neighbour references
+            org.rutebanken.netex.model.FareZoneRefs_RelStructure neighbours =
+                    new org.rutebanken.netex.model.FareZoneRefs_RelStructure();
+            neighbours.getFareZoneRef().add(
+                    new org.rutebanken.netex.model.FareZoneRefStructure().withRef("NSR:FareZone:801"));
+            neighbours.getFareZoneRef().add(
+                    new org.rutebanken.netex.model.FareZoneRefStructure().withRef("NSR:FareZone:802"));
+            mainZone.withNeighbours(neighbours);
+
+            FareFrame mainFrame = publicationDeliveryTestHelper.fareFrame();
+            mainFrame.setFareZones(new FareZonesInFrame_RelStructure());
+            mainFrame.getFareZones().getFareZone().add(mainZone);
+
+            PublicationDeliveryStructure response =
+                    publicationDeliveryTestHelper.postAndReturnPublicationDelivery(
+                            publicationDeliveryTestHelper.publicationDelivery(mainFrame), importParams);
+
+            // THEN: Import should succeed with neighbour references
+            FareFrame responseFareFrame = publicationDeliveryTestHelper.findFareFrame(response);
+            assertThat(responseFareFrame).isNotNull();
+            assertThat(responseFareFrame.getFareZones().getFareZone()).hasSize(1);
+
+            // Verify in database - neighbours should be stored
+            org.rutebanken.tiamat.model.FareZone savedZone = fareZoneRepository
+                    .findFirstByNetexIdOrderByVersionDesc("NSR:FareZone:800");
+            assertThat(savedZone).isNotNull();
+            assertThat(savedZone.getNeighbours()).isNotNull();
+            assertThat(savedZone.getNeighbours()).hasSize(2);
+
+            // Verify neighbour references contain correct IDs
+            Set<String> neighbourRefs = savedZone.getNeighbours().stream()
+                    .map(org.rutebanken.tiamat.model.TariffZoneRef::getRef)
+                    .collect(java.util.stream.Collectors.toSet());
+            assertThat(neighbourRefs).contains("NSR:FareZone:801", "NSR:FareZone:802");
+
+        } finally {
+            ReflectionTestUtils.setField(fareZoneConfig, "externalVersioning", false);
+        }
+    }
+
 }
