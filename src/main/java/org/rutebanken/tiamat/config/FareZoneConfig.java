@@ -13,35 +13,18 @@
  * limitations under the Licence.
  */
 
-package org.rutebanken.tiamat.model;
+package org.rutebanken.tiamat.config;
 
-public enum ModificationEnumeration {
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Configuration;
 
+@Configuration
+public class FareZoneConfig {
 
-    NEW("new"),
+    @Value("${fareZone.externalVersioning:false}")
+    private boolean externalVersioning;
 
-    DELETE("delete"),
-
-    REVISE("revise"),
-    UNCHANGED("unchanged"),
-    DELTA("delta");
-    private final String value;
-
-    ModificationEnumeration(String v) {
-        value = v;
+    public boolean isExternalVersioning() {
+        return externalVersioning;
     }
-
-    public static ModificationEnumeration fromValue(String v) {
-        for (ModificationEnumeration c : ModificationEnumeration.values()) {
-            if (c.value.equals(v)) {
-                return c;
-            }
-        }
-        throw new IllegalArgumentException(v);
-    }
-
-    public String value() {
-        return value;
-    }
-
 }

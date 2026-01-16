@@ -17,6 +17,7 @@ package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
 import jakarta.xml.bind.JAXBElement;
 import org.junit.Test;
+import org.rutebanken.netex.model.FareFrame;
 import org.rutebanken.netex.model.FareZone;
 import org.rutebanken.netex.model.LocationStructure;
 import org.rutebanken.netex.model.MultilingualString;
@@ -330,5 +331,108 @@ public class FareZoneImportTest extends TiamatIntegrationTest {
         assertThat(actualIdMatchedStopPlaces).hasSize(1);
         assertThat(actualIdMatchedStopPlaces.getFirst().getTariffZones().getTariffZoneRef()).as("number of tariff zone refs").hasSize(2);
 
+    }
+
+    @Test
+    public void backwardCompatibilityDefaultToSiteFrame() throws Exception {
+        // GIVEN: PublicationDelivery with SiteFrame containing FareZone
+        LocalDateTime validFrom = LocalDateTime.now().minusDays(3);
+        List<JAXBElement<? extends Zone_VersionStructure>> tariffZones = new ArrayList<>();
+
+        FareZone fareZone = new FareZone()
+                .withName(new MultilingualString().withValue("Backward Compat Zone"))
+                .withVersion("1")
+                .withValidBetween(new ValidBetween().withFromDate(validFrom))
+                .withId("RUT:FareZone:BC01");
+
+        tariffZones.add(new ObjectFactory().createFareZone(fareZone));
+        SiteFrame siteFrame = publicationDeliveryTestHelper.siteFrame()
+                .withTariffZones(new TariffZonesInFrame_RelStructure()
+                        .withTariffZone(tariffZones));
+
+        PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryTestHelper.publicationDelivery(siteFrame);
+
+        // WHEN: Import without fareZoneFrameSource parameter (should default to SITE_FRAME)
+        ImportParams importParams = new ImportParams();
+        // Note: fareZoneFrameSource not set, should default to SITE_FRAME
+
+        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDeliveryStructure, importParams);
+
+        // THEN: Should use SiteFrame (default behavior)
+        final List<JAXBElement<? extends Zone_VersionStructure>> actualZones = publicationDeliveryTestHelper.findSiteFrame(response)
+                .getTariffZones().getTariffZone();
+
+        assertThat(actualZones).isNotEmpty();
+        assertThat(actualZones.getFirst().getValue().getName().getValue()).isEqualTo(fareZone.getName().getValue());
+
+        // Verify no FareFrame in response (backward compatible behavior)
+        FareFrame responseFareFrame = publicationDeliveryTestHelper.findFareFrame(response);
+        assertThat(responseFareFrame).isNull();
+    }
+
+    @Test
+    public void backwardCompatibilityImportOnlyTariffZonesStillWorks() throws Exception {
+        // GIVEN: PublicationDelivery with SiteFrame containing FareZone and TariffZone
+        LocalDateTime validFrom = LocalDateTime.now().minusDays(3);
+        List<JAXBElement<? extends Zone_VersionStructure>> tariffZones = new ArrayList<>();
+
+        FareZone fareZone = new FareZone()
+                .withName(new MultilingualString().withValue("Legacy Import Zone"))
+                .withVersion("1")
+                .withValidBetween(new ValidBetween().withFromDate(validFrom))
+                .withId("RUT:FareZone:Legacy01");
+
+        tariffZones.add(new ObjectFactory().createFareZone(fareZone));
+        SiteFrame siteFrame = publicationDeliveryTestHelper.siteFrame()
+                .withTariffZones(new TariffZonesInFrame_RelStructure()
+                        .withTariffZone(tariffZones));
+
+        PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryTestHelper.publicationDelivery(siteFrame);
+
+        // WHEN: Import with importOnlyTariffZones=true (legacy parameter)
+        ImportParams importParams = new ImportParams();
+        importParams.importOnlyTariffZones = true;
+
+        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDeliveryStructure, importParams);
+
+        // THEN: Should use PublicationDeliveryTariffZoneImporter (legacy behavior)
+        final List<JAXBElement<? extends Zone_VersionStructure>> actualZones = publicationDeliveryTestHelper.findSiteFrame(response)
+                .getTariffZones().getTariffZone();
+
+        assertThat(actualZones).isNotEmpty();
+        assertThat(actualZones.getFirst().getValue().getName().getValue()).isEqualTo(fareZone.getName().getValue());
+    }
+
+    @Test
+    public void explicitSiteFrameSourceMatchesDefaultBehavior() throws Exception {
+        // GIVEN: PublicationDelivery with SiteFrame containing FareZone
+        LocalDateTime validFrom = LocalDateTime.now().minusDays(3);
+        List<JAXBElement<? extends Zone_VersionStructure>> tariffZones = new ArrayList<>();
+
+        FareZone fareZone = new FareZone()
+                .withName(new MultilingualString().withValue("Explicit Site Zone"))
+                .withVersion("1")
+                .withValidBetween(new ValidBetween().withFromDate(validFrom))
+                .withId("RUT:FareZone:Exp01");
+
+        tariffZones.add(new ObjectFactory().createFareZone(fareZone));
+        SiteFrame siteFrame = publicationDeliveryTestHelper.siteFrame()
+                .withTariffZones(new TariffZonesInFrame_RelStructure()
+                        .withTariffZone(tariffZones));
+
+        PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryTestHelper.publicationDelivery(siteFrame);
+
+        // WHEN: Import with explicit SITE_FRAME parameter
+        ImportParams importParams = new ImportParams();
+        importParams.fareZoneFrameSource = org.rutebanken.tiamat.importer.FareZoneFrameSource.SITE_FRAME;
+
+        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDeliveryStructure, importParams);
+
+        // THEN: Should behave identically to default
+        final List<JAXBElement<? extends Zone_VersionStructure>> actualZones = publicationDeliveryTestHelper.findSiteFrame(response)
+                .getTariffZones().getTariffZone();
+
+        assertThat(actualZones).isNotEmpty();
+        assertThat(actualZones.getFirst().getValue().getName().getValue()).isEqualTo(fareZone.getName().getValue());
     }
 }

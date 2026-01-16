@@ -122,6 +122,33 @@ public class PublicationDeliveryCreator {
         return publicationDeliveryStructure;
     }
 
+    public PublicationDeliveryStructure createPublicationDelivery(org.rutebanken.netex.model.SiteFrame siteFrame,
+                                                                  org.rutebanken.netex.model.FareFrame fareFrame
+    ) {
+        PublicationDeliveryStructure publicationDeliveryStructure = createPublicationDelivery();
+
+        publicationDeliveryStructure.withDataObjects
+                (
+                        new PublicationDeliveryStructure.DataObjects()
+                                .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(siteFrame))
+                                .withCompositeFrameOrCommonFrame(new ObjectFactory().createFareFrame(fareFrame))
+                );
+
+        logger.info("Returning publication delivery {} with site frame and fare frame", publicationDeliveryStructure);
+        return publicationDeliveryStructure;
+    }
+
+    public PublicationDeliveryStructure createPublicationDelivery(org.rutebanken.netex.model.FareFrame fareFrame) {
+        PublicationDeliveryStructure publicationDeliveryStructure = createPublicationDelivery();
+        publicationDeliveryStructure.withDataObjects(
+                new PublicationDeliveryStructure.DataObjects()
+                        .withCompositeFrameOrCommonFrame(new ObjectFactory().createFareFrame(fareFrame))
+        );
+
+        logger.info("Returning publication delivery {} with fare frame only", publicationDeliveryStructure);
+        return publicationDeliveryStructure;
+    }
+
 
 
     private ResourceFrame createResourceFrame() {

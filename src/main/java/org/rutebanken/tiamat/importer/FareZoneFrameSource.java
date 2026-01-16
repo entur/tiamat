@@ -13,35 +13,13 @@
  * limitations under the Licence.
  */
 
-package org.rutebanken.tiamat.model;
+package org.rutebanken.tiamat.importer;
 
-public enum ModificationEnumeration {
-
-
-    NEW("new"),
-
-    DELETE("delete"),
-
-    REVISE("revise"),
-    UNCHANGED("unchanged"),
-    DELTA("delta");
-    private final String value;
-
-    ModificationEnumeration(String v) {
-        value = v;
-    }
-
-    public static ModificationEnumeration fromValue(String v) {
-        for (ModificationEnumeration c : ModificationEnumeration.values()) {
-            if (c.value.equals(v)) {
-                return c;
-            }
-        }
-        throw new IllegalArgumentException(v);
-    }
-
-    public String value() {
-        return value;
-    }
-
+/**
+ * Enum to control which frame to use for fare zone import.
+ * Either SiteFrame or FareFrame, but not both.
+ */
+public enum FareZoneFrameSource {
+    SITE_FRAME,      // Import from SiteFrame only (default, backward compatible)
+    FARE_FRAME       // Import from FareFrame only
 }

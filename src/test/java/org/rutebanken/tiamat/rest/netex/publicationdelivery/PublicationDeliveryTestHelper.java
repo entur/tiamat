@@ -359,9 +359,9 @@ public class PublicationDeliveryTestHelper {
                 .map(element -> (CompositeFrame) element.getValue())
                 .map(compositeFrame -> compositeFrame.getFrames())
                 .flatMap(frames -> frames.getCommonFrame().stream())
-                .filter(jaxbElement -> jaxbElement.getValue() instanceof SiteFrame)
+                .filter(jaxbElement -> jaxbElement.getValue() instanceof FareFrame)
                 .map(jaxbElement -> (FareFrame) jaxbElement.getValue())
-                .findAny().get();
+                .findAny().orElse(null);
     }
 
     public StopPlace findStopPlace(PublicationDeliveryStructure publicationDeliveryStructure, String stopPlaceId) {
