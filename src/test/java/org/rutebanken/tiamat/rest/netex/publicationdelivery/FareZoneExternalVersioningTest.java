@@ -330,8 +330,19 @@ public class FareZoneExternalVersioningTest extends TiamatIntegrationTest {
                             publicationDeliveryTestHelper.publicationDelivery(emptyFrame), importParams);
 
             // THEN: No cleanup should happen (empty import means no zones in import, not delete all)
-            // This behavior depends on implementation - let's verify current behavior
             // Since we only cleanup when importedNetexIds is not empty, empty import shouldn't trigger cleanup
+            assertThat(fareZoneRepository.findAll()).hasSize(3);
+
+            // Verify original zones still exist
+            assertThat(fareZoneRepository.findFirstByNetexIdOrderByVersionDesc("NSR:FareZone:501")).isNotNull();
+            assertThat(fareZoneRepository.findFirstByNetexIdOrderByVersionDesc("NSR:FareZone:502")).isNotNull();
+            assertThat(fareZoneRepository.findFirstByNetexIdOrderByVersionDesc("NSR:FareZone:503")).isNotNull();
+
+            // Verify response has no fare zones (empty import)
+            FareFrame responseFareFrame = publicationDeliveryTestHelper.findFareFrame(response);
+            if (responseFareFrame != null && responseFareFrame.getFareZones() != null) {
+                assertThat(responseFareFrame.getFareZones().getFareZone()).isEmpty();
+            }
 
         } finally {
             ReflectionTestUtils.setField(fareZoneConfig, "externalVersioning", false);
