@@ -25,7 +25,9 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @MappedSuperclass
 public abstract class SiteElement extends AddressablePlace {
@@ -37,6 +39,9 @@ public abstract class SiteElement extends AddressablePlace {
     @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     protected AccessibilityAssessment accessibilityAssessment;
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<SiteFacilitySet> facilities = new HashSet<>();
 
     @Transient
     protected MultilingualStringEntity nameSuffix;
@@ -153,4 +158,11 @@ public abstract class SiteElement extends AddressablePlace {
         this.personCapacity = value;
     }
 
+    public Set<SiteFacilitySet> getFacilities() {
+        return facilities;
+    }
+
+    public void setFacilities(Set<SiteFacilitySet> facilities) {
+        this.facilities = facilities;
+    }
 }

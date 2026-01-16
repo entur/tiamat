@@ -397,6 +397,10 @@ public class StopPlaceRegisterGraphQLSchema {
                 .name(LOCAL_SERVICES)
                 .type(localServiceType)
                 .build());
+        commonFieldsList.add(newFieldDefinition()
+                .name(FACILITIES)
+                .type(new GraphQLList(siteFacilitySetObjectType))
+                .build());
 
         commonFieldsList.add(newFieldDefinition()
                         .name(PUBLIC_CODE)
@@ -1525,6 +1529,7 @@ public class StopPlaceRegisterGraphQLSchema {
         commonInputFieldsList.add(newInputObjectField().name(ALTERNATIVE_NAMES).type(new GraphQLList(alternativeNameInputObjectType)).build());
         commonInputFieldsList.add(newInputObjectField().name(PLACE_EQUIPMENTS).type(equipmentInputType).build());
         commonInputFieldsList.add(newInputObjectField().name(LOCAL_SERVICES).type(localServiceInputType).build());
+        commonInputFieldsList.add(newInputObjectField().name(FACILITIES).type(new GraphQLList(siteFacilitySetInputObjectType)).build());
         commonInputFieldsList.add(newInputObjectField().name(KEY_VALUES).type(new GraphQLList(keyValuesObjectInputType)).build());
         commonInputFieldsList.add(
                 newInputObjectField()

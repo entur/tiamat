@@ -52,6 +52,7 @@ import org.rutebanken.netex.model.TopographicPlace;
 import org.rutebanken.netex.model.WaitingRoomEquipment;
 import org.rutebanken.tiamat.netex.mapping.mapper.AccessibilityAssessmentMapper;
 import org.rutebanken.tiamat.netex.mapping.mapper.DataManagedObjectStructureMapper;
+import org.rutebanken.tiamat.netex.mapping.mapper.FacilityMapper;
 import org.rutebanken.tiamat.netex.mapping.mapper.FareZoneMapper;
 import org.rutebanken.tiamat.netex.mapping.mapper.GroupOfStopPlacesMapper;
 import org.rutebanken.tiamat.netex.mapping.mapper.GroupOfTariffZonesMapper;
@@ -198,12 +199,12 @@ public class NetexMapper {
                 .byDefault()
                 .register();
 
+        // TODO: Remove the custom mapper and add a .byDefault() one once the netex model library is updated to the latest:
         mapperFactoryWithNetexIdClassBuilder(SiteFacilitySet.class, org.rutebanken.tiamat.model.SiteFacilitySet.class)
-                .byDefault()
+                .customize(new FacilityMapper())
                 .register();
 
         mapperFactoryWithNetexIdClassBuilder(PlaceEquipments_RelStructure.class, org.rutebanken.tiamat.model.PlaceEquipment.class)
-
                 .customize(new PlaceEquipmentMapper())
                 .byDefault()
                 .register();

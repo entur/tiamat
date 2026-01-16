@@ -30,11 +30,35 @@ public class SiteFacilitySet
     @Enumerated(EnumType.STRING)
     private List<MobilityFacilityEnumeration> mobilityFacilityList;
 
+    @ElementCollection(targetClass = PassengerInformationFacilityEnumeration.class)
+    @Enumerated(EnumType.STRING)
+    private List<PassengerInformationFacilityEnumeration> passengerInformationFacilityList;
+
+    @ElementCollection(targetClass = PassengerInformationEquipmentEnumeration.class)
+    @Enumerated(EnumType.STRING)
+    private List<PassengerInformationEquipmentEnumeration> passengerInformationEquipmentList;
+
     public List<MobilityFacilityEnumeration> getMobilityFacilityList() {
         return mobilityFacilityList;
     }
 
     public void setMobilityFacilityList(List<MobilityFacilityEnumeration> mobilityFacilityList) {
         this.mobilityFacilityList = mobilityFacilityList;
+    }
+
+    public List<PassengerInformationEquipmentEnumeration> getPassengerInformationEquipmentList() {
+        return passengerInformationEquipmentList;
+    }
+
+    public void setPassengerInformationEquipmentList(List<PassengerInformationEquipmentEnumeration> passengerInformationEquipmentList) {
+        this.passengerInformationEquipmentList = passengerInformationEquipmentList;
+    }
+
+    public List<PassengerInformationFacilityEnumeration> getPassengerInformationFacilityList() {
+        return passengerInformationFacilityList;
+    }
+
+    public void setPassengerInformationFacilityList(List<PassengerInformationFacilityEnumeration> passengerInformationFacilityList) {
+        this.passengerInformationFacilityList = passengerInformationFacilityList;
     }
 }
