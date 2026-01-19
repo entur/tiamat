@@ -48,7 +48,7 @@ class FintrafficApiControllerTest {
                 "1.12:FI-NeTEx-stops:1.0"
         );
 
-        controller = new FintrafficApiController(publicationDeliveryService);
+        controller = new FintrafficApiController(publicationDeliveryService, "[A-ZÅÄÖ]{3}");
 
         // Setup mock response
         response = mock(HttpServletResponse.class);

@@ -10,7 +10,7 @@ public class V2__CreateExtFintrafficNetexEntityTable extends BaseJavaMigration {
         String sql =
                 """
                 -- Drop the old table if it exists
-                DROP TABLE IF EXISTS ext_fintraffix_netex_entity;
+                DROP TABLE IF EXISTS ext_fintraffic_netex_entity;
                 CREATE TABLE ext_fintraffic_netex_entity (
                     id TEXT PRIMARY KEY,
                     type TEXT NOT NULL,

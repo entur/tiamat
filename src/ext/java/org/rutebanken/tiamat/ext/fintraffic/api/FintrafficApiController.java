@@ -3,6 +3,7 @@ package org.rutebanken.tiamat.ext.fintraffic.api;
 import jakarta.servlet.http.HttpServletResponse;
 import org.rutebanken.tiamat.ext.fintraffic.api.model.FintrafficReadApiSearchKey;
 import org.rutebanken.tiamat.model.VehicleModeEnumeration;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -17,10 +18,15 @@ import java.nio.charset.StandardCharsets;
 @Controller
 public class FintrafficApiController {
     private final ReadApiNetexPublicationDeliveryService readApiNetexPublicationDeliveryService;
+    private final String areaCodeRegex;
 
     public FintrafficApiController(
-            ReadApiNetexPublicationDeliveryService readApiNetexPublicationDeliveryService) {
+            ReadApiNetexPublicationDeliveryService readApiNetexPublicationDeliveryService,
+            @Value("${tiamat.ext.fintraffic.area-code-pattern:[A-ZÅÄÖ]{3}}")
+            String areaCodeRegex
+    ) {
         this.readApiNetexPublicationDeliveryService = readApiNetexPublicationDeliveryService;
+        this.areaCodeRegex = areaCodeRegex;
     }
 
     @GetMapping("/fintraffic/v1/stops")
@@ -60,7 +66,7 @@ public class FintrafficApiController {
     private void validateAreaCodes(String[] areaCodes) {
         if (areaCodes != null) {
             for (String code : areaCodes) {
-                if (!code.matches("[A-ZÅÄÖ]{3}")) {
+                if (!code.matches(areaCodeRegex)) {
                     throw new IllegalArgumentException("Invalid areaCode: " + code);
                 }
             }
