@@ -59,17 +59,17 @@ public class ParallelInitialStopPlaceImporter {
                 stopPlacesCreated
         );
 
-        List<StopPlace> stops = tiamatStops.parallelStream()
+        List<org.rutebanken.netex.model.StopPlace> stops = tiamatStops.parallelStream()
                 .map(this::clearTariffZoneVersions)
                 .map(stopPlaceTopographicPlaceReferenceUpdater::updateTopographicReference)
-                .flatMap(processor::processStopPlace)
+                .flatMap(stopPlace ->  processor.processStopPlace(stopPlace).map(netexMapper::mapToNetexModel))
                 .toList();
 
-        List<StopPlace> parents = processor.createAndSaveParentStopPlaces();
+        List<org.rutebanken.netex.model.StopPlace> parents = processor.createAndSaveParentStopPlaces()
+                .parallelStream()
+                .map(netexMapper::mapToNetexModel).toList();
 
-        return concat(stops.stream(), parents.stream())
-                .map(netexMapper::mapToNetexModel)
-                .toList();
+        return concat(stops.stream(), parents.stream()).toList();
     }
 
     private StopPlace clearTariffZoneVersions(StopPlace stopPlace) {
