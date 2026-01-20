@@ -15,9 +15,11 @@
 
 package org.rutebanken.tiamat.netex.mapping.converter;
 
+import jakarta.xml.bind.JAXBElement;
 import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;
+import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.ParkingAreas_RelStructure;
 import org.rutebanken.tiamat.model.ParkingArea;
 import org.slf4j.Logger;
@@ -44,17 +46,18 @@ public class ParkingAreaListConverter extends BidirectionalConverter<List<Parkin
 
         parkingAreas.forEach(parkingArea -> {
             org.rutebanken.netex.model.ParkingArea netexParkingArea = mapperFacade.map(parkingArea, org.rutebanken.netex.model.ParkingArea.class);
-            parkingAreasRelStructure.getParkingAreaRefOrParkingArea().add(netexParkingArea);
+            parkingAreasRelStructure.withParkingAreaRefOrParkingArea_(List.of(new ObjectFactory().createParkingArea_(netexParkingArea)));
         });
         return parkingAreasRelStructure;
     }
 
     @Override
     public List<ParkingArea> convertFrom(ParkingAreas_RelStructure parkingAreasRelStructure, Type<List<ParkingArea>> destinationType, MappingContext mappingContext) {
-        logger.debug("Mapping {} quays to internal model", parkingAreasRelStructure != null ? parkingAreasRelStructure.getParkingAreaRefOrParkingArea().size() : 0);
+        logger.debug("Mapping {} quays to internal model", parkingAreasRelStructure != null ? parkingAreasRelStructure.getParkingAreaRefOrParkingArea_().size() : 0);
         List<ParkingArea> parkingAreas = new ArrayList<>();
-        if(parkingAreasRelStructure != null && parkingAreasRelStructure.getParkingAreaRefOrParkingArea() != null) {
-            parkingAreasRelStructure.getParkingAreaRefOrParkingArea().stream()
+        if(parkingAreasRelStructure != null && parkingAreasRelStructure.getParkingAreaRefOrParkingArea_() != null) {
+            parkingAreasRelStructure.getParkingAreaRefOrParkingArea_().stream()
+                    .map(JAXBElement::getValue)
                     .filter(object -> object instanceof org.rutebanken.netex.model.ParkingArea)
                     .map(object -> ((org.rutebanken.netex.model.ParkingArea) object))
                     .map(netexParkingArea ->  mapperFacade.map(netexParkingArea, ParkingArea.class))

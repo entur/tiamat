@@ -15,9 +15,11 @@
 
 package org.rutebanken.tiamat.netex.mapping.converter;
 
+import jakarta.xml.bind.JAXBElement;
 import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;
+import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.Quays_RelStructure;
 import org.rutebanken.tiamat.model.Quay;
 import org.slf4j.Logger;
@@ -25,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Component
@@ -44,7 +47,7 @@ public class QuayListConverter extends BidirectionalConverter<Set<Quay>, Quays_R
 
         quays.forEach(quay -> {
             org.rutebanken.netex.model.Quay netexQuay = mapperFacade.map(quay, org.rutebanken.netex.model.Quay.class);
-            quays_relStructure.getQuayRefOrQuay().add(netexQuay);
+            quays_relStructure.withQuayRefOrQuay(List.of(new ObjectFactory().createQuay(netexQuay)));
         });
         return quays_relStructure;
     }
@@ -55,13 +58,11 @@ public class QuayListConverter extends BidirectionalConverter<Set<Quay>, Quays_R
         Set<Quay> quays = new HashSet<>();
         if(quays_relStructure != null && quays_relStructure.getQuayRefOrQuay() != null) {
             quays_relStructure.getQuayRefOrQuay().stream()
+                    .map(JAXBElement::getValue)
                     .filter(object -> object instanceof org.rutebanken.netex.model.Quay)
                     .map(object -> ((org.rutebanken.netex.model.Quay) object))
-                    .map(netexQuay -> {
-                        Quay tiamatQuay = mapperFacade.map(netexQuay, Quay.class);
-                        return tiamatQuay;
-                    })
-                    .forEach(quay -> quays.add(quay));
+                    .map(netexQuay -> mapperFacade.map(netexQuay, Quay.class))
+                    .forEach(quays::add);
         }
         
         return quays;

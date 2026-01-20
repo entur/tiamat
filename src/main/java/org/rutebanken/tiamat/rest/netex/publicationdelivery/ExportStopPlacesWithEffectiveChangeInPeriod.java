@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
+import jakarta.xml.bind.JAXBElement;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.tiamat.exporter.PublicationDeliveryCreator;
 import org.rutebanken.tiamat.exporter.PublicationDeliveryStructurePage;
@@ -18,6 +19,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.StreamSupport;
@@ -96,10 +98,13 @@ public class ExportStopPlacesWithEffectiveChangeInPeriod {
 
         if (convertedSiteFrame.getStopPlaces() != null) {
             if (relevantTariffZones) {
-                tariffZonesFromStopsExporter.resolveTariffZones(convertedSiteFrame.getStopPlaces().getStopPlace(), convertedSiteFrame);
+                final Collection<org.rutebanken.netex.model.StopPlace> stopPlace = convertedSiteFrame.getStopPlaces().getStopPlace_().stream()
+                        .map(sp -> (org.rutebanken.netex.model.StopPlace) sp.getValue())
+                        .toList();
             } else if (ExportParams.ExportMode.NONE.equals(exportParams.getTariffZoneExportMode())) {
-                logger.info("TariffZone export mode is NONE. Removing references from {} converted stop places", convertedSiteFrame.getStopPlaces().getStopPlace().size());
-                convertedSiteFrame.getStopPlaces().getStopPlace().stream()
+                logger.info("TariffZone export mode is NONE. Removing references from {} converted stop places", convertedSiteFrame.getStopPlaces().getStopPlace_().size());
+                convertedSiteFrame.getStopPlaces().getStopPlace_().stream()
+                        .map(sp -> (org.rutebanken.netex.model.StopPlace) sp.getValue())
                         .forEach(convertedStop -> convertedStop.setTariffZones(null));
             }
         }
@@ -112,8 +117,8 @@ public class ExportStopPlacesWithEffectiveChangeInPeriod {
     }
     private void removeVersionFromTopographicPlaceReferences(org.rutebanken.netex.model.SiteFrame convertedSiteFrame) {
         if (convertedSiteFrame.getStopPlaces() != null) {
-            convertedSiteFrame.getStopPlaces().getStopPlace()
-                    .stream()
+            convertedSiteFrame.getStopPlaces().getStopPlace_().stream()
+                    .map(sp -> (org.rutebanken.netex.model.StopPlace) sp.getValue())
                     .filter(sp -> sp.getTopographicPlaceRef() != null)
                     .forEach(sp -> sp.getTopographicPlaceRef().setVersion(null));
         }

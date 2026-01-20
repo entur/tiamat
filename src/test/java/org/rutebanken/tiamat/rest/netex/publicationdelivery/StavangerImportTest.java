@@ -19,6 +19,7 @@ import org.junit.Test;
 import org.rutebanken.netex.model.LocationStructure;
 import org.rutebanken.netex.model.MultilingualString;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
+import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.Quay;
 import org.rutebanken.netex.model.Quays_RelStructure;
 import org.rutebanken.netex.model.SimplePoint_VersionStructure;
@@ -55,13 +56,13 @@ public class StavangerImportTest  extends TiamatIntegrationTest {
                 .withName(new MultilingualString().withValue("Stavanger hpl. 12").withLang("no"))
                 .withStopPlaceType(StopTypeEnumeration.ONSTREET_BUS)
                 .withQuays(new Quays_RelStructure()
-                        .withQuayRefOrQuay(new Quay()
+                        .withQuayRefOrQuay(new ObjectFactory().createQuay(new Quay()
                                         .withVersion("1")
                                         .withId("KOL:StopArea:87654")
                                         .withName(new MultilingualString().withValue("Stavanger hpl. 12").withLang("no"))
                                         .withCentroid(new SimplePoint_VersionStructure().withLocation(new LocationStructure()
                                                 .withLatitude(new BigDecimal("58.966910"))
-                                                .withLongitude(new BigDecimal("5.732949"))))));
+                                                .withLongitude(new BigDecimal("5.732949")))))));
 
         PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace);
 
@@ -92,13 +93,13 @@ public class StavangerImportTest  extends TiamatIntegrationTest {
                 .withName(new MultilingualString().withValue(originalStopPlaceName).withLang("no"))
                 .withStopPlaceType(StopTypeEnumeration.ONSTREET_BUS)
                 .withQuays(new Quays_RelStructure()
-                        .withQuayRefOrQuay(new Quay()
+                        .withQuayRefOrQuay(new ObjectFactory().createQuay(new Quay()
                                 .withVersion("1")
                                 .withId("KOL:StopArea:1103265001")
                                 .withName(new MultilingualString().withValue(originalStopPlaceName).withLang("no"))
                                 .withCentroid(new SimplePoint_VersionStructure().withLocation(new LocationStructure()
                                         .withLatitude(new BigDecimal("58.966910"))
-                                        .withLongitude(new BigDecimal("5.732949"))))));
+                                        .withLongitude(new BigDecimal("5.732949")))))));
 
         PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace);
 

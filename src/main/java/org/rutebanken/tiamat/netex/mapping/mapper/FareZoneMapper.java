@@ -4,7 +4,7 @@ import jakarta.xml.bind.JAXBElement;
 import ma.glasnost.orika.CustomMapper;
 import ma.glasnost.orika.MappingContext;
 import org.apache.commons.lang3.StringUtils;
-import org.rutebanken.netex.model.AuthorityRefStructure;
+import org.rutebanken.netex.model.AuthorityRef;
 import org.rutebanken.netex.model.FareZone;
 import org.rutebanken.netex.model.FareZoneRefStructure;
 import org.rutebanken.netex.model.FareZoneRefs_RelStructure;
@@ -58,7 +58,7 @@ public class FareZoneMapper extends CustomMapper<FareZone, org.rutebanken.tiamat
     public void mapBtoA(org.rutebanken.tiamat.model.FareZone tiamatFareZone, FareZone netexFareZone, MappingContext context) {
         super.mapBtoA(tiamatFareZone, netexFareZone, context);
         if (tiamatFareZone.getTransportOrganisationRef() != null) {
-            final JAXBElement<AuthorityRefStructure> authorityRef = objectFactory.createAuthorityRef(new AuthorityRefStructure().withRef(tiamatFareZone.getTransportOrganisationRef()));
+            final JAXBElement<AuthorityRef> authorityRef = objectFactory.createAuthorityRef(new AuthorityRef().withRef(tiamatFareZone.getTransportOrganisationRef()));
             netexFareZone.withTransportOrganisationRef(authorityRef);
         }
 

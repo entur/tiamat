@@ -37,6 +37,7 @@ import org.rutebanken.netex.model.QuayRefStructure;
 import org.rutebanken.netex.model.ScheduledStopPoint;
 import org.rutebanken.netex.model.ScheduledStopPointRefStructure;
 import org.rutebanken.netex.model.ScheduledStopPointsInFrame_RelStructure;
+import org.rutebanken.netex.model.Site_VersionStructure;
 import org.rutebanken.netex.model.SiteFrame;
 import org.rutebanken.netex.model.StopAssignment_VersionStructure;
 import org.rutebanken.netex.model.StopAssignmentsInFrame_RelStructure;
@@ -383,8 +384,26 @@ public class StreamingPublicationDelivery {
             ParentStopFetchingIterator parentStopFetchingIterator = new ParentStopFetchingIterator(stopPlaceIterator, stopPlaceRepository);
             NetexMappingIterator<org.rutebanken.tiamat.model.StopPlace, StopPlace> netexMappingIterator = new NetexMappingIterator<>(netexMapper, parentStopFetchingIterator, StopPlace.class, mappedStopPlaceCount, evicter);
 
-            List<StopPlace> stopPlaces = new NetexMappingIteratorList<>(() -> new NetexReferenceRemovingIterator(netexMappingIterator, exportParams));
-            setField(StopPlacesInFrame_RelStructure.class, "stopPlace", stopPlacesInFrame_relStructure, stopPlaces);
+            // Wrap StopPlace objects in JAXBElement for JAXB marshalling (required by @XmlElementRef)
+            // Use custom ArrayList that wraps elements in JAXBElement during iteration
+            List<JAXBElement<? extends Site_VersionStructure>> stopPlaces = new ArrayList<>() {
+                @Override
+                public Iterator<JAXBElement<? extends Site_VersionStructure>> iterator() {
+                    Iterator<StopPlace> innerIterator = new NetexReferenceRemovingIterator(netexMappingIterator, exportParams);
+                    return new Iterator<>() {
+                        @Override
+                        public boolean hasNext() {
+                            return innerIterator.hasNext();
+                        }
+
+                        @Override
+                        public JAXBElement<? extends Site_VersionStructure> next() {
+                            return netexObjectFactory.createStopPlace(innerIterator.next());
+                        }
+                    };
+                }
+            };
+            setField(StopPlacesInFrame_RelStructure.class, "stopPlace_", stopPlacesInFrame_relStructure, stopPlaces);
             netexSiteFrame.setStopPlaces(stopPlacesInFrame_relStructure);
         } else {
             logger.info("No stop places to export");

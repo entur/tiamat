@@ -54,7 +54,7 @@ public class PublicationDeliveryHelper {
     }
 
     public boolean hasStops(SiteFrame siteFrame) {
-        return siteFrame.getStopPlaces() != null && siteFrame.getStopPlaces().getStopPlace() != null;
+        return siteFrame.getStopPlaces() != null && siteFrame.getStopPlaces().getStopPlace_() != null;
     }
 
     public boolean hasTariffZones(SiteFrame netexSiteFrame) {
@@ -70,7 +70,7 @@ public class PublicationDeliveryHelper {
     }
 
     public int numberOfStops(SiteFrame netexSiteFrame) {
-        return hasStops(netexSiteFrame) ? netexSiteFrame.getStopPlaces().getStopPlace().size() : 0;
+        return hasStops(netexSiteFrame) ? netexSiteFrame.getStopPlaces().getStopPlace_().size() : 0;
     }
 
     public SiteFrame findSiteFrame(PublicationDeliveryStructure incomingPublicationDelivery) {

@@ -15,7 +15,9 @@
 
 package org.rutebanken.tiamat.exporter.async;
 
+import jakarta.xml.bind.JAXBElement;
 import org.junit.Test;
+import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.StopPlace;
 import org.rutebanken.netex.model.TariffZoneRef;
 import org.rutebanken.netex.model.TariffZoneRefs_RelStructure;
@@ -38,14 +40,15 @@ public class NetexReferenceRemovingIteratorTest {
         StopPlace stopPlace = new StopPlace()
                 .withTariffZones(
                         new TariffZoneRefs_RelStructure()
-                                .withTariffZoneRef(
-                                        new TariffZoneRef()
+                                .withTariffZoneRef_(
+                                        new ObjectFactory().createTariffZoneRef(
+                                            new TariffZoneRef()
                                                 .withRef("RUT:TariffZone:1")
-                                                .withVersion("1"))
-                                .withTariffZoneRef(
+                                                .withVersion("1")),
+                                        new ObjectFactory().createTariffZoneRef(
                                         new TariffZoneRef()
                                                 .withRef("RUT:FareZone:2")
-                                                .withVersion("2")
+                                                .withVersion("2"))
                                 )
                 )
                 .withTopographicPlaceRef(
@@ -68,8 +71,14 @@ public class NetexReferenceRemovingIteratorTest {
 
         StopPlace actual = netexReferenceRemovingIterator.next();
 
-        assertThat(actual.getTariffZones().getTariffZoneRef().getFirst().getVersion()).as("TariffZoneref version").isNull();
-        assertThat(actual.getTariffZones().getTariffZoneRef().getLast().getVersion()).as("TariffZoneref version").isNull();
+        assertThat(actual.getTariffZones().getTariffZoneRef_().stream()
+                .map(JAXBElement::getValue)
+                .toList()
+                .getFirst().getVersion()).as("TariffZoneref version").isNull();
+        assertThat(actual.getTariffZones().getTariffZoneRef_().stream()
+                .map(JAXBElement::getValue)
+                .toList()
+                .getLast().getVersion()).as("TariffZoneref version").isNull();
         assertThat(actual.getTopographicPlaceRef().getVersion()).as("topographic place ref version").isNull();
     }
 
@@ -80,17 +89,17 @@ public class NetexReferenceRemovingIteratorTest {
         StopPlace stopPlace = new StopPlace()
                 .withTariffZones(
                         new TariffZoneRefs_RelStructure()
-                                .withTariffZoneRef(
+                                .withTariffZoneRef_(new ObjectFactory().createTariffZoneRef(
                                         new TariffZoneRef()
                                                 .withRef("ref")
-                                                .withVersion("version")))
+                                                .withVersion("version"))))
                 .withTopographicPlaceRef(
                         new TopographicPlaceRefStructure()
                                 .withValue("KVE:TopographicPlace:XXX")
                                 .withVersion("version"));
 
 
-        List<StopPlace> stopPlaces = Arrays.asList(stopPlace);
+        List<StopPlace> stopPlaces = Collections.singletonList(stopPlace);
 
 
         ExportParams exportParams = ExportParams.newExportParamsBuilder()
@@ -102,7 +111,10 @@ public class NetexReferenceRemovingIteratorTest {
 
         StopPlace actual = netexReferenceRemovingIterator.next();
 
-        assertThat(actual.getTariffZones().getTariffZoneRef().getFirst().getVersion()).as("TariffZoneref version").isEqualTo("version");
+        assertThat(actual.getTariffZones().getTariffZoneRef_().stream()
+                .map(JAXBElement::getValue)
+                .toList()
+                .getFirst().getVersion()).as("TariffZoneref version").isEqualTo("version");
         assertThat(actual.getTopographicPlaceRef().getVersion()).as("topographic place ref version").isEqualTo("version");
     }
 
