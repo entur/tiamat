@@ -24,6 +24,7 @@ import org.rutebanken.tiamat.model.MetroSubmodeEnumeration;
 import org.rutebanken.tiamat.model.PostalAddress;
 import org.rutebanken.tiamat.model.PrivateCodeStructure;
 import org.rutebanken.tiamat.model.RailSubmodeEnumeration;
+import org.rutebanken.tiamat.model.SiteFacilitySet;
 import org.rutebanken.tiamat.model.SiteRefStructure;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
@@ -39,9 +40,12 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ADJACENT_SITES;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ENTITY_REF_REF;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.FACILITIES;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PARENT_SITE_REF;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.POSTAL_ADDRESS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PRIVATE_CODE;
@@ -72,6 +76,9 @@ public class StopPlaceMapper {
 
     @Autowired
     private ValidBetweenMapper validBetweenMapper;
+
+    @Autowired
+    private FacilitiesMapper facilitiesMapper;
 
     @Autowired
     private PostalAddressMapper postalAddressMapper;
@@ -157,7 +164,7 @@ public class StopPlaceMapper {
                 }
             }
         }
-        isUpdated = isUpdated | groupOfEntitiesMapper.populate(input, stopPlace);
+        isUpdated = isUpdated | groupOfEntitiesMapper.populate(input, stopPlace) | setFacilities(stopPlace, input.get(FACILITIES));
 
         return isUpdated;
     }
@@ -227,5 +234,12 @@ public class StopPlaceMapper {
         return false;
     }
 
-
+    private boolean setFacilities(StopPlace stopPlace, Object facilitiesListObject) {
+        Set<SiteFacilitySet> facilities = facilitiesMapper.mapFacilities((List) facilitiesListObject);
+        if (Objects.equals(stopPlace.getFacilities(), facilities)) {
+            return false;
+        }
+        stopPlace.setFacilities(facilities);
+        return true;
+    }
 }
