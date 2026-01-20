@@ -201,4 +201,4 @@ CREATE TABLE ext_fintraffic_netex_entity (
 
 ### Database Migrations
 
-Flyway migrations are located in `src/ext/fintraffic/resources/db/migration/` and only execute when the `fintraffic-read-api` profile is active.
+Flyway migrations are located in `org.rutebanken.tiamat.ext.fintraffic.db.migration` and only execute when the `fintraffic-read-api` profile is active.
