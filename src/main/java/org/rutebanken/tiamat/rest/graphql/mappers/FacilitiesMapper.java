@@ -43,7 +43,7 @@ public class FacilitiesMapper {
         List passengerInformationEquipmentInput = (List) facilityMap.get(PASSENGER_INFORMATION_EQUIPMENT_LIST);
         List<PassengerInformationEquipmentEnumeration> passengerEquipmentFacilityList  = getPassengerInformationEquipmentEnumerationList(passengerInformationEquipmentInput);
 
-        if (!mobilityFacilityListInput.isEmpty() || !passengerInformationFacilityList.isEmpty() || passengerEquipmentFacilityList.isEmpty()) {
+        if (!mobilityFacilityListInput.isEmpty() || !passengerInformationFacilityList.isEmpty() || !passengerEquipmentFacilityList.isEmpty()) {
             SiteFacilitySet facilitySet = new SiteFacilitySet();
             facilitySet.setMobilityFacilityList(mobilityFacilityList);
             facilitySet.setPassengerInformationFacilityList(passengerInformationFacilityList);
@@ -102,6 +102,6 @@ public class FacilitiesMapper {
                 passengerEquipmentFacilityList.add(passengerEquipmentFacilityVal);
             }
         }
-        return passengerInformationEquipmentInput;
+        return passengerEquipmentFacilityList;
     }
 }
