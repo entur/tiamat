@@ -34,10 +34,12 @@ public class FacilityMapper extends CustomMapper<SiteFacilitySet, org.rutebanken
             tiamatSiteFacilitySet.setPassengerInformationFacilityList(tiamatPassengerInformationFacilityList);
         }
 
-        // At the moment only a single value can be handled as part of the passengerInformationEquipmentList:
         if (netexSiteFacilitySet.getPassengerInformationEquipmentList() != null) {
-            PassengerInformationEquipmentEnumeration tiamatPassengerEquipmentFacility = PassengerInformationEquipmentEnumeration.fromValue(netexSiteFacilitySet.getPassengerInformationEquipmentList().value());
-            tiamatSiteFacilitySet.setPassengerInformationEquipmentList(List.of(tiamatPassengerEquipmentFacility));
+            final List<PassengerInformationEquipmentEnumeration> passengerInformationEquipmentEnumerationList = netexSiteFacilitySet.getPassengerInformationEquipmentList().stream()
+                    .map(p -> p.value())
+                    .map(PassengerInformationEquipmentEnumeration::fromValue)
+                    .toList();
+            tiamatSiteFacilitySet.setPassengerInformationEquipmentList(passengerInformationEquipmentEnumerationList);
         }
     }
 
@@ -55,11 +57,13 @@ public class FacilityMapper extends CustomMapper<SiteFacilitySet, org.rutebanken
             netexSiteFacilitySet.withMobilityFacilityList(netexMobilityFacilityList);
         }
 
-        // At the moment only a single value can be handled as part of the passengerInformationEquipmentList:
+
         if (tiamatSiteFacilitySet.getPassengerInformationEquipmentList() != null && !tiamatSiteFacilitySet.getPassengerInformationEquipmentList().isEmpty()) {
-            org.rutebanken.netex.model.PassengerInformationEquipmentEnumeration netexPassengerEquipmentFacility = org.rutebanken.netex.model.PassengerInformationEquipmentEnumeration
-                    .fromValue(tiamatSiteFacilitySet.getPassengerInformationEquipmentList().getFirst().value());
-            netexSiteFacilitySet.setPassengerInformationEquipmentList(netexPassengerEquipmentFacility);
+            List<org.rutebanken.netex.model.PassengerInformationEquipmentEnumeration> passengerInformationEquipmentList = new ArrayList<>();
+            tiamatSiteFacilitySet.getPassengerInformationEquipmentList().forEach(equipment ->
+                    passengerInformationEquipmentList.add(org.rutebanken.netex.model.PassengerInformationEquipmentEnumeration.fromValue(equipment.value())));
+
+            netexSiteFacilitySet.getPassengerInformationEquipmentList().addAll(passengerInformationEquipmentList);
         }
 
         if (tiamatSiteFacilitySet.getPassengerInformationFacilityList() != null && !tiamatSiteFacilitySet.getPassengerInformationFacilityList().isEmpty()) {
