@@ -4,18 +4,13 @@ import jakarta.annotation.PostConstruct;
 import org.rutebanken.tiamat.ext.fintraffic.api.repository.NetexRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Profile;
-import org.springframework.stereotype.Service;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
-@Profile("fintraffic-read-api")
-@Service
 public class ReadApiBackgroundJobs {
     private static final Logger logger = LoggerFactory.getLogger(ReadApiBackgroundJobs.class);
 
@@ -27,7 +22,6 @@ public class ReadApiBackgroundJobs {
     private final NetexRepository netexRepository;
     private final boolean backgroundJobsEnabled;
 
-    @Autowired
     public ReadApiBackgroundJobs(
             NetexRepository netexRepository,
             @Value("${tiamat.ext.fintraffic.read-api-background-jobs.enabled:false}") boolean backgroundJobsEnabled

@@ -13,8 +13,6 @@ import org.rutebanken.tiamat.repository.ParkingRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Profile;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
@@ -25,8 +23,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
 
-@Service
-@Profile({"fintraffic-update-task"})
 public class ReadApiBatchUpdateService {
     private final Logger logger = LoggerFactory.getLogger(ReadApiBatchUpdateService.class);
 

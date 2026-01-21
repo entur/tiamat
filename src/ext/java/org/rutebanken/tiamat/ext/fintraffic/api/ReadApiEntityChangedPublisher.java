@@ -6,21 +6,17 @@ import org.rutebanken.tiamat.changelog.EntityChangedListener;
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.slf4j.Logger;
-import org.springframework.context.annotation.Profile;
-import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 
-@Component
 @Transactional
-@Profile("fintraffic-read-api")
-public class FintrafficEntityChangedPublisher extends EntityChangedEventPublisher implements EntityChangedListener {
-    private static final Logger logger = org.slf4j.LoggerFactory.getLogger(FintrafficEntityChangedPublisher.class);
+public class ReadApiEntityChangedPublisher extends EntityChangedEventPublisher implements EntityChangedListener {
+    private static final Logger logger = org.slf4j.LoggerFactory.getLogger(ReadApiEntityChangedPublisher.class);
 
     private final ReadApiNetexMarshallingService readApiNetexMarshallingService;
 
-    public FintrafficEntityChangedPublisher(
+    public ReadApiEntityChangedPublisher(
             ReadApiNetexMarshallingService readApiNetexMarshallingService
     ) {
         this.readApiNetexMarshallingService = readApiNetexMarshallingService;

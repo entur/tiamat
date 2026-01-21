@@ -23,7 +23,6 @@ import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
@@ -36,7 +35,6 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 @Transactional(readOnly = true)
-@Service
 public class FintrafficSearchKeyService implements SearchKeyService {
     private final Logger logger = LoggerFactory.getLogger(FintrafficSearchKeyService.class);
     private final ObjectMapper objectMapper;

@@ -1,6 +1,6 @@
 package org.rutebanken.tiamat.ext.fintraffic.api.batch;
 
-import org.rutebanken.tiamat.ext.fintraffic.api.repository.FintrafficNetexRepository;
+import org.rutebanken.tiamat.ext.fintraffic.api.repository.NetexRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,8 +8,6 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Profile;
-import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -23,20 +21,18 @@ import java.time.Instant;
  * 4. Clean up stale entities that were not updated
  * 5. Shut down the application when complete
  */
-@Component
-@Profile({"fintraffic-update-task"})
 public class ReadApiBatchUpdateTask implements ApplicationRunner {
     private static final Logger logger = LoggerFactory.getLogger(ReadApiBatchUpdateTask.class);
     private static final int DEFAULT_BATCH_SIZE = 1000;
 
-    private final FintrafficNetexRepository netexRepository;
+    private final NetexRepository netexRepository;
     private final ApplicationContext applicationContext;
     private final ReadApiBatchUpdateService readApiBatchUpdateService;
     private final ReadApiBatchWriteService readApiBatchWriteService;
 
     @Autowired
     public ReadApiBatchUpdateTask(
-            FintrafficNetexRepository netexRepository,
+            NetexRepository netexRepository,
             ApplicationContext applicationContext,
             ReadApiBatchUpdateService readApiBatchUpdateService,
             ReadApiBatchWriteService readApiBatchWriteService) {

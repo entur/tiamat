@@ -5,7 +5,6 @@ import org.rutebanken.tiamat.ext.fintraffic.api.model.ReadApiEntityOutRecord;
 import org.rutebanken.tiamat.ext.fintraffic.api.model.FintrafficReadApiSearchKey;
 import org.rutebanken.tiamat.ext.fintraffic.api.model.ReadApiSearchKey;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,7 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-@Repository
 public class FintrafficNetexRepository extends AbstractNetexRepository {
 
     public FintrafficNetexRepository(
