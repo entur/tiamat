@@ -7,7 +7,6 @@ import org.rutebanken.netex.model.GroupOfTariffZones;
 import org.rutebanken.tiamat.model.TariffZoneRef;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class GroupOfTariffZonesMapper extends CustomMapper<GroupOfTariffZones, org.rutebanken.tiamat.model.GroupOfTariffZones> {
 

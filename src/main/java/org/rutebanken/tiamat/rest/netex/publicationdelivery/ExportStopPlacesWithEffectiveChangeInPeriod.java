@@ -1,6 +1,5 @@
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
-import jakarta.xml.bind.JAXBElement;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.tiamat.exporter.PublicationDeliveryCreator;
 import org.rutebanken.tiamat.exporter.PublicationDeliveryStructurePage;
