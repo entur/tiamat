@@ -15,15 +15,15 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-class FintrafficEntityChangedPublisherTest {
+class ReadApiEntityChangedPublisherTest {
 
     private ReadApiNetexMarshallingService marshallingService;
-    private FintrafficEntityChangedPublisher publisher;
+    private ReadApiEntityChangedPublisher publisher;
 
     @BeforeEach
     void setUp() {
         marshallingService = mock(ReadApiNetexMarshallingService.class);
-        publisher = new FintrafficEntityChangedPublisher(marshallingService);
+        publisher = new ReadApiEntityChangedPublisher(marshallingService);
     }
 
     @Test

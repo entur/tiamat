@@ -8,8 +8,6 @@ import org.rutebanken.tiamat.time.ExportTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Profile;
-import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -22,8 +20,6 @@ import java.util.Iterator;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-@Service
-@Profile("fintraffic-read-api")
 public class ReadApiNetexPublicationDeliveryService {
     // Predefined byte arrays for collection tags
     private static final byte[] START_TAG_SCHEDULED_STOP_POINTS = "<scheduledStopPoints>".getBytes(StandardCharsets.UTF_8);

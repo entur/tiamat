@@ -1,11 +1,9 @@
 package org.rutebanken.tiamat.ext.fintraffic.api.batch;
 
 import org.rutebanken.tiamat.ext.fintraffic.api.model.ReadApiEntityInRecord;
-import org.rutebanken.tiamat.ext.fintraffic.api.repository.FintrafficNetexRepository;
+import org.rutebanken.tiamat.ext.fintraffic.api.repository.NetexRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Profile;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,14 +14,12 @@ import java.util.List;
  * Uses REQUIRES_NEW propagation to ensure writes happen in separate transactions
  * from the read operations, avoiding transaction isolation level conflicts.
  */
-@Service
-@Profile({"fintraffic-update-task"})
 public class ReadApiBatchWriteService {
 
-    private final FintrafficNetexRepository netexRepository;
+    private final NetexRepository netexRepository;
     private final Logger logger = LoggerFactory.getLogger(ReadApiBatchWriteService.class);
 
-    public ReadApiBatchWriteService(FintrafficNetexRepository netexRepository) {
+    public ReadApiBatchWriteService(NetexRepository netexRepository) {
         this.netexRepository = netexRepository;
     }
 
