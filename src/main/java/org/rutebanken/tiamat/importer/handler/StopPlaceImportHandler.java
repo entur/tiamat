@@ -16,8 +16,11 @@
 package org.rutebanken.tiamat.importer.handler;
 
 import com.hazelcast.core.HazelcastInstance;
+import jakarta.xml.bind.JAXBElement;
 import org.apache.commons.lang3.NotImplementedException;
+import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.SiteFrame;
+import org.rutebanken.netex.model.Site_VersionStructure;
 import org.rutebanken.netex.model.StopPlacesInFrame_RelStructure;
 import org.rutebanken.netex.model.TopographicPlace;
 import org.rutebanken.netex.model.TopographicPlacesInFrame_RelStructure;
@@ -106,7 +109,11 @@ public class StopPlaceImportHandler {
 
     public void handleStops(SiteFrame netexSiteFrame, ImportParams importParams, AtomicInteger stopPlacesCreatedMatchedOrUpdated, SiteFrame responseSiteframe) {
         if (publicationDeliveryHelper.hasStops(netexSiteFrame)) {
-            List<StopPlace> tiamatStops = netexMapper.mapStopsToTiamatModel(netexSiteFrame.getStopPlaces().getStopPlace());
+            final List<org.rutebanken.netex.model.StopPlace> netexStopPlace = netexSiteFrame.getStopPlaces().getStopPlace_().stream()
+                                                                                  .map(sp -> (org.rutebanken.netex.model.StopPlace) sp.getValue())
+                                                                                  .toList();
+
+            List<StopPlace> tiamatStops = netexMapper.mapStopsToTiamatModel(netexStopPlace);
 
             tiamatStops = stopPlaceTypeFilter.filter(tiamatStops, importParams.allowOnlyStopTypes);
 
@@ -194,9 +201,14 @@ public class StopPlaceImportHandler {
 
             if (!importedOrMatchedNetexStopPlaces.isEmpty()) {
                 logger.info("Add {} stops to response site frame", importedOrMatchedNetexStopPlaces.size());
+                List<JAXBElement<? extends Site_VersionStructure>> wrappedStopPlaces = importedOrMatchedNetexStopPlaces.stream()
+                                .map(sp -> new ObjectFactory().createStopPlace(sp))
+                        .collect(Collectors.toList());
+
+
                 responseSiteframe.withStopPlaces(
                         new StopPlacesInFrame_RelStructure()
-                                .withStopPlace(importedOrMatchedNetexStopPlaces));
+                                .withStopPlace_( wrappedStopPlaces));
             } else {
                 logger.info("No stops in response");
             }

@@ -15,13 +15,17 @@
 
 package org.rutebanken.tiamat.netex.mapping.converter;
 
+import jakarta.xml.bind.JAXBElement;
 import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;
+import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.TariffZoneRefs_RelStructure;
+import org.rutebanken.netex.model.ZoneRefStructure;
 import org.rutebanken.tiamat.model.TariffZoneRef;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Set;
 
 import static java.util.stream.Collectors.toList;
@@ -36,23 +40,28 @@ public class TariffZonesRefConverter extends BidirectionalConverter<Set<TariffZo
             return null;
         }
 
-        return new TariffZoneRefs_RelStructure()
-                .withTariffZoneRef(tariffZones.stream()
-                    .map(tariffZoneRef -> mapperFacade.map(tariffZoneRef, org.rutebanken.netex.model.TariffZoneRef.class))
-                        .collect(toList()));
+        final List<JAXBElement<? extends ZoneRefStructure>> wrappedTariffZoneRefList = tariffZones.stream()
+                .map(tariffZoneRef -> mapperFacade.map(tariffZoneRef, org.rutebanken.netex.model.TariffZoneRef.class))
+                .map(tariffZoneRef -> new ObjectFactory().createTariffZoneRef(tariffZoneRef))
+                .collect(toList());
+
+
+        return new TariffZoneRefs_RelStructure().withTariffZoneRef_(wrappedTariffZoneRefList);
+
     }
 
     @Override
     public Set<TariffZoneRef> convertFrom(TariffZoneRefs_RelStructure tariffZoneRefs_relStructure, Type<Set<TariffZoneRef>> type, MappingContext mappingContext) {
         if(tariffZoneRefs_relStructure == null
-                || tariffZoneRefs_relStructure.getTariffZoneRef() == null
-                || tariffZoneRefs_relStructure.getTariffZoneRef().isEmpty()) {
+                || tariffZoneRefs_relStructure.getTariffZoneRef_() == null
+                || tariffZoneRefs_relStructure.getTariffZoneRef_().isEmpty()) {
             return null;
         }
 
         return tariffZoneRefs_relStructure
-                .getTariffZoneRef()
+                .getTariffZoneRef_()
                 .stream()
+                .map(JAXBElement::getValue)
                 .map(tariffZoneRef -> mapperFacade.map(tariffZoneRef, TariffZoneRef.class))
                 .collect(toSet());
 

@@ -23,7 +23,6 @@ import jakarta.xml.bind.JAXBException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.rutebanken.netex.model.AccessibilityLimitation;
-import org.rutebanken.netex.model.AccessibilityLimitations_RelStructure;
 import org.rutebanken.netex.model.KeyValueStructure;
 import org.rutebanken.netex.model.LimitationStatusEnumeration;
 import org.rutebanken.netex.model.LocationStructure;
@@ -34,6 +33,7 @@ import org.rutebanken.netex.model.PassengerInformationEquipmentEnumeration;
 import org.rutebanken.netex.model.PassengerInformationFacilityEnumeration;
 import org.rutebanken.netex.model.PrivateCodeStructure;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
+import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.Quay;
 import org.rutebanken.netex.model.Quays_RelStructure;
 import org.rutebanken.netex.model.SanitaryEquipment;
@@ -333,14 +333,14 @@ public class ImportResourceTest extends TiamatIntegrationTest {
                                 .withLatitude(new BigDecimal("59.4172358106178"))
                                 .withLongitude(new BigDecimal("10.66847409589632"))))
                 .withQuays(new Quays_RelStructure()
-                        .withQuayRefOrQuay(new Quay()
+                        .withQuayRefOrQuay(new ObjectFactory().createQuay(new Quay()
                                 .withId("OST:StopArea:0136068001")
                                 .withVersion("1")
                                 .withName(new MultilingualString().withValue(name))
                                 .withCentroid(new SimplePoint_VersionStructure()
                                         .withLocation(new LocationStructure()
                                                 .withLongitude(new BigDecimal("10.6684740958963200085918288095854222774505615234375"))
-                                                .withLatitude(new BigDecimal("59.41723581061779668743838556110858917236328125"))))));
+                                                .withLatitude(new BigDecimal("59.41723581061779668743838556110858917236328125")))))));
 
 
         StopPlace stopPlace2 = new StopPlace()
@@ -353,14 +353,14 @@ public class ImportResourceTest extends TiamatIntegrationTest {
                                 .withLatitude(new BigDecimal("59.41727956639375"))
                                 .withLongitude(new BigDecimal("10.66866436373097"))))
                 .withQuays(new Quays_RelStructure()
-                        .withQuayRefOrQuay(new Quay()
+                        .withQuayRefOrQuay(new ObjectFactory().createQuay(new Quay()
                                 .withId("OST:StopArea:0104072001")
                                 .withVersion("1")
                                 .withName(new MultilingualString().withValue(name))
                                 .withCentroid(new SimplePoint_VersionStructure()
                                         .withLocation(new LocationStructure()
                                                 .withLongitude(new BigDecimal("10.6686643637309706122096031322143971920013427734375"))
-                                                .withLatitude(new BigDecimal("59.41727956639375207714692805893719196319580078125"))))));
+                                                .withLatitude(new BigDecimal("59.41727956639375207714692805893719196319580078125")))))));
 
 
         PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace, stopPlace2);
@@ -392,7 +392,7 @@ public class ImportResourceTest extends TiamatIntegrationTest {
                                 .withLatitude(new BigDecimal("9"))
                                 .withLongitude(new BigDecimal("71"))))
                 .withQuays(new Quays_RelStructure()
-                        .withQuayRefOrQuay(new Quay()
+                        .withQuayRefOrQuay(new ObjectFactory().createQuay(new Quay()
                                 .withId("XYZ:Quay:4")
                                 .withVersion("1")
                                 .withPrivateCode(new PrivateCodeStructure().withValue("B02").withType("type"))
@@ -408,9 +408,10 @@ public class ImportResourceTest extends TiamatIntegrationTest {
                                                 .withMobilityFacilityList(
                                                         org.rutebanken.netex.model.MobilityFacilityEnumeration.TACTILE_GUIDING_STRIPS,
                                                         org.rutebanken.netex.model.MobilityFacilityEnumeration.TACTILE_PLATFORM_EDGES)
+
                                                 .withPassengerInformationFacilityList(PassengerInformationFacilityEnumeration.PASSENGER_INFORMATION_DISPLAY)
                                                 .withPassengerInformationEquipmentList(PassengerInformationEquipmentEnumeration.INFORMATION_DESK)
-                                ))));
+                                )))));
 
         PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace);
 
@@ -422,6 +423,7 @@ public class ImportResourceTest extends TiamatIntegrationTest {
 
         Quay quay = actualStopPlace.getQuays()
                 .getQuayRefOrQuay().stream()
+                .map(JAXBElement::getValue)
                 .filter(object -> object instanceof Quay)
                 .map(object -> ((Quay) object))
                 .findFirst()
@@ -452,20 +454,20 @@ public class ImportResourceTest extends TiamatIntegrationTest {
                                 .withLatitude(new BigDecimal("9"))
                                 .withLongitude(new BigDecimal("71"))))
                 .withQuays(new Quays_RelStructure()
-                        .withQuayRefOrQuay(new Quay()
+                        .withQuayRefOrQuay(new ObjectFactory().createQuay(new Quay()
                                 .withId("XYZ:Quay:4")
                                 .withVersion("1")
                                 .withCentroid(new SimplePoint_VersionStructure()
                                         .withLocation(new LocationStructure()
                                                 .withLatitude(new BigDecimal("9.1"))
-                                                .withLongitude(new BigDecimal("71.2")))))
-                        .withQuayRefOrQuay(new Quay()
+                                                .withLongitude(new BigDecimal("71.2"))))),
+                        new ObjectFactory().createQuay(new Quay()
                                 .withId("XYZ:Quay:5")
                                 .withVersion("1")
                                 .withCentroid(new SimplePoint_VersionStructure()
                                         .withLocation(new LocationStructure()
                                                 .withLatitude(new BigDecimal("9.1"))
-                                                .withLongitude(new BigDecimal("71.2"))))));
+                                                .withLongitude(new BigDecimal("71.2")))))));
 
         PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace);
 
@@ -516,15 +518,15 @@ public class ImportResourceTest extends TiamatIntegrationTest {
                                 .withLatitude(new BigDecimal("59.83314448493502"))
                                 .withLongitude(new BigDecimal("11.142676854561447"))))
                 .withQuays(new Quays_RelStructure()
-                        .withQuayRefOrQuay(new Quay()
+                        .withQuayRefOrQuay(new ObjectFactory().createQuay(new Quay()
                                         .withId("RUT:StopArea:0229012201")
                                         .withVersion("1")
                                         .withName(name)
                                         .withCentroid(new SimplePoint_VersionStructure()
                                                 .withLocation(new LocationStructure()
                                                         .withLatitude(new BigDecimal("59.83314448493502"))
-                                                        .withLongitude(new BigDecimal("11.142676854561447")))),
-                                new Quay()
+                                                        .withLongitude(new BigDecimal("11.142676854561447"))))),
+                                new ObjectFactory().createQuay(new Quay()
                                         .withId("RUT:StopArea:0229012202")
                                         .withVersion("1")
                                         .withName(name)
@@ -532,7 +534,7 @@ public class ImportResourceTest extends TiamatIntegrationTest {
                                                 .withLocation(new LocationStructure()
                                                         .withLatitude(new BigDecimal("59.83297022041692"))
                                                         .withLongitude(new BigDecimal("11.142897636770531"))))
-                        ));
+                        )));
 
         /**
          * StopPlace{name=Fredheimveien (no),
@@ -553,22 +555,22 @@ public class ImportResourceTest extends TiamatIntegrationTest {
                                 .withLongitude(new BigDecimal("11.142902250197631"))))
                 .withQuays(new Quays_RelStructure()
                         .withQuayRefOrQuay(
-                                new Quay()
+                                new ObjectFactory().createQuay(new Quay()
                                         .withId("BRA:StopArea:0229012201")
                                         .withVersion("1")
                                         .withName(name)
                                         .withCentroid(new SimplePoint_VersionStructure()
                                                 .withLocation(new LocationStructure()
                                                         .withLatitude(new BigDecimal("59.83304200609072"))
-                                                        .withLongitude(new BigDecimal("11.142902250197631")))),
-                                new Quay()
+                                                        .withLongitude(new BigDecimal("11.142902250197631"))))),
+                                new ObjectFactory().createQuay(new Quay()
                                         .withId("BRA:StopArea:0229012202")
                                         .withVersion("1")
                                         .withName(name)
                                         .withCentroid(new SimplePoint_VersionStructure()
                                                 .withLocation(new LocationStructure()
                                                         .withLatitude(new BigDecimal("59.832848923825956"))
-                                                        .withLongitude(new BigDecimal("11.14317535486387"))))
+                                                        .withLongitude(new BigDecimal("11.14317535486387")))))
                         ));
 
         List<PublicationDeliveryStructure> publicationDeliveryStructures = new ArrayList<>();
@@ -611,17 +613,17 @@ public class ImportResourceTest extends TiamatIntegrationTest {
                 .withVersion("1")
                 .withName(new MultilingualString().withValue("Skaret").withLang("no"))
                 .withQuays(new Quays_RelStructure()
-                        .withQuayRefOrQuay(new Quay()
+                        .withQuayRefOrQuay(new ObjectFactory().createQuay(new Quay()
                                         .withVersion("1")
                                         .withId("MOR:StopArea:1548612801")
                                         .withName(new MultilingualString().withValue("Skaret").withLang("no"))
                                         .withCentroid(new SimplePoint_VersionStructure().withLocation(new LocationStructure()
                                                 .withLatitude(new BigDecimal("62.799557598196465"))
-                                                .withLongitude(new BigDecimal("7.328336965528884")))),
-                                new Quay()
+                                                .withLongitude(new BigDecimal("7.328336965528884"))))),
+                                new ObjectFactory().createQuay(new Quay()
                                         .withId("MOR:StopArea:1548575301")
                                         .withVersion("1")
-                                        .withName(new MultilingualString().withValue("Skaret").withLang("no"))));
+                                        .withName(new MultilingualString().withValue("Skaret").withLang("no")))));
 
         PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace);
 
@@ -642,13 +644,13 @@ public class ImportResourceTest extends TiamatIntegrationTest {
                 .withVersion("1")
                 .withName(new MultilingualString().withValue("new"))
                 .withQuays(new Quays_RelStructure()
-                        .withQuayRefOrQuay(new Quay()
+                        .withQuayRefOrQuay(new ObjectFactory().createQuay(new Quay()
                                 .withVersion("1")
                                 .withId("XYZ:Quay:5")
                                 .withName(new MultilingualString().withValue("new quay"))
                                 .withCentroid(new SimplePoint_VersionStructure().withLocation(new LocationStructure()
                                         .withLatitude(new BigDecimal("62.799557598196465"))
-                                        .withLongitude(new BigDecimal("7.328336965528884"))))));
+                                        .withLongitude(new BigDecimal("7.328336965528884")))))));
 
         PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace);
 
@@ -708,13 +710,13 @@ public class ImportResourceTest extends TiamatIntegrationTest {
         // Add a Quay to the stop place so that it will be updated.
         stopPlace.withQuays(
                 new Quays_RelStructure()
-                        .withQuayRefOrQuay(new Quay()
+                        .withQuayRefOrQuay(new ObjectFactory().createQuay(new Quay()
                                 .withVersion("1")
                                 .withId("XYZ:Quay:321")
                                 .withName(new MultilingualString().withValue("new quay"))
                                 .withCentroid(new SimplePoint_VersionStructure().withLocation(new LocationStructure()
                                         .withLatitude(new BigDecimal("62.799557598196465"))
-                                        .withLongitude(new BigDecimal("7.328336965528884"))))));
+                                        .withLongitude(new BigDecimal("7.328336965528884")))))));
 
         PublicationDeliveryStructure secondPublicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace);
         PublicationDeliveryStructure secondResponse = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(secondPublicationDelivery);
@@ -734,10 +736,10 @@ public class ImportResourceTest extends TiamatIntegrationTest {
                 .withId(chouetteId)
                 .withVersion("1")
                 .withQuays(new Quays_RelStructure()
-                        .withQuayRefOrQuay(new Quay()
+                        .withQuayRefOrQuay(new ObjectFactory().createQuay(new Quay()
                                 .withName(new MultilingualString().withValue("quay"))
                                 .withId("XYZ:Quay:1")
-                                .withVersion("1")));
+                                .withVersion("1"))));
 
         PublicationDeliveryStructure firstPublicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace);
         PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(firstPublicationDelivery);
@@ -761,14 +763,14 @@ public class ImportResourceTest extends TiamatIntegrationTest {
                                 .withLatitude(new BigDecimal("9"))
                                 .withLongitude(new BigDecimal("71"))))
                 .withQuays(new Quays_RelStructure()
-                        .withQuayRefOrQuay(new Quay()
+                        .withQuayRefOrQuay(new ObjectFactory().createQuay(new Quay()
                                 .withVersion("1")
                                 .withId(chouetteId + 1)
                                 .withName(new MultilingualString().withValue("quay"))
                                 .withCentroid(new SimplePoint_VersionStructure()
                                         .withLocation(new LocationStructure()
                                                 .withLatitude(new BigDecimal("9.1"))
-                                                .withLongitude(new BigDecimal("71.2"))))));
+                                                .withLongitude(new BigDecimal("71.2")))))));
 
         PublicationDeliveryStructure firstPublicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace);
         PublicationDeliveryStructure firstResponse = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(firstPublicationDelivery);
@@ -778,10 +780,10 @@ public class ImportResourceTest extends TiamatIntegrationTest {
                 .withId(chouetteId)
                 .withVersion("1")
                 .withQuays(new Quays_RelStructure()
-                        .withQuayRefOrQuay(new Quay()
+                        .withQuayRefOrQuay(new ObjectFactory().createQuay(new Quay()
                                 .withId("XYZ:Quay:1")
                                 .withVersion("1")
-                                .withName(new MultilingualString().withValue("quay"))));
+                                .withName(new MultilingualString().withValue("quay")))));
 
         PublicationDeliveryStructure secondPublicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlaceWithoutCoordinates);
         PublicationDeliveryStructure secondResponse = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(secondPublicationDelivery);
@@ -806,14 +808,14 @@ public class ImportResourceTest extends TiamatIntegrationTest {
                                 .withLatitude(new BigDecimal("9"))
                                 .withLongitude(new BigDecimal("71"))))
                 .withQuays(new Quays_RelStructure()
-                        .withQuayRefOrQuay(new Quay()
+                        .withQuayRefOrQuay(new ObjectFactory().createQuay(new Quay()
                                 .withId(originalQuayId)
                                 .withVersion("1")
                                 .withName(new MultilingualString().withValue("quay"))
                                 .withCentroid(new SimplePoint_VersionStructure()
                                         .withLocation(new LocationStructure()
                                                 .withLatitude(new BigDecimal("9.1"))
-                                                .withLongitude(new BigDecimal("71.2"))))));
+                                                .withLongitude(new BigDecimal("71.2")))))));
 
         PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace);
         PublicationDeliveryStructure firstResponse = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery);
@@ -825,6 +827,7 @@ public class ImportResourceTest extends TiamatIntegrationTest {
         Quay quay = actualStopPlace.getQuays()
                 .getQuayRefOrQuay()
                 .stream()
+                .map(JAXBElement::getValue)
                 .peek(System.out::println)
                 .filter(object -> object instanceof Quay)
                 .map(object -> ((Quay) object))
@@ -845,14 +848,14 @@ public class ImportResourceTest extends TiamatIntegrationTest {
                                 .withLatitude(new BigDecimal("9"))
                                 .withLongitude(new BigDecimal("71"))))
                 .withQuays(new Quays_RelStructure()
-                        .withQuayRefOrQuay(new Quay()
+                        .withQuayRefOrQuay(new ObjectFactory().createQuay(new Quay()
                                 .withId("XYZ:boardingpos:2")
                                 .withVersion("1")
                                 .withName(new MultilingualString().withValue("Steinerskolen [tog]"))
                                 .withCentroid(new SimplePoint_VersionStructure()
                                         .withLocation(new LocationStructure()
                                                 .withLatitude(new BigDecimal("9.1"))
-                                                .withLongitude(new BigDecimal("71.2"))))));
+                                                .withLongitude(new BigDecimal("71.2")))))));
 
         PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace);
         PublicationDeliveryStructure firstResponse = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery);
@@ -862,6 +865,7 @@ public class ImportResourceTest extends TiamatIntegrationTest {
         Quay quay = actualStopPlace.getQuays()
                 .getQuayRefOrQuay()
                 .stream()
+                .map(JAXBElement::getValue)
                 .peek(object -> System.out.println(object))
                 .filter(object -> object instanceof Quay)
                 .map(object -> ((Quay) object))
@@ -884,14 +888,14 @@ public class ImportResourceTest extends TiamatIntegrationTest {
                                 .withLatitude(new BigDecimal("9"))
                                 .withLongitude(new BigDecimal("71"))))
                 .withQuays(new Quays_RelStructure()
-                        .withQuayRefOrQuay(new Quay()
+                        .withQuayRefOrQuay(new ObjectFactory().createQuay(new Quay()
                                 .withId("XYZ:boardingpos:2")
                                 .withVersion("1")
                                 .withName(new MultilingualString().withValue("Fleskeby sentrum"))
                                 .withCentroid(new SimplePoint_VersionStructure()
                                         .withLocation(new LocationStructure()
                                                 .withLatitude(new BigDecimal("9.1"))
-                                                .withLongitude(new BigDecimal("71.2"))))));
+                                                .withLongitude(new BigDecimal("71.2")))))));
 
         PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace);
         PublicationDeliveryStructure firstResponse = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery);
@@ -901,6 +905,7 @@ public class ImportResourceTest extends TiamatIntegrationTest {
         Quay quay = actualStopPlace.getQuays()
                 .getQuayRefOrQuay()
                 .stream()
+                .map(JAXBElement::getValue)
                 .peek(object -> System.out.println(object))
                 .filter(object -> object instanceof Quay)
                 .map(object -> ((Quay) object))
@@ -922,7 +927,7 @@ public class ImportResourceTest extends TiamatIntegrationTest {
                                 .withLatitude(new BigDecimal("1"))
                                 .withLongitude(new BigDecimal("2"))))
                 .withQuays(new Quays_RelStructure()
-                        .withQuayRefOrQuay(new Quay()
+                        .withQuayRefOrQuay(new ObjectFactory().createQuay(new Quay()
                                         .withId("XYZ:Quay:9")
                                         .withVersion("1")
                                         .withName(new MultilingualString().withValue("quay number one"))
@@ -931,8 +936,8 @@ public class ImportResourceTest extends TiamatIntegrationTest {
                                                 .withVersion("1")
                                                 .withLocation(new LocationStructure()
                                                         .withLatitude(new BigDecimal("10"))
-                                                        .withLongitude(new BigDecimal("20")))),
-                                new Quay()
+                                                        .withLongitude(new BigDecimal("20"))))),
+                                new ObjectFactory().createQuay(new Quay()
                                         .withId("XYZ:Quay:133")
                                         .withVersion("1")
                                         .withName(new MultilingualString().withValue("quay number two"))
@@ -941,7 +946,7 @@ public class ImportResourceTest extends TiamatIntegrationTest {
                                                 .withVersion("1")
                                                 .withLocation(new LocationStructure()
                                                         .withLatitude(new BigDecimal("10.0002"))
-                                                        .withLongitude(new BigDecimal("20.0002"))))));
+                                                        .withLongitude(new BigDecimal("20.0002")))))));
 
         PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace);
 
@@ -966,7 +971,7 @@ public class ImportResourceTest extends TiamatIntegrationTest {
                                 .withLatitude(new BigDecimal("10.123456789123456789123456789"))
                                 .withLongitude(new BigDecimal("20.123456789123456789123456789"))))
                 .withQuays(new Quays_RelStructure()
-                        .withQuayRefOrQuay(new Quay()
+                        .withQuayRefOrQuay(new ObjectFactory().createQuay(new Quay()
                                 .withId("XYZ:Quay:91")
                                 .withVersion("1")
                                 .withName(new MultilingualString().withValue("quay number one"))
@@ -974,7 +979,7 @@ public class ImportResourceTest extends TiamatIntegrationTest {
                                         .withVersion("1")
                                         .withLocation(new LocationStructure()
                                                 .withLatitude(new BigDecimal("10.123456789123456789123456789"))
-                                                .withLongitude(new BigDecimal("20.123456789123456789123456789"))))));
+                                                .withLongitude(new BigDecimal("20.123456789123456789123456789")))))));
 
         PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryWithStopPlace(stopPlace);
 
@@ -1206,7 +1211,7 @@ public class ImportResourceTest extends TiamatIntegrationTest {
                                   <WaitingRoomEquipment id="NSB:WaitingRoomEquipment:3" version="1"/>
                                   <SanitaryEquipment id="NSB:SanitaryEquipment:3" version="1">
                                      <Gender>both</Gender>
-                                     <SanitaryFacilityList>toilet wheelChairAccessToilet</SanitaryFacilityList>
+                                     <SanitaryFacilityList>toilet wheelchairAccessToilet</SanitaryFacilityList>
                                   </SanitaryEquipment>
                                   <TicketingEquipment id="NSB:TicketingEquipment:3" version="1">
                                      <NumberOfMachines>1</NumberOfMachines>
@@ -1320,7 +1325,7 @@ public class ImportResourceTest extends TiamatIntegrationTest {
                 .startsWith("NSR:");
 
         assertThat(stopPlace.getQuays().getQuayRefOrQuay()).hasSize(1);
-        Quay quay = (Quay) stopPlace.getQuays().getQuayRefOrQuay().getFirst();
+        Quay quay = (Quay) ((JAXBElement<?>) stopPlace.getQuays().getQuayRefOrQuay().getFirst()).getValue();
         SiteFacilitySet siteFacilitySet = (SiteFacilitySet) quay.getFacilities().getSiteFacilitySetRefOrSiteFacilitySet().getFirst();
         List<MobilityFacilityEnumeration> mobilityFacilityList = siteFacilitySet.getMobilityFacilityList();
         assertThat(mobilityFacilityList).hasSize(2);
@@ -1340,7 +1345,7 @@ public class ImportResourceTest extends TiamatIntegrationTest {
         equipmentElement = (JAXBElement) sanitaryEquipmentObj;
         SanitaryEquipment sanitaryEquipment = (SanitaryEquipment) equipmentElement.getValue();
         assertThat(sanitaryEquipment.getSanitaryFacilityList()).hasSize(2);
-        assertThat(sanitaryEquipment.getSanitaryFacilityList().get(1)).isEqualTo(SanitaryFacilityEnumeration.WHEEL_CHAIR_ACCESS_TOILET);
+        assertThat(sanitaryEquipment.getSanitaryFacilityList().get(1)).isEqualTo(SanitaryFacilityEnumeration.WHEELCHAIR_ACCESS_TOILET);
     }
 
     @Test

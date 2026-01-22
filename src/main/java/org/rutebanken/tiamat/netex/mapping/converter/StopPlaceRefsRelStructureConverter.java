@@ -15,9 +15,11 @@
 
 package org.rutebanken.tiamat.netex.mapping.converter;
 
+import jakarta.xml.bind.JAXBElement;
 import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;
+import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.StopPlaceRefStructure;
 import org.rutebanken.netex.model.StopPlaceRefs_RelStructure;
 import org.rutebanken.tiamat.model.StopPlaceReference;
@@ -26,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -35,6 +38,7 @@ import java.util.Set;
 public class StopPlaceRefsRelStructureConverter extends BidirectionalConverter<Set<StopPlaceReference>, StopPlaceRefs_RelStructure> {
 
     private static final Logger logger = LoggerFactory.getLogger(StopPlaceRefsRelStructureConverter.class);
+    private final ObjectFactory objectFactory = new ObjectFactory();
 
     @Override
     public StopPlaceRefs_RelStructure convertTo(Set<StopPlaceReference> stopPlaceReferences, Type<StopPlaceRefs_RelStructure> type, MappingContext mappingContext) {
@@ -42,7 +46,11 @@ public class StopPlaceRefsRelStructureConverter extends BidirectionalConverter<S
         if (!CollectionUtils.isEmpty(stopPlaceReferences)) {
 
             StopPlaceRefs_RelStructure stopPlaceRefs_relStructure = new StopPlaceRefs_RelStructure();
-            stopPlaceRefs_relStructure.withStopPlaceRef(mapperFacade.mapAsList(stopPlaceReferences, StopPlaceRefStructure.class));
+            List<JAXBElement<? extends StopPlaceRefStructure>> jaxbRefs = mapperFacade.mapAsList(stopPlaceReferences, StopPlaceRefStructure.class)
+                    .stream()
+                    .<JAXBElement<? extends StopPlaceRefStructure>>map(objectFactory::createStopPlaceRef)
+                    .toList();
+            stopPlaceRefs_relStructure.withStopPlaceRef(jaxbRefs);
             return stopPlaceRefs_relStructure;
         }
         return null;

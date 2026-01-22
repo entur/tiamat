@@ -206,7 +206,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         SanitaryEquipment toalett = new SanitaryEquipment();
         toalett.setNumberOfToilets(BigInteger.valueOf(2));
         toalett.setGender(GenderLimitationEnumeration.BOTH);
-        toalett.setSanitaryFacilityList(List.of(SanitaryFacilityEnumeration.WHEEL_CHAIR_ACCESS_TOILET));
+        toalett.setSanitaryFacilityList(List.of(SanitaryFacilityEnumeration.WHEELCHAIR_ACCESS_TOILET));
 
         installedEquipments.add(toalett);
 

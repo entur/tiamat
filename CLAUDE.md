@@ -25,7 +25,7 @@
 - **Hazelcast 5.2.5** (distributed caching and coordination)
 
 ### Key Dependencies
-- **netex-java-model 2.0.14**: NeTEx format models
+- **netex-java-model 2.0.15**: NeTEx format models
 - **GeoTools 30.2**: Geospatial processing
 - **JTS (Java Topology Suite) 1.20.0**: Geometric operations
 - **Flyway**: Database migration management

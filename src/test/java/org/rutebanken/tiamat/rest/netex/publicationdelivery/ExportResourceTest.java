@@ -192,7 +192,7 @@ public class ExportResourceTest extends TiamatIntegrationTest {
                 .as("stop place ref list")
                 .isNotNull()
                 .isNotEmpty()
-                .extracting(StopPlaceRefStructure::getRef)
+                .extracting(sp -> sp.getValue().getRef())
                 .as("reference to stop place id")
                 .containsOnly(stopPlace.getNetexId(), stopPlace2.getNetexId());
 

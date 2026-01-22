@@ -1,8 +1,10 @@
 package org.rutebanken.tiamat.netex.mapping.converter;
 
+import jakarta.xml.bind.JAXBElement;
 import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;
+import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.StopPlaceRefStructure;
 import org.rutebanken.netex.model.StopPlaceRefs_RelStructure;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -31,13 +33,14 @@ public class SetOfStopPlacesStopPlaceRefsConverter extends BidirectionalConverte
 
         if(stopPlaces != null && !stopPlaces.isEmpty()) {
             logger.debug("Mapping set of stop places to netex. stops: {}", stopPlaces.size());
+
             return new StopPlaceRefs_RelStructure()
                     .withStopPlaceRef(
                         stopPlaces.stream().map(stopPlace -> {
                             StopPlaceRefStructure stopPlaceRefStructure = new StopPlaceRefStructure();
                             stopPlaceRefStructure.withVersion(String.valueOf(stopPlace.getVersion()));
                             stopPlaceRefStructure.withRef(stopPlace.getNetexId());
-                            return stopPlaceRefStructure;
+                            return new ObjectFactory().createStopPlaceRef(stopPlaceRefStructure);
                         })
                         .collect(toList()));
         }
@@ -50,6 +53,7 @@ public class SetOfStopPlacesStopPlaceRefsConverter extends BidirectionalConverte
             logger.debug("Mapping set stopPlaceRefs_relStructure from netex. stops {}", stopPlaceRefs_relStructure.getStopPlaceRef().size());
             return stopPlaceRefs_relStructure.getStopPlaceRef()
                     .stream()
+                    .map(JAXBElement::getValue)
                     .map(stopPlaceRefStructure -> (StopPlace) referenceResolver.resolve(new VersionOfObjectRefStructure(stopPlaceRefStructure.getRef(), stopPlaceRefStructure.getVersion())))
                     .collect(toSet());
         }
