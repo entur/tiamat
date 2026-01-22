@@ -71,9 +71,9 @@ public class ExportStopPlacesWithEffectiveChangeInPeriod {
     }
     /**
      *
-     * @param stopPlaces
-     * @param exportParams
-     * @return
+     * @param stopPlaces stop places to include in the publication delivery
+     * @param exportParams export parameters
+     * @return publication delivery structure containing the stop places and related data
      */
     public PublicationDeliveryStructure exportPublicationDeliveryWithStops(List<StopPlace> stopPlaces, ExportParams exportParams) {
         logger.info("Preparing publication delivery export");
@@ -100,6 +100,7 @@ public class ExportStopPlacesWithEffectiveChangeInPeriod {
                 final Collection<org.rutebanken.netex.model.StopPlace> stopPlace = convertedSiteFrame.getStopPlaces().getStopPlace_().stream()
                         .map(sp -> (org.rutebanken.netex.model.StopPlace) sp.getValue())
                         .toList();
+                tariffZonesFromStopsExporter.resolveTariffZones(stopPlace, convertedSiteFrame);
             } else if (ExportParams.ExportMode.NONE.equals(exportParams.getTariffZoneExportMode())) {
                 logger.info("TariffZone export mode is NONE. Removing references from {} converted stop places", convertedSiteFrame.getStopPlaces().getStopPlace_().size());
                 convertedSiteFrame.getStopPlaces().getStopPlace_().stream()

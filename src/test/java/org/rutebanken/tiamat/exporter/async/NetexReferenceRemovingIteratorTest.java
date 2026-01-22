@@ -24,7 +24,6 @@ import org.rutebanken.netex.model.TariffZoneRefs_RelStructure;
 import org.rutebanken.netex.model.TopographicPlaceRefStructure;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
