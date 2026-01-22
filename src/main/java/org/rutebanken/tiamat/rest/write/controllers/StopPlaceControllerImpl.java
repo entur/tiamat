@@ -22,7 +22,14 @@ public class StopPlaceControllerImpl implements StopPlaceController {
 
     @Override
     @GET
-    public Response getStopPlace(String stopPlaceId) {
+    @Produces(
+        {
+            MediaType.APPLICATION_XML,
+            MediaType.APPLICATION_XML + "; charset=utf-8",
+        }
+    )
+    @Path("/{stopPlaceId}")
+    public Response getStopPlace(@PathParam("stopPlaceId") String stopPlaceId) {
         return Response.ok(stopPlaceFacade.getStopPlace(stopPlaceId)).build();
     }
 

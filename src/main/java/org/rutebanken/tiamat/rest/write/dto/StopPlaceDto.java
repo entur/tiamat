@@ -12,9 +12,4 @@ import org.rutebanken.netex.model.StopPlace;
         name = "StopPlace",
         namespace = "http://www.netex.org.uk/netex"
 )
-public class StopPlaceDto extends StopPlace {
-
-    public fromStopPlace() {
-
-    }
-}
+public class StopPlaceDto extends StopPlace {}

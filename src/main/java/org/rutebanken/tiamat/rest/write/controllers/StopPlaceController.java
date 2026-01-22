@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.core.Response;
+import org.rutebanken.netex.model.StopPlace;
 import org.rutebanken.tiamat.rest.write.dto.StopPlaceJobDto;
 import org.rutebanken.tiamat.rest.write.dto.StopPlacesDto;
 
@@ -25,10 +26,10 @@ interface StopPlaceController {
         """,
             responses = {
                     @ApiResponse(
-                            responseCode = "202",
-                            description = "Creation job submitted",
+                            responseCode = "200",
+                            description = "The stop place ",
                             content = @Content(
-                                    schema = @Schema(implementation = StopPlaceJobDto.class)
+                                    schema = @Schema(implementation = StopPlace.class)
                             )
                     ),
                     @ApiResponse(responseCode = "400", description = "Malformed input"),

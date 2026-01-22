@@ -1,12 +1,13 @@
 package org.rutebanken.tiamat.rest.write;
 
 import jakarta.annotation.PostConstruct;
+import jakarta.transaction.Transactional;
+import jakarta.ws.rs.core.StreamingOutput;
 import org.rutebanken.netex.model.LocaleStructure;
 import org.rutebanken.netex.model.SiteFrame;
 import org.rutebanken.netex.model.VersionFrameDefaultsStructure;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
-import org.rutebanken.tiamat.rest.write.dto.StopPlaceDto;
 import org.rutebanken.tiamat.rest.write.dto.StopPlaceJobDto;
 import org.rutebanken.tiamat.rest.write.dto.StopPlacesDto;
 import org.springframework.stereotype.Service;
@@ -20,16 +21,19 @@ public class StopPlaceFacade {
     private final JobService jobService;
     private final StopPlaceAsyncProcessor asyncProcessor;
     private final StopPlaceDomainService stopPlaceDomainService;
+    private final StopPlaceXmlWriter stopPlaceXmlWriter;
 
     public StopPlaceFacade(
         NetexMapper netexMapper,
         JobService jobService,
         StopPlaceAsyncProcessor asyncProcessor,
-        StopPlaceDomainService stopPlaceDomainService) {
+        StopPlaceDomainService stopPlaceDomainService,
+        StopPlaceXmlWriter stopPlaceXmlWriter) {
         this.netexMapper = netexMapper;
         this.jobService = jobService;
         this.asyncProcessor = asyncProcessor;
         this.stopPlaceDomainService = stopPlaceDomainService;
+        this.stopPlaceXmlWriter = stopPlaceXmlWriter;
     }
 
     @PostConstruct
@@ -49,9 +53,10 @@ public class StopPlaceFacade {
         );
     }
 
-    public StopPlaceDto getStopPlace(String netexId) {
-        // TOOD: do not cast
-        return (StopPlaceDto) netexMapper.mapToNetexModel(stopPlaceDomainService.getStopPlace(netexId));
+    @Transactional
+    public StreamingOutput getStopPlace(String netexId) {
+        org.rutebanken.netex.model.StopPlace stopPlace = netexMapper.mapToNetexModel(stopPlaceDomainService.getStopPlace(netexId));
+        return stopPlaceXmlWriter.write(stopPlace);
     }
 
     public StopPlaceJobDto createStopPlaces(StopPlacesDto dto) {

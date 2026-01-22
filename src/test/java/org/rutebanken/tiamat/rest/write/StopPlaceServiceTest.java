@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.rutebanken.tiamat.model.ModificationEnumeration;
 import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.service.stopplace.StopPlaceTerminator;
 import org.rutebanken.tiamat.versioning.save.StopPlaceVersionedSaverService;
 
@@ -17,12 +18,13 @@ class StopPlaceServiceTest {
     private StopPlaceVersionedSaverService saverService;
     private StopPlaceTerminator terminator;
     private StopPlaceService service;
+    private StopPlaceRepository repository;
 
     @BeforeEach
     void setup() {
         saverService = mock(StopPlaceVersionedSaverService.class);
         terminator = mock(StopPlaceTerminator.class);
-        service = new StopPlaceService(saverService, terminator);
+        service = new StopPlaceService(saverService, terminator, repository);
     }
 
     @Test
