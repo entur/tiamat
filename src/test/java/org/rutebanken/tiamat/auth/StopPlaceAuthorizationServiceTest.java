@@ -39,6 +39,7 @@ import org.springframework.security.access.AccessDeniedException;
 
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -116,7 +117,7 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
      * Borrowing the config class to get field mappings.
      */
     @Before
-    public void StopPlaceAuthorizationServiceTest() {
+    public void setup() {
         roleAssignmentExtractor = mock(RoleAssignmentExtractor.class);
 
         AuthorizationServiceConfig authorizationServiceConfig = new AuthorizationServiceConfig();
@@ -337,6 +338,25 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
         stopPlaceAuthorizationService.assertAuthorizedToEdit(existingVersion, newVersion);
     }
 
+    @Test
+    public void userCannotEditStopByCreatingNewVersion() {
+        setRoleAssignmentReturned(ADMIN);
+
+        var existingVersion = createOnstreetBus();
+        stopPlaceRepository.save(existingVersion);
+
+        var roleAssignment = canOnlyEdit(StopTypeEnumeration.RAIL_STATION.value());
+
+        setRoleAssignmentReturned(roleAssignment);
+
+        var newVersion = versionCreator.createCopy(existingVersion, StopPlace.class);
+        newVersion.setStopPlaceType(StopTypeEnumeration.RAIL_STATION);
+
+        assertThatThrownBy(() ->
+            stopPlaceAuthorizationService.assertAuthorizedToEdit(existingVersion, newVersion, Collections.emptySet()))
+                .isInstanceOf(AccessDeniedException.class);
+        }
+
     private RoleAssignment canOnlyEdit(String stopPlaceType) {
         return RoleAssignment.builder()
                 .withRole(ROLE_EDIT_STOPS)
@@ -368,10 +388,6 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
         List<RoleAssignment> roleAssignments = Arrays.asList(roleAssignment);
         when(roleAssignmentExtractor.getRoleAssignmentsForUser()).thenReturn(roleAssignments);
         when(roleAssignmentExtractor.getRoleAssignmentsForUser(any())).thenReturn(roleAssignments);
-    }
-
-    private void removeAllChildrenExcept(StopPlace parentStopPlace, String exceptThisNetexId) {
-        parentStopPlace.getChildren().removeIf(child -> !child.getNetexId().equals(exceptThisNetexId));
     }
 
     private StopPlace createOnstreetBus() {
