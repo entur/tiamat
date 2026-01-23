@@ -45,23 +45,25 @@ class StopPlaceFacadeTest {
 
     private StopPlaceDomainService domainService;
 
+    private StopPlaceXmlWriter xmlWriter;
+
     @BeforeEach
     void setup() {
-        facade = new StopPlaceFacade(netexMapper, jobService, asyncProcessor, domainService);
+        facade = new StopPlaceFacade(netexMapper, jobService, asyncProcessor, domainService, xmlWriter);
     }
 
     @Test
     void createStopPlaces_Success() {
         StopPlacesDto dto = createStopPlacesDto();
         org.rutebanken.tiamat.model.StopPlace tiamatStopPlace =
-            createTiamatStopPlace();
+                createTiamatStopPlace();
         AsyncStopPlaceJob job = createJob(
-            1L,
-            AsyncStopPlaceJobStatus.PROCESSING
+                1L,
+                AsyncStopPlaceJobStatus.PROCESSING
         );
 
         when(netexMapper.mapStopsToTiamatModel(anyList())).thenReturn(
-            List.of(tiamatStopPlace)
+                List.of(tiamatStopPlace)
         );
         when(jobService.createJob()).thenReturn(job);
 
@@ -77,13 +79,13 @@ class StopPlaceFacadeTest {
     void createStopPlaces_MultipleStopPlaces_ThrowsException() {
         StopPlacesDto dto = createStopPlacesDto();
         org.rutebanken.tiamat.model.StopPlace stopPlace1 =
-            createTiamatStopPlace();
+                createTiamatStopPlace();
         org.rutebanken.tiamat.model.StopPlace stopPlace2 =
-            createTiamatStopPlace();
+                createTiamatStopPlace();
         AsyncStopPlaceJob job = createJob(1L, AsyncStopPlaceJobStatus.FAILED);
 
         when(netexMapper.mapStopsToTiamatModel(anyList())).thenReturn(
-            List.of(stopPlace1, stopPlace2)
+                List.of(stopPlace1, stopPlace2)
         );
         when(jobService.createJob()).thenReturn(job);
         when(jobService.fail(eq(1L), anyString())).thenReturn(job);
@@ -92,12 +94,12 @@ class StopPlaceFacadeTest {
 
         assertEquals(AsyncStopPlaceJobStatus.FAILED, result.status());
         verify(jobService).fail(
-            eq(1L),
-            contains("Only one stop place allowed")
+                eq(1L),
+                contains("Only one stop place allowed")
         );
         verify(asyncProcessor, never()).processCreateStopPlace(
-            anyLong(),
-            any()
+                anyLong(),
+                any()
         );
     }
 
@@ -105,12 +107,12 @@ class StopPlaceFacadeTest {
     void createStopPlaces_ParentStopPlace_ThrowsException() {
         StopPlacesDto dto = createStopPlacesDto();
         org.rutebanken.tiamat.model.StopPlace tiamatStopPlace =
-            createTiamatStopPlace();
+                createTiamatStopPlace();
         tiamatStopPlace.setParentStopPlace(true);
         AsyncStopPlaceJob job = createJob(1L, AsyncStopPlaceJobStatus.FAILED);
 
         when(netexMapper.mapStopsToTiamatModel(anyList())).thenReturn(
-            List.of(tiamatStopPlace)
+                List.of(tiamatStopPlace)
         );
         when(jobService.createJob()).thenReturn(job);
         when(jobService.fail(eq(1L), anyString())).thenReturn(job);
@@ -119,12 +121,12 @@ class StopPlaceFacadeTest {
 
         assertEquals(AsyncStopPlaceJobStatus.FAILED, result.status());
         verify(jobService).fail(
-            eq(1L),
-            contains("Only mono-modal stop place allowed")
+                eq(1L),
+                contains("Only mono-modal stop place allowed")
         );
         verify(asyncProcessor, never()).processCreateStopPlace(
-            anyLong(),
-            any()
+                anyLong(),
+                any()
         );
     }
 
@@ -132,14 +134,14 @@ class StopPlaceFacadeTest {
     void createStopPlaces_WithChildren_ThrowsException() {
         StopPlacesDto dto = createStopPlacesDto();
         org.rutebanken.tiamat.model.StopPlace tiamatStopPlace =
-            createTiamatStopPlace();
+                createTiamatStopPlace();
         tiamatStopPlace
-            .getChildren()
-            .add(new org.rutebanken.tiamat.model.StopPlace());
+                .getChildren()
+                .add(new org.rutebanken.tiamat.model.StopPlace());
         AsyncStopPlaceJob job = createJob(1L, AsyncStopPlaceJobStatus.FAILED);
 
         when(netexMapper.mapStopsToTiamatModel(anyList())).thenReturn(
-            List.of(tiamatStopPlace)
+                List.of(tiamatStopPlace)
         );
         when(jobService.createJob()).thenReturn(job);
         when(jobService.fail(eq(1L), anyString())).thenReturn(job);
@@ -148,12 +150,12 @@ class StopPlaceFacadeTest {
 
         assertEquals(AsyncStopPlaceJobStatus.FAILED, result.status());
         verify(jobService).fail(
-            eq(1L),
-            contains("Only mono-modal stop place allowed")
+                eq(1L),
+                contains("Only mono-modal stop place allowed")
         );
         verify(asyncProcessor, never()).processCreateStopPlace(
-            anyLong(),
-            any()
+                anyLong(),
+                any()
         );
     }
 
@@ -161,15 +163,15 @@ class StopPlaceFacadeTest {
     void updateStopPlace_Success() {
         StopPlacesDto dto = createStopPlacesDto();
         org.rutebanken.tiamat.model.StopPlace tiamatStopPlace =
-            createTiamatStopPlace();
+                createTiamatStopPlace();
         tiamatStopPlace.setNetexId("NSR:StopPlace:100");
         AsyncStopPlaceJob job = createJob(
-            2L,
-            AsyncStopPlaceJobStatus.PROCESSING
+                2L,
+                AsyncStopPlaceJobStatus.PROCESSING
         );
 
         when(netexMapper.mapStopsToTiamatModel(anyList())).thenReturn(
-            List.of(tiamatStopPlace)
+                List.of(tiamatStopPlace)
         );
         when(jobService.createJob()).thenReturn(job);
 
@@ -185,8 +187,8 @@ class StopPlaceFacadeTest {
     void deleteStopPlace_Success() {
         String stopPlaceId = "NSR:StopPlace:100";
         AsyncStopPlaceJob job = createJob(
-            3L,
-            AsyncStopPlaceJobStatus.PROCESSING
+                3L,
+                AsyncStopPlaceJobStatus.PROCESSING
         );
 
         when(jobService.createJob()).thenReturn(job);
@@ -206,8 +208,8 @@ class StopPlaceFacadeTest {
 
         when(jobService.createJob()).thenReturn(job);
         doThrow(new RuntimeException("Delete failed"))
-            .when(asyncProcessor)
-            .processDeleteStopPlace(anyLong(), anyString());
+                .when(asyncProcessor)
+                .processDeleteStopPlace(anyLong(), anyString());
         when(jobService.fail(eq(3L), anyString())).thenReturn(job);
 
         StopPlaceJobDto result = facade.deleteStopPlace(stopPlaceId);
@@ -219,26 +221,26 @@ class StopPlaceFacadeTest {
     private StopPlacesDto createStopPlacesDto() {
         StopPlacesDto dto = new StopPlacesDto();
         StopPlace netexStopPlace = new StopPlace()
-            .withId("NSR:StopPlace:100")
-            .withName(
-                new org.rutebanken.netex.model.MultilingualString().withValue(
-                    "Test Stop"
-                )
-            );
+                .withId("NSR:StopPlace:100")
+                .withName(
+                        new org.rutebanken.netex.model.MultilingualString().withValue(
+                                "Test Stop"
+                        )
+                );
         dto.setStopPlaces(Collections.singletonList(netexStopPlace));
         return dto;
     }
 
     private org.rutebanken.tiamat.model.StopPlace createTiamatStopPlace() {
         org.rutebanken.tiamat.model.StopPlace stopPlace =
-            new org.rutebanken.tiamat.model.StopPlace();
+                new org.rutebanken.tiamat.model.StopPlace();
         stopPlace.setStopPlaceType(StopTypeEnumeration.BUS_STATION);
         return stopPlace;
     }
 
     private AsyncStopPlaceJob createJob(
-        Long id,
-        AsyncStopPlaceJobStatus status
+            Long id,
+            AsyncStopPlaceJobStatus status
     ) {
         AsyncStopPlaceJob job = new AsyncStopPlaceJob();
         job.setId(id);
