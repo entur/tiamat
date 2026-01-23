@@ -15,9 +15,12 @@
 
 package org.rutebanken.tiamat.model;
 
+import jakarta.persistence.Embeddable;
+
 import java.time.Duration;
 
 
+@Embeddable
 public class TransferDuration {
 
     protected Duration defaultDuration;
