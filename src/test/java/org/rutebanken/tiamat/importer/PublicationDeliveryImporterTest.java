@@ -120,14 +120,15 @@ public class PublicationDeliveryImporterTest extends TiamatIntegrationTest {
                                 .withLongitude(new BigDecimal("71"))))
                 .withParentSiteRef(new SiteRefStructure().withRef("NSR:StopPlace:01").withVersion(parentStop.getVersion()))
                 .withQuays(new Quays_RelStructure()
-                        .withQuayRefOrQuay(new Quay()
+                        .withQuayRefOrQuay(new ObjectFactory().createQuay(
+                                new Quay()
                                 .withId("XYZ:01:03")
                                 .withVersion("1")
                                 .withName(new MultilingualString().withValue("A"))
                                 .withCentroid(new SimplePoint_VersionStructure()
                                         .withLocation(new LocationStructure()
                                                 .withLatitude(new BigDecimal("9.1"))
-                                                .withLongitude(new BigDecimal("71.2"))))));
+                                                .withLongitude(new BigDecimal("71.2")))))));
 
         StopPlace childStopB = new StopPlace()
                 .withId("NSR:StopPlace:05")
@@ -139,14 +140,15 @@ public class PublicationDeliveryImporterTest extends TiamatIntegrationTest {
                                 .withLongitude(new BigDecimal("71"))))
                 .withParentSiteRef(new SiteRefStructure().withRef("NSR:StopPlace:01").withVersion(parentStop.getVersion()))
                 .withQuays(new Quays_RelStructure()
-                        .withQuayRefOrQuay(new Quay()
+                        .withQuayRefOrQuay(new ObjectFactory().createQuay(
+                                new Quay()
                                 .withId("XYZ:01:02")
                                 .withVersion("1")
                                 .withName(new MultilingualString().withValue("B"))
                                 .withCentroid(new SimplePoint_VersionStructure()
                                         .withLocation(new LocationStructure()
                                                 .withLatitude(new BigDecimal("9.2"))
-                                                .withLongitude(new BigDecimal("71.3"))))));
+                                                .withLongitude(new BigDecimal("71.3")))))));
 
         StopPlace childStopC = new StopPlace()
                 .withId("NSR:StopPlace:03")
@@ -158,14 +160,15 @@ public class PublicationDeliveryImporterTest extends TiamatIntegrationTest {
                                 .withLongitude(new BigDecimal("11"))))
                 .withParentSiteRef(new SiteRefStructure().withRef("NSR:StopPlace:02").withVersion(parentStop.getVersion()))
                 .withQuays(new Quays_RelStructure()
-                        .withQuayRefOrQuay(new Quay()
+                        .withQuayRefOrQuay(new ObjectFactory().createQuay(
+                                new Quay()
                                 .withId("XYZ:02:01")
                                 .withVersion("1")
                                 .withName(new MultilingualString().withValue("C"))
                                 .withCentroid(new SimplePoint_VersionStructure()
                                         .withLocation(new LocationStructure()
                                                 .withLatitude(new BigDecimal("9.1"))
-                                                .withLongitude(new BigDecimal("71.2"))))));
+                                                .withLongitude(new BigDecimal("71.2")))))));
 
         ImportParams importParams = new ImportParams();
         importParams.importType = ImportType.INITIAL;

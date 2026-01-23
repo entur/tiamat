@@ -17,6 +17,7 @@ package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
 import jakarta.xml.bind.JAXBElement;
 import org.junit.Test;
+import org.rutebanken.netex.model.FareFrame;
 import org.rutebanken.netex.model.FareZone;
 import org.rutebanken.netex.model.LocationStructure;
 import org.rutebanken.netex.model.MultilingualString;
@@ -48,6 +49,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class FareZoneImportTest extends TiamatIntegrationTest {
 
+    private static final ObjectFactory netexObjectFactory = new ObjectFactory();
+
     @Autowired
     private PublicationDeliveryTestHelper publicationDeliveryTestHelper;
 
@@ -63,7 +66,7 @@ public class FareZoneImportTest extends TiamatIntegrationTest {
                 .withValidBetween(new ValidBetween().withFromDate(validFrom))
                 .withId("RUT:FareZone:01");
 
-        tariffZones.add(new ObjectFactory().createFareZone(fareZone));
+        tariffZones.add(netexObjectFactory.createFareZone(fareZone));
         SiteFrame siteFrame = publicationDeliveryTestHelper.siteFrame()
                 .withTariffZones(new TariffZonesInFrame_RelStructure()
                         .withTariffZone(tariffZones));
@@ -92,30 +95,30 @@ public class FareZoneImportTest extends TiamatIntegrationTest {
                 .withValidBetween(new ValidBetween().withFromDate(validFrom))
                 .withId("RUT:FareZone:05");
 
-        tariffZones.add(new ObjectFactory().createFareZone(fareZone));
+        tariffZones.add(netexObjectFactory.createFareZone(fareZone));
 
         StopPlace stopPlace = new StopPlace();
         stopPlace.withId("XYZ:StopPlace:32111");
         stopPlace.setVersion("1");
         stopPlace.setTariffZones(new TariffZoneRefs_RelStructure()
-                .withTariffZoneRef(new TariffZoneRef()
+                .withTariffZoneRef_(netexObjectFactory.createTariffZoneRef(new TariffZoneRef()
                         .withVersion(fareZone.getVersion())
-                        .withRef(fareZone.getId())));
+                        .withRef(fareZone.getId()))));
         stopPlace.setQuays(
                 new Quays_RelStructure()
-                        .withQuayRefOrQuay(new Quay()
+                        .withQuayRefOrQuay(netexObjectFactory.createQuay(new Quay()
                                 .withId("XYZ:01:02")
                                 .withVersion("1")
                                 .withName(new MultilingualString().withValue("B"))
                                 .withCentroid(new SimplePoint_VersionStructure()
                                         .withLocation(new LocationStructure()
                                                 .withLatitude(new BigDecimal("9.6"))
-                                                .withLongitude(new BigDecimal("76"))))));
+                                                .withLongitude(new BigDecimal("76")))))));
 
         SiteFrame siteFrame = publicationDeliveryTestHelper.siteFrame()
                 .withTariffZones(new TariffZonesInFrame_RelStructure()
                         .withTariffZone(tariffZones))
-                .withStopPlaces(new StopPlacesInFrame_RelStructure().withStopPlace(stopPlace));
+                .withStopPlaces(new StopPlacesInFrame_RelStructure().withStopPlace_(netexObjectFactory.createStopPlace(stopPlace)));
 
         PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryTestHelper.publicationDelivery(siteFrame);
 
@@ -153,7 +156,7 @@ public class FareZoneImportTest extends TiamatIntegrationTest {
                 .withName(new MultilingualString().withValue("V02"))
                 .withVersion("1")
                 .withId("RUT:FareZone:01");
-        tariffZones1.add(new ObjectFactory().createFareZone(fareZone1));
+        tariffZones1.add(netexObjectFactory.createFareZone(fareZone1));
         StopPlace stopPlace = new StopPlace()
                 .withId("RUT:StopPlace:321")
                 .withName(new MultilingualString().withValue("name"))
@@ -161,23 +164,23 @@ public class FareZoneImportTest extends TiamatIntegrationTest {
                 .withVersion("1")
                 .withStopPlaceType(StopTypeEnumeration.ONSTREET_BUS)
                 .withQuays(new Quays_RelStructure()
-                        .withQuayRefOrQuay(new Quay()
+                        .withQuayRefOrQuay(netexObjectFactory.createQuay(new Quay()
                                 .withId("XYZ:01:02")
                                 .withVersion("1")
                                 .withName(new MultilingualString().withValue("B"))
                                 .withCentroid(new SimplePoint_VersionStructure()
                                         .withLocation(new LocationStructure()
                                                 .withLatitude(new BigDecimal("9.6"))
-                                                .withLongitude(new BigDecimal("76"))))))
+                                                .withLongitude(new BigDecimal("76")))))))
                 .withTariffZones(new TariffZoneRefs_RelStructure()
-                        .withTariffZoneRef(new TariffZoneRef()
+                        .withTariffZoneRef_(netexObjectFactory.createTariffZoneRef(new TariffZoneRef()
                                 .withVersion(fareZone1.getVersion())
-                                .withRef(fareZone1.getId())));
+                                .withRef(fareZone1.getId()))));
 
         SiteFrame siteFrame = publicationDeliveryTestHelper.siteFrame()
                 .withTariffZones(new TariffZonesInFrame_RelStructure()
                         .withTariffZone(tariffZones1))
-                .withStopPlaces(new StopPlacesInFrame_RelStructure().withStopPlace(stopPlace));
+                .withStopPlaces(new StopPlacesInFrame_RelStructure().withStopPlace_(netexObjectFactory.createStopPlace(stopPlace)));
 
         PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryTestHelper.publicationDelivery(siteFrame);
 
@@ -192,19 +195,19 @@ public class FareZoneImportTest extends TiamatIntegrationTest {
                 .withName(new MultilingualString().withValue("X09"))
                 .withVersion("1")
                 .withId("BRA:FareZone:02");
-        tariffZones2.add(new ObjectFactory().createFareZone(fareZone2));
+        tariffZones2.add(netexObjectFactory.createFareZone(fareZone2));
         stopPlace
                 .withId("BRA:Stopplace:3")
                 .withTariffZones(new TariffZoneRefs_RelStructure()
-                        .withTariffZoneRef(new TariffZoneRef()
+                        .withTariffZoneRef_(netexObjectFactory.createTariffZoneRef(new TariffZoneRef()
                                 .withVersion(fareZone2.getVersion())
-                                .withRef(fareZone2.getId())));
+                                .withRef(fareZone2.getId()))));
 
 
         SiteFrame siteFrame2 = publicationDeliveryTestHelper.siteFrame()
                 .withTariffZones(new TariffZonesInFrame_RelStructure()
                         .withTariffZone(tariffZones2))
-                .withStopPlaces(new StopPlacesInFrame_RelStructure().withStopPlace(stopPlace));
+                .withStopPlaces(new StopPlacesInFrame_RelStructure().withStopPlace_(netexObjectFactory.createStopPlace(stopPlace)));
 
         PublicationDeliveryStructure publicationDeliveryStructure2 = publicationDeliveryTestHelper.publicationDelivery(siteFrame2);
 
@@ -235,7 +238,7 @@ public class FareZoneImportTest extends TiamatIntegrationTest {
                 .withName(new MultilingualString().withValue("V03"))
                 .withVersion("1")
                 .withId("ATB:FareZone:01");
-        tariffZones1.add(new ObjectFactory().createFareZone(fareZone1));
+        tariffZones1.add(netexObjectFactory.createFareZone(fareZone1));
         StopPlace stopPlace = new StopPlace()
                 .withId("ATB:StopPlace:322")
                 .withName(new MultilingualString().withValue("name"))
@@ -243,23 +246,23 @@ public class FareZoneImportTest extends TiamatIntegrationTest {
                 .withVersion("1")
                 .withStopPlaceType(StopTypeEnumeration.ONSTREET_BUS)
                 .withQuays(new Quays_RelStructure()
-                        .withQuayRefOrQuay(new Quay()
+                        .withQuayRefOrQuay(netexObjectFactory.createQuay(new Quay()
                                 .withId("XYZ:01:02")
                                 .withVersion("1")
                                 .withName(new MultilingualString().withValue("B"))
                                 .withCentroid(new SimplePoint_VersionStructure()
                                         .withLocation(new LocationStructure()
                                                 .withLatitude(new BigDecimal("77"))
-                                                .withLongitude(new BigDecimal("9.7"))))))
+                                                .withLongitude(new BigDecimal("9.7")))))))
                 .withTariffZones(new TariffZoneRefs_RelStructure()
-                        .withTariffZoneRef(new TariffZoneRef()
+                        .withTariffZoneRef_(netexObjectFactory.createTariffZoneRef(new TariffZoneRef()
                                 .withVersion(fareZone1.getVersion())
-                                .withRef(fareZone1.getId())));
+                                .withRef(fareZone1.getId()))));
 
         SiteFrame siteFrame = publicationDeliveryTestHelper.siteFrame()
                 .withTariffZones(new TariffZonesInFrame_RelStructure()
                         .withTariffZone(tariffZones1))
-                .withStopPlaces(new StopPlacesInFrame_RelStructure().withStopPlace(stopPlace));
+                .withStopPlaces(new StopPlacesInFrame_RelStructure().withStopPlace_(netexObjectFactory.createStopPlace(stopPlace)));
 
         PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryTestHelper.publicationDelivery(siteFrame);
 
@@ -275,30 +278,30 @@ public class FareZoneImportTest extends TiamatIntegrationTest {
                 .withName(new MultilingualString().withValue("X08"))
                 .withVersion("1")
                 .withId("NTR:FareZone:03");
-        tariffZones2.add(new ObjectFactory().createFareZone(fareZone2));
+        tariffZones2.add(netexObjectFactory.createFareZone(fareZone2));
         StopPlace stopPlace2 = new StopPlace()
                 .withId("NTR:StopPlace:322")
                 .withVersion("2")
                 .withStopPlaceType(StopTypeEnumeration.ONSTREET_BUS)
                 .withQuays(new Quays_RelStructure()
-                        .withQuayRefOrQuay(new Quay()
+                        .withQuayRefOrQuay(netexObjectFactory.createQuay(new Quay()
                                 .withId("XYZ:01:02")
                                 .withVersion("1")
                                 .withName(new MultilingualString().withValue("B"))
                                 .withCentroid(new SimplePoint_VersionStructure()
                                         .withLocation(new LocationStructure()
                                                 .withLatitude(new BigDecimal("77"))
-                                                .withLongitude(new BigDecimal("9.7"))))))
+                                                .withLongitude(new BigDecimal("9.7")))))))
                 .withTariffZones(new TariffZoneRefs_RelStructure()
-                        .withTariffZoneRef(new TariffZoneRef()
+                        .withTariffZoneRef_(netexObjectFactory.createTariffZoneRef(new TariffZoneRef()
                                 .withVersion(fareZone2.getVersion())
-                                .withRef(fareZone2.getId())));
+                                .withRef(fareZone2.getId()))));
 
 
         SiteFrame siteFrame2 = publicationDeliveryTestHelper.siteFrame()
                 .withTariffZones(new TariffZonesInFrame_RelStructure()
                         .withTariffZone(tariffZones2))
-                .withStopPlaces(new StopPlacesInFrame_RelStructure().withStopPlace(stopPlace2));
+                .withStopPlaces(new StopPlacesInFrame_RelStructure().withStopPlace_(netexObjectFactory.createStopPlace(stopPlace2)));
 
         PublicationDeliveryStructure publicationDeliveryStructure2 = publicationDeliveryTestHelper.publicationDelivery(siteFrame2);
 
@@ -315,7 +318,7 @@ public class FareZoneImportTest extends TiamatIntegrationTest {
 
         List<StopPlace> actualIdMatchedStopPlaces = publicationDeliveryTestHelper.extractStopPlaces(matchReponse);
         assertThat(actualIdMatchedStopPlaces).hasSize(1);
-        assertThat(actualIdMatchedStopPlaces.getFirst().getTariffZones().getTariffZoneRef()).as("number of tariff zone refs").hasSize(2);
+        assertThat(actualIdMatchedStopPlaces.getFirst().getTariffZones().getTariffZoneRef_()).as("number of tariff zone refs").hasSize(2);
 
         importParams.importType = ImportType.ID_MATCH;
 
@@ -328,7 +331,110 @@ public class FareZoneImportTest extends TiamatIntegrationTest {
 
         actualIdMatchedStopPlaces = publicationDeliveryTestHelper.extractStopPlaces(matchReponse);
         assertThat(actualIdMatchedStopPlaces).hasSize(1);
-        assertThat(actualIdMatchedStopPlaces.getFirst().getTariffZones().getTariffZoneRef()).as("number of tariff zone refs").hasSize(2);
+        assertThat(actualIdMatchedStopPlaces.getFirst().getTariffZones().getTariffZoneRef_()).as("number of tariff zone refs").hasSize(2);
 
+    }
+
+    @Test
+    public void backwardCompatibilityDefaultToSiteFrame() throws Exception {
+        // GIVEN: PublicationDelivery with SiteFrame containing FareZone
+        LocalDateTime validFrom = LocalDateTime.now().minusDays(3);
+        List<JAXBElement<? extends Zone_VersionStructure>> tariffZones = new ArrayList<>();
+
+        FareZone fareZone = new FareZone()
+                .withName(new MultilingualString().withValue("Backward Compat Zone"))
+                .withVersion("1")
+                .withValidBetween(new ValidBetween().withFromDate(validFrom))
+                .withId("RUT:FareZone:BC01");
+
+        tariffZones.add(netexObjectFactory.createFareZone(fareZone));
+        SiteFrame siteFrame = publicationDeliveryTestHelper.siteFrame()
+                .withTariffZones(new TariffZonesInFrame_RelStructure()
+                        .withTariffZone(tariffZones));
+
+        PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryTestHelper.publicationDelivery(siteFrame);
+
+        // WHEN: Import without fareZoneFrameSource parameter (should default to SITE_FRAME)
+        ImportParams importParams = new ImportParams();
+        // Note: fareZoneFrameSource not set, should default to SITE_FRAME
+
+        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDeliveryStructure, importParams);
+
+        // THEN: Should use SiteFrame (default behavior)
+        final List<JAXBElement<? extends Zone_VersionStructure>> actualZones = publicationDeliveryTestHelper.findSiteFrame(response)
+                .getTariffZones().getTariffZone();
+
+        assertThat(actualZones).isNotEmpty();
+        assertThat(actualZones.getFirst().getValue().getName().getValue()).isEqualTo(fareZone.getName().getValue());
+
+        // Verify no FareFrame in response (backward compatible behavior)
+        FareFrame responseFareFrame = publicationDeliveryTestHelper.findFareFrame(response);
+        assertThat(responseFareFrame).isNull();
+    }
+
+    @Test
+    public void backwardCompatibilityImportOnlyTariffZonesStillWorks() throws Exception {
+        // GIVEN: PublicationDelivery with SiteFrame containing FareZone and TariffZone
+        LocalDateTime validFrom = LocalDateTime.now().minusDays(3);
+        List<JAXBElement<? extends Zone_VersionStructure>> tariffZones = new ArrayList<>();
+
+        FareZone fareZone = new FareZone()
+                .withName(new MultilingualString().withValue("Legacy Import Zone"))
+                .withVersion("1")
+                .withValidBetween(new ValidBetween().withFromDate(validFrom))
+                .withId("RUT:FareZone:Legacy01");
+
+        tariffZones.add(netexObjectFactory.createFareZone(fareZone));
+        SiteFrame siteFrame = publicationDeliveryTestHelper.siteFrame()
+                .withTariffZones(new TariffZonesInFrame_RelStructure()
+                        .withTariffZone(tariffZones));
+
+        PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryTestHelper.publicationDelivery(siteFrame);
+
+        // WHEN: Import with importOnlyTariffZones=true (legacy parameter)
+        ImportParams importParams = new ImportParams();
+        importParams.importOnlyTariffZones = true;
+
+        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDeliveryStructure, importParams);
+
+        // THEN: Should use PublicationDeliveryTariffZoneImporter (legacy behavior)
+        final List<JAXBElement<? extends Zone_VersionStructure>> actualZones = publicationDeliveryTestHelper.findSiteFrame(response)
+                .getTariffZones().getTariffZone();
+
+        assertThat(actualZones).isNotEmpty();
+        assertThat(actualZones.getFirst().getValue().getName().getValue()).isEqualTo(fareZone.getName().getValue());
+    }
+
+    @Test
+    public void explicitSiteFrameSourceMatchesDefaultBehavior() throws Exception {
+        // GIVEN: PublicationDelivery with SiteFrame containing FareZone
+        LocalDateTime validFrom = LocalDateTime.now().minusDays(3);
+        List<JAXBElement<? extends Zone_VersionStructure>> tariffZones = new ArrayList<>();
+
+        FareZone fareZone = new FareZone()
+                .withName(new MultilingualString().withValue("Explicit Site Zone"))
+                .withVersion("1")
+                .withValidBetween(new ValidBetween().withFromDate(validFrom))
+                .withId("RUT:FareZone:Exp01");
+
+        tariffZones.add(netexObjectFactory.createFareZone(fareZone));
+        SiteFrame siteFrame = publicationDeliveryTestHelper.siteFrame()
+                .withTariffZones(new TariffZonesInFrame_RelStructure()
+                        .withTariffZone(tariffZones));
+
+        PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryTestHelper.publicationDelivery(siteFrame);
+
+        // WHEN: Import with explicit SITE_FRAME parameter
+        ImportParams importParams = new ImportParams();
+        importParams.fareZoneFrameSource = org.rutebanken.tiamat.importer.FareZoneFrameSource.SITE_FRAME;
+
+        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDeliveryStructure, importParams);
+
+        // THEN: Should behave identically to default
+        final List<JAXBElement<? extends Zone_VersionStructure>> actualZones = publicationDeliveryTestHelper.findSiteFrame(response)
+                .getTariffZones().getTariffZone();
+
+        assertThat(actualZones).isNotEmpty();
+        assertThat(actualZones.getFirst().getValue().getName().getValue()).isEqualTo(fareZone.getName().getValue());
     }
 }

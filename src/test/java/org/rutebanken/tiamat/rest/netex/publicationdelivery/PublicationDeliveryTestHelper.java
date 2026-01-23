@@ -77,7 +77,9 @@ public class PublicationDeliveryTestHelper {
 
     static {
         try {
-            jaxbContext = newInstance(PublicationDeliveryStructure.class);
+            // Use package name to include ObjectFactory's @XmlElementDecl mappings
+            // Required for netex-java-model 2.0.15+ which uses @XmlElementRefs in structures like Quays_RelStructure
+            jaxbContext = newInstance("org.rutebanken.netex.model");
         } catch (JAXBException e) {
             throw new RuntimeException(e);
         }
@@ -136,8 +138,12 @@ public class PublicationDeliveryTestHelper {
 
     public PublicationDeliveryStructure createPublicationDeliveryWithStopPlace(StopPlace... stopPlace) {
         SiteFrame siteFrame = siteFrame();
-        siteFrame.withStopPlaces(new StopPlacesInFrame_RelStructure()
-                .withStopPlace(stopPlace));
+        ObjectFactory objectFactory = new ObjectFactory();
+        StopPlacesInFrame_RelStructure stopPlacesStruct = new StopPlacesInFrame_RelStructure();
+        for (StopPlace sp : stopPlace) {
+            stopPlacesStruct.getStopPlace_().add(objectFactory.createStopPlace(sp));
+        }
+        siteFrame.withStopPlaces(stopPlacesStruct);
 
         return publicationDelivery(siteFrame);
     }
@@ -181,11 +187,15 @@ public class PublicationDeliveryTestHelper {
     public List<StopPlace> extractStopPlaces(SiteFrame siteFrame, boolean verifyNotNull) {
         if(verifyNotNull) {
             assertThat(siteFrame.getStopPlaces()).as("Site frame stop places").isNotNull();
-            assertThat(siteFrame.getStopPlaces().getStopPlace()).as("Site frame stop places getStopPlace").isNotNull();
-        } else if(siteFrame.getStopPlaces() == null || siteFrame.getStopPlaces().getStopPlace() == null) {
+            assertThat(siteFrame.getStopPlaces().getStopPlace_()).as("Site frame stop places getStopPlace_").isNotNull();
+        } else if(siteFrame.getStopPlaces() == null || siteFrame.getStopPlaces().getStopPlace_() == null) {
             return new ArrayList<>();
         }
-        return siteFrame.getStopPlaces().getStopPlace();
+        return siteFrame.getStopPlaces().getStopPlace_().stream()
+                .map(JAXBElement::getValue)
+                .filter(site -> site instanceof StopPlace)
+                .map(site -> (StopPlace) site)
+                .collect(toList());
     }
 
     public List<GroupOfStopPlaces> extractGroupOfStopPlaces(SiteFrame siteFrame) {
@@ -234,6 +244,7 @@ public class PublicationDeliveryTestHelper {
                 .getQuays()
                 .getQuayRefOrQuay()
                 .stream()
+                .map(JAXBElement::getValue)
                 .filter(object -> object instanceof Quay)
                 .map(object -> ((Quay) object))
                 .collect(toList());
@@ -245,7 +256,10 @@ public class PublicationDeliveryTestHelper {
                 .stream()
                 .map(JAXBElement::getValue)
                 .filter(commonVersionFrameStructure -> commonVersionFrameStructure instanceof SiteFrame)
-                .flatMap(commonVersionFrameStructure -> ((SiteFrame) commonVersionFrameStructure).getStopPlaces().getStopPlace().stream())
+                .flatMap(commonVersionFrameStructure -> ((SiteFrame) commonVersionFrameStructure).getStopPlaces().getStopPlace_().stream())
+                .map(JAXBElement::getValue)
+                .filter(site -> site instanceof StopPlace)
+                .map(site -> (StopPlace) site)
                 .findFirst().get();
     }
 
@@ -359,9 +373,9 @@ public class PublicationDeliveryTestHelper {
                 .map(element -> (CompositeFrame) element.getValue())
                 .map(compositeFrame -> compositeFrame.getFrames())
                 .flatMap(frames -> frames.getCommonFrame().stream())
-                .filter(jaxbElement -> jaxbElement.getValue() instanceof SiteFrame)
+                .filter(jaxbElement -> jaxbElement.getValue() instanceof FareFrame)
                 .map(jaxbElement -> (FareFrame) jaxbElement.getValue())
-                .findAny().get();
+                .findAny().orElse(null);
     }
 
     public StopPlace findStopPlace(PublicationDeliveryStructure publicationDeliveryStructure, String stopPlaceId) {

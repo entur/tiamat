@@ -16,7 +16,6 @@
 package org.rutebanken.tiamat.auth;
 
 import org.rutebanken.tiamat.diff.TiamatObjectDiffer;
-import org.rutebanken.tiamat.diff.generic.Difference;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,10 +23,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -100,41 +97,11 @@ public class StopPlaceAuthorizationService {
                         existingChildrenIds, newVersion.getNetexId(), mustBeAuthorizedToEditTheseChildren);
             }
         } else {
-            authorizationService.verifyCanEditEntities( Arrays.asList(newVersion));
-        }
-
-    }
-
-    private boolean compareChild(StopPlace newVersionOfChild, StopPlace existingVersion) {
-        if (existingVersion == null) {
-            return true;
-        }
-        Optional<StopPlace> matchingExistingChild = existingVersion.getChildren().stream().filter(existingChild -> newVersionOfChild.getNetexId().equals(existingChild.getNetexId())).findFirst();
-
-        if (matchingExistingChild.isPresent()) {
-            return stopShouldBeAuthorized(newVersionOfChild, matchingExistingChild.get());
-        }
-        logger.info("Cannot find matching existing child {}. Return true.", newVersionOfChild.getNetexId());
-        return true;
-    }
-
-    private boolean stopShouldBeAuthorized(StopPlace newVersionOfChild, StopPlace matchingExistingChild) {
-        try {
-            List<Difference> differenceList = tiamatObjectDiffer.compareObjects(matchingExistingChild, newVersionOfChild);
-
-            if (differenceList.isEmpty()) {
-                logger.info("Child has NOT changed {} {}", newVersionOfChild.getNetexId(), newVersionOfChild.getStopPlaceType());
-                // Disable authorization check for this stop. It has not been changed.
-                return false;
-            } else {
-                logger.info("Child has changed {} {}", newVersionOfChild.getNetexId(), newVersionOfChild.getStopPlaceType());
-                return true;
-            }
-        } catch (IllegalAccessException e) {
-            logger.warn("Could not compare children", e);
-            return true;
+            authorizationService.verifyCanEditEntities(
+                    existingVersion == null
+                            ? List.of(newVersion)
+                            : List.of(existingVersion, newVersion)
+            );
         }
     }
-
-
 }

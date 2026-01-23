@@ -28,8 +28,10 @@ import jakarta.ws.rs.core.Response;
 import jakarta.xml.bind.JAXBException;
 import org.rutebanken.helper.organisation.NotAuthenticatedException;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
+import org.rutebanken.tiamat.importer.FareZoneFrameSource;
 import org.rutebanken.tiamat.importer.ImportParams;
 import org.rutebanken.tiamat.importer.ImportType;
+import org.rutebanken.tiamat.importer.PublicationDeliveryFareFrameImporter;
 import org.rutebanken.tiamat.importer.PublicationDeliveryImporter;
 import org.rutebanken.tiamat.importer.PublicationDeliveryTariffZoneImporter;
 import org.slf4j.Logger;
@@ -62,6 +64,8 @@ public class ImportResource {
 
     private final PublicationDeliveryTariffZoneImporter publicationDeliveryTariffZoneImporter;
 
+    private final PublicationDeliveryFareFrameImporter publicationDeliveryFareFrameImporter;
+
     private final Set<ImportType> enabledImportTypes;
 
     @Autowired
@@ -69,12 +73,14 @@ public class ImportResource {
                                  PublicationDeliveryStreamingOutput publicationDeliveryStreamingOutput,
                                  PublicationDeliveryImporter publicationDeliveryImporter,
                                  PublicationDeliveryTariffZoneImporter publicationDeliveryTariffZoneImporter,
+                                 PublicationDeliveryFareFrameImporter publicationDeliveryFareFrameImporter,
                                  @Value("#{'${netex.import.enabled.types:ID_MATCH}'.split(',')}") Set<ImportType> enabledImportTypes) {
 
         this.publicationDeliveryUnmarshaller = publicationDeliveryUnmarshaller;
         this.publicationDeliveryStreamingOutput = publicationDeliveryStreamingOutput;
         this.publicationDeliveryImporter = publicationDeliveryImporter;
         this.publicationDeliveryTariffZoneImporter = publicationDeliveryTariffZoneImporter;
+        this.publicationDeliveryFareFrameImporter = publicationDeliveryFareFrameImporter;
         this.enabledImportTypes = enabledImportTypes;
     }
 
@@ -86,14 +92,17 @@ public class ImportResource {
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.APPLICATION_XML + "; charset=UTF-8")
     public Response importPublicationDelivery(@Parameter(hidden = true) InputStream inputStream, @BeanParam ImportParams importParams) throws IOException, JAXBException, SAXException {
-        logger.info("Received Netex publication delivery, starting to parse...");
+        logger.info("Received NeTEx publication delivery, starting to parse...");
         boolean importOnlyTariffZones = importParams != null && importParams.importOnlyTariffZones;
+        FareZoneFrameSource frameSource = importParams != null && importParams.fareZoneFrameSource != null
+                ? importParams.fareZoneFrameSource
+                : FareZoneFrameSource.SITE_FRAME;
 
-        return importPublicationDelivery(inputStream, importParams, importOnlyTariffZones);
+        return importPublicationDelivery(inputStream, importParams, importOnlyTariffZones, frameSource);
     }
 
 
-    private Response importPublicationDelivery(InputStream inputStream, ImportParams importParams, boolean importOnlyTariffZones) throws JAXBException, IOException, SAXException {
+    private Response importPublicationDelivery(InputStream inputStream, ImportParams importParams, boolean importOnlyTariffZones, FareZoneFrameSource frameSource) throws JAXBException, IOException, SAXException {
         ImportType effectiveImportType = safeGetImportType(importParams);
         if (!enabledImportTypes.contains(effectiveImportType)) {
             String error = "ImportType: " + effectiveImportType + " not enabled!";
@@ -104,11 +113,27 @@ public class ImportResource {
         PublicationDeliveryStructure incomingPublicationDelivery = publicationDeliveryUnmarshaller.unmarshal(inputStream);
         try {
             PublicationDeliveryStructure responsePublicationDelivery;
-            if(importOnlyTariffZones) {
-                responsePublicationDelivery = publicationDeliveryTariffZoneImporter.importPublicationDelivery(incomingPublicationDelivery,importParams);
+
+            // Route to appropriate importer based on parameters
+            if (importOnlyTariffZones) {
+                // Legacy: importOnlyTariffZones uses SiteFrame-based tariff zone importer
+                logger.info("Importing tariff zones only from SiteFrame");
+                responsePublicationDelivery = publicationDeliveryTariffZoneImporter
+                        .importPublicationDelivery(incomingPublicationDelivery, importParams);
+
+            } else if (frameSource == FareZoneFrameSource.FARE_FRAME) {
+                // NEW: FareFrame-only import
+                logger.info("Importing fare zones from FareFrame only");
+                responsePublicationDelivery = publicationDeliveryFareFrameImporter
+                        .importPublicationDelivery(incomingPublicationDelivery, importParams);
+
             } else {
-                responsePublicationDelivery = publicationDeliveryImporter.importPublicationDelivery(incomingPublicationDelivery, importParams);
+                // Default: Full import from SiteFrame
+                logger.info("Importing from SiteFrame (frameSource: {})", frameSource);
+                responsePublicationDelivery = publicationDeliveryImporter
+                        .importPublicationDelivery(incomingPublicationDelivery, importParams);
             }
+
             if (importParams != null && importParams.skipOutput) {
                 return Response.ok().build();
             } else {

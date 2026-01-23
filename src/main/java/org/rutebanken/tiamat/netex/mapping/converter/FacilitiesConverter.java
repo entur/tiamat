@@ -55,10 +55,7 @@ public class FacilitiesConverter extends BidirectionalConverter<Set<SiteFacility
             if (netexFacility instanceof org.rutebanken.netex.model.SiteFacilitySet facility) {
                 final SiteFacilitySet tiamatFacility = new SiteFacilitySet();
                 mapperFacade.map(facility, tiamatFacility);
-                boolean hasMobilityFacilities = tiamatFacility.getMobilityFacilityList() != null && !tiamatFacility.getMobilityFacilityList().isEmpty();
-                if (hasMobilityFacilities) {
-                    tiamatFacilities.add(tiamatFacility);
-                }
+                tiamatFacilities.add(tiamatFacility);
             }
         }
         return tiamatFacilities;

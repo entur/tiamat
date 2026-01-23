@@ -28,6 +28,7 @@ import org.rutebanken.tiamat.repository.TariffZoneRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Arrays;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -50,11 +51,13 @@ public class TariffZonesFromStopsExporterTest extends TiamatIntegrationTest {
         // Two stops with reference to the same tariffzone
         StopPlace netexStopPlace = new StopPlace();
         netexStopPlace.setId("NSR:StopPlace:1");
-        netexStopPlace.withTariffZones(new TariffZoneRefs_RelStructure().withTariffZoneRef(new TariffZoneRef().withRef(tariffZone.getNetexId()).withVersion("1")));
+        netexStopPlace.withTariffZones(new TariffZoneRefs_RelStructure().withTariffZoneRef_(new ObjectFactory().createTariffZoneRef(
+                new TariffZoneRef().withRef(tariffZone.getNetexId()).withVersion("1"))));
 
         StopPlace netexStopPlace2 = new StopPlace();
         netexStopPlace2.setId("NSR:StopPlace:2");
-        netexStopPlace2.withTariffZones(new TariffZoneRefs_RelStructure().withTariffZoneRef(new TariffZoneRef().withRef(tariffZone.getNetexId()).withVersion("1")));
+        netexStopPlace2.withTariffZones(new TariffZoneRefs_RelStructure().withTariffZoneRef_(new ObjectFactory().createTariffZoneRef(
+                new TariffZoneRef().withRef(tariffZone.getNetexId()).withVersion("1"))));
 
         SiteFrame siteFrame = new SiteFrame();
         tariffZonesFromStopsExporter.resolveTariffZones(Arrays.asList(netexStopPlace, netexStopPlace2), siteFrame);
@@ -73,10 +76,11 @@ public class TariffZonesFromStopsExporterTest extends TiamatIntegrationTest {
 
         StopPlace netexStopPlace = new StopPlace();
         netexStopPlace.setId("NSR:StopPlace:1");
-        netexStopPlace.withTariffZones(new TariffZoneRefs_RelStructure().withTariffZoneRef(new TariffZoneRef().withRef("NSR:TariffZone:1")));
+        netexStopPlace.withTariffZones(new TariffZoneRefs_RelStructure().withTariffZoneRef_(new ObjectFactory().createTariffZoneRef(
+                new TariffZoneRef().withRef("NSR:TariffZone:1"))));
 
         SiteFrame siteFrame = new SiteFrame();
-        tariffZonesFromStopsExporter.resolveTariffZones(Arrays.asList(netexStopPlace), siteFrame);
+        tariffZonesFromStopsExporter.resolveTariffZones(List.of(netexStopPlace), siteFrame);
 
         assertThat(siteFrame.getTariffZones()).as("Number of tariffzones returned").isNull();
 
@@ -96,7 +100,8 @@ public class TariffZonesFromStopsExporterTest extends TiamatIntegrationTest {
 
         StopPlace netexStopPlace = new StopPlace();
         netexStopPlace.setId("NSR:StopPlace:1");
-        netexStopPlace.withTariffZones(new TariffZoneRefs_RelStructure().withTariffZoneRef(new TariffZoneRef().withRef(tariffZone.getNetexId()).withVersion("1")));
+        netexStopPlace.withTariffZones(new TariffZoneRefs_RelStructure().withTariffZoneRef_(new ObjectFactory().createTariffZoneRef(
+                new TariffZoneRef().withRef(tariffZone.getNetexId()).withVersion("1"))));
 
         SiteFrame siteFrame = new SiteFrame();
         siteFrame.withTariffZones(new TariffZonesInFrame_RelStructure().withTariffZone(new ObjectFactory().createTariffZone(alreadyAddedTariffZone)));

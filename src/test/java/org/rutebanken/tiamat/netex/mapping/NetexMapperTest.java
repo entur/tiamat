@@ -15,6 +15,7 @@
 
 package org.rutebanken.tiamat.netex.mapping;
 
+import jakarta.xml.bind.JAXBElement;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -23,8 +24,8 @@ import org.rutebanken.netex.model.AccessibilityLimitations_RelStructure;
 import org.rutebanken.netex.model.KeyListStructure;
 import org.rutebanken.netex.model.KeyValueStructure;
 import org.rutebanken.netex.model.MultilingualString;
+import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.SiteRefs_RelStructure;
-import org.rutebanken.netex.model.StopPlaceRefStructure;
 import org.rutebanken.netex.model.TopographicPlacesInFrame_RelStructure;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.AccessibilityAssessment;
@@ -101,7 +102,7 @@ public class NetexMapperTest extends TiamatIntegrationTest {
         org.rutebanken.netex.model.SiteFrame netexSiteFrame = netexMapper.mapToNetexModel(sourceSiteFrame);
 
         assertThat(netexSiteFrame).isNotNull();
-        assertThat(netexSiteFrame.getStopPlaces().getStopPlace().getFirst().getName().getValue()).isEqualTo(stopPlace.getName().getValue());
+        assertThat(netexSiteFrame.getStopPlaces().getStopPlace_().getFirst().getValue().getName().getValue()).isEqualTo(stopPlace.getName().getValue());
     }
 
     @Test
@@ -118,7 +119,7 @@ public class NetexMapperTest extends TiamatIntegrationTest {
         String stopPlaceId = "1337";
         stopPlace.setId("AVI:StopPlace:" + stopPlaceId);
 
-        stopPlacesInFrame_relStructure.getStopPlace().add(stopPlace);
+        stopPlacesInFrame_relStructure.getStopPlace_().add(new ObjectFactory().createStopPlace(stopPlace));
         netexSiteFrame.setStopPlaces(stopPlacesInFrame_relStructure);
 
         org.rutebanken.tiamat.model.SiteFrame actualSiteFrame = netexMapper.mapToTiamatModel(netexSiteFrame);
@@ -173,7 +174,7 @@ public class NetexMapperTest extends TiamatIntegrationTest {
                 .as("stop place ref list")
                 .isNotNull()
                 .isNotEmpty()
-                .extracting(StopPlaceRefStructure::getRef)
+                .extracting(sp -> sp.getValue().getRef())
                     .as("reference to stop place id")
                     .containsOnly(stopPlace.getNetexId());
 
@@ -320,6 +321,7 @@ public class NetexMapperTest extends TiamatIntegrationTest {
         org.rutebanken.netex.model.StopPlace actualStop = netexMapper.mapToNetexModel(stopPlace);
 
         org.rutebanken.netex.model.Quay actualQuay = actualStop.getQuays().getQuayRefOrQuay().stream()
+                .map(JAXBElement::getValue)
                 .filter(object -> object instanceof org.rutebanken.netex.model.Quay)
                 .map(object -> ((org.rutebanken.netex.model.Quay) object))
                 .findFirst()

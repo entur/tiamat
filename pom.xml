@@ -57,12 +57,12 @@
         <graphql-java-extended-scalars.version>20.2</graphql-java-extended-scalars.version>
         <hazelcast-hibernate53.version>5.2.0</hazelcast-hibernate53.version>
         <hazelcast.version>5.2.5</hazelcast.version>
-        <swagger-jersey2.version>2.2.41</swagger-jersey2.version>
-        <netex-java-model.version>2.0.14</netex-java-model.version>
+        <swagger-jersey2.version>2.2.42</swagger-jersey2.version>
+        <netex-java-model.version>2.0.15</netex-java-model.version>
         <entur.helpers.version>5.50.0</entur.helpers.version>
         <jts-core.version>1.20.0</jts-core.version>
-        <groovy-all.version>4.0.29</groovy-all.version>
-        <rest-assured.version>5.5.6</rest-assured.version>
+        <groovy-all.version>4.0.30</groovy-all.version>
+        <rest-assured.version>5.5.7</rest-assured.version>
         <spring-cloud-aws-secrets-manager.version>3.1.1</spring-cloud-aws-secrets-manager.version>
         <aws-secretsmanager.version>2.0.4</aws-secretsmanager.version>
         <argLine/>

@@ -39,6 +39,8 @@ import org.rutebanken.tiamat.model.LimitationStatusEnumeration;
 import org.rutebanken.tiamat.model.LocalService;
 import org.rutebanken.tiamat.model.MobilityFacilityEnumeration;
 import org.rutebanken.tiamat.model.NameTypeEnumeration;
+import org.rutebanken.tiamat.model.PassengerInformationEquipmentEnumeration;
+import org.rutebanken.tiamat.model.PassengerInformationFacilityEnumeration;
 import org.rutebanken.tiamat.model.PlaceEquipment;
 import org.rutebanken.tiamat.model.PostalAddress;
 import org.rutebanken.tiamat.model.PrivateCodeStructure;
@@ -47,6 +49,7 @@ import org.rutebanken.tiamat.model.SanitaryEquipment;
 import org.rutebanken.tiamat.model.SanitaryFacilityEnumeration;
 import org.rutebanken.tiamat.model.ShelterEquipment;
 import org.rutebanken.tiamat.model.SignContentEnumeration;
+import org.rutebanken.tiamat.model.SiteFacilitySet;
 import org.rutebanken.tiamat.model.SiteRefStructure;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
@@ -75,6 +78,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.comparesEqualTo;
@@ -202,7 +206,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         SanitaryEquipment toalett = new SanitaryEquipment();
         toalett.setNumberOfToilets(BigInteger.valueOf(2));
         toalett.setGender(GenderLimitationEnumeration.BOTH);
-        toalett.setSanitaryFacilityList(List.of(SanitaryFacilityEnumeration.WHEEL_CHAIR_ACCESS_TOILET));
+        toalett.setSanitaryFacilityList(List.of(SanitaryFacilityEnumeration.WHEELCHAIR_ACCESS_TOILET));
 
         installedEquipments.add(toalett);
 
@@ -2620,4 +2624,46 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         return equipments;
     }
 
+    @Test
+    public void retrieveStopPlaceWithFacilities() throws Exception {
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("StopPlace"));
+        stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(5, 60)));
+
+        Set<SiteFacilitySet> facilities = new HashSet<>();
+        SiteFacilitySet siteFacilitySet = new SiteFacilitySet();
+        siteFacilitySet.setMobilityFacilityList(List.of(MobilityFacilityEnumeration.TACTILE_GUIDING_STRIPS, MobilityFacilityEnumeration.TACTILE_PLATFORM_EDGES));
+        siteFacilitySet.setPassengerInformationEquipmentList(List.of(PassengerInformationEquipmentEnumeration.INFORMATION_DESK));
+        siteFacilitySet.setPassengerInformationFacilityList(List.of(PassengerInformationFacilityEnumeration.PASSENGER_INFORMATION_DISPLAY));
+        facilities.add(siteFacilitySet);
+        stopPlace.setFacilities(facilities);
+        stopPlaceRepository.save(stopPlace);
+
+        String graphQlJsonQuery = """
+                  {
+                  stopPlace:  stopPlace (query:"StopPlace", allVersions:true) {
+                            id
+                            name { value }
+                            facilities {
+                                mobilityFacilityList
+                                passengerInformationEquipmentList
+                                passengerInformationFacilityList
+                            }
+                        }
+                    }""";
+
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
+                .rootPath("data.stopPlace[0]")
+                .body("id", equalTo(stopPlace.getNetexId()))
+                .body("name.value", equalTo("StopPlace"))
+                .body("facilities", notNullValue())
+
+                .body("facilities[0].mobilityFacilityList", hasSize(2))
+                .body("facilities[0].mobilityFacilityList", hasItem(siteFacilitySet.getMobilityFacilityList().getFirst().value()))
+                .body("facilities[0].mobilityFacilityList", hasItem(siteFacilitySet.getMobilityFacilityList().getLast().value()))
+                .body("facilities[0].passengerInformationEquipmentList", hasSize(1))
+                .body("facilities[0].passengerInformationEquipmentList", hasItem(siteFacilitySet.getPassengerInformationEquipmentList().getFirst().value()))
+                .body("facilities[0].passengerInformationFacilityList", hasSize(1))
+                .body("facilities[0].passengerInformationFacilityList", hasItem(siteFacilitySet.getPassengerInformationFacilityList().getFirst().value()));
+        ;
+    }
 }

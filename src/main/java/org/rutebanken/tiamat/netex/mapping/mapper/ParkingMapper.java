@@ -15,8 +15,10 @@
 
 package org.rutebanken.tiamat.netex.mapping.mapper;
 
+import jakarta.xml.bind.JAXBElement;
 import ma.glasnost.orika.CustomMapper;
 import ma.glasnost.orika.MappingContext;
+import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.Parking;
 import org.rutebanken.netex.model.ParkingArea;
 import org.rutebanken.netex.model.ParkingAreas_RelStructure;
@@ -29,9 +31,9 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
     public void mapAtoB(Parking parking, org.rutebanken.tiamat.model.Parking parking2, MappingContext context) {
         super.mapAtoB(parking, parking2, context);
         if (parking.getParkingAreas() != null &&
-                parking.getParkingAreas().getParkingAreaRefOrParkingArea() != null &&
-                !parking.getParkingAreas().getParkingAreaRefOrParkingArea().isEmpty()) {
-            List<org.rutebanken.tiamat.model.ParkingArea> parkingAreas = mapperFacade.mapAsList(parking.getParkingAreas().getParkingAreaRefOrParkingArea(), org.rutebanken.tiamat.model.ParkingArea.class, context);
+                parking.getParkingAreas().getParkingAreaRefOrParkingArea_() != null &&
+                !parking.getParkingAreas().getParkingAreaRefOrParkingArea_().isEmpty()) {
+            List<org.rutebanken.tiamat.model.ParkingArea> parkingAreas = mapperFacade.mapAsList(parking.getParkingAreas().getParkingAreaRefOrParkingArea_(), org.rutebanken.tiamat.model.ParkingArea.class, context);
             if (!parkingAreas.isEmpty()) {
                 parking2.setParkingAreas(parkingAreas);
             }
@@ -45,9 +47,13 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
                 !tiamatParking.getParkingAreas().isEmpty()) {
 
             List<ParkingArea> parkingAreas = mapperFacade.mapAsList(tiamatParking.getParkingAreas(), ParkingArea.class, context);
+            final List<JAXBElement<ParkingArea>> wrappedParkingAreas = parkingAreas.stream()
+                    .map(pa -> new ObjectFactory().createParkingArea(pa))
+                    .toList();
+
             if (!parkingAreas.isEmpty()) {
                 ParkingAreas_RelStructure parkingAreas_relStructure = new ParkingAreas_RelStructure();
-                parkingAreas_relStructure.getParkingAreaRefOrParkingArea().addAll(parkingAreas);
+                parkingAreas_relStructure.getParkingAreaRefOrParkingArea_().addAll(wrappedParkingAreas);
 
                 netexParking.setParkingAreas(parkingAreas_relStructure);
             }
