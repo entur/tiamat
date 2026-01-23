@@ -111,7 +111,6 @@ public class VersionCreatorTest extends TiamatIntegrationTest {
         assertThat(actualStopPlaceId).isNull();
     }
 
-    @Ignore
     @Test
     public void deepCopiedObjectShouldHaveOriginalId() {
         StopPlace stopPlace = new StopPlace();
