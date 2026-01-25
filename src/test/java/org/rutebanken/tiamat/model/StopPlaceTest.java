@@ -15,7 +15,7 @@
 
 package org.rutebanken.tiamat.model;
 
-import org.junit.Ignore;
+import jakarta.persistence.EntityManager;
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -46,6 +47,9 @@ public class StopPlaceTest extends TiamatIntegrationTest {
 
     @Autowired
     private NetexIdHelper netexIdHelper;
+
+    @Autowired
+    private EntityManager entityManager;
 
     @Test
     public void persistStopPlaceWithTariffZone() {
@@ -230,26 +234,6 @@ public class StopPlaceTest extends TiamatIntegrationTest {
 //        assertThat(((SiteElement)actualStopPlace.getFacilities().getSiteFacilitySetRefOrSiteFacilitySet().get(0)).getNetexId()).isEqualTo(luggageLockerEquipment.getNetexId());
     }
 
-    @Ignore // level is transient
-    @Test
-    public void persistStopPlaceWithLevels() {
-        StopPlace stopPlace = new StopPlace();
-
-        Level level = new Level();
-        level.setName(new MultilingualStringEntity("Erde", "fr"));
-        level.setPublicCode("E");
-        level.setVersion(1L);
-        stopPlace.getLevels().add(level);
-
-        stopPlaceRepository.save(stopPlace);
-        StopPlace actualStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId());
-
-        assertThat(actualStopPlace.getLevels()).isNotEmpty();
-        assertThat(actualStopPlace.getLevels().getFirst().getName().getValue()).isEqualTo(level.getName().getValue());
-        assertThat(actualStopPlace.getLevels().getFirst().getPublicCode()).isEqualTo(level.getPublicCode());
-        assertThat(actualStopPlace.getLevels().getFirst().getVersion()).isEqualTo(level.getVersion());
-    }
-
     @Test
     public void persistStopPlaceWithUrl() {
         StopPlace stopPlace = new StopPlace();
@@ -282,7 +266,6 @@ public class StopPlaceTest extends TiamatIntegrationTest {
         assertThat(actualValidBetween.getToDate()).isEqualTo(validBetween.getToDate());
     }
 
-    @Ignore
     @Test
     public void persistStopPlaceWithParentReference() {
         StopPlace stopPlace = new StopPlace();
@@ -299,7 +282,6 @@ public class StopPlaceTest extends TiamatIntegrationTest {
         assertThat(actualStopPlace.getParentSiteRef().getRef()).isEqualTo(stopPlaceReference.getRef());
     }
 
-    @Ignore // other vehicle mode is transient
     @Test
     public void persistStopPlaceWithOtherVehicleMode() {
         StopPlace stopPlace = new StopPlace();
@@ -424,7 +406,6 @@ public class StopPlaceTest extends TiamatIntegrationTest {
     }
 
     @Test
-    @Ignore
     public void saveModifiedStopPlaceWithModifiedQuayAndNewQuay() throws Exception {
         Quay quay = new Quay();
         quay.setName(new EmbeddableMultilingualString("existing quay"));
@@ -440,13 +421,20 @@ public class StopPlaceTest extends TiamatIntegrationTest {
     }
 
     private void modifyStopPlaceAndAddQuay(String stopPlaceNetexId) {
+        // Clear the persistence context to get a fresh entity
+        entityManager.clear();
         StopPlace existingStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlaceNetexId);
 
-        existingStopPlace.getQuays().forEach(q -> {
+        List<Quay> quaysToModify = new ArrayList<>(existingStopPlace.getQuays());
+        existingStopPlace.getQuays().clear();
+        entityManager.flush();
+
+        quaysToModify.forEach(q -> {
             q.setDescription(new EmbeddableMultilingualString("a new description for quay"));
             q.setCentroid(geometryFactory.createPoint(new Coordinate(12.345, 56.789)));
         });
 
+        existingStopPlace.getQuays().addAll(quaysToModify);
         existingStopPlace.setStopPlaceType(StopTypeEnumeration.AIRPORT);
 
         Quay newQuay = new Quay(new EmbeddableMultilingualString("New quay"));
