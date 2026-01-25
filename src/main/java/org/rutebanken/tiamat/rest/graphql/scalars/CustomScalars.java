@@ -137,12 +137,28 @@ public class CustomScalars {
                 @Override
                 public Object parseLiteral(Value input, CoercedVariables variables, GraphQLContext graphQLContext, Locale locale) {
                     if (input instanceof ArrayValue arrayValue) {
-                        List<Value> coordinatePair = arrayValue.getValues();
-                        Coordinate[] coordinates = new Coordinate[coordinatePair.size()];
-                        var longitude = (FloatValue) coordinatePair.getFirst();
-                        var latitude = (FloatValue) coordinatePair.getLast();
-                        coordinates[0] = new Coordinate(longitude.getValue().doubleValue(), latitude.getValue().doubleValue());
-                        return coordinates;
+                        List<Value> values = arrayValue.getValues();
+
+                        // Check if this is a single coordinate pair [lon, lat] or array of coordinates [[lon, lat], ...]
+                        if (!values.isEmpty() && values.getFirst() instanceof FloatValue) {
+                            // Single coordinate pair: [10.3, 59.9]
+                            Coordinate[] coordinates = new Coordinate[1];
+                            var longitude = (FloatValue) values.getFirst();
+                            var latitude = (FloatValue) values.getLast();
+                            coordinates[0] = new Coordinate(longitude.getValue().doubleValue(), latitude.getValue().doubleValue());
+                            return coordinates;
+                        } else if (!values.isEmpty() && values.getFirst() instanceof ArrayValue) {
+                            // Array of coordinate pairs: [[10.3, 59.9], [10.3, 59.9], ...]
+                            Coordinate[] coordinates = new Coordinate[values.size()];
+                            for (int i = 0; i < values.size(); i++) {
+                                ArrayValue coordPair = (ArrayValue) values.get(i);
+                                List<Value> pair = coordPair.getValues();
+                                FloatValue longitude = (FloatValue) pair.get(0);
+                                FloatValue latitude = (FloatValue) pair.get(1);
+                                coordinates[i] = new Coordinate(longitude.getValue().doubleValue(), latitude.getValue().doubleValue());
+                            }
+                            return coordinates;
+                        }
                     }
                     if (input instanceof List list) {
                         final ArrayValue arrayValue = (ArrayValue) list.getFirst();

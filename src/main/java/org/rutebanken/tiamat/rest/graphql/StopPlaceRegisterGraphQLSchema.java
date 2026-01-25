@@ -74,6 +74,7 @@ import org.rutebanken.tiamat.rest.graphql.fetchers.StopPlaceFareZoneFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.StopPlaceTariffZoneFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.TagFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.UserPermissionsFetcher;
+import org.rutebanken.tiamat.rest.graphql.fetchers.PathLinkGeometryFetcher;
 import org.rutebanken.tiamat.rest.graphql.mappers.GeometryMapper;
 import org.rutebanken.tiamat.rest.graphql.mappers.PostalAddressMapper;
 import org.rutebanken.tiamat.rest.graphql.mappers.ValidBetweenMapper;
@@ -313,6 +314,9 @@ public class StopPlaceRegisterGraphQLSchema {
 
     @Autowired
     private PolygonFetcher polygonFetcher;
+
+    @Autowired
+    private PathLinkGeometryFetcher pathLinkGeometryFetcher;
 
     @Autowired
     private ValidBetweenMapper validBetweenMapper;
@@ -841,6 +845,9 @@ public class StopPlaceRegisterGraphQLSchema {
         registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_GROUP_OF_TARIFF_ZONES,ID,getNetexIdFetcher());
 
         //path link data fetchers
+        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_PATH_LINK,ID,getNetexIdFetcher());
+        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_PATH_LINK_END,ID,getNetexIdFetcher());
+        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_PATH_LINK,GEOMETRY,pathLinkGeometryFetcher);
         registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_TRANSFER_DURATION,DEFAULT_DURATION,pathLinkObjectTypeCreator.durationSecondsFetcher());
         registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_TRANSFER_DURATION,FREQUENT_TRAVELLER_DURATION,pathLinkObjectTypeCreator.durationSecondsFetcher());
         registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_TRANSFER_DURATION,OCCASIONAL_TRAVELLER_DURATION,pathLinkObjectTypeCreator.durationSecondsFetcher());

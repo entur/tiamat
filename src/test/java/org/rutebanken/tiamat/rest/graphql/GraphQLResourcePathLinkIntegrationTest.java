@@ -18,7 +18,6 @@ package org.rutebanken.tiamat.rest.graphql;
 import com.google.common.collect.Sets;
 import io.restassured.response.ValidatableResponse;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.CoordinateSequence;
@@ -53,7 +52,7 @@ import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.MUTATE_PATH_LINK;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.TRANSFER_DURATION;
 import static org.rutebanken.tiamat.versioning.VersionIncrementor.INITIAL_VERSION;
 
-@Ignore
+
 public class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResourceIntegrationTest {
 
     @Autowired
