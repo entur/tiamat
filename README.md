@@ -552,7 +552,3 @@ Commit the migration together with code changes that requires this schema change
 Various queries and scripts related to tiamat, has been collected here:
 https://github.com/entur/tiamat-scripts
 
-
-## CircleCI
-Tiamat is built using CircleCI. See the .circleci folder.
-
