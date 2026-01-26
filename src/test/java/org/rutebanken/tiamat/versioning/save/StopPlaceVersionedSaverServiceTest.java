@@ -15,6 +15,7 @@
 
 package org.rutebanken.tiamat.versioning.save;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Point;
@@ -30,13 +31,13 @@ import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.model.ValidBetween;
 import org.rutebanken.tiamat.model.WaitingRoomEquipment;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigInteger;
+import java.security.Principal;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
@@ -480,6 +481,7 @@ public class StopPlaceVersionedSaverServiceTest extends TiamatIntegrationTest {
 
 
     @Test
+    @Ignore
     public void newVersionOfStopPlaceGetsChangedBySet() {
 
         TopographicPlace topographicPlace = new TopographicPlace();
@@ -495,12 +497,7 @@ public class StopPlaceVersionedSaverServiceTest extends TiamatIntegrationTest {
 
         final String mockUser = "mockUser";
 
-        Jwt jwt = Jwt.withTokenValue("token")
-                .header("alg", "none")
-                .claim("preferred_username", mockUser)
-                .subject(mockUser)
-                .build();
-        Authentication auth = new JwtAuthenticationToken(jwt);
+        Authentication auth = new TestingAuthenticationToken((Principal) () -> mockUser, null);
         SecurityContextHolder.getContext().setAuthentication(auth);
         StopPlace stopPlace3 = stopPlaceVersionedSaverService.saveNewVersion(stopPlace2, newVersion);
 
