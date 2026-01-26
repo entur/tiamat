@@ -15,7 +15,6 @@
 
 package org.rutebanken.tiamat.exporter;
 
-import jakarta.xml.bind.JAXBException;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
@@ -27,18 +26,18 @@ import org.rutebanken.tiamat.model.job.ExportJob;
 import org.rutebanken.tiamat.model.job.JobStatus;
 import org.rutebanken.tiamat.repository.ExportJobRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.transform.TransformerException;
-import java.io.IOException;
 import java.util.Optional;
 
 import static junit.framework.TestCase.fail;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.rutebanken.tiamat.exporter.params.ExportParams.newExportParamsBuilder;
 
+/**
+ * Manual test for verifying async export to Google Cloud Storage.
+ * Requires actual GCS bucket configuration to run.
+ */
+@Ignore("Manual test - requires GCS bucket configuration")
 public class AsyncPublicationDeliveryExporterTest extends TiamatIntegrationTest {
 
     @Autowired
@@ -47,9 +46,8 @@ public class AsyncPublicationDeliveryExporterTest extends TiamatIntegrationTest 
     @Autowired
     private ExportJobRepository exportJobRepository;
 
-    @Ignore
     @Test
-    public void test() throws JAXBException, ParserConfigurationException, IOException, SAXException, TransformerException, XMLStreamException, InterruptedException {
+    public void testAsyncExportToGcs() throws InterruptedException {
 
         StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("stop place to be exported"));
 
@@ -66,7 +64,7 @@ public class AsyncPublicationDeliveryExporterTest extends TiamatIntegrationTest 
         long timeout = 10000;
         while (true) {
             Optional<ExportJob> actualExportJob = exportJobRepository.findById(exportJob.getId());
-            if (actualExportJob.get().getStatus().equals(exportJob.getStatus())) {
+            if (actualExportJob.isPresent() && actualExportJob.get().getStatus().equals(exportJob.getStatus())) {
                 if (System.currentTimeMillis() - start > timeout) {
                     fail("Waited more than " + timeout + " millis for job status to change");
                 }
@@ -74,11 +72,13 @@ public class AsyncPublicationDeliveryExporterTest extends TiamatIntegrationTest 
                 continue;
             }
 
-            if (actualExportJob.get().getStatus().equals(JobStatus.FAILED)) {
-                fail("Job status is failed");
-            } else if (actualExportJob.get().getStatus().equals(JobStatus.FINISHED)) {
-                System.out.println("Job finished");
-
+            if (actualExportJob.isPresent()) {
+                if (actualExportJob.get().getStatus().equals(JobStatus.FAILED)) {
+                    fail("Job status is failed: " + actualExportJob.get().getMessage());
+                } else if (actualExportJob.get().getStatus().equals(JobStatus.FINISHED)) {
+                    assertThat(actualExportJob.get().getFileName()).isNotEmpty();
+                    return; // Test passed
+                }
             }
         }
     }

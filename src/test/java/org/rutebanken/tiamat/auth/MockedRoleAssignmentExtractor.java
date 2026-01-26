@@ -21,17 +21,20 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
  * For assigned user roles in integration tests. Defaults to full access.
+ * By default, the mock resets after each call. Use {@link #setPersistent(boolean)}
+ * to keep the role assignment across multiple calls within the same test.
  */
 @Service
 @Primary
 public class MockedRoleAssignmentExtractor implements RoleAssignmentExtractor {
 
 	private List<RoleAssignment> nextReturnedRoleAssignmentList;
+	private boolean persistent = false;
 
 
 	@Override
@@ -42,7 +45,9 @@ public class MockedRoleAssignmentExtractor implements RoleAssignmentExtractor {
 			returnValue = RoleAssignmentListBuilder.builder().withAccessAllAreas().build();
 		}
 
-		nextReturnedRoleAssignmentList = null;
+		if (!persistent) {
+			nextReturnedRoleAssignmentList = null;
+		}
 		return returnValue;
 
 	}
@@ -57,6 +62,23 @@ public class MockedRoleAssignmentExtractor implements RoleAssignmentExtractor {
 	}
 
 	public void setNextReturnedRoleAssignment(RoleAssignment roleAssignment) {
-		this.nextReturnedRoleAssignmentList = Arrays.asList(roleAssignment);
+		this.nextReturnedRoleAssignmentList = Collections.singletonList(roleAssignment);
+	}
+
+	/**
+	 * When persistent is true, the role assignment will not reset after each call.
+	 * This is useful for tests where methods internally call getRoleAssignmentsForUser() multiple times.
+	 * Remember to call {@link #reset()} after the test to restore default behavior.
+	 */
+	public void setPersistent(boolean persistent) {
+		this.persistent = persistent;
+	}
+
+	/**
+	 * Resets the mock to its default state: clears role assignments and disables persistent mode.
+	 */
+	public void reset() {
+		this.nextReturnedRoleAssignmentList = null;
+		this.persistent = false;
 	}
 }

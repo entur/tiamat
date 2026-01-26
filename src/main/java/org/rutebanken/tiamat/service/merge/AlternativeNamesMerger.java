@@ -29,6 +29,10 @@ public class AlternativeNamesMerger {
             fromAlternativeNames.forEach(altName -> {
                 AlternativeName mergedAltName = new AlternativeName();
                 ObjectMerger.copyPropertiesNotNull(altName, mergedAltName);
+                // Reset identity fields to ensure a new entity is created
+                // This prevents unique constraint violation on (netex_id, version)
+                mergedAltName.setNetexId(null);
+                mergedAltName.setVersion(0L);
                 toAlternativeNames.add(mergedAltName);
             });
         }
