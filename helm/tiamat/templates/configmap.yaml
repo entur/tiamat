@@ -15,7 +15,7 @@ data:
     netex.import.enabled.types=MERGE
     changelog.publish.enabled=true
     netex.id.valid.prefix.list={TopographicPlace:{'KVE','WOF','OSM','ENT','LAN'},TariffZone:{'*'},FareZone:{'*'},GroupOfTariffZones:{'*'}}
-    netex.profile.version=1.14:NO-NeTEx-stops:1.5
+    netex.profile.version=1.15:NO-NeTEx-stops:1.5
 
     # GCS properties
     blobstore.gcs.bucket.name={{.Values.configMap.gcsBucketName}}
