@@ -19,9 +19,11 @@ import org.locationtech.jts.geom.Envelope;
 import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
 import org.rutebanken.tiamat.dtoassembling.dto.JbvCodeMappingDto;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
+import org.rutebanken.tiamat.model.PlaceEquipment;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
+import org.rutebanken.tiamat.model.Value;
 import org.rutebanken.tiamat.repository.search.ChangedStopPlaceSearch;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -83,4 +85,51 @@ public interface StopPlaceRepositoryCustom extends DataManagedObjectStructureRep
     Map<String, Set<String>> listStopPlaceIdsAndQuayIds(Instant validFrom, Instant validTo);
 
     int deleteStopPlaceTariffZoneRefs();
+
+    /**
+     * Batch load stop places by netexId and version combinations
+     * @param netexIdToVersions map of netexId to set of versions to load
+     * @return map of (netexId, version) to StopPlace
+     */
+    Map<String, Map<Long, StopPlace>> findByNetexIdsAndVersions(Map<String, Set<Long>> netexIdToVersions);
+
+    /**
+     * Efficiently finds latest version StopPlaces for the given netex IDs using a window function approach
+     * @param netexIds List of netex IDs to find latest versions for
+     * @return List of latest version StopPlace entities
+     */
+    List<StopPlace> findLatestVersionByNetexIds(List<String> netexIds);
+
+    /**
+     * Optimized method for report queries that eagerly fetches all required associations
+     * to avoid N+1 query problems when loading large datasets with deep nesting.
+     * This method uses JOIN FETCH to load all data in minimal queries.
+     *
+     * @param exportParams The search parameters
+     * @param includeChildren Whether to fetch children for parent stop places
+     * @param includeQuays Whether to fetch quays and their associations
+     * @return Page of StopPlaces with eagerly loaded associations
+     */
+    Page<StopPlace> findStopPlacesForReport(ExportParams exportParams, boolean includeChildren, boolean includeQuays);
+
+    /**
+     * Batch loading method for DataLoader - efficiently loads children by parent stop place IDs
+     * @param parentStopPlaceIds Set of parent stop place IDs to load children for
+     * @return Map of parent stop place ID to set of children
+     */
+    Map<Long, Set<StopPlace>> findChildrenByParentStopPlaceIds(Set<Long> parentStopPlaceIds);
+
+    /**
+     * Batch loading method for DataLoader - efficiently loads key-value pairs by stop place IDs
+     * @param stopPlaceIds Set of stop place IDs to load key-values for
+     * @return Map of stop place ID to map of key-value pairs
+     */
+    Map<Long, Map<String, Value>> findKeyValuesByIds(Set<Long> stopPlaceIds);
+
+    /**
+     * Batch loading method for DataLoader - efficiently loads place equipment with installed equipment
+     * @param placeEquipmentIds Set of place equipment IDs to load
+     * @return Map of place equipment ID to PlaceEquipment with eagerly loaded installed equipment
+     */
+    Map<Long, PlaceEquipment> findPlaceEquipmentsByIds(Set<Long> placeEquipmentIds);
 }
