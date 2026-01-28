@@ -58,7 +58,7 @@
         <hazelcast-hibernate53.version>5.2.0</hazelcast-hibernate53.version>
         <hazelcast.version>5.2.5</hazelcast.version>
         <swagger-jersey2.version>2.2.42</swagger-jersey2.version>
-        <netex-java-model.version>2.0.15</netex-java-model.version>
+        <netex-java-model.version>2.0.15.1</netex-java-model.version>
         <entur.helpers.version>5.50.0</entur.helpers.version>
         <jts-core.version>1.20.0</jts-core.version>
         <groovy-all.version>4.0.30</groovy-all.version>
