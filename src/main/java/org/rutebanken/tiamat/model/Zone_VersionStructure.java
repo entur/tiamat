@@ -67,6 +67,10 @@ public class Zone_VersionStructure
     }
 
     public void setPolygon(Polygon polygon) {
+        if (polygon == null) {
+            this.polygon = null;
+            return;
+        }
         if (this.polygon == null) {
             this.polygon = new PersistablePolygon();
         }
@@ -81,6 +85,10 @@ public class Zone_VersionStructure
     }
 
     public void setMultiSurface(MultiPolygon multiPolygon) {
+        if (multiPolygon == null) {
+            this.multiSurface = null;
+            return;
+        }
         if (this.multiSurface == null) {
             this.multiSurface = new PersistableMultiPolygon();
         }
