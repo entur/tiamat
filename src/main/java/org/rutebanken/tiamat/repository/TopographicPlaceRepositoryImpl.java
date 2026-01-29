@@ -167,4 +167,65 @@ public class TopographicPlaceRepositoryImpl implements TopographicPlaceRepositor
 				"JOIN topographic_place tp ON tp.id = tp1.id");
 		return sql.toString();
 	}
+
+	/**
+	 * Updates stop_place.topographic_place_id using a native query with PostGIS spatial intersection.
+	 * Prioritizes by admin hierarchy: MUNICIPALITY (1) > COUNTY (2) > COUNTRY (3).
+	 * Only updates currently valid stop places.
+	 */
+	@Override
+	public int updateStopPlaceTopographicPlaceRef() {
+		String sql = """
+				UPDATE stop_place sp
+				SET topographic_place_id = matched.tp_id
+				FROM (
+				    SELECT DISTINCT ON (sp_id)
+				        sp_id,
+				        tp_id
+				    FROM (
+				        SELECT
+				            sp.id AS sp_id,
+				            tp.id AS tp_id,
+				            CASE tp.topographic_place_type
+				                WHEN 'MUNICIPALITY' THEN 1
+				                WHEN 'COUNTY' THEN 2
+				                WHEN 'COUNTRY' THEN 3
+				                ELSE 4
+				            END AS priority
+				        FROM stop_place sp
+				        JOIN persistable_polygon pp
+				            ON ST_Contains(pp.polygon, sp.centroid)
+				        JOIN topographic_place tp
+				            ON tp.polygon_id = pp.id
+				            AND tp.version = (
+				                SELECT MAX(tpv.version)
+				                FROM topographic_place tpv
+				                WHERE tpv.netex_id = tp.netex_id
+				                AND (tpv.to_date IS NULL OR tpv.to_date > NOW())
+				                AND (tpv.from_date IS NULL OR tpv.from_date < NOW())
+				            )
+				        LEFT JOIN stop_place psp
+				            ON sp.parent_site_ref = psp.netex_id
+				            AND sp.parent_site_ref_version = CAST(psp.version AS text)
+				        WHERE
+				            sp.centroid IS NOT NULL
+				            AND (
+				                (
+				                    sp.from_date <= NOW()
+				                    AND (sp.to_date >= NOW() OR sp.to_date IS NULL)
+				                )
+				                OR (
+				                    psp.from_date <= NOW()
+				                    AND (psp.to_date >= NOW() OR psp.to_date IS NULL)
+				                )
+				            )
+				    ) ranked
+				    ORDER BY sp_id, priority ASC
+				) matched
+				WHERE sp.id = matched.sp_id
+				""";
+
+		final Query query = entityManager.createNativeQuery(sql);
+		return query.executeUpdate();
+	}
 }
