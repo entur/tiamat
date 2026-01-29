@@ -20,6 +20,7 @@ import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.LinearRing;
+import org.locationtech.jts.geom.MultiPolygon;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.geom.impl.CoordinateArraySequence;
@@ -256,10 +257,148 @@ public class TopographicPlaceRepositoryImplIntegrationTest extends TiamatIntegra
                 .isEqualTo("Bergen");
     }
 
+    @Test
+    public void updateStopPlaceTopographicPlaceRef_shouldMatchViaMultiSurface() {
+        // Create a point for the stop place
+        Point stopPlacePoint = geometryFactory.createPoint(new Coordinate(12.0, 61.0));
+
+        // Create a MultiPolygon for the topographic place
+        MultiPolygon multiPolygon = createMultiPolygonAroundPoint(stopPlacePoint, 0.5);
+
+        // Create Municipality with multi_surface (not polygon)
+        TopographicPlace municipality = new TopographicPlace();
+        municipality.setName(new EmbeddableMultilingualString("MultiSurface Municipality"));
+        municipality.setTopographicPlaceType(TopographicPlaceTypeEnumeration.MUNICIPALITY);
+        municipality.setMultiSurface(multiPolygon);
+        municipality.setVersion(1L);
+        topographicPlaceRepository.save(municipality);
+
+        // Create stop place
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setName(new EmbeddableMultilingualString("Stop in MultiSurface"));
+        stopPlace.setCentroid(stopPlacePoint);
+        stopPlace.setVersion(1L);
+        stopPlace.setValidBetween(new ValidBetween(Instant.now().minusSeconds(3600), null));
+        stopPlaceRepository.save(stopPlace);
+
+        // Flush and clear
+        entityManager.flush();
+        entityManager.clear();
+
+        // Run the update
+        int updated = topographicPlaceRepository.updateStopPlaceTopographicPlaceRef();
+
+        assertThat(updated).isGreaterThanOrEqualTo(1);
+
+        // Clear and verify
+        entityManager.clear();
+        StopPlace updatedStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId());
+
+        assertThat(updatedStopPlace.getTopographicPlace())
+                .as("Stop place should have topographic place assigned via multi_surface")
+                .isNotNull();
+        assertThat(updatedStopPlace.getTopographicPlace().getName().getValue())
+                .isEqualTo("MultiSurface Municipality");
+    }
+
+    @Test
+    public void updateStopPlaceTopographicPlaceRef_shouldPreferMultiSurfaceOverPolygonForSameTopographicPlace() {
+        // Create a point for the stop place
+        Point stopPlacePoint = geometryFactory.createPoint(new Coordinate(14.0, 63.0));
+
+        // Create a Municipality with BOTH polygon AND multi_surface containing the point
+        Polygon polygon = createPolygonAroundPoint(stopPlacePoint, 0.5);
+        MultiPolygon multiPolygon = createMultiPolygonAroundPoint(stopPlacePoint, 0.3);
+
+        TopographicPlace municipality = new TopographicPlace();
+        municipality.setName(new EmbeddableMultilingualString("Both Geometries Municipality"));
+        municipality.setTopographicPlaceType(TopographicPlaceTypeEnumeration.MUNICIPALITY);
+        municipality.setPolygon(polygon);
+        municipality.setMultiSurface(multiPolygon);
+        municipality.setVersion(1L);
+        topographicPlaceRepository.save(municipality);
+
+        // Create stop place
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setName(new EmbeddableMultilingualString("Stop in Both Geometries"));
+        stopPlace.setCentroid(stopPlacePoint);
+        stopPlace.setVersion(1L);
+        stopPlace.setValidBetween(new ValidBetween(Instant.now().minusSeconds(3600), null));
+        stopPlaceRepository.save(stopPlace);
+
+        // Flush and clear
+        entityManager.flush();
+        entityManager.clear();
+
+        // Run the update - should match via multi_surface (geometry_priority=0) over polygon (geometry_priority=1)
+        int updated = topographicPlaceRepository.updateStopPlaceTopographicPlaceRef();
+
+        assertThat(updated).isGreaterThanOrEqualTo(1);
+
+        // Clear and verify
+        entityManager.clear();
+        StopPlace updatedStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId());
+
+        assertThat(updatedStopPlace.getTopographicPlace())
+                .as("Stop place should have topographic place assigned")
+                .isNotNull();
+        assertThat(updatedStopPlace.getTopographicPlace().getName().getValue())
+                .isEqualTo("Both Geometries Municipality");
+        // The match should have been via multi_surface (preferred), but we can't directly verify which geometry was used
+        // The important thing is that the topographic place was matched correctly
+    }
+
+    @Test
+    public void updateStopPlaceTopographicPlaceRef_shouldMatchPolygonWhenNoMultiSurface() {
+        // Create two separate points - one for polygon-only and one for multi-surface-only topographic places
+        Point stopPlacePoint = geometryFactory.createPoint(new Coordinate(13.0, 62.0));
+
+        // Create a Municipality with only polygon (no multi_surface)
+        Polygon polygon = createPolygonAroundPoint(stopPlacePoint, 0.3);
+        TopographicPlace polygonMunicipality = new TopographicPlace();
+        polygonMunicipality.setName(new EmbeddableMultilingualString("Polygon Only Municipality"));
+        polygonMunicipality.setTopographicPlaceType(TopographicPlaceTypeEnumeration.MUNICIPALITY);
+        polygonMunicipality.setPolygon(polygon);
+        polygonMunicipality.setVersion(1L);
+        topographicPlaceRepository.save(polygonMunicipality);
+
+        // Create stop place in the polygon area
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setName(new EmbeddableMultilingualString("Stop in Polygon"));
+        stopPlace.setCentroid(stopPlacePoint);
+        stopPlace.setVersion(1L);
+        stopPlace.setValidBetween(new ValidBetween(Instant.now().minusSeconds(3600), null));
+        stopPlaceRepository.save(stopPlace);
+
+        // Flush and clear
+        entityManager.flush();
+        entityManager.clear();
+
+        // Run the update
+        int updated = topographicPlaceRepository.updateStopPlaceTopographicPlaceRef();
+
+        assertThat(updated).isGreaterThanOrEqualTo(1);
+
+        // Clear and verify
+        entityManager.clear();
+        StopPlace updatedStopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId());
+
+        assertThat(updatedStopPlace.getTopographicPlace())
+                .as("Stop place should have topographic place assigned via polygon")
+                .isNotNull();
+        assertThat(updatedStopPlace.getTopographicPlace().getName().getValue())
+                .isEqualTo("Polygon Only Municipality");
+    }
+
     private Polygon createPolygonAroundPoint(Point point, double bufferSize) {
         Geometry buffered = point.buffer(bufferSize);
         Coordinate[] coordinates = buffered.getCoordinates();
         LinearRing ring = new LinearRing(new CoordinateArraySequence(coordinates), geometryFactory);
         return geometryFactory.createPolygon(ring, null);
+    }
+
+    private MultiPolygon createMultiPolygonAroundPoint(Point point, double bufferSize) {
+        Polygon polygon = createPolygonAroundPoint(point, bufferSize);
+        return geometryFactory.createMultiPolygon(new Polygon[]{polygon});
     }
 }

@@ -170,7 +170,10 @@ public class TopographicPlaceRepositoryImpl implements TopographicPlaceRepositor
 
 	/**
 	 * Updates stop_place.topographic_place_id using a native query with PostGIS spatial intersection.
-	 * Prioritizes by admin hierarchy: MUNICIPALITY (1) > COUNTY (2) > COUNTRY (3).
+	 * Checks both persistable_multi_polygon and persistable_polygon for matches.
+	 * Prioritizes by:
+	 *   1. Admin hierarchy: MUNICIPALITY (1) > COUNTY (2) > COUNTRY (3)
+	 *   2. Geometry type: multi_surface (0) > polygon (1)
 	 * Only updates currently valid stop places.
 	 */
 	@Override
@@ -183,6 +186,7 @@ public class TopographicPlaceRepositoryImpl implements TopographicPlaceRepositor
 				        sp_id,
 				        tp_id
 				    FROM (
+				        -- Match via multi_surface (persistable_multi_polygon) - geometry_priority = 0
 				        SELECT
 				            sp.id AS sp_id,
 				            tp.id AS tp_id,
@@ -191,7 +195,49 @@ public class TopographicPlaceRepositoryImpl implements TopographicPlaceRepositor
 				                WHEN 'COUNTY' THEN 2
 				                WHEN 'COUNTRY' THEN 3
 				                ELSE 4
-				            END AS priority
+				            END AS admin_priority,
+				            0 AS geometry_priority
+				        FROM stop_place sp
+				        JOIN persistable_multi_polygon pmp
+				            ON ST_Contains(pmp.multi_polygon, sp.centroid)
+				        JOIN topographic_place tp
+				            ON tp.multi_surface_id = pmp.id
+				            AND tp.version = (
+				                SELECT MAX(tpv.version)
+				                FROM topographic_place tpv
+				                WHERE tpv.netex_id = tp.netex_id
+				                AND (tpv.to_date IS NULL OR tpv.to_date > NOW())
+				                AND (tpv.from_date IS NULL OR tpv.from_date < NOW())
+				            )
+				        LEFT JOIN stop_place psp
+				            ON sp.parent_site_ref = psp.netex_id
+				            AND sp.parent_site_ref_version = CAST(psp.version AS text)
+				        WHERE
+				            sp.centroid IS NOT NULL
+				            AND (
+				                (
+				                    sp.from_date <= NOW()
+				                    AND (sp.to_date >= NOW() OR sp.to_date IS NULL)
+				                )
+				                OR (
+				                    psp.from_date <= NOW()
+				                    AND (psp.to_date >= NOW() OR psp.to_date IS NULL)
+				                )
+				            )
+
+				        UNION ALL
+
+				        -- Match via polygon (persistable_polygon) - geometry_priority = 1
+				        SELECT
+				            sp.id AS sp_id,
+				            tp.id AS tp_id,
+				            CASE tp.topographic_place_type
+				                WHEN 'MUNICIPALITY' THEN 1
+				                WHEN 'COUNTY' THEN 2
+				                WHEN 'COUNTRY' THEN 3
+				                ELSE 4
+				            END AS admin_priority,
+				            1 AS geometry_priority
 				        FROM stop_place sp
 				        JOIN persistable_polygon pp
 				            ON ST_Contains(pp.polygon, sp.centroid)
@@ -220,7 +266,7 @@ public class TopographicPlaceRepositoryImpl implements TopographicPlaceRepositor
 				                )
 				            )
 				    ) ranked
-				    ORDER BY sp_id, priority ASC
+				    ORDER BY sp_id, admin_priority ASC, geometry_priority ASC
 				) matched
 				WHERE sp.id = matched.sp_id
 				""";
