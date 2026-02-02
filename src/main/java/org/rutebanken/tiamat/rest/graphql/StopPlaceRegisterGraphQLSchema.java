@@ -754,6 +754,7 @@ public class StopPlaceRegisterGraphQLSchema {
         dataFetcherGeometry(codeRegistryBuilder, OUTPUT_TYPE_TARIFF_ZONE);
         dataFetcherGeometry(codeRegistryBuilder, OUTPUT_TYPE_FARE_ZONE);
         dataFetcherGeometry(codeRegistryBuilder, OUTPUT_TYPE_BOARDING_POSITION);
+        dataFetcherGeometry(codeRegistryBuilder, OUTPUT_TYPE_TOPOGRAPHIC_PLACE);
 
 
         dataFetcherPlaceEquipments(codeRegistryBuilder, OUTPUT_TYPE_STOPPLACE);
@@ -1000,10 +1001,13 @@ public class StopPlaceRegisterGraphQLSchema {
     private void dataFetcherGeometry(GraphQLCodeRegistry.Builder codeRegistryBuilder, String parentType) {
         registerDataFetcher(codeRegistryBuilder, parentType, GEOMETRY, env -> {
             if (env.getSource() instanceof Zone_VersionStructure source) {
-                if (source.getCentroid()!=null) {
+                if (source.getCentroid() != null) {
                     return source.getCentroid();
                 }
-                return source.getPolygon();
+                if (source.getPolygon() != null) {
+                    return source.getPolygon();
+                }
+                return source.getMultiSurface();
             } else if (env.getSource() instanceof Link link) {
                 return link.getLineString();
             }
