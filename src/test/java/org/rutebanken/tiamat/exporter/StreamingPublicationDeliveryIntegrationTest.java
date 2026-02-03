@@ -490,7 +490,7 @@ public class StreamingPublicationDeliveryIntegrationTest extends TiamatIntegrati
         stopPlaceRepository.save(stopPlace);
         stopPlaceRepository.flush();
 
-        // Export with topographic places
+        // Export with topographic places - use exportMultiSurface=true to export multiSurface
         ExportParams exportParams = ExportParams.newExportParamsBuilder()
                 .setStopPlaceSearch(
                         StopPlaceSearch.newStopPlaceSearchBuilder()
@@ -498,13 +498,12 @@ public class StreamingPublicationDeliveryIntegrationTest extends TiamatIntegrati
                                 .build())
                 .setTopographicPlaceExportMode(ExportParams.ExportMode.ALL)
                 .setTariffZoneExportMode(ExportParams.ExportMode.NONE)
+                .setExportMultiSurface(true)
                 .build();
 
         streamingPublicationDelivery.stream(exportParams, byteArrayOutputStream);
 
         String xml = byteArrayOutputStream.toString();
-        System.out.println("Exported NeTEx with multiSurface only:");
-        System.out.println(xml);
 
         // Validate against NeTEx schema - multiSurface alone should be valid
         validate(xml);
@@ -639,24 +638,21 @@ public class StreamingPublicationDeliveryIntegrationTest extends TiamatIntegrati
     }
 
     /**
-     * IMPORTANT: This test documents that polygon and multiSurface are MUTUALLY EXCLUSIVE
-     * in the NeTEx XSD schema. Having both causes schema validation to fail.
+     * Test that when a TopographicPlace has BOTH polygon AND multiSurface,
+     * the export correctly handles this based on exportMultiSurface flag.
      *
-     * NeTEx XSD defines Zone_VersionStructure geometry as a choice:
+     * NeTEx XSD defines Zone_VersionStructure geometry as a choice (mutually exclusive):
      *   <xs:choice minOccurs="0">
      *     <xs:element ref="gml:Polygon"/>
      *     <xs:element ref="gml:MultiSurface"/>
      *   </xs:choice>
      *
-     * This means:
-     * - Zones can have polygon OR multiSurface, but NOT both
-     * - Introducing multiSurface IS a breaking change for clients that only parse polygon
-     * - When migrating from polygon to multiSurface, clients MUST be updated
+     * The exportMultiSurface parameter controls which is exported:
+     * - exportMultiSurface=false (default): exports polygon, clears multiSurface
+     * - exportMultiSurface=true: exports multiSurface, clears polygon
      */
     @Test
-    public void exportTopographicPlaceWithBothPolygonAndMultiSurfaceFailsSchemaValidation() throws Exception {
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-
+    public void exportTopographicPlaceWithBothPolygonAndMultiSurfaceUsesExportFlag() throws Exception {
         // Create a single polygon
         Coordinate[] polygonCoordinates = new Coordinate[] {
                 new Coordinate(9.0, 59.0),
@@ -682,17 +678,148 @@ public class StreamingPublicationDeliveryIntegrationTest extends TiamatIntegrati
         MultiPolygon multiSurface = geometryFactory.createMultiPolygon(new Polygon[] { multiPolygon1 });
 
         // Create TopographicPlace with BOTH polygon AND multiSurface
-        TopographicPlace topographicPlace = new TopographicPlace(new EmbeddableMultilingualString("Place with both - invalid"));
+        TopographicPlace topographicPlace = new TopographicPlace(new EmbeddableMultilingualString("Place with both geometries"));
         topographicPlace.setTopographicPlaceType(TopographicPlaceTypeEnumeration.MUNICIPALITY);
         topographicPlace.setPolygon(polygon);
         topographicPlace.setMultiSurface(multiSurface);
         topographicPlace = topographicPlaceVersionedSaverService.saveNewVersion(topographicPlace);
+        final String topographicPlaceNetexId = topographicPlace.getNetexId();
 
         StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("Stop"));
         stopPlace.setTopographicPlace(topographicPlace);
         stopPlaceRepository.save(stopPlace);
         stopPlaceRepository.flush();
 
+        // Test 1: exportMultiSurface=false (default) - should export polygon
+        ByteArrayOutputStream outputFalse = new ByteArrayOutputStream();
+        ExportParams exportParamsFalse = ExportParams.newExportParamsBuilder()
+                .setStopPlaceSearch(
+                        StopPlaceSearch.newStopPlaceSearchBuilder()
+                                .setVersionValidity(ExportParams.VersionValidity.CURRENT_FUTURE)
+                                .build())
+                .setTopographicPlaceExportMode(ExportParams.ExportMode.ALL)
+                .setTariffZoneExportMode(ExportParams.ExportMode.NONE)
+                .setExportMultiSurface(false)
+                .build();
+
+        streamingPublicationDelivery.stream(exportParamsFalse, outputFalse);
+        String xmlFalse = outputFalse.toString();
+        validate(xmlFalse);
+
+        PublicationDeliveryStructure pdFalse = publicationDeliveryUnmarshaller.unmarshal(new ByteArrayInputStream(xmlFalse.getBytes()));
+        org.rutebanken.netex.model.SiteFrame siteFrameFalse = publicationDeliveryHelper.findSiteFrame(pdFalse);
+        org.rutebanken.netex.model.TopographicPlace exportedPlaceFalse = siteFrameFalse.getTopographicPlaces()
+                .getTopographicPlace().stream()
+                .filter(tp -> tp.getId().equals(topographicPlaceNetexId))
+                .findFirst()
+                .orElseThrow();
+
+        assertThat(exportedPlaceFalse.getPolygon())
+                .as("With exportMultiSurface=false, polygon should be exported")
+                .isNotNull();
+        assertThat(exportedPlaceFalse.getMultiSurface())
+                .as("With exportMultiSurface=false, multiSurface should be null")
+                .isNull();
+
+        // Test 2: exportMultiSurface=true - should export multiSurface
+        ByteArrayOutputStream outputTrue = new ByteArrayOutputStream();
+        ExportParams exportParamsTrue = ExportParams.newExportParamsBuilder()
+                .setStopPlaceSearch(
+                        StopPlaceSearch.newStopPlaceSearchBuilder()
+                                .setVersionValidity(ExportParams.VersionValidity.CURRENT_FUTURE)
+                                .build())
+                .setTopographicPlaceExportMode(ExportParams.ExportMode.ALL)
+                .setTariffZoneExportMode(ExportParams.ExportMode.NONE)
+                .setExportMultiSurface(true)
+                .build();
+
+        streamingPublicationDelivery.stream(exportParamsTrue, outputTrue);
+        String xmlTrue = outputTrue.toString();
+        validate(xmlTrue);
+
+        PublicationDeliveryStructure pdTrue = publicationDeliveryUnmarshaller.unmarshal(new ByteArrayInputStream(xmlTrue.getBytes()));
+        org.rutebanken.netex.model.SiteFrame siteFrameTrue = publicationDeliveryHelper.findSiteFrame(pdTrue);
+        org.rutebanken.netex.model.TopographicPlace exportedPlaceTrue = siteFrameTrue.getTopographicPlaces()
+                .getTopographicPlace().stream()
+                .filter(tp -> tp.getId().equals(topographicPlaceNetexId))
+                .findFirst()
+                .orElseThrow();
+
+        assertThat(exportedPlaceTrue.getPolygon())
+                .as("With exportMultiSurface=true, polygon should be null")
+                .isNull();
+        assertThat(exportedPlaceTrue.getMultiSurface())
+                .as("With exportMultiSurface=true, multiSurface should be exported")
+                .isNotNull();
+    }
+
+    /**
+     * Test the exportMultiSurface parameter with default value (false).
+     * When exportMultiSurface=false:
+     * - Places with polygon should export polygon
+     * - Places with multiSurface should have multiSurface cleared (backward compatible)
+     */
+    @Test
+    public void exportMultiSurfaceParameterDefaultFalse() throws Exception {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
+        // Create TopographicPlace with polygon only
+        Coordinate[] polygonCoordinates = new Coordinate[] {
+                new Coordinate(9.0, 59.0),
+                new Coordinate(10.0, 59.0),
+                new Coordinate(10.0, 60.0),
+                new Coordinate(9.0, 60.0),
+                new Coordinate(9.0, 59.0)
+        };
+        LinearRing polygonRing = new LinearRing(new CoordinateArraySequence(polygonCoordinates), geometryFactory);
+        Polygon polygon = geometryFactory.createPolygon(polygonRing, null);
+
+        TopographicPlace polygonPlace = new TopographicPlace(new EmbeddableMultilingualString("Place with polygon"));
+        polygonPlace.setTopographicPlaceType(TopographicPlaceTypeEnumeration.MUNICIPALITY);
+        polygonPlace.setPolygon(polygon);
+        polygonPlace = topographicPlaceVersionedSaverService.saveNewVersion(polygonPlace);
+        final String polygonPlaceNetexId = polygonPlace.getNetexId();
+
+        // Create TopographicPlace with multiSurface only
+        Coordinate[] multiPolygon1Coordinates = new Coordinate[] {
+                new Coordinate(11.0, 61.0),
+                new Coordinate(12.0, 61.0),
+                new Coordinate(12.0, 62.0),
+                new Coordinate(11.0, 62.0),
+                new Coordinate(11.0, 61.0)
+        };
+        LinearRing multiPolygon1Ring = new LinearRing(new CoordinateArraySequence(multiPolygon1Coordinates), geometryFactory);
+        Polygon multiPolygon1 = geometryFactory.createPolygon(multiPolygon1Ring, null);
+
+        Coordinate[] multiPolygon2Coordinates = new Coordinate[] {
+                new Coordinate(13.0, 63.0),
+                new Coordinate(14.0, 63.0),
+                new Coordinate(14.0, 64.0),
+                new Coordinate(13.0, 64.0),
+                new Coordinate(13.0, 63.0)
+        };
+        LinearRing multiPolygon2Ring = new LinearRing(new CoordinateArraySequence(multiPolygon2Coordinates), geometryFactory);
+        Polygon multiPolygon2 = geometryFactory.createPolygon(multiPolygon2Ring, null);
+
+        MultiPolygon multiSurface = geometryFactory.createMultiPolygon(new Polygon[] { multiPolygon1, multiPolygon2 });
+
+        TopographicPlace multiSurfacePlace = new TopographicPlace(new EmbeddableMultilingualString("Place with multiSurface"));
+        multiSurfacePlace.setTopographicPlaceType(TopographicPlaceTypeEnumeration.COUNTY);
+        multiSurfacePlace.setMultiSurface(multiSurface);
+        multiSurfacePlace = topographicPlaceVersionedSaverService.saveNewVersion(multiSurfacePlace);
+        final String multiSurfacePlaceNetexId = multiSurfacePlace.getNetexId();
+
+        // Create stop places referencing these topographic places
+        StopPlace stopPlace1 = new StopPlace(new EmbeddableMultilingualString("Stop in polygon place"));
+        stopPlace1.setTopographicPlace(polygonPlace);
+        stopPlaceRepository.save(stopPlace1);
+
+        StopPlace stopPlace2 = new StopPlace(new EmbeddableMultilingualString("Stop in multiSurface place"));
+        stopPlace2.setTopographicPlace(multiSurfacePlace);
+        stopPlaceRepository.save(stopPlace2);
+        stopPlaceRepository.flush();
+
+        // Export with exportMultiSurface=false (default)
         ExportParams exportParams = ExportParams.newExportParamsBuilder()
                 .setStopPlaceSearch(
                         StopPlaceSearch.newStopPlaceSearchBuilder()
@@ -700,16 +827,183 @@ public class StreamingPublicationDeliveryIntegrationTest extends TiamatIntegrati
                                 .build())
                 .setTopographicPlaceExportMode(ExportParams.ExportMode.ALL)
                 .setTariffZoneExportMode(ExportParams.ExportMode.NONE)
+                .setExportMultiSurface(false)
                 .build();
 
-        // This should throw an exception because having both polygon and multiSurface
-        // violates the NeTEx XSD schema (they are mutually exclusive)
-        org.assertj.core.api.Assertions.assertThatThrownBy(() ->
-                streamingPublicationDelivery.stream(exportParams, byteArrayOutputStream))
-                .as("Export with both polygon AND multiSurface should fail schema validation")
-                .isInstanceOf(jakarta.xml.bind.MarshalException.class)
-                .cause()
-                .hasMessageContaining("MultiSurface");
+        streamingPublicationDelivery.stream(exportParams, byteArrayOutputStream);
+
+        String xml = byteArrayOutputStream.toString();
+
+        // Parse and verify
+        PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryUnmarshaller.unmarshal(
+                new ByteArrayInputStream(xml.getBytes()));
+
+        org.rutebanken.netex.model.SiteFrame siteFrame = publicationDeliveryHelper.findSiteFrame(publicationDeliveryStructure);
+
+        assertThat(siteFrame.getTopographicPlaces().getTopographicPlace())
+                .as("Should have two topographic places")
+                .hasSize(2);
+
+        // Find the polygon place
+        org.rutebanken.netex.model.TopographicPlace exportedPolygonPlace = siteFrame.getTopographicPlaces()
+                .getTopographicPlace().stream()
+                .filter(tp -> tp.getId().equals(polygonPlaceNetexId))
+                .findFirst()
+                .orElseThrow();
+
+        assertThat(exportedPolygonPlace.getPolygon())
+                .as("Polygon place should have polygon exported")
+                .isNotNull();
+        assertThat(exportedPolygonPlace.getMultiSurface())
+                .as("Polygon place should NOT have multiSurface")
+                .isNull();
+
+        // Find the multiSurface place - with exportMultiSurface=false, multiSurface should be cleared
+        org.rutebanken.netex.model.TopographicPlace exportedMultiSurfacePlace = siteFrame.getTopographicPlaces()
+                .getTopographicPlace().stream()
+                .filter(tp -> tp.getId().equals(multiSurfacePlaceNetexId))
+                .findFirst()
+                .orElseThrow();
+
+        assertThat(exportedMultiSurfacePlace.getMultiSurface())
+                .as("MultiSurface place should NOT have multiSurface when exportMultiSurface=false")
+                .isNull();
+        // Polygon was never set, so it should also be null
+        assertThat(exportedMultiSurfacePlace.getPolygon())
+                .as("MultiSurface place has no polygon data, so polygon should be null")
+                .isNull();
+    }
+
+    /**
+     * Test the exportMultiSurface parameter with value true.
+     * When exportMultiSurface=true:
+     * - Places with multiSurface should export multiSurface (polygon cleared)
+     * - Places with only polygon should still export polygon
+     */
+    @Test
+    public void exportMultiSurfaceParameterTrue() throws Exception {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
+        // Create TopographicPlace with polygon only
+        Coordinate[] polygonCoordinates = new Coordinate[] {
+                new Coordinate(9.0, 59.0),
+                new Coordinate(10.0, 59.0),
+                new Coordinate(10.0, 60.0),
+                new Coordinate(9.0, 60.0),
+                new Coordinate(9.0, 59.0)
+        };
+        LinearRing polygonRing = new LinearRing(new CoordinateArraySequence(polygonCoordinates), geometryFactory);
+        Polygon polygon = geometryFactory.createPolygon(polygonRing, null);
+
+        TopographicPlace polygonPlace = new TopographicPlace(new EmbeddableMultilingualString("Place with polygon for multiSurface test"));
+        polygonPlace.setTopographicPlaceType(TopographicPlaceTypeEnumeration.MUNICIPALITY);
+        polygonPlace.setPolygon(polygon);
+        polygonPlace = topographicPlaceVersionedSaverService.saveNewVersion(polygonPlace);
+        final String polygonPlaceNetexId = polygonPlace.getNetexId();
+
+        // Create TopographicPlace with multiSurface only
+        Coordinate[] multiPolygon1Coordinates = new Coordinate[] {
+                new Coordinate(11.0, 61.0),
+                new Coordinate(12.0, 61.0),
+                new Coordinate(12.0, 62.0),
+                new Coordinate(11.0, 62.0),
+                new Coordinate(11.0, 61.0)
+        };
+        LinearRing multiPolygon1Ring = new LinearRing(new CoordinateArraySequence(multiPolygon1Coordinates), geometryFactory);
+        Polygon multiPolygon1 = geometryFactory.createPolygon(multiPolygon1Ring, null);
+
+        Coordinate[] multiPolygon2Coordinates = new Coordinate[] {
+                new Coordinate(13.0, 63.0),
+                new Coordinate(14.0, 63.0),
+                new Coordinate(14.0, 64.0),
+                new Coordinate(13.0, 64.0),
+                new Coordinate(13.0, 63.0)
+        };
+        LinearRing multiPolygon2Ring = new LinearRing(new CoordinateArraySequence(multiPolygon2Coordinates), geometryFactory);
+        Polygon multiPolygon2 = geometryFactory.createPolygon(multiPolygon2Ring, null);
+
+        MultiPolygon multiSurface = geometryFactory.createMultiPolygon(new Polygon[] { multiPolygon1, multiPolygon2 });
+
+        TopographicPlace multiSurfacePlace = new TopographicPlace(new EmbeddableMultilingualString("Place with multiSurface for export test"));
+        multiSurfacePlace.setTopographicPlaceType(TopographicPlaceTypeEnumeration.COUNTY);
+        multiSurfacePlace.setMultiSurface(multiSurface);
+        multiSurfacePlace = topographicPlaceVersionedSaverService.saveNewVersion(multiSurfacePlace);
+        final String multiSurfacePlaceNetexId = multiSurfacePlace.getNetexId();
+
+        // Create stop places referencing these topographic places
+        StopPlace stopPlace1 = new StopPlace(new EmbeddableMultilingualString("Stop in polygon place 2"));
+        stopPlace1.setTopographicPlace(polygonPlace);
+        stopPlaceRepository.save(stopPlace1);
+
+        StopPlace stopPlace2 = new StopPlace(new EmbeddableMultilingualString("Stop in multiSurface place 2"));
+        stopPlace2.setTopographicPlace(multiSurfacePlace);
+        stopPlaceRepository.save(stopPlace2);
+        stopPlaceRepository.flush();
+
+        // Export with exportMultiSurface=true
+        ExportParams exportParams = ExportParams.newExportParamsBuilder()
+                .setStopPlaceSearch(
+                        StopPlaceSearch.newStopPlaceSearchBuilder()
+                                .setVersionValidity(ExportParams.VersionValidity.CURRENT_FUTURE)
+                                .build())
+                .setTopographicPlaceExportMode(ExportParams.ExportMode.ALL)
+                .setTariffZoneExportMode(ExportParams.ExportMode.NONE)
+                .setExportMultiSurface(true)
+                .build();
+
+        streamingPublicationDelivery.stream(exportParams, byteArrayOutputStream);
+
+        String xml = byteArrayOutputStream.toString();
+
+        // Validate against NeTEx schema
+        validate(xml);
+
+        // Parse and verify
+        PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryUnmarshaller.unmarshal(
+                new ByteArrayInputStream(xml.getBytes()));
+
+        org.rutebanken.netex.model.SiteFrame siteFrame = publicationDeliveryHelper.findSiteFrame(publicationDeliveryStructure);
+
+        assertThat(siteFrame.getTopographicPlaces().getTopographicPlace())
+                .as("Should have two topographic places")
+                .hasSize(2);
+
+        // Find the polygon-only place - should still have polygon when exportMultiSurface=true
+        // because it doesn't have multiSurface data
+        org.rutebanken.netex.model.TopographicPlace exportedPolygonPlace = siteFrame.getTopographicPlaces()
+                .getTopographicPlace().stream()
+                .filter(tp -> tp.getId().equals(polygonPlaceNetexId))
+                .findFirst()
+                .orElseThrow();
+
+        assertThat(exportedPolygonPlace.getPolygon())
+                .as("Polygon-only place should still have polygon when exportMultiSurface=true")
+                .isNotNull();
+        assertThat(exportedPolygonPlace.getMultiSurface())
+                .as("Polygon-only place should NOT have multiSurface")
+                .isNull();
+
+        // Find the multiSurface place - should have multiSurface, no polygon
+        org.rutebanken.netex.model.TopographicPlace exportedMultiSurfacePlace = siteFrame.getTopographicPlaces()
+                .getTopographicPlace().stream()
+                .filter(tp -> tp.getId().equals(multiSurfacePlaceNetexId))
+                .findFirst()
+                .orElseThrow();
+
+        assertThat(exportedMultiSurfacePlace.getMultiSurface())
+                .as("MultiSurface place should have multiSurface when exportMultiSurface=true")
+                .isNotNull();
+        assertThat(exportedMultiSurfacePlace.getMultiSurface().getSurfaceMember())
+                .as("MultiSurface should have 2 surface members")
+                .hasSize(2);
+        assertThat(exportedMultiSurfacePlace.getPolygon())
+                .as("MultiSurface place should NOT have polygon when exportMultiSurface=true")
+                .isNull();
+
+        // Verify the XML contains MultiSurface element
+        assertThat(xml)
+                .as("XML should contain MultiSurface element")
+                .containsPattern("(gml:|ns2:)MultiSurface");
     }
 
 }
