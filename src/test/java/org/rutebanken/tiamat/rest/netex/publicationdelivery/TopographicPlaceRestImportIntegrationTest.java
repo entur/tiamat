@@ -39,7 +39,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class TopographicPlaceImportTest extends TiamatIntegrationTest {
+public class TopographicPlaceRestImportIntegrationTest extends TiamatIntegrationTest {
 
     private static final net.opengis.gml._3.ObjectFactory openGisObjectFactory = new ObjectFactory();
 

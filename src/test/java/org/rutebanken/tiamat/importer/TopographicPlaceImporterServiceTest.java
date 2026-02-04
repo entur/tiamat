@@ -38,7 +38,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Transactional
-public class TopographicPlaceImporterTest extends TiamatIntegrationTest {
+public class TopographicPlaceImporterServiceTest extends TiamatIntegrationTest {
 
     @Autowired
     private TopographicPlaceImporter topographicPlaceImporter;

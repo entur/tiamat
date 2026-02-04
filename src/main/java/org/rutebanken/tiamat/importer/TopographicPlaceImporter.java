@@ -91,7 +91,11 @@ public class TopographicPlaceImporter {
 
         List<TopographicPlace> result = new ArrayList<>(parentTopographicPlaces);
         result.addAll(withParentTopographicPlace);
-        return result.stream().map(topographicPlace -> netexMapper.mapToNetexModel(topographicPlace)).collect(toList());
+        // Return multiSurface if the topographic place has it stored, otherwise return polygon
+        return result.stream().map(topographicPlace -> {
+            boolean hasMultiSurface = topographicPlace.getMultiSurface() != null;
+            return netexMapper.mapToNetexModel(topographicPlace, hasMultiSurface);
+        }).collect(toList());
 
     }
 
