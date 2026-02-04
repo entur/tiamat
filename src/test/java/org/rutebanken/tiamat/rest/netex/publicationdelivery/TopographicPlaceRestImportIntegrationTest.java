@@ -176,7 +176,7 @@ public class TopographicPlaceRestImportIntegrationTest extends TiamatIntegration
                 .isNotNull()
                 .hasSize(1);
 
-        List<Double> actualInteriorValues = polygonConverter.extractValues(actualTopographicPlace.getPolygon().getInterior().get(0));
+        List<Double> actualInteriorValues = polygonConverter.extractValues(actualTopographicPlace.getPolygon().getInterior().getFirst());
         assertThat(actualInteriorValues).as("interior ring values").isEqualTo(interiorValues);
 
         assertThat(actualTopographicPlace.getId()).isEqualTo(topographicPlace.getId());

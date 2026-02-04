@@ -51,8 +51,6 @@ public class ExportParams {
 
     public static final ExportMode DEFAULT_GROUP_OF_TARIFF_ZONES_EXPORT_MODE = ExportMode.RELEVANT;
 
-    public static final ExportMode DEFAULT_SERVICE_FRAME_EXPORT_MODE = ExportMode.NONE;
-
     @QueryParam(value = "topographicPlaceExportMode")
     @DefaultValue(value = "RELEVANT")
     @Parameter(description = "Controls exported topographic places. If set to relevant, only topographic places relevant to exported stop places are exported.")

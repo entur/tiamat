@@ -45,7 +45,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 @Component
 public class MultiSurfaceConverter extends BidirectionalConverter<MultiPolygon, MultiSurfaceType> {
@@ -77,8 +76,7 @@ public class MultiSurfaceConverter extends BidirectionalConverter<MultiPolygon, 
 
         for (SurfacePropertyType surfaceProperty : multiSurfaceType.getSurfaceMember()) {
             JAXBElement<? extends AbstractSurfaceType> abstractSurface = surfaceProperty.getAbstractSurface();
-            if (abstractSurface != null && abstractSurface.getValue() instanceof PolygonType) {
-                PolygonType polygonType = (PolygonType) abstractSurface.getValue();
+            if (abstractSurface != null && abstractSurface.getValue() instanceof PolygonType polygonType) {
                 Polygon polygon = convertPolygonType(polygonType);
                 if (polygon != null) {
                     polygons.add(polygon);

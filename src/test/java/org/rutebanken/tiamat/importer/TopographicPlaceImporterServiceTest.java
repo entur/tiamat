@@ -65,7 +65,7 @@ public class TopographicPlaceImporterServiceTest extends TiamatIntegrationTest {
         poiNew.setPolygon(geometryFactory.createPolygon(linearRingNew, null));
 
         AtomicInteger counter = new AtomicInteger();
-        List<org.rutebanken.netex.model.TopographicPlace> imported = topographicPlaceImporter.importTopographicPlaces(Arrays.asList(poiNew), counter);
+        List<org.rutebanken.netex.model.TopographicPlace> imported = topographicPlaceImporter.importTopographicPlaces(List.of(poiNew), counter);
 
         assertThat(imported).isNotNull().hasSize(1);
 

@@ -77,9 +77,6 @@ public class StreamingPublicationDeliveryIntegrationTest extends TiamatIntegrati
     private StreamingPublicationDelivery streamingPublicationDelivery;
 
     @Autowired
-    private TariffZoneSaverService tariffZoneSaverService;
-
-    @Autowired
     private GroupOfStopPlacesSaverService groupOfStopPlacesSaverService;
 
     @Autowired
@@ -97,7 +94,7 @@ public class StreamingPublicationDeliveryIntegrationTest extends TiamatIntegrati
     @Autowired
     private PublicationDeliveryTestHelper publicationDeliveryTestHelper;
 
-    private NetexXmlReferenceValidator netexXmlReferenceValidator = new NetexXmlReferenceValidator(true);
+    private final NetexXmlReferenceValidator netexXmlReferenceValidator = new NetexXmlReferenceValidator(true);
 
 
     /**
