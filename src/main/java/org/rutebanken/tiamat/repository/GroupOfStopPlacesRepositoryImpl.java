@@ -18,6 +18,7 @@ package org.rutebanken.tiamat.repository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
+import jakarta.persistence.TypedQuery;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
@@ -35,6 +36,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -134,6 +136,62 @@ public class GroupOfStopPlacesRepositoryImpl implements GroupOfStopPlacesReposit
         String sql = sqlStringBuilder.toString();
         logger.info(sql);
         return sql;
+    }
+
+    @Override
+    public Map<Long, List<GroupOfStopPlaces>> findGroupsByStopPlaceIds(Set<Long> stopPlaceIds) {
+        if (stopPlaceIds == null || stopPlaceIds.isEmpty()) {
+            return new HashMap<>();
+        }
+
+        logger.debug("Batch loading groups for {} stop places", stopPlaceIds.size());
+
+        // Use JPQL to find groups that contain the given stop place IDs
+        Map<Long, List<GroupOfStopPlaces>> groupsByStopPlaceId = new HashMap<>();
+        String jpql = """
+            SELECT g FROM GroupOfStopPlaces g 
+            JOIN g.members m 
+            WHERE m.ref IN (
+                SELECT sp.netexId FROM StopPlace sp WHERE sp.id IN :stopPlaceIds
+            )
+            """;
+
+        TypedQuery<GroupOfStopPlaces> jpqlQuery = entityManager.createQuery(jpql, GroupOfStopPlaces.class);
+        jpqlQuery.setParameter("stopPlaceIds", stopPlaceIds);
+
+        List<GroupOfStopPlaces> groups = jpqlQuery.getResultList();
+
+        // Now we need to map groups back to stop place IDs
+        // Get the netex IDs for the stop place IDs
+        String netexIdQuery = "SELECT sp.id, sp.netexId FROM StopPlace sp WHERE sp.id IN :stopPlaceIds";
+        TypedQuery<Object[]> netexQuery = entityManager.createQuery(netexIdQuery, Object[].class);
+        netexQuery.setParameter("stopPlaceIds", stopPlaceIds);
+        List<Object[]> netexResults = netexQuery.getResultList();
+
+        Map<String, Long> netexIdToStopPlaceId = new HashMap<>();
+        for (Object[] result : netexResults) {
+            Long stopPlaceId = (Long) result[0];
+            String netexId = (String) result[1];
+            netexIdToStopPlaceId.put(netexId, stopPlaceId);
+        }
+
+        // Map groups to stop place IDs
+        for (GroupOfStopPlaces group : groups) {
+            for (var member : group.getMembers()) {
+                Long stopPlaceId = netexIdToStopPlaceId.get(member.getRef());
+                if (stopPlaceId != null) {
+                    groupsByStopPlaceId.computeIfAbsent(stopPlaceId, k -> new ArrayList<>()).add(group);
+                }
+            }
+        }
+
+        // Ensure all requested stop place IDs have entries (even if empty)
+        for (Long stopPlaceId : stopPlaceIds) {
+            groupsByStopPlaceId.putIfAbsent(stopPlaceId, new ArrayList<>());
+        }
+
+        logger.debug("Found groups for {} stop places", groupsByStopPlaceId.size());
+        return groupsByStopPlaceId;
     }
 }
 

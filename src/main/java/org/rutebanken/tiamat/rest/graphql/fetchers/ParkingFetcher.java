@@ -74,10 +74,7 @@ class ParkingFetcher implements DataFetcher {
             }
         } else if (stopPlaceId != null) {
             logger.info("Finding parkings by stop place netexid {}", stopPlaceId);
-            return parkingRepository.findByStopPlaceNetexId(stopPlaceId).stream()
-                    .peek(parkingNetexId -> logger.info("Finding parking by netexid {} and highest version", parkingNetexId))
-                    .map(netexId -> parkingRepository.findFirstByNetexIdOrderByVersionDesc(netexId))
-                    .collect(Collectors.toList());
+            return parkingRepository.findParkingEntitiesByStopPlaceNetexId(stopPlaceId);
         } else {
             logger.info("Finding all parkings regardless of version and validity");
             allParkings = parkingRepository.findAll(pageable);

@@ -17,7 +17,9 @@ package org.rutebanken.tiamat.rest.graphql.fetchers;
 
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
+import org.dataloader.DataLoader;
 import org.rutebanken.tiamat.dtoassembling.dto.BoundingBoxDto;
+import org.rutebanken.tiamat.rest.graphql.dataloader.StopPlaceDataLoader;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.exporter.params.StopPlaceSearch;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -97,6 +99,9 @@ class StopPlaceFetcher implements DataFetcher {
 
     @Autowired
     private ParentStopPlacesFetcher parentStopPlacesFetcher;
+    
+    @Autowired
+    private StopPlaceDataLoader stopPlaceDataLoader;
 
     @Override
     @Transactional
@@ -265,8 +270,13 @@ class StopPlaceFetcher implements DataFetcher {
         if (onlyMonomodalStopplaces) {
             return getStopPlaces(environment, stopPlaces, stopPlaces.size());
         } else {
-            List<StopPlace> parentsResolved = parentStopPlacesFetcher.resolveParents(stopPlaces, KEEP_CHILDREN);
-            return getStopPlaces(environment,parentsResolved,parentsResolved.size());
+            // Always use DataLoader to solve N+1 problem for parent resolution
+            DataLoader<StopPlaceDataLoader.StopPlaceKey, StopPlace> dataLoader = 
+                stopPlaceDataLoader.createDataLoader();
+            
+            List<StopPlace> parentsResolved = parentStopPlacesFetcher.resolveParents(stopPlaces, KEEP_CHILDREN, dataLoader);
+            
+            return getStopPlaces(environment, parentsResolved, parentsResolved.size());
         }
     }
 

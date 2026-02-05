@@ -95,9 +95,10 @@ public class PathLinkRepositoryImpl implements PathLinkRepositoryCustom {
             return new ArrayList<>();
         }
 
-        String sql = createFindPathLinkFromStopPlaceIdsSQL(stopPlaceIds);
+        // Use optimized query with UNION to separate stop place and quay lookups
+        // This allows better index usage and avoids complex OR conditions
+        String sql = createOptimizedFindPathLinkFromStopPlaceIdsSQL(stopPlaceIds);
 
-        System.out.println(sql);
         Query query = entityManager.createNativeQuery(sql, PathLink.class);
 
         try {
@@ -110,6 +111,43 @@ public class PathLinkRepositoryImpl implements PathLinkRepositoryCustom {
         }
     }
 
+    /**
+     * Optimized SQL query using UNION to combine results from stop place and quay path links.
+     * This approach allows the database to use indexes more effectively by avoiding complex OR conditions.
+     */
+    private String createOptimizedFindPathLinkFromStopPlaceIdsSQL(Set<Long> stopPlaceIds) {
+        String stopPlaceIdList = StringUtils.join(stopPlaceIds, ',');
+        
+        return "SELECT DISTINCT pl.* " +
+               "FROM path_link pl " +
+               "WHERE pl.id IN ( " +
+               "    -- Path links connected directly to stop places " +
+               "    SELECT DISTINCT pl2.id " +
+               "    FROM stop_place s " +
+               "    INNER JOIN path_link_end ple ON ple.place_ref = s.netex_id " +
+               "    INNER JOIN path_link pl2 ON (ple.id = pl2.from_id OR ple.id = pl2.to_id) " +
+               "    WHERE s.id IN (" + stopPlaceIdList + ") " +
+               "      AND (ple.place_version = CAST(s.version AS TEXT) OR ple.place_version IS NULL) " +
+               "    " +
+               "    UNION " +
+               "    " +
+               "    -- Path links connected to quays of the stop places " +
+               "    SELECT DISTINCT pl2.id " +
+               "    FROM stop_place s " +
+               "    INNER JOIN stop_place_quays spq ON spq.stop_place_id = s.id " +
+               "    INNER JOIN quay q ON spq.quays_id = q.id " +
+               "    INNER JOIN path_link_end ple ON ple.place_ref = q.netex_id " +
+               "    INNER JOIN path_link pl2 ON (ple.id = pl2.from_id OR ple.id = pl2.to_id) " +
+               "    WHERE s.id IN (" + stopPlaceIdList + ") " +
+               "      AND (ple.place_version = CAST(q.version AS TEXT) OR ple.place_version IS NULL) " +
+               ") " +
+               "ORDER BY pl.netex_id, pl.version";
+    }
+
+    /**
+     * @deprecated Use createOptimizedFindPathLinkFromStopPlaceIdsSQL instead
+     */
+    @Deprecated
     public String createFindPathLinkFromStopPlaceIdsSQL(Set<Long> stopPlaceIds) {
         return new StringBuilder(
                 "SELECT pl.* " +

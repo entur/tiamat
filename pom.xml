@@ -195,6 +195,11 @@
             <artifactId>graphql-java-extended-scalars</artifactId>
             <version>${graphql-java-extended-scalars.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.graphql-java</groupId>
+            <artifactId>java-dataloader</artifactId>
+            <version>3.3.0</version>
+        </dependency>
 
         <dependency>
             <groupId>net.logstash.logback</groupId>
