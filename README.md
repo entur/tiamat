@@ -419,6 +419,17 @@ Relevant tariff zones with be found from the exported list of stop places. Becau
 The parameter ```groupOfStopPlacesExportMode``` can be set to *NONE*, *RELEVANT* or *ALL*
 Relevant group of stop places can be found from the exported list of stop places.
 
+### MultiSurface geometry export
+The parameter ```exportMultiSurface``` controls how geometry is exported for topographic places and zones (tariff zones, fare zones).
+* ```false``` (default): Export polygon geometry. This maintains backward compatibility with existing clients.
+* ```true```: Export multiSurface geometry when available. If a zone has multiSurface geometry stored, it will be exported as multiSurface instead of polygon.
+
+Note: According to the NeTEx XSD schema, polygon and multiSurface are mutually exclusive - only one can be present per zone.
+
+```http request
+GET https://api.dev.entur.io/stop-places/v1/netex?exportMultiSurface=true
+```
+
 ### Version validity
 The ```versionValidity``` parameter controls what stop places to return.
 * ALL: returns all stops in any version (See allVersions attribute), regardless of version validity

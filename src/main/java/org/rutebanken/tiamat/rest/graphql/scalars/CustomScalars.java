@@ -93,6 +93,11 @@ public class CustomScalars {
             .coercing(new Coercing() {
                 @Override
                 public Object serialize(Object input, GraphQLContext graphQLContext, Locale locale) {
+                    // If already structured as a List (from GeoJSONCoordinatesFetcher), pass through
+                    if (input instanceof List) {
+                        return input;
+                    }
+                    // Legacy handling for Coordinate[] (simple geometries)
                     if (input instanceof Coordinate[] coordinates) {
                         List<List<Double>> coordinateList = new ArrayList<>();
                         for (Coordinate coordinate : coordinates) {

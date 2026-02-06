@@ -17,9 +17,10 @@ package org.rutebanken.tiamat.service;
 
 
 import com.google.common.collect.Sets;
+import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Point;
-import org.locationtech.jts.geom.Polygon;
 import org.rutebanken.tiamat.general.ResettableMemoizer;
+import org.rutebanken.tiamat.model.Zone_VersionStructure;
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
 import org.rutebanken.tiamat.model.FareZone;
 import org.rutebanken.tiamat.model.ScopingMethodEnumeration;
@@ -55,8 +56,8 @@ public class TariffZonesLookupService {
 
     private static final Logger logger = LoggerFactory.getLogger(TariffZonesLookupService.class);
 
-    private final ResettableMemoizer<List<Pair<String, Polygon>>> tariffZones = new ResettableMemoizer<>(getTariffZones());
-    private final ResettableMemoizer<List<Pair<String, Polygon>>> fareZones = new ResettableMemoizer<>(getFareZones());
+    private final ResettableMemoizer<List<Pair<String, Geometry>>> tariffZones = new ResettableMemoizer<>(getTariffZones());
+    private final ResettableMemoizer<List<Pair<String, Geometry>>> fareZones = new ResettableMemoizer<>(getFareZones());
 
     private final TariffZoneRepository tariffZoneRepository;
     private final FareZoneRepository fareZoneRepository;
@@ -148,12 +149,12 @@ public class TariffZonesLookupService {
                 .collect(toList());
     }
 
-    public Supplier<List<Pair<String, Polygon>>> getTariffZones() {
+    public Supplier<List<Pair<String, Geometry>>> getTariffZones() {
         return () -> {
             logger.info("Fetching and memoizing tariff zones from repository");
             return tariffZoneRepository.findAllValidTariffZones()
                     .stream()
-                    .filter(tariffZone -> tariffZone.getPolygon() != null)
+                    .filter(tariffZone -> getZoneGeometry(tariffZone) != null)
                     .collect(
                             groupingBy(TariffZone::getNetexId,
                                     maxBy(Comparator.comparingLong(EntityInVersionStructure::getVersion))))
@@ -162,18 +163,18 @@ public class TariffZonesLookupService {
                     .filter(Optional::isPresent)
                     .map(Optional::get)
                     .peek(tariffZone -> logger.debug("Memoizing tariff zone {} {}", tariffZone.getNetexId(), tariffZone.getVersion()))
-                    .map(tariffZone -> Pair.of(tariffZone.getNetexId(), tariffZone.getPolygon()))
+                    .map(tariffZone -> Pair.of(tariffZone.getNetexId(), getZoneGeometry(tariffZone)))
                     .collect(toList());
 
         };
     }
 
-    public Supplier<List<Pair<String, Polygon>>> getFareZones() {
+    public Supplier<List<Pair<String, Geometry>>> getFareZones() {
         return () -> {
             logger.info("Fetching and memoizing fare zones from repository");
             return fareZoneRepository.findAllValidFareZones()
                     .stream()
-                    .filter(fareZone -> fareZone.getPolygon() != null)
+                    .filter(fareZone -> getZoneGeometry(fareZone) != null)
                     .collect(
                             groupingBy(FareZone::getNetexId,
                                     maxBy(Comparator.comparingLong(EntityInVersionStructure::getVersion))))
@@ -182,7 +183,7 @@ public class TariffZonesLookupService {
                     .filter(Optional::isPresent)
                     .map(Optional::get)
                     .peek(fareZone -> logger.debug("Memoizing fare zone {} {}", fareZone.getNetexId(), fareZone.getVersion()))
-                    .map(fareZone -> Pair.of(fareZone.getNetexId(), fareZone.getPolygon()))
+                    .map(fareZone -> Pair.of(fareZone.getNetexId(), getZoneGeometry(fareZone)))
                     .collect(toList());
 
         };
@@ -196,5 +197,16 @@ public class TariffZonesLookupService {
         fareZones.reset();
     }
 
+    /**
+     * Returns the geometry to use for spatial lookups.
+     * Prefers multiSurface if present, otherwise falls back to polygon.
+     * JTS coveredBy() works on both Polygon and MultiPolygon.
+     */
+    private Geometry getZoneGeometry(Zone_VersionStructure zone) {
+        if (zone.getMultiSurface() != null) {
+            return zone.getMultiSurface();
+        }
+        return zone.getPolygon();
+    }
 
 }
