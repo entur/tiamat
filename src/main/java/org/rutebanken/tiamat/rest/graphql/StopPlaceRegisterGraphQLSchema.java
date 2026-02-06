@@ -31,8 +31,10 @@ import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.TypeResolver;
 import jakarta.annotation.PostConstruct;
+import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.MultiPolygon;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
 import org.rutebanken.tiamat.auth.AuthorizationService;
@@ -968,6 +970,7 @@ public class StopPlaceRegisterGraphQLSchema {
         registerDataFetcher(codeRegistryBuilder,STOPPLACES_MUTATION,CREATE_TAG,environment -> tagCreator.createTag(environment.getArgument(TAG_NAME), environment.getArgument(TAG_ID_REFERENCE), environment.getArgument(TAG_COMMENT)));
 
         registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_GEO_JSON, LEGACY_COORDINATES,getLegacyCoordinates());
+        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_GEO_JSON, COORDINATES, getGeoJSONCoordinates());
 
         codeRegistryBuilder.typeResolver(OUTPUT_TYPE_STOPPLACE_INTERFACE, stopPlaceTypeResolver);
 
@@ -1038,6 +1041,78 @@ public class StopPlaceRegisterGraphQLSchema {
             }
             return null;
         };
+    }
+
+    /**
+     * Returns GeoJSON-compliant coordinates for different geometry types.
+     * <p>
+     * GeoJSON coordinate formats:
+     * - Point: [lon, lat]
+     * - LineString: [[lon, lat], [lon, lat], ...]
+     * - Polygon: [[[outer_ring], [hole1], [hole2], ...]]
+     * - MultiPolygon: [[[[poly1_ring1], [poly1_hole1]], [[poly2_ring1]], ...]]
+     */
+    private static DataFetcher<Object> getGeoJSONCoordinates() {
+        return env -> {
+            Object source = env.getSource();
+
+            if (source instanceof Point point) {
+                // Point: [lon, lat]
+                Coordinate coord = point.getCoordinate();
+                return List.of(coord.x, coord.y);
+            }
+
+            if (source instanceof LineString lineString) {
+                // LineString: [[lon, lat], [lon, lat], ...]
+                return coordinatesToList(lineString.getCoordinates());
+            }
+
+            if (source instanceof MultiPolygon multiPolygon) {
+                // MultiPolygon: [[[[ring1], [ring2]], [[ring1]], ...]]
+                List<List<List<List<Double>>>> polygons = new ArrayList<>();
+                for (int i = 0; i < multiPolygon.getNumGeometries(); i++) {
+                    Polygon polygon = (Polygon) multiPolygon.getGeometryN(i);
+                    polygons.add(polygonToRings(polygon));
+                }
+                return polygons;
+            }
+
+            if (source instanceof Polygon polygon) {
+                // Polygon: [[[outer_ring], [hole1], [hole2], ...]]
+                return polygonToRings(polygon);
+            }
+
+            return null;
+        };
+    }
+
+    /**
+     * Converts a JTS Polygon to GeoJSON rings format.
+     * Returns a list of rings where each ring is a list of [lon, lat] coordinate pairs.
+     */
+    private static List<List<List<Double>>> polygonToRings(Polygon polygon) {
+        List<List<List<Double>>> rings = new ArrayList<>();
+
+        // Add exterior ring
+        rings.add(coordinatesToList(polygon.getExteriorRing().getCoordinates()));
+
+        // Add interior rings (holes)
+        for (int i = 0; i < polygon.getNumInteriorRing(); i++) {
+            rings.add(coordinatesToList(polygon.getInteriorRingN(i).getCoordinates()));
+        }
+
+        return rings;
+    }
+
+    /**
+     * Converts a JTS Coordinate array to a list of [lon, lat] pairs.
+     */
+    private static List<List<Double>> coordinatesToList(Coordinate[] coordinates) {
+        List<List<Double>> coordList = new ArrayList<>();
+        for (Coordinate coord : coordinates) {
+            coordList.add(List.of(coord.x, coord.y));
+        }
+        return coordList;
     }
 
     private static DataFetcher<Object> getOriginalIdsFetcher(){
