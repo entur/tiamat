@@ -255,7 +255,8 @@ public class TopographicPlaceRepositoryImpl implements TopographicPlaceRepositor
 				            ON sp.parent_site_ref = psp.netex_id
 				            AND sp.parent_site_ref_version = CAST(psp.version AS text)
 				        WHERE
-				            sp.centroid IS NOT NULL
+				            tp.topographic_place_type IN ('MUNICIPALITY', 'COUNTY', 'COUNTRY')
+				            AND sp.centroid IS NOT NULL
 				            AND (
 				                (
 				                    sp.from_date <= NOW()
