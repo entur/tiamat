@@ -138,26 +138,14 @@ public class TopographicPlaceLookupService {
             logger.info("Fetching topographic places from repository");
             List<ImmutableTriple<String, TopographicPlaceTypeEnumeration, Geometry>> topographicPlaces = topographicPlaceRepository.findTopographicPlace(topographicPlaceSearch)
                     .stream()
-                    .filter(topographicPlace -> getZoneGeometry(topographicPlace) != null)
+                    .filter(topographicPlace -> topographicPlace.getGeometry() != null)
                     .filter(topographicPlace -> ADMIN_LEVEL_ORDER.contains(topographicPlace.getTopographicPlaceType()))
                     .sorted(new TopographicPlaceByAdminLevelComparator())
-                    .map(topographicPlace -> ImmutableTriple.of(topographicPlace.getNetexId(), topographicPlace.getTopographicPlaceType(), getZoneGeometry(topographicPlace)))
+                    .map(topographicPlace -> ImmutableTriple.of(topographicPlace.getNetexId(), topographicPlace.getTopographicPlaceType(), topographicPlace.getGeometry()))
                     .collect(toList());
             logger.info("Fetched {} topographic places from repository", topographicPlaces.size());
             return topographicPlaces;
         };
-    }
-
-    /**
-     * Returns the geometry to use for spatial lookups.
-     * Prefers multiSurface if present, otherwise falls back to polygon.
-     * JTS coveredBy() works on both Polygon and MultiPolygon.
-     */
-    private Geometry getZoneGeometry(TopographicPlace topographicPlace) {
-        if (topographicPlace.getMultiSurface() != null) {
-            return topographicPlace.getMultiSurface();
-        }
-        return topographicPlace.getPolygon();
     }
 
     private static class TopographicPlaceByAdminLevelComparator implements Comparator<TopographicPlace> {

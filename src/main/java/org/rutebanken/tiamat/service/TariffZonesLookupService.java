@@ -20,7 +20,6 @@ import com.google.common.collect.Sets;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Point;
 import org.rutebanken.tiamat.general.ResettableMemoizer;
-import org.rutebanken.tiamat.model.Zone_VersionStructure;
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
 import org.rutebanken.tiamat.model.FareZone;
 import org.rutebanken.tiamat.model.ScopingMethodEnumeration;
@@ -154,7 +153,7 @@ public class TariffZonesLookupService {
             logger.info("Fetching and memoizing tariff zones from repository");
             return tariffZoneRepository.findAllValidTariffZones()
                     .stream()
-                    .filter(tariffZone -> getZoneGeometry(tariffZone) != null)
+                    .filter(tariffZone -> tariffZone.getGeometry() != null)
                     .collect(
                             groupingBy(TariffZone::getNetexId,
                                     maxBy(Comparator.comparingLong(EntityInVersionStructure::getVersion))))
@@ -163,7 +162,7 @@ public class TariffZonesLookupService {
                     .filter(Optional::isPresent)
                     .map(Optional::get)
                     .peek(tariffZone -> logger.debug("Memoizing tariff zone {} {}", tariffZone.getNetexId(), tariffZone.getVersion()))
-                    .map(tariffZone -> Pair.of(tariffZone.getNetexId(), getZoneGeometry(tariffZone)))
+                    .map(tariffZone -> Pair.of(tariffZone.getNetexId(), tariffZone.getGeometry()))
                     .collect(toList());
 
         };
@@ -174,7 +173,7 @@ public class TariffZonesLookupService {
             logger.info("Fetching and memoizing fare zones from repository");
             return fareZoneRepository.findAllValidFareZones()
                     .stream()
-                    .filter(fareZone -> getZoneGeometry(fareZone) != null)
+                    .filter(fareZone -> fareZone.getGeometry() != null)
                     .collect(
                             groupingBy(FareZone::getNetexId,
                                     maxBy(Comparator.comparingLong(EntityInVersionStructure::getVersion))))
@@ -183,7 +182,7 @@ public class TariffZonesLookupService {
                     .filter(Optional::isPresent)
                     .map(Optional::get)
                     .peek(fareZone -> logger.debug("Memoizing fare zone {} {}", fareZone.getNetexId(), fareZone.getVersion()))
-                    .map(fareZone -> Pair.of(fareZone.getNetexId(), getZoneGeometry(fareZone)))
+                    .map(fareZone -> Pair.of(fareZone.getNetexId(), fareZone.getGeometry()))
                     .collect(toList());
 
         };
@@ -195,18 +194,6 @@ public class TariffZonesLookupService {
 
     public void resetFareZone() {
         fareZones.reset();
-    }
-
-    /**
-     * Returns the geometry to use for spatial lookups.
-     * Prefers multiSurface if present, otherwise falls back to polygon.
-     * JTS coveredBy() works on both Polygon and MultiPolygon.
-     */
-    private Geometry getZoneGeometry(Zone_VersionStructure zone) {
-        if (zone.getMultiSurface() != null) {
-            return zone.getMultiSurface();
-        }
-        return zone.getPolygon();
     }
 
 }

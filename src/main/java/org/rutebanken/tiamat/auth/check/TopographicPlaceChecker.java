@@ -48,7 +48,7 @@ public class TopographicPlaceChecker implements AdministrativeZoneChecker {
                 logger.warn("RoleAssignment contains unknown adminZone reference: {}. Will not allow authorization", roleAssignment.getAdministrativeZone());
                 return false;
             }
-            Geometry geometry = getZoneGeometry(topographicPlace);
+            final Geometry geometry = topographicPlace.getGeometry();
             if (geometry == null) {
                 logger.warn("TopographicPlace {}-{} has no polygon or multiSurface. Will not allow authorization", topographicPlace.getNetexId(), topographicPlace.getVersion());
                 return false;
@@ -83,7 +83,7 @@ public class TopographicPlaceChecker implements AdministrativeZoneChecker {
                 logger.warn("RoleAssignment contains unknown adminZone reference: {}. Will not allow authorization", roleAssignment.getAdministrativeZone());
                 return false;
             }
-            Geometry geometry = getZoneGeometry(topographicPlace);
+            Geometry geometry = topographicPlace.getGeometry();
             if (geometry == null) {
                 logger.warn("TopographicPlace {}-{} has no polygon or multiSurface. Will not allow authorization", topographicPlace.getNetexId(), topographicPlace.getVersion());
                 return false;
@@ -102,15 +102,4 @@ public class TopographicPlaceChecker implements AdministrativeZoneChecker {
         return true;
     }
 
-    /**
-     * Returns the geometry to use for authorization checks.
-     * Prefers multiSurface if present, otherwise falls back to polygon.
-     * JTS contains() works on both Polygon and MultiPolygon.
-     */
-    private Geometry getZoneGeometry(TopographicPlace topographicPlace) {
-        if (topographicPlace.getMultiSurface() != null) {
-            return topographicPlace.getMultiSurface();
-        }
-        return topographicPlace.getPolygon();
-    }
 }
