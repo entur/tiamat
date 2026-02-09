@@ -21,6 +21,8 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Transient;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.MultiPolygon;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
 
@@ -37,6 +39,13 @@ public class Zone_VersionStructure
      */
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     protected PersistablePolygon polygon;
+
+    /**
+     * MultiSurface is wrapped in PersistableMultiPolygon.
+     * Used for zones that have multiple disconnected polygon areas.
+     */
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    protected PersistableMultiPolygon multiSurface;
 
     @Transient
     protected Projections_RelStructure projections;
@@ -59,10 +68,32 @@ public class Zone_VersionStructure
     }
 
     public void setPolygon(Polygon polygon) {
+        if (polygon == null) {
+            this.polygon = null;
+            return;
+        }
         if (this.polygon == null) {
             this.polygon = new PersistablePolygon();
         }
         this.polygon.setPolygon(polygon);
+    }
+
+    public MultiPolygon getMultiSurface() {
+        if (multiSurface != null) {
+            return multiSurface.getMultiPolygon();
+        }
+        return null;
+    }
+
+    public void setMultiSurface(MultiPolygon multiPolygon) {
+        if (multiPolygon == null) {
+            this.multiSurface = null;
+            return;
+        }
+        if (this.multiSurface == null) {
+            this.multiSurface = new PersistableMultiPolygon();
+        }
+        this.multiSurface.setMultiPolygon(multiPolygon);
     }
 
     public Point getCentroid() {
@@ -93,6 +124,22 @@ public class Zone_VersionStructure
         return centroid != null;
     }
 
+    /**
+     * Returns the geometry to use for spatial operations.
+     * Prefers multiSurface if present, otherwise falls back to polygon.
+     * JTS spatial methods (contains, coveredBy) work on both Polygon and MultiPolygon.
+     *
+     * @return the zone's geometry (MultiPolygon or Polygon), or null if neither is set
+     */
+    public Geometry getGeometry() {
+        if (multiSurface != null && multiSurface.getMultiPolygon() != null) {
+            return multiSurface.getMultiPolygon();
+        }
+        if (polygon != null) {
+            return polygon.getPolygon();
+        }
+        return null;
+    }
 
     @Override
     public String toString() {

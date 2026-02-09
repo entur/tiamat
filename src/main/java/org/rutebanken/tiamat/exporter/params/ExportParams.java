@@ -51,8 +51,6 @@ public class ExportParams {
 
     public static final ExportMode DEFAULT_GROUP_OF_TARIFF_ZONES_EXPORT_MODE = ExportMode.RELEVANT;
 
-    public static final ExportMode DEFAULT_SERVICE_FRAME_EXPORT_MODE = ExportMode.NONE;
-
     @QueryParam(value = "topographicPlaceExportMode")
     @DefaultValue(value = "RELEVANT")
     @Parameter(description = "Controls exported topographic places. If set to relevant, only topographic places relevant to exported stop places are exported.")
@@ -103,6 +101,12 @@ public class ExportParams {
     @Schema(description = "codeSpace")
     private String codeSpace;
 
+    @QueryParam(value = "exportMultiSurface")
+    @DefaultValue(value = "false")
+    @Parameter(description = "Export multiSurface geometry instead of polygon for topographic places and zones. Default is false to maintain backward compatibility.")
+    @Schema(description = "Export multiSurface geometry")
+    private boolean exportMultiSurface = false;
+
     @BeanParam
     @Schema(hidden = true)
     private StopPlaceSearch stopPlaceSearch;
@@ -116,7 +120,8 @@ public class ExportParams {
                          List<String> countyReferences,
                          List<String> countryReferences,
                          StopPlaceSearch stopPlaceSearch,
-                         String codeSpace) {
+                         String codeSpace,
+                         boolean exportMultiSurface) {
         this.topographicPlaceExportMode = topographicPlaceExportMode;
         this.tariffZoneExportMode = tariffZoneExportMode;
         this.fareZoneExportMode = fareZoneExportMode;
@@ -127,6 +132,7 @@ public class ExportParams {
         this.countryReferences = countryReferences;
         this.stopPlaceSearch = stopPlaceSearch;
         this.codeSpace = codeSpace;
+        this.exportMultiSurface = exportMultiSurface;
     }
 
     public ExportParams(StopPlaceSearch stopPlaceSearch) {
@@ -174,6 +180,10 @@ public class ExportParams {
         return codeSpace;
     }
 
+    public boolean isExportMultiSurface() {
+        return exportMultiSurface;
+    }
+
     public static ExportParams.Builder newExportParamsBuilder() {
         return new Builder();
     }
@@ -190,6 +200,7 @@ public class ExportParams {
                 .add("tariffZoneExportMode", tariffZoneExportMode)
                 .add("fareZoneExportMode", fareZoneExportMode)
                 .add("codeSpace", codeSpace)
+                .add("exportMultiSurface", exportMultiSurface)
                 .toString();
     }
 
@@ -204,6 +215,7 @@ public class ExportParams {
         private List<String> countryReferences;
         private StopPlaceSearch stopPlaceSearch;
         private String codeSpace;
+        private boolean exportMultiSurface = false;
 
         private Builder() {
         }
@@ -273,6 +285,11 @@ public class ExportParams {
             return this;
         }
 
+        public Builder setExportMultiSurface(boolean exportMultiSurface) {
+            this.exportMultiSurface = exportMultiSurface;
+            return this;
+        }
+
         public ExportParams build() {
             return new ExportParams(topographicPlaceExportMode,
                     tariffZoneExportMode,fareZoneExportMode,
@@ -282,7 +299,8 @@ public class ExportParams {
                     countyReferences,
                     countryReferences,
                     stopPlaceSearch,
-                    codeSpace);
+                    codeSpace,
+                    exportMultiSurface);
         }
     }
 }

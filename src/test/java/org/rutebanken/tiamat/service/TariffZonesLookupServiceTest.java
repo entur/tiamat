@@ -21,7 +21,6 @@ import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LinearRing;
 import org.locationtech.jts.geom.Point;
-import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.geom.impl.CoordinateArraySequence;
 import org.rutebanken.tiamat.config.GeometryFactoryConfig;
 import org.rutebanken.tiamat.model.TariffZone;
@@ -71,7 +70,7 @@ public class TariffZonesLookupServiceTest {
         when(tariffZoneRepository.findAllValidTariffZones()).thenReturn(Arrays.asList(firstVersion, secondVersion, anotherOne));
 
 
-        java.util.function.Supplier<List<Pair<String, Polygon>>> actual = tariffZonesLookupService.getTariffZones();
+        java.util.function.Supplier<List<Pair<String, Geometry>>> actual = tariffZonesLookupService.getTariffZones();
 
         assertThat(actual.get()).hasSize(2);
 

@@ -291,7 +291,7 @@ public class StreamingPublicationDelivery {
         List<FareZone> netexFareZones= new ArrayList<>();
         while (fareZoneIterator.hasNext()) {
             final org.rutebanken.tiamat.model.FareZone fareZone = fareZoneIterator.next();
-            final FareZone netexFareZone = netexMapper.mapToNetexModel(fareZone);
+            final FareZone netexFareZone = netexMapper.mapToNetexModel(fareZone, exportParams.isExportMultiSurface());
             netexFareZones.add(netexFareZone);
             mappedFareZonesCount.incrementAndGet();
 
@@ -325,7 +325,7 @@ public class StreamingPublicationDelivery {
 
         List<JAXBElement<? extends Zone_VersionStructure>> netexTariffZones = new ArrayList<>();
         while (tariffZoneIterator.hasNext()) {
-            final TariffZone tariffZone = netexMapper.mapToNetexModel(tariffZoneIterator.next());
+            final TariffZone tariffZone = netexMapper.mapToNetexModel(tariffZoneIterator.next(), exportParams.isExportMultiSurface());
             final JAXBElement<TariffZone> tariffZoneJAXBElement = new ObjectFactory().createTariffZone(tariffZone);
             netexTariffZones.add(tariffZoneJAXBElement);
             mappedTariffZonesCount.incrementAndGet();
@@ -446,13 +446,16 @@ public class StreamingPublicationDelivery {
             relevantTopographicPlacesIterator = Collections.emptyIterator();
         }
 
-        if (relevantTopographicPlacesIterator.hasNext()) {
+        List<org.rutebanken.netex.model.TopographicPlace> topographicPlaces = new ArrayList<>();
+        while (relevantTopographicPlacesIterator.hasNext()) {
+            final TopographicPlace tiamatTopographicPlace = relevantTopographicPlacesIterator.next();
+            final org.rutebanken.netex.model.TopographicPlace netexTopographicPlace = netexMapper.mapToNetexModel(tiamatTopographicPlace, exportParams.isExportMultiSurface());
+            topographicPlaces.add(netexTopographicPlace);
+            mappedTopographicPlacesCount.incrementAndGet();
+            evicter.evictKnownEntitiesFromSession(tiamatTopographicPlace);
+        }
 
-            NetexMappingIterator<TopographicPlace, org.rutebanken.netex.model.TopographicPlace> topographicPlaceNetexMappingIterator = new NetexMappingIterator<>(
-                    netexMapper, relevantTopographicPlacesIterator, org.rutebanken.netex.model.TopographicPlace.class, mappedTopographicPlacesCount, evicter);
-
-            List<org.rutebanken.netex.model.TopographicPlace> topographicPlaces = new NetexMappingIteratorList<>(() -> topographicPlaceNetexMappingIterator);
-
+        if (!topographicPlaces.isEmpty()) {
             TopographicPlacesInFrame_RelStructure topographicPlacesInFrame_relStructure = new TopographicPlacesInFrame_RelStructure();
             setField(TopographicPlacesInFrame_RelStructure.class, "topographicPlace", topographicPlacesInFrame_relStructure, topographicPlaces);
             netexSiteFrame.setTopographicPlaces(topographicPlacesInFrame_relStructure);

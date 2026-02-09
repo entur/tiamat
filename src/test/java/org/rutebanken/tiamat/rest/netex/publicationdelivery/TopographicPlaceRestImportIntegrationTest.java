@@ -18,8 +18,10 @@ package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 import net.opengis.gml._3.AbstractRingPropertyType;
 import net.opengis.gml._3.DirectPositionListType;
 import net.opengis.gml._3.LinearRingType;
+import net.opengis.gml._3.MultiSurfaceType;
 import net.opengis.gml._3.ObjectFactory;
 import net.opengis.gml._3.PolygonType;
+import net.opengis.gml._3.SurfacePropertyType;
 import org.junit.Test;
 import org.rutebanken.netex.model.CountryRef;
 import org.rutebanken.netex.model.MultilingualString;
@@ -37,7 +39,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class TopographicPlaceImportTest extends TiamatIntegrationTest {
+public class TopographicPlaceRestImportIntegrationTest extends TiamatIntegrationTest {
 
     private static final net.opengis.gml._3.ObjectFactory openGisObjectFactory = new ObjectFactory();
 
@@ -98,6 +100,166 @@ public class TopographicPlaceImportTest extends TiamatIntegrationTest {
         List<Double> actualExteriorValues = polygonConverter.extractValues(topographicPlace.getPolygon().getExterior());
 
         assertThat(actualExteriorValues).isEqualTo(values);
+        assertThat(actualTopographicPlace.getId()).isEqualTo(topographicPlace.getId());
+    }
+
+    @Test
+    public void publicationDeliveryWithTopographicPlaceAndPolygonWithHole() throws Exception {
+
+        // Exterior ring (outer boundary) - larger polygon
+        List<Double> exteriorValues = new ArrayList<>();
+        exteriorValues.add(9.0);
+        exteriorValues.add(59.0);
+        exteriorValues.add(10.0);
+        exteriorValues.add(59.0);
+        exteriorValues.add(10.0);
+        exteriorValues.add(60.0);
+        exteriorValues.add(9.0);
+        exteriorValues.add(60.0);
+        exteriorValues.add(exteriorValues.get(0));
+        exteriorValues.add(exteriorValues.get(1));
+
+        // Interior ring (hole) - smaller polygon inside the exterior
+        List<Double> interiorValues = new ArrayList<>();
+        interiorValues.add(9.3);
+        interiorValues.add(59.3);
+        interiorValues.add(9.7);
+        interiorValues.add(59.3);
+        interiorValues.add(9.7);
+        interiorValues.add(59.7);
+        interiorValues.add(9.3);
+        interiorValues.add(59.7);
+        interiorValues.add(interiorValues.get(0));
+        interiorValues.add(interiorValues.get(1));
+
+        PolygonType polygonType = new PolygonType()
+                .withId("KVE-HOLE-07")
+                .withExterior(new AbstractRingPropertyType()
+                        .withAbstractRing(openGisObjectFactory.createLinearRing(
+                                new LinearRingType()
+                                        .withPosList(new DirectPositionListType().withValue(exteriorValues)))))
+                .withInterior(new AbstractRingPropertyType()
+                        .withAbstractRing(openGisObjectFactory.createLinearRing(
+                                new LinearRingType()
+                                        .withPosList(new DirectPositionListType().withValue(interiorValues)))));
+
+        MultilingualString nameDescriptor = new MultilingualString().withValue("Vestfold med hull").withLang("nb");
+
+        TopographicPlace topographicPlace = new TopographicPlace()
+                .withId("KVE:TopographicPlace:07")
+                .withName(nameDescriptor)
+                .withVersion("1")
+                .withDescriptor(new TopographicPlaceDescriptor_VersionedChildStructure().withName(nameDescriptor))
+                .withTopographicPlaceType(TopographicPlaceTypeEnumeration.COUNTY)
+                .withCountryRef(new CountryRef().withValue("NO"))
+                .withPolygon(polygonType);
+
+        PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryTopographicPlace(topographicPlace);
+
+        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery);
+
+        List<TopographicPlace> result = publicationDeliveryTestHelper.extractTopographicPlace(response);
+        assertThat(result).as("Expecting topographic place in return").hasSize(1);
+        TopographicPlace actualTopographicPlace = result.getFirst();
+
+        assertThat(actualTopographicPlace.getPolygon())
+                .as("polygon must not be null")
+                .isNotNull();
+
+        // Verify exterior ring
+        List<Double> actualExteriorValues = polygonConverter.extractValues(actualTopographicPlace.getPolygon().getExterior());
+        assertThat(actualExteriorValues).as("exterior ring values").isEqualTo(exteriorValues);
+
+        // Verify interior ring (hole)
+        assertThat(actualTopographicPlace.getPolygon().getInterior())
+                .as("interior rings list")
+                .isNotNull()
+                .hasSize(1);
+
+        List<Double> actualInteriorValues = polygonConverter.extractValues(actualTopographicPlace.getPolygon().getInterior().getFirst());
+        assertThat(actualInteriorValues).as("interior ring values").isEqualTo(interiorValues);
+
+        assertThat(actualTopographicPlace.getId()).isEqualTo(topographicPlace.getId());
+    }
+
+    @Test
+    public void publicationDeliveryWithTopographicPlaceAndMultiSurface() throws Exception {
+
+        // First polygon coordinates
+        List<Double> polygon1Values = new ArrayList<>();
+        polygon1Values.add(9.8468);
+        polygon1Values.add(59.2649);
+        polygon1Values.add(9.8456);
+        polygon1Values.add(59.2654);
+        polygon1Values.add(9.8457);
+        polygon1Values.add(59.2655);
+        polygon1Values.add(9.8443);
+        polygon1Values.add(59.2663);
+        polygon1Values.add(polygon1Values.get(0));
+        polygon1Values.add(polygon1Values.get(1));
+
+        // Second polygon coordinates (offset from first)
+        List<Double> polygon2Values = new ArrayList<>();
+        polygon2Values.add(10.8468);
+        polygon2Values.add(60.2649);
+        polygon2Values.add(10.8456);
+        polygon2Values.add(60.2654);
+        polygon2Values.add(10.8457);
+        polygon2Values.add(60.2655);
+        polygon2Values.add(10.8443);
+        polygon2Values.add(60.2663);
+        polygon2Values.add(polygon2Values.get(0));
+        polygon2Values.add(polygon2Values.get(1));
+
+        // Create first polygon
+        PolygonType polygonType1 = new PolygonType()
+                .withId("KVE-07-1")
+                .withExterior(new AbstractRingPropertyType()
+                        .withAbstractRing(openGisObjectFactory.createLinearRing(
+                                new LinearRingType()
+                                        .withPosList(new DirectPositionListType().withValue(polygon1Values)))));
+
+        // Create second polygon
+        PolygonType polygonType2 = new PolygonType()
+                .withId("KVE-07-2")
+                .withExterior(new AbstractRingPropertyType()
+                        .withAbstractRing(openGisObjectFactory.createLinearRing(
+                                new LinearRingType()
+                                        .withPosList(new DirectPositionListType().withValue(polygon2Values)))));
+
+        // Create MultiSurface with two polygon surface members
+        MultiSurfaceType multiSurfaceType = new MultiSurfaceType()
+                .withId("KVE-MultiSurface-07")
+                .withSurfaceMember(
+                        new SurfacePropertyType().withAbstractSurface(openGisObjectFactory.createPolygon(polygonType1)),
+                        new SurfacePropertyType().withAbstractSurface(openGisObjectFactory.createPolygon(polygonType2))
+                );
+
+        MultilingualString nameDescriptor = new MultilingualString().withValue("Vestfold").withLang("nb");
+
+        TopographicPlace topographicPlace = new TopographicPlace()
+                .withId("KVE:TopographicPlace:07")
+                .withName(nameDescriptor)
+                .withVersion("1")
+                .withDescriptor(new TopographicPlaceDescriptor_VersionedChildStructure().withName(nameDescriptor))
+                .withTopographicPlaceType(TopographicPlaceTypeEnumeration.COUNTY)
+                .withCountryRef(new CountryRef().withValue("NO"))
+                .withMultiSurface(multiSurfaceType);
+
+        PublicationDeliveryStructure publicationDelivery = publicationDeliveryTestHelper.createPublicationDeliveryTopographicPlace(topographicPlace);
+
+        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDelivery);
+
+        List<TopographicPlace> result = publicationDeliveryTestHelper.extractTopographicPlace(response);
+        assertThat(result).as("Expecting topographic place in return").hasSize(1);
+        TopographicPlace actualTopographicPlace = result.getFirst();
+
+        // Assert that either multiSurface or polygon is returned
+        // The import should handle multiSurface and convert/store it appropriately
+        assertThat(actualTopographicPlace.getMultiSurface() != null || actualTopographicPlace.getPolygon() != null)
+                .as("Either multiSurface or polygon must not be null")
+                .isTrue();
+
         assertThat(actualTopographicPlace.getId()).isEqualTo(topographicPlace.getId());
     }
 
