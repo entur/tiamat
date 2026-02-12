@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -172,12 +173,12 @@ public class FintrafficSearchKeyService implements SearchKeyService {
     }
 
     private List<PolygonAndAreaCodes> loadPolygonsAndAreaCodes() {
+        Instant start = Instant.now();
         TopographicPlaceSearch search = TopographicPlaceSearch.newTopographicPlaceSearchBuilder()
                 .versionValidity(ExportParams.VersionValidity.CURRENT).build();
 
         List<TopographicPlace> topographicPlaces = topographicPlaceRepository.findTopographicPlace(search);
-        logger.info("Loaded {} topographic places for administrative zones", topographicPlaces.size());
-        return topographicPlaces.stream()
+        List<PolygonAndAreaCodes> polygonAndAreaCodes = topographicPlaces.stream()
                 .filter(tp -> tp.getTopographicPlaceType().equals(TopographicPlaceTypeEnumeration.REGION))
                 .filter(tp -> tp.getKeyValues().containsKey(CODESPACE_KEY))
                 .filter(tp -> tp.getPolygon() != null)
@@ -188,5 +189,9 @@ public class FintrafficSearchKeyService implements SearchKeyService {
                         Set.copyOf(tp.getKeyValues().get(CODESPACE_KEY).getItems())
                 ))
                 .toList();
+        Instant end = Instant.now();
+        long duration = Duration.between(start, end).toMillis();
+        logger.info("Prepared {} zone geometries for spatial queries in {} ms", polygonAndAreaCodes.size(), duration);
+        return polygonAndAreaCodes;
     }
 }
