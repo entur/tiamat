@@ -25,6 +25,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.AdditionalMatchers.not;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.matches;
@@ -89,10 +90,10 @@ class FintrafficAuthorizationServiceTest {
         when(topographicPlaceRepositoryMock.findTopographicPlace(any(TopographicPlaceSearch.class))).thenReturn(List.of(place));
         when(trivoreAuthorizationsMock.getAccessibleCodespaces()).thenReturn(Set.of("ABC", "XYZ"));
 
-        when(trivoreAuthorizationsMock.hasAccess(matches("StopPlace"), matches("BUS"), eq(TrivorePermission.MANAGE))).thenReturn(true);
-        when(trivoreAuthorizationsMock.hasAccess(matches("Parking"), matches("\\{all\\}"), eq(TrivorePermission.MANAGE))).thenReturn(true);
-        when(trivoreAuthorizationsMock.hasAccess(matches("Quay"), matches("\\{all\\}"), eq(TrivorePermission.MANAGE))).thenReturn(true);
-        when(trivoreAuthorizationsMock.hasAccess(matches("StopPlace"), matches("RAIL"), eq(TrivorePermission.MANAGE))).thenReturn(false);
+        when(trivoreAuthorizationsMock.hasAccess(matches("StopPlace"), matches("BUS"), eq(TrivorePermission.MANAGE), anyBoolean())).thenReturn(true);
+        when(trivoreAuthorizationsMock.hasAccess(matches("Parking"), matches("\\{all\\}"), eq(TrivorePermission.MANAGE), anyBoolean())).thenReturn(true);
+        when(trivoreAuthorizationsMock.hasAccess(matches("Quay"), matches("\\{all\\}"), eq(TrivorePermission.MANAGE), anyBoolean())).thenReturn(true);
+        when(trivoreAuthorizationsMock.hasAccess(matches("StopPlace"), matches("RAIL"), eq(TrivorePermission.MANAGE), anyBoolean())).thenReturn(false);
         if (enableCodeSpaceFiltering) {
             when(trivoreAuthorizationsMock.hasAccessToCodespace(matches(allowedCodeSpace))).thenReturn(true);
             when(trivoreAuthorizationsMock.hasAccessToCodespace(not(matches(allowedCodeSpace)))).thenReturn(false);

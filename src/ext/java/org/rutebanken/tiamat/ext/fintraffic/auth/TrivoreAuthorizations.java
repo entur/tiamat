@@ -109,7 +109,7 @@ public class TrivoreAuthorizations {
     /**
      * @return Returns the <code>sub</code> claim of JWT or human readable "unknown" value if token isn't present.
      */
-    private static String getCurrentSubject() {
+    public static String getCurrentSubject() {
         return getToken().map(Jwt::getSubject).orElse("<unknown user>");
     }
 
@@ -301,13 +301,17 @@ public class TrivoreAuthorizations {
     }
 
     public boolean hasAccess(String entityType, String transportMode, TrivorePermission permission) {
+        return hasAccess(entityType, transportMode, permission, false);
+    }
+
+    public boolean hasAccess(String entityType, String transportMode, TrivorePermission permission, boolean logEvent) {
         List<String> cascadingPermissions = generateCascadingPermissions(entityType, transportMode, permission);
         Optional<String> r = cascadingPermissions
                 .stream()
                 .filter(this::hasDirectPermission)
                 .findFirst();
 
-        if (logger.isDebugEnabled()) {
+        if (logEvent) {
             String requiredPermission = entityType + ":" + transportMode + ":" + permission.getValue();
             String s = "User [" + getCurrentSubject() + "]";
             if (r.isPresent()) {
@@ -316,7 +320,7 @@ public class TrivoreAuthorizations {
                 s += " is not allowed to access [" + requiredPermission + "]";
             }
             s += (", possible applicable permissions were " + cascadingPermissions);
-            logger.debug(s);
+            logger.info(s);
         }
 
         return r.isPresent();
