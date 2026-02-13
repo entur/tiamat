@@ -49,7 +49,6 @@ public class TrivoreAuthorizations {
     private final String oidcServerUri;
     private final String clientId;
     private final String clientSecret;
-    private final boolean enableCodespaceFiltering;
 
     /**
      * Poor man's infinite cache. This content needs to be loaded once and should never change.
@@ -61,12 +60,10 @@ public class TrivoreAuthorizations {
     public TrivoreAuthorizations(WebClient webClient,
                                  String oidcServerUri,
                                  String clientId,
-                                 String clientSecret,
-                                 boolean enableCodespaceFiltering) {
+                                 String clientSecret) {
         this.oidcServerUri = oidcServerUri;
         this.clientId = clientId;
         this.clientSecret = clientSecret;
-        this.enableCodespaceFiltering = enableCodespaceFiltering;
         this.httpClient = webClient;
         this.externalPermissionCache = createCache(50, Duration.of(5, MINUTES), new CacheLoader<>() {
             @Override
@@ -222,37 +219,6 @@ public class TrivoreAuthorizations {
             logger.trace("User [{}] has permission [{}] {}", getCurrentSubject(), directPermission, hasPermission);
         }
         return hasPermission;
-    }
-
-    public boolean hasAccessToCodespace(String codespace) {
-        if (!enableCodespaceFiltering) {
-            logger.debug("Codespace filtering is disabled, will not block access to {}", codespace);
-            return true;
-        }
-
-        return getToken()
-                .flatMap(jwt -> fetchTrivoreUsersGroupMemberships(jwt.getSubject()))
-                .map(groupMemberships -> {
-                    for (GroupMembership groupMembership : groupMemberships) {
-                        Set<String> accessibleCodespaces = groupMembership.getCodespaces();
-                        if (accessibleCodespaces.contains(codespace)) {
-                            if (logger.isTraceEnabled()) {
-                                logger.trace("User [{}] is allowed to access codespace {} [{}]", getCurrentSubject(), codespace, groupMembership.id());
-                            }
-                            return true;
-                        }
-                    }
-                    if (logger.isTraceEnabled()) {
-                        logger.trace("User [{}] is not allowed to access codespace {}", getCurrentSubject(), codespace);
-                    }
-                    return false;
-                })
-                .orElseGet(() -> {
-                    if (logger.isTraceEnabled()) {
-                        logger.trace("Could not resolve {} codespace access for user [{}]", codespace, getCurrentSubject());
-                    }
-                    return false;
-                });
     }
 
     public Set<String> getAccessibleCodespaces() {

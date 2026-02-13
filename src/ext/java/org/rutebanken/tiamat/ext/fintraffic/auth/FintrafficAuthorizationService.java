@@ -27,8 +27,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.rutebanken.tiamat.ext.fintraffic.auth.TrivoreAuthorizations.ENTITY_TYPE_ALL;
@@ -106,11 +104,7 @@ public class FintrafficAuthorizationService implements AuthorizationService {
         if (entity == null) {
             return true;
         }
-        String codespace = getCodespace(entity.getNetexId());
         if (!trivoreAuthorizations.hasAccess(detectEntityType(entity), detectTransportMode(entity), MANAGE, logEvent)) {
-            return false;
-        }
-        if (!trivoreAuthorizations.hasAccessToCodespace(codespace)) {
             return false;
         }
 
@@ -239,18 +233,5 @@ public class FintrafficAuthorizationService implements AuthorizationService {
     @Override
     public boolean isGuest() {
         return !trivoreAuthorizations.isAuthenticated();
-    }
-
-    private final Pattern netexIdPattern = Pattern.compile("([A-Z]{3}):([^:]*):([^:]*)");
-    private String getCodespace(String netexId) {
-        if (netexId == null) {
-            return null;
-        }
-        Matcher matcher = netexIdPattern.matcher(netexId);
-        if (matcher.matches()) {
-            return matcher.group(1);
-        } else {
-            throw new InvalidNetexIdException(netexId + " is not a valid NeTEx id");
-        }
     }
 }
