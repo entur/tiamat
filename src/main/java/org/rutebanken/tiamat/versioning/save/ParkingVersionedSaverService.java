@@ -20,6 +20,7 @@ import com.google.api.client.util.Preconditions;
 import org.rutebanken.tiamat.auth.AuthorizationService;
 import org.rutebanken.tiamat.auth.UsernameFetcher;
 import org.rutebanken.tiamat.changelog.EntityChangedListener;
+import org.rutebanken.tiamat.diff.TiamatObjectDiffer;
 import org.rutebanken.tiamat.model.DataManagedObjectStructure;
 import org.rutebanken.tiamat.model.Parking;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -65,6 +66,9 @@ public class ParkingVersionedSaverService {
     @Autowired
     private EntityChangedListener entityChangedListener;
 
+    @Autowired
+    private TiamatObjectDiffer tiamatObjectDiffer;
+
     public Parking saveNewVersion(Parking newVersion) {
 
         Preconditions.checkArgument(newVersion.getParentSiteRef() != null, "Parent site ref cannot be null for parking");
@@ -94,7 +98,11 @@ public class ParkingVersionedSaverService {
         newVersion.setChangedBy(usernameFetcher.getUserNameForAuthenticatedUser());
         result = parkingRepository.save(newVersion);
 
-        logger.info("Saved parking {}, version {}, name {}", result.getNetexId(), result.getVersion(), result.getName());
+        logger.info("Parking [{}], version {} changed by user [{}].", result.getNetexId(), result.getVersion(), result.getChangedBy());
+
+        if (existing != null) {
+            tiamatObjectDiffer.logDifference(existing, result);
+        }
 
         prometheusMetricsService.registerEntitySaved(newVersion.getClass(),1L);
 

@@ -176,7 +176,6 @@ public class StopPlaceVersionedSaverService {
         newVersion = versionIncrementor.initiateOrIncrementVersions(newVersion);
 
         newVersion.setChangedBy(usernameFetcher.getUserNameForAuthenticatedUser());
-        logger.info("StopPlace [{}], version {} changed by user [{}]. {}", newVersion.getNetexId(), newVersion.getVersion(), newVersion.getChangedBy(), newVersion.getValidBetween());
 
         if (newVersion.getWeighting() == null) {
             logger.info("Weighting is null for stop {} {}. Setting default value {}.", newVersion.getName(), newVersion.getNetexId(), DEFAULT_WEIGHTING);
@@ -201,6 +200,9 @@ public class StopPlaceVersionedSaverService {
             }
         }
         newVersion = stopPlaceRepository.save(newVersion);
+
+        logger.info("StopPlace [{}], version {} changed by user [{}]. {}", newVersion.getNetexId(), newVersion.getVersion(), newVersion.getChangedBy(), newVersion.getValidBetween());
+
         logger.debug("Saved stop place with id: {} and childs {}", newVersion.getId(), newVersion.getChildren().stream().map(ch -> ch.getId()).collect(toList()));
 
         updateParentSiteRefsForChildren(newVersion);
