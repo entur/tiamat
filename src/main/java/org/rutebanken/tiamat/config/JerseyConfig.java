@@ -17,6 +17,7 @@ package org.rutebanken.tiamat.config;
 
 
 import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
+import org.glassfish.jersey.jaxb.internal.XmlJaxbElementProvider;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
 import org.rutebanken.tiamat.filter.LoggingFilter;
@@ -32,6 +33,8 @@ import org.rutebanken.tiamat.rest.netex.publicationdelivery.AsyncExportResource;
 import org.rutebanken.tiamat.rest.netex.publicationdelivery.ExportResource;
 import org.rutebanken.tiamat.rest.netex.publicationdelivery.ImportResource;
 import org.rutebanken.tiamat.rest.promethouse.PrometheusResource;
+import org.rutebanken.tiamat.rest.write.controllers.JobControllerImpl;
+import org.rutebanken.tiamat.rest.write.controllers.StopPlaceControllerImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
@@ -86,6 +89,8 @@ public class JerseyConfig {
         publicResources.add(AsyncExportResource.class);
         publicResources.add(ExportResource.class);
         publicResources.add(GraphQLResource.class);
+        publicResources.add(StopPlaceControllerImpl.class);
+        publicResources.add(JobControllerImpl.class);
 
         publicResources.add(GeneralExceptionMapper.class);
         publicResources.add(ErrorResponseEntityMessageBodyWriter.class);
@@ -94,10 +99,16 @@ public class JerseyConfig {
 
         ResourceConfig resourceConfig = new ResourceConfig(publicResources);
         resourceConfig.register(JerseyJava8TimeConverterProvider.class);
+
+        // TODO: ai suggested these. why are they needed?
+        resourceConfig.register(XmlJaxbElementProvider.App.class);
+        resourceConfig.register(XmlJaxbElementProvider.General.class);
+        resourceConfig.register(XmlJaxbElementProvider.Text.class);
         ServletRegistrationBean publicServicesJersey = new ServletRegistrationBean(new ServletContainer(resourceConfig));
 
 
         publicServicesJersey.addUrlMappings(SERVICES_STOP_PLACE_PATH + "/*");
+
         publicServicesJersey.setName("PublicJersey");
 
         publicServicesJersey.setLoadOnStartup(0);
