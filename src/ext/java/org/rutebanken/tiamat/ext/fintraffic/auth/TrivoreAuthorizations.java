@@ -270,14 +270,14 @@ public class TrivoreAuthorizations {
         return hasAccess(entityType, transportMode, permission, false);
     }
 
-    public boolean hasAccess(String entityType, String transportMode, TrivorePermission permission, boolean logEvent) {
+    public boolean hasAccess(String entityType, String transportMode, TrivorePermission permission, boolean logAuthorizationCheck) {
         List<String> cascadingPermissions = generateCascadingPermissions(entityType, transportMode, permission);
         Optional<String> r = cascadingPermissions
                 .stream()
                 .filter(this::hasDirectPermission)
                 .findFirst();
 
-        if (logEvent) {
+        if (logAuthorizationCheck) {
             String requiredPermission = entityType + ":" + transportMode + ":" + permission.getValue();
             String s = "User [" + getCurrentSubject() + "]";
             if (r.isPresent()) {

@@ -91,8 +91,8 @@ public class FintrafficAuthorizationService implements AuthorizationService {
         return this.canDeleteEntity(entity, false);
     }
 
-    private boolean canDeleteEntity(EntityStructure entity, boolean logEvent) {
-        return trivoreAuthorizations.hasAccess(detectEntityType(entity), detectTransportMode(entity), ADMINISTER, logEvent);
+    private boolean canDeleteEntity(EntityStructure entity, boolean logAuthorizationCheck) {
+        return trivoreAuthorizations.hasAccess(detectEntityType(entity), detectTransportMode(entity), ADMINISTER, logAuthorizationCheck);
     }
 
     @Override
@@ -100,26 +100,26 @@ public class FintrafficAuthorizationService implements AuthorizationService {
        return canEditEntity(entity, false);
     }
 
-    private boolean canEditEntity(EntityStructure entity, boolean logEvent) {
+    private boolean canEditEntity(EntityStructure entity, boolean logAuthorizationCheck) {
         if (entity == null) {
             return true;
         }
-        if (!trivoreAuthorizations.hasAccess(detectEntityType(entity), detectTransportMode(entity), MANAGE, logEvent)) {
+        if (!trivoreAuthorizations.hasAccess(detectEntityType(entity), detectTransportMode(entity), MANAGE, logAuthorizationCheck)) {
             return false;
         }
 
         if (entity instanceof StopPlace stop) {
             // Ensure that user has sufficient permission to edit all nested entities
-            if (!stop.getChildren().stream().allMatch(e -> canEditEntity(e, logEvent))) {
+            if (!stop.getChildren().stream().allMatch(e -> canEditEntity(e, logAuthorizationCheck))) {
                 return false;
             }
-            if (!stop.getQuays().stream().allMatch(e -> canEditEntity(e, logEvent))) {
+            if (!stop.getQuays().stream().allMatch(e -> canEditEntity(e, logAuthorizationCheck))) {
                 return false;
             }
         }
 
         if (entity instanceof Zone_VersionStructure zone) {
-            return canEditEntity(zone.getCentroid(), logEvent);
+            return canEditEntity(zone.getCentroid(), logAuthorizationCheck);
         }
         return true;
     }
@@ -140,12 +140,12 @@ public class FintrafficAuthorizationService implements AuthorizationService {
         return canEditEntity(point, false);
     }
 
-    private boolean canEditEntity(Point point, boolean logEvent) {
+    private boolean canEditEntity(Point point, boolean logAuthorizationCheck) {
         logger.trace("FintrafficAuthorizationService.canEditEntity({})", point);
         Set<String> accessibleCodespaces = trivoreAuthorizations.getAccessibleCodespaces();
 
         if (accessibleCodespaces.isEmpty()) {
-            if (logEvent) {
+            if (logAuthorizationCheck) {
                 logger.info("User [{}] has no accessible codespaces, cannot edit entity at point {}.", TrivoreAuthorizations.getCurrentSubject(), point);
             }
             logger.trace("FintrafficAuthorizationService.canEditEntity({}) codespaces is empty", point);
@@ -162,7 +162,7 @@ public class FintrafficAuthorizationService implements AuthorizationService {
                     }
                 }
         );
-        if (logEvent) {
+        if (logAuthorizationCheck) {
             String isAllowed = result ? "is allowed": "is not allowed";
             logger.info("User [{}] with codespaces {} {} to edit entity at point {}.", TrivoreAuthorizations.getCurrentSubject(), accessibleCodespaces, isAllowed, point);
         }
