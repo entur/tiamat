@@ -37,6 +37,6 @@ public class ReadApiBackgroundJobs {
             return;
         }
         logger.info("Scheduling background job for netexRepository::checkDatabaseConsistency");
-        backgroundJobExecutor.scheduleAtFixedRate(netexRepository::checkDatabaseConsistency, 2, 15, TimeUnit.MINUTES);
+        backgroundJobExecutor.scheduleAtFixedRate(netexRepository::checkDatabaseConsistency, 2, 360, TimeUnit.MINUTES);
     }
 }
