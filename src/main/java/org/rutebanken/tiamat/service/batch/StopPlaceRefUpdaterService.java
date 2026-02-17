@@ -13,6 +13,7 @@ import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.FareZoneRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.repository.TariffZoneRepository;
+import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.rutebanken.tiamat.service.TariffZonesLookupService;
 import org.rutebanken.tiamat.service.TopographicPlaceLookupService;
 import org.slf4j.Logger;
@@ -42,6 +43,7 @@ public class StopPlaceRefUpdaterService {
     private final StopPlaceRepository stopPlaceRepository;
     private final TariffZoneRepository tariffZoneRepository;
     private final FareZoneRepository fareZoneRepository;
+    private final TopographicPlaceRepository topographicPlaceRepository;
 
     private final TariffZonesLookupService tariffZonesLookupService;
     private final TopographicPlaceLookupService topographicPlaceLookupService;
@@ -54,6 +56,7 @@ public class StopPlaceRefUpdaterService {
     public StopPlaceRefUpdaterService(StopPlaceRepository stopPlaceRepository,
                                       TariffZoneRepository tariffZoneRepository,
                                       FareZoneRepository fareZoneRepository,
+                                      TopographicPlaceRepository topographicPlaceRepository,
                                       TariffZonesLookupService tariffZonesLookupService,
                                       TopographicPlaceLookupService topographicPlaceLookupService,
                                       EntityManager entityManager,
@@ -62,6 +65,7 @@ public class StopPlaceRefUpdaterService {
         this.stopPlaceRepository = stopPlaceRepository;
         this.tariffZoneRepository = tariffZoneRepository;
         this.fareZoneRepository = fareZoneRepository;
+        this.topographicPlaceRepository = topographicPlaceRepository;
         this.tariffZonesLookupService = tariffZonesLookupService;
         this.topographicPlaceLookupService = topographicPlaceLookupService;
         this.entityManager = entityManager;
@@ -94,22 +98,32 @@ public class StopPlaceRefUpdaterService {
         }
     }
 
-    /*
-     * Updates stop place tariff zone ref faster
-     * Note currently this method updates only tariff zone refs
-     * to update topographical places use updateStopsLegacy.
+    /**
+     * Updates stop place refs (tariff zones, fare zones, and topographic places) using native queries.
+     * This is significantly faster than the legacy updater which processes stops one-by-one.
      */
     public void updateStops() {
-        logger.info("About to update all currently valid stop places (tariff zone and fare zone refs)");
-        long startTime = System.currentTimeMillis();
+        logger.info("About to update all currently valid stop places (tariff zone, fare zone, and topographic place refs)");
+        long totalStartTime = System.currentTimeMillis();
 
+        long stepStartTime = System.currentTimeMillis();
         stopPlaceRepository.deleteStopPlaceTariffZoneRefs();
-        tariffZoneRepository.updateStopPlaceTariffZoneRef();
+        logger.info("Deleted stop place tariff zone refs in {} ms", System.currentTimeMillis() - stepStartTime);
+
+        stepStartTime = System.currentTimeMillis();
+        int tariffZoneUpdates = tariffZoneRepository.updateStopPlaceTariffZoneRef();
+        logger.info("Updated {} tariff zone refs in {} ms", tariffZoneUpdates, System.currentTimeMillis() - stepStartTime);
+
+        stepStartTime = System.currentTimeMillis();
         fareZoneRepository.updateStopPlaceTariffZoneRef();
+        logger.info("Updated fare zone refs in {} ms", System.currentTimeMillis() - stepStartTime);
 
-        long timeSpent = System.currentTimeMillis() - startTime;
-        logger.info("Update stops in {} ms.", timeSpent);
+        stepStartTime = System.currentTimeMillis();
+        int topographicPlaceUpdates = topographicPlaceRepository.updateStopPlaceTopographicPlaceRef();
+        logger.info("Updated {} topographic place refs in {} ms", topographicPlaceUpdates, System.currentTimeMillis() - stepStartTime);
 
+        long totalTimeSpent = System.currentTimeMillis() - totalStartTime;
+        logger.info("Completed all stop place ref updates in {} ms", totalTimeSpent);
     }
 
     /*

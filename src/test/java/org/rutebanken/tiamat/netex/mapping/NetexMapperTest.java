@@ -17,7 +17,6 @@ package org.rutebanken.tiamat.netex.mapping;
 
 import jakarta.xml.bind.JAXBElement;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.rutebanken.netex.model.AccessibilityLimitations_RelStructure;
@@ -280,10 +279,6 @@ public class NetexMapperTest extends TiamatIntegrationTest {
         assertThat(netexStopPlace.getId()).isEqualTo("NSR:StopPlace:123456");
     }
 
-    /**
-     * Ignored because the logic for handling incoming NSR IDs must be implemented differently.
-     */
-    @Ignore
     @Test
     public void mapNetexQuayIdToInternal() {
         org.rutebanken.netex.model.Quay netexQuay = new org.rutebanken.netex.model.Quay();

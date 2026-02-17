@@ -15,7 +15,6 @@
 
 package org.rutebanken.tiamat.repository;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.internal.util.collections.Sets;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
@@ -33,7 +32,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 ;
 
 
-@Ignore
 public class PathLinkRepositoryTest extends TiamatIntegrationTest {
 
     @Test

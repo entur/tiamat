@@ -17,7 +17,6 @@ package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
 import net.opengis.gml._3.DirectPositionListType;
 import net.opengis.gml._3.LineStringType;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.rutebanken.netex.model.LocationStructure;
 import org.rutebanken.netex.model.PathDirectionEnumeration;
@@ -39,7 +38,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Ignore
+
 public class PathLinkImportTest extends TiamatIntegrationTest {
 
     @Autowired

@@ -15,14 +15,10 @@
 
 package org.rutebanken.tiamat.versioning;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
-import org.rutebanken.tiamat.model.AddressablePlaceRefStructure;
 import org.rutebanken.tiamat.model.InstalledEquipment_VersionStructure;
-import org.rutebanken.tiamat.model.PathLink;
-import org.rutebanken.tiamat.model.PathLinkEnd;
 import org.rutebanken.tiamat.model.PlaceEquipment;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.SiteRefStructure;
@@ -111,7 +107,6 @@ public class VersionCreatorTest extends TiamatIntegrationTest {
         assertThat(actualStopPlaceId).isNull();
     }
 
-    @Ignore
     @Test
     public void deepCopiedObjectShouldHaveOriginalId() {
         StopPlace stopPlace = new StopPlace();
@@ -139,43 +134,6 @@ public class VersionCreatorTest extends TiamatIntegrationTest {
         assertThat(newVersion.getChanged()).isNotNull();
     }
 
-
-    @Ignore // Should be testing future path link saver service
-    @Test
-    public void createNewVersionOfPathLink() {
-        Quay fromQuay = new Quay();
-        fromQuay.setVersion(1L);
-        fromQuay = quayRepository.save(fromQuay);
-
-        Quay toQuay = new Quay();
-        toQuay.setVersion(1L);
-        toQuay = quayRepository.save(toQuay);
-
-        PathLinkEnd pathLinkEndFromQuay = new PathLinkEnd(new AddressablePlaceRefStructure(fromQuay.getNetexId(), String.valueOf(fromQuay.getVersion())));
-        PathLinkEnd pathLinkEndToQuay = new PathLinkEnd(new AddressablePlaceRefStructure(toQuay.getNetexId(), String.valueOf(toQuay.getVersion())));
-
-        PathLink pathLink = new PathLink(pathLinkEndFromQuay, pathLinkEndToQuay);
-        pathLink.setVersion(1L);
-
-        pathLink = pathLinkRepository.save(pathLink);
-
-        PathLink newVersion = versionCreator.createCopy(pathLink, PathLink.class);
-
-        assertThat(newVersion.getVersion())
-                .describedAs("The version of path link should have been incremented")
-                .isEqualTo(pathLink.getVersion() + 1);
-
-        newVersion = pathLinkRepository.save(newVersion);
-
-        PathLink actualNewVersionPathLink = pathLinkRepository.findFirstByNetexIdOrderByVersionDesc(newVersion.getNetexId());
-
-        assertThat(actualNewVersionPathLink.getVersion()).isEqualTo(2L);
-        assertThat(actualNewVersionPathLink.getFrom().getPlaceRef().getRef()).isEqualTo(fromQuay.getNetexId());
-        assertThat(actualNewVersionPathLink.getTo().getPlaceRef().getRef()).isEqualTo(toQuay.getNetexId());
-
-        PathLink actualOldVersionPathLink = pathLinkRepository.findFirstByNetexIdAndVersion(newVersion.getNetexId(), 1L);
-        assertThat(actualOldVersionPathLink).isNotNull();
-    }
 
     @Test
     public void createCopyOfStopPlaceWithChildren() {

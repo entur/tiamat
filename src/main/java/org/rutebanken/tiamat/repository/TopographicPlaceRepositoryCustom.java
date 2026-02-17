@@ -35,4 +35,13 @@ public interface TopographicPlaceRepositoryCustom extends DataManagedObjectStruc
     Iterator<TopographicPlace> scrollTopographicPlaces();
 
     List<TopographicPlace> getTopographicPlacesFromStopPlaceIds(Set<Long> stopPlaceDbIds);
+
+    /**
+     * Updates stop_place.topographic_place_id for all valid stop places using a native query
+     * with PostGIS spatial intersection. Prioritizes by admin hierarchy:
+     * MUNICIPALITY (highest) > COUNTY > COUNTRY (lowest).
+     *
+     * @return the number of stop places updated
+     */
+    int updateStopPlaceTopographicPlaceRef();
 }

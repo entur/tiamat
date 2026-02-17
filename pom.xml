@@ -50,7 +50,7 @@
 
     <properties>
         <java.version>21</java.version>
-        <spring-cloud-gcp.version>5.13.8</spring-cloud-gcp.version>
+        <spring-cloud-gcp.version>5.13.10</spring-cloud-gcp.version>
         <geotools.version>30.2</geotools.version>
         <orika-core.version>1.5.4</orika-core.version>
         <graphql-java.version>20.9</graphql-java.version>
@@ -58,7 +58,7 @@
         <hazelcast-hibernate53.version>5.2.0</hazelcast-hibernate53.version>
         <hazelcast.version>5.2.5</hazelcast.version>
         <swagger-jersey2.version>2.2.42</swagger-jersey2.version>
-        <netex-java-model.version>2.0.15</netex-java-model.version>
+        <netex-java-model.version>2.0.15.2</netex-java-model.version>
         <entur.helpers.version>5.50.0</entur.helpers.version>
         <jts-core.version>1.20.0</jts-core.version>
         <groovy-all.version>4.0.30</groovy-all.version>
@@ -71,7 +71,7 @@
         <maven.compiler.args>--add-opens java.base/java.lang=ALL-UNNAMED</maven.compiler.args>
         <testcontainers.version>1.21.4</testcontainers.version>
         <build-helper-maven-plugin.version>3.6.1</build-helper-maven-plugin.version>
-        <metrics-graphite.version>4.2.37</metrics-graphite.version>
+        <metrics-graphite.version>4.2.38</metrics-graphite.version>
         <!-- There is breaking change in spring-boot 3.4/hibernate 6.6.5 -->
         <hibernate.version>6.5.3.Final</hibernate.version>
     </properties>

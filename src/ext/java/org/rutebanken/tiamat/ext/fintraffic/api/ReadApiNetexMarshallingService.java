@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.ext.fintraffic.api;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBElement;
 import jakarta.xml.bind.JAXBException;
@@ -24,6 +25,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -60,6 +62,34 @@ public class ReadApiNetexMarshallingService {
         this.netexRepository = netexRepository;
         this.serviceFrameElementCreator = serviceFrameElementCreator;
         this.searchKeyService = searchKeyService;
+    }
+
+    @PostConstruct
+    public void initializeJAXBContextCache() {
+        Thread.ofVirtual().name("read-api-netex-marshalling-service-jaxb-context-cache-init").start(() -> {
+            Instant start = Instant.now();
+            List<Class<?>> supportedClasses = List.of(
+                    org.rutebanken.netex.model.StopPlace.class,
+                    org.rutebanken.netex.model.Parking.class,
+                    org.rutebanken.netex.model.TopographicPlace.class,
+                    org.rutebanken.netex.model.ScheduledStopPoint.class,
+                    org.rutebanken.netex.model.PassengerStopAssignment.class
+            );
+            String classNames = supportedClasses.stream()
+                    .map(Class::getSimpleName)
+                    .reduce((a, b) -> a + ", " + b)
+                    .orElse("");
+
+            logger.info("Starting asynchronous JAXBContext cache initialization for {}", classNames);
+
+            try {
+                supportedClasses.forEach(clazz -> jaxbContextMap.computeIfAbsent(clazz, ReadApiNetexMarshallingService::createJAXBContext));
+                long duration = Instant.now().toEpochMilli() - start.toEpochMilli();
+                logger.info("JAXBContext cache initialized for {} classes in {} ms", supportedClasses.size(), duration);
+            } catch (Exception e) {
+                logger.error("Failed to initialize JAXBContext cache", e);
+            }
+        });
     }
 
     public void handleEntityChange(EntityInVersionStructure entity, EntityChangedEvent event) {

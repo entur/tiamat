@@ -18,7 +18,6 @@ package org.rutebanken.tiamat.repository;
 import com.google.common.collect.Sets;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
@@ -371,8 +370,6 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
     }
 
     @Test
-    @Ignore
-    //todo: fix this test - it fails because of the fuzzy match
     public void findNearbyStopPlaceFuzzyMatch() throws Exception {
         StopPlace stopPlace = new StopPlace();
         stopPlace.setName(new EmbeddableMultilingualString("Nesbru nord", ""));
@@ -383,7 +380,7 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
 
         Envelope envelope = new Envelope(10.500340, 59.875649, 10.500699, 59.875924);
 
-        String result = stopPlaceRepository.findNearbyStopPlace(envelope, "Nesbru N", StopTypeEnumeration.ONSTREET_BUS);
+        String result = stopPlaceRepository.findNearbyStopPlace(envelope, "Nesbru No", StopTypeEnumeration.ONSTREET_BUS);
         assertThat(result).isNotNull();
         StopPlace actual = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(result);
         assertThat(actual.getName().getValue()).isEqualTo(stopPlace.getName().getValue());

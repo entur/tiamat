@@ -32,6 +32,7 @@ import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.TOPOGRAPHIC_PLACE_
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.VERSION;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.embeddableMultilingualStringObjectType;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.geoJsonObjectType;
+import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.geometryFieldDefinition;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.topographicPlaceTypeEnum;
 
 @Component
@@ -59,6 +60,7 @@ public class TopographicPlaceObjectTypeCreator {
                 .field(newFieldDefinition()
                         .name(POLYGON)
                         .type(geoJsonObjectType))
+                .field(geometryFieldDefinition)
                 .build();
     }
 

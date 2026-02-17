@@ -15,8 +15,8 @@
 
 package org.rutebanken.tiamat.auth.check;
 
+import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Point;
-import org.locationtech.jts.geom.Polygon;
 import org.rutebanken.helper.organisation.AdministrativeZoneChecker;
 import org.rutebanken.helper.organisation.RoleAssignment;
 import org.rutebanken.tiamat.model.TopographicPlace;
@@ -48,16 +48,20 @@ public class TopographicPlaceChecker implements AdministrativeZoneChecker {
                 logger.warn("RoleAssignment contains unknown adminZone reference: {}. Will not allow authorization", roleAssignment.getAdministrativeZone());
                 return false;
             }
-            Polygon polygon = topographicPlace.getPolygon();
+            final Geometry geometry = topographicPlace.getGeometry();
+            if (geometry == null) {
+                logger.warn("TopographicPlace {}-{} has no polygon or multiSurface. Will not allow authorization", topographicPlace.getNetexId(), topographicPlace.getVersion());
+                return false;
+            }
 
             if (entity instanceof Zone_VersionStructure zone) {
                 if (zone.getCentroid() == null) {
-                    logger.warn("Centroid is null for entity, cannot match polygon for topographic place {}-{}, Returning true for entity: {}", topographicPlace.getNetexId(), topographicPlace.getVersion(), zone);
+                    logger.warn("Centroid is null for entity, cannot match geometry for topographic place {}-{}, Returning true for entity: {}", topographicPlace.getNetexId(), topographicPlace.getVersion(), zone);
                     return true;
                 }
 
-                if (polygon.contains(zone.getCentroid())) {
-                    logger.debug("Polygon for topographic place {}-{} contains centroid for {}", topographicPlace.getNetexId(), topographicPlace.getVersion(), zone);
+                if (geometry.contains(zone.getCentroid())) {
+                    logger.debug("Geometry for topographic place {}-{} contains centroid for {}", topographicPlace.getNetexId(), topographicPlace.getVersion(), zone);
                     return true;
                 } else {
                     return false;
@@ -79,18 +83,23 @@ public class TopographicPlaceChecker implements AdministrativeZoneChecker {
                 logger.warn("RoleAssignment contains unknown adminZone reference: {}. Will not allow authorization", roleAssignment.getAdministrativeZone());
                 return false;
             }
-            Polygon polygon = topographicPlace.getPolygon();
+            Geometry geometry = topographicPlace.getGeometry();
+            if (geometry == null) {
+                logger.warn("TopographicPlace {}-{} has no polygon or multiSurface. Will not allow authorization", topographicPlace.getNetexId(), topographicPlace.getVersion());
+                return false;
+            }
 
-                if (polygon.contains(point)) {
-                    logger.debug("Polygon for topographic place {}-{} contains point for {}", topographicPlace.getNetexId(), topographicPlace.getVersion(), point);
-                    return true;
-                } else {
-                    logger.warn("No polygon match for topographic place {}-{} and point {}", topographicPlace.getNetexId(), topographicPlace.getVersion(), point);
-                    return false;
-                }
+            if (geometry.contains(point)) {
+                logger.debug("Geometry for topographic place {}-{} contains point {}", topographicPlace.getNetexId(), topographicPlace.getVersion(), point);
+                return true;
+            } else {
+                logger.warn("No geometry match for topographic place {}-{} and point {}", topographicPlace.getNetexId(), topographicPlace.getVersion(), point);
+                return false;
+            }
 
         }
         logger.warn("Cannot look for matches in topographic place for point {} ({})", point, point.getClass().getSimpleName());
         return true;
     }
+
 }

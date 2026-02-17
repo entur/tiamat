@@ -15,7 +15,6 @@
 
 package org.rutebanken.tiamat.auth;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
@@ -42,7 +41,6 @@ import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
-import static org.rutebanken.helper.organisation.AuthorizationConstants.ENTITY_CLASSIFIER_ALL_TYPES;
 import static org.rutebanken.helper.organisation.AuthorizationConstants.ENTITY_TYPE;
 import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_DELETE_STOPS;
 import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_EDIT_STOPS;
@@ -197,92 +195,96 @@ public class TiamatAuthorizationServiceTest extends TiamatIntegrationTest {
 
 
     /**
-     * Test  banned stop place types
-     * EntityType=StopPlace, StopPlaceType=railStation,railReplacementBus
-     * Test ignored as it is not working as expected
+     * Test banned stop place types with administrative zone restrictions.
+     * EntityType=StopPlace, StopPlaceType=!airport,!railStation, Submode=!railReplacementBus
+     *
+     * Uses persistent mode for MockedRoleAssignmentExtractor because getBannedStopPlaceTypes()
+     * and getBannedSubmodes() internally call getRoleAssignmentsForUser() multiple times.
      */
     @Test
-    @Ignore
     public void authorizedGetBannedStopPlaceTypesTest() {
-        RoleAssignment roleAssignment = RoleAssignment.builder()
-                .withRole(ROLE_EDIT_STOPS)
-                .withOrganisation("OST")
-                .withAdministrativeZone("KVE:TopographicalPlace:01")
-                .withEntityClassification(ENTITY_TYPE, "StopPlace")
-                .withEntityClassification("StopPlaceType", "!airport")
-                .withEntityClassification("StopPlaceType", "!railStation")
-                .withEntityClassification("Submode", "!railReplacementBus")
-                .build();
+        // Enable persistent mode so role assignment survives multiple internal calls
+        mockedRoleAssignmentExtractor.setPersistent(true);
+        try {
+            RoleAssignment roleAssignment = RoleAssignment.builder()
+                    .withRole(ROLE_EDIT_STOPS)
+                    .withOrganisation("OST")
+                    .withAdministrativeZone("KVE:TopographicalPlace:01")
+                    .withEntityClassification(ENTITY_TYPE, "StopPlace")
+                    .withEntityClassification("StopPlaceType", "!airport")
+                    .withEntityClassification("StopPlaceType", "!railStation")
+                    .withEntityClassification("Submode", "!railReplacementBus")
+                    .build();
 
-        mockedRoleAssignmentExtractor.setNextReturnedRoleAssignment(roleAssignment);
+            mockedRoleAssignmentExtractor.setNextReturnedRoleAssignment(roleAssignment);
 
-        Point point = geometryFactory.createPoint(new Coordinate(9.536819, 61.772281));
-        Point point2 = geometryFactory.createPoint(new Coordinate(23.682516, 70.664175));
+            Point point = geometryFactory.createPoint(new Coordinate(9.536819, 61.772281));
+            Point point2 = geometryFactory.createPoint(new Coordinate(23.682516, 70.664175));
 
+            TopographicPlace municipality = new TopographicPlace();
+            municipality.setNetexId("KVE:TopographicalPlace:01");
+            municipality.setVersion(1);
+            municipality.setPolygon(createPolygon(point));
+            topographicPlaceRepository.saveAndFlush(municipality);
 
-        TopographicPlace municipality = new TopographicPlace();
-        municipality.setNetexId("KVE:TopographicalPlace:01");
-        municipality.setVersion(1);
-        municipality.setPolygon(createPolygon(point));
-        topographicPlaceRepository.saveAndFlush(municipality);
+            TopographicPlace municipality2 = new TopographicPlace();
+            municipality2.setNetexId("KVE:TopographicalPlace:02");
+            municipality2.setVersion(1);
+            municipality2.setPolygon(createPolygon(point2));
+            topographicPlaceRepository.saveAndFlush(municipality2);
 
-        TopographicPlace municipality2 = new TopographicPlace();
-        municipality2.setNetexId("KVE:TopographicalPlace:02");
-        municipality2.setVersion(1);
-        municipality2.setPolygon(createPolygon(point2));
-        topographicPlaceRepository.saveAndFlush(municipality2);
+            StopPlace stopPlace = new StopPlace();
+            stopPlace.setStopPlaceType(StopTypeEnumeration.BUS_STATION);
+            stopPlace.setBusSubmode(BusSubmodeEnumeration.REGIONAL_BUS);
+            stopPlace.setTopographicPlace(municipality);
+            stopPlace.setCentroid(point);
+            stopPlaceRepository.saveAndFlush(stopPlace);
 
+            StopPlace railStation = new StopPlace();
+            railStation.setStopPlaceType(StopTypeEnumeration.RAIL_STATION);
+            railStation.setTopographicPlace(municipality);
+            railStation.setCentroid(point);
+            stopPlaceRepository.saveAndFlush(railStation);
 
+            StopPlace outsideStopPlace = new StopPlace();
+            outsideStopPlace.setStopPlaceType(StopTypeEnumeration.BUS_STATION);
+            outsideStopPlace.setBusSubmode(BusSubmodeEnumeration.REGIONAL_BUS);
+            outsideStopPlace.setTopographicPlace(municipality2);
+            outsideStopPlace.setCentroid(point2);
+            stopPlaceRepository.saveAndFlush(outsideStopPlace);
 
-        StopPlace stopPlace = new StopPlace();
-        stopPlace.setStopPlaceType(StopTypeEnumeration.BUS_STATION);
-        stopPlace.setBusSubmode(BusSubmodeEnumeration.REGIONAL_BUS);
-        stopPlace.setTopographicPlace(municipality);
-        stopPlace.setCentroid(point);
-        stopPlaceRepository.saveAndFlush(stopPlace);
+            // Test getBannedStopPlaceTypes for stop place inside authorized zone
+            final Set<StopTypeEnumeration> bannedStopPlaceTypes = authorizationService.getBannedStopPlaceTypes(stopPlace);
+            assertThat("Should contain banned StopPlaceType airport", bannedStopPlaceTypes.contains(StopTypeEnumeration.AIRPORT), is(true));
+            assertThat("Should contain banned StopPlaceType railStation", bannedStopPlaceTypes.contains(StopTypeEnumeration.RAIL_STATION), is(true));
 
-        StopPlace railStation = new StopPlace();
-        railStation.setStopPlaceType(StopTypeEnumeration.RAIL_STATION);
-        railStation.setTopographicPlace(municipality);
-        railStation.setCentroid(point);
-        stopPlaceRepository.saveAndFlush(railStation);
+            // Test getBannedSubmodes for stop place inside authorized zone
+            final Set<SubmodeEnumuration> bannedSubmodes = authorizationService.getBannedSubmodes(stopPlace);
+            assertThat("Should contain banned Submode railReplacementBus", bannedSubmodes.contains(SubmodeEnumuration.RAIL_REPLACEMENT_BUS), is(true));
 
-        StopPlace outsideStopPlace = new StopPlace();
-        outsideStopPlace.setStopPlaceType(StopTypeEnumeration.BUS_STATION);
-        outsideStopPlace.setBusSubmode(BusSubmodeEnumeration.REGIONAL_BUS);
-        outsideStopPlace.setTopographicPlace(municipality2);
-        outsideStopPlace.setCentroid(point2);
-        stopPlaceRepository.saveAndFlush(outsideStopPlace);
+            // Test canEditEntity for allowed stop place type
+            boolean authorized = authorizationService.canEditEntity(stopPlace);
+            assertThat("Should be authorized as both type and submode are allowed", authorized, is(true));
 
-        final Set<StopTypeEnumeration> bannedStopPlaceTypes = authorizationService.getBannedStopPlaceTypes(stopPlace);
+            // Test canEditEntity for banned stop place type
+            boolean authorizedRail = authorizationService.canEditEntity(railStation);
+            assertThat("Should not be authorized as rail station is banned", authorizedRail, is(false));
 
-        mockedRoleAssignmentExtractor.setNextReturnedRoleAssignment(roleAssignment);
-        final Set<SubmodeEnumuration> bannedSubmodes = authorizationService.getBannedSubmodes(stopPlace);
+            // Test canEditEntity for stop place outside authorized zone
+            boolean authorizedOutside = authorizationService.canEditEntity(outsideStopPlace);
+            assertThat("Should not be authorized as stop place is outside administrative zone", authorizedOutside, is(false));
 
-        assertThat("Should contain banned StopPlaceType", bannedStopPlaceTypes.contains("airport"), is(true));
-        assertThat("Should contain banned StopPlaceType", bannedStopPlaceTypes.contains("railStation"), is(true));
-        assertThat("Should contain banned Submode", bannedSubmodes.contains("railReplacementBus"), is(true));
+            // Test getBannedSubmodes for stop place outside authorized zone (user cannot edit)
+            final Set<SubmodeEnumuration> bannedSubmodesOutside = authorizationService.getBannedSubmodes(outsideStopPlace);
+            assertThat("Should be empty when user cannot edit location (all submodes implicitly banned)", bannedSubmodesOutside.isEmpty(), is(true));
 
-        mockedRoleAssignmentExtractor.setNextReturnedRoleAssignment(roleAssignment);
-        boolean authorized = authorizationService.canEditEntity(stopPlace);
-        assertThat("Should be authorized as both type and submode are allowed", authorized, is(true));
-
-        mockedRoleAssignmentExtractor.setNextReturnedRoleAssignment(roleAssignment);
-        boolean authorizedRail = authorizationService.canEditEntity(railStation);
-        assertThat("Should not be authorized as rail station is banned", authorizedRail, is(false));
-
-
-        mockedRoleAssignmentExtractor.setNextReturnedRoleAssignment(roleAssignment);
-        boolean authorizedOutside = authorizationService.canEditEntity(outsideStopPlace);
-        assertThat("Should be authorized as outside stop place is not in the same topographical place", authorizedOutside, is(false));
-
-        mockedRoleAssignmentExtractor.setNextReturnedRoleAssignment(roleAssignment);
-        final Set<SubmodeEnumuration> bannedSubmodesOutside = authorizationService.getBannedSubmodes(outsideStopPlace);
-        assertThat("Should contain all banned Submode", bannedSubmodesOutside.contains(ENTITY_CLASSIFIER_ALL_TYPES), is(true));
-
-        mockedRoleAssignmentExtractor.setNextReturnedRoleAssignment(roleAssignment);
-        final Set<SubmodeEnumuration> bannedStopPlaceTypesOutside = authorizationService.getBannedSubmodes(outsideStopPlace);
-        assertThat("Should not contain banned stop place type", bannedStopPlaceTypesOutside.isEmpty(), is(true));
+            // Test getBannedStopPlaceTypes for stop place outside authorized zone (user cannot edit)
+            final Set<StopTypeEnumeration> bannedStopPlaceTypesOutside = authorizationService.getBannedStopPlaceTypes(outsideStopPlace);
+            assertThat("Should be empty when user cannot edit location (all types implicitly banned)", bannedStopPlaceTypesOutside.isEmpty(), is(true));
+        } finally {
+            // Reset mock to default behavior for other tests
+            mockedRoleAssignmentExtractor.reset();
+        }
     }
 
     /**

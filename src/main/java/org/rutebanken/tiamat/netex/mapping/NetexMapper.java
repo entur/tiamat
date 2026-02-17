@@ -52,7 +52,6 @@ import org.rutebanken.netex.model.TopographicPlace;
 import org.rutebanken.netex.model.WaitingRoomEquipment;
 import org.rutebanken.tiamat.netex.mapping.mapper.AccessibilityAssessmentMapper;
 import org.rutebanken.tiamat.netex.mapping.mapper.DataManagedObjectStructureMapper;
-import org.rutebanken.tiamat.netex.mapping.mapper.FacilityMapper;
 import org.rutebanken.tiamat.netex.mapping.mapper.FareZoneMapper;
 import org.rutebanken.tiamat.netex.mapping.mapper.GroupOfStopPlacesMapper;
 import org.rutebanken.tiamat.netex.mapping.mapper.GroupOfTariffZonesMapper;
@@ -199,9 +198,8 @@ public class NetexMapper {
                 .byDefault()
                 .register();
 
-        // TODO: Remove the custom mapper and add a .byDefault() one once the netex model library is updated to the latest:
         mapperFactoryWithNetexIdClassBuilder(SiteFacilitySet.class, org.rutebanken.tiamat.model.SiteFacilitySet.class)
-                .customize(new FacilityMapper())
+                .byDefault()
                 .register();
 
         mapperFactoryWithNetexIdClassBuilder(PlaceEquipments_RelStructure.class, org.rutebanken.tiamat.model.PlaceEquipment.class)
@@ -246,15 +244,51 @@ public class NetexMapper {
     }
 
     public TopographicPlace mapToNetexModel(org.rutebanken.tiamat.model.TopographicPlace topographicPlace) {
-        return facade.map(topographicPlace, TopographicPlace.class);
+        return mapToNetexModel(topographicPlace, false);
+    }
+
+    public TopographicPlace mapToNetexModel(org.rutebanken.tiamat.model.TopographicPlace topographicPlace, boolean exportMultiSurface) {
+        TopographicPlace netexTopographicPlace = facade.map(topographicPlace, TopographicPlace.class);
+        if (netexTopographicPlace != null) {
+            if (exportMultiSurface && netexTopographicPlace.getMultiSurface() != null) {
+                netexTopographicPlace.setPolygon(null);
+            } else {
+                netexTopographicPlace.setMultiSurface(null);
+            }
+        }
+        return netexTopographicPlace;
     }
 
     public TariffZone mapToNetexModel(org.rutebanken.tiamat.model.TariffZone tariffZone) {
-        return facade.map(tariffZone, TariffZone.class);
+        return mapToNetexModel(tariffZone, false);
+    }
+
+    public TariffZone mapToNetexModel(org.rutebanken.tiamat.model.TariffZone tariffZone, boolean exportMultiSurface) {
+        TariffZone netexTariffZone = facade.map(tariffZone, TariffZone.class);
+        if (netexTariffZone != null) {
+            if (exportMultiSurface && netexTariffZone.getMultiSurface() != null) {
+                netexTariffZone.setPolygon(null);
+            } else {
+                netexTariffZone.setMultiSurface(null);
+            }
+        }
+        return netexTariffZone;
     }
 
     public FareZone mapToNetexModel(org.rutebanken.tiamat.model.FareZone fareZone) {
-        return facade.map(fareZone, FareZone.class);
+        return mapToNetexModel(fareZone, false);
+    }
+
+    public FareZone mapToNetexModel(org.rutebanken.tiamat.model.FareZone fareZone, boolean exportMultiSurface) {
+        FareZone netexFareZone = facade.map(fareZone, FareZone.class);
+        if (netexFareZone != null) {
+            if (exportMultiSurface && netexFareZone.getMultiSurface() != null) {
+                netexFareZone.setPolygon(null);
+            } else {
+                netexFareZone.setMultiSurface(null);
+            }
+        }
+        return netexFareZone;
     }
 
     public SiteFrame mapToNetexModel(org.rutebanken.tiamat.model.SiteFrame tiamatSiteFrame) {

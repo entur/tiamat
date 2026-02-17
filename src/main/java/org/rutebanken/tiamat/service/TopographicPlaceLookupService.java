@@ -16,8 +16,8 @@
 package org.rutebanken.tiamat.service;
 
 import org.apache.commons.lang3.tuple.ImmutableTriple;
+import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Point;
-import org.locationtech.jts.geom.Polygon;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.exporter.params.TopographicPlaceSearch;
 import org.rutebanken.tiamat.general.ResettableMemoizer;
@@ -48,7 +48,7 @@ public class TopographicPlaceLookupService {
 
     private static final List<TopographicPlaceTypeEnumeration> ADMIN_LEVEL_ORDER = Arrays.asList(TopographicPlaceTypeEnumeration.MUNICIPALITY, TopographicPlaceTypeEnumeration.COUNTY, TopographicPlaceTypeEnumeration.COUNTRY);
 
-    private final ResettableMemoizer<List<ImmutableTriple<String, TopographicPlaceTypeEnumeration, Polygon>>> memoizedTopographicPlaces = new ResettableMemoizer<>(getTopographicPlaceSupplier());
+    private final ResettableMemoizer<List<ImmutableTriple<String, TopographicPlaceTypeEnumeration, Geometry>>> memoizedTopographicPlaces = new ResettableMemoizer<>(getTopographicPlaceSupplier());
 
     @Autowired
     private TopographicPlaceRepository topographicPlaceRepository;
@@ -128,7 +128,7 @@ public class TopographicPlaceLookupService {
         memoizedTopographicPlaces.reset();
     }
 
-    private Supplier<List<ImmutableTriple<String, TopographicPlaceTypeEnumeration, Polygon>>> getTopographicPlaceSupplier() {
+    private Supplier<List<ImmutableTriple<String, TopographicPlaceTypeEnumeration, Geometry>>> getTopographicPlaceSupplier() {
         return () -> {
 
             TopographicPlaceSearch topographicPlaceSearch = TopographicPlaceSearch.newTopographicPlaceSearchBuilder()
@@ -136,12 +136,12 @@ public class TopographicPlaceLookupService {
                     .build();
 
             logger.info("Fetching topographic places from repository");
-            List<ImmutableTriple<String, TopographicPlaceTypeEnumeration, Polygon>> topographicPlaces = topographicPlaceRepository.findTopographicPlace(topographicPlaceSearch)
+            List<ImmutableTriple<String, TopographicPlaceTypeEnumeration, Geometry>> topographicPlaces = topographicPlaceRepository.findTopographicPlace(topographicPlaceSearch)
                     .stream()
-                    .filter(topographicPlace -> topographicPlace.getPolygon() != null)
+                    .filter(topographicPlace -> topographicPlace.getGeometry() != null)
                     .filter(topographicPlace -> ADMIN_LEVEL_ORDER.contains(topographicPlace.getTopographicPlaceType()))
                     .sorted(new TopographicPlaceByAdminLevelComparator())
-                    .map(topographicPlace -> ImmutableTriple.of(topographicPlace.getNetexId(), topographicPlace.getTopographicPlaceType(), topographicPlace.getPolygon()))
+                    .map(topographicPlace -> ImmutableTriple.of(topographicPlace.getNetexId(), topographicPlace.getTopographicPlaceType(), topographicPlace.getGeometry()))
                     .collect(toList());
             logger.info("Fetched {} topographic places from repository", topographicPlaces.size());
             return topographicPlaces;
@@ -154,6 +154,5 @@ public class TopographicPlaceLookupService {
             return ADMIN_LEVEL_ORDER.indexOf(tp1.getTopographicPlaceType()) - ADMIN_LEVEL_ORDER.indexOf(tp2.getTopographicPlaceType());
         }
     }
-
 
 }

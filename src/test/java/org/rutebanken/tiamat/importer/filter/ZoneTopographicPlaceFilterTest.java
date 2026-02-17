@@ -15,7 +15,6 @@
 
 package org.rutebanken.tiamat.importer.filter;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
@@ -31,6 +30,7 @@ import org.rutebanken.tiamat.model.Zone_VersionStructure;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -40,7 +40,6 @@ public class ZoneTopographicPlaceFilterTest extends TiamatIntegrationTest {
     @Autowired
     private ZoneTopographicPlaceFilter zoneTopographicPlaceFilter;
 
-    @Ignore
     @Test
     public void filterByCountyMatch() throws Exception {
 
@@ -59,11 +58,11 @@ public class ZoneTopographicPlaceFilterTest extends TiamatIntegrationTest {
         StopPlace stopPlace = new StopPlace();
         stopPlace.setCentroid(point);
 
-        List<? extends Zone_VersionStructure> list = zoneTopographicPlaceFilter.filterByTopographicPlaceMatch(Arrays.asList(county1.getNetexId()), Arrays.asList(stopPlace));
+        List<? extends Zone_VersionStructure> list = zoneTopographicPlaceFilter.filterByTopographicPlaceMatch(Collections.singletonList(county1.getNetexId()), List.of(stopPlace));
 
         assertThat(list).as("List of stops filtered by county").hasSize(1);
 
-        list = zoneTopographicPlaceFilter.filterByTopographicPlaceMatch(Arrays.asList(county1.getNetexId()), Arrays.asList(stopPlace), true);
+        list = zoneTopographicPlaceFilter.filterByTopographicPlaceMatch(Collections.singletonList(county1.getNetexId()), Arrays.asList(stopPlace), true);
 
         assertThat(list).as("Negated list of stops not in county").isEmpty();
 

@@ -139,5 +139,77 @@ public class CustomScalarsTest {
         return subList;
     }
 
+    /**
+     * Test that pre-structured List coordinates pass through the scalar unchanged.
+     * This is needed for proper GeoJSON output from the GeoJSONCoordinatesFetcher.
+     */
+    @Test
+    public void testSerializePassesThroughPreStructuredList() {
+        // Simulate Polygon with hole format: [[[outer_ring], [hole_ring]]]
+        List<List<List<Double>>> polygonWithHole = new ArrayList<>();
+
+        // Outer ring
+        List<List<Double>> outerRing = new ArrayList<>();
+        outerRing.add(List.of(0.0, 0.0));
+        outerRing.add(List.of(10.0, 0.0));
+        outerRing.add(List.of(10.0, 10.0));
+        outerRing.add(List.of(0.0, 10.0));
+        outerRing.add(List.of(0.0, 0.0));
+        polygonWithHole.add(outerRing);
+
+        // Hole ring
+        List<List<Double>> holeRing = new ArrayList<>();
+        holeRing.add(List.of(2.0, 2.0));
+        holeRing.add(List.of(8.0, 2.0));
+        holeRing.add(List.of(8.0, 8.0));
+        holeRing.add(List.of(2.0, 8.0));
+        holeRing.add(List.of(2.0, 2.0));
+        polygonWithHole.add(holeRing);
+
+        Object result = CustomScalars.GraphQLGeoJSONCoordinates.getCoercing()
+                .serialize(polygonWithHole, GraphQLContext.getDefault(), Locale.getDefault());
+
+        assertNotNull(result);
+        // Should pass through unchanged
+        assertEquals(polygonWithHole, result);
+    }
+
+    /**
+     * Test that pre-structured MultiPolygon coordinates pass through unchanged.
+     */
+    @Test
+    public void testSerializePassesThroughPreStructuredMultiPolygon() {
+        // MultiPolygon format: [[[[poly1_ring1]], [[poly2_ring1]]]]
+        List<List<List<List<Double>>>> multiPolygon = new ArrayList<>();
+
+        // First polygon
+        List<List<List<Double>>> poly1 = new ArrayList<>();
+        List<List<Double>> poly1Ring = new ArrayList<>();
+        poly1Ring.add(List.of(0.0, 0.0));
+        poly1Ring.add(List.of(5.0, 0.0));
+        poly1Ring.add(List.of(5.0, 5.0));
+        poly1Ring.add(List.of(0.0, 5.0));
+        poly1Ring.add(List.of(0.0, 0.0));
+        poly1.add(poly1Ring);
+        multiPolygon.add(poly1);
+
+        // Second polygon
+        List<List<List<Double>>> poly2 = new ArrayList<>();
+        List<List<Double>> poly2Ring = new ArrayList<>();
+        poly2Ring.add(List.of(10.0, 10.0));
+        poly2Ring.add(List.of(15.0, 10.0));
+        poly2Ring.add(List.of(15.0, 15.0));
+        poly2Ring.add(List.of(10.0, 15.0));
+        poly2Ring.add(List.of(10.0, 10.0));
+        poly2.add(poly2Ring);
+        multiPolygon.add(poly2);
+
+        Object result = CustomScalars.GraphQLGeoJSONCoordinates.getCoercing()
+                .serialize(multiPolygon, GraphQLContext.getDefault(), Locale.getDefault());
+
+        assertNotNull(result);
+        // Should pass through unchanged
+        assertEquals(multiPolygon, result);
+    }
 
 }
