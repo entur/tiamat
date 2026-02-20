@@ -152,6 +152,9 @@ import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.getEqu
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.getLocalServiceOfType;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.interchangeWeightingEnum;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.keyValuesObjectInputType;
+import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.lightingEnumType;
+import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.lightingInputType;
+import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.lightingOutputType;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.localServiceInputType;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.localServiceType;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.modificationEnumerationType;
@@ -1496,6 +1499,9 @@ public class StopPlaceRegisterGraphQLSchema {
                     .field(newFieldDefinition()
                             .name(FACILITIES)
                             .type(new GraphQLList(siteFacilitySetObjectType)))
+                    .field(newFieldDefinition()
+                            .name(LIGHTING)
+                            .type(lightingEnumType))
                     .build();
     }
 
@@ -1641,6 +1647,9 @@ public class StopPlaceRegisterGraphQLSchema {
                 .field(newInputObjectField()
                         .name(FACILITIES)
                         .type(new GraphQLList(siteFacilitySetInputObjectType)))
+                .field(newInputObjectField()
+                    .name(LIGHTING)
+                    .type(lightingEnumType))
                 .build();
     }
 

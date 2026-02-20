@@ -18,6 +18,8 @@ package org.rutebanken.tiamat.model;
 import com.google.common.base.MoreObjects;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
@@ -46,6 +48,9 @@ public class Quay extends StopPlaceSpace_VersionStructure {
     private Set<SiteFacilitySet> facilities = new HashSet<>();
 
     protected String publicCode;
+
+    @Enumerated(EnumType.STRING)
+    protected LightingEnumeration lighting;
 
     /**
      * TODO: reconsider data type for compass bearing.
@@ -88,6 +93,14 @@ public class Quay extends StopPlaceSpace_VersionStructure {
        this.facilities = facilities;
     }
 
+    public LightingEnumeration getLighting() {
+        return lighting;
+    }
+
+    public void setLighting(LightingEnumeration lighting) {
+        this.lighting = lighting;
+    }
+
     @Override
     public boolean equals(Object object) {
         if (this == object) {
@@ -102,6 +115,7 @@ public class Quay extends StopPlaceSpace_VersionStructure {
                 && Objects.equals(this.centroid, other.centroid)
                 && Objects.equals(this.compassBearing, other.compassBearing)
                 && Objects.equals(this.publicCode, other.publicCode)
+                && Objects.equals(this.lighting, other.lighting)
                 && getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).containsAll(other.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY));
     }
 
@@ -123,6 +137,7 @@ public class Quay extends StopPlaceSpace_VersionStructure {
                 .add("centroid", centroid)
                 .add("bearing", compassBearing)
                 .add("publicCode", publicCode)
+                .add("lighting", lighting)
                 .add("keyValues", getKeyValues())
                 .toString();
     }

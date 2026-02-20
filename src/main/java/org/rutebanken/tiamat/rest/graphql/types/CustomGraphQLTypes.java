@@ -136,6 +136,7 @@ public class CustomGraphQLTypes {
     public static GraphQLEnumType passengerInformationFacilityListEnum = createCustomEnumType("PassengerInformationFacilityEnumerationType", PassengerInformationFacilityEnumeration.class);
     public static GraphQLEnumType passengerInformationEquipmentListEnum = createCustomEnumType("PassengerInformationEquipmentEnumerationType", PassengerInformationEquipmentEnumeration.class);
     public static GraphQLEnumType sanitaryFacilityEnumType = createCustomEnumType("SanitaryFacilityEnumeration", SanitaryFacilityEnumeration.class);
+    public static GraphQLEnumType lightingEnumType = createCustomEnumType("LightingEnumeration", org.rutebanken.tiamat.model.LightingEnumeration.class);
 
     public static GraphQLEnumType createCustomEnumType(String name, Class c) {
 
@@ -583,6 +584,20 @@ public class CustomGraphQLTypes {
                     .name(ASSISTANCE_SERVICE)
                     .type(new GraphQLList(assistanceServiceOutputType))
             )
+            .build();
+
+    public static GraphQLInputObjectType lightingInputType = GraphQLInputObjectType.newInputObject()
+            .name(INPUT_TYPE_LIGHTING)
+            .field(newInputObjectField()
+                    .name(LIGHTING)
+                    .type(lightingEnumType))
+            .build();
+
+    public static GraphQLObjectType lightingOutputType = newObject()
+            .name(OUTPUT_TYPE_LIGHTING)
+            .field(newFieldDefinition()
+                    .name(LIGHTING)
+                    .type(lightingEnumType))
             .build();
 
     public static List getLocalServiceOfType(Class clazz, DataFetchingEnvironment env) {

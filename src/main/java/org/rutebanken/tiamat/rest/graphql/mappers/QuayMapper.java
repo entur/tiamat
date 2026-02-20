@@ -17,6 +17,7 @@ package org.rutebanken.tiamat.rest.graphql.mappers;
 
 import com.google.api.client.util.Preconditions;
 import org.rutebanken.tiamat.model.BoardingPosition;
+import org.rutebanken.tiamat.model.LightingEnumeration;
 import org.rutebanken.tiamat.model.PrivateCodeStructure;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.SiteFacilitySet;
@@ -39,6 +40,7 @@ import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.BOARDING_POSITIONS
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.COMPASS_BEARING;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.FACILITIES;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ID;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.LIGHTING;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PRIVATE_CODE;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PUBLIC_CODE;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.TYPE;
@@ -109,6 +111,12 @@ public class QuayMapper {
             }
             quay.getPrivateCode().setType((String) privateCodeInputMap.get(TYPE));
             quay.getPrivateCode().setValue((String) privateCodeInputMap.get(VALUE));
+            isQuayUpdated = true;
+        }
+
+        if (quayInputMap.get(LIGHTING) != null) {
+            LightingEnumeration lighting = (LightingEnumeration) quayInputMap.get(LIGHTING);
+            quay.setLighting(lighting);
             isQuayUpdated = true;
         }
 

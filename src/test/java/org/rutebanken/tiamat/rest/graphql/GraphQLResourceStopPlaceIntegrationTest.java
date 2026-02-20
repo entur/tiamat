@@ -35,6 +35,7 @@ import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.GenderLimitationEnumeration;
 import org.rutebanken.tiamat.model.GeneralSign;
 import org.rutebanken.tiamat.model.InterchangeWeightingEnumeration;
+import org.rutebanken.tiamat.model.LightingEnumeration;
 import org.rutebanken.tiamat.model.LimitationStatusEnumeration;
 import org.rutebanken.tiamat.model.LocalService;
 import org.rutebanken.tiamat.model.MobilityFacilityEnumeration;
@@ -1818,6 +1819,8 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         Float lon =  Float.valueOf("10.11111");
         Float lat =  Float.valueOf("59.11111");
 
+        LightingEnumeration lighting = LightingEnumeration.WELL_LIT;
+
         String graphQlJsonQuery = """
                 mutation {
                  stopPlace:mutateStopPlace(StopPlace: {
@@ -1832,6 +1835,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                               type: Point
                               coordinates: [%s,%s]
                             }
+                            lighting: %s
                           }]
                       }) {
                           id
@@ -1844,9 +1848,10 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                             publicCode
                             privateCode { value type }
                             geometry { type coordinates }
+                            lighting
                           }
                       }
-                  }""".formatted(stopPlace.getNetexId(), name, shortName, description, publicCode, privateCodeValue, privateCodeType, lon, lat);
+                  }""".formatted(stopPlace.getNetexId(), name, shortName, description, publicCode, privateCodeValue, privateCodeType, lon, lat, lighting.value());
 
 
         executeGraphqQLQueryOnly(graphQlJsonQuery)
@@ -1862,7 +1867,8 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                     .body("privateCode.type", equalTo(privateCodeType))
                     .body("geometry.type", equalTo("Point"))
                     .body("geometry.coordinates[0]", comparesEqualTo(lon))
-                    .body("geometry.coordinates[1]", comparesEqualTo(lat));
+                    .body("geometry.coordinates[1]", comparesEqualTo(lat))
+                    .body("lighting", equalTo(lighting.value()));
     }
 
     @Test
@@ -1887,6 +1893,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         Float lat =  Float.valueOf("59.11111");
 
         Float compassBearing =  Float.valueOf("180");
+        LightingEnumeration lighting = LightingEnumeration.POORLY_LIT;
 
         String graphQlJsonQuery = """
                 mutation {
@@ -1902,6 +1909,7 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                               coordinates: [%s,%s]
                             }
                             compassBearing: %s
+                            lighting: %s
                           }]
                       }) {
                           id
@@ -1913,9 +1921,10 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                             description { value }
                             geometry { type coordinates }
                             compassBearing
+                            lighting
                           }
                       }
-                  }""".formatted(stopPlace.getNetexId(), quay.getNetexId(), name, shortName, description, lon, lat, compassBearing);
+                  }""".formatted(stopPlace.getNetexId(), quay.getNetexId(), name, shortName, description, lon, lat, compassBearing, lighting.value());
 
         executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .body("data.stopPlace[0].id", comparesEqualTo(stopPlace.getNetexId()))
@@ -1928,7 +1937,8 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
                     .body("geometry.type", equalTo("Point"))
                     .body("geometry.coordinates[0]", comparesEqualTo(lon))
                     .body("geometry.coordinates[1]", comparesEqualTo(lat))
-                    .body("compassBearing", comparesEqualTo(compassBearing));
+                    .body("compassBearing", comparesEqualTo(compassBearing))
+                    .body("lighting", equalTo(lighting.value()));
     }
 
 
