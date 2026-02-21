@@ -53,8 +53,8 @@
         <spring-cloud-gcp.version>5.13.11</spring-cloud-gcp.version>
         <geotools.version>30.2</geotools.version>
         <orika-core.version>1.5.4</orika-core.version>
-        <graphql-java.version>20.9</graphql-java.version>
-        <graphql-java-extended-scalars.version>20.2</graphql-java-extended-scalars.version>
+        <graphql-java.version>25.0</graphql-java.version>
+        <graphql-java-extended-scalars.version>24.0</graphql-java-extended-scalars.version>
         <hazelcast-hibernate53.version>5.2.0</hazelcast-hibernate53.version>
         <hazelcast.version>5.2.5</hazelcast.version>
         <swagger-jersey2.version>2.2.43</swagger-jersey2.version>
