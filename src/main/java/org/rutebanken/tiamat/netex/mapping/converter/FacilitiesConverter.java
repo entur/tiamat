@@ -25,6 +25,7 @@ import org.springframework.stereotype.Component;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 public class FacilitiesConverter extends BidirectionalConverter<Set<SiteFacilitySet>, org.rutebanken.netex.model.SiteFacilitySets_RelStructure> {
@@ -33,7 +34,8 @@ public class FacilitiesConverter extends BidirectionalConverter<Set<SiteFacility
     public SiteFacilitySets_RelStructure convertTo(Set<SiteFacilitySet> facilities, Type<SiteFacilitySets_RelStructure> type, MappingContext mappingContext) {
         if (facilities != null && !facilities.isEmpty()) {
             final SiteFacilitySets_RelStructure siteFacilitySets_relStructure = new SiteFacilitySets_RelStructure();
-            List<org.rutebanken.netex.model.SiteFacilitySet> facilitiesList = facilities.stream().map(facility -> {
+            Set<SiteFacilitySet> facilitiesContainingData = facilities.stream().filter(this::isTiamatFacilityContainingData).collect(Collectors.toSet());
+            List<org.rutebanken.netex.model.SiteFacilitySet> facilitiesList = facilitiesContainingData.stream().map(facility -> {
                 org.rutebanken.netex.model.SiteFacilitySet netexFacility = new org.rutebanken.netex.model.SiteFacilitySet();
                 mapperFacade.map(facility, netexFacility);
                 return netexFacility;
@@ -52,12 +54,26 @@ public class FacilitiesConverter extends BidirectionalConverter<Set<SiteFacility
         }
         Set<SiteFacilitySet> tiamatFacilities = new HashSet<>();
         for (Object netexFacility : siteFacilitySets_relStructure.getSiteFacilitySetRefOrSiteFacilitySet()) {
-            if (netexFacility instanceof org.rutebanken.netex.model.SiteFacilitySet facility) {
+            if (netexFacility instanceof org.rutebanken.netex.model.SiteFacilitySet facility && isNetexFacilityContainingData(facility)) {
                 final SiteFacilitySet tiamatFacility = new SiteFacilitySet();
                 mapperFacade.map(facility, tiamatFacility);
                 tiamatFacilities.add(tiamatFacility);
             }
         }
         return tiamatFacilities;
+    }
+
+    private boolean isTiamatFacilityContainingData(SiteFacilitySet facility) {
+        boolean containsNonEmptyMobilityFacilityList = facility.getMobilityFacilityList() != null && !facility.getMobilityFacilityList().isEmpty();
+        boolean containsNonEmptyPassengerInformationFacilityList = facility.getPassengerInformationFacilityList() != null && !facility.getPassengerInformationFacilityList().isEmpty();
+        boolean containsNonEmptyPassengerInformationEquipmentList = facility.getPassengerInformationEquipmentList() != null && !facility.getPassengerInformationEquipmentList().isEmpty();
+        return containsNonEmptyMobilityFacilityList || containsNonEmptyPassengerInformationFacilityList || containsNonEmptyPassengerInformationEquipmentList;
+    }
+
+    private boolean isNetexFacilityContainingData(org.rutebanken.netex.model.SiteFacilitySet facility) {
+        boolean containsNonEmptyMobilityFacilityList = facility.getMobilityFacilityList() != null && !facility.getMobilityFacilityList().isEmpty();
+        boolean containsNonEmptyPassengerInformationFacilityList = facility.getPassengerInformationFacilityList() != null && !facility.getPassengerInformationFacilityList().isEmpty();
+        boolean containsNonEmptyPassengerInformationEquipmentList = facility.getPassengerInformationEquipmentList() != null && !facility.getPassengerInformationEquipmentList().isEmpty();
+        return containsNonEmptyMobilityFacilityList || containsNonEmptyPassengerInformationFacilityList || containsNonEmptyPassengerInformationEquipmentList;
     }
 }
