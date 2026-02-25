@@ -15,9 +15,14 @@ import org.rutebanken.tiamat.rest.validation.StopPlaceMutationValidator;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class StopPlaceDomainServiceTest {
@@ -36,34 +41,29 @@ class StopPlaceDomainServiceTest {
     @BeforeEach
     void setup() {
         domainService = new StopPlaceDomainService(
-            validator,
-            stopPlaceService,
-            differ
+                validator,
+                stopPlaceService,
+                differ
         );
     }
 
     @Test
-    void updateStopPlace_NoDifferencesDetected_ThrowsException()
-        throws IllegalAccessException {
+    void updateStopPlace_NoDifferencesDetected_ThrowsException() throws IllegalAccessException {
         String stopPlaceId = "NSR:StopPlace:100";
         StopPlace existingStopPlace = createStopPlace(stopPlaceId, "Test Stop", 1L);
         StopPlace updatedStopPlace = createStopPlace(stopPlaceId, "Test Stop", 2L);
 
-        when(validator.validateStopPlaceUpdate(stopPlaceId, false)).thenReturn(
-            existingStopPlace
-        );
-        when(
-            differ.compareObjects(existingStopPlace, updatedStopPlace)
-        ).thenReturn(Collections.emptyList());
+        when(validator.validateStopPlaceUpdate(stopPlaceId, false)).thenReturn(existingStopPlace);
+        when(differ.compareObjects(existingStopPlace, updatedStopPlace)).thenReturn(Collections.emptyList());
 
         IllegalArgumentException exception = assertThrows(
-            IllegalArgumentException.class,
-            () -> domainService.updateStopPlace(updatedStopPlace)
+                IllegalArgumentException.class,
+                () -> domainService.updateStopPlace(updatedStopPlace)
         );
 
         assertEquals(
-            "No changes detected for StopPlace with id NSR:StopPlace:100",
-            exception.getMessage()
+                "No changes detected for StopPlace with id NSR:StopPlace:100",
+                exception.getMessage()
         );
 
         verify(validator).validateStopPlaceUpdate(stopPlaceId, false);
@@ -74,23 +74,23 @@ class StopPlaceDomainServiceTest {
 
     @Test
     void updateStopPlace_DifferencesDetected_UpdatesSuccessfully()
-        throws IllegalAccessException {
+            throws IllegalAccessException {
         String stopPlaceId = "NSR:StopPlace:100";
         StopPlace existingStopPlace = createStopPlace(stopPlaceId, "Old Name", 1L);
         StopPlace updatedStopPlace = createStopPlace(stopPlaceId, "New Name", 2L);
         StopPlace savedStopPlace = createStopPlace(stopPlaceId, "New Name", 2L);
 
         when(validator.validateStopPlaceUpdate(stopPlaceId, false)).thenReturn(
-            existingStopPlace
+                existingStopPlace
         );
         when(
-            differ.compareObjects(existingStopPlace, updatedStopPlace)
+                differ.compareObjects(existingStopPlace, updatedStopPlace)
         ).thenReturn(List.of(new Difference("name", "Old Name", "New Name")));
         when(
-            stopPlaceService.updateStopPlace(
-                existingStopPlace,
-                updatedStopPlace
-            )
+                stopPlaceService.updateStopPlace(
+                        existingStopPlace,
+                        updatedStopPlace
+                )
         ).thenReturn(savedStopPlace);
 
         StopPlace result = domainService.updateStopPlace(updatedStopPlace);
@@ -101,8 +101,8 @@ class StopPlaceDomainServiceTest {
         verify(differ).compareObjects(existingStopPlace, updatedStopPlace);
         verify(validator).validateStopPlaceName(updatedStopPlace);
         verify(stopPlaceService).updateStopPlace(
-            existingStopPlace,
-            updatedStopPlace
+                existingStopPlace,
+                updatedStopPlace
         );
     }
 
@@ -110,13 +110,13 @@ class StopPlaceDomainServiceTest {
     void createStopPlace_Success() {
         StopPlace newStopPlace = createStopPlace(null, "New Stop", 1L);
         StopPlace savedStopPlace = createStopPlace(
-            "NSR:StopPlace:200",
-            "New Stop",
-                 1L
+                "NSR:StopPlace:200",
+                "New Stop",
+                1L
         );
 
         when(stopPlaceService.createStopPlace(newStopPlace)).thenReturn(
-            savedStopPlace
+                savedStopPlace
         );
 
         StopPlace result = domainService.createStopPlace(newStopPlace);
@@ -139,20 +139,20 @@ class StopPlaceDomainServiceTest {
 
     @Test
     void updateStopPlace_ValidationFails_ThrowsException()
-        throws IllegalAccessException {
+            throws IllegalAccessException {
         String stopPlaceId = "NSR:StopPlace:100";
         StopPlace updatedStopPlace = createStopPlace(
-            stopPlaceId,
-            "Invalid Stop",
+                stopPlaceId,
+                "Invalid Stop",
                 1L
         );
 
         when(validator.validateStopPlaceUpdate(stopPlaceId, false)).thenThrow(
-            new IllegalArgumentException("Stop place not found")
+                new IllegalArgumentException("Stop place not found")
         );
 
         assertThrows(IllegalArgumentException.class, () ->
-            domainService.updateStopPlace(updatedStopPlace)
+                domainService.updateStopPlace(updatedStopPlace)
         );
 
         verify(validator).validateStopPlaceUpdate(stopPlaceId, false);
@@ -162,23 +162,23 @@ class StopPlaceDomainServiceTest {
 
     @Test
     void updateStopPlace_NameValidationFails_ThrowsException()
-        throws IllegalAccessException {
+            throws IllegalAccessException {
         String stopPlaceId = "NSR:StopPlace:100";
         StopPlace existingStopPlace = createStopPlace(stopPlaceId, "Old Name", 1L);
         StopPlace updatedStopPlace = createStopPlace(stopPlaceId, "", 2L);
 
         when(validator.validateStopPlaceUpdate(stopPlaceId, false)).thenReturn(
-            existingStopPlace
+                existingStopPlace
         );
         when(
-            differ.compareObjects(existingStopPlace, updatedStopPlace)
+                differ.compareObjects(existingStopPlace, updatedStopPlace)
         ).thenReturn(List.of(new Difference("name", "Old Name", "")));
         doThrow(new IllegalArgumentException("Stop place name is required"))
-            .when(validator)
-            .validateStopPlaceName(updatedStopPlace);
+                .when(validator)
+                .validateStopPlaceName(updatedStopPlace);
 
         assertThrows(IllegalArgumentException.class, () ->
-            domainService.updateStopPlace(updatedStopPlace)
+                domainService.updateStopPlace(updatedStopPlace)
         );
 
         verify(validator).validateStopPlaceUpdate(stopPlaceId, false);
@@ -187,32 +187,12 @@ class StopPlaceDomainServiceTest {
         verify(stopPlaceService, never()).updateStopPlace(any(), any());
     }
 
-    @Test
-    void updateStopPlace_VersionNotIncreased_ThrowsException() {
-        String stopPlaceId = "NSR:StopPlace:100";
-        StopPlace existingStopPlace = createStopPlace(stopPlaceId, "Old Name", 2L);
-        StopPlace updatedStopPlace = createStopPlace(stopPlaceId, "New Name", 2L);
-        when(validator.validateStopPlaceUpdate(stopPlaceId, false)).thenReturn(
-            existingStopPlace
-        );
-        IllegalArgumentException exception = assertThrows(
-            IllegalArgumentException.class,
-            () -> domainService.updateStopPlace(updatedStopPlace)
-        );
-        assertEquals(
-            "Invalid version for StopPlace with id NSR:StopPlace:100. Expected version 3 but got 2",
-            exception.getMessage()
-        );
-        verify(validator).validateStopPlaceUpdate(stopPlaceId, false);
-    }
-
     private StopPlace createStopPlace(String netexId, String name, Long version) {
         StopPlace stopPlace = new StopPlace();
         stopPlace.setNetexId(netexId);
         stopPlace.setStopPlaceType(StopTypeEnumeration.BUS_STATION);
 
-        EmbeddableMultilingualString multilingualName =
-            new EmbeddableMultilingualString();
+        EmbeddableMultilingualString multilingualName = new EmbeddableMultilingualString();
         multilingualName.setValue(name);
         stopPlace.setName(multilingualName);
 

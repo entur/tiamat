@@ -1,6 +1,5 @@
 package org.rutebanken.tiamat.rest.write;
 
-import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.core.StreamingOutput;
 import org.rutebanken.netex.model.LocaleStructure;
@@ -8,11 +7,10 @@ import org.rutebanken.netex.model.SiteFrame;
 import org.rutebanken.netex.model.VersionFrameDefaultsStructure;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
+import org.rutebanken.tiamat.netex.mapping.NetexMappingContextThreadLocal;
 import org.rutebanken.tiamat.rest.write.dto.StopPlaceJobDto;
 import org.rutebanken.tiamat.rest.write.dto.StopPlacesDto;
 import org.springframework.stereotype.Service;
-
-import static org.rutebanken.tiamat.netex.mapping.NetexMappingContextThreadLocal.updateMappingContext;
 
 @Service
 public class StopPlaceFacade {
@@ -24,11 +22,11 @@ public class StopPlaceFacade {
     private final StopPlaceXmlWriter stopPlaceXmlWriter;
 
     public StopPlaceFacade(
-        NetexMapper netexMapper,
-        JobService jobService,
-        StopPlaceAsyncProcessor asyncProcessor,
-        StopPlaceDomainService stopPlaceDomainService,
-        StopPlaceXmlWriter stopPlaceXmlWriter) {
+            NetexMapper netexMapper,
+            JobService jobService,
+            StopPlaceAsyncProcessor asyncProcessor,
+            StopPlaceDomainService stopPlaceDomainService,
+            StopPlaceXmlWriter stopPlaceXmlWriter) {
         this.netexMapper = netexMapper;
         this.jobService = jobService;
         this.asyncProcessor = asyncProcessor;
@@ -36,30 +34,15 @@ public class StopPlaceFacade {
         this.stopPlaceXmlWriter = stopPlaceXmlWriter;
     }
 
-    @PostConstruct
-    private void initializeMappingContext() {
-        /*
-         * The mapper needs a timezone, usually provided from the SiteFrame in the Netex
-         * document. Since we are only dealing with StopPlaces here, we set a default
-         * timezone (UTC) to avoid mapping errors. Any date times provided in the StopPlace
-         * data should be ignored anyway.
-         */
-        updateMappingContext(
-            new SiteFrame().withFrameDefaults(
-                new VersionFrameDefaultsStructure().withDefaultLocale(
-                    new LocaleStructure().withTimeZone("UTC")
-                )
-            )
-        );
-    }
-
     @Transactional
     public StreamingOutput getStopPlace(String netexId) {
+        updateMappingContext();
         org.rutebanken.netex.model.StopPlace stopPlace = netexMapper.mapToNetexModel(stopPlaceDomainService.getStopPlace(netexId));
         return stopPlaceXmlWriter.write(stopPlace);
     }
 
     public StopPlaceJobDto createStopPlaces(StopPlacesDto dto) {
+        updateMappingContext();
         var job = jobService.createJob();
         try {
             var stopPlace = validateAndGetSingleStopPlace(dto);
@@ -67,12 +50,13 @@ public class StopPlaceFacade {
             return StopPlaceJobDto.from(job);
         } catch (Exception e) {
             return StopPlaceJobDto.from(
-                jobService.fail(job.getId(), e.getMessage())
+                    jobService.fail(job.getId(), e.getMessage())
             );
         }
     }
 
     public StopPlaceJobDto updateStopPlace(StopPlacesDto dto) {
+        updateMappingContext();
         var job = jobService.createJob();
         try {
             var stopPlace = validateAndGetSingleStopPlace(dto);
@@ -80,7 +64,7 @@ public class StopPlaceFacade {
             return StopPlaceJobDto.from(job);
         } catch (Exception e) {
             return StopPlaceJobDto.from(
-                jobService.fail(job.getId(), e.getMessage())
+                    jobService.fail(job.getId(), e.getMessage())
             );
         }
     }
@@ -92,7 +76,7 @@ public class StopPlaceFacade {
             return StopPlaceJobDto.from(job);
         } catch (Exception e) {
             return StopPlaceJobDto.from(
-                jobService.fail(job.getId(), e.getMessage())
+                    jobService.fail(job.getId(), e.getMessage())
             );
         }
     }
@@ -101,17 +85,29 @@ public class StopPlaceFacade {
         var stopPlaces = netexMapper.mapStopsToTiamatModel(dto.getStopPlaces());
         if (stopPlaces.size() != 1) {
             throw new IllegalArgumentException(
-                "Only one stop place allowed per request"
+                    "Only one stop place allowed per request"
             );
         }
         var stopPlace = stopPlaces.getFirst();
         if (
-            stopPlace.isParentStopPlace() || !stopPlace.getChildren().isEmpty()
+                stopPlace.isParentStopPlace() || !stopPlace.getChildren().isEmpty()
         ) {
             throw new IllegalArgumentException(
-                "Only mono-modal stop place allowed"
+                    "Only mono-modal stop place allowed"
             );
         }
         return stopPlace;
+    }
+
+    private void updateMappingContext() {
+        if (NetexMappingContextThreadLocal.get() == null) {
+            NetexMappingContextThreadLocal.updateMappingContext(
+                    new SiteFrame().withFrameDefaults(
+                            new VersionFrameDefaultsStructure().withDefaultLocale(
+                                    new LocaleStructure().withTimeZone("UTC")
+                            )
+                    )
+            );
+        }
     }
 }

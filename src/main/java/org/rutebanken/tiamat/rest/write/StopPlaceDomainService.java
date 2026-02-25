@@ -11,18 +11,16 @@ import org.springframework.stereotype.Service;
 @Service
 public class StopPlaceDomainService {
 
-    private static final Logger logger = LoggerFactory.getLogger(
-        StopPlaceDomainService.class
-    );
+    private static final Logger logger = LoggerFactory.getLogger(StopPlaceDomainService.class);
     private final StopPlaceMutationValidator validator;
     private final StopPlaceService stopPlaceService;
 
     private final TiamatObjectDiffer differ;
 
     public StopPlaceDomainService(
-        StopPlaceMutationValidator validator,
-        StopPlaceService stopPlaceService,
-        TiamatObjectDiffer differ
+            StopPlaceMutationValidator validator,
+            StopPlaceService stopPlaceService,
+            TiamatObjectDiffer differ
     ) {
         this.validator = validator;
         this.stopPlaceService = stopPlaceService;
@@ -39,37 +37,25 @@ public class StopPlaceDomainService {
     }
 
     @Transactional
-    public StopPlace updateStopPlace(StopPlace stopPlace)
-        throws IllegalAccessException {
+    public StopPlace updateStopPlace(StopPlace stopPlace) throws IllegalAccessException {
         var existingStopPlace = validator.validateStopPlaceUpdate(
-            stopPlace.getNetexId(),
-            false
+                stopPlace.getNetexId(),
+                false
         );
-
-        if (stopPlace.getVersion() != existingStopPlace.getVersion() + 1) {
-            throw new IllegalArgumentException(
-                String.format(
-                    "Invalid version for StopPlace with id %s. Expected version %d but got %d",
-                    stopPlace.getNetexId(),
-                    existingStopPlace.getVersion() + 1,
-                    stopPlace.getVersion()
-                )
-            );
-        }
 
         var diffResult = differ.compareObjects(existingStopPlace, stopPlace);
         if (diffResult.isEmpty()) {
             throw new IllegalArgumentException(
-                String.format(
-                    "No changes detected for StopPlace with id %s",
-                    stopPlace.getNetexId()
-                )
+                    String.format(
+                            "No changes detected for StopPlace with id %s",
+                            stopPlace.getNetexId()
+                    )
             );
         }
         logger.debug(
-            "Differences detected for StopPlace id {}: {}",
-            stopPlace.getNetexId(),
-            diffResult
+                "Differences detected for StopPlace id {}: {}",
+                stopPlace.getNetexId(),
+                diffResult
         );
         validator.validateStopPlaceName(stopPlace);
         return stopPlaceService.updateStopPlace(existingStopPlace, stopPlace);
