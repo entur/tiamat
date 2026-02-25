@@ -99,11 +99,6 @@ public class JerseyConfig {
 
         ResourceConfig resourceConfig = new ResourceConfig(publicResources);
         resourceConfig.register(JerseyJava8TimeConverterProvider.class);
-
-        // TODO: ai suggested these. why are they needed?
-        resourceConfig.register(XmlJaxbElementProvider.App.class);
-        resourceConfig.register(XmlJaxbElementProvider.General.class);
-        resourceConfig.register(XmlJaxbElementProvider.Text.class);
         ServletRegistrationBean publicServicesJersey = new ServletRegistrationBean(new ServletContainer(resourceConfig));
 
 
