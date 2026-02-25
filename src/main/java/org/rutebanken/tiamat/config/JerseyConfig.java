@@ -17,7 +17,6 @@ package org.rutebanken.tiamat.config;
 
 
 import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
-import org.glassfish.jersey.jaxb.internal.XmlJaxbElementProvider;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
 import org.rutebanken.tiamat.filter.LoggingFilter;
@@ -130,7 +129,6 @@ public class JerseyConfig {
         ServletRegistrationBean healthServicesJersey = new ServletRegistrationBean(new ServletContainer(resourceConfig));
 
 
-
         healthServicesJersey.addUrlMappings(SERVICES_HEALTH_PATH + "/*");
         healthServicesJersey.setName("HealthJersey");
 
@@ -156,7 +154,6 @@ public class JerseyConfig {
 
         ResourceConfig resourceConfig = new ResourceConfig(resources);
         ServletRegistrationBean prometheusServicesJersey = new ServletRegistrationBean(new ServletContainer(resourceConfig));
-
 
 
         prometheusServicesJersey.addUrlMappings(SERVICES_HEALTH_PATH + "/scrape/*");
