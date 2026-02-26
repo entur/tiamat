@@ -30,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -45,12 +46,14 @@ public class FacilitiesConverterTest extends TiamatIntegrationTest {
     @Test
     public void convertToNetexStructure() {
         SiteFacilitySet facility1 = new SiteFacilitySet();
+        facility1.setMobilityFacilityList(List.of(org.rutebanken.tiamat.model.MobilityFacilityEnumeration.TACTILE_GUIDING_STRIPS));
         SiteFacilitySet facility2 = new SiteFacilitySet();
         Set<SiteFacilitySet> facilities = Set.of(facility1, facility2);
 
         SiteFacilitySets_RelStructure relStructure = facilitiesConverter.convertTo(facilities, siteFacilitySetsRelStructureType, mappingContext);
         assertThat(relStructure).isNotNull();
-        Assertions.assertThat(relStructure.getSiteFacilitySetRefOrSiteFacilitySet().size()).isEqualTo(2);
+        // Only 1 because facility2 doesn't have a ny data in it
+        Assertions.assertThat(relStructure.getSiteFacilitySetRefOrSiteFacilitySet().size()).isEqualTo(1);
     }
 
     @Test
