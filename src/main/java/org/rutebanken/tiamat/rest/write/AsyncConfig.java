@@ -3,6 +3,7 @@ package org.rutebanken.tiamat.rest.write;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.security.concurrent.DelegatingSecurityContextExecutor;
 
 import java.util.concurrent.Executor;
 
@@ -17,6 +18,6 @@ public class AsyncConfig {
         executor.setQueueCapacity(Integer.MAX_VALUE);
         executor.setThreadNamePrefix("StopPlaceWriter-");
         executor.initialize();
-        return executor;
+        return new DelegatingSecurityContextExecutor(executor);
     }
 }
