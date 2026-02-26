@@ -21,7 +21,11 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 public class ReadApiNetexPublicationDeliveryService {
-    // Predefined byte arrays for collection tags
+    // Predefined string constants for collection tags
+    private static final String COLLECTION_TAG_SCHEDULED_STOP_POINTS = "<scheduledStopPoints/>";
+    private static final String COLLECTION_TAG_STOP_ASSIGNMENTS = "<stopAssignments/>";
+    private static final String COLLECTION_TAG_STOP_PLACES = "<stopPlaces/>";
+    private static final String COLLECTION_TAG_PARKINGS = "<parkings/>";
     private static final byte[] START_TAG_SCHEDULED_STOP_POINTS = "<scheduledStopPoints>".getBytes(StandardCharsets.UTF_8);
     private static final byte[] START_TAG_STOP_ASSIGNMENTS = "<stopAssignments>".getBytes(StandardCharsets.UTF_8);
     private static final byte[] START_TAG_STOP_PLACES = "<stopPlaces>".getBytes(StandardCharsets.UTF_8);
@@ -97,10 +101,10 @@ public class ReadApiNetexPublicationDeliveryService {
 
     private static String getCollectionTag(String type) {
         return switch (type) {
-            case "ScheduledStopPoint" -> "<scheduledStopPoints/>";
-            case "PassengerStopAssignment" -> "<stopAssignments/>";
-            case "StopPlace" -> "<stopPlaces/>";
-            case "Parking" -> "<parkings/>";
+            case "ScheduledStopPoint" -> COLLECTION_TAG_SCHEDULED_STOP_POINTS;
+            case "PassengerStopAssignment" -> COLLECTION_TAG_STOP_ASSIGNMENTS;
+            case "StopPlace" -> COLLECTION_TAG_STOP_PLACES;
+            case "Parking" -> COLLECTION_TAG_PARKINGS;
             default -> throw new IllegalArgumentException("Unsupported type for collection tag: " + type);
         };
     }
@@ -123,6 +127,17 @@ public class ReadApiNetexPublicationDeliveryService {
             case "Parking" -> END_TAG_PARKINGS;
             default -> throw new IllegalArgumentException("Unsupported type for collection end tag: " + type);
         };
+    }
+
+    private static byte[] suppressCollectionPlaceholder(byte[] bytes) {
+        String trimmed = new String(bytes, StandardCharsets.UTF_8).trim();
+        if (trimmed.equals(COLLECTION_TAG_SCHEDULED_STOP_POINTS)
+                || trimmed.equals(COLLECTION_TAG_STOP_ASSIGNMENTS)
+                || trimmed.equals(COLLECTION_TAG_STOP_PLACES)
+                || trimmed.equals(COLLECTION_TAG_PARKINGS)) {
+            return new byte[]{};
+        }
+        return bytes;
     }
 
     public void streamPublicationDelivery(
@@ -156,7 +171,7 @@ public class ReadApiNetexPublicationDeliveryService {
                             outputStream.write(NEWLINE);
                             break;
                         } else {
-                            outputStream.write(line.getBytes(StandardCharsets.UTF_8));
+                            outputStream.write(suppressCollectionPlaceholder(line.getBytes(StandardCharsets.UTF_8)));
                             outputStream.write(NEWLINE);
                         }
                     }
@@ -176,7 +191,7 @@ public class ReadApiNetexPublicationDeliveryService {
 
             while ((line = xmlReader.readLine()) != null) {
                 // Write remaining lines after last collection
-                outputStream.write(line.getBytes(StandardCharsets.UTF_8));
+                outputStream.write(suppressCollectionPlaceholder(line.getBytes(StandardCharsets.UTF_8)));
                 outputStream.write(NEWLINE);
             }
             outputStream.flush();
