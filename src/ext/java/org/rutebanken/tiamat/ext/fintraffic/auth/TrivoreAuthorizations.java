@@ -49,7 +49,6 @@ public class TrivoreAuthorizations {
     private final String oidcServerUri;
     private final String clientId;
     private final String clientSecret;
-    private final boolean enableCodespaceFiltering;
 
     /**
      * Poor man's infinite cache. This content needs to be loaded once and should never change.
@@ -61,12 +60,10 @@ public class TrivoreAuthorizations {
     public TrivoreAuthorizations(WebClient webClient,
                                  String oidcServerUri,
                                  String clientId,
-                                 String clientSecret,
-                                 boolean enableCodespaceFiltering) {
+                                 String clientSecret) {
         this.oidcServerUri = oidcServerUri;
         this.clientId = clientId;
         this.clientSecret = clientSecret;
-        this.enableCodespaceFiltering = enableCodespaceFiltering;
         this.httpClient = webClient;
         this.externalPermissionCache = createCache(50, Duration.of(5, MINUTES), new CacheLoader<>() {
             @Override
@@ -109,7 +106,7 @@ public class TrivoreAuthorizations {
     /**
      * @return Returns the <code>sub</code> claim of JWT or human readable "unknown" value if token isn't present.
      */
-    private static String getCurrentSubject() {
+    public static String getCurrentSubject() {
         return getToken().map(Jwt::getSubject).orElse("<unknown user>");
     }
 
@@ -224,37 +221,6 @@ public class TrivoreAuthorizations {
         return hasPermission;
     }
 
-    public boolean hasAccessToCodespace(String codespace) {
-        if (!enableCodespaceFiltering) {
-            logger.debug("Codespace filtering is disabled, will not block access to {}", codespace);
-            return true;
-        }
-
-        return getToken()
-                .flatMap(jwt -> fetchTrivoreUsersGroupMemberships(jwt.getSubject()))
-                .map(groupMemberships -> {
-                    for (GroupMembership groupMembership : groupMemberships) {
-                        Set<String> accessibleCodespaces = groupMembership.getCodespaces();
-                        if (accessibleCodespaces.contains(codespace)) {
-                            if (logger.isTraceEnabled()) {
-                                logger.trace("User [{}] is allowed to access codespace {} [{}]", getCurrentSubject(), codespace, groupMembership.id());
-                            }
-                            return true;
-                        }
-                    }
-                    if (logger.isTraceEnabled()) {
-                        logger.trace("User [{}] is not allowed to access codespace {}", getCurrentSubject(), codespace);
-                    }
-                    return false;
-                })
-                .orElseGet(() -> {
-                    if (logger.isTraceEnabled()) {
-                        logger.trace("Could not resolve {} codespace access for user [{}]", codespace, getCurrentSubject());
-                    }
-                    return false;
-                });
-    }
-
     public Set<String> getAccessibleCodespaces() {
         return getToken()
                 .flatMap(jwt -> fetchTrivoreUsersGroupMemberships(jwt.getSubject()))
@@ -301,13 +267,17 @@ public class TrivoreAuthorizations {
     }
 
     public boolean hasAccess(String entityType, String transportMode, TrivorePermission permission) {
+        return hasAccess(entityType, transportMode, permission, false);
+    }
+
+    public boolean hasAccess(String entityType, String transportMode, TrivorePermission permission, boolean logAuthorizationCheck) {
         List<String> cascadingPermissions = generateCascadingPermissions(entityType, transportMode, permission);
         Optional<String> r = cascadingPermissions
                 .stream()
                 .filter(this::hasDirectPermission)
                 .findFirst();
 
-        if (logger.isDebugEnabled()) {
+        if (logAuthorizationCheck) {
             String requiredPermission = entityType + ":" + transportMode + ":" + permission.getValue();
             String s = "User [" + getCurrentSubject() + "]";
             if (r.isPresent()) {
@@ -316,7 +286,7 @@ public class TrivoreAuthorizations {
                 s += " is not allowed to access [" + requiredPermission + "]";
             }
             s += (", possible applicable permissions were " + cascadingPermissions);
-            logger.debug(s);
+            logger.info(s);
         }
 
         return r.isPresent();

@@ -27,8 +27,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.rutebanken.tiamat.ext.fintraffic.auth.TrivoreAuthorizations.ENTITY_TYPE_ALL;
@@ -70,8 +68,8 @@ public class FintrafficAuthorizationService implements AuthorizationService {
 
     @Override
     public boolean canEditEntities(Collection<? extends EntityStructure> entities) {
-        return trivoreAuthorizations.hasAccess(ENTITY_TYPE_ALL, TRANSPORT_MODE_ALL, MANAGE)
-                || entities.stream().allMatch(this::canEditEntity);
+        return trivoreAuthorizations.hasAccess(ENTITY_TYPE_ALL, TRANSPORT_MODE_ALL, MANAGE, true)
+                || entities.stream().allMatch(e -> canEditEntity(e, true));
     }
 
     @Override
@@ -83,43 +81,45 @@ public class FintrafficAuthorizationService implements AuthorizationService {
 
     @Override
     public void verifyCanDeleteEntities(Collection<? extends EntityStructure> entities) {
-        if (!entities.stream().allMatch(this::canDeleteEntity)) {
+        if (!entities.stream().allMatch(e -> this.canDeleteEntity(e, true))) {
             throw new AccessDeniedException("current user is not allowed to delete entities");
         }
     }
 
     @Override
     public boolean canDeleteEntity(EntityStructure entity) {
-        String codespace = getCodespace(entity.getNetexId());
-        return trivoreAuthorizations.hasAccess(detectEntityType(entity), detectTransportMode(entity), ADMINISTER)
-                && trivoreAuthorizations.hasAccessToCodespace(codespace);
+        return this.canDeleteEntity(entity, false);
+    }
+
+    private boolean canDeleteEntity(EntityStructure entity, boolean logAuthorizationCheck) {
+        return trivoreAuthorizations.hasAccess(detectEntityType(entity), detectTransportMode(entity), ADMINISTER, logAuthorizationCheck);
     }
 
     @Override
     public boolean canEditEntity(EntityStructure entity) {
+       return canEditEntity(entity, false);
+    }
+
+    private boolean canEditEntity(EntityStructure entity, boolean logAuthorizationCheck) {
         if (entity == null) {
             return true;
         }
-        String codespace = getCodespace(entity.getNetexId());
-        if (!trivoreAuthorizations.hasAccess(detectEntityType(entity), detectTransportMode(entity), MANAGE)) {
-            return false;
-        }
-        if (!trivoreAuthorizations.hasAccessToCodespace(codespace)) {
+        if (!trivoreAuthorizations.hasAccess(detectEntityType(entity), detectTransportMode(entity), MANAGE, logAuthorizationCheck)) {
             return false;
         }
 
         if (entity instanceof StopPlace stop) {
             // Ensure that user has sufficient permission to edit all nested entities
-            if (!stop.getChildren().stream().allMatch(this::canEditEntity)) {
+            if (!stop.getChildren().stream().allMatch(e -> canEditEntity(e, logAuthorizationCheck))) {
                 return false;
             }
-            if (!stop.getQuays().stream().allMatch(this::canEditEntity)) {
+            if (!stop.getQuays().stream().allMatch(e -> canEditEntity(e, logAuthorizationCheck))) {
                 return false;
             }
         }
 
         if (entity instanceof Zone_VersionStructure zone) {
-            return canEditEntity(zone.getCentroid());
+            return canEditEntity(zone.getCentroid(), logAuthorizationCheck);
         }
         return true;
     }
@@ -137,10 +137,17 @@ public class FintrafficAuthorizationService implements AuthorizationService {
 
     @Override
     public boolean canEditEntity(Point point) {
+        return canEditEntity(point, false);
+    }
+
+    private boolean canEditEntity(Point point, boolean logAuthorizationCheck) {
         logger.trace("FintrafficAuthorizationService.canEditEntity({})", point);
         Set<String> accessibleCodespaces = trivoreAuthorizations.getAccessibleCodespaces();
 
         if (accessibleCodespaces.isEmpty()) {
+            if (logAuthorizationCheck) {
+                logger.info("User [{}] has no accessible codespaces, cannot edit entity at point {}.", TrivoreAuthorizations.getCurrentSubject(), point);
+            }
             logger.trace("FintrafficAuthorizationService.canEditEntity({}) codespaces is empty", point);
             return false;
         }
@@ -155,7 +162,10 @@ public class FintrafficAuthorizationService implements AuthorizationService {
                     }
                 }
         );
-        logger.trace("FintrafficAuthorizationService.canEditEntity({}, {}, {})", result, point, accessibleCodespaces);
+        if (logAuthorizationCheck) {
+            String isAllowed = result ? "is allowed": "is not allowed";
+            logger.info("User [{}] with codespaces {} {} to edit entity at point {}.", TrivoreAuthorizations.getCurrentSubject(), accessibleCodespaces, isAllowed, point);
+        }
         return result;
     }
 
@@ -223,18 +233,5 @@ public class FintrafficAuthorizationService implements AuthorizationService {
     @Override
     public boolean isGuest() {
         return !trivoreAuthorizations.isAuthenticated();
-    }
-
-    private final Pattern netexIdPattern = Pattern.compile("([A-Z]{3}):([^:]*):([^:]*)");
-    private String getCodespace(String netexId) {
-        if (netexId == null) {
-            return null;
-        }
-        Matcher matcher = netexIdPattern.matcher(netexId);
-        if (matcher.matches()) {
-            return matcher.group(1);
-        } else {
-            throw new InvalidNetexIdException(netexId + " is not a valid NeTEx id");
-        }
     }
 }
