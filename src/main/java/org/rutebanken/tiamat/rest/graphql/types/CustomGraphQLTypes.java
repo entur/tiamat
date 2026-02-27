@@ -586,20 +586,6 @@ public class CustomGraphQLTypes {
             )
             .build();
 
-    public static GraphQLInputObjectType lightingInputType = GraphQLInputObjectType.newInputObject()
-            .name(INPUT_TYPE_LIGHTING)
-            .field(newInputObjectField()
-                    .name(LIGHTING)
-                    .type(lightingEnumType))
-            .build();
-
-    public static GraphQLObjectType lightingOutputType = newObject()
-            .name(OUTPUT_TYPE_LIGHTING)
-            .field(newFieldDefinition()
-                    .name(LIGHTING)
-                    .type(lightingEnumType))
-            .build();
-
     public static List getLocalServiceOfType(Class clazz, DataFetchingEnvironment env) {
         List<LocalService> localServices = env.getSource();
         List localServicesOfType = new ArrayList<>();

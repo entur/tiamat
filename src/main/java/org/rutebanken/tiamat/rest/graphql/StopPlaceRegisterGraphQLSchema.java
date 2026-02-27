@@ -153,8 +153,6 @@ import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.getLoc
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.interchangeWeightingEnum;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.keyValuesObjectInputType;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.lightingEnumType;
-import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.lightingInputType;
-import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.lightingOutputType;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.localServiceInputType;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.localServiceType;
 import static org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes.modificationEnumerationType;
