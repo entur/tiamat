@@ -161,6 +161,9 @@ public class GraphQLNames {
     public static final String OUTPUT_TYPE_PURPOSE_OF_GROUPING="PurposeOfGrouping";
     public static final String INPUT_TYPE_GROUP_OF_STOPPLACES = OUTPUT_TYPE_GROUP_OF_STOPPLACES + INPUT_TYPE_POSTFIX;
 
+    public static final String OUTPUT_TYPE_LIGHTING ="Lighting";
+    public static final String INPUT_TYPE_LIGHTING = OUTPUT_TYPE_LIGHTING + INPUT_TYPE_POSTFIX;
+
     public static final String INPUT_TYPE_PURPOSE_OF_GROUPING = OUTPUT_TYPE_PURPOSE_OF_GROUPING + INPUT_TYPE_POSTFIX;
 
     public static final String GROUP_OF_STOP_PLACES_MEMBERS = "members";
@@ -340,6 +343,7 @@ public class GraphQLNames {
     public static final String PUBLIC_CODE = "publicCode";
     public static final String WEIGHTING = "weighting";
     public static final String URL = "url";
+    public static final String LIGHTING = "lighting";
 
     // Postal address fields
     public static final String OUTPUT_TYPE_POSTAL_ADDRESS = "PostalAddress";
