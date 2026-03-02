@@ -52,7 +52,7 @@ public class FacilitiesConverterTest extends TiamatIntegrationTest {
 
         SiteFacilitySets_RelStructure relStructure = facilitiesConverter.convertTo(facilities, siteFacilitySetsRelStructureType, mappingContext);
         assertThat(relStructure).isNotNull();
-        // Only 1 because facility2 doesn't have a ny data in it
+        // Only 1 because facility2 doesn't have any data in it
         Assertions.assertThat(relStructure.getSiteFacilitySetRefOrSiteFacilitySet().size()).isEqualTo(1);
     }
 

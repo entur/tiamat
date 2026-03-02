@@ -35,6 +35,10 @@ public class FacilitiesConverter extends BidirectionalConverter<Set<SiteFacility
         if (facilities != null && !facilities.isEmpty()) {
             final SiteFacilitySets_RelStructure siteFacilitySets_relStructure = new SiteFacilitySets_RelStructure();
             Set<SiteFacilitySet> facilitiesContainingData = facilities.stream().filter(this::isTiamatFacilityContainingData).collect(Collectors.toSet());
+            if (facilitiesContainingData.isEmpty()) {
+                return null;
+            }
+
             List<org.rutebanken.netex.model.SiteFacilitySet> facilitiesList = facilitiesContainingData.stream().map(facility -> {
                 org.rutebanken.netex.model.SiteFacilitySet netexFacility = new org.rutebanken.netex.model.SiteFacilitySet();
                 mapperFacade.map(facility, netexFacility);
