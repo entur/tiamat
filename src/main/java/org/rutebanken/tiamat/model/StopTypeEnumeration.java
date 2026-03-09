@@ -30,6 +30,7 @@ public enum StopTypeEnumeration {
     FERRY_STOP("ferryStop"),
     LIFT_STATION("liftStation"),
     VEHICLE_RAIL_INTERCHANGE("vehicleRailInterchange"),
+    FUNICULAR("funicular"),
     OTHER("other");
     private final String value;
 
