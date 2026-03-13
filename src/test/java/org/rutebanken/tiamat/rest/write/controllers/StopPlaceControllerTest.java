@@ -2,12 +2,14 @@ package org.rutebanken.tiamat.rest.write.controllers;
 
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
+import org.rutebanken.tiamat.TiamatTestApplication;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.rutebanken.tiamat.model.job.AsyncStopPlaceJobStatus;
 import org.rutebanken.tiamat.rest.write.dto.StopPlaceJobDto;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -18,6 +20,11 @@ import org.springframework.http.ResponseEntity;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@SpringBootTest(
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+    classes = TiamatTestApplication.class,
+    properties = "authorization.enabled=false"
+)
 public class StopPlaceControllerTest extends TiamatIntegrationTest {
 
     private static final String WRITE_ENDPOINT = "/services/stop_places/write";
@@ -28,53 +35,69 @@ public class StopPlaceControllerTest extends TiamatIntegrationTest {
     @Test
     public void createStopPlaceReturnsAcceptedWithProcessingJob() {
         String xml = """
-                <stopPlaces xmlns="http://www.netex.org.uk/netex">
-                    <StopPlace version="1">
-                        <Name>Test Station</Name>
-                        <StopPlaceType>busStation</StopPlaceType>
-                    </StopPlace>
-                </stopPlaces>
-                """;
+            <stopPlaces xmlns="http://www.netex.org.uk/netex">
+                <StopPlace version="1">
+                    <Name>Test Station</Name>
+                    <StopPlaceType>busStation</StopPlaceType>
+                </StopPlace>
+            </stopPlaces>
+            """;
 
-        ResponseEntity<StopPlaceJobDto> response = postXml(xml, StopPlaceJobDto.class);
+        ResponseEntity<StopPlaceJobDto> response = postXml(
+            xml,
+            StopPlaceJobDto.class
+        );
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().jobId()).isNotNull();
-        assertThat(response.getBody().status()).isEqualTo(AsyncStopPlaceJobStatus.PROCESSING);
+        assertThat(response.getBody().status()).isEqualTo(
+            AsyncStopPlaceJobStatus.PROCESSING
+        );
     }
 
     @Test
-    public void createStopPlaceWithMultipleStopPlacesReturnsFailedJob() {
+    public void createStopPlaceWithMultipleStopPlacesReturnsFailedJob()
+        throws InterruptedException {
         String xml = """
-                <stopPlaces xmlns="http://www.netex.org.uk/netex">
-                    <StopPlace version="1">
-                        <Name>Station A</Name>
-                        <StopPlaceType>busStation</StopPlaceType>
-                    </StopPlace>
-                    <StopPlace version="1">
-                        <Name>Station B</Name>
-                        <StopPlaceType>busStation</StopPlaceType>
-                    </StopPlace>
-                </stopPlaces>
-                """;
+            <stopPlaces xmlns="http://www.netex.org.uk/netex">
+                <StopPlace version="1">
+                    <Name>Station A</Name>
+                    <StopPlaceType>busStation</StopPlaceType>
+                </StopPlace>
+                <StopPlace version="1">
+                    <Name>Station B</Name>
+                    <StopPlaceType>busStation</StopPlaceType>
+                </StopPlace>
+            </stopPlaces>
+            """;
 
-        ResponseEntity<StopPlaceJobDto> response = postXml(xml, StopPlaceJobDto.class);
+        ResponseEntity<StopPlaceJobDto> response = postXml(
+            xml,
+            StopPlaceJobDto.class
+        );
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
         assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().status()).isEqualTo(AsyncStopPlaceJobStatus.FAILED);
-        assertThat(response.getBody().errorMessage()).contains("Only one stop place allowed");
+        assertThat(response.getBody().jobId()).isNotNull();
+
+        Long jobId = response.getBody().jobId();
+        StopPlaceJobDto finalJob = awaitJobCompletion(jobId);
+
+        assertThat(finalJob.status()).isEqualTo(AsyncStopPlaceJobStatus.FAILED);
+        assertThat(finalJob.errorMessage()).contains(
+            "Exactly one stop place must be provided"
+        );
     }
 
     @Test
     public void createStopPlaceWithMalformedXmlReturnsBadRequest() {
         String xml = """
-                <stopPlaces xmlns="http://www.netex.org.uk/netex">
-                    <StopPlace version="1">
-                        <Name>Broken
-                </stopPlaces>
-                """;
+            <stopPlaces xmlns="http://www.netex.org.uk/netex">
+                <StopPlace version="1">
+                    <Name>Broken
+            </stopPlaces>
+            """;
 
         ResponseEntity<String> response = postXml(xml, String.class);
 
@@ -83,58 +106,72 @@ public class StopPlaceControllerTest extends TiamatIntegrationTest {
 
     @Test
     public void deleteStopPlaceReturnsAcceptedWithProcessingJob() {
-        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("To Be Deleted"));
+        StopPlace stopPlace = new StopPlace(
+            new EmbeddableMultilingualString("To Be Deleted")
+        );
         stopPlace.setStopPlaceType(StopTypeEnumeration.BUS_STATION);
         StopPlace saved = stopPlaceRepository.save(stopPlace);
 
         ResponseEntity<StopPlaceJobDto> response = restTemplate.exchange(
-                WRITE_ENDPOINT + "/" + saved.getNetexId(),
-                HttpMethod.DELETE,
-                null,
-                StopPlaceJobDto.class
+            WRITE_ENDPOINT + "/" + saved.getNetexId(),
+            HttpMethod.DELETE,
+            null,
+            StopPlaceJobDto.class
         );
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().jobId()).isNotNull();
-        assertThat(response.getBody().status()).isEqualTo(AsyncStopPlaceJobStatus.PROCESSING);
+        assertThat(response.getBody().status()).isEqualTo(
+            AsyncStopPlaceJobStatus.PROCESSING
+        );
     }
 
     @Test
     public void updateStopPlaceReturnsAcceptedWithProcessingJob() {
-        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("Original Name"));
+        StopPlace stopPlace = new StopPlace(
+            new EmbeddableMultilingualString("Original Name")
+        );
         stopPlace.setStopPlaceType(StopTypeEnumeration.BUS_STATION);
         StopPlace saved = stopPlaceRepository.save(stopPlace);
 
-        String xml = String.format("""
-                <stopPlaces xmlns="http://www.netex.org.uk/netex">
-                    <StopPlace id="%s" version="%d">
-                        <Name>Updated Name</Name>
-                        <StopPlaceType>busStation</StopPlaceType>
-                    </StopPlace>
-                </stopPlaces>
-                """, saved.getNetexId(), saved.getVersion() + 1);
+        String xml = String.format(
+            """
+            <stopPlaces xmlns="http://www.netex.org.uk/netex">
+                <StopPlace id="%s" version="%d">
+                    <Name>Updated Name</Name>
+                    <StopPlaceType>busStation</StopPlaceType>
+                </StopPlace>
+            </stopPlaces>
+            """,
+            saved.getNetexId(),
+            saved.getVersion() + 1
+        );
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_XML);
         HttpEntity<String> request = new HttpEntity<>(xml, headers);
 
         ResponseEntity<StopPlaceJobDto> response = restTemplate.exchange(
-                WRITE_ENDPOINT,
-                HttpMethod.PATCH,
-                request,
-                StopPlaceJobDto.class
+            WRITE_ENDPOINT,
+            HttpMethod.PATCH,
+            request,
+            StopPlaceJobDto.class
         );
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().jobId()).isNotNull();
-        assertThat(response.getBody().status()).isEqualTo(AsyncStopPlaceJobStatus.PROCESSING);
+        assertThat(response.getBody().status()).isEqualTo(
+            AsyncStopPlaceJobStatus.PROCESSING
+        );
     }
 
     @Test
     public void getStopPlaceReturnsXml() {
-        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("Test Stop Place"));
+        StopPlace stopPlace = new StopPlace(
+            new EmbeddableMultilingualString("Test Stop Place")
+        );
         stopPlace.setStopPlaceType(StopTypeEnumeration.RAIL_STATION);
         StopPlace saved = stopPlaceRepository.save(stopPlace);
 
@@ -143,20 +180,44 @@ public class StopPlaceControllerTest extends TiamatIntegrationTest {
         HttpEntity<Void> request = new HttpEntity<>(headers);
 
         ResponseEntity<String> response = restTemplate.exchange(
-                WRITE_ENDPOINT + "/" + saved.getNetexId(),
-                HttpMethod.GET,
-                request,
-                String.class
+            WRITE_ENDPOINT + "/" + saved.getNetexId(),
+            HttpMethod.GET,
+            request,
+            String.class
         );
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).contains("Test Stop Place");
     }
 
+    private StopPlaceJobDto awaitJobCompletion(Long jobId)
+        throws InterruptedException {
+        String jobUrl = WRITE_ENDPOINT + "/jobs/" + jobId;
+        for (int i = 0; i < 20; i++) {
+            ResponseEntity<StopPlaceJobDto> jobResponse =
+                restTemplate.getForEntity(jobUrl, StopPlaceJobDto.class);
+            StopPlaceJobDto job = jobResponse.getBody();
+            if (
+                job != null &&
+                job.status() != AsyncStopPlaceJobStatus.PROCESSING
+            ) {
+                return job;
+            }
+            Thread.sleep(200);
+        }
+        throw new AssertionError(
+            "Job did not complete within the expected time"
+        );
+    }
+
     private <T> ResponseEntity<T> postXml(String xml, Class<T> responseType) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_XML);
         HttpEntity<String> request = new HttpEntity<>(xml, headers);
-        return restTemplate.postForEntity(WRITE_ENDPOINT, request, responseType);
+        return restTemplate.postForEntity(
+            WRITE_ENDPOINT,
+            request,
+            responseType
+        );
     }
 }

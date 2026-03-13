@@ -1,12 +1,16 @@
 package org.rutebanken.tiamat.model.job;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.util.List;
+import java.util.Map;
 
 @Entity
 @Schema(description = "Asynchronous StopPlace mutation job model")
@@ -20,8 +24,10 @@ public class AsyncStopPlaceJob {
     @Schema(description = "Job status")
     private AsyncStopPlaceJobStatus status;
 
-    @Schema(description = "List of created StopPlace IDs")
-    private List<String> createdIds;
+    @Schema(description = "List of submitted to created StopPlace ID mappings")
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb")
+    private List<StopPlaceIdMapping> createdIds;
 
     @Schema(description = "Reason for failure if the job has failed")
     private String reason;
@@ -42,11 +48,11 @@ public class AsyncStopPlaceJob {
         this.status = status;
     }
 
-    public List<String> getCreatedIds() {
+    public List<StopPlaceIdMapping> getCreatedIds() {
         return createdIds;
     }
 
-    public void setCreatedIds(List<String> createdIds) {
+    public void setCreatedIds(List<StopPlaceIdMapping> createdIds) {
         this.createdIds = createdIds;
     }
 

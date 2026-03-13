@@ -35,6 +35,7 @@ import org.rutebanken.tiamat.rest.promethouse.PrometheusResource;
 import org.rutebanken.tiamat.rest.write.controllers.JobControllerImpl;
 import org.rutebanken.tiamat.rest.write.controllers.StopPlaceControllerImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -45,6 +46,9 @@ import java.util.Set;
 
 @Configuration
 public class JerseyConfig {
+
+    @Value("${tiamat.write-api.enabled:true}")
+    private boolean writeApiEnabled;
 
     /**
      * Client ID header.
@@ -88,8 +92,10 @@ public class JerseyConfig {
         publicResources.add(AsyncExportResource.class);
         publicResources.add(ExportResource.class);
         publicResources.add(GraphQLResource.class);
-        publicResources.add(StopPlaceControllerImpl.class);
-        publicResources.add(JobControllerImpl.class);
+        if (writeApiEnabled) {
+            publicResources.add(StopPlaceControllerImpl.class);
+            publicResources.add(JobControllerImpl.class);
+        }
 
         publicResources.add(GeneralExceptionMapper.class);
         publicResources.add(ErrorResponseEntityMessageBodyWriter.class);

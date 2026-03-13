@@ -2,12 +2,14 @@ package org.rutebanken.tiamat.rest.write;
 
 import org.rutebanken.tiamat.model.job.AsyncStopPlaceJob;
 import org.rutebanken.tiamat.model.job.AsyncStopPlaceJobStatus;
+import org.rutebanken.tiamat.model.job.StopPlaceIdMapping;
 import org.rutebanken.tiamat.repository.AsyncStopPlaceJobRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.RejectedExecutionException;
 
 @Service
 public class JobService {
@@ -29,17 +31,26 @@ public class JobService {
         return repo.findById(jobId);
     }
 
-    public AsyncStopPlaceJob succeed(Long id, List<String> stopPlaceIds) {
+    public void succeed(Long id, List<StopPlaceIdMapping> createdStopPlaceIds) {
         var job = repo.findById(id).orElseThrow();
         job.setStatus(AsyncStopPlaceJobStatus.FINISHED);
-        job.setCreatedIds(stopPlaceIds);
+        job.setCreatedIds(createdStopPlaceIds);
+        repo.save(job);
+    }
+
+    public AsyncStopPlaceJob fail(Long id, Exception exception) {
+        var job = repo.findById(id).orElseThrow();
+        job.setStatus(AsyncStopPlaceJobStatus.FAILED);
+        job.setReason(formatException(exception));
         return repo.save(job);
     }
 
-    public AsyncStopPlaceJob fail(Long id, String reason) {
-        var job = repo.findById(id).orElseThrow();
-        job.setStatus(AsyncStopPlaceJobStatus.FAILED);
-        job.setReason(reason);
-        return repo.save(job);
+    private String formatException(Exception e) {
+        if (e instanceof IllegalArgumentException) {
+            return e.getMessage();
+        } else if (e instanceof RejectedExecutionException) {
+            return "The job queue is full. Please try again later.";
+        }
+        return "An unexpected error occurred.";
     }
 }

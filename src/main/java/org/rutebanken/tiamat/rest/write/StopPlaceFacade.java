@@ -1,19 +1,28 @@
 package org.rutebanken.tiamat.rest.write;
 
 import jakarta.transaction.Transactional;
+import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.ServiceUnavailableException;
 import jakarta.ws.rs.core.StreamingOutput;
 import org.rutebanken.netex.model.LocaleStructure;
 import org.rutebanken.netex.model.SiteFrame;
 import org.rutebanken.netex.model.VersionFrameDefaultsStructure;
-import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.job.AsyncStopPlaceJob;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.netex.mapping.NetexMappingContextThreadLocal;
 import org.rutebanken.tiamat.rest.write.dto.StopPlaceJobDto;
 import org.rutebanken.tiamat.rest.write.dto.StopPlacesDto;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
+import java.util.concurrent.RejectedExecutionException;
 
 @Service
 public class StopPlaceFacade {
+
+    private static final Logger logger = LoggerFactory.getLogger(StopPlaceFacade.class);
 
     private final NetexMapper netexMapper;
     private final JobService jobService;
@@ -37,20 +46,24 @@ public class StopPlaceFacade {
     @Transactional
     public StreamingOutput getStopPlace(String netexId) {
         updateMappingContext();
-        org.rutebanken.netex.model.StopPlace stopPlace = netexMapper.mapToNetexModel(stopPlaceDomainService.getStopPlace(netexId));
-        return stopPlaceXmlWriter.write(stopPlace);
+        var tiamatStopPlace = Optional.ofNullable(stopPlaceDomainService.getStopPlace(netexId))
+                .orElseThrow(() -> new NotFoundException("Stop place not found: " + netexId));
+        org.rutebanken.netex.model.StopPlace netexStopPlace =
+                netexMapper.mapToNetexModel(tiamatStopPlace);
+        return stopPlaceXmlWriter.write(netexStopPlace);
     }
 
     public StopPlaceJobDto createStopPlaces(StopPlacesDto dto) {
         updateMappingContext();
         var job = jobService.createJob();
         try {
-            var stopPlace = validateAndGetSingleStopPlace(dto);
-            asyncProcessor.processCreateStopPlace(job.getId(), stopPlace);
+            asyncProcessor.processCreateStopPlace(job.getId(), dto);
             return StopPlaceJobDto.from(job);
+        } catch (RejectedExecutionException e) {
+            throw rejectJobIfQueueFull(job, e);
         } catch (Exception e) {
             return StopPlaceJobDto.from(
-                    jobService.fail(job.getId(), e.getMessage())
+                    jobService.fail(job.getId(), e)
             );
         }
     }
@@ -59,12 +72,13 @@ public class StopPlaceFacade {
         updateMappingContext();
         var job = jobService.createJob();
         try {
-            var stopPlace = validateAndGetSingleStopPlace(dto);
-            asyncProcessor.processUpdateStopPlace(job.getId(), stopPlace);
+            asyncProcessor.processUpdateStopPlace(job.getId(), dto);
             return StopPlaceJobDto.from(job);
+        } catch (RejectedExecutionException e) {
+            throw rejectJobIfQueueFull(job, e);
         } catch (Exception e) {
             return StopPlaceJobDto.from(
-                    jobService.fail(job.getId(), e.getMessage())
+                    jobService.fail(job.getId(), e)
             );
         }
     }
@@ -74,32 +88,22 @@ public class StopPlaceFacade {
         try {
             asyncProcessor.processDeleteStopPlace(job.getId(), id);
             return StopPlaceJobDto.from(job);
+        } catch (RejectedExecutionException e) {
+            throw rejectJobIfQueueFull(job, e);
         } catch (Exception e) {
             return StopPlaceJobDto.from(
-                    jobService.fail(job.getId(), e.getMessage())
+                    jobService.fail(job.getId(), e)
             );
         }
     }
 
-    private StopPlace validateAndGetSingleStopPlace(StopPlacesDto dto) {
-        var stopPlaces = netexMapper.mapStopsToTiamatModel(dto.getStopPlaces());
-        if (stopPlaces.size() != 1) {
-            throw new IllegalArgumentException(
-                    "Only one stop place allowed per request"
-            );
-        }
-        var stopPlace = stopPlaces.getFirst();
-        if (
-                stopPlace.isParentStopPlace() || !stopPlace.getChildren().isEmpty()
-        ) {
-            throw new IllegalArgumentException(
-                    "Only mono-modal stop place allowed"
-            );
-        }
-        return stopPlace;
-    }
+
 
     private void updateMappingContext() {
+        // TODO: solve this in some other way
+        // perhaps just ignore validbetween in this api?
+        // or require timezone in the request?
+        // or require that validbetween does not exist in request?
         if (NetexMappingContextThreadLocal.get() == null) {
             NetexMappingContextThreadLocal.updateMappingContext(
                     new SiteFrame().withFrameDefaults(
@@ -109,5 +113,11 @@ public class StopPlaceFacade {
                     )
             );
         }
+    }
+
+    private ServiceUnavailableException rejectJobIfQueueFull(AsyncStopPlaceJob job, Exception exception) {
+        logger.warn("Write queue is full, rejecting new job.", exception);
+        jobService.fail(job.getId(), exception);
+        return new ServiceUnavailableException("Write queue is full, please retry later.");
     }
 }

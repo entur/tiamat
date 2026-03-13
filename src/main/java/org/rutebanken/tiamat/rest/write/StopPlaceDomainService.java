@@ -1,12 +1,13 @@
 package org.rutebanken.tiamat.rest.write;
 
-import jakarta.transaction.Transactional;
 import org.rutebanken.tiamat.diff.TiamatObjectDiffer;
+import org.rutebanken.tiamat.lock.MutateLock;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.rest.validation.StopPlaceMutationValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class StopPlaceDomainService {
@@ -16,15 +17,18 @@ public class StopPlaceDomainService {
     private final StopPlaceService stopPlaceService;
 
     private final TiamatObjectDiffer differ;
+    private final MutateLock mutateLock;
 
     public StopPlaceDomainService(
             StopPlaceMutationValidator validator,
             StopPlaceService stopPlaceService,
-            TiamatObjectDiffer differ
+            TiamatObjectDiffer differ,
+            MutateLock mutateLock
     ) {
         this.validator = validator;
         this.stopPlaceService = stopPlaceService;
         this.differ = differ;
+        this.mutateLock = mutateLock;
     }
 
     public StopPlace getStopPlace(String stopPlaceId) {
@@ -33,7 +37,7 @@ public class StopPlaceDomainService {
 
     public StopPlace createStopPlace(StopPlace stopPlace) {
         validator.validateStopPlaceName(stopPlace);
-        return stopPlaceService.createStopPlace(stopPlace);
+        return mutateLock.executeInLock(() -> stopPlaceService.createStopPlace(stopPlace));
     }
 
     @Transactional
@@ -44,6 +48,7 @@ public class StopPlaceDomainService {
         );
 
         var diffResult = differ.compareObjects(existingStopPlace, stopPlace);
+        differ.logDifference(existingStopPlace, stopPlace);
         if (diffResult.isEmpty()) {
             throw new IllegalArgumentException(
                     String.format(
@@ -52,13 +57,15 @@ public class StopPlaceDomainService {
                     )
             );
         }
-        logger.debug(
+        // TODO: there are differences when the stored stopplace has empty lists and the incoming stopplace has
+        //  null values for those lists, and vica versa. perhaps we should ignore those differences?
+        logger.info(
                 "Differences detected for StopPlace id {}: {}",
                 stopPlace.getNetexId(),
                 diffResult
         );
         validator.validateStopPlaceName(stopPlace);
-        return stopPlaceService.updateStopPlace(existingStopPlace, stopPlace);
+        return mutateLock.executeInLock(() -> stopPlaceService.updateStopPlace(existingStopPlace, stopPlace));
     }
 
     public void deleteStopPlace(String stopPlaceId) {

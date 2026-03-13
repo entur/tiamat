@@ -1,13 +1,19 @@
 package org.rutebanken.tiamat.rest.write.controllers;
 
-import jakarta.ws.rs.*;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import org.rutebanken.tiamat.rest.write.JobService;
 import org.rutebanken.tiamat.rest.write.dto.StopPlaceJobDto;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 @Component
+@ConditionalOnProperty(name = "tiamat.write-api.enabled", havingValue = "true")
 @Produces(MediaType.APPLICATION_JSON)
 @Path("write/jobs")
 public class JobControllerImpl implements JobController {

@@ -20,29 +20,34 @@ import org.rutebanken.tiamat.rest.write.dto.StopPlacesDto;
 )
 interface StopPlaceController {
     @Operation(
-            summary = "Gets a stop place by ID",
-            description = """
+        summary = "Gets a stop place by ID",
+        description = """
         Gets a mono-modal StopPlace by its ID.
         """,
-            responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            description = "The stop place ",
-                            content = @Content(
-                                    schema = @Schema(implementation = StopPlace.class)
-                            )
-                    ),
-                    @ApiResponse(responseCode = "400", description = "Malformed input"),
-            }
+        responses = {
+            @ApiResponse(
+                responseCode = "200",
+                description = "The stop place ",
+                content = @Content(
+                    schema = @Schema(implementation = StopPlace.class)
+                )
+            ),
+            @ApiResponse(
+                responseCode = "404",
+                description = "Stop place by NeTEx ID not found"
+            ),
+        }
     )
     Response getStopPlace(String stopPlaceId);
 
     @Operation(
-        summary = "Creates a stop place from a Netex XML representation",
+        summary = "Creates a stop place from a NeTEx XML representation",
         description = """
         Accepts a StopPlacesDto containing a NeTEx StopPlace XML.
+        The NeTEx ID submitted will be overwritten by the system-generated ID for the created stop place.
         Only a single mono-modal stop place is allowed.
         Returns a job representing the asynchronous creation process.
+        On successful creation, the job result will include the generated NeTEx ID of the created stop place.
         """,
         requestBody = @RequestBody(
             required = true,
@@ -87,12 +92,13 @@ interface StopPlaceController {
                 )
             ),
             @ApiResponse(responseCode = "400", description = "Malformed input"),
+            @ApiResponse(responseCode = "503", description = "Job queue full"),
         }
     )
     Response createStopPlace(StopPlacesDto stopPlacesDto);
 
     @Operation(
-        summary = "Updates a stop place from a Netex XML representation",
+        summary = "Updates a stop place from a NeTEx XML representation",
         description = """
         Accepts a StopPlacesDto containing a NeTEx StopPlace XML.
         Only a single mono-modal stop place is allowed.
@@ -143,6 +149,7 @@ interface StopPlaceController {
                 )
             ),
             @ApiResponse(responseCode = "400", description = "Malformed input"),
+            @ApiResponse(responseCode = "503", description = "Job queue full"),
         }
     )
     Response updateStopPlace(StopPlacesDto stopPlacesDto);
@@ -169,6 +176,7 @@ interface StopPlaceController {
                     schema = @Schema(implementation = StopPlaceJobDto.class)
                 )
             ),
+            @ApiResponse(responseCode = "503", description = "Job queue full"),
         }
     )
     Response deleteStopPlace(@PathParam("stopPlaceId") String stopPlaceId);

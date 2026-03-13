@@ -4,6 +4,7 @@ import jakarta.ws.rs.NotFoundException;
 import org.junit.Test;
 import org.rutebanken.tiamat.model.job.AsyncStopPlaceJob;
 import org.rutebanken.tiamat.model.job.AsyncStopPlaceJobStatus;
+import org.rutebanken.tiamat.model.job.StopPlaceIdMapping;
 import org.rutebanken.tiamat.rest.write.JobService;
 import org.rutebanken.tiamat.rest.write.dto.StopPlaceJobDto;
 
@@ -18,7 +19,9 @@ import static org.mockito.Mockito.when;
 public class JobControllerTest {
 
     private final JobService jobService = mock(JobService.class);
-    private final JobController jobController = new JobControllerImpl(jobService);
+    private final JobController jobController = new JobControllerImpl(
+        jobService
+    );
 
     @Test
     public void shouldGetJobStatus() {
@@ -26,7 +29,9 @@ public class JobControllerTest {
         when(job.getId()).thenReturn(1L);
         when(job.getStatus()).thenReturn(AsyncStopPlaceJobStatus.FAILED);
         when(job.getReason()).thenReturn("Error");
-        when(job.getCreatedIds()).thenReturn(singletonList("id"));
+        when(job.getCreatedIds()).thenReturn(
+            singletonList(new StopPlaceIdMapping("submitted-id", "created-id"))
+        );
         when(jobService.getJob(1L)).thenReturn(Optional.of(job));
 
         StopPlaceJobDto result = jobController.getJobStatus(1L);
@@ -35,13 +40,15 @@ public class JobControllerTest {
         assertThat(result.jobId()).isEqualTo(1L);
         assertThat(result.status()).isEqualTo(AsyncStopPlaceJobStatus.FAILED);
         assertThat(result.errorMessage()).isEqualTo("Error");
-        assertThat(result.createdIds()).containsExactly("id");
+        assertThat(result.createdIds()).containsExactly(
+            new StopPlaceIdMapping("submitted-id", "created-id")
+        );
     }
 
     @Test
     public void shouldThrowErrorIfJobNotFound() {
         assertThatThrownBy(() -> jobController.getJobStatus(1L))
-                .isInstanceOf(NotFoundException.class)
-                .hasMessageContaining("Job with ID 1 not found");
+            .isInstanceOf(NotFoundException.class)
+            .hasMessageContaining("Job with ID 1 not found");
     }
 }
