@@ -1,4 +1,4 @@
-FROM eclipse-temurin:21-noble
+FROM eclipse-temurin:25-noble
 WORKDIR /deployments
 COPY target/tiamat-*-SNAPSHOT.jar tiamat.jar
 RUN addgroup --gid 2000 appuser && adduser --uid 2000 --disabled-password --ingroup appuser appuser
