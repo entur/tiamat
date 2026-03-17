@@ -32,7 +32,10 @@ import org.rutebanken.tiamat.rest.netex.publicationdelivery.AsyncExportResource;
 import org.rutebanken.tiamat.rest.netex.publicationdelivery.ExportResource;
 import org.rutebanken.tiamat.rest.netex.publicationdelivery.ImportResource;
 import org.rutebanken.tiamat.rest.promethouse.PrometheusResource;
+import org.rutebanken.tiamat.rest.write.controllers.JobControllerImpl;
+import org.rutebanken.tiamat.rest.write.controllers.StopPlaceControllerImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -43,6 +46,9 @@ import java.util.Set;
 
 @Configuration
 public class JerseyConfig {
+
+    @Value("${tiamat.write-api.enabled:true}")
+    private boolean writeApiEnabled;
 
     /**
      * Client ID header.
@@ -86,6 +92,10 @@ public class JerseyConfig {
         publicResources.add(AsyncExportResource.class);
         publicResources.add(ExportResource.class);
         publicResources.add(GraphQLResource.class);
+        if (writeApiEnabled) {
+            publicResources.add(StopPlaceControllerImpl.class);
+            publicResources.add(JobControllerImpl.class);
+        }
 
         publicResources.add(GeneralExceptionMapper.class);
         publicResources.add(ErrorResponseEntityMessageBodyWriter.class);
@@ -98,6 +108,7 @@ public class JerseyConfig {
 
 
         publicServicesJersey.addUrlMappings(SERVICES_STOP_PLACE_PATH + "/*");
+
         publicServicesJersey.setName("PublicJersey");
 
         publicServicesJersey.setLoadOnStartup(0);
@@ -122,7 +133,6 @@ public class JerseyConfig {
 
         ResourceConfig resourceConfig = new ResourceConfig(resources);
         ServletRegistrationBean healthServicesJersey = new ServletRegistrationBean(new ServletContainer(resourceConfig));
-
 
 
         healthServicesJersey.addUrlMappings(SERVICES_HEALTH_PATH + "/*");
@@ -150,7 +160,6 @@ public class JerseyConfig {
 
         ResourceConfig resourceConfig = new ResourceConfig(resources);
         ServletRegistrationBean prometheusServicesJersey = new ServletRegistrationBean(new ServletContainer(resourceConfig));
-
 
 
         prometheusServicesJersey.addUrlMappings(SERVICES_HEALTH_PATH + "/scrape/*");
