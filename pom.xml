@@ -63,7 +63,7 @@
         <jts-core.version>1.20.0</jts-core.version>
         <groovy-all.version>4.0.30</groovy-all.version>
         <rest-assured.version>5.5.7</rest-assured.version>
-        <spring-cloud-aws-secrets-manager.version>3.1.1</spring-cloud-aws-secrets-manager.version>
+        <spring-cloud-aws-secrets-manager.version>3.4.2</spring-cloud-aws-secrets-manager.version>
         <aws-secretsmanager.version>2.0.4</aws-secretsmanager.version>
         <argLine/>
 
