@@ -54,10 +54,6 @@ public class GraphQLResourceTariffZoneIntegrationTest extends AbstractGraphQLRes
                                         type
                                         coordinates
                                     }
-                                    polygon {
-                                        type
-                                        coordinates
-                                    }
                           }
                         }""";
 
@@ -66,7 +62,7 @@ public class GraphQLResourceTariffZoneIntegrationTest extends AbstractGraphQLRes
                 .body("name.value", equalTo(tariffZone.getName().getValue()))
                 .body("id", equalTo(tariffZone.getNetexId()))
                 .body("version", equalTo(Long.toString(tariffZone.getVersion())))
-                .body("polygon",notNullValue());
+                .body("geometry",notNullValue());
     }
 
 }

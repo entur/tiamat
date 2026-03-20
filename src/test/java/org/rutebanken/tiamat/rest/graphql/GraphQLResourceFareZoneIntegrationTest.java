@@ -61,10 +61,6 @@ public class GraphQLResourceFareZoneIntegrationTest extends AbstractGraphQLResou
                                         type
                                         coordinates
                                     }
-                                    polygon {
-                                        type
-                                        coordinates
-                                    }
                           }
                         }""";
 
@@ -73,7 +69,7 @@ public class GraphQLResourceFareZoneIntegrationTest extends AbstractGraphQLResou
                 .body("name.value", equalTo(fareZone.getName().getValue()))
                 .body("id", equalTo(fareZone.getNetexId()))
                 .body("version", equalTo(Long.toString(fareZone.getVersion())))
-                .body("polygon",notNullValue());
+                .body("geometry",notNullValue());
     }
 
     @Test

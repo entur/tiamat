@@ -71,7 +71,6 @@ import org.rutebanken.tiamat.rest.graphql.fetchers.GroupOfStopPlacesMembersFetch
 import org.rutebanken.tiamat.rest.graphql.fetchers.GroupOfStopPlacesPurposeOfGroupingFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.KeyValuesDataFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.LocationPermissionsFetcher;
-import org.rutebanken.tiamat.rest.graphql.fetchers.PolygonFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.StopPlaceFareZoneFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.StopPlaceTariffZoneFetcher;
 import org.rutebanken.tiamat.rest.graphql.fetchers.TagFetcher;
@@ -314,9 +313,6 @@ public class StopPlaceRegisterGraphQLSchema {
 
     @Autowired
     private KeyValuesDataFetcher keyValuesDataFetcher;
-
-    @Autowired
-    private PolygonFetcher polygonFetcher;
 
     @Autowired
     private PathLinkGeometryFetcher pathLinkGeometryFetcher;
@@ -787,12 +783,6 @@ public class StopPlaceRegisterGraphQLSchema {
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_FARE_ZONE, KEY_VALUES, keyValuesDataFetcher);
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_QUAY, KEY_VALUES, keyValuesDataFetcher);
 
-        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_STOPPLACE, POLYGON, polygonFetcher);
-        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_PARENT_STOPPLACE, POLYGON, polygonFetcher);
-        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_TARIFF_ZONE, POLYGON, polygonFetcher);
-        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_FARE_ZONE, POLYGON, polygonFetcher);
-        registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_QUAY, POLYGON, polygonFetcher);
-
         registerDataFetcher(codeRegistryBuilder, STOPPLACES_REGISTER, VALID_TRANSPORT_MODES, env -> transportModeScalar.getConfiguredTransportModes().keySet());
 
         registerDataFetcher(codeRegistryBuilder, STOPPLACES_REGISTER, FIND_STOPPLACE, stopPlaceFetcher);
@@ -874,8 +864,6 @@ public class StopPlaceRegisterGraphQLSchema {
             }
             return null;
         });
-        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_TOPOGRAPHIC_PLACE,POLYGON,polygonFetcher);
-
         registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_STOPPLACE,SUBMODE,env -> transportModeScalar.resolveSubmode(env));
         registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_STOPPLACE,PARENT_SITE_REF,env -> {
             SiteRefStructure parentSiteRef = ((StopPlace) env.getSource()).getParentSiteRef();
