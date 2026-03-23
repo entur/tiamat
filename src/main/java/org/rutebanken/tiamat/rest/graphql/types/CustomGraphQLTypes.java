@@ -77,7 +77,6 @@ import static graphql.schema.GraphQLInputObjectField.newInputObjectField;
 import static graphql.schema.GraphQLObjectType.newObject;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 import static org.rutebanken.tiamat.rest.graphql.scalars.CustomScalars.GraphQLGeoJSONCoordinates;
-import static org.rutebanken.tiamat.rest.graphql.scalars.CustomScalars.GraphQLLegacyGeoJSONCoordinates;
 
 
 public class CustomGraphQLTypes {
@@ -173,12 +172,6 @@ public class CustomGraphQLTypes {
                     .name(TYPE)
                     .type(geometryTypeEnum))
             .field(newFieldDefinition()
-                    .name(LEGACY_COORDINATES)
-                    .description("non standard coordinates")
-                    .deprecate("no standard coordinates, should be removed in future versions")
-                    .type(GraphQLLegacyGeoJSONCoordinates))
-
-            .field(newFieldDefinition()
                     .name(COORDINATES)
                     .description("GeoJSON-standard coordinates")
                     .type(GraphQLGeoJSONCoordinates))
@@ -192,11 +185,6 @@ public class CustomGraphQLTypes {
             .field(newInputObjectField()
                     .name(TYPE)
                     .type(new GraphQLNonNull(geometryTypeEnum))
-                    .build())
-            .field(newInputObjectField()
-                    .name(LEGACY_COORDINATES)
-                    .description("non-standard coordinates")
-                    .type(GraphQLLegacyGeoJSONCoordinates)
                     .build())
             .field(newInputObjectField()
                     .name(COORDINATES)

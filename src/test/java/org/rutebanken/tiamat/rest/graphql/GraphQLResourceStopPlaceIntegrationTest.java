@@ -457,57 +457,6 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
     /**
      * Use query parameter for original ID search
      */
-    // todo: remove test when legacy coordinates are removed
-    @Test
-    public void searchForStopPlaceWithoutLegacyCoordinates() throws Exception {
-        String basename = "koordinaten";
-        String nameWithLocation = basename + " nr 1";
-        StopPlace stopPlaceWithCoordinates = new StopPlace(new EmbeddableMultilingualString(nameWithLocation));
-        stopPlaceWithCoordinates.setCentroid(geometryFactory.createPoint(new Coordinate(10.533212, 59.678080)));
-
-        String nameWithoutLocation = basename + " nr 2";
-        StopPlace stopPlaceWithoutCoordinates = new StopPlace(new EmbeddableMultilingualString(nameWithoutLocation));
-        stopPlaceWithoutCoordinates.setCentroid(null);
-
-        stopPlaceRepository.save(stopPlaceWithCoordinates);
-        stopPlaceRepository.save(stopPlaceWithoutCoordinates);
-
-        String graphQlJsonQuery = """
-                  {
-                  stopPlace:  stopPlace (query:"koordinaten", allVersions:true) {
-                            id
-                            name { value }
-                            geometry {legacyCoordinates }
-                        }
-                    }""";
-
-        // Search for stopPlace should return both StopPlaces above
-        executeGraphqQLQueryOnly(graphQlJsonQuery)
-                .rootPath("data.stopPlace.find { it.id == '" + stopPlaceWithCoordinates.getNetexId() + "'}")
-                    .body("name.value", equalTo(nameWithLocation))
-                    .body("geometry", notNullValue())
-                    .body("geometry.legacyCoordinates", hasSize(1))
-                .rootPath("data.stopPlace.find { it.id == '" + stopPlaceWithoutCoordinates.getNetexId() + "'}")
-                    .body("name.value", equalTo(nameWithoutLocation))
-                    .body("geometry", nullValue());
-
-        graphQlJsonQuery = """
-                  {
-                  stopPlace:  stopPlace (query:"koordinaten", allVersions:true, withoutLocationOnly:true) {
-                            id
-                            name { value }
-                            geometry {legacyCoordinates }
-                        }
-                    }""";
-
-        // Filtering on withoutLocationsOnly stopPlace should only return one
-        executeGraphqQLQueryOnly(graphQlJsonQuery)
-                .body("data.stopPlace", hasSize(1))
-                .body("data.stopPlace[0].name.value", equalTo(nameWithoutLocation))
-                .body("data.stopPlace[0].geometry", nullValue());
-
-    }
-
     @Test
     public void searchForStopPlaceWithoutCoordinates() throws Exception {
         String basename = "koordinaten";

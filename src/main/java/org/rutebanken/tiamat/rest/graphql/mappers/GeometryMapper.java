@@ -25,7 +25,6 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.COORDINATES;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.LEGACY_COORDINATES;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.TYPE;
 
 @Component
@@ -54,11 +53,6 @@ public class GeometryMapper {
                         final Coordinate coordinate = ((Coordinate[]) map.get(COORDINATES))[0];
                         return geometryFactory.createPoint(coordinate);
                     }
-                    //todo: remove this block after all clients are updated
-                    if (map.get(LEGACY_COORDINATES) != null) {
-                      Coordinate[] coordinates = (Coordinate[]) map.get(LEGACY_COORDINATES);
-                      return geometryFactory.createPoint(coordinates[0]);
-                }
             }
         }
         return null;

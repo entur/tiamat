@@ -958,7 +958,6 @@ public class StopPlaceRegisterGraphQLSchema {
         registerDataFetcher(codeRegistryBuilder,STOPPLACES_MUTATION,REMOVE_TAG,environment -> tagRemover.removeTag(environment.getArgument(TAG_NAME), environment.getArgument(TAG_ID_REFERENCE), environment.getArgument(TAG_COMMENT)));
         registerDataFetcher(codeRegistryBuilder,STOPPLACES_MUTATION,CREATE_TAG,environment -> tagCreator.createTag(environment.getArgument(TAG_NAME), environment.getArgument(TAG_ID_REFERENCE), environment.getArgument(TAG_COMMENT)));
 
-        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_GEO_JSON, LEGACY_COORDINATES,getLegacyCoordinates());
         registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_GEO_JSON, COORDINATES, getGeoJSONCoordinates());
 
         codeRegistryBuilder.typeResolver(OUTPUT_TYPE_STOPPLACE_INTERFACE, stopPlaceTypeResolver);
@@ -1012,21 +1011,6 @@ public class StopPlaceRegisterGraphQLSchema {
         return env -> {
             if (env.getSource() instanceof IdentifiedEntity identifiedEntity) {
                 return identifiedEntity.getNetexId();
-            }
-            return null;
-        };
-    }
-
-    private static DataFetcher<Object> getLegacyCoordinates() {
-        return env -> {
-            if(env.getSource() instanceof Polygon polygon) {
-                return polygon.getCoordinates();
-            }
-            if (env.getSource() instanceof Point point) {
-                return point.getCoordinates();
-            }
-            if (env.getSource() instanceof LineString lineString) {
-                return lineString.getCoordinates();
             }
             return null;
         };
