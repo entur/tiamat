@@ -995,10 +995,10 @@ public class StopPlaceRegisterGraphQLSchema {
                 if (source.getCentroid() != null) {
                     return source.getCentroid();
                 }
-                if (source.getPolygon() != null) {
-                    return source.getPolygon();
+                if (source.getMultiSurface() != null) {
+                    return source.getMultiSurface();
                 }
-                return source.getMultiSurface();
+                return source.getPolygon();
             } else if (env.getSource() instanceof Link link) {
                 return link.getLineString();
             }
