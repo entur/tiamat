@@ -35,10 +35,12 @@ public class GeneratedIdState implements Serializable{
     public static final String ENTITY_NAMES_REGISTERED = "entityNamesRegistered";
 
     private final HazelcastInstance hazelcastInstance;
+    private final NetexIdRangeConfiguration netexIdRangeConfiguration;
 
     @Autowired
-    public GeneratedIdState(HazelcastInstance hazelcastInstance) {
+    public GeneratedIdState(HazelcastInstance hazelcastInstance, NetexIdRangeConfiguration netexIdRangeConfiguration) {
         this.hazelcastInstance = hazelcastInstance;
+        this.netexIdRangeConfiguration = netexIdRangeConfiguration;
     }
 
 
@@ -56,15 +58,20 @@ public class GeneratedIdState implements Serializable{
     }
 
     /**
-     * Last generated id for entity
-     * If no value for entity, INITIAL_LAST_ID is set.
+     * Last generated id for entity.
+     * If no value for entity, uses the configured range minimum minus one
+     * (so the first generated ID will be exactly the range minimum),
+     * or falls back to {@link GaplessIdGeneratorService#INITIAL_LAST_ID}.
      *
-     * @param entityTypeName
+     * @param entityTypeName the entity type name
      * @return the last generated id.
      */
     public long getLastIdForEntity(String entityTypeName) {
         ConcurrentMap<String, Long> lastIdMap = hazelcastInstance.getMap(LAST_IDS_FOR_ENTITY);
-        lastIdMap.putIfAbsent(entityTypeName, INITIAL_LAST_ID);
+        long initialId = netexIdRangeConfiguration.getRangeForEntity(entityTypeName)
+                .map(range -> range.getMin() - 1)
+                .orElse(INITIAL_LAST_ID);
+        lastIdMap.putIfAbsent(entityTypeName, initialId);
         return lastIdMap.get(entityTypeName);
     }
 

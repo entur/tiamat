@@ -38,17 +38,22 @@ public class NetexIdProvider {
 
     private final NetexIdHelper netexIdHelper;
 
+    private final NetexIdRangeConfiguration netexIdRangeConfiguration;
+
     @Autowired
-    public NetexIdProvider(GaplessIdGeneratorService gaplessIdGenerator, ValidPrefixList validPrefixList, NetexIdHelper netexIdHelper) {
+    public NetexIdProvider(GaplessIdGeneratorService gaplessIdGenerator, ValidPrefixList validPrefixList, NetexIdHelper netexIdHelper, NetexIdRangeConfiguration netexIdRangeConfiguration) {
         this.gaplessIdGenerator = gaplessIdGenerator;
         this.validPrefixList = validPrefixList;
         this.netexIdHelper = netexIdHelper;
+        this.netexIdRangeConfiguration = netexIdRangeConfiguration;
     }
 
     public String getGeneratedId(IdentifiedEntity identifiedEntity) {
         String entityTypeName = key(identifiedEntity);
 
         long longId = gaplessIdGenerator.getNextIdForEntity(entityTypeName);
+
+        validateIdRange(entityTypeName, String.valueOf(longId));
 
         return netexIdHelper.getNetexId(entityTypeName, longId);
     }
@@ -60,10 +65,12 @@ public class NetexIdProvider {
         if(validPrefixList.isValidPrefixForType(prefix, identifiedEntity.getClass())) {
             logger.debug("Claimed ID {} contains valid prefix for claiming: {}", identifiedEntity.getNetexId(), prefix);
 
+            String entityTypeName = key(identifiedEntity);
+            String idPostfix = netexIdHelper.extractIdPostfix(identifiedEntity.getNetexId());
+            validateIdRange(entityTypeName, idPostfix);
+
             if(netexIdHelper.isNsrId(identifiedEntity.getNetexId())) {
                 Long claimedId = netexIdHelper.extractIdPostfixNumeric(identifiedEntity.getNetexId());
-
-                String entityTypeName = key(identifiedEntity);
 
                 gaplessIdGenerator.getNextIdForEntity(entityTypeName, claimedId);
             } else {
@@ -73,6 +80,23 @@ public class NetexIdProvider {
             // Because IDs might end with non-numbers we cannot support claiming for any ID other than NSR.
         } else {
             logger.warn("Detected non NSR ID: {} with prefix {}", identifiedEntity.getNetexId(), prefix);
+        }
+    }
+
+    /**
+     * Validates that the given ID postfix is within the configured range for the entity type.
+     * Throws {@link IdGeneratorException} if the ID is outside the configured range.
+     *
+     * @param entityTypeName the entity type name
+     * @param idPostfix the postfix part of the NeTEx ID (numeric or alphanumeric)
+     */
+    private void validateIdRange(String entityTypeName, String idPostfix) {
+        if (!netexIdRangeConfiguration.isIdInRange(entityTypeName, idPostfix)) {
+            throw new IdGeneratorException(
+                    String.format("ID %s is outside the configured range %s for entity type %s",
+                            idPostfix,
+                            netexIdRangeConfiguration.getRangeForEntity(entityTypeName).orElse(null),
+                            entityTypeName));
         }
     }
 

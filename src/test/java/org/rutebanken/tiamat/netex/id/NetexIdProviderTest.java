@@ -47,7 +47,12 @@ public class NetexIdProviderTest {
 
         ValidPrefixList validPrefixList = new ValidPrefixList("NSR", validPrefixesPerType);
         NetexIdHelper netexIdHelper = new NetexIdHelper(validPrefixList);
-        NetexIdProvider netexIdProvider = new NetexIdProvider(gaplessIdGeneratorService, validPrefixList, netexIdHelper);
+        NetexIdProvider netexIdProvider = new NetexIdProvider(
+                gaplessIdGeneratorService,
+                validPrefixList,
+                netexIdHelper,
+                new NetexIdRangeConfiguration()
+        );
 
         netexIdProvider.claimId(topographicPlace);
         verify(gaplessIdGeneratorService, times(1)).getNextIdForEntity(TopographicPlace.class.getSimpleName(),1L);
@@ -69,7 +74,12 @@ public class NetexIdProviderTest {
         validPrefixesPerType.put("TopographicPlace", Arrays.asList("KVE", "VVV"));
         ValidPrefixList validPrefixList = new ValidPrefixList("NSR", validPrefixesPerType);
         NetexIdHelper netexIdHelper = new NetexIdHelper(validPrefixList);
-        NetexIdProvider netexIdProvider = new NetexIdProvider(gaplessIdGeneratorService, validPrefixList, netexIdHelper);
+        NetexIdProvider netexIdProvider = new NetexIdProvider(
+                gaplessIdGeneratorService,
+                validPrefixList,
+                netexIdHelper,
+                new NetexIdRangeConfiguration()
+        );
 
         netexIdProvider.claimId(topographicPlace);
         verify(gaplessIdGeneratorService, times(0)).getNextIdForEntity(TopographicPlace.class.getSimpleName(),1L);
@@ -95,7 +105,12 @@ public class NetexIdProviderTest {
 
         NetexIdHelper netexIdHelper = new NetexIdHelper(validPrefixList);
 
-        NetexIdProvider netexIdProvider = new NetexIdProvider(gaplessIdGeneratorService, validPrefixList, netexIdHelper);
+        NetexIdProvider netexIdProvider = new NetexIdProvider(
+                gaplessIdGeneratorService,
+                validPrefixList,
+                netexIdHelper,
+                new NetexIdRangeConfiguration()
+        );
 
         netexIdProvider.claimId(topographicPlace);
 

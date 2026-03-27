@@ -66,24 +66,36 @@ public class GaplessIdGeneratorService {
 
     private static BasicFormatterImpl basicFormatter = new BasicFormatterImpl();
 
+    /**
+     * Percentage of the configured range that triggers a warning when the high-water mark is approaching the max.
+     */
+    private static final double HIGH_WATER_MARK_WARNING_THRESHOLD = 0.9;
+
     private final int fetchSize;
 
     private final EntityManagerFactory entityManagerFactory;
     private final HazelcastInstance hazelcastInstance;
     private final GeneratedIdState generatedIdState;
+    private final NetexIdRangeConfiguration netexIdRangeConfiguration;
 
     @Autowired
-    public GaplessIdGeneratorService(EntityManagerFactory entityManagerFactory, HazelcastInstance hazelcastInstance, GeneratedIdState generatedIdState) {
+    public GaplessIdGeneratorService(EntityManagerFactory entityManagerFactory, HazelcastInstance hazelcastInstance, GeneratedIdState generatedIdState, NetexIdRangeConfiguration netexIdRangeConfiguration) {
         this.entityManagerFactory = entityManagerFactory;
         this.hazelcastInstance = hazelcastInstance;
         this.generatedIdState = generatedIdState;
+        this.netexIdRangeConfiguration = netexIdRangeConfiguration;
         this.fetchSize = DEFAULT_FETCH_SIZE;
     }
 
     public GaplessIdGeneratorService(EntityManagerFactory entityManagerFactory, HazelcastInstance hazelcastInstance, GeneratedIdState generatedIdState, int fetchSize) {
+        this(entityManagerFactory, hazelcastInstance, generatedIdState, new NetexIdRangeConfiguration(), fetchSize);
+    }
+
+    public GaplessIdGeneratorService(EntityManagerFactory entityManagerFactory, HazelcastInstance hazelcastInstance, GeneratedIdState generatedIdState, NetexIdRangeConfiguration netexIdRangeConfiguration, int fetchSize) {
         this.entityManagerFactory = entityManagerFactory;
         this.hazelcastInstance = hazelcastInstance;
         this.generatedIdState = generatedIdState;
+        this.netexIdRangeConfiguration = netexIdRangeConfiguration;
 
         if (fetchSize < LOW_LEVEL_AVAILABLE_IDS) {
             logger.warn("Fetch size {} cannot be lower than LOW LEVEL AVAILABLE IDS {}. Setting fetch size to {}", fetchSize, LOW_LEVEL_AVAILABLE_IDS, LOW_LEVEL_AVAILABLE_IDS);
@@ -207,6 +219,8 @@ public class GaplessIdGeneratorService {
     private List<Long> retrieveIds(String entityTypeName, EntityManager entityManager) {
         long lastId = generatedIdState.getLastIdForEntity(entityTypeName);
 
+        checkHighWaterMark(entityTypeName, lastId);
+
         List<Long> retrievedIds = selectNextAvailableIds(entityTypeName, lastId, entityManager);
 
         logger.trace("Generated for {}: {}", entityTypeName, retrievedIds);
@@ -218,6 +232,31 @@ public class GaplessIdGeneratorService {
             generatedIdState.setLastIdForEntity(entityTypeName, Collections.max(retrievedIds));
         }
         return retrievedIds;
+    }
+
+    /**
+     * Log a warning when the high-water mark for an entity type is approaching the configured max.
+     * This serves as an early warning that the ID range is running out.
+     *
+     * @param entityTypeName the entity type name
+     * @param lastId the current high-water mark
+     */
+    private void checkHighWaterMark(String entityTypeName, long lastId) {
+        netexIdRangeConfiguration.getRangeForEntity(entityTypeName).ifPresent(range -> {
+            long min = range.getMin();
+            long max = range.getMax();
+            long totalRange = max - min;
+            long used = lastId - min;
+            double usageRatio = (double) used / totalRange;
+
+            if (usageRatio >= HIGH_WATER_MARK_WARNING_THRESHOLD) {
+                long remaining = max - lastId;
+                logger.warn("ID range for {} is {}% exhausted. Last ID: {}, configured max: {}, remaining: {}",
+                        entityTypeName,
+                        String.format("%.1f", usageRatio * 100),
+                        lastId, max, remaining);
+            }
+        });
     }
 
     /**
