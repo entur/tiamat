@@ -32,6 +32,7 @@ class ReadApiNetexMarshallingServiceTest {
     private NetexRepository netexRepository;
     private ServiceFrameElementCreator serviceFrameElementCreator;
     private SearchKeyService searchKeyService;
+    private NetexEntityEnricher netexEntityEnricher;
     private ReadApiNetexMarshallingService marshallingService;
 
     @BeforeEach
@@ -40,12 +41,14 @@ class ReadApiNetexMarshallingServiceTest {
         netexRepository = mock(NetexRepository.class);
         serviceFrameElementCreator = mock(ServiceFrameElementCreator.class);
         searchKeyService = mock(SearchKeyService.class);
+        netexEntityEnricher = mock(NetexEntityEnricher.class);
 
         marshallingService = new ReadApiNetexMarshallingService(
                 netexMapper,
                 netexRepository,
                 serviceFrameElementCreator,
-                searchKeyService
+                searchKeyService,
+                netexEntityEnricher
         );
     }
 
@@ -169,6 +172,24 @@ class ReadApiNetexMarshallingServiceTest {
         marshallingService.handleEntityChange(stopPlace, event);
 
         verify(netexRepository, times(1)).upsertEntities(any());
+    }
+
+    @Test
+    void marshallToXMLInvokesEnricher() {
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setNetexId("FSR:StopPlace:1");
+        stopPlace.setVersion(1L);
+        stopPlace.setChanged(Instant.now());
+
+        org.rutebanken.netex.model.StopPlace netexStopPlace = new org.rutebanken.netex.model.StopPlace();
+        netexStopPlace.setId(stopPlace.getNetexId());
+        netexStopPlace.setVersion(String.valueOf(stopPlace.getVersion()));
+
+        when(netexMapper.mapToNetexModel(stopPlace)).thenReturn(netexStopPlace);
+
+        marshallingService.marshallToXML(stopPlace);
+
+        verify(netexEntityEnricher, times(1)).enrich(netexStopPlace);
     }
 
     @Test

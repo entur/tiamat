@@ -41,6 +41,7 @@ public class ReadApiNetexMarshallingService {
     private final NetexRepository netexRepository;
     private final ServiceFrameElementCreator serviceFrameElementCreator;
     private final SearchKeyService searchKeyService;
+    private final NetexEntityEnricher netexEntityEnricher;
 
     private static final Map<Class<?>, Function<org.rutebanken.netex.model.EntityInVersionStructure, JAXBElement<?>>> JAXB_ELEMENT_FACTORIES = Map.of(
             org.rutebanken.netex.model.StopPlace.class, e -> objectFactory.createStopPlace((org.rutebanken.netex.model.StopPlace) e),
@@ -56,12 +57,14 @@ public class ReadApiNetexMarshallingService {
             NetexMapper netexMapper,
             NetexRepository netexRepository,
             ServiceFrameElementCreator serviceFrameElementCreator,
-            SearchKeyService searchKeyService
+            SearchKeyService searchKeyService,
+            NetexEntityEnricher netexEntityEnricher
     ) {
         this.netexMapper = netexMapper;
         this.netexRepository = netexRepository;
         this.serviceFrameElementCreator = serviceFrameElementCreator;
         this.searchKeyService = searchKeyService;
+        this.netexEntityEnricher = netexEntityEnricher;
     }
 
     @PostConstruct
@@ -205,6 +208,7 @@ public class ReadApiNetexMarshallingService {
     }
 
     public String marshallToXML(org.rutebanken.netex.model.EntityInVersionStructure netexEntity) {
+        netexEntityEnricher.enrich(netexEntity);
         XMLOutputFactory xof = XMLOutputFactory.newInstance();
 
         try (StringWriter stringWriter = new StringWriter(512)) {
