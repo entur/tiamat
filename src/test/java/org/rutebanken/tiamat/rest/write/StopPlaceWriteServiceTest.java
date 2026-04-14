@@ -11,6 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.rutebanken.tiamat.model.job.AsyncStopPlaceJob;
 import org.rutebanken.tiamat.model.job.AsyncStopPlaceJobStatus;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
+import org.rutebanken.tiamat.rest.write.async.StopPlaceAsyncProcessor;
 import org.rutebanken.tiamat.rest.write.dto.StopPlaceJobDto;
 import org.rutebanken.tiamat.rest.write.dto.StopPlacesDto;
 
@@ -30,7 +31,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class StopPlaceFacadeTest {
+class StopPlaceWriteServiceTest {
 
     @Mock
     private NetexMapper netexMapper;
@@ -47,11 +48,11 @@ class StopPlaceFacadeTest {
     @Mock
     private StopPlaceXmlWriter stopPlaceXmlWriter;
 
-    private StopPlaceFacade facade;
+    private StopPlaceWriteService facade;
 
     @BeforeEach
     void setup() {
-        facade = new StopPlaceFacade(
+        facade = new StopPlaceWriteService(
             netexMapper,
             jobService,
             asyncProcessor,

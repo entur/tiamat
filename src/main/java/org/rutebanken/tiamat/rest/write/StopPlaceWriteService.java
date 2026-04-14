@@ -10,6 +10,7 @@ import org.rutebanken.netex.model.VersionFrameDefaultsStructure;
 import org.rutebanken.tiamat.model.job.AsyncStopPlaceJob;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.netex.mapping.NetexMappingContextThreadLocal;
+import org.rutebanken.tiamat.rest.write.async.StopPlaceAsyncProcessor;
 import org.rutebanken.tiamat.rest.write.dto.StopPlaceJobDto;
 import org.rutebanken.tiamat.rest.write.dto.StopPlacesDto;
 import org.slf4j.Logger;
@@ -21,6 +22,7 @@ import java.util.concurrent.RejectedExecutionException;
 
 @Service
 public class StopPlaceFacade {
+    // TODO: rename. StopPlaceJobHandler? StopPlaceWriteService?
 
     private static final Logger logger = LoggerFactory.getLogger(StopPlaceFacade.class);
 

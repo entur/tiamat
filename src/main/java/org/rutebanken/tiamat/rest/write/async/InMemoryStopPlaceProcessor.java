@@ -14,16 +14,16 @@ import java.util.List;
 
 @Service
 @EnableAsync
-public class InProcessStopPlaceProcessor implements StopPlaceAsyncProcessor {
+public class InMemoryStopPlaceProcessor implements StopPlaceAsyncProcessor {
 
     private static final Logger logger = LoggerFactory.getLogger(
-        InProcessStopPlaceProcessor.class
+        InMemoryStopPlaceProcessor.class
     );
     private final JobService jobService;
     private final StopPlaceDomainService domainService;
     private final NetexMapper netexMapper;
 
-    public InProcessStopPlaceProcessor(
+    public InMemoryStopPlaceProcessor(
         JobService jobService,
         StopPlaceDomainService domainService,
         NetexMapper netexMapper
@@ -33,7 +33,7 @@ public class InProcessStopPlaceProcessor implements StopPlaceAsyncProcessor {
         this.netexMapper = netexMapper;
     }
 
-    @Async("stopPlaceExecutor")
+    @Async("stopPlaceWriteExecutor")
     public void processCreateStopPlace(Long jobId, StopPlacesDto dto) {
         try {
             var validatedStopPlace = validateAndGetSingleStopPlace(dto);
@@ -53,7 +53,7 @@ public class InProcessStopPlaceProcessor implements StopPlaceAsyncProcessor {
         }
     }
 
-    @Async("stopPlaceExecutor")
+    @Async("stopPlaceWriteExecutor")
     public void processUpdateStopPlace(Long jobId, StopPlacesDto dto) {
         try {
             var validatedStopPlace = validateAndGetSingleStopPlace(dto);
@@ -65,7 +65,7 @@ public class InProcessStopPlaceProcessor implements StopPlaceAsyncProcessor {
         }
     }
 
-    @Async("stopPlaceExecutor")
+    @Async("stopPlaceWriteExecutor")
     public void processDeleteStopPlace(Long jobId, String stopPlaceId) {
         try {
             domainService.deleteStopPlace(stopPlaceId);

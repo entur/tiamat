@@ -1,4 +1,4 @@
-package org.rutebanken.tiamat.rest.write;
+package org.rutebanken.tiamat.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -10,9 +10,9 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadPoolExecutor;
 
 @Configuration
-public class AsyncConfig {
+public class AsyncStopPlaceWriterConfig {
 
-    @Bean(name = "stopPlaceExecutor")
+    @Bean(name = "stopPlaceWriteExecutor")
     public Executor stopPlaceExecutor(
             @Value("${tiamat.write-api.queue-capacity:100}") int queueCapacity
     ) {
