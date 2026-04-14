@@ -225,6 +225,11 @@ public class FintrafficAuthorizationService implements AuthorizationService {
         return !trivoreAuthorizations.isAuthenticated();
     }
 
+    @Override
+    public boolean canUseWriteApi() {
+        return false;
+    }
+
     private final Pattern netexIdPattern = Pattern.compile("([A-Z]{3}):([^:]*):([^:]*)");
     private String getCodespace(String netexId) {
         if (netexId == null) {

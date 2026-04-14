@@ -144,4 +144,11 @@ public interface AuthorizationService {
       * @return {@code true} if the user is a guest, otherwise {@code false}.
       */
     boolean isGuest();
+
+    /**
+     * Checks if the current user has permission to use the write API.
+     *
+     * @return {@code true} if the user can use the write API, otherwise {@code false}.
+     */
+    boolean canUseWriteApi();
 }

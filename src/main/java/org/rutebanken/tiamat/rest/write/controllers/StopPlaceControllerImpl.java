@@ -2,7 +2,6 @@ package org.rutebanken.tiamat.rest.write.controllers;
 
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
-import jakarta.ws.rs.ForbiddenException;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.PATCH;
 import jakarta.ws.rs.POST;
@@ -11,50 +10,25 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import org.rutebanken.tiamat.auth.AuthorizationService;
-import org.rutebanken.tiamat.rest.write.StopPlaceFacade;
+import org.rutebanken.tiamat.rest.write.StopPlaceWriteService;
 import org.rutebanken.tiamat.rest.write.dto.StopPlacesDto;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 
 @Component
 @ConditionalOnProperty(name = "tiamat.write-api.enabled", havingValue = "true")
 @Produces(MediaType.APPLICATION_JSON)
 @Path("write")
+@PreAuthorize("@authorizationService.canUseWriteApi()")
 public class StopPlaceControllerImpl implements StopPlaceController {
 
-    private final StopPlaceFacade stopPlaceFacade;
-    private final AuthorizationService authorizationService;
-    private final boolean authorizationEnabled;
+    private final StopPlaceWriteService stopPlaceWriteService;
 
     @Autowired
-    public StopPlaceControllerImpl(StopPlaceFacade stopPlaceFacade, AuthorizationService authorizationService, @Value("${authorization.enabled:true}") boolean authorizationEnabled) {
-        this.stopPlaceFacade = stopPlaceFacade;
-        this.authorizationService = authorizationService;
-        this.authorizationEnabled = authorizationEnabled;
-    }
-
-    private void checkCanRead() {
-        // TODO: more finegrained permissions
-        if (authorizationEnabled && !authorizationService.canEditAllEntities()) {
-            throw new ForbiddenException();
-        }
-    }
-
-    private void checkCanEdit() {
-        // TODO: more finegrained permissions
-        if (authorizationEnabled && !authorizationService.canEditAllEntities()) {
-            throw new ForbiddenException();
-        }
-    }
-
-    private void checkCanDelete() {
-        // TODO: more finegrained permissions
-        if (authorizationEnabled && !authorizationService.canEditAllEntities()) {
-            throw new ForbiddenException();
-        }
+    public StopPlaceControllerImpl(StopPlaceWriteService stopPlaceWriteService) {
+        this.stopPlaceWriteService = stopPlaceWriteService;
     }
 
     @Override
@@ -67,8 +41,7 @@ public class StopPlaceControllerImpl implements StopPlaceController {
     )
     @Path("/{stopPlaceId}")
     public Response getStopPlace(@PathParam("stopPlaceId") String stopPlaceId) {
-        checkCanRead();
-        return Response.ok(stopPlaceFacade.getStopPlace(stopPlaceId)).build();
+        return Response.ok(stopPlaceWriteService.getStopPlace(stopPlaceId)).build();
     }
 
     @Override
@@ -80,9 +53,8 @@ public class StopPlaceControllerImpl implements StopPlaceController {
         }
     )
     public Response createStopPlace(StopPlacesDto stopPlacesDto) {
-        checkCanEdit();
         return Response.accepted(
-            stopPlaceFacade.createStopPlaces(stopPlacesDto)
+            stopPlaceWriteService.createStopPlaces(stopPlacesDto)
         ).build();
     }
 
@@ -95,9 +67,8 @@ public class StopPlaceControllerImpl implements StopPlaceController {
         }
     )
     public Response updateStopPlace(StopPlacesDto stopPlacesDto) {
-        checkCanEdit();
         return Response.accepted(
-            stopPlaceFacade.updateStopPlace(stopPlacesDto)
+            stopPlaceWriteService.updateStopPlace(stopPlacesDto)
         ).build();
     }
 
@@ -107,9 +78,8 @@ public class StopPlaceControllerImpl implements StopPlaceController {
     public Response deleteStopPlace(
         @PathParam("stopPlaceId") String stopPlaceId
     ) {
-        checkCanDelete();
         return Response.accepted(
-            stopPlaceFacade.deleteStopPlace(stopPlaceId)
+            stopPlaceWriteService.deleteStopPlace(stopPlaceId)
         ).build();
     }
 }

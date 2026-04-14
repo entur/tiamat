@@ -17,7 +17,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -32,6 +31,7 @@ public class DefaultAuthorizationService implements AuthorizationService {
     private final boolean authorizationEnabled;
     private final RoleAssignmentExtractor roleAssignmentExtractor;
     private static final String STOP_PLACE_TYPE = "StopPlaceType";
+    private static final String ROLE_USE_WRITE_STOPS_API = "useWriteStopsApi";
     private static final String SUBMODE = "Submode";
     private final TopographicPlaceChecker topographicPlaceChecker;
     private final GroupOfStopPlacesMembersResolver groupOfStopPlacesMembersResolver;
@@ -188,6 +188,17 @@ public class DefaultAuthorizationService implements AuthorizationService {
             return true;
         }
         return roleAssignmentExtractor.getRoleAssignmentsForUser().isEmpty();
+    }
+
+    @Override
+    public boolean canUseWriteApi() {
+        if (hasNoAuthentications()) {
+            return false;
+        }
+        return roleAssignmentExtractor.getRoleAssignmentsForUser()
+                .stream()
+                .map(RoleAssignment::getRole)
+                .anyMatch(ROLE_USE_WRITE_STOPS_API::equals);
     }
 
     private Set<String> getStopTypesOrSubmode(String type, boolean isAllowed, EntityStructure entity) {
