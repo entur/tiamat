@@ -64,7 +64,7 @@ class TrivoreAuthorizationsTest {
                         }
                 )
                 .build();
-        trivoreAuthorizations = new TrivoreAuthorizations(webClient, "", "", "", true);
+        trivoreAuthorizations = new TrivoreAuthorizations(webClient, "", "", "");
     }
 
     @Test
@@ -100,12 +100,6 @@ class TrivoreAuthorizationsTest {
         assertThat(permissionsToTest, equalTo(List.of(
                 "{entities}:{all}:administer"
         )));
-    }
-
-    @Test
-    void testHasAccessToCodespace() {
-        assertThat(trivoreAuthorizations.hasAccessToCodespace("ABC"), equalTo(true));
-        assertThat(trivoreAuthorizations.hasAccessToCodespace("NOT"), equalTo(false));
     }
 
     @Test

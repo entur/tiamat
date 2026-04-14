@@ -50,16 +50,7 @@ import org.rutebanken.netex.model.LocalService_VersionStructure;
 import org.rutebanken.netex.model.TicketingEquipment;
 import org.rutebanken.netex.model.TopographicPlace;
 import org.rutebanken.netex.model.WaitingRoomEquipment;
-import org.rutebanken.tiamat.netex.mapping.mapper.AccessibilityAssessmentMapper;
-import org.rutebanken.tiamat.netex.mapping.mapper.DataManagedObjectStructureMapper;
-import org.rutebanken.tiamat.netex.mapping.mapper.FareZoneMapper;
-import org.rutebanken.tiamat.netex.mapping.mapper.GroupOfStopPlacesMapper;
-import org.rutebanken.tiamat.netex.mapping.mapper.GroupOfTariffZonesMapper;
-import org.rutebanken.tiamat.netex.mapping.mapper.KeyListToKeyValuesMapMapper;
-import org.rutebanken.tiamat.netex.mapping.mapper.ParkingMapper;
-import org.rutebanken.tiamat.netex.mapping.mapper.PlaceEquipmentMapper;
-import org.rutebanken.tiamat.netex.mapping.mapper.QuayMapper;
-import org.rutebanken.tiamat.netex.mapping.mapper.StopPlaceMapper;
+import org.rutebanken.tiamat.netex.mapping.mapper.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -199,7 +190,7 @@ public class NetexMapper {
                 .register();
 
         mapperFactoryWithNetexIdClassBuilder(SiteFacilitySet.class, org.rutebanken.tiamat.model.SiteFacilitySet.class)
-                .byDefault()
+                .customize(new FacilityMapper())
                 .register();
 
         mapperFactoryWithNetexIdClassBuilder(PlaceEquipments_RelStructure.class, org.rutebanken.tiamat.model.PlaceEquipment.class)

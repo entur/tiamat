@@ -1,0 +1,2 @@
+ALTER TABLE IF EXISTS quay
+    ADD COLUMN lighting varchar(255) CHECK (lighting IN ('WELL_LIT','POORLY_LIT','UNLIT','UNKNOWN','OTHER'));

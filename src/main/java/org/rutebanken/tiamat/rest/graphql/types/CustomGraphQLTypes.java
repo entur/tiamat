@@ -136,6 +136,7 @@ public class CustomGraphQLTypes {
     public static GraphQLEnumType passengerInformationFacilityListEnum = createCustomEnumType("PassengerInformationFacilityEnumerationType", PassengerInformationFacilityEnumeration.class);
     public static GraphQLEnumType passengerInformationEquipmentListEnum = createCustomEnumType("PassengerInformationEquipmentEnumerationType", PassengerInformationEquipmentEnumeration.class);
     public static GraphQLEnumType sanitaryFacilityEnumType = createCustomEnumType("SanitaryFacilityEnumeration", SanitaryFacilityEnumeration.class);
+    public static GraphQLEnumType lightingEnumType = createCustomEnumType("LightingEnumeration", org.rutebanken.tiamat.model.LightingEnumeration.class);
 
     public static GraphQLEnumType createCustomEnumType(String name, Class c) {
 

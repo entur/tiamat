@@ -35,10 +35,9 @@ public class FintrafficSecurityConfig {
             @Value("${tiamat.ext.fintraffic.security.oidc-server-uri}") String oidcServerUri,
             @Value("${tiamat.ext.fintraffic.security.client-id}") String clientId,
             @Value("${tiamat.ext.fintraffic.security.client-secret}") String clientSecret,
-            @Value("${tiamat.ext.fintraffic.security.enable-codespace-filtering:false}") boolean enableCodespaceFiltering,
             TopographicPlaceRepository topographicPlaceRepository
     ) {
-        TrivoreAuthorizations trivoreAuthorizations = new TrivoreAuthorizations(prepareWebClient(webClientBuilder), oidcServerUri, clientId, clientSecret, enableCodespaceFiltering);
+        TrivoreAuthorizations trivoreAuthorizations = new TrivoreAuthorizations(prepareWebClient(webClientBuilder), oidcServerUri, clientId, clientSecret);
         return new FintrafficAuthorizationService(trivoreAuthorizations, topographicPlaceRepository);
     }
 

@@ -142,6 +142,35 @@ public class FareZoneRepositoryImplTest extends TiamatIntegrationTest {
     }
 
     @Test
+    public void findFareZonesReturnsOnlyCurrentVersionWhenMultipleVersionsExist() {
+        String netexId = "RUT:FareZone:MultiVersion";
+        Instant past = Instant.now().minusSeconds(3600);
+
+        FareZone v1 = new FareZone();
+        v1.setNetexId(netexId);
+        v1.setVersion(1L);
+        v1.setName(new EmbeddableMultilingualString("Old"));
+        v1.setValidBetween(new ValidBetween(past, past.plusSeconds(60)));
+        fareZoneRepository.save(v1);
+
+        FareZone v2 = new FareZone();
+        v2.setNetexId(netexId);
+        v2.setVersion(2L);
+        v2.setName(new EmbeddableMultilingualString("Current"));
+        v2.setValidBetween(new ValidBetween(past, null));
+        fareZoneRepository.save(v2);
+
+        FareZoneSearch search = FareZoneSearch.newFareZoneSearchBuilder().build();
+        List<FareZone> result = fareZoneRepository.findFareZones(search);
+
+        assertThat(result)
+                .filteredOn(fz -> netexId.equals(fz.getNetexId()))
+                .hasSize(1)
+                .extracting(FareZone::getVersion)
+                .containsOnly(2L);
+    }
+
+    @Test
     public void getFareZonesFromStopPlaceIds() throws Exception {
 
         String fareZoneNetexId = "CRI:FareZone:1";

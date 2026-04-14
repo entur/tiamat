@@ -25,6 +25,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.AdditionalMatchers.not;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.matches;
@@ -78,10 +79,7 @@ class FintrafficAuthorizationServiceTest {
         return quay;
     }
 
-    private static FintrafficAuthorizationService getAuthorizationService(
-            boolean enableCodeSpaceFiltering,
-            String allowedCodeSpace
-    ) {
+    private static FintrafficAuthorizationService getAuthorizationService() {
         TopographicPlaceRepository topographicPlaceRepositoryMock = mock(TopographicPlaceRepository.class);
         TrivoreAuthorizations trivoreAuthorizationsMock = mock(TrivoreAuthorizations.class);
 
@@ -89,16 +87,10 @@ class FintrafficAuthorizationServiceTest {
         when(topographicPlaceRepositoryMock.findTopographicPlace(any(TopographicPlaceSearch.class))).thenReturn(List.of(place));
         when(trivoreAuthorizationsMock.getAccessibleCodespaces()).thenReturn(Set.of("ABC", "XYZ"));
 
-        when(trivoreAuthorizationsMock.hasAccess(matches("StopPlace"), matches("BUS"), eq(TrivorePermission.MANAGE))).thenReturn(true);
-        when(trivoreAuthorizationsMock.hasAccess(matches("Parking"), matches("\\{all\\}"), eq(TrivorePermission.MANAGE))).thenReturn(true);
-        when(trivoreAuthorizationsMock.hasAccess(matches("Quay"), matches("\\{all\\}"), eq(TrivorePermission.MANAGE))).thenReturn(true);
-        when(trivoreAuthorizationsMock.hasAccess(matches("StopPlace"), matches("RAIL"), eq(TrivorePermission.MANAGE))).thenReturn(false);
-        if (enableCodeSpaceFiltering) {
-            when(trivoreAuthorizationsMock.hasAccessToCodespace(matches(allowedCodeSpace))).thenReturn(true);
-            when(trivoreAuthorizationsMock.hasAccessToCodespace(not(matches(allowedCodeSpace)))).thenReturn(false);
-        } else {
-            when(trivoreAuthorizationsMock.hasAccessToCodespace(anyString())).thenReturn(true);
-        }
+        when(trivoreAuthorizationsMock.hasAccess(matches("StopPlace"), matches("BUS"), eq(TrivorePermission.MANAGE), anyBoolean())).thenReturn(true);
+        when(trivoreAuthorizationsMock.hasAccess(matches("Parking"), matches("\\{all\\}"), eq(TrivorePermission.MANAGE), anyBoolean())).thenReturn(true);
+        when(trivoreAuthorizationsMock.hasAccess(matches("Quay"), matches("\\{all\\}"), eq(TrivorePermission.MANAGE), anyBoolean())).thenReturn(true);
+        when(trivoreAuthorizationsMock.hasAccess(matches("StopPlace"), matches("RAIL"), eq(TrivorePermission.MANAGE), anyBoolean())).thenReturn(false);
 
         return new FintrafficAuthorizationService(
                 trivoreAuthorizationsMock,
@@ -109,7 +101,7 @@ class FintrafficAuthorizationServiceTest {
 
     @Test
     public void testCanEditEntityPoint() {
-        FintrafficAuthorizationService authorizationService = getAuthorizationService(false, null);
+        FintrafficAuthorizationService authorizationService = getAuthorizationService();
         assertThat(authorizationService.canEditEntity(getPoint(new Coordinate(0.5, 0.5))), equalTo(true));
         assertThat(authorizationService.canEditEntity(getPoint(new Coordinate(2, 2))), equalTo(false));
     }
@@ -118,14 +110,12 @@ class FintrafficAuthorizationServiceTest {
     @Test
     public void testCanEditEntityStopPlace() {
         StopPlace stopPlaceAllowedToEdit = getStopPlace("FSR:StopPlace:1", VehicleModeEnumeration.BUS, getPoint(new Coordinate(0.3, 0.3)));
-        StopPlace stopPlaceForbiddenToEditCodespace = getStopPlace("AAA:StopPlace:1", VehicleModeEnumeration.BUS, getPoint(new Coordinate(0.3, 0.3)));
         StopPlace stopPlaceForbiddenToEditTransportMode = getStopPlace("FSR:StopPlace:1", VehicleModeEnumeration.RAIL, getPoint(new Coordinate(0.3, 0.3)));
         StopPlace stopPlaceOutOfBounds = getStopPlace("FSR:StopPlace:1", VehicleModeEnumeration.BUS, getPoint(new Coordinate(3, 3)));
 
-        FintrafficAuthorizationService authorizationService = getAuthorizationService(true, "FSR");
+        FintrafficAuthorizationService authorizationService = getAuthorizationService();
 
         assertThat(authorizationService.canEditEntity(stopPlaceAllowedToEdit), equalTo(true));
-        assertThat(authorizationService.canEditEntity(stopPlaceForbiddenToEditCodespace), equalTo(false));
         assertThat(authorizationService.canEditEntity(stopPlaceForbiddenToEditTransportMode), equalTo(false));
         assertThat(authorizationService.canEditEntity(stopPlaceOutOfBounds), equalTo(false));
     }
@@ -135,7 +125,7 @@ class FintrafficAuthorizationServiceTest {
         Parking parkingAllowedToEdit = getParking("FSR:Parking:1", getPoint(new Coordinate(0.3, 0.3)));
         Parking parkingOutOfBounds = getParking("FSR:Parking:2", getPoint(new Coordinate(3, 3)));
 
-        FintrafficAuthorizationService authorizationService = getAuthorizationService(false, null);
+        FintrafficAuthorizationService authorizationService = getAuthorizationService();
 
         assertThat(authorizationService.canEditEntity(parkingAllowedToEdit), equalTo(true));
         assertThat(authorizationService.canEditEntity(parkingOutOfBounds), equalTo(false));
@@ -149,7 +139,7 @@ class FintrafficAuthorizationServiceTest {
         stopPlaceWithQuayAndNestedStopPlace.setChildren(Set.of(childStopPlace));
         Quay quay = getQuay("FSR:Quay:1", getPoint(new Coordinate(0.4, 0.4)));
         stopPlaceWithQuayAndNestedStopPlace.setQuays(Set.of(quay));
-        FintrafficAuthorizationService authorizationService = getAuthorizationService(false, null);
+        FintrafficAuthorizationService authorizationService = getAuthorizationService();
         assertThat(authorizationService.canEditEntity(stopPlaceWithQuayAndNestedStopPlace), equalTo(true));
     }
 
@@ -160,7 +150,7 @@ class FintrafficAuthorizationServiceTest {
         stopPlaceWithQuayAndNestedStopPlace.setChildren(Set.of(childStopPlace));
         Quay quay = getQuay("FSR:Quay:1", getPoint(new Coordinate(1.4, 0.4)));
         stopPlaceWithQuayAndNestedStopPlace.setQuays(Set.of(quay));
-        FintrafficAuthorizationService authorizationService = getAuthorizationService(false, null);
+        FintrafficAuthorizationService authorizationService = getAuthorizationService();
         assertThat(authorizationService.canEditEntity(stopPlaceWithQuayAndNestedStopPlace), equalTo(false));
     }
 }

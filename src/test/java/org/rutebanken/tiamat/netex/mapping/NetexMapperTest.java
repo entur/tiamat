@@ -35,6 +35,7 @@ import org.rutebanken.tiamat.model.CountryRef;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.GroupOfStopPlaces;
 import org.rutebanken.tiamat.model.IanaCountryTldEnumeration;
+import org.rutebanken.tiamat.model.LightingEnumeration;
 import org.rutebanken.tiamat.model.LimitationStatusEnumeration;
 import org.rutebanken.tiamat.model.NameTypeEnumeration;
 import org.rutebanken.tiamat.model.PathLink;
@@ -285,10 +286,16 @@ public class NetexMapperTest extends TiamatIntegrationTest {
 
         String netexId = "NSR:Quay:12345";
         netexQuay.setId(netexId);
+        netexQuay.setCompassBearing(312f);
+        netexQuay.setPublicCode("B");
+        netexQuay.setLighting(org.rutebanken.netex.model.LightingEnumeration.UNLIT);
 
         org.rutebanken.tiamat.model.Quay tiamatQuay = netexMapper.mapToTiamatModel(netexQuay);
 
         assertThat(tiamatQuay.getNetexId()).isEqualTo("NSR:Quay:12345");
+        assertThat(tiamatQuay.getCompassBearing()).isEqualTo(312f);
+        assertThat(tiamatQuay.getPublicCode()).isEqualTo("B");
+        assertThat(tiamatQuay.getLighting()).isEqualTo(LightingEnumeration.UNLIT);
     }
 
     @Test
@@ -310,6 +317,9 @@ public class NetexMapperTest extends TiamatIntegrationTest {
         String netexId = "NSR:Quay:" + 1234567;
         org.rutebanken.tiamat.model.Quay tiamatQuay = new org.rutebanken.tiamat.model.Quay();
         tiamatQuay.setNetexId(netexId);
+        tiamatQuay.setCompassBearing(123f);
+        tiamatQuay.setLighting(LightingEnumeration.WELL_LIT);
+        tiamatQuay.setPublicCode("A");
 
         stopPlace.getQuays().add(tiamatQuay);
 
@@ -323,7 +333,9 @@ public class NetexMapperTest extends TiamatIntegrationTest {
                 .get();
 
         assertThat(actualQuay.getId()).isEqualTo(netexId);
-
+        assertThat(actualQuay.getCompassBearing()).isEqualTo(123f);
+        assertThat(actualQuay.getLighting()).isEqualTo(org.rutebanken.netex.model.LightingEnumeration.WELL_LIT);
+        assertThat(actualQuay.getPublicCode()).isEqualTo("A");
     }
 
     @Test

@@ -37,7 +37,18 @@ public class FareZoneQueryFromSearchBuilder {
 
     public Pair<String, Map<String, Object>> buildQueryFromSearch(FareZoneSearch search) {
 
-        StringBuilder queryString = new StringBuilder("select f.* from fare_zone f ");
+        StringBuilder queryString = new StringBuilder("""
+                SELECT f.*
+                FROM fare_zone f
+                INNER JOIN (
+                    SELECT fv.netex_id, MAX(fv.version) AS max_version
+                    FROM fare_zone fv
+                    WHERE (fv.to_date IS NULL OR fv.to_date > NOW())
+                      AND (fv.from_date IS NULL OR fv.from_date < NOW())
+                    GROUP BY fv.netex_id
+                ) latest_fv ON f.netex_id = latest_fv.netex_id
+                          AND f.version = latest_fv.max_version
+                """);
         List<String> wheres = new ArrayList<>();
         List<String> operators = new ArrayList<>();
         List<String> orderByStatements = new ArrayList<>();
@@ -68,9 +79,6 @@ public class FareZoneQueryFromSearchBuilder {
             wheres.add("f.zone_topology = :zoneTopology ");
             parameters.put("zoneTopology",search.getZoneTopologyEnumeration().name());
         }
-
-        operators.add("and");
-        wheres.add("f.version = (select max(fv.version) from fare_zone fv where fv.netex_id = f.netex_id and (fv.to_date is null or fv.to_date > now()) and (fv.from_date is null or fv.from_date < now()))");
 
         searchHelper.addWheres(queryString, wheres, operators);
         searchHelper.addOrderByStatements(queryString, orderByStatements);

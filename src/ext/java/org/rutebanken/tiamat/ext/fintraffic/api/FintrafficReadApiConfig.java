@@ -62,13 +62,15 @@ public class FintrafficReadApiConfig {
             NetexMapper netexMapper,
             NetexRepository netexRepository,
             ServiceFrameElementCreator serviceFrameElementCreator,
-            SearchKeyService searchKeyService
+            SearchKeyService searchKeyService,
+            NetexEntityEnricher netexEntityEnricher
     ) {
         return new ReadApiNetexMarshallingService(
                 netexMapper,
                 netexRepository,
                 serviceFrameElementCreator,
-                searchKeyService
+                searchKeyService,
+                netexEntityEnricher
         );
     }
 
@@ -88,5 +90,10 @@ public class FintrafficReadApiConfig {
                 netexRepository,
                 backgroundJobsEnabled
         );
+    }
+
+    @Bean
+    public NetexEntityEnricher fintrafficNetexEntityEnricher() {
+        return new FintrafficNetexEntityEnricher();
     }
 }
