@@ -10,12 +10,12 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.PathParam;
 import org.rutebanken.tiamat.rest.write.dto.StopPlaceJobDto;
 
-@Tag(name = "Jobs", description = "Manage asynchronous StopPlace jobs.")
+@Tag(name = "Jobs", description = "Manage asynchronous stop place write jobs.")
 interface JobController {
     @Operation(
-        summary = "Get status of a StopPlace job",
+        summary = "Get status of a stop place write job",
         description = """
-        Returns the current status of a StopPlace job.
+        Returns the current status of a stop place write job.
         """,
         parameters = {
             @Parameter(

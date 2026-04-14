@@ -20,14 +20,13 @@ import org.rutebanken.tiamat.rest.write.dto.StopPlacesDto;
 )
 interface StopPlaceController {
     @Operation(
-        summary = "Gets a stop place by ID",
+        summary = "Gets a stop place by NeTEx ID",
         description = """
-        Gets a mono-modal StopPlace by its ID.
+        Gets a StopPlace by its NeTEx ID.
         """,
         responses = {
             @ApiResponse(
                 responseCode = "200",
-                description = "The stop place ",
                 content = @Content(
                     schema = @Schema(implementation = StopPlace.class)
                 )
@@ -55,7 +54,7 @@ interface StopPlaceController {
                 mediaType = "application/xml",
                 examples = {
                     @ExampleObject(
-                        name = "Create StopPlace Example",
+                        name = "Create StopPlace example",
                         value = """
                                                 <stopPlaces xmlns="http://www.netex.org.uk/netex">
                                                   <StopPlace id="MES:StopPlace:1" version="1">
@@ -103,8 +102,6 @@ interface StopPlaceController {
         Accepts a StopPlacesDto containing a NeTEx StopPlace XML.
         Only a single mono-modal stop place is allowed.
         Returns a job representing the asynchronous creation process.
-
-        The version must be incremented by 1 for updates.
         """,
         requestBody = @RequestBody(
             required = true,
@@ -155,9 +152,9 @@ interface StopPlaceController {
     Response updateStopPlace(StopPlacesDto stopPlacesDto);
 
     @Operation(
-        summary = "Deletes a stop place by ID",
+        summary = "Deletes a stop place by NeTEx ID",
         description = """
-        Deletes a mono-modal StopPlace by its ID.
+        Deletes a stop place by its NeTEx ID.
         Returns a job representing the asynchronous deletion process.
         """,
         parameters = {
@@ -176,6 +173,7 @@ interface StopPlaceController {
                     schema = @Schema(implementation = StopPlaceJobDto.class)
                 )
             ),
+            @ApiResponse(responseCode = "404", description = "Stop place by NeTEx ID not found"),
             @ApiResponse(responseCode = "503", description = "Job queue full"),
         }
     )
