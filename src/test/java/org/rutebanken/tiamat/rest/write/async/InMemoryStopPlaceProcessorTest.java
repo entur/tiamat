@@ -127,7 +127,7 @@ class InMemoryStopPlaceProcessorTest {
     }
 
     @Test
-    void processUpdateStopPlace_Success_CallsSucceedWithNull() throws Exception {
+    void processUpdateStopPlace_Success_CallsSucceedWithNullCreatedIds() throws Exception {
         var dto = singleStopPlaceDto("NSR:StopPlace:200");
         var tiamatStop = monoModalStop("NSR:StopPlace:200");
 
@@ -169,7 +169,7 @@ class InMemoryStopPlaceProcessorTest {
     }
 
     @Test
-    void processDeleteStopPlace_Success_CallsSucceedWithNull() {
+    void processDeleteStopPlace_Success_CallsSucceedWithNullCreatedIds() {
         processor.processDeleteStopPlace(JOB_ID, "NSR:StopPlace:300");
 
         verify(domainService).deleteStopPlace("NSR:StopPlace:300");
