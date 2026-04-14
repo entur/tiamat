@@ -1,4 +1,4 @@
-package org.rutebanken.tiamat.rest.write;
+package org.rutebanken.tiamat.rest.write.async;
 
 import org.rutebanken.tiamat.rest.write.dto.StopPlacesDto;
 

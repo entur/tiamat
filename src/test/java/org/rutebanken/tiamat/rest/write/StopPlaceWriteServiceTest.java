@@ -43,7 +43,7 @@ class StopPlaceWriteServiceTest {
     private StopPlaceAsyncProcessor asyncProcessor;
 
     @Mock
-    private StopPlaceDomainService stopPlaceDomainService;
+    private StopPlaceWriteDomainService stopPlaceWriteDomainService;
 
     @Mock
     private StopPlaceXmlWriter stopPlaceXmlWriter;
@@ -56,7 +56,7 @@ class StopPlaceWriteServiceTest {
             netexMapper,
             jobService,
             asyncProcessor,
-            stopPlaceDomainService,
+                stopPlaceWriteDomainService,
             stopPlaceXmlWriter
         );
     }
@@ -68,7 +68,7 @@ class StopPlaceWriteServiceTest {
         var netexStopPlace = new org.rutebanken.netex.model.StopPlace();
         StreamingOutput expectedOutput = outputStream -> {};
 
-        when(stopPlaceDomainService.getStopPlace(netexId)).thenReturn(
+        when(stopPlaceWriteDomainService.getStopPlace(netexId)).thenReturn(
             tiamatStopPlace
         );
         when(netexMapper.mapToNetexModel(tiamatStopPlace)).thenReturn(
@@ -81,7 +81,7 @@ class StopPlaceWriteServiceTest {
         StreamingOutput result = facade.getStopPlace(netexId);
 
         assertEquals(expectedOutput, result);
-        verify(stopPlaceDomainService).getStopPlace(netexId);
+        verify(stopPlaceWriteDomainService).getStopPlace(netexId);
         verify(netexMapper).mapToNetexModel(tiamatStopPlace);
         verify(stopPlaceXmlWriter).write(netexStopPlace);
     }
@@ -89,7 +89,7 @@ class StopPlaceWriteServiceTest {
     @Test
     void getStopPlace_WhenNotFound_ThrowsNotFoundException() {
         String netexId = "NSR:StopPlace:999";
-        when(stopPlaceDomainService.getStopPlace(netexId)).thenReturn(null);
+        when(stopPlaceWriteDomainService.getStopPlace(netexId)).thenReturn(null);
 
         assertThrows(NotFoundException.class, () ->
             facade.getStopPlace(netexId)

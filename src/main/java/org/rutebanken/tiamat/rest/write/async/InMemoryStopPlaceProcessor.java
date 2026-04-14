@@ -1,8 +1,10 @@
-package org.rutebanken.tiamat.rest.write;
+package org.rutebanken.tiamat.rest.write.async;
 
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.job.StopPlaceIdMapping;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
+import org.rutebanken.tiamat.rest.write.JobService;
+import org.rutebanken.tiamat.rest.write.StopPlaceWriteDomainService;
 import org.rutebanken.tiamat.rest.write.dto.StopPlacesDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,12 +22,12 @@ public class InMemoryStopPlaceProcessor implements StopPlaceAsyncProcessor {
         InMemoryStopPlaceProcessor.class
     );
     private final JobService jobService;
-    private final StopPlaceDomainService domainService;
+    private final StopPlaceWriteDomainService domainService;
     private final NetexMapper netexMapper;
 
     public InMemoryStopPlaceProcessor(
         JobService jobService,
-        StopPlaceDomainService domainService,
+        StopPlaceWriteDomainService domainService,
         NetexMapper netexMapper
     ) {
         this.jobService = jobService;

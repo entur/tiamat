@@ -18,9 +18,9 @@ import java.time.Instant;
 import java.util.List;
 
 @Service
-public class StopPlaceDomainService {
+public class StopPlaceWriteDomainService {
 
-    private static final Logger logger = LoggerFactory.getLogger(StopPlaceDomainService.class);
+    private static final Logger logger = LoggerFactory.getLogger(StopPlaceWriteDomainService.class);
     private final StopPlaceMutationValidator stopPlaceMutationValidator;
     private final StopPlaceVersionedSaverService stopPlaceVersionedSaverService;
     private final StopPlaceTerminator stopPlaceTerminator;
@@ -29,7 +29,7 @@ public class StopPlaceDomainService {
     private final TiamatObjectDiffer differ;
     private final MutateLock mutateLock;
 
-    public StopPlaceDomainService(
+    public StopPlaceWriteDomainService(
             StopPlaceMutationValidator stopPlaceMutationValidator,
             StopPlaceVersionedSaverService stopPlaceVersionedSaverService,
             StopPlaceTerminator stopPlaceTerminator,

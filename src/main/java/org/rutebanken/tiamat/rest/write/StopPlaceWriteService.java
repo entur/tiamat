@@ -21,34 +21,33 @@ import java.util.Optional;
 import java.util.concurrent.RejectedExecutionException;
 
 @Service
-public class StopPlaceFacade {
-    // TODO: rename. StopPlaceJobHandler? StopPlaceWriteService?
+public class StopPlaceWriteService {
 
-    private static final Logger logger = LoggerFactory.getLogger(StopPlaceFacade.class);
+    private static final Logger logger = LoggerFactory.getLogger(StopPlaceWriteService.class);
 
     private final NetexMapper netexMapper;
     private final JobService jobService;
     private final StopPlaceAsyncProcessor asyncProcessor;
-    private final StopPlaceDomainService stopPlaceDomainService;
+    private final StopPlaceWriteDomainService stopPlaceWriteDomainService;
     private final StopPlaceXmlWriter stopPlaceXmlWriter;
 
-    public StopPlaceFacade(
+    public StopPlaceWriteService(
             NetexMapper netexMapper,
             JobService jobService,
             StopPlaceAsyncProcessor asyncProcessor,
-            StopPlaceDomainService stopPlaceDomainService,
+            StopPlaceWriteDomainService stopPlaceWriteDomainService,
             StopPlaceXmlWriter stopPlaceXmlWriter) {
         this.netexMapper = netexMapper;
         this.jobService = jobService;
         this.asyncProcessor = asyncProcessor;
-        this.stopPlaceDomainService = stopPlaceDomainService;
+        this.stopPlaceWriteDomainService = stopPlaceWriteDomainService;
         this.stopPlaceXmlWriter = stopPlaceXmlWriter;
     }
 
     @Transactional
     public StreamingOutput getStopPlace(String netexId) {
         updateMappingContext();
-        var tiamatStopPlace = Optional.ofNullable(stopPlaceDomainService.getStopPlace(netexId))
+        var tiamatStopPlace = Optional.ofNullable(stopPlaceWriteDomainService.getStopPlace(netexId))
                 .orElseThrow(() -> new NotFoundException("Stop place not found: " + netexId));
         org.rutebanken.netex.model.StopPlace netexStopPlace =
                 netexMapper.mapToNetexModel(tiamatStopPlace);
