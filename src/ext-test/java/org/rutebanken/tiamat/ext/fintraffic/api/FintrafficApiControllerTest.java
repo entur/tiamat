@@ -20,6 +20,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class FintrafficApiControllerTest {
@@ -48,7 +50,7 @@ class FintrafficApiControllerTest {
                 "1.12:FI-NeTEx-stops:1.0"
         );
 
-        controller = new FintrafficApiController(publicationDeliveryService, "[A-ZÅÄÖ]{3}");
+        controller = new FintrafficApiController(publicationDeliveryService, "[A-ZÅÄÖ]{3}", "\\d{3}");
 
         // Setup mock response
         response = mock(HttpServletResponse.class);
@@ -81,6 +83,11 @@ class FintrafficApiControllerTest {
                 "<ScheduledStopPoint id=\"FSR:ScheduledStopPoint:1\" version=\"1\"/>".getBytes(StandardCharsets.UTF_8)
         );
 
+        ReadApiEntityOutRecord topographicPlace = new ReadApiEntityOutRecord(
+                "TopographicPlace",
+                "<TopographicPlace id=\"FSR:TopographicPlace:91\" version=\"1\"/>".getBytes(StandardCharsets.UTF_8)
+        );
+
         ReadApiEntityOutRecord stopPlace = new ReadApiEntityOutRecord(
                 "StopPlace",
                 "<StopPlace id=\"FSR:StopPlace:1\" version=\"1\"/>".getBytes(StandardCharsets.UTF_8)
@@ -92,20 +99,50 @@ class FintrafficApiControllerTest {
         );
 
         when(netexRepository.streamStopPlaces(any(ReadApiSearchKey.class)))
-                .thenReturn(Stream.of(scheduledStopPoint, stopPlace, parking));
+                .thenReturn(Stream.of(scheduledStopPoint, topographicPlace, stopPlace, parking));
 
-        controller.getNetexStream(transportModes, areaCodes, response);
+        controller.getNetexStream(transportModes, areaCodes, null, response);
 
         String output = outputStream.toString(StandardCharsets.UTF_8);
         assertThat(output, containsString("FSR:ScheduledStopPoint:1"));
+        assertThat(output, containsString("FSR:TopographicPlace:91"));
         assertThat(output, containsString("FSR:StopPlace:1"));
         assertThat(output, containsString("FSR:Parking:1"));
         assertThat(output, containsString("<scheduledStopPoints>"));
         assertThat(output, containsString("</scheduledStopPoints>"));
+        assertThat(output, containsString("<topographicPlaces>"));
+        assertThat(output, containsString("</topographicPlaces>"));
         assertThat(output, containsString("<stopPlaces>"));
         assertThat(output, containsString("</stopPlaces>"));
         assertThat(output, containsString("<parkings>"));
         assertThat(output, containsString("</parkings>"));
+    }
+
+    @Test
+    void getNetexStreamRejectsInvalidMunicipalityCode() {
+        controller.getNetexStream(null, null, new String[]{"ABC"}, response);
+        verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
+    }
+
+    @Test
+    void getNetexStreamRejectsInvalidMunicipalityCodeTooShort() {
+        controller.getNetexStream(null, null, new String[]{"09"}, response);
+        verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
+    }
+
+    @Test
+    void getNetexStreamRejectsInvalidAreaCode() {
+        controller.getNetexStream(null, new String[]{"123"}, null, response);
+        verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
+    }
+
+    @Test
+    void getNetexStreamAcceptsValidMunicipalityCode() {
+        when(netexRepository.streamStopPlaces(any(ReadApiSearchKey.class)))
+                .thenReturn(Stream.empty());
+
+        controller.getNetexStream(null, null, new String[]{"091"}, response);
+        verify(response, never()).setStatus(HttpServletResponse.SC_BAD_REQUEST);
     }
 }
 

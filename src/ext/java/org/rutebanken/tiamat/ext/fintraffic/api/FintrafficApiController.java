@@ -19,25 +19,31 @@ import java.nio.charset.StandardCharsets;
 public class FintrafficApiController {
     private final ReadApiNetexPublicationDeliveryService readApiNetexPublicationDeliveryService;
     private final String areaCodeRegex;
+    private final String municipalityCodeRegex;
 
     public FintrafficApiController(
             ReadApiNetexPublicationDeliveryService readApiNetexPublicationDeliveryService,
             @Value("${tiamat.ext.fintraffic.area-code-pattern:[A-ZÅÄÖ]{3}}")
-            String areaCodeRegex
+            String areaCodeRegex,
+            @Value("${tiamat.ext.fintraffic.municipality-code-pattern:\\d{3}}")
+            String municipalityCodeRegex
     ) {
         this.readApiNetexPublicationDeliveryService = readApiNetexPublicationDeliveryService;
         this.areaCodeRegex = areaCodeRegex;
+        this.municipalityCodeRegex = municipalityCodeRegex;
     }
 
     @GetMapping("/fintraffic/v1/stops")
     public void getNetexStream(
             @RequestParam(value = "transportModes", required = false) String[] transportMode,
             @RequestParam(value = "areaCodes", required = false) String[] areaCode,
+            @RequestParam(value = "municipalityCodes", required = false) String[] municipalityCode,
             HttpServletResponse response
     ) {
         try {
             validateTransportModes(transportMode);
             validateAreaCodes(areaCode);
+            validateMunicipalityCodes(municipalityCode);
         } catch (IllegalArgumentException e) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             return;
@@ -48,7 +54,7 @@ public class FintrafficApiController {
         response.setBufferSize(32 * 1024); // 32 KB buffer size for efficient streaming
 
         try (OutputStream outputStream = response.getOutputStream()) {
-            FintrafficReadApiSearchKey searchKey = new FintrafficReadApiSearchKey(transportMode, areaCode);
+            FintrafficReadApiSearchKey searchKey = new FintrafficReadApiSearchKey(transportMode, areaCode, municipalityCode);
             readApiNetexPublicationDeliveryService.streamPublicationDelivery(searchKey, outputStream);
         } catch (IOException e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -68,6 +74,16 @@ public class FintrafficApiController {
             for (String code : areaCodes) {
                 if (!code.matches(areaCodeRegex)) {
                     throw new IllegalArgumentException("Invalid areaCode: " + code);
+                }
+            }
+        }
+    }
+
+    private void validateMunicipalityCodes(String[] municipalityCodes) {
+        if (municipalityCodes != null) {
+            for (String code : municipalityCodes) {
+                if (!code.matches(municipalityCodeRegex)) {
+                    throw new IllegalArgumentException("Invalid municipalityCode: " + code);
                 }
             }
         }

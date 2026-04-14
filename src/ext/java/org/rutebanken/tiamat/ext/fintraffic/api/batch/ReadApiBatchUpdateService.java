@@ -3,14 +3,18 @@ package org.rutebanken.tiamat.ext.fintraffic.api.batch;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.exporter.params.ParkingSearch;
 import org.rutebanken.tiamat.exporter.params.StopPlaceSearch;
+import org.rutebanken.tiamat.exporter.params.TopographicPlaceSearch;
 import org.rutebanken.tiamat.ext.fintraffic.api.ReadApiNetexMarshallingService;
 import org.rutebanken.tiamat.ext.fintraffic.api.model.ReadApiEntityInRecord;
 import org.rutebanken.tiamat.ext.fintraffic.api.model.ReadApiEntityStatus;
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
 import org.rutebanken.tiamat.model.Parking;
 import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.TopographicPlace;
+import org.rutebanken.tiamat.model.TopographicPlaceTypeEnumeration;
 import org.rutebanken.tiamat.repository.ParkingRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
+import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,14 +33,17 @@ public class ReadApiBatchUpdateService {
     private final ReadApiNetexMarshallingService marshallingService;
     private final StopPlaceRepository stopPlaceRepository;
     private final ParkingRepository parkingRepository;
+    private final TopographicPlaceRepository topographicPlaceRepository;
 
     public ReadApiBatchUpdateService(
             ReadApiNetexMarshallingService marshallingService,
             StopPlaceRepository stopPlaceRepository,
-            ParkingRepository parkingRepository) {
+            ParkingRepository parkingRepository,
+            TopographicPlaceRepository topographicPlaceRepository) {
         this.marshallingService = marshallingService;
         this.stopPlaceRepository = stopPlaceRepository;
         this.parkingRepository = parkingRepository;
+        this.topographicPlaceRepository = topographicPlaceRepository;
     }
 
     /**
@@ -81,6 +88,30 @@ public class ReadApiBatchUpdateService {
 
         Iterator<Parking> parkingIterator = parkingRepository.scrollParkings(parkingSearch);
         return processEntitiesInBatches(parkingIterator, batchSize, batchConsumer, "Parking");
+    }
+
+    /**
+     * Process municipality TopographicPlaces in batches.
+     *
+     * Unlike StopPlaces and Parkings which use scrollable results for large datasets,
+     * TopographicPlaces are loaded as a list since municipalities are few (~300 in Finland).
+     *
+     * @param batchSize Number of entities to process before flushing to database
+     * @param batchConsumer Consumer that handles each batch (typically database upsert)
+     * @return Statistics about the processing
+     */
+    @Transactional(readOnly = true)
+    public ProcessingStats processTopographicPlacesInBatches(int batchSize, Consumer<List<ReadApiEntityInRecord>> batchConsumer) {
+        TopographicPlaceSearch search = TopographicPlaceSearch.newTopographicPlaceSearchBuilder()
+                .versionValidity(ExportParams.VersionValidity.CURRENT)
+                .build();
+
+        List<TopographicPlace> municipalities = topographicPlaceRepository.findTopographicPlace(search).stream()
+                .filter(tp -> tp.getTopographicPlaceType() == TopographicPlaceTypeEnumeration.MUNICIPALITY)
+                .toList();
+
+        Iterator<TopographicPlace> municipalityIterator = municipalities.iterator();
+        return processEntitiesInBatches(municipalityIterator, batchSize, batchConsumer, "TopographicPlace");
     }
 
     /**

@@ -122,6 +122,7 @@ public class ReadApiNetexMarshallingService {
             records.add(createEntityRecord(stopPlace, status, searchKey));
             return records;
         }
+        // TopographicPlace, Parking, etc. — single record per entity, no ServiceFrame sub-elements
         return List.of(createEntityRecord(entity, status, searchKey));
     }
 

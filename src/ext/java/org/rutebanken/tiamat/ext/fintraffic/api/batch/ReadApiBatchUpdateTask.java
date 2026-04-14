@@ -53,12 +53,30 @@ public class ReadApiBatchUpdateTask implements ApplicationRunner {
 
         try {
             // Step 1: Mark all rows as STALE
-            logger.info("Step 1/4: Marking all entities as STALE");
+            logger.info("Step 1/5: Marking all entities as STALE");
             int markedStale = netexRepository.markAllEntitiesAsStale();
             logger.info("Marked {} entities as STALE", markedStale);
 
-            // Step 2: Process StopPlaces in batches (streaming)
-            logger.info("Step 2/4: Processing StopPlaces (this may take 1-2 hours)");
+            // Step 2: Process TopographicPlaces (municipalities only)
+            logger.info("Step 2/5: Processing TopographicPlaces");
+            ReadApiBatchUpdateService.ProcessingStats topographicPlaceStats =
+                readApiBatchUpdateService.processTopographicPlacesInBatches(DEFAULT_BATCH_SIZE, batch -> {
+                    readApiBatchWriteService.upsertBatch(batch);
+                    logger.debug("Upserted batch of {} TopographicPlace records", batch.size());
+                });
+
+            totalEntitiesProcessed += topographicPlaceStats.entitiesProcessed();
+            totalRecordsGenerated += topographicPlaceStats.recordsGenerated();
+            totalEntitiesFailed += topographicPlaceStats.entitiesFailed();
+
+            logger.info("TopographicPlace processing completed: {} entities → {} records ({} failed) in {}",
+                topographicPlaceStats.entitiesProcessed(),
+                topographicPlaceStats.recordsGenerated(),
+                topographicPlaceStats.entitiesFailed(),
+                formatDuration(topographicPlaceStats.duration()));
+
+            // Step 3: Process StopPlaces in batches (streaming)
+            logger.info("Step 3/5: Processing StopPlaces (this may take 1-2 hours)");
             ReadApiBatchUpdateService.ProcessingStats stopPlaceStats =
                 readApiBatchUpdateService.processStopPlacesInBatches(DEFAULT_BATCH_SIZE, batch -> {
                     readApiBatchWriteService.upsertBatch(batch);
@@ -75,8 +93,8 @@ public class ReadApiBatchUpdateTask implements ApplicationRunner {
                 stopPlaceStats.entitiesFailed(),
                 formatDuration(stopPlaceStats.duration()));
 
-            // Step 3: Process Parkings in batches (streaming)
-            logger.info("Step 3/4: Processing Parkings");
+            // Step 4: Process Parkings in batches (streaming)
+            logger.info("Step 4/5: Processing Parkings");
             ReadApiBatchUpdateService.ProcessingStats parkingStats =
                 readApiBatchUpdateService.processParkingsInBatches(DEFAULT_BATCH_SIZE, batch -> {
                     readApiBatchWriteService.upsertBatch(batch);
@@ -93,8 +111,8 @@ public class ReadApiBatchUpdateTask implements ApplicationRunner {
                 parkingStats.entitiesFailed(),
                 formatDuration(parkingStats.duration()));
 
-            // Step 4: Clean up deleted entities
-            logger.info("Step 4/4: Cleaning up stale entities");
+            // Step 5: Clean up deleted entities
+            logger.info("Step 5/5: Cleaning up stale entities");
             int deletedCount = -1;
             if (totalEntitiesFailed > 0) {
                 logger.warn("There were {} failed entities during processing. " +

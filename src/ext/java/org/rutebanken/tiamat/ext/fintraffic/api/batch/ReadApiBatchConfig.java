@@ -4,6 +4,7 @@ import org.rutebanken.tiamat.ext.fintraffic.api.ReadApiNetexMarshallingService;
 import org.rutebanken.tiamat.ext.fintraffic.api.repository.NetexRepository;
 import org.rutebanken.tiamat.repository.ParkingRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
+import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,12 +17,14 @@ public class ReadApiBatchConfig {
     public ReadApiBatchUpdateService readApiBatchUpdateService(
             ReadApiNetexMarshallingService marshallingService,
             StopPlaceRepository stopPlaceRepository,
-            ParkingRepository parkingRepository
+            ParkingRepository parkingRepository,
+            TopographicPlaceRepository topographicPlaceRepository
     ) {
         return new ReadApiBatchUpdateService(
                 marshallingService,
                 stopPlaceRepository,
-                parkingRepository
+                parkingRepository,
+                topographicPlaceRepository
         );
     }
 

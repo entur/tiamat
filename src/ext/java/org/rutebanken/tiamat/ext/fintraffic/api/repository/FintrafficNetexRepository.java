@@ -28,6 +28,7 @@ public class FintrafficNetexRepository extends AbstractNetexRepository {
             WHERE status IN ('STALE', 'CURRENT') AND type IN (
                 'ScheduledStopPoint',
                 'PassengerStopAssignment',
+                'TopographicPlace',
                 'StopPlace',
                 'Parking'
             )
@@ -35,15 +36,30 @@ public class FintrafficNetexRepository extends AbstractNetexRepository {
 
         List<Object> params = new ArrayList<>();
 
-        if (searchKey instanceof FintrafficReadApiSearchKey(String[] transportModes, String[] areaCodes)) {
+        if (searchKey instanceof FintrafficReadApiSearchKey(String[] transportModes, String[] areaCodes, String[] municipalityCodes)) {
+            List<String> filters = new ArrayList<>();
+
             if (transportModes != null && transportModes.length > 0) {
-                sql.append(" AND search_key->'transportModes' ??| ?::text[] ");
+                filters.add("search_key->'transportModes' ??| ?::text[]");
                 params.add(transportModes);
             }
 
             if (areaCodes != null && areaCodes.length > 0) {
-                sql.append(" AND search_key->'areaCodes' ??| ?::text[] ");
+                filters.add("search_key->'areaCodes' ??| ?::text[]");
                 params.add(areaCodes);
+            }
+
+            if (municipalityCodes != null && municipalityCodes.length > 0) {
+                filters.add("search_key->'municipalityCodes' ??| ?::text[]");
+                params.add(municipalityCodes);
+            }
+
+            if (!filters.isEmpty()) {
+                // TopographicPlace is always included regardless of search filters because it provides geographic
+                // context needed for all stop place data
+                sql.append(" AND (type = 'TopographicPlace' OR (");
+                sql.append(String.join(" AND ", filters));
+                sql.append("))");
             }
         }
 
@@ -52,9 +68,10 @@ public class FintrafficNetexRepository extends AbstractNetexRepository {
             CASE type
                 WHEN 'ScheduledStopPoint' THEN 1
                 WHEN 'PassengerStopAssignment' THEN 2
-                WHEN 'StopPlace' THEN 3
-                WHEN 'Parking' THEN 4
-                ELSE 5
+                WHEN 'TopographicPlace' THEN 3
+                WHEN 'StopPlace' THEN 4
+                WHEN 'Parking' THEN 5
+                ELSE 6
             END
         """);
 

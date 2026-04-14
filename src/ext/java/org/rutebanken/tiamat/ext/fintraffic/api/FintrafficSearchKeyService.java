@@ -15,6 +15,7 @@ import org.rutebanken.tiamat.ext.fintraffic.api.model.FintrafficReadApiSearchKey
 import org.rutebanken.tiamat.ext.fintraffic.api.model.ReadApiSearchKey;
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
 import org.rutebanken.tiamat.model.Parking;
+import org.rutebanken.tiamat.model.PrivateCodeStructure;
 import org.rutebanken.tiamat.model.SiteRefStructure;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.TopographicPlace;
@@ -95,13 +96,20 @@ public class FintrafficSearchKeyService implements SearchKeyService {
                         Stream.of(parentSearchKey.areaCodes())
                 ).distinct().toArray(String[]::new);
 
-                return new FintrafficReadApiSearchKey(mergedTransportModes, mergedAreaCodes);
+                String[] mergedMunicipalityCodes = Stream.concat(
+                        Stream.of(stopPlaceSearchKey.municipalityCodes()),
+                        Stream.of(parentSearchKey.municipalityCodes())
+                ).distinct().toArray(String[]::new);
+
+                return new FintrafficReadApiSearchKey(mergedTransportModes, mergedAreaCodes, mergedMunicipalityCodes);
             } else {
                 return stopPlaceSearchKey;
             }
         } else if (entity instanceof Parking) {
             // For Parking, use parent StopPlace search key if available
             return searchKeyFromParent.orElse(FintrafficReadApiSearchKey.empty());
+        } else if (entity instanceof TopographicPlace) {
+            return FintrafficReadApiSearchKey.empty();
         } else {
             return FintrafficReadApiSearchKey.empty();
         }
@@ -146,7 +154,15 @@ public class FintrafficSearchKeyService implements SearchKeyService {
                 : new String[]{};
         Optional<Point> stopPlaceCentroid = Optional.ofNullable(stopPlace.getCentroid());
         Optional<String[]> areaCodes = stopPlaceCentroid.map(this::getAdministrativeZonesForPoint);
-        return new FintrafficReadApiSearchKey(transportModes, areaCodes.orElse(new String[]{}));
+
+        String[] municipalityCodes = Optional.ofNullable(stopPlace.getTopographicPlace())
+                .map(TopographicPlace::getPrivateCode)
+                .map(PrivateCodeStructure::getValue)
+                .filter(Objects::nonNull)
+                .map(code -> new String[]{code})
+                .orElse(new String[]{});
+
+        return new FintrafficReadApiSearchKey(transportModes, areaCodes.orElse(new String[]{}), municipalityCodes);
     }
 
     private String createJSONString(ReadApiSearchKey searchKey) {
