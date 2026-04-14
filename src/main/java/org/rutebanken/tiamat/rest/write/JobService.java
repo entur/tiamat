@@ -4,6 +4,7 @@ import org.rutebanken.tiamat.model.job.AsyncStopPlaceJob;
 import org.rutebanken.tiamat.model.job.AsyncStopPlaceJobStatus;
 import org.rutebanken.tiamat.model.job.StopPlaceIdMapping;
 import org.rutebanken.tiamat.repository.AsyncStopPlaceJobRepository;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -50,6 +51,8 @@ public class JobService {
             return e.getMessage();
         } else if (e instanceof RejectedExecutionException) {
             return "The job queue is full. Please try again later.";
+        } else if (e instanceof DataIntegrityViolationException) {
+            return "A database constraint was violated. This may be due to invalid input data or a conflict with existing data.";
         }
         return "An unexpected error occurred.";
     }
