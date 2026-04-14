@@ -101,12 +101,6 @@ public class StopPlaceWriteDomainService {
                     )
             );
         }
-        logger.debug(
-                "Differences detected for StopPlace id {}: {}",
-                newStopPlace.getNetexId(),
-                diffResult
-        );
-
     }
 
     @Transactional
