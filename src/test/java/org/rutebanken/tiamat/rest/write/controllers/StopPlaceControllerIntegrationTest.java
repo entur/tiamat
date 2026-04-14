@@ -1,8 +1,11 @@
 package org.rutebanken.tiamat.rest.write.controllers;
 
+import org.junit.Before;
 import org.junit.Test;
+import org.rutebanken.helper.organisation.RoleAssignment;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.TiamatTestApplication;
+import org.rutebanken.tiamat.auth.MockedRoleAssignmentExtractor;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
@@ -22,10 +25,22 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-    classes = TiamatTestApplication.class,
-    properties = "authorization.enabled=false"
+    classes = { TiamatTestApplication.class, MethodSecurityTestConfig.class }
 )
-public class StopPlaceControllerTest extends TiamatIntegrationTest {
+public class StopPlaceControllerIntegrationTest extends TiamatIntegrationTest {
+
+    @Autowired
+    private MockedRoleAssignmentExtractor mockedRoleAssignmentExtractor;
+
+    @Before
+    public void setUpWriteApiRole() {
+        RoleAssignment writeApiRole = RoleAssignment.builder()
+            .withRole("none")
+            .withOrganisation("*")
+            .build();
+        mockedRoleAssignmentExtractor.setNextReturnedRoleAssignment(writeApiRole);
+        mockedRoleAssignmentExtractor.setPersistent(true);
+    }
 
     private static final String WRITE_ENDPOINT = "/services/stop_places/write";
 
