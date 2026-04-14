@@ -65,6 +65,8 @@ import org.rutebanken.tiamat.model.ValidBetween;
 import org.rutebanken.tiamat.model.Value;
 import org.rutebanken.tiamat.model.VehicleModeEnumeration;
 import org.rutebanken.tiamat.model.WaitingRoomEquipment;
+import org.rutebanken.tiamat.auth.MockedRoleAssignmentExtractor;
+import org.rutebanken.tiamat.auth.RoleAssignmentListBuilder;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.service.stopplace.MultiModalStopPlaceEditor;
 import org.rutebanken.tiamat.time.ExportTimeZone;
@@ -104,6 +106,9 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
 
     @Autowired
     private ExportTimeZone exportTimeZone;
+
+    @Autowired
+    private MockedRoleAssignmentExtractor mockedRoleAssignmentExtractor;
 
     private Instant now = Instant.now().truncatedTo(ChronoUnit.SECONDS);
 
@@ -1671,24 +1676,28 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
 
         String newTransportMode = VehicleModeEnumeration.TRAM.value();
         String newSubmode = TramSubmodeEnumeration.LOCAL_TRAM.value();
+        String newStopPlaceType = StopTypeEnumeration.ONSTREET_TRAM.value();
         String graphQlJsonQuery = """
                  mutation {
                   stopPlace: mutateStopPlace (StopPlace: {
                           id: "%s"
                           transportMode: %s
                           submode: %s
+                          stopPlaceType: %s
                       }) {
                           id
                           transportMode
                           submode
+                          stopPlaceType
                       }
-                  }""".formatted(stopPlace.getNetexId(), newTransportMode, newSubmode);
+                  }""".formatted(stopPlace.getNetexId(), newTransportMode, newSubmode, newStopPlaceType);
 
         executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .rootPath("data.stopPlace[0]")
                 .body("id", equalTo(stopPlace.getNetexId()))
                 .body("transportMode", equalTo(newTransportMode))
-                .body("submode", equalTo(newSubmode));
+                .body("submode", equalTo(newSubmode))
+                .body("stopPlaceType", equalTo(newStopPlaceType));
 
         var stopPlaces = stopPlaceRepository.findAll();
         for(StopPlace stopPlaceVersion : stopPlaces) {
@@ -1768,25 +1777,29 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
 
         String newTransportMode = VehicleModeEnumeration.TRAM.value();
         String newSubmode = TramSubmodeEnumeration.CITY_TRAM.value();
+        String newStopPlaceType = StopTypeEnumeration.ONSTREET_TRAM.value();
         String graphQlJsonQuery = """
                 mutation {
                     stopPlace: mutateStopPlace (StopPlace: {
                         id: "%s"
                         transportMode: %s
                         submode: %s
+                        stopPlaceType: %s
                     }) {
                         id
                         transportMode
                         submode
+                        stopPlaceType
                     }
                 }
-                """.formatted(stopPlace.getNetexId(), newTransportMode, newSubmode);
+                """.formatted(stopPlace.getNetexId(), newTransportMode, newSubmode, newStopPlaceType);
 
         executeGraphqQLQueryOnly(graphQlJsonQuery)
                 .rootPath("data.stopPlace[0]")
                 .body("id", equalTo(stopPlace.getNetexId()))
                 .body("transportMode", equalTo(newTransportMode))
-                .body("submode", equalTo(newSubmode));
+                .body("submode", equalTo(newSubmode))
+                .body("stopPlaceType", equalTo(newStopPlaceType));
 
         var stopPlaces = stopPlaceRepository.findAll();
         for(StopPlace stopPlaceVersion : stopPlaces) {
@@ -1800,6 +1813,99 @@ public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLReso
         }
     }
 
+
+    /**
+     * A user with full access should still not be able to create a stop place with a stopPlaceType
+     * that is incompatible with the selected transportMode (domain validation).
+     */
+    @Test
+    public void testMutationRejectsStopPlaceTypeInvalidForTransportMode() {
+        // Full access — failure must come from domain validation, not authorization
+        mockedRoleAssignmentExtractor.setNextReturnedRoleAssignment(
+                RoleAssignmentListBuilder.builder().withAccessAllAreas().build());
+
+        // BUS transport mode is incompatible with RAIL_STATION stop place type
+        String graphQlJsonQuery = """
+                mutation {
+                    stopPlace: mutateStopPlace (StopPlace: {
+                        name: { value: "Invalid Stop" }
+                        transportMode: %s
+                        stopPlaceType: %s
+                    }) {
+                        id
+                        transportMode
+                        stopPlaceType
+                    }
+                }
+                """.formatted(VehicleModeEnumeration.BUS.value(), StopTypeEnumeration.RAIL_STATION.value());
+
+        executeGraphqQLQueryOnly(graphQlJsonQuery, 400);
+    }
+
+    /**
+     * A valid (transportMode, stopPlaceType) combination must still be accepted after the fix.
+     */
+    @Test
+    public void testMutationAcceptsStopPlaceTypeValidForTransportMode() {
+        mockedRoleAssignmentExtractor.setNextReturnedRoleAssignment(
+                RoleAssignmentListBuilder.builder().withStopPlaceOfType(StopTypeEnumeration.BUS_STATION).build());
+
+        String graphQlJsonQuery = """
+                mutation {
+                    stopPlace: mutateStopPlace (StopPlace: {
+                        name: { value: "Bus Stop" }
+                        transportMode: %s
+                        stopPlaceType: %s
+                    }) {
+                        id
+                        transportMode
+                        stopPlaceType
+                    }
+                }
+                """.formatted(VehicleModeEnumeration.BUS.value(), StopTypeEnumeration.BUS_STATION.value());
+
+        executeGraphqQLQueryOnly(graphQlJsonQuery)
+                .rootPath("data.stopPlace[0]")
+                .body("id", notNullValue())
+                .body("transportMode", equalTo(VehicleModeEnumeration.BUS.value()))
+                .body("stopPlaceType", equalTo(StopTypeEnumeration.BUS_STATION.value()));
+    }
+
+    /**
+     * Changing transportMode to one that is incompatible with the existing stopPlaceType must be rejected.
+     * The user has full access (via withAccessAllAreas) so the failure is from domain validation.
+     */
+    @Test
+    public void testMutationRejectsStopPlaceTypeInvalidWhenOnlyTransportModeUpdated() {
+        // Full access — failure must come from domain validation, not authorization
+        mockedRoleAssignmentExtractor.setNextReturnedRoleAssignment(
+                RoleAssignmentListBuilder.builder().withAccessAllAreas().build());
+
+        StopPlace stopPlace = createStopPlace("Train station");
+        stopPlace.setTransportMode(VehicleModeEnumeration.RAIL);
+        stopPlace.setStopPlaceType(StopTypeEnumeration.RAIL_STATION);
+        stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(10, 59)));
+        stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+
+        mockedRoleAssignmentExtractor.setNextReturnedRoleAssignment(
+                RoleAssignmentListBuilder.builder().withAccessAllAreas().build());
+
+        // RAIL_STATION is incompatible with BUS — updating transportMode should be rejected
+        String graphQlJsonQuery = """
+                mutation {
+                    stopPlace: mutateStopPlace (StopPlace: {
+                        id: "%s"
+                        transportMode: %s
+                    }) {
+                        id
+                        transportMode
+                        stopPlaceType
+                    }
+                }
+                """.formatted(stopPlace.getNetexId(), VehicleModeEnumeration.BUS.value());
+
+        executeGraphqQLQueryOnly(graphQlJsonQuery, 400);
+    }
 
     @Test
     public void testSimpleMutationCreateQuay() throws Exception {
