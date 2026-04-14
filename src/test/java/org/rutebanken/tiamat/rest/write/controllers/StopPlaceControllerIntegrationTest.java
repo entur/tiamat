@@ -25,7 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-    classes = { TiamatTestApplication.class, MethodSecurityTestConfig.class }
+    classes = { TiamatTestApplication.class }
 )
 public class StopPlaceControllerIntegrationTest extends TiamatIntegrationTest {
 
