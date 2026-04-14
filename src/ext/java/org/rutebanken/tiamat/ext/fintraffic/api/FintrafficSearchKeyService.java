@@ -158,7 +158,6 @@ public class FintrafficSearchKeyService implements SearchKeyService {
         String[] municipalityCodes = Optional.ofNullable(stopPlace.getTopographicPlace())
                 .map(TopographicPlace::getPrivateCode)
                 .map(PrivateCodeStructure::getValue)
-                .filter(Objects::nonNull)
                 .map(code -> new String[]{code})
                 .orElse(new String[]{});
 
