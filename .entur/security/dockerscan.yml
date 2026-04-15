@@ -1,0 +1,18 @@
+apiVersion: entur.io/securitytools/v1
+kind: DockerScanConfig
+metadata:
+  id: tiamat
+spec:
+  allowlist:
+    # libexpat1 - false positive; CVE-2026-4739 affects InsightSoftwareConsortium ITK's bundled
+    # copy of Expat (xmlparse.c), not the system libexpat1 package. Tiamat does not use ITK.
+    - cve: "CVE-2026-4739"
+      comment: "False positive - CVE targets ITK's vendored Expat copy, not the system libexpat1 package. Tiamat image does not include ITK."
+      reason: "false_positive"
+    # ncurses-bin - stack overflow in infocmp -i; Ubuntu won't fix (low priority, no USN issued).
+    # Compiler hardening on Noble (24.04) restricts impact to crash of CLI tool only, no RCE possible.
+    - cve: "CVE-2025-69720"
+      comment: "Ubuntu Low priority, no USN issued. Affects infocmp CLI tool only; compiler hardening on Noble restricts to DoS (crash), no remote or network attack vector."
+      reason: "wont_fix"
+    # ncurses-base - same source package as ncurses-bin, same CVE-2025-69720 root cause.
+    # Ubuntu won't fix (low priority, no USN issued). No RCE possible due to compiler hardening on Noble.
