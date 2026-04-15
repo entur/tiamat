@@ -1,10 +1,10 @@
 package org.rutebanken.tiamat.rest.write.controllers;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.rutebanken.helper.organisation.RoleAssignment;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
-import org.rutebanken.tiamat.TiamatTestApplication;
 import org.rutebanken.tiamat.auth.MockedRoleAssignmentExtractor;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -12,7 +12,6 @@ import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.rutebanken.tiamat.model.job.AsyncStopPlaceJobStatus;
 import org.rutebanken.tiamat.rest.write.dto.StopPlaceJobDto;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -23,23 +22,24 @@ import org.springframework.http.ResponseEntity;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(
-    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-    classes = { TiamatTestApplication.class }
-)
 public class StopPlaceControllerIntegrationTest extends TiamatIntegrationTest {
 
     @Autowired
     private MockedRoleAssignmentExtractor mockedRoleAssignmentExtractor;
 
     @Before
-    public void setUpWriteApiRole() {
+    public void setUpPersistentRoleAssignment() {
         RoleAssignment writeApiRole = RoleAssignment.builder()
             .withRole("none")
             .withOrganisation("*")
             .build();
         mockedRoleAssignmentExtractor.setNextReturnedRoleAssignment(writeApiRole);
         mockedRoleAssignmentExtractor.setPersistent(true);
+    }
+
+    @After
+    public void tearDownPersistentRoleAssignment() {
+        mockedRoleAssignmentExtractor.reset();
     }
 
     private static final String WRITE_ENDPOINT = "/services/stop_places/write";
