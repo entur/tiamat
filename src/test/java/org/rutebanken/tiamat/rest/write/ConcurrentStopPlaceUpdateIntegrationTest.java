@@ -44,10 +44,13 @@ import static org.mockito.Mockito.doAnswer;
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     classes = TiamatTestApplication.class,
-    properties = "authorization.enabled=false"
+    properties = {
+        "authorization.enabled=false",
+        // the shared test context already bound Hazelcast to port 5701
+        "tiamat.hazelcast.port-auto-increment=true",
+    }
 )
-public class ConcurrentStopPlaceUpdateIntegrationTest
-    extends TiamatIntegrationTest {
+public class ConcurrentStopPlaceUpdateIntegrationTest extends TiamatIntegrationTest {
 
     private static final String WRITE_ENDPOINT = "/services/stop_places/write";
 

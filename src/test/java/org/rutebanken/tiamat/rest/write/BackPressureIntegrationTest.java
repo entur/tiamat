@@ -25,9 +25,14 @@ import static org.mockito.Mockito.doAnswer;
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     classes = TiamatTestApplication.class,
-    // setting this to zero means no requests will be queued when the single worker thread is busy,
-    // so that we can test backpressure behavior
-    properties = {"tiamat.write-api.queue-capacity=0", "authorization.enabled=false"}
+    properties = {
+        // setting this to zero means no requests will be queued when the single worker thread is busy,
+        // so that we can test backpressure behavior.
+        "tiamat.write-api.queue-capacity=0",
+        "authorization.enabled=false",
+        // the shared test context already bound Hazelcast to port 5701
+        "tiamat.hazelcast.port-auto-increment=true"
+    }
 )
 public class BackPressureIntegrationTest extends TiamatIntegrationTest {
 
@@ -75,7 +80,7 @@ public class BackPressureIntegrationTest extends TiamatIntegrationTest {
 
         // Wait until the worker thread is actually blocked before sending the next request.
         boolean started = workerStarted.await(5, TimeUnit.SECONDS);
-        // assertThat(started).as("Worker thread did not start in time").isTrue();
+        assertThat(started).as("Worker thread did not start in time").isTrue();
 
         // Second request: queue is full (capacity=0) and the worker is busy → should get 503.
         ResponseEntity<String> response = postXml(xml, String.class);
