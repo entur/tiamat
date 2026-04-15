@@ -50,7 +50,7 @@ class FintrafficApiControllerTest {
                 "1.12:FI-NeTEx-stops:1.0"
         );
 
-        controller = new FintrafficApiController(publicationDeliveryService, "[A-ZÅÄÖ]{3}", "\\d{3}");
+        controller = new FintrafficApiController(publicationDeliveryService);
 
         // Setup mock response
         response = mock(HttpServletResponse.class);
@@ -119,14 +119,14 @@ class FintrafficApiControllerTest {
     }
 
     @Test
-    void getNetexStreamRejectsInvalidMunicipalityCode() {
+    void getNetexStreamRejectsNonNumericMunicipalityCode() {
         controller.getNetexStream(null, null, new String[]{"ABC"}, response);
         verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
     }
 
     @Test
-    void getNetexStreamRejectsInvalidMunicipalityCodeTooShort() {
-        controller.getNetexStream(null, null, new String[]{"09"}, response);
+    void getNetexStreamRejectsTwoDigitMunicipalityCode() {
+        controller.getNetexStream(null, null, new String[]{"99"}, response);
         verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
     }
 
@@ -137,12 +137,27 @@ class FintrafficApiControllerTest {
     }
 
     @Test
-    void getNetexStreamAcceptsValidMunicipalityCode() {
+    void getNetexStreamAcceptsFirstThreeDigitMunicipalityCode() {
         when(netexRepository.streamStopPlaces(any(ReadApiSearchKey.class)))
                 .thenReturn(Stream.empty());
 
-        controller.getNetexStream(null, null, new String[]{"091"}, response);
+        controller.getNetexStream(null, null, new String[]{"000"}, response);
         verify(response, never()).setStatus(HttpServletResponse.SC_BAD_REQUEST);
+    }
+
+    @Test
+    void getNetexStreamAcceptsLastFourDigitMunicipalityCode() {
+        when(netexRepository.streamStopPlaces(any(ReadApiSearchKey.class)))
+                .thenReturn(Stream.empty());
+
+        controller.getNetexStream(null, null, new String[]{"9999"}, response);
+        verify(response, never()).setStatus(HttpServletResponse.SC_BAD_REQUEST);
+    }
+
+    @Test
+    void getNetexStreamRejectsFiveDigitMunicipalityCode() {
+        controller.getNetexStream(null, null, new String[]{"10000"}, response);
+        verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
     }
 }
 
