@@ -47,7 +47,7 @@ import java.util.Set;
 @Configuration
 public class JerseyConfig {
 
-    @Value("${tiamat.write-api.enabled:true}")
+    @Value("${tiamat.write-api.enabled:false}")
     private boolean writeApiEnabled;
 
     /**
@@ -108,7 +108,6 @@ public class JerseyConfig {
 
 
         publicServicesJersey.addUrlMappings(SERVICES_STOP_PLACE_PATH + "/*");
-
         publicServicesJersey.setName("PublicJersey");
 
         publicServicesJersey.setLoadOnStartup(0);

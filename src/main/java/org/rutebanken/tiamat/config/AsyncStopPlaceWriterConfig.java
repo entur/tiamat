@@ -14,7 +14,7 @@ public class AsyncStopPlaceWriterConfig {
 
     @Bean(name = "stopPlaceWriteExecutor")
     public Executor stopPlaceExecutor(
-            @Value("${tiamat.write-api.queue-capacity:100}") int queueCapacity
+            @Value("${tiamat.write-api.queue-capacity:0}") int queueCapacity
     ) {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(1);
