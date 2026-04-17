@@ -21,14 +21,27 @@ public record GroupMembership(String id,
      */
     private static final String CUSTOM_FIELD_CODESPACE = "codespaces";
 
+    /**
+     * Metadata field which contains list of municipality codes members of the group are allowed to access.
+     */
+    private static final String CUSTOM_FIELD_MUNICIPALITY_CODES = "municipalityCodes";
+
     public Set<String> getCodespaces() {
+        return splitCustomField(CUSTOM_FIELD_CODESPACE);
+    }
+
+    public Set<String> getMunicipalityCodes() {
+        return splitCustomField(CUSTOM_FIELD_MUNICIPALITY_CODES);
+    }
+
+    private Set<String> splitCustomField(String fieldName) {
         if (customFields != null) {
-            String codespaceField = customFields.getOrDefault(CUSTOM_FIELD_CODESPACE, "").toString();
-            List<String> codespaces = Splitter.on(",")
+            String fieldValue = customFields.getOrDefault(fieldName, "").toString();
+            List<String> values = Splitter.on(",")
                     .trimResults()
                     .omitEmptyStrings()
-                    .splitToList(codespaceField);
-            return new HashSet<>(codespaces);
+                    .splitToList(fieldValue);
+            return new HashSet<>(values);
         }
         return Set.of();
     }

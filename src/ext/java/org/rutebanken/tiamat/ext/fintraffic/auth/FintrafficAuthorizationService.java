@@ -43,12 +43,24 @@ public class FintrafficAuthorizationService implements AuthorizationService {
 
     private final TopographicPlaceRepository topographicPlaceRepository;
 
+    private final boolean codespaceAuthorizationEnabled;
+
+    private final boolean municipalityAuthorizationEnabled;
+
     private final LoadingCache<String, List<TopographicPlace>> fintrafficAdministrativeZoneCache;
 
+    private final LoadingCache<String, Optional<TopographicPlace>> municipalityCache;
+
     public FintrafficAuthorizationService(TrivoreAuthorizations trivoreAuthorizations,
-                                          TopographicPlaceRepository topographicPlaceRepository) {
+                                          TopographicPlaceRepository topographicPlaceRepository,
+                                          boolean codespaceAuthorizationEnabled,
+                                          boolean municipalityAuthorizationEnabled) {
         this.trivoreAuthorizations = trivoreAuthorizations;
         this.topographicPlaceRepository = topographicPlaceRepository;
+        this.codespaceAuthorizationEnabled = codespaceAuthorizationEnabled;
+        this.municipalityAuthorizationEnabled = municipalityAuthorizationEnabled;
+        logger.info("FintrafficAuthorizationService initialized: codespace authorization={}, municipality authorization={}",
+                codespaceAuthorizationEnabled, municipalityAuthorizationEnabled);
         this.fintrafficAdministrativeZoneCache = CacheBuilder.newBuilder()
                 .maximumSize(100)
                 .expireAfterWrite(Duration.ofMinutes(10))
@@ -57,6 +69,16 @@ public class FintrafficAuthorizationService implements AuthorizationService {
                     @Nonnull
                     public List<TopographicPlace> load(@Nonnull String codespace) {
                         return loadTopographicPlaces(codespace);
+                    }
+                });
+        this.municipalityCache = CacheBuilder.newBuilder()
+                .maximumSize(500)
+                .expireAfterWrite(Duration.ofMinutes(10))
+                .build(new CacheLoader<>() {
+                    @Override
+                    @Nonnull
+                    public Optional<TopographicPlace> load(@Nonnull String municipalityCode) {
+                        return loadMunicipalityTopographicPlace(municipalityCode);
                     }
                 });
     }
@@ -68,8 +90,7 @@ public class FintrafficAuthorizationService implements AuthorizationService {
 
     @Override
     public boolean canEditEntities(Collection<? extends EntityStructure> entities) {
-        return trivoreAuthorizations.hasAccess(ENTITY_TYPE_ALL, TRANSPORT_MODE_ALL, MANAGE, true)
-                || entities.stream().allMatch(e -> canEditEntity(e, true));
+        return entities.stream().allMatch(e -> canEditEntity(e, true));
     }
 
     @Override
@@ -142,29 +163,52 @@ public class FintrafficAuthorizationService implements AuthorizationService {
 
     private boolean canEditEntity(Point point, boolean logAuthorizationCheck) {
         logger.trace("FintrafficAuthorizationService.canEditEntity({})", point);
-        Set<String> accessibleCodespaces = trivoreAuthorizations.getAccessibleCodespaces();
+        return (municipalityAuthorizationEnabled && canEditEntityByMunicipalityCode(point, logAuthorizationCheck))
+                || (codespaceAuthorizationEnabled && canEditEntityByCodespace(point, logAuthorizationCheck));
+    }
 
+    private boolean canEditEntityByCodespace(Point point, boolean logAuthorizationCheck) {
+        Set<String> accessibleCodespaces = trivoreAuthorizations.getAccessibleCodespaces();
         if (accessibleCodespaces.isEmpty()) {
-            if (logAuthorizationCheck) {
-                logger.info("User [{}] has no accessible codespaces, cannot edit entity at point {}.", TrivoreAuthorizations.getCurrentSubject(), point);
-            }
-            logger.trace("FintrafficAuthorizationService.canEditEntity({}) codespaces is empty", point);
+            logger.trace("FintrafficAuthorizationService.canEditEntityByCodespace({}) codespaces is empty", point);
             return false;
         }
         boolean result = accessibleCodespaces.stream().anyMatch(codespace ->
                 {
                     try {
                         List<TopographicPlace> topographicPlacesForCodespace = fintrafficAdministrativeZoneCache.get(codespace);
-                        return topographicPlacesForCodespace.stream().anyMatch(tp -> tp.getPolygon() != null && tp.getPolygon().contains(point));
+                        return topographicPlacesForCodespace.stream().anyMatch(tp -> tp.getGeometry() != null && tp.getGeometry().contains(point));
                     } catch (ExecutionException e) {
                         logger.warn("Failed to fetch topographic places for codespaces [{}]", accessibleCodespaces, e);
                         return false;
                     }
                 }
         );
-        if (logAuthorizationCheck) {
-            String isAllowed = result ? "is allowed": "is not allowed";
-            logger.info("User [{}] with codespaces {} {} to edit entity at point {}.", TrivoreAuthorizations.getCurrentSubject(), accessibleCodespaces, isAllowed, point);
+        if (logAuthorizationCheck && result) {
+            logger.info("User [{}] with codespaces {} is allowed to edit entity at point {} (codespace check).",
+                    TrivoreAuthorizations.getCurrentSubject(), accessibleCodespaces, point);
+        }
+        return result;
+    }
+
+    private boolean canEditEntityByMunicipalityCode(Point point, boolean logAuthorizationCheck) {
+        Set<String> municipalityCodes = trivoreAuthorizations.getAccessibleMunicipalityCodes();
+        if (municipalityCodes.isEmpty()) {
+            logger.trace("FintrafficAuthorizationService.canEditEntityByMunicipalityCode({}) municipalityCodes is empty", point);
+            return false;
+        }
+        boolean result = municipalityCodes.stream().anyMatch(code -> {
+            try {
+                Optional<TopographicPlace> tp = municipalityCache.get(code);
+                return tp.isPresent() && tp.get().getGeometry() != null && tp.get().getGeometry().contains(point);
+            } catch (ExecutionException e) {
+                logger.warn("Failed to fetch municipality TopographicPlace for code [{}]", code, e);
+                return false;
+            }
+        });
+        if (logAuthorizationCheck && result) {
+            logger.info("User [{}] with municipalityCodes {} is allowed to edit entity at point {} (municipality check).",
+                    TrivoreAuthorizations.getCurrentSubject(), municipalityCodes, point);
         }
         return result;
     }
@@ -174,12 +218,23 @@ public class FintrafficAuthorizationService implements AuthorizationService {
         List<TopographicPlace> topographicPlaces = topographicPlaceRepository.findTopographicPlace(
                 TopographicPlaceSearch.newTopographicPlaceSearchBuilder().versionValidity(ExportParams.VersionValidity.CURRENT).build()
         );
-
         return topographicPlaces.stream()
                 .filter(tp -> tp.getTopographicPlaceType().equals(TopographicPlaceTypeEnumeration.REGION))
                 .filter(tp -> tp.getKeyValues().get("codespace").getItems().contains(codespace))
-                .peek(Zone_VersionStructure::getPolygon) // Prefetch polygons
+                .peek(Zone_VersionStructure::getGeometry) // Prefetch geometry
                 .collect(Collectors.toList());
+    }
+
+    private Optional<TopographicPlace> loadMunicipalityTopographicPlace(String municipalityCode) {
+        logger.trace("FintrafficAuthorizationService.loadMunicipalityTopographicPlace({})", municipalityCode);
+        List<TopographicPlace> topographicPlaces = topographicPlaceRepository.findTopographicPlace(
+                TopographicPlaceSearch.newTopographicPlaceSearchBuilder().versionValidity(ExportParams.VersionValidity.CURRENT).build()
+        );
+        return topographicPlaces.stream()
+                .filter(tp -> tp.getTopographicPlaceType().equals(TopographicPlaceTypeEnumeration.MUNICIPALITY))
+                .filter(tp -> tp.getPrivateCode() != null && municipalityCode.equals(tp.getPrivateCode().getValue()))
+                .peek(Zone_VersionStructure::getGeometry) // Prefetch geometry
+                .findFirst();
     }
 
     @Override

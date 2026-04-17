@@ -231,8 +231,22 @@ public class TrivoreAuthorizations {
                 });
     }
 
+    public Set<String> getAccessibleMunicipalityCodes() {
+        return getToken()
+                .flatMap(jwt -> fetchTrivoreUsersGroupMemberships(jwt.getSubject()))
+                .map(TrivoreAuthorizations::collectAllMunicipalityCodes)
+                .orElseGet(() -> {
+                    logger.trace("Could not resolve municipality codes for user [{}]", getCurrentSubject());
+                    return Set.of();
+                });
+    }
+
     private static Set<String> collectAllCodespaces(List<GroupMembership> groupMemberships) {
         return groupMemberships.stream().flatMap(groupMembership -> groupMembership.getCodespaces().stream()).collect(Collectors.toSet());
+    }
+
+    private static Set<String> collectAllMunicipalityCodes(List<GroupMembership> groupMemberships) {
+        return groupMemberships.stream().flatMap(groupMembership -> groupMembership.getMunicipalityCodes().stream()).collect(Collectors.toSet());
     }
 
     private static final Map<String, List<String>> SUPERCEDING_PERMISSIONS = Map.of(

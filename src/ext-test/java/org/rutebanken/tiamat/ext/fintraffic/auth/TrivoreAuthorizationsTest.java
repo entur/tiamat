@@ -45,7 +45,7 @@ class TrivoreAuthorizationsTest {
                             case "/api/rest/v1/user/test-subject/groupmembership" -> Mono.just(
                                     ClientResponse.create(HttpStatus.OK)
                                             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                                            .body("[{\"id\": \"test-id\",\"name\": \"group-name\",\"customFields\":{\"codespaces\": \"ABC,XYZ\"}}]")
+                                            .body("[{\"id\": \"test-id\",\"name\": \"group-name\",\"customFields\":{\"codespaces\": \"ABC,XYZ\",\"municipalityCodes\": \"091,049\"}}]")
                                             .build()
                             );
                             case "/api/rest/v1/user/test-subject/externalpermissions" -> Mono.just(
@@ -106,6 +106,12 @@ class TrivoreAuthorizationsTest {
     void testGetAccessibleCodespaces() {
         Set<String> codespaces = trivoreAuthorizations.getAccessibleCodespaces();
         assertThat(codespaces, equalTo(Set.of("ABC", "XYZ")));
+    }
+
+    @Test
+    void testGetAccessibleMunicipalityCodes() {
+        Set<String> municipalityCodes = trivoreAuthorizations.getAccessibleMunicipalityCodes();
+        assertThat(municipalityCodes, equalTo(Set.of("091", "049")));
     }
 
     @Test

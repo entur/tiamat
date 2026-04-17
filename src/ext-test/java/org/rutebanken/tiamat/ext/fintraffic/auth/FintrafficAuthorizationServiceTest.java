@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LinearRing;
+import org.locationtech.jts.geom.MultiPolygon;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
 import org.rutebanken.tiamat.exporter.params.TopographicPlaceSearch;
@@ -52,6 +53,18 @@ class FintrafficAuthorizationServiceTest {
         return place;
     }
 
+    private static @Nonnull TopographicPlace getMunicipalityTopographicPlace(String municipalityCode,
+                                                                             Coordinate[] coordinates) {
+        TopographicPlace place = new TopographicPlace();
+        GeometryFactory fact = new GeometryFactory();
+        LinearRing ring = fact.createLinearRing(coordinates);
+        Polygon polygon = new Polygon(ring, null, fact);
+        place.setMultiSurface(new MultiPolygon(new Polygon[]{polygon}, fact));
+        place.setTopographicPlaceType(TopographicPlaceTypeEnumeration.MUNICIPALITY);
+        place.setPrivateCode(new org.rutebanken.tiamat.model.PrivateCodeStructure(municipalityCode, "type"));
+        return place;
+    }
+
     private static @Nonnull Point getPoint(Coordinate coordinate) {
         GeometryFactory fact = new GeometryFactory();
         return fact.createPoint(coordinate);
@@ -80,12 +93,25 @@ class FintrafficAuthorizationServiceTest {
     }
 
     private static FintrafficAuthorizationService getAuthorizationService() {
+        return getAuthorizationService(true, true);
+    }
+
+    private static FintrafficAuthorizationService getAuthorizationService(boolean codespaceEnabled, boolean municipalityEnabled) {
         TopographicPlaceRepository topographicPlaceRepositoryMock = mock(TopographicPlaceRepository.class);
         TrivoreAuthorizations trivoreAuthorizationsMock = mock(TrivoreAuthorizations.class);
 
-        TopographicPlace place = getTopographicPlace();
-        when(topographicPlaceRepositoryMock.findTopographicPlace(any(TopographicPlaceSearch.class))).thenReturn(List.of(place));
+        TopographicPlace regionPlace = getTopographicPlace();
+        TopographicPlace municipalityPlace = getMunicipalityTopographicPlace("091", new Coordinate[] {
+                new Coordinate(2, 2),
+                new Coordinate(3, 2),
+                new Coordinate(3, 3),
+                new Coordinate(2, 3),
+                new Coordinate(2, 2),
+        });
+        when(topographicPlaceRepositoryMock.findTopographicPlace(any(TopographicPlaceSearch.class)))
+                .thenReturn(List.of(regionPlace, municipalityPlace));
         when(trivoreAuthorizationsMock.getAccessibleCodespaces()).thenReturn(Set.of("ABC", "XYZ"));
+        when(trivoreAuthorizationsMock.getAccessibleMunicipalityCodes()).thenReturn(Set.of("091"));
 
         when(trivoreAuthorizationsMock.hasAccess(matches("StopPlace"), matches("BUS"), eq(TrivorePermission.MANAGE), anyBoolean())).thenReturn(true);
         when(trivoreAuthorizationsMock.hasAccess(matches("Parking"), matches("\\{all\\}"), eq(TrivorePermission.MANAGE), anyBoolean())).thenReturn(true);
@@ -94,7 +120,9 @@ class FintrafficAuthorizationServiceTest {
 
         return new FintrafficAuthorizationService(
                 trivoreAuthorizationsMock,
-                topographicPlaceRepositoryMock
+                topographicPlaceRepositoryMock,
+                codespaceEnabled,
+                municipalityEnabled
         );
     }
 
@@ -152,5 +180,59 @@ class FintrafficAuthorizationServiceTest {
         stopPlaceWithQuayAndNestedStopPlace.setQuays(Set.of(quay));
         FintrafficAuthorizationService authorizationService = getAuthorizationService();
         assertThat(authorizationService.canEditEntity(stopPlaceWithQuayAndNestedStopPlace), equalTo(false));
+    }
+
+    @Test
+    public void testCanEditEntityByMunicipalityCodes() {
+        // Point (2.5, 2.5) is inside municipality polygon (2,2)-(3,3) but outside region polygon (0,0)-(1,1)
+        StopPlace stopPlace = getStopPlace("FSR:StopPlace:10", VehicleModeEnumeration.BUS, getPoint(new Coordinate(2.5, 2.5)));
+        FintrafficAuthorizationService authorizationService = getAuthorizationService();
+        assertThat(authorizationService.canEditEntity(stopPlace), equalTo(true));
+    }
+
+    @Test
+    public void testCanEditEntityByMunicipalityCodesOutOfBounds() {
+        // Point (5, 5) is outside both region and municipality polygons
+        StopPlace stopPlace = getStopPlace("FSR:StopPlace:11", VehicleModeEnumeration.BUS, getPoint(new Coordinate(5, 5)));
+        FintrafficAuthorizationService authorizationService = getAuthorizationService();
+        assertThat(authorizationService.canEditEntity(stopPlace), equalTo(false));
+    }
+
+    @Test
+    public void testCanEditEntityByEitherCodespaceOrMunicipality() {
+        // Point (0.5, 0.5) is inside region polygon — should pass via codespace check
+        StopPlace stopPlaceInRegion = getStopPlace("FSR:StopPlace:12", VehicleModeEnumeration.BUS, getPoint(new Coordinate(0.5, 0.5)));
+        // Point (2.5, 2.5) is inside municipality polygon — should pass via municipality check
+        StopPlace stopPlaceInMunicipality = getStopPlace("FSR:StopPlace:13", VehicleModeEnumeration.BUS, getPoint(new Coordinate(2.5, 2.5)));
+
+        FintrafficAuthorizationService authorizationService = getAuthorizationService();
+        assertThat(authorizationService.canEditEntity(stopPlaceInRegion), equalTo(true));
+        assertThat(authorizationService.canEditEntity(stopPlaceInMunicipality), equalTo(true));
+    }
+
+    @Test
+    public void testCodespaceOnlyMode() {
+        FintrafficAuthorizationService authorizationService = getAuthorizationService(true, false);
+        // Point inside region (codespace) — allowed
+        assertThat(authorizationService.canEditEntity(getPoint(new Coordinate(0.5, 0.5))), equalTo(true));
+        // Point inside municipality area but municipality auth disabled — denied
+        assertThat(authorizationService.canEditEntity(getPoint(new Coordinate(2.5, 2.5))), equalTo(false));
+    }
+
+    @Test
+    public void testMunicipalityOnlyMode() {
+        FintrafficAuthorizationService authorizationService = getAuthorizationService(false, true);
+        // Point inside region but codespace auth disabled — denied
+        assertThat(authorizationService.canEditEntity(getPoint(new Coordinate(0.5, 0.5))), equalTo(false));
+        // Point inside municipality area — allowed
+        assertThat(authorizationService.canEditEntity(getPoint(new Coordinate(2.5, 2.5))), equalTo(true));
+    }
+
+    @Test
+    public void testBothAuthorizationMethodsDisabled() {
+        FintrafficAuthorizationService authorizationService = getAuthorizationService(false, false);
+        // Both disabled — all geographic edits denied
+        assertThat(authorizationService.canEditEntity(getPoint(new Coordinate(0.5, 0.5))), equalTo(false));
+        assertThat(authorizationService.canEditEntity(getPoint(new Coordinate(2.5, 2.5))), equalTo(false));
     }
 }
