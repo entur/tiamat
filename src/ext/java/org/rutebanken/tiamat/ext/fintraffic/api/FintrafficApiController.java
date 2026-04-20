@@ -1,6 +1,7 @@
 package org.rutebanken.tiamat.ext.fintraffic.api;
 
 import jakarta.servlet.http.HttpServletResponse;
+import org.rutebanken.tiamat.ext.fintraffic.FintrafficConstants;
 import org.rutebanken.tiamat.ext.fintraffic.api.model.FintrafficReadApiSearchKey;
 import org.rutebanken.tiamat.model.VehicleModeEnumeration;
 import org.springframework.context.annotation.Profile;
@@ -17,9 +18,6 @@ import java.nio.charset.StandardCharsets;
 @Controller
 public class FintrafficApiController {
     private final ReadApiNetexPublicationDeliveryService readApiNetexPublicationDeliveryService;
-    private static final String AREA_CODE_REGEX = "[A-ZÅÄÖ]{3}";
-    // 3 digits for normal municipalities, 4 digits for special areas like Haaparanta and Eurooppa
-    private static final String MUNICIPALITY_CODE_REGEX = "\\d{3,4}";
 
     public FintrafficApiController(
             ReadApiNetexPublicationDeliveryService readApiNetexPublicationDeliveryService
@@ -36,8 +34,8 @@ public class FintrafficApiController {
     ) {
         try {
             validateTransportModes(transportMode);
-            validateAreaCodes(areaCode);
-            validateMunicipalityCodes(municipalityCode);
+            FintrafficConstants.validateAreaCodes(areaCode);
+            FintrafficConstants.validateMunicipalityCodes(municipalityCode);
         } catch (IllegalArgumentException e) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             return;
@@ -59,26 +57,6 @@ public class FintrafficApiController {
         if (transportModes != null) {
             for (String mode : transportModes) {
                 VehicleModeEnumeration.fromValue(mode);
-            }
-        }
-    }
-
-    private void validateAreaCodes(String[] areaCodes) {
-        if (areaCodes != null) {
-            for (String code : areaCodes) {
-                if (!code.matches(AREA_CODE_REGEX)) {
-                    throw new IllegalArgumentException("Invalid areaCode: " + code);
-                }
-            }
-        }
-    }
-
-    private void validateMunicipalityCodes(String[] municipalityCodes) {
-        if (municipalityCodes != null) {
-            for (String code : municipalityCodes) {
-                if (!code.matches(MUNICIPALITY_CODE_REGEX)) {
-                    throw new IllegalArgumentException("Invalid municipalityCode: " + code);
-                }
             }
         }
     }
