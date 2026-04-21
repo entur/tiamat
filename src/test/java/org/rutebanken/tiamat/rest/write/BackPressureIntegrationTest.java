@@ -11,7 +11,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
@@ -24,10 +23,8 @@ import static org.mockito.Mockito.doAnswer;
 
 @TestPropertySource(properties = {
     "tiamat.write-api.queue-capacity=0",
-    "authorization.enabled=false",
     "tiamat.hazelcast.port-auto-increment=true"
 })
-@DirtiesContext
 public class BackPressureIntegrationTest extends TiamatIntegrationTest {
 
     private static final String WRITE_ENDPOINT = "/services/stop_places/write";
