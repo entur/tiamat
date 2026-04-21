@@ -1,7 +1,9 @@
 package org.rutebanken.tiamat.rest.write;
 
+import com.hazelcast.cp.lock.FencedLock;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
@@ -11,7 +13,6 @@ import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.rutebanken.tiamat.model.job.AsyncStopPlaceJobStatus;
 import org.rutebanken.tiamat.rest.write.dto.StopPlaceJobDto;
-import org.rutebanken.tiamat.versioning.save.StopPlaceVersionedSaverService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpEntity;
@@ -19,17 +20,12 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
 
 /**
  * Integration test verifying that when the async write API and the GraphQL API attempt to update
@@ -40,13 +36,6 @@ import static org.mockito.Mockito.doAnswer;
  * request reaches the lock first will hold it, and the second request will fail after the
  * configured wait-timeout ({@link MutateLock#WAIT_FOR_LOCK_SECONDS} s).
  */
-@TestPropertySource(
-    properties = {
-        "authorization.enabled=false",
-        // the shared test context already bound Hazelcast to port 5701
-        "tiamat.hazelcast.port-auto-increment=true",
-    }
-)
 public class ConcurrentStopPlaceUpdateIntegrationTest extends TiamatIntegrationTest {
 
     private static final String WRITE_ENDPOINT = "/services/stop_places/write";
@@ -54,8 +43,8 @@ public class ConcurrentStopPlaceUpdateIntegrationTest extends TiamatIntegrationT
     @Autowired
     private TestRestTemplate restTemplate;
 
-    @MockitoSpyBean
-    private StopPlaceVersionedSaverService stopPlaceVersionedSaverServiceSpy;
+    /** Background thread that holds the Hazelcast CP mutate-lock during a test. */
+    private Thread lockHolderThread;
 
     @Before
     public void configureRestAssured() {
@@ -63,214 +52,163 @@ public class ConcurrentStopPlaceUpdateIntegrationTest extends TiamatIntegrationT
         RestAssured.port = port;
     }
 
+    @After
+    public void releaseLockIfHeld() throws InterruptedException {
+        if (lockHolderThread != null && lockHolderThread.isAlive()) {
+            lockHolderThread.interrupt();
+            lockHolderThread.join(5_000);
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Helper: acquire the mutate-lock on a background thread and hold it until
+    // the returned CountDownLatch is counted down (or the thread is interrupted).
+    // -------------------------------------------------------------------------
+
     /**
-     * Scenario: the async write API wins the lock first.
-     * <ol>
-     *   <li>A stop place is persisted to the database.</li>
-     *   <li>The async write API PATCH request is submitted; the spy holds the worker thread
-     *       inside {@code updateStopPlace} so the lock stays acquired.</li>
-     *   <li>While the lock is held, a GraphQL {@code mutateStopPlace} mutation targeting the
-     *       same stop place is sent.</li>
-     *   <li>The GraphQL mutation must fail because it cannot acquire the lock within the
-     *       timeout period.</li>
-     *   <li>The async write API job is allowed to finish and must succeed.</li>
-     * </ol>
+     * Acquires the Hazelcast CP {@value MutateLock#LOCK_NAME} lock on a background thread.
+     *
+     * @param lockAcquired latch signaled once the lock is held
+     * @param releaseLock  latch the background thread waits on before releasing the lock
+     * @return the background thread (already started)
      */
-    @Test
-    public void whenAsyncWriteApiHoldsLock_GraphQLMutationIsRejected()
-        throws Exception {
-        StopPlace stopPlace = new StopPlace(
-            new EmbeddableMultilingualString("Concurrent Test Stop")
-        );
-        stopPlace.setStopPlaceType(StopTypeEnumeration.BUS_STATION);
-        StopPlace saved = stopPlaceVersionedSaverService.saveNewVersion(
-            stopPlace
-        );
-        String netexId = saved.getNetexId();
-
-        CountDownLatch asyncWorkerStarted = new CountDownLatch(1);
-        CountDownLatch asyncWorkerMayFinish = new CountDownLatch(1);
-
-        doAnswer(invocation -> {
-            asyncWorkerStarted.countDown(); // signal: lock is now held
-            boolean released = asyncWorkerMayFinish.await(30, TimeUnit.SECONDS); // hold the lock
-            if (!released) throw new RuntimeException("Latch timed out");
-            return invocation.callRealMethod();
-        })
-            .when(stopPlaceVersionedSaverServiceSpy)
-            .saveNewVersion(any(StopPlace.class), any(StopPlace.class));
-
-        // --- act 1: fire the async write API PATCH (holds the lock) ----------------
-        String patchXml = """
-            <stopPlaces xmlns="http://www.netex.org.uk/netex">
-                <StopPlace id="%s" version="%d">
-                    <Name>Async Updated Name</Name>
-                    <StopPlaceType>busStation</StopPlaceType>
-                </StopPlace>
-            </stopPlaces>
-            """.formatted(netexId, saved.getVersion());
-
-        AtomicReference<ResponseEntity<StopPlaceJobDto>> asyncResponse =
-            new AtomicReference<>();
-        Thread asyncWriteThread = new Thread(() ->
-            asyncResponse.set(patchStopPlace(patchXml))
-        );
-        asyncWriteThread.start();
-
-        // Wait until the async worker actually holds the Hazelcast lock
-        boolean workerStarted = asyncWorkerStarted.await(10, TimeUnit.SECONDS);
-        assertThat(workerStarted)
-            .as("Async worker did not start within the expected time")
-            .isTrue();
-
-        // --- act 2: send a GraphQL mutation while the lock is held ------------------
-        // MutateLock.WAIT_FOR_LOCK_SECONDS is 15 s; we use a short wait to keep the test fast.
-        // We override it via property below in the @SpringBootTest, but the default is fine:
-        // the GraphQL call will block for up to 15 s and then get a LockException which
-        // GraphQL surfaces as an error in the response body.
-        String graphQlMutation = """
-            {
-              "query": "mutation { stopPlace: mutateStopPlace(StopPlace: {id: \\"%s\\", name: {value: \\"GraphQL Updated Name\\"}}) { id name { value } } }"
+    private Thread holdLockInBackground(CountDownLatch lockAcquired, CountDownLatch releaseLock) {
+        Thread t = new Thread(() -> {
+            FencedLock lock = hazelcastInstance.getCPSubsystem().getLock(MutateLock.LOCK_NAME);
+            lock.lock();
+            try {
+                lockAcquired.countDown();
+                releaseLock.await(); // hold until the test signals release
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            } finally {
+                lock.unlock();
             }
-            """.formatted(netexId);
-
-        var graphQlResponse = given()
-            .port(port)
-            .contentType(ContentType.JSON)
-            .body(graphQlMutation)
-            .when()
-            .post("/services/stop_places/graphql/")
-            .then()
-            .statusCode(200) // GraphQL always returns HTTP 200; errors go in the body
-            .extract()
-            .response();
-
-        // The GraphQL response must contain an error because the lock timed out
-        assertThat(graphQlResponse.jsonPath().getList("errors").toString())
-            .as("GraphQL mutation should have failed due to lock contention")
-            .contains("Timed out waiting to aquire lock mutate-lock");
-
-        // --- cleanup: release the async worker and verify it succeeded --------------
-        asyncWorkerMayFinish.countDown();
-        asyncWriteThread.join(30_000);
-
-        ResponseEntity<StopPlaceJobDto> jobResponse = asyncResponse.get();
-        assertThat(jobResponse).isNotNull();
-        assertThat(jobResponse.getBody()).isNotNull();
-
-        // Poll until the async job reaches a terminal state
-        Long jobId = jobResponse.getBody().jobId();
-        StopPlaceJobDto finalJob = awaitJobCompletion(jobId);
-
-        assertThat(finalJob.status())
-            .as(
-                "The async write job should have succeeded once the lock was released"
-            )
-            .isEqualTo(AsyncStopPlaceJobStatus.FINISHED);
+        }, "mutate-lock-holder");
+        lockHolderThread = t;
+        t.setDaemon(true);
+        t.start();
+        return t;
     }
 
     /**
-     * Scenario: the GraphQL API wins the lock first.
-     * <ol>
-     *   <li>A stop place is persisted to the database.</li>
-     *   <li>The GraphQL mutation is held inside the lock via a spy on
-     *       {@code StopPlaceVersionedSaverService} (not done here – instead we keep
-     *       the async-wins scenario above and provide the mirror test as a design note).</li>
-     * </ol>
-     *
-     * <p>Note: testing the GraphQL-wins scenario requires intercepting {@link
-     * org.rutebanken.tiamat.versioning.save.StopPlaceVersionedSaverService} inside the GraphQL
-     * execution path (which runs on the HTTP thread, not on a separate worker). Because the
-     * GraphQL request itself blocks the test thread, a separate {@code CompletableFuture} or
-     * {@code Thread} is needed to send the async write request while the GraphQL call is in
-     * flight. The assertion logic is symmetric: the async job must end in
-     * {@link AsyncStopPlaceJobStatus#FAILED} with a lock-timeout message.
+     * Scenario: the mutate-lock is held (simulating another write in progress).
+     * A GraphQL {@code mutateStopPlace} mutation must be rejected with a lock-timeout error.
+     * After the lock is released a PATCH via the async write API must succeed.
      */
     @Test
-    public void whenAsyncWriteApiRacesGraphQL_onlyOneSucceeds()
-        throws Exception {
-        // --- arrange ---------------------------------------------------------------
+    public void whenLockIsHeld_GraphQLMutationIsRejected() throws Exception {
+        // --- arrange -----------------------------------------------------------
         StopPlace stopPlace = new StopPlace(
-            new EmbeddableMultilingualString("Race Condition Stop")
+                new EmbeddableMultilingualString("Concurrent Test Stop")
         );
-        stopPlace.setStopPlaceType(StopTypeEnumeration.RAIL_STATION);
-        StopPlace saved = stopPlaceVersionedSaverService.saveNewVersion(
-            stopPlace
-        );
+        stopPlace.setStopPlaceType(StopTypeEnumeration.BUS_STATION);
+        StopPlace saved = stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
         String netexId = saved.getNetexId();
 
-        CountDownLatch asyncWorkerStarted = new CountDownLatch(1);
-        CountDownLatch asyncWorkerMayFinish = new CountDownLatch(1);
+        CountDownLatch lockAcquired = new CountDownLatch(1);
+        CountDownLatch releaseLock  = new CountDownLatch(1);
 
-        // Slow down the async worker so it holds the lock long enough for the GraphQL
-        doAnswer(invocation -> {
-            asyncWorkerStarted.countDown();
-            boolean released = asyncWorkerMayFinish.await(30, TimeUnit.SECONDS);
-            if (!released) throw new RuntimeException("Latch timed out");
-            return invocation.callRealMethod();
-        })
-            .when(stopPlaceVersionedSaverServiceSpy)
-            .saveNewVersion(any(StopPlace.class), any(StopPlace.class));
+        Thread lockHolder = holdLockInBackground(lockAcquired, releaseLock);
 
-        // Fire async write (will hold the lock)
+        assertThat(lockAcquired.await(10, TimeUnit.SECONDS))
+                .as("Background thread did not acquire the lock in time")
+                .isTrue();
+
+        // --- act: send GraphQL mutation while the lock is held -----------------
+        String graphQlMutation = """
+                {
+                  "query": "mutation { stopPlace: mutateStopPlace(StopPlace: {id: \\"%s\\", name: {value: \\"GraphQL Updated Name\\"}}) { id name { value } } }"
+                }
+                """.formatted(netexId);
+
+        var graphQlResponse = given()
+                .port(port)
+                .contentType(ContentType.JSON)
+                .body(graphQlMutation)
+                .when()
+                .post("/services/stop_places/graphql/")
+                .then()
+                .statusCode(200) // GraphQL always returns HTTP 200; errors go in the body
+                .extract()
+                .response();
+
+        // The GraphQL response must contain an error because the lock timed out
+        assertThat(graphQlResponse.jsonPath().getList("errors").toString())
+                .as("GraphQL mutation should have failed due to lock contention")
+                .contains("Timed out waiting to aquire lock mutate-lock");
+
+        // --- cleanup: release the lock and run an async PATCH that should succeed
+        releaseLock.countDown();
+        lockHolder.join(10_000);
+
         String patchXml = """
-            <stopPlaces xmlns="http://www.netex.org.uk/netex">
-                <StopPlace id="%s" version="%d">
-                    <Name>Async Race Update</Name>
-                    <StopPlaceType>railStation</StopPlaceType>
-                </StopPlace>
-            </stopPlaces>
-            """.formatted(netexId, saved.getVersion());
+                <stopPlaces xmlns="http://www.netex.org.uk/netex">
+                    <StopPlace id="%s" version="%d">
+                        <Name>Async Updated Name</Name>
+                        <StopPlaceType>busStation</StopPlaceType>
+                    </StopPlace>
+                </stopPlaces>
+                """.formatted(netexId, saved.getVersion());
 
-        AtomicReference<ResponseEntity<StopPlaceJobDto>> asyncJobRef =
-            new AtomicReference<>();
-        Thread asyncThread = new Thread(() ->
-            asyncJobRef.set(patchStopPlace(patchXml))
+        ResponseEntity<StopPlaceJobDto> jobResponse = patchStopPlace(patchXml);
+        assertThat(jobResponse.getBody()).isNotNull();
+        StopPlaceJobDto finalJob = awaitJobCompletion(jobResponse.getBody().jobId());
+
+        assertThat(finalJob.status())
+                .as("Async write job should succeed once the lock is released")
+                .isEqualTo(AsyncStopPlaceJobStatus.FINISHED);
+    }
+
+    /**
+     * Symmetric scenario: the async write API job must fail when it cannot acquire the lock.
+     */
+    @Test
+    public void whenLockIsHeld_AsyncWriteJobFails() throws Exception {
+        // --- arrange -----------------------------------------------------------
+        StopPlace stopPlace = new StopPlace(
+                new EmbeddableMultilingualString("Race Condition Stop")
         );
-        asyncThread.start();
+        stopPlace.setStopPlaceType(StopTypeEnumeration.RAIL_STATION);
+        StopPlace saved = stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+        String netexId = saved.getNetexId();
 
-        assertThat(asyncWorkerStarted.await(10, TimeUnit.SECONDS))
-            .as("Async worker did not acquire the lock in time")
-            .isTrue();
+        CountDownLatch lockAcquired = new CountDownLatch(1);
+        CountDownLatch releaseLock  = new CountDownLatch(1);
 
-        // Send GraphQL mutation – must be rejected because async already holds the lock
-        String gql = """
-            {
-              "query": "mutation { stopPlace: mutateStopPlace(StopPlace: {id: \\"%s\\", name: {value: \\"GraphQL Race Update\\"}}) { id } }"
-            }
-            """.formatted(netexId);
+        Thread lockHolder = holdLockInBackground(lockAcquired, releaseLock);
 
-        var gqlErrors = given()
-            .port(port)
-            .contentType(ContentType.JSON)
-            .body(gql)
-            .when()
-            .post("/services/stop_places/graphql/")
-            .then()
-            .statusCode(200)
-            .extract()
-            .jsonPath()
-            .getList("errors");
+        assertThat(lockAcquired.await(10, TimeUnit.SECONDS))
+                .as("Background thread did not acquire the lock in time")
+                .isTrue();
 
-        assertThat(gqlErrors)
-            .as(
-                "GraphQL must report an error when it cannot acquire the mutate-lock"
-            )
-            .isNotEmpty();
+        // --- act: send async PATCH while the lock is held ----------------------
+        String patchXml = """
+                <stopPlaces xmlns="http://www.netex.org.uk/netex">
+                    <StopPlace id="%s" version="%d">
+                        <Name>Async Race Update</Name>
+                        <StopPlaceType>railStation</StopPlaceType>
+                    </StopPlace>
+                </stopPlaces>
+                """.formatted(netexId, saved.getVersion());
 
-        // Release the async worker
-        asyncWorkerMayFinish.countDown();
-        asyncThread.join(30_000);
+        // Submit the job — returns immediately with a job ID; actual processing happens
+        // asynchronously on the server and will block trying to acquire the lock.
+        ResponseEntity<StopPlaceJobDto> jobResponse = patchStopPlace(patchXml);
+        assertThat(jobResponse.getBody()).isNotNull();
+        Long jobId = jobResponse.getBody().jobId();
 
-        ResponseEntity<StopPlaceJobDto> asyncJobResponse = asyncJobRef.get();
-        assertThat(asyncJobResponse).isNotNull();
-        assertThat(asyncJobResponse.getBody()).isNotNull();
-        Long jobId = asyncJobResponse.getBody().jobId();
+        // Hold the lock for longer than WAIT_FOR_LOCK_SECONDS (15 s) so the server-side
+        // async worker times out waiting for the lock, then release.
+        Thread.sleep((MutateLock.WAIT_FOR_LOCK_SECONDS + 5) * 1_000L);
+        releaseLock.countDown();
+        lockHolder.join(10_000);
+
         StopPlaceJobDto finalJob = awaitJobCompletion(jobId);
 
         assertThat(finalJob.status())
-            .as("Async job should succeed after the lock is released")
-            .isEqualTo(AsyncStopPlaceJobStatus.FINISHED);
+                .as("Async write job should fail when it cannot acquire the mutate-lock")
+                .isEqualTo(AsyncStopPlaceJobStatus.FAILED);
     }
 
     @Test
@@ -279,17 +217,15 @@ public class ConcurrentStopPlaceUpdateIntegrationTest extends TiamatIntegrationT
                 new EmbeddableMultilingualString("Stockholm Central")
         );
         stopPlace.setStopPlaceType(StopTypeEnumeration.RAIL_STATION);
-        StopPlace stopPlaceVersion1 = stopPlaceVersionedSaverService.saveNewVersion(
-                stopPlace
-        );
+        StopPlace stopPlaceVersion1 = stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
         String netexId = stopPlaceVersion1.getNetexId();
 
         // GraphQL updates first, bumping the DB version from 1 to 2
         String gql = """
-            {
-              "query": "mutation { stopPlace: mutateStopPlace(StopPlace: {id: \\"%s\\", name: {value: \\"GraphQL Race Update\\"}}) { id } }"
-            }
-            """.formatted(netexId);
+                {
+                  "query": "mutation { stopPlace: mutateStopPlace(StopPlace: {id: \\"%s\\", name: {value: \\"GraphQL Race Update\\"}}) { id } }"
+                }
+                """.formatted(netexId);
 
         given()
                 .port(port)
@@ -300,16 +236,15 @@ public class ConcurrentStopPlaceUpdateIntegrationTest extends TiamatIntegrationT
                 .then()
                 .statusCode(200);
 
-        // Async PATCH sends the original version (1), which is now stale — must hit a DB constraint
+        // Async PATCH sends the original version (1), which is now stale — must hit a version check
         String patchXml = """
-            <stopPlaces xmlns="http://www.netex.org.uk/netex">
-                <StopPlace id="%s" version="%d">
-                    <Name>Async Race Update</Name>
-                    <StopPlaceType>railStation</StopPlaceType>
-                </StopPlace>
-            </stopPlaces>
-            """.formatted(netexId, stopPlaceVersion1.getVersion());
-
+                <stopPlaces xmlns="http://www.netex.org.uk/netex">
+                    <StopPlace id="%s" version="%d">
+                        <Name>Async Race Update</Name>
+                        <StopPlaceType>railStation</StopPlaceType>
+                    </StopPlace>
+                </stopPlaces>
+                """.formatted(netexId, stopPlaceVersion1.getVersion());
 
         var asyncJobResponse = patchStopPlace(patchXml);
 
@@ -327,30 +262,24 @@ public class ConcurrentStopPlaceUpdateIntegrationTest extends TiamatIntegrationT
         headers.setContentType(MediaType.APPLICATION_XML);
         HttpEntity<String> request = new HttpEntity<>(xml, headers);
         return restTemplate.exchange(
-            WRITE_ENDPOINT,
-            HttpMethod.PATCH,
-            request,
-            StopPlaceJobDto.class
+                WRITE_ENDPOINT,
+                HttpMethod.PATCH,
+                request,
+                StopPlaceJobDto.class
         );
     }
 
-    private StopPlaceJobDto awaitJobCompletion(Long jobId)
-        throws InterruptedException {
+    private StopPlaceJobDto awaitJobCompletion(Long jobId) throws InterruptedException {
         String jobUrl = WRITE_ENDPOINT + "/jobs/" + jobId;
         for (int i = 0; i < 60; i++) {
             ResponseEntity<StopPlaceJobDto> jobResponse =
-                restTemplate.getForEntity(jobUrl, StopPlaceJobDto.class);
+                    restTemplate.getForEntity(jobUrl, StopPlaceJobDto.class);
             StopPlaceJobDto job = jobResponse.getBody();
-            if (
-                job != null &&
-                job.status() != AsyncStopPlaceJobStatus.PROCESSING
-            ) {
+            if (job != null && job.status() != AsyncStopPlaceJobStatus.PROCESSING) {
                 return job;
             }
             Thread.sleep(500);
         }
-        throw new AssertionError(
-            "Async job did not reach a terminal state within 30 s"
-        );
+        throw new AssertionError("Async job did not reach a terminal state within 30 s");
     }
 }

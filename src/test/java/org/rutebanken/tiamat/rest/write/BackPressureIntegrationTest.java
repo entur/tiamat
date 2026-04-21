@@ -2,29 +2,21 @@ package org.rutebanken.tiamat.rest.write;
 
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
-import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.rest.write.dto.StopPlaceJobDto;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
 
-@TestPropertySource(properties = {
-    "tiamat.write-api.queue-capacity=0",
-    "tiamat.hazelcast.port-auto-increment=true"
-})
 public class BackPressureIntegrationTest extends TiamatIntegrationTest {
 
     private static final String WRITE_ENDPOINT = "/services/stop_places/write";
@@ -32,27 +24,33 @@ public class BackPressureIntegrationTest extends TiamatIntegrationTest {
     @Autowired
     private TestRestTemplate restTemplate;
 
-    @MockitoSpyBean
-    private StopPlaceWriteDomainService stopPlaceWriteDomainService;
+    @Autowired
+    @Qualifier("stopPlaceWriteExecutor")
+    private Executor stopPlaceWriteExecutor;
 
     @Test
     public void whenQueueIsFullSubsequentRequestsReturn503() throws Exception {
         setUpSecurityContext();
 
-        // This latch blocks the worker thread inside createStopPlace so it stays busy.
+        // Latch to keep the worker thread occupied.
         CountDownLatch workerBlocked = new CountDownLatch(1);
-        // This latch lets us know the worker has actually started (thread is occupied).
+        // Latch to confirm the worker thread has started.
         CountDownLatch workerStarted = new CountDownLatch(1);
 
-        doAnswer(invocation -> {
-            workerStarted.countDown(); // signal: worker thread is now occupied
-            workerBlocked.await(10, TimeUnit.SECONDS); // hold the thread until released
-            var stopPlace = new StopPlace();
-            stopPlace.setNetexId("SAM:StopPlace:1");
-            return stopPlace;
-        })
-            .when(stopPlaceWriteDomainService)
-            .createStopPlace(any());
+        // Submit a blocking task directly to the executor to occupy the single worker thread.
+        // This avoids mocking the domain service and keeps the application context shared.
+        stopPlaceWriteExecutor.execute(() -> {
+            workerStarted.countDown();
+            try {
+                workerBlocked.await(10, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        });
+
+        // Wait until the worker thread is actually blocked.
+        boolean started = workerStarted.await(5, TimeUnit.SECONDS);
+        assertThat(started).as("Worker thread did not start in time").isTrue();
 
         String xml = """
             <stopPlaces xmlns="http://www.netex.org.uk/netex">
@@ -63,26 +61,15 @@ public class BackPressureIntegrationTest extends TiamatIntegrationTest {
             </stopPlaces>
             """;
 
-        // First request: occupies the single worker thread (async, so returns immediately).
-        Thread firstRequest = new Thread(() ->
-            postXml(xml, StopPlaceJobDto.class)
-        );
-        firstRequest.start();
-
-        // Wait until the worker thread is actually blocked before sending the next request.
-        boolean started = workerStarted.await(5, TimeUnit.SECONDS);
-        assertThat(started).as("Worker thread did not start in time").isTrue();
-
-        // Second request: queue is full (capacity=0) and the worker is busy → should get 503.
+        // The worker is busy and the queue capacity is 0, so this request should get 503.
         ResponseEntity<String> response = postXml(xml, String.class);
 
         assertThat(response.getStatusCode())
             .as("Expected 503 Service Unavailable when the write queue is full")
             .isEqualTo(HttpStatus.SERVICE_UNAVAILABLE);
 
-        // Release the blocked worker so the test can finish cleanly.
+        // Release the blocked worker so the thread pool recovers cleanly.
         workerBlocked.countDown();
-        firstRequest.join(5_000);
     }
 
     private <T> ResponseEntity<T> postXml(String xml, Class<T> responseType) {
