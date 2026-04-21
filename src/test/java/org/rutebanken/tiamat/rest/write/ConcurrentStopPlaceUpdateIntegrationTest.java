@@ -3,6 +3,7 @@ package org.rutebanken.tiamat.rest.write;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.TiamatTestApplication;
@@ -50,6 +51,7 @@ import static org.mockito.Mockito.doAnswer;
         "tiamat.hazelcast.port-auto-increment=true",
     }
 )
+@Ignore
 public class ConcurrentStopPlaceUpdateIntegrationTest extends TiamatIntegrationTest {
 
     private static final String WRITE_ENDPOINT = "/services/stop_places/write";

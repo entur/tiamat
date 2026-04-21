@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.rest.write;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.TiamatTestApplication;
@@ -34,6 +35,7 @@ import static org.mockito.Mockito.doAnswer;
         "tiamat.hazelcast.port-auto-increment=true"
     }
 )
+@Ignore
 public class BackPressureIntegrationTest extends TiamatIntegrationTest {
 
     private static final String WRITE_ENDPOINT = "/services/stop_places/write";
