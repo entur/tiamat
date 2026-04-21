@@ -52,21 +52,21 @@ jobs:
               -Dsonar.login=${SONAR_TOKEN}
   docker-lint:
     needs: [maven-verify]
-    uses: entur/gha-docker/.github/workflows/lint.yml@v1
+    uses: entur/gha-docker/.github/workflows/lint.yml@123-build-args.20240906-SHA3e0016a
     with:
       ignore: "DL3018"
 
   docker-build:
     if: github.repository_owner == 'entur' && github.event_name == 'push'
     needs: [maven-verify]
-    uses: entur/gha-docker/.github/workflows/build.yml@v1
+    uses: entur/gha-docker/.github/workflows/build.yml@123-build-args.20240906-SHA3e0016a
     with:
       build_artifact_name: artifact
       build_artifact_path: target
   docker-push:
     if: github.repository_owner == 'entur' && github.event_name == 'push'
     needs: [docker-build]
-    uses: entur/gha-docker/.github/workflows/push.yml@v1
+    uses: entur/gha-docker/.github/workflows/push.yml@123-build-args.20240906-SHA3e0016a
 
   docker-scan:
     needs: [ docker-build ]
