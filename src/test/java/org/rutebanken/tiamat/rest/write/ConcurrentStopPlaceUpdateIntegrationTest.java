@@ -3,10 +3,8 @@ package org.rutebanken.tiamat.rest.write;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
-import org.rutebanken.tiamat.TiamatTestApplication;
 import org.rutebanken.tiamat.lock.MutateLock;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -15,13 +13,14 @@ import org.rutebanken.tiamat.model.job.AsyncStopPlaceJobStatus;
 import org.rutebanken.tiamat.rest.write.dto.StopPlaceJobDto;
 import org.rutebanken.tiamat.versioning.save.StopPlaceVersionedSaverService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 import java.util.concurrent.CountDownLatch;
@@ -42,16 +41,14 @@ import static org.mockito.Mockito.doAnswer;
  * request reaches the lock first will hold it, and the second request will fail after the
  * configured wait-timeout ({@link MutateLock#WAIT_FOR_LOCK_SECONDS} s).
  */
-@SpringBootTest(
-    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-    classes = TiamatTestApplication.class,
+@TestPropertySource(
     properties = {
         "authorization.enabled=false",
         // the shared test context already bound Hazelcast to port 5701
         "tiamat.hazelcast.port-auto-increment=true",
     }
 )
-@Ignore
+@DirtiesContext
 public class ConcurrentStopPlaceUpdateIntegrationTest extends TiamatIntegrationTest {
 
     private static final String WRITE_ENDPOINT = "/services/stop_places/write";

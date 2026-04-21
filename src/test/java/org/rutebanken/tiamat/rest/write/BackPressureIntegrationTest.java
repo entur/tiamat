@@ -1,19 +1,18 @@
 package org.rutebanken.tiamat.rest.write;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
-import org.rutebanken.tiamat.TiamatTestApplication;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.rest.write.dto.StopPlaceJobDto;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 import java.util.concurrent.CountDownLatch;
@@ -23,19 +22,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 
-@SpringBootTest(
-    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-    classes = TiamatTestApplication.class,
-    properties = {
-        // setting this to zero means no requests will be queued when the single worker thread is busy,
-        // so that we can test backpressure behavior.
-        "tiamat.write-api.queue-capacity=0",
-        "authorization.enabled=false",
-        // the shared test context already bound Hazelcast to port 5701
-        "tiamat.hazelcast.port-auto-increment=true"
-    }
-)
-@Ignore
+@TestPropertySource(properties = {
+    "tiamat.write-api.queue-capacity=0",
+    "authorization.enabled=false",
+    "tiamat.hazelcast.port-auto-increment=true"
+})
+@DirtiesContext
 public class BackPressureIntegrationTest extends TiamatIntegrationTest {
 
     private static final String WRITE_ENDPOINT = "/services/stop_places/write";
