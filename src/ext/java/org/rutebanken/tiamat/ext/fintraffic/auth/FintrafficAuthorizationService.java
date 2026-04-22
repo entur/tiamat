@@ -47,6 +47,8 @@ public class FintrafficAuthorizationService implements AuthorizationService {
 
     private final boolean municipalityAuthorizationEnabled;
 
+    private final boolean multiModalStopPlaceSupportDisabled;
+
     private final LoadingCache<String, List<TopographicPlace>> fintrafficAdministrativeZoneCache;
 
     private final LoadingCache<String, Optional<TopographicPlace>> municipalityCache;
@@ -54,11 +56,13 @@ public class FintrafficAuthorizationService implements AuthorizationService {
     public FintrafficAuthorizationService(TrivoreAuthorizations trivoreAuthorizations,
                                           TopographicPlaceRepository topographicPlaceRepository,
                                           boolean codespaceAuthorizationEnabled,
-                                          boolean municipalityAuthorizationEnabled) {
+                                          boolean municipalityAuthorizationEnabled,
+                                          boolean multiModalStopPlaceSupportDisabled) {
         this.trivoreAuthorizations = trivoreAuthorizations;
         this.topographicPlaceRepository = topographicPlaceRepository;
         this.codespaceAuthorizationEnabled = codespaceAuthorizationEnabled;
         this.municipalityAuthorizationEnabled = municipalityAuthorizationEnabled;
+        this.multiModalStopPlaceSupportDisabled = multiModalStopPlaceSupportDisabled;
         logger.info("FintrafficAuthorizationService initialized: codespace authorization={}, municipality authorization={}",
                 codespaceAuthorizationEnabled, municipalityAuthorizationEnabled);
         this.fintrafficAdministrativeZoneCache = CacheBuilder.newBuilder()
@@ -122,10 +126,26 @@ public class FintrafficAuthorizationService implements AuthorizationService {
     }
 
     private boolean canEditEntity(EntityStructure entity, boolean logAuthorizationCheck) {
-        if (entity == null) {
-            return true;
+        switch (entity) {
+            case null -> {
+                return true;
+            }
+            case StopPlace stop when stop.isParentStopPlace() && multiModalStopPlaceSupportDisabled -> {
+                logger.warn("Access denied to entity {} because it is a parent StopPlace and multi-modal StopPlace support is disabled.", entity);
+                return false;
+            }
+            default -> {
+            }
         }
-        if (!trivoreAuthorizations.hasAccess(detectEntityType(entity), detectTransportMode(entity), MANAGE, logAuthorizationCheck)) {
+
+        boolean isParentStopPlaceWithChildStops = entity instanceof StopPlace stop && stop.isParentStopPlace() && stop.getChildren() != null && !stop.getChildren().isEmpty();
+
+        if (entity instanceof StopPlace stop && isParentStopPlaceWithChildStops) {
+            if (!canEditChildStops(stop, logAuthorizationCheck)) {
+                return false;
+            }
+        } else if (!trivoreAuthorizations.hasAccess(detectEntityType(entity), detectTransportMode(entity), MANAGE, logAuthorizationCheck)) {
+            // For other entities, check the transport mode and entity type directly
             return false;
         }
 
@@ -143,6 +163,19 @@ public class FintrafficAuthorizationService implements AuthorizationService {
             return canEditEntity(zone.getCentroid(), logAuthorizationCheck);
         }
         return true;
+    }
+
+    /**
+     * Check if the user has permission to edit the child stops of a parent stop place.
+     * This is used to determine if the user can edit a parent stop place when it contains child stops that the user does not have access to.
+     * @param stopPlace the parent stop place to check the child stops of
+     * @param logAuthorizationCheck
+     * @return true if the user has permission to edit all child stops, otherwise false
+     */
+    private boolean canEditChildStops(StopPlace stopPlace, boolean logAuthorizationCheck) {
+        // For parent stop places, require manage access to all transport modes and entity types of the children
+        // This is because parent stop places do not have transport modes set
+        return stopPlace.getChildren().stream().allMatch(e -> trivoreAuthorizations.hasAccess(detectEntityType(stopPlace), detectTransportMode(e), MANAGE, logAuthorizationCheck));
     }
 
     private static String detectEntityType(EntityStructure entity) {
