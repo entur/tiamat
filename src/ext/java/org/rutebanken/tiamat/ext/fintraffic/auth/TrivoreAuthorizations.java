@@ -117,7 +117,8 @@ public class TrivoreAuthorizations {
     private List<GroupMembership> loadUsersGroupMemberships(UserIdentifier userIdentifier) throws CacheLoadingException {
         Optional<List<GroupMembership>> groupMembership = executeRequest(
                 HttpMethod.GET,
-                oidcServerUri + "/api/rest/v1/user/" + userIdentifier.userId() + "/groupmembership",
+                oidcServerUri + "/api/rest/v1/user/{userId}/groupmembership",
+                new String[]{ userIdentifier.userId() },
                 Map.of("Authorization", "Basic " + basicAuthenticationHeaderValue(),
                         "Content-Type", "application/json"),
                 new ParameterizedTypeReference<>() {});
@@ -130,7 +131,8 @@ public class TrivoreAuthorizations {
     private ExternalPermission loadExternalPermission(PermissionIdentifiers permissionIdentifiers) throws CacheLoadingException {
         Optional<ExternalPermission> externalPermission = executeRequest(
                 HttpMethod.GET,
-                oidcServerUri + "/api/rest/v1/externalpermission/group/" + permissionIdentifiers.permissionGroupId() + "/permission/" + permissionIdentifiers.permissionId(),
+                oidcServerUri + "/api/rest/v1/externalpermission/group/{permissionGroupId}/permission/{permissionId}",
+                new String[]{ permissionIdentifiers.permissionGroupId(), permissionIdentifiers.permissionId() },
                 Map.of("Authorization", "Basic " + basicAuthenticationHeaderValue(),
                         "Content-Type", "application/json"),
                 new ParameterizedTypeReference<>() {});
@@ -144,7 +146,8 @@ public class TrivoreAuthorizations {
     private List<ExternalPermissionGrant> loadUsersExternalPermissionGrants(UserIdentifier userIdentifier) throws CacheLoadingException {
         Optional<List<ExternalPermissionGrant>> userExternalPermissionGrants = executeRequest(
                 HttpMethod.GET,
-                oidcServerUri + "/api/rest/v1/user/" + userIdentifier.userId() + "/externalpermissions",
+                oidcServerUri + "/api/rest/v1/user/{userId}/externalpermissions",
+                new String[]{ userIdentifier.userId() },
                 Map.of("Authorization", "Basic " + basicAuthenticationHeaderValue(),
                         "Content-Type", "application/json"),
                 new ParameterizedTypeReference<>() {});
@@ -183,10 +186,10 @@ public class TrivoreAuthorizations {
         }
     }
 
-    private <T> Optional<T> executeRequest(HttpMethod method, String uri, Map<String, String> headers, ParameterizedTypeReference<T> type) {
+    private <T> Optional<T> executeRequest(HttpMethod method, String uri, Object[] uriVariables, Map<String, String> headers, ParameterizedTypeReference<T> type) {
         try {
             return httpClient.method(method)
-                    .uri(uri)
+                    .uri(uri, uriVariables)
                     .accept(org.springframework.http.MediaType.APPLICATION_JSON)
                     .headers(requestHeaders -> headers.forEach(requestHeaders::set))
                     .retrieve()
