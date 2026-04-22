@@ -54,7 +54,8 @@ public class TrivoreAuthorizations {
      * Poor man's infinite cache. This content needs to be loaded once and should never change.
      */
     private final LoadingCache<PermissionIdentifiers, ExternalPermission> externalPermissionCache;
-    private final LoadingCache<UserIdentifier, List<GroupMembership>> usersGroupMembershipCache;
+    private final LoadingCache<UserIdentifier, Set<String>> usersAccessibleCodespacesCache;
+    private final LoadingCache<UserIdentifier, Set<String>> usersAccessibleMunicipalityCodesCache;
     private final LoadingCache<UserIdentifier, List<ExternalPermissionGrant>> usersExternalPermissionsCache;
 
     public TrivoreAuthorizations(WebClient webClient,
@@ -72,11 +73,18 @@ public class TrivoreAuthorizations {
                 return loadExternalPermission(permissionIdentifiers);
             }
         });
-        this.usersGroupMembershipCache = createCache(1000, Duration.of(5, MINUTES), new CacheLoader<>() {
+        this.usersAccessibleCodespacesCache = createCache(1000, Duration.of(5, MINUTES), new CacheLoader<>() {
             @Override
             @Nonnull
-            public List<GroupMembership> load(@Nonnull UserIdentifier userIdentifier) throws Exception {
-                return loadUsersGroupMemberships(userIdentifier);
+            public Set<String> load(@Nonnull UserIdentifier userIdentifier) throws Exception {
+                return loadUsersAccessibleCodespaces(userIdentifier);
+            }
+        });
+        this.usersAccessibleMunicipalityCodesCache = createCache(1000, Duration.of(5, MINUTES), new CacheLoader<>() {
+            @Override
+            @Nonnull
+            public Set<String> load(@Nonnull UserIdentifier userIdentifier) throws Exception {
+                return loadUsersAccessibleMunicipalityCodes(userIdentifier);
             }
         });
         this.usersExternalPermissionsCache = createCache(50, Duration.of(5, MINUTES), new CacheLoader<>() {
@@ -127,6 +135,19 @@ public class TrivoreAuthorizations {
             throw new CacheLoadingException("Failed to load user's group membership data for user [" + userIdentifier + "]");
         }
     }
+
+    private Set<String> loadUsersAccessibleCodespaces(UserIdentifier userIdentifier) throws CacheLoadingException {
+        return loadUsersGroupMemberships(userIdentifier).stream()
+                .flatMap(groupMembership -> groupMembership.getCodespaces().stream())
+                .collect(Collectors.toSet());
+    }
+
+    private Set<String> loadUsersAccessibleMunicipalityCodes(UserIdentifier userIdentifier) throws CacheLoadingException {
+        return loadUsersGroupMemberships(userIdentifier).stream()
+                .flatMap(groupMembership -> groupMembership.getMunicipalityCodes().stream())
+                .collect(Collectors.toSet());
+    }
+
     private ExternalPermission loadExternalPermission(PermissionIdentifiers permissionIdentifiers) throws CacheLoadingException {
         Optional<ExternalPermission> externalPermission = executeRequest(
                 HttpMethod.GET,
@@ -173,12 +194,22 @@ public class TrivoreAuthorizations {
             return Optional.empty();
         }
     }
-    private Optional<List<GroupMembership>> fetchTrivoreUsersGroupMemberships(String userId) {
+    private Optional<Set<String>> fetchTrivoreUsersAccessibleCodespaces(String userId) {
         UserIdentifier identifier  = new UserIdentifier(userId);
         try {
-            return Optional.of(usersGroupMembershipCache.get(identifier));
+            return Optional.of(usersAccessibleCodespacesCache.get(identifier));
         } catch (ExecutionException e) {
-            logger.warn("Failed to fetch user's group memberships for identifier [{}]", identifier, e);
+            logger.warn("Failed to fetch user's accessible codespaces for identifier [{}]", identifier, e);
+            return Optional.empty();
+        }
+    }
+
+    private Optional<Set<String>> fetchTrivoreUsersAccessibleMunicipalityCodes(String userId) {
+        UserIdentifier identifier  = new UserIdentifier(userId);
+        try {
+            return Optional.of(usersAccessibleMunicipalityCodesCache.get(identifier));
+        } catch (ExecutionException e) {
+            logger.warn("Failed to fetch user's accessible municipality codes for identifier [{}]", identifier, e);
             return Optional.empty();
         }
     }
@@ -223,8 +254,7 @@ public class TrivoreAuthorizations {
 
     public Set<String> getAccessibleCodespaces() {
         return getToken()
-                .flatMap(jwt -> fetchTrivoreUsersGroupMemberships(jwt.getSubject()))
-                .map(TrivoreAuthorizations::collectAllCodespaces)
+                .flatMap(jwt -> fetchTrivoreUsersAccessibleCodespaces(jwt.getSubject()))
                 .orElseGet(() -> {
                     logger.trace("Could not resolve codespaces for user [{}]", getCurrentSubject());
                     return Set.of();
@@ -233,21 +263,13 @@ public class TrivoreAuthorizations {
 
     public Set<String> getAccessibleMunicipalityCodes() {
         return getToken()
-                .flatMap(jwt -> fetchTrivoreUsersGroupMemberships(jwt.getSubject()))
-                .map(TrivoreAuthorizations::collectAllMunicipalityCodes)
+                .flatMap(jwt -> fetchTrivoreUsersAccessibleMunicipalityCodes(jwt.getSubject()))
                 .orElseGet(() -> {
                     logger.trace("Could not resolve municipality codes for user [{}]", getCurrentSubject());
                     return Set.of();
                 });
     }
 
-    private static Set<String> collectAllCodespaces(List<GroupMembership> groupMemberships) {
-        return groupMemberships.stream().flatMap(groupMembership -> groupMembership.getCodespaces().stream()).collect(Collectors.toSet());
-    }
-
-    private static Set<String> collectAllMunicipalityCodes(List<GroupMembership> groupMemberships) {
-        return groupMemberships.stream().flatMap(groupMembership -> groupMembership.getMunicipalityCodes().stream()).collect(Collectors.toSet());
-    }
 
     private static final Map<String, List<String>> SUPERCEDING_PERMISSIONS = Map.of(
             "view", List.of("administer", "manage", "edit", "view"),
