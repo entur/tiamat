@@ -289,4 +289,9 @@ public class FintrafficAuthorizationService implements AuthorizationService {
     public boolean isGuest() {
         return !trivoreAuthorizations.isAuthenticated();
     }
+
+    @Override
+    public boolean canUseWriteApi() {
+        return false;
+    }
 }
