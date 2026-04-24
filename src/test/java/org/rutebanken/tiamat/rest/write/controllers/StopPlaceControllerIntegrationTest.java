@@ -29,11 +29,11 @@ public class StopPlaceControllerIntegrationTest extends TiamatIntegrationTest {
 
     @Before
     public void setUpPersistentRoleAssignment() {
-        RoleAssignment writeApiRole = RoleAssignment.builder()
+        RoleAssignment role = RoleAssignment.builder()
             .withRole("none")
             .withOrganisation("*")
             .build();
-        mockedRoleAssignmentExtractor.setNextReturnedRoleAssignment(writeApiRole);
+        mockedRoleAssignmentExtractor.setNextReturnedRoleAssignment(role);
         mockedRoleAssignmentExtractor.setPersistent(true);
     }
 

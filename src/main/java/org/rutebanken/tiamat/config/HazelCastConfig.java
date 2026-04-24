@@ -24,9 +24,6 @@ public class HazelCastConfig {
     @Value("${tiamat.hazelcast.cluster.name:tiamat}")
     private String hazelcastClusterName;
 
-    @Value("${tiamat.hazelcast.port-auto-increment:false}")
-    private boolean portAutoIncrement;
-
 
     @Bean
     public Config hazelcastConfig() {
@@ -36,7 +33,7 @@ public class HazelCastConfig {
         config.setClusterName(hazelcastClusterName);
 
         // Configure network settings
-        config.getNetworkConfig().setPortAutoIncrement(portAutoIncrement);
+        config.getNetworkConfig().setPortAutoIncrement(false);
 
         // Configure Kubernetes discovery
         JoinConfig joinConfig = config.getNetworkConfig().getJoin();
