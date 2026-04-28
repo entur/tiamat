@@ -20,6 +20,7 @@ import org.rutebanken.tiamat.model.SiteRefStructure;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.model.TopographicPlaceTypeEnumeration;
+import org.rutebanken.tiamat.model.VehicleModeEnumeration;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.slf4j.Logger;
@@ -152,6 +153,19 @@ public class FintrafficSearchKeyService implements SearchKeyService {
         String[] transportModes = stopPlace.getTransportMode() != null
                 ? new String[]{stopPlace.getTransportMode().value()}
                 : new String[]{};
+
+        // If StopPlace is parentStopPlace then get transportModes from child stopPlaces as well
+        if (stopPlace.isParentStopPlace() && stopPlace.getChildren() != null) {
+            String[] childTransportModes = stopPlace.getChildren().stream().map(org.rutebanken.tiamat.model.StopPlace::getTransportMode)
+                    .filter(Objects::nonNull)
+                    .map(VehicleModeEnumeration::value)
+                    .toArray(String[]::new);
+
+            transportModes = Stream.concat(Stream.of(transportModes), Stream.of(childTransportModes))
+                    .distinct()
+                    .toArray(String[]::new);
+        }
+
         Optional<Point> stopPlaceCentroid = Optional.ofNullable(stopPlace.getCentroid());
         Optional<String[]> areaCodes = stopPlaceCentroid.map(this::getAdministrativeZonesForPoint);
 
