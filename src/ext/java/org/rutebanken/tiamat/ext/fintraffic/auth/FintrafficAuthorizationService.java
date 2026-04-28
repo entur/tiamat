@@ -9,6 +9,7 @@ import org.rutebanken.tiamat.diff.generic.SubmodeEnumuration;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.exporter.params.TopographicPlaceSearch;
 import org.rutebanken.tiamat.model.EntityStructure;
+import org.rutebanken.tiamat.model.FareZone;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.rutebanken.tiamat.model.TopographicPlace;
@@ -129,6 +130,12 @@ public class FintrafficAuthorizationService implements AuthorizationService {
         switch (entity) {
             case null -> {
                 return true;
+            }
+            case TopographicPlace tp -> {
+                return trivoreAuthorizations.hasAccess(ENTITY_TYPE_ALL, TRANSPORT_MODE_ALL, ADMINISTER);
+            }
+            case FareZone fz -> {
+                return trivoreAuthorizations.hasAccess(ENTITY_TYPE_ALL, TRANSPORT_MODE_ALL, ADMINISTER);
             }
             case StopPlace stop when stop.isParentStopPlace() && multiModalStopPlaceSupportDisabled -> {
                 logger.warn("Access denied to entity {} because it is a parent StopPlace and multi-modal StopPlace support is disabled.", entity);
