@@ -335,13 +335,17 @@ public class FareZoneRepositoryImpl implements FareZoneRepositoryCustom {
                     "                                    ON SP.NETEX_ID = FZM.REF" +
                     "                                    AND FZ.SCOPING_METHOD='EXPLICIT_STOPS'";
         } else {
-            subQuery = "        JOIN" +
+            subQuery = "        LEFT JOIN" +
                     "                     PERSISTABLE_POLYGON PP " +
                     "                       ON PP.ID = FZ.POLYGON_ID " +
+                    "                        LEFT JOIN" +
+                    "                         PERSISTABLE_MULTI_POLYGON PMP " +
+                    "                           ON PMP.ID = FZ.MULTI_SURFACE_ID " +
                     "                        JOIN" +
                     "                         STOP_PLACE SP " +
-                    "                           ON ST_CONTAINS(PP.POLYGON,SP.CENTROID) " +
-                    "                           AND FZ.SCOPING_METHOD='IMPLICIT_SPATIAL_PROJECTION' ";
+                    "                           ON FZ.SCOPING_METHOD='IMPLICIT_SPATIAL_PROJECTION' " +
+                    "                           AND (FZ.POLYGON_ID IS NOT NULL OR FZ.MULTI_SURFACE_ID IS NOT NULL) " +
+                    "                           AND (ST_CONTAINS(PP.POLYGON,SP.CENTROID) OR ST_CONTAINS(PMP.MULTI_POLYGON,SP.CENTROID)) ";
         }
         return subQuery;
     }
