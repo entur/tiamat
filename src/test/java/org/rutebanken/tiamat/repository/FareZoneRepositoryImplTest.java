@@ -17,10 +17,16 @@ package org.rutebanken.tiamat.repository;
 
 import com.google.common.collect.Sets;
 import org.junit.Test;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.LinearRing;
+import org.locationtech.jts.geom.MultiPolygon;
+import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.geom.impl.CoordinateArraySequence;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.exporter.params.FareZoneSearch;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.FareZone;
+import org.rutebanken.tiamat.model.ScopingMethodEnumeration;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.TariffZoneRef;
 import org.rutebanken.tiamat.model.ValidBetween;
@@ -201,6 +207,82 @@ public class FareZoneRepositoryImplTest extends TiamatIntegrationTest {
 
         assertThat(fareZones).hasSize(1);
         assertThat(fareZones.getFirst().getVersion()).isEqualTo(v2.getVersion());
+    }
+
+    @Test
+    public void updateStopPlaceTariffZoneRef_stopPlaceInsideMultiSurface_shouldAssignFareZone() {
+        MultiPolygon multiPolygon = createTwoPolygonMultiSurface();
+
+        FareZone fareZone = new FareZone();
+        fareZone.setNetexId("TST:FareZone:MultiSurface2");
+        fareZone.setName(new EmbeddableMultilingualString("Implicit Spatial Zone"));
+        fareZone.setScopingMethod(ScopingMethodEnumeration.IMPLICIT_SPATIAL_PROJECTION);
+        fareZone.setMultiSurface(multiPolygon);
+        fareZone.setValidBetween(new ValidBetween(Instant.now().minusSeconds(3600), null));
+        fareZoneRepository.saveAndFlush(fareZone);
+
+        // Centroid at (0.5, 0.5) is inside Polygon 1: (0,0)-(0,1)-(1,1)-(1,0)-(0,0)
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setName(new EmbeddableMultilingualString("Stop Inside Zone"));
+        stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(0.5, 0.5)));
+        stopPlace.setValidBetween(new ValidBetween(Instant.now().minusSeconds(3600), null));
+        stopPlaceRepository.saveAndFlush(stopPlace);
+
+        fareZoneRepository.updateStopPlaceTariffZoneRef();
+
+        StopPlace updated = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId());
+        assertThat(updated.getTariffZones())
+                .extracting(TariffZoneRef::getRef)
+                .contains(fareZone.getNetexId());
+    }
+
+    @Test
+    public void updateStopPlaceTariffZoneRef_stopPlaceOutsideMultiSurface_shouldNotAssignFareZone() {
+        MultiPolygon multiPolygon = createTwoPolygonMultiSurface();
+
+        FareZone fareZone = new FareZone();
+        fareZone.setNetexId("TST:FareZone:MultiSurface3");
+        fareZone.setName(new EmbeddableMultilingualString("Implicit Spatial Zone Outside"));
+        fareZone.setScopingMethod(ScopingMethodEnumeration.IMPLICIT_SPATIAL_PROJECTION);
+        fareZone.setMultiSurface(multiPolygon);
+        fareZone.setValidBetween(new ValidBetween(Instant.now().minusSeconds(3600), null));
+        fareZoneRepository.saveAndFlush(fareZone);
+
+        // Centroid at (10.0, 10.0) is outside both polygons
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setName(new EmbeddableMultilingualString("Stop Outside Zone"));
+        stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(10.0, 10.0)));
+        stopPlace.setValidBetween(new ValidBetween(Instant.now().minusSeconds(3600), null));
+        stopPlaceRepository.saveAndFlush(stopPlace);
+
+        fareZoneRepository.updateStopPlaceTariffZoneRef();
+
+        StopPlace updated = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlace.getNetexId());
+        assertThat(updated.getTariffZones())
+                .extracting(TariffZoneRef::getRef)
+                .doesNotContain(fareZone.getNetexId());
+    }
+
+    /**
+     * Creates a MultiPolygon with two disconnected unit squares:
+     * - Polygon 1: (0,0), (0,1), (1,1), (1,0), (0,0)
+     * - Polygon 2: (3,0), (3,1), (4,1), (4,0), (3,0)
+     */
+    private MultiPolygon createTwoPolygonMultiSurface() {
+        Polygon polygon1 = createPolygon(
+                new Coordinate(0, 0), new Coordinate(0, 1),
+                new Coordinate(1, 1), new Coordinate(1, 0),
+                new Coordinate(0, 0));
+        Polygon polygon2 = createPolygon(
+                new Coordinate(3, 0), new Coordinate(3, 1),
+                new Coordinate(4, 1), new Coordinate(4, 0),
+                new Coordinate(3, 0));
+        return geometryFactory.createMultiPolygon(new Polygon[]{polygon1, polygon2});
+    }
+
+    private Polygon createPolygon(Coordinate... coordinates) {
+        LinearRing ring = new LinearRing(new CoordinateArraySequence(coordinates), geometryFactory);
+        return geometryFactory.createPolygon(ring, null);
     }
 
 }
