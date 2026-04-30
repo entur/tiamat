@@ -37,10 +37,17 @@ public class FintrafficSecurityConfig {
             @Value("${tiamat.ext.fintraffic.security.client-secret}") String clientSecret,
             @Value("${tiamat.ext.fintraffic.auth.codespace-authorization.enabled:true}") boolean codespaceAuthEnabled,
             @Value("${tiamat.ext.fintraffic.auth.municipality-authorization.enabled:false}") boolean municipalityAuthEnabled,
+            @Value("${tiamat.ext.fintraffic.auth.multiModal.disabled:false}") boolean multiModalStopPlaceSupportDisabled,
             TopographicPlaceRepository topographicPlaceRepository
     ) {
         TrivoreAuthorizations trivoreAuthorizations = new TrivoreAuthorizations(prepareWebClient(webClientBuilder), oidcServerUri, clientId, clientSecret);
-        return new FintrafficAuthorizationService(trivoreAuthorizations, topographicPlaceRepository, codespaceAuthEnabled, municipalityAuthEnabled);
+        return new FintrafficAuthorizationService(
+                trivoreAuthorizations,
+                topographicPlaceRepository,
+                codespaceAuthEnabled,
+                municipalityAuthEnabled,
+                multiModalStopPlaceSupportDisabled
+        );
     }
 
     private WebClient prepareWebClient(WebClient.Builder webClientBuilder) {

@@ -8,6 +8,7 @@ import org.locationtech.jts.geom.MultiPolygon;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
 import org.rutebanken.tiamat.exporter.params.TopographicPlaceSearch;
+import org.rutebanken.tiamat.model.GroupOfStopPlaces;
 import org.rutebanken.tiamat.model.Parking;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -24,10 +25,8 @@ import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.mockito.AdditionalMatchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.matches;
 import static org.mockito.Mockito.mock;
@@ -93,10 +92,14 @@ class FintrafficAuthorizationServiceTest {
     }
 
     private static FintrafficAuthorizationService getAuthorizationService() {
-        return getAuthorizationService(true, true);
+        return getAuthorizationService(true, true, false);
     }
 
-    private static FintrafficAuthorizationService getAuthorizationService(boolean codespaceEnabled, boolean municipalityEnabled) {
+    private static FintrafficAuthorizationService getAuthorizationService(
+            boolean codespaceEnabled,
+            boolean municipalityEnabled,
+            boolean multiModalStopPlaceSupportDisabled
+    ) {
         TopographicPlaceRepository topographicPlaceRepositoryMock = mock(TopographicPlaceRepository.class);
         TrivoreAuthorizations trivoreAuthorizationsMock = mock(TrivoreAuthorizations.class);
 
@@ -117,12 +120,14 @@ class FintrafficAuthorizationServiceTest {
         when(trivoreAuthorizationsMock.hasAccess(matches("Parking"), matches("\\{all\\}"), eq(TrivorePermission.MANAGE), anyBoolean())).thenReturn(true);
         when(trivoreAuthorizationsMock.hasAccess(matches("Quay"), matches("\\{all\\}"), eq(TrivorePermission.MANAGE), anyBoolean())).thenReturn(true);
         when(trivoreAuthorizationsMock.hasAccess(matches("StopPlace"), matches("RAIL"), eq(TrivorePermission.MANAGE), anyBoolean())).thenReturn(false);
+        when(trivoreAuthorizationsMock.hasAccess(matches("GroupOfStopPlaces"), matches("\\{all\\}"), eq(TrivorePermission.MANAGE), anyBoolean())).thenReturn(true);
 
         return new FintrafficAuthorizationService(
                 trivoreAuthorizationsMock,
                 topographicPlaceRepositoryMock,
                 codespaceEnabled,
-                municipalityEnabled
+                municipalityEnabled,
+                multiModalStopPlaceSupportDisabled
         );
     }
 
@@ -159,6 +164,69 @@ class FintrafficAuthorizationServiceTest {
         assertThat(authorizationService.canEditEntity(parkingOutOfBounds), equalTo(false));
     }
 
+
+    @Test
+    public void testCanEditParentStopPlaceAllChildTransportModesAllowed() {
+        // Parent stop place with children that all have allowed transport modes (BUS)
+        StopPlace parentStopPlace = getStopPlace("FSR:StopPlace:100", null, getPoint(new Coordinate(0.3, 0.3)));
+        parentStopPlace.setParentStopPlace(true);
+        StopPlace child1 = getStopPlace("FSR:StopPlace:101", VehicleModeEnumeration.BUS, getPoint(new Coordinate(0.3, 0.3)));
+        StopPlace child2 = getStopPlace("FSR:StopPlace:102", VehicleModeEnumeration.BUS, getPoint(new Coordinate(0.4, 0.4)));
+        parentStopPlace.setChildren(Set.of(child1, child2));
+
+        FintrafficAuthorizationService authorizationService = getAuthorizationService();
+        assertThat(authorizationService.canEditEntity(parentStopPlace), equalTo(true));
+    }
+
+    @Test
+    public void testCanEditParentStopPlaceChildTransportModeNotAllowed() {
+        // Parent stop place with a child that has a forbidden transport mode (RAIL)
+        StopPlace parentStopPlace = getStopPlace("FSR:StopPlace:200", null, getPoint(new Coordinate(0.3, 0.3)));
+        parentStopPlace.setParentStopPlace(true);
+        StopPlace child = getStopPlace("FSR:StopPlace:201", VehicleModeEnumeration.RAIL, getPoint(new Coordinate(0.3, 0.3)));
+        parentStopPlace.setChildren(Set.of(child));
+
+        FintrafficAuthorizationService authorizationService = getAuthorizationService();
+        assertThat(authorizationService.canEditEntity(parentStopPlace), equalTo(false));
+    }
+
+    @Test
+    public void testCanNotEditParentStopPlaceMultiModalSupportDisabled() {
+        // Parent stop place with children that all have allowed transport modes (BUS)
+        // Multi-modal stop place support is disabled, so parent stop place should not be editable even if child transport mode is allowed
+        StopPlace parentStopPlace = getStopPlace("FSR:StopPlace:100", null, getPoint(new Coordinate(0.3, 0.3)));
+        parentStopPlace.setParentStopPlace(true);
+        StopPlace child1 = getStopPlace("FSR:StopPlace:101", VehicleModeEnumeration.BUS, getPoint(new Coordinate(0.3, 0.3)));
+        StopPlace child2 = getStopPlace("FSR:StopPlace:102", VehicleModeEnumeration.BUS, getPoint(new Coordinate(0.4, 0.4)));
+        parentStopPlace.setChildren(Set.of(child1, child2));
+
+        FintrafficAuthorizationService authorizationService = getAuthorizationService(true, true, true);
+        assertThat(authorizationService.canEditEntity(parentStopPlace), equalTo(false));
+    }
+
+    @Test
+    public void testCanEditParentStopPlaceWithMixedChildTransportModes() {
+        // Parent stop place with children of mixed transport modes: one allowed (BUS), one denied (RAIL)
+        StopPlace parentStopPlace = getStopPlace("FSR:StopPlace:300", null, getPoint(new Coordinate(0.3, 0.3)));
+        parentStopPlace.setParentStopPlace(true);
+        StopPlace childBus = getStopPlace("FSR:StopPlace:301", VehicleModeEnumeration.BUS, getPoint(new Coordinate(0.3, 0.3)));
+        StopPlace childRail = getStopPlace("FSR:StopPlace:302", VehicleModeEnumeration.RAIL, getPoint(new Coordinate(0.4, 0.4)));
+        parentStopPlace.setChildren(Set.of(childBus, childRail));
+
+        FintrafficAuthorizationService authorizationService = getAuthorizationService();
+        assertThat(authorizationService.canEditEntity(parentStopPlace), equalTo(false));
+    }
+
+    @Test
+    public void testCanEditParentStopPlaceWithNoChildren() {
+        // Parent stop place with no children
+        StopPlace parentStopPlace = getStopPlace("FSR:StopPlace:400", null, getPoint(new Coordinate(0.3, 0.3)));
+        parentStopPlace.setParentStopPlace(true);
+        parentStopPlace.setChildren(Set.of());
+
+        FintrafficAuthorizationService authorizationService = getAuthorizationService();
+        assertThat(authorizationService.canEditEntity(parentStopPlace), equalTo(false));
+    }
 
     @Test
     public void testCanEditStopPlaceWithNestedEntities() {
@@ -212,7 +280,7 @@ class FintrafficAuthorizationServiceTest {
 
     @Test
     public void testCodespaceOnlyMode() {
-        FintrafficAuthorizationService authorizationService = getAuthorizationService(true, false);
+        FintrafficAuthorizationService authorizationService = getAuthorizationService(true, false, false);
         // Point inside region (codespace) — allowed
         assertThat(authorizationService.canEditEntity(getPoint(new Coordinate(0.5, 0.5))), equalTo(true));
         // Point inside municipality area but municipality auth disabled — denied
@@ -221,7 +289,7 @@ class FintrafficAuthorizationServiceTest {
 
     @Test
     public void testMunicipalityOnlyMode() {
-        FintrafficAuthorizationService authorizationService = getAuthorizationService(false, true);
+        FintrafficAuthorizationService authorizationService = getAuthorizationService(false, true, false);
         // Point inside region but codespace auth disabled — denied
         assertThat(authorizationService.canEditEntity(getPoint(new Coordinate(0.5, 0.5))), equalTo(false));
         // Point inside municipality area — allowed
@@ -230,9 +298,18 @@ class FintrafficAuthorizationServiceTest {
 
     @Test
     public void testBothAuthorizationMethodsDisabled() {
-        FintrafficAuthorizationService authorizationService = getAuthorizationService(false, false);
+        FintrafficAuthorizationService authorizationService = getAuthorizationService(false, false, false);
         // Both disabled — all geographic edits denied
         assertThat(authorizationService.canEditEntity(getPoint(new Coordinate(0.5, 0.5))), equalTo(false));
         assertThat(authorizationService.canEditEntity(getPoint(new Coordinate(2.5, 2.5))), equalTo(false));
+    }
+
+    @Test
+    public void testGroupOfStopPlacesEditable() {
+        GroupOfStopPlaces groupOfStopPlaces = new GroupOfStopPlaces();
+        groupOfStopPlaces.setNetexId("FSR:GroupOfStopPlaces:1");
+
+        FintrafficAuthorizationService authorizationService = getAuthorizationService();
+        assertThat(authorizationService.canEditEntity(groupOfStopPlaces), equalTo(true));
     }
 }
