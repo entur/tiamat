@@ -15,10 +15,10 @@
 
 package org.rutebanken.tiamat.model;
 
-import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.Embeddable;
 
 
-@MappedSuperclass
+@Embeddable
 public class SiteElementRefStructure extends AddressablePlaceRefStructure {
 
     public SiteElementRefStructure() {
