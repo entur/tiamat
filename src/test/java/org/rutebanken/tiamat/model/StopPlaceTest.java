@@ -270,7 +270,7 @@ public class StopPlaceTest extends TiamatIntegrationTest {
     public void persistStopPlaceWithParentReference() {
         StopPlace stopPlace = new StopPlace();
 
-        StopPlaceReference stopPlaceReference = new StopPlaceReference();
+        SiteRefStructure stopPlaceReference = new SiteRefStructure();
         stopPlaceReference.setRef("id-to-another-stop-place");
         stopPlaceReference.setVersion("001");
 

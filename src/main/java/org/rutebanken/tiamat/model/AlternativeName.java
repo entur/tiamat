@@ -34,6 +34,7 @@ import java.math.BigInteger;
 public class AlternativeName
         extends VersionedChildStructure {
 
+    @Transient
     protected VersionOfObjectRefStructure namedObjectRef;
 
     protected String lang;

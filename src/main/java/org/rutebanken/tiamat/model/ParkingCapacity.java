@@ -18,6 +18,7 @@ package org.rutebanken.tiamat.model;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.Transient;
 
 import java.math.BigInteger;
 
@@ -25,6 +26,7 @@ import java.math.BigInteger;
 public class ParkingCapacity
         extends VersionedChildStructure {
 
+    @Transient
     protected SiteElementRefStructure parentRef;
     @Enumerated(EnumType.STRING)
     protected ParkingUserEnumeration parkingUserType;

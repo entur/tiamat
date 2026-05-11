@@ -16,8 +16,11 @@
 package org.rutebanken.tiamat.model;
 
 import com.google.common.base.MoreObjects;
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -40,6 +43,10 @@ public class GroupOfStopPlaces extends GroupOfEntities_VersionStructure {
     @CollectionTable(
             name = "group_of_stop_places_members"
     )
+    @AttributeOverrides({
+            @AttributeOverride(name = "ref", column = @Column(name = "ref")),
+            @AttributeOverride(name = "version", column = @Column(name = "version"))
+    })
     private Set<StopPlaceReference> members = new HashSet<>();
     private Point centroid;
 

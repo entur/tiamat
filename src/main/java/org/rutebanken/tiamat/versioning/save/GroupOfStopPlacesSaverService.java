@@ -140,7 +140,7 @@ public class GroupOfStopPlacesSaverService {
     /**
      * Validates that each member exists, is valid, and user has authorization to edit it.
      */
-    private void validateAndAuthorizeMembers(Collection<? extends org.rutebanken.tiamat.model.SiteRefStructure> members) {
+    private void validateAndAuthorizeMembers(Collection<? extends org.rutebanken.tiamat.model.PlaceRefStructure> members) {
         members.forEach(member -> {
             String memberRef = member.getRef();
             StopPlace resolvedMember = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(memberRef);

@@ -65,6 +65,10 @@ public abstract class Site_VersionStructure
     protected SiteRefStructure parentSiteRef;
 
     @ElementCollection(targetClass = SiteRefStructure.class, fetch = FetchType.EAGER)
+    @AttributeOverrides({
+            @AttributeOverride(name = "ref", column = @Column(name = "ref")),
+            @AttributeOverride(name = "version", column = @Column(name = "version"))
+    })
     protected Set<SiteRefStructure> adjacentSites = new HashSet<>();
 
     @Transient

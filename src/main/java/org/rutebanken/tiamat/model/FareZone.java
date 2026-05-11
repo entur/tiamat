@@ -15,7 +15,10 @@
 
 package org.rutebanken.tiamat.model;
 
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -45,6 +48,10 @@ public class FareZone extends Zone_VersionStructure {
     @CollectionTable(
             name = "fare_zone_members"
     )
+    @AttributeOverrides({
+            @AttributeOverride(name = "ref", column = @Column(name = "ref")),
+            @AttributeOverride(name = "version", column = @Column(name = "version"))
+    })
     private Set<StopPlaceReference> fareZoneMembers = new HashSet<>();
 
 
