@@ -146,7 +146,6 @@ class StopPlaceFetcher implements DataFetcher {
                     stopPlace = Arrays.asList(stopPlaceRepository.findFirstByNetexIdAndVersion(netexId, version));
                     stopPlacesPage = getStopPlaces(environment, stopPlace, 1L);
                 } else if (ExportParams.VersionValidity.MAX_VERSION.equals(versionValidity)) {
-                    // scan (167k rows × correlated subquery = ~1.8s for a single stop).
                     StopPlace sp = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(netexId);
                     if (sp != null && sp.isParentStopPlace()) {
                         // Parent stop: need children via the full query (OR p.netex_id filter)
