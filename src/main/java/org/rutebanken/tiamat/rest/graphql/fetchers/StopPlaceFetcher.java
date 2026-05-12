@@ -132,8 +132,9 @@ class StopPlaceFetcher implements DataFetcher {
             pointInTime = null;
         }
 
+        ExportParams.VersionValidity versionValidity = null;
         if(environment.getArgument(VERSION_VALIDITY_ARG) != null) {
-            ExportParams.VersionValidity versionValidity = ExportParams.VersionValidity.valueOf(ExportParams.VersionValidity.class, environment.getArgument(VERSION_VALIDITY_ARG));
+            versionValidity = ExportParams.VersionValidity.valueOf(ExportParams.VersionValidity.class, environment.getArgument(VERSION_VALIDITY_ARG));
             stopPlaceSearchBuilder.setVersionValidity(versionValidity);
         }
 
@@ -144,6 +145,18 @@ class StopPlaceFetcher implements DataFetcher {
                 if(version != null && version > 0) {
                     stopPlace = Arrays.asList(stopPlaceRepository.findFirstByNetexIdAndVersion(netexId, version));
                     stopPlacesPage = getStopPlaces(environment, stopPlace, 1L);
+                } else if (ExportParams.VersionValidity.MAX_VERSION.equals(versionValidity)) {
+                    // Direct index lookup: avoids the OR + correlated subquery that causes a full sequential
+                    // scan (167k rows × correlated subquery = ~1.8s for a single stop).
+                    StopPlace sp = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(netexId);
+                    if (sp != null && sp.isParentStopPlace()) {
+                        // Parent stop: need children via the full query (OR p.netex_id filter)
+                        stopPlaceSearchBuilder.setNetexIdList(Arrays.asList(netexId));
+                        stopPlacesPage = stopPlaceRepository.findStopPlace(exportParamsBuilder.setStopPlaceSearch(stopPlaceSearchBuilder.build()).build());
+                    } else {
+                        List<StopPlace> result = sp != null ? Arrays.asList(sp) : new ArrayList<>();
+                        stopPlacesPage = getStopPlaces(environment, result, result.size());
+                    }
                 } else {
                     stopPlaceSearchBuilder.setNetexIdList(Arrays.asList(netexId));
                     stopPlacesPage = stopPlaceRepository.findStopPlace(exportParamsBuilder.setStopPlaceSearch(stopPlaceSearchBuilder.build()).build());
