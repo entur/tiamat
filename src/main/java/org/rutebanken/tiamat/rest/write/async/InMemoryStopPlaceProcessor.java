@@ -1,6 +1,6 @@
 package org.rutebanken.tiamat.rest.write.async;
 
-import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.netex.model.StopPlace;
 import org.rutebanken.tiamat.model.job.StopPlaceIdMapping;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.rest.write.JobService;
@@ -12,6 +12,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -38,13 +39,14 @@ public class InMemoryStopPlaceProcessor implements StopPlaceAsyncProcessor {
     @Async("stopPlaceWriteExecutor")
     public void processCreateStopPlace(Long jobId, StopPlacesDto dto) {
         try {
+            // TODO: ignore id and version for all entities
             var validatedStopPlace = validateAndGetSingleStopPlace(dto);
-            var savedStopPlace = domainService.createStopPlace(validatedStopPlace.stopPlace);
+            var savedStopPlace = domainService.createStopPlace(validatedStopPlace);
             jobService.succeed(
                 jobId,
                 List.of(
                     new StopPlaceIdMapping(
-                        validatedStopPlace.originalId,
+                        validatedStopPlace.getId(),
                         savedStopPlace.getNetexId()
                     )
                 )
@@ -59,7 +61,7 @@ public class InMemoryStopPlaceProcessor implements StopPlaceAsyncProcessor {
     public void processUpdateStopPlace(Long jobId, StopPlacesDto dto) {
         try {
             var validatedStopPlace = validateAndGetSingleStopPlace(dto);
-            domainService.updateStopPlace(validatedStopPlace.stopPlace);
+            domainService.updateStopPlace(validatedStopPlace);
             jobService.succeed(jobId, null);
         } catch (Exception e) {
             logger.error("Error updating stop place", e);
@@ -78,7 +80,7 @@ public class InMemoryStopPlaceProcessor implements StopPlaceAsyncProcessor {
         }
     }
 
-    private ValidatedStopPlace validateAndGetSingleStopPlace(StopPlacesDto dto) {
+    private StopPlace validateAndGetSingleStopPlace(StopPlacesDto dto) {
         if (dto.getStopPlaces().size() != 1) {
             throw new IllegalArgumentException(
                 "Exactly one stop place must be provided"
@@ -86,18 +88,18 @@ public class InMemoryStopPlaceProcessor implements StopPlaceAsyncProcessor {
         }
 
         var dtoStopPlace = dto.getStopPlaces().getFirst();
-        var stopPlace = netexMapper.mapToTiamatModel(dtoStopPlace);
 
-        if (
-            stopPlace.isParentStopPlace() || !stopPlace.getChildren().isEmpty()
-        ) {
-            throw new IllegalArgumentException(
-                "Only mono-modal stop place allowed"
-            );
+        boolean isParentStopPlace = dtoStopPlace.getKeyList() != null &&
+                dtoStopPlace.getKeyList().getKeyValue().stream()
+                        .anyMatch(kv -> "IS_PARENT_STOP_PLACE".equals(kv.getKey()) &&
+                                "true".equalsIgnoreCase(kv.getValue()));
+
+        boolean isChildStopPlace = dtoStopPlace.getParentSiteRef() != null;
+
+        if (isParentStopPlace || isChildStopPlace) {
+            throw new IllegalArgumentException("Only mono-modal stop place allowed");
         }
 
-        return new ValidatedStopPlace(stopPlace, dtoStopPlace.getId());
+        return dtoStopPlace;
     }
-
-    private record ValidatedStopPlace(StopPlace stopPlace, String originalId) {}
 }

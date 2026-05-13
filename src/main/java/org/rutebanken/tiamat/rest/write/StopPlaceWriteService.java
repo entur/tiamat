@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import java.util.TimeZone;
 import java.util.concurrent.RejectedExecutionException;
 
 @Service
@@ -101,15 +102,11 @@ public class StopPlaceWriteService {
 
 
     private void updateMappingContext() {
-        // TODO: solve this in some other way
-        // perhaps just ignore validbetween in this api?
-        // or require timezone in the request?
-        // or require that validbetween does not exist in request?
         if (NetexMappingContextThreadLocal.get() == null) {
             NetexMappingContextThreadLocal.updateMappingContext(
                     new SiteFrame().withFrameDefaults(
                             new VersionFrameDefaultsStructure().withDefaultLocale(
-                                    new LocaleStructure().withTimeZone("UTC")
+                                    new LocaleStructure().withTimeZone(TimeZone.getDefault().getID())
                             )
                     )
             );

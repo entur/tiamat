@@ -16,7 +16,12 @@ import org.rutebanken.tiamat.rest.write.dto.StopPlacesDto;
 
 @Tag(
     name = "Stop Places write API",
-    description = "Write mono-modal StopPlace entities asynchronously."
+    description = """
+    Write mono-modal StopPlace entities asynchronously.
+    
+    Version and ValidBetween attributes in the submitted NeTEx XML are ignored, and will be managed by the system.
+    Timestamps in the returned NeTEx XML will always use the systems timezone, without any timezone information.
+    """
 )
 interface StopPlaceController {
     @Operation(

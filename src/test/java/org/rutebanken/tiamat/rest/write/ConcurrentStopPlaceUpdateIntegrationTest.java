@@ -151,7 +151,7 @@ public class ConcurrentStopPlaceUpdateIntegrationTest extends TiamatIntegrationT
                 </stopPlaces>
                 """.formatted(netexId, saved.getVersion());
 
-        ResponseEntity<StopPlaceJobDto> jobResponse = patchStopPlace(patchXml);
+        ResponseEntity<StopPlaceJobDto> jobResponse = putStopPlace(patchXml);
         assertThat(jobResponse.getBody()).isNotNull();
         StopPlaceJobDto finalJob = awaitJobCompletion(jobResponse.getBody().jobId());
 
@@ -194,7 +194,7 @@ public class ConcurrentStopPlaceUpdateIntegrationTest extends TiamatIntegrationT
 
         // Submit the job — returns immediately with a job ID; actual processing happens
         // asynchronously on the server and will block trying to acquire the lock.
-        ResponseEntity<StopPlaceJobDto> jobResponse = patchStopPlace(patchXml);
+        ResponseEntity<StopPlaceJobDto> jobResponse = putStopPlace(patchXml);
         assertThat(jobResponse.getBody()).isNotNull();
         Long jobId = jobResponse.getBody().jobId();
 
@@ -246,7 +246,7 @@ public class ConcurrentStopPlaceUpdateIntegrationTest extends TiamatIntegrationT
                 </stopPlaces>
                 """.formatted(netexId, stopPlaceVersion1.getVersion());
 
-        var asyncJobResponse = patchStopPlace(patchXml);
+        var asyncJobResponse = putStopPlace(patchXml);
 
         assertThat(asyncJobResponse).isNotNull();
         assertThat(asyncJobResponse.getBody()).isNotNull();
@@ -254,16 +254,16 @@ public class ConcurrentStopPlaceUpdateIntegrationTest extends TiamatIntegrationT
         StopPlaceJobDto job = awaitJobCompletion(jobId);
 
         assertThat(job.status()).isEqualTo(AsyncStopPlaceJobStatus.FAILED);
-        assertThat(job.errorMessage()).contains("Version mismatch");
+        assertThat(job.errorMessage()).contains("A database constraint was violated");
     }
 
-    private ResponseEntity<StopPlaceJobDto> patchStopPlace(String xml) {
+    private ResponseEntity<StopPlaceJobDto> putStopPlace(String xml) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_XML);
         HttpEntity<String> request = new HttpEntity<>(xml, headers);
         return restTemplate.exchange(
                 WRITE_ENDPOINT,
-                HttpMethod.PATCH,
+                HttpMethod.PUT,
                 request,
                 StopPlaceJobDto.class
         );

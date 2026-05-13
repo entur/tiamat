@@ -5,6 +5,7 @@ import org.rutebanken.tiamat.model.job.AsyncStopPlaceJobStatus;
 import org.rutebanken.tiamat.model.job.StopPlaceIdMapping;
 import org.rutebanken.tiamat.repository.AsyncStopPlaceJobRepository;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -49,6 +50,8 @@ public class JobService {
     private String formatException(Exception e) {
         if (e instanceof IllegalArgumentException) {
             return e.getMessage();
+        } else if (e instanceof AccessDeniedException) {
+            return "You do not have permission to perform this operation.";
         } else if (e instanceof RejectedExecutionException) {
             return "The job queue is full. Please try again later.";
         } else if (e instanceof DataIntegrityViolationException) {

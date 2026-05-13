@@ -152,7 +152,7 @@ class StopPlaceWriteServiceTest {
 
     @Test
     void updateStopPlace_Success() {
-        StopPlacesDto dto = createStopPlacesDto();
+        var dto = createStopPlacesDto();
         AsyncStopPlaceJob job = createJob(
             2L,
             AsyncStopPlaceJobStatus.PROCESSING
@@ -170,7 +170,7 @@ class StopPlaceWriteServiceTest {
 
     @Test
     void updateStopPlace_ProcessorThrowsException_ReturnsFailedJob() {
-        StopPlacesDto dto = createStopPlacesDto();
+        var dto = createStopPlacesDto();
         AsyncStopPlaceJob job = createJob(2L, AsyncStopPlaceJobStatus.FAILED);
 
         when(jobService.createJob()).thenReturn(job);
@@ -187,7 +187,7 @@ class StopPlaceWriteServiceTest {
 
     @Test
     void updateStopPlace_QueueFull_ThrowsServiceUnavailableException() {
-        StopPlacesDto dto = createStopPlacesDto();
+        var dto = createStopPlacesDto();
         AsyncStopPlaceJob job = createJob(2L, AsyncStopPlaceJobStatus.FAILED);
 
         when(jobService.createJob()).thenReturn(job);
