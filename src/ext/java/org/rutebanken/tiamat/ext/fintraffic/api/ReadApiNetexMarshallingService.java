@@ -217,6 +217,7 @@ public class ReadApiNetexMarshallingService {
             JAXBElement<?> jaxbElement = createJAXBElementForEntity(netexEntity);
             Marshaller marshaller = createMarshaller(netexEntity.getClass());
             marshaller.marshal(jaxbElement, xsw);
+            xsw.flush();
             return stringWriter.toString();
         } catch (JAXBException | XMLStreamException | IOException e) {
             logger.error(e.getMessage(), e);
