@@ -5,6 +5,7 @@ import org.rutebanken.tiamat.ext.fintraffic.FintrafficConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Profile;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -12,6 +13,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+@Profile("fintraffic-read-api")
 @ConfigurationProperties(prefix = "ext.fintraffic")
 public class AreaCodeMappingConfig {
 
