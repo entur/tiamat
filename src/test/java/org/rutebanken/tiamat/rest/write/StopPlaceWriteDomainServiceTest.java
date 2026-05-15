@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.rest.write;
 
+import ma.glasnost.orika.MapperFacade;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,7 +27,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -62,10 +65,14 @@ class StopPlaceWriteDomainServiceTest {
     private NetexMapper netexMapper;
 
     @Mock
+    private MapperFacade mapperFacade;
+
+    @Mock
     private NetexIdMapper netexIdMapper;
 
     @BeforeEach
     void setup() {
+        lenient().when(netexMapper.getFacade()).thenReturn(mapperFacade);
         TiamatObjectDiffer differ = new TiamatObjectDiffer(new GenericObjectDiffer());
         domainService = new StopPlaceWriteDomainService(
             validator,
@@ -83,12 +90,12 @@ class StopPlaceWriteDomainServiceTest {
     @Test
     void updateStopPlace_NoDifferencesDetected_ThrowsException() {
         String stopPlaceId = "NSR:StopPlace:100";
-        // Same version so version check passes
         StopPlace existingStopPlace = createTiamatStopPlace(stopPlaceId, "Test Stop", 1L);
         StopPlace updatedTiamatStopPlace = createTiamatStopPlace(stopPlaceId, "Test Stop", 1L);
         org.rutebanken.netex.model.StopPlace updatedNetexStopPlace = createNetexStopPlace(stopPlaceId, "Test Stop", 1L);
 
         when(validator.validateStopPlaceUpdate(stopPlaceId, false)).thenReturn(existingStopPlace);
+        when(versionCreator.createCopy(existingStopPlace, StopPlace.class)).thenReturn(updatedTiamatStopPlace);
 
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class,
@@ -108,14 +115,14 @@ class StopPlaceWriteDomainServiceTest {
     @Test
     void updateStopPlace_DifferencesDetected_UpdatesSuccessfully() throws Exception {
         String stopPlaceId = "NSR:StopPlace:100";
-        // Same version so version check passes
         StopPlace existingStopPlace = createTiamatStopPlace(stopPlaceId, "Old Name", 1L);
         StopPlace updatedTiamatStopPlace = createTiamatStopPlace(stopPlaceId, "New Name", 1L);
         org.rutebanken.netex.model.StopPlace updatedNetexStopPlace = createNetexStopPlace(stopPlaceId, "New Name", 1L);
         StopPlace savedStopPlace = createTiamatStopPlace(stopPlaceId, "New Name", 2L);
 
         when(validator.validateStopPlaceUpdate(stopPlaceId, false)).thenReturn(existingStopPlace);
-        when(stopPlaceVersionedSaverService.saveNewVersion(existingStopPlace, updatedTiamatStopPlace))
+        when(versionCreator.createCopy(existingStopPlace, StopPlace.class)).thenReturn(updatedTiamatStopPlace);
+        when(stopPlaceVersionedSaverService.saveNewVersion(eq(existingStopPlace), eq(updatedTiamatStopPlace), any(java.util.Set.class)))
             .thenReturn(savedStopPlace);
 
         StopPlace result = domainService.updateStopPlace(updatedNetexStopPlace);
@@ -124,30 +131,7 @@ class StopPlaceWriteDomainServiceTest {
         assertEquals("New Name", result.getName().getValue());
         verify(validator).validateStopPlaceUpdate(stopPlaceId, false);
         verify(validator).validateStopPlaceName(updatedTiamatStopPlace);
-        verify(stopPlaceVersionedSaverService).saveNewVersion(existingStopPlace, updatedTiamatStopPlace);
-    }
-
-    @Test
-    void updateStopPlace_VersionMismatch_ThrowsException() {
-        String stopPlaceId = "NSR:StopPlace:100";
-        StopPlace existingStopPlace = createTiamatStopPlace(stopPlaceId, "Test Stop", 1L);
-        org.rutebanken.netex.model.StopPlace updatedNetexStopPlace = createNetexStopPlace(stopPlaceId, "Test Stop", 2L);
-
-        when(validator.validateStopPlaceUpdate(stopPlaceId, false)).thenReturn(existingStopPlace);
-
-        IllegalArgumentException exception = assertThrows(
-            IllegalArgumentException.class,
-            () -> domainService.updateStopPlace(updatedNetexStopPlace)
-        );
-
-        assertEquals(
-            "Version mismatch for StopPlace with id NSR:StopPlace:100: expected version 1, but got 2",
-            exception.getMessage()
-        );
-
-        verify(validator).validateStopPlaceUpdate(stopPlaceId, false);
-        verify(validator, never()).validateStopPlaceName(any());
-        verify(stopPlaceVersionedSaverService, never()).saveNewVersion(any(), any());
+        verify(stopPlaceVersionedSaverService).saveNewVersion(eq(existingStopPlace), eq(updatedTiamatStopPlace), any(java.util.Set.class));
     }
 
     @Test
@@ -156,6 +140,7 @@ class StopPlaceWriteDomainServiceTest {
         org.rutebanken.netex.model.StopPlace newNetexStopPlace = createNetexStopPlace(null, "New Stop", 1L);
         StopPlace savedStopPlace = createTiamatStopPlace("NSR:StopPlace:200", "New Stop", 1L);
 
+        when(versionCreator.createCopy(any(StopPlace.class), eq(StopPlace.class))).thenReturn(newTiamatStopPlace);
         when(stopPlaceVersionedSaverService.saveNewVersion(newTiamatStopPlace)).thenReturn(savedStopPlace);
 
         StopPlace result = domainService.createStopPlace(newNetexStopPlace);
@@ -207,6 +192,7 @@ class StopPlaceWriteDomainServiceTest {
         org.rutebanken.netex.model.StopPlace updatedNetexStopPlace = createNetexStopPlace(stopPlaceId, "", 1L);
 
         when(validator.validateStopPlaceUpdate(stopPlaceId, false)).thenReturn(existingStopPlace);
+        when(versionCreator.createCopy(existingStopPlace, StopPlace.class)).thenReturn(updatedTiamatStopPlace);
         doThrow(new IllegalArgumentException("Stop place name is required"))
             .when(validator)
             .validateStopPlaceName(updatedTiamatStopPlace);

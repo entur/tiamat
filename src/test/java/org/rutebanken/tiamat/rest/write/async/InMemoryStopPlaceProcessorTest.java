@@ -34,16 +34,13 @@ class InMemoryStopPlaceProcessorTest {
     @Mock
     private StopPlaceWriteDomainService domainService;
 
-    @Mock
-    private NetexMapper netexMapper;
-
     private InMemoryStopPlaceProcessor processor;
 
     private static final Long JOB_ID = 42L;
 
     @BeforeEach
     void setup() {
-        processor = new InMemoryStopPlaceProcessor(jobService, domainService, netexMapper);
+        processor = new InMemoryStopPlaceProcessor(jobService, domainService);
     }
 
     @Test
