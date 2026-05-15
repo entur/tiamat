@@ -10,7 +10,6 @@ import org.rutebanken.netex.model.KeyValueStructure;
 import org.rutebanken.netex.model.SiteRefStructure;
 import org.rutebanken.netex.model.StopPlace;
 import org.rutebanken.tiamat.model.job.StopPlaceIdMapping;
-import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.rest.write.JobService;
 import org.rutebanken.tiamat.rest.write.StopPlaceWriteDomainService;
 import org.rutebanken.tiamat.rest.write.dto.StopPlacesDto;

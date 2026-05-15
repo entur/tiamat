@@ -2,7 +2,6 @@ package org.rutebanken.tiamat.rest.write.async;
 
 import org.rutebanken.netex.model.StopPlace;
 import org.rutebanken.tiamat.model.job.StopPlaceIdMapping;
-import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.rest.write.JobService;
 import org.rutebanken.tiamat.rest.write.StopPlaceWriteDomainService;
 import org.rutebanken.tiamat.rest.write.dto.StopPlacesDto;
@@ -12,7 +11,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -24,33 +22,40 @@ public class InMemoryStopPlaceProcessor implements StopPlaceAsyncProcessor {
     );
     private final JobService jobService;
     private final StopPlaceWriteDomainService domainService;
-    private final NetexMapper netexMapper;
 
     public InMemoryStopPlaceProcessor(
         JobService jobService,
-        StopPlaceWriteDomainService domainService,
-        NetexMapper netexMapper
+        StopPlaceWriteDomainService domainService
     ) {
         this.jobService = jobService;
         this.domainService = domainService;
-        this.netexMapper = netexMapper;
     }
 
     @Async("stopPlaceWriteExecutor")
     public void processCreateStopPlace(Long jobId, StopPlacesDto dto) {
         try {
-            // TODO: ignore id and version for all entities
-            var validatedStopPlace = validateAndGetSingleStopPlace(dto);
-            var savedStopPlace = domainService.createStopPlace(validatedStopPlace);
-            jobService.succeed(
-                jobId,
-                List.of(
-                    new StopPlaceIdMapping(
-                        validatedStopPlace.getId(),
-                        savedStopPlace.getNetexId()
-                    )
-                )
-            );
+            var structure = classify(dto.getStopPlaces());
+            if (structure == StopPlaceStructure.MONOMODAL) {
+                var newStopPlace = dto.getStopPlaces().getFirst();
+                var savedStopPlace = domainService.createStopPlace(newStopPlace);
+                jobService.succeed(
+                        jobId,
+                        List.of(
+                                new StopPlaceIdMapping(
+                                        newStopPlace.getId(),
+                                        savedStopPlace.getNetexId()
+                                )
+                        )
+                );
+            } else if (structure == StopPlaceStructure.MULTIMODAL) {
+                throw new IllegalArgumentException(
+                        "Multimodal stop place creation not currently supported in this endpoint."
+                );
+            } else if (structure == StopPlaceStructure.INVALID) {
+                throw new IllegalArgumentException(
+                        "Invalid stop place structure."
+                );
+            }
         } catch (Exception e) {
             logger.error("Error creating stop place", e);
             jobService.fail(jobId, e);
@@ -60,8 +65,18 @@ public class InMemoryStopPlaceProcessor implements StopPlaceAsyncProcessor {
     @Async("stopPlaceWriteExecutor")
     public void processUpdateStopPlace(Long jobId, StopPlacesDto dto) {
         try {
-            var validatedStopPlace = validateAndGetSingleStopPlace(dto);
-            domainService.updateStopPlace(validatedStopPlace);
+            var structure = classify(dto.getStopPlaces());
+            if (structure == StopPlaceStructure.MONOMODAL) {
+                domainService.updateStopPlace(dto.getStopPlaces().getFirst());
+            } else if (structure == StopPlaceStructure.MULTIMODAL) {
+                 throw new IllegalArgumentException(
+                    "Multimodal stop place updates not currently supported in this endpoint."
+                 );
+            } else if (structure == StopPlaceStructure.INVALID) {
+                throw new IllegalArgumentException(
+                    "Invalid stop place structure."
+                );
+            }
             jobService.succeed(jobId, null);
         } catch (Exception e) {
             logger.error("Error updating stop place", e);
@@ -80,26 +95,43 @@ public class InMemoryStopPlaceProcessor implements StopPlaceAsyncProcessor {
         }
     }
 
-    private StopPlace validateAndGetSingleStopPlace(StopPlacesDto dto) {
-        if (dto.getStopPlaces().size() != 1) {
-            throw new IllegalArgumentException(
-                "Exactly one stop place must be provided"
-            );
+    public enum StopPlaceStructure {
+        MULTIMODAL,
+        MONOMODAL,
+        INVALID
+    }
+
+    public StopPlaceStructure classify(List<StopPlace> stopPlaces) {
+        if (stopPlaces == null || stopPlaces.isEmpty()) {
+            return StopPlaceStructure.INVALID;
         }
 
-        var dtoStopPlace = dto.getStopPlaces().getFirst();
+        List<StopPlace> roots = stopPlaces.stream()
+                .filter(sp -> sp.getParentSiteRef() == null)
+                .toList();
 
-        boolean isParentStopPlace = dtoStopPlace.getKeyList() != null &&
-                dtoStopPlace.getKeyList().getKeyValue().stream()
-                        .anyMatch(kv -> "IS_PARENT_STOP_PLACE".equals(kv.getKey()) &&
-                                "true".equalsIgnoreCase(kv.getValue()));
-
-        boolean isChildStopPlace = dtoStopPlace.getParentSiteRef() != null;
-
-        if (isParentStopPlace || isChildStopPlace) {
-            throw new IllegalArgumentException("Only mono-modal stop place allowed");
+        if (stopPlaces.size() == 1 && roots.size() == 1) {
+            var monoModalStopPlace = stopPlaces.getFirst();
+            if (monoModalStopPlace.getKeyList() != null &&
+                    monoModalStopPlace.getKeyList().getKeyValue().stream()
+                            .anyMatch(kv -> "IS_PARENT_STOP_PLACE".equals(kv.getKey()) &&
+                                    "true".equalsIgnoreCase(kv.getValue()))) {
+                return StopPlaceStructure.INVALID;
+            }
+            return StopPlaceStructure.MONOMODAL;
         }
 
-        return dtoStopPlace;
+        if (roots.size() == 1) {
+            String parentId = roots.getFirst().getId();
+            boolean allChildrenReferenceParent = stopPlaces.stream()
+                    .filter(sp -> sp.getParentSiteRef() != null)
+                    .allMatch(sp -> parentId.equals(sp.getParentSiteRef().getRef()));
+
+            if (allChildrenReferenceParent) {
+                return StopPlaceStructure.MULTIMODAL;
+            }
+        }
+
+        return StopPlaceStructure.INVALID;
     }
 }
