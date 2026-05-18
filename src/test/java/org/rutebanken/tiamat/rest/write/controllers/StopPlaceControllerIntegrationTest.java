@@ -111,7 +111,7 @@ public class StopPlaceControllerIntegrationTest extends TiamatIntegrationTest {
 
         assertThat(finalJob.status()).isEqualTo(AsyncStopPlaceJobStatus.FAILED);
         assertThat(finalJob.errorMessage()).contains(
-            "Exactly one stop place must be provided"
+            "Invalid stop place structure."
         );
     }
 
