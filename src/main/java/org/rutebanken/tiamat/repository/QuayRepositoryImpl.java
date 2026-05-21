@@ -26,6 +26,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -126,10 +129,13 @@ public class QuayRepositoryImpl implements QuayRepositoryCustom {
     }
 
     private Instant parseInstant(Object timestampObject) {
-        if (timestampObject instanceof Timestamp) {
-            return ((Timestamp)timestampObject).toInstant();
-        }
-        return null;
+        return switch (timestampObject) {
+            case Instant instant -> instant;
+            case OffsetDateTime odt -> odt.toInstant();
+            case LocalDateTime ldt -> ldt.atZone(ZoneId.systemDefault()).toInstant();
+            case Timestamp ts -> ts.toInstant();
+            case null, default -> null;
+        };
     }
 
     @Override
