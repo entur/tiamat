@@ -182,7 +182,7 @@ public class StopPlaceRefUpdaterService {
                             session.evict(stopPlaceToSave);
                         }
 
-                        session.update(stopPlaceToSave);
+                        session.merge(stopPlaceToSave);
 
 
                         logger.trace("Saved stop {}", stopPlaceToSave);

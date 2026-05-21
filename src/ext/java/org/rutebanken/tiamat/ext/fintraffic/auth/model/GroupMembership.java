@@ -14,7 +14,7 @@ import java.util.stream.Stream;
 public record GroupMembership(String id,
                               String name,
                               String description,
-                              boolean member,
+                              Boolean member,
                               String eligibleFrom,
                               String eligibleUntil,
                               Map<String, Object> customFields) {
