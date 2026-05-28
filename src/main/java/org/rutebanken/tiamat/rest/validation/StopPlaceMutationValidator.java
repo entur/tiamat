@@ -91,7 +91,7 @@ public class StopPlaceMutationValidator {
         if (isParentMutation) {
             Preconditions.checkArgument(
                     stopPlace.isParentStopPlace(),
-                    "Stop place [id = %s] is not a parent", netexId
+                    "Cannot update Stop place [id = %s] as parent when it is not a parent", netexId
             );
         } else {
             Preconditions.checkArgument(
