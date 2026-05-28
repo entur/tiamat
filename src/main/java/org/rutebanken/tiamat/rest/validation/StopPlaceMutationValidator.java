@@ -37,7 +37,6 @@ public class StopPlaceMutationValidator {
         StopPlace existingStopPlace = findAndVerifyExists(netexId);
         validateNotDeleted(existingStopPlace);
         validateParentChildType(existingStopPlace, isParentMutation, netexId);
-        validateNoParentReference(existingStopPlace, netexId);
         return existingStopPlace;
     }
 
@@ -99,15 +98,13 @@ public class StopPlaceMutationValidator {
                     !stopPlace.isParentStopPlace(),
                     "Cannot update parent stop place [id = %s] with this mutation", netexId
             );
-        }
-    }
 
-    private void validateNoParentReference(StopPlace stopPlace, String netexId) {
-        Preconditions.checkArgument(
-                stopPlace.getParentSiteRef() == null,
-                "Cannot update stop place [id = %s] which has parent. Edit parent instead: %s",
-                netexId, stopPlace.getParentSiteRef()
-        );
+            Preconditions.checkArgument(
+                    stopPlace.getParentSiteRef() == null,
+                    "Cannot update stop place [id = %s] which has parent. Edit parent instead: %s",
+                    netexId, stopPlace.getParentSiteRef()
+            );
+        }
     }
 }
 
