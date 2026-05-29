@@ -74,6 +74,17 @@ public abstract class DataManagedObjectStructure
         return keyValues.get(key).getItems();
     }
 
+    /**
+     * Returns the items for the given key, or an empty set if the key is absent.
+     * Unlike {@link #getOrCreateValues(String)}, this method never modifies
+     * the {@code keyValues} map — safe to call on Hibernate-managed entities
+     * and from {@code hashCode()}/{@code equals()}.
+     */
+    public Set<String> getValues(String key) {
+        Value value = keyValues.get(key);
+        return value != null ? value.getItems() : Set.of();
+    }
+
     public Set<String> getOriginalIds() {
         return getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY);
     }
