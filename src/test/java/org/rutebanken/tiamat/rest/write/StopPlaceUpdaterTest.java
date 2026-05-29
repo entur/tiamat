@@ -2,25 +2,40 @@ package org.rutebanken.tiamat.rest.write;
 
 import org.junit.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.rutebanken.tiamat.model.AccessibilityAssessment;
+import org.rutebanken.tiamat.model.AccessibilityLimitation;
+import org.rutebanken.tiamat.model.AlternativeName;
+import org.rutebanken.tiamat.model.CoveredEnumeration;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
+import org.rutebanken.tiamat.model.InterchangeWeightingEnumeration;
+import org.rutebanken.tiamat.model.LimitationStatusEnumeration;
+import org.rutebanken.tiamat.model.NameTypeEnumeration;
 import org.rutebanken.tiamat.model.PostalAddress;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.SiteRefStructure;
 import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.rutebanken.tiamat.model.TariffZoneRef;
+import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.model.ValidBetween;
 import org.rutebanken.tiamat.model.Value;
+import org.rutebanken.tiamat.model.VehicleModeEnumeration;
 import org.rutebanken.tiamat.rest.write.mapper.CreateStopPlaceMapper;
 import org.rutebanken.tiamat.rest.write.mapper.UpdateStopPlaceMapper;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
 public class StopPlaceUpdaterTest {
+
+    private static final GeometryFactory GEOMETRY_FACTORY = new GeometryFactory();
 
     private final StopPlaceUpdater stopPlaceUpdater = new StopPlaceUpdater(
             new CreateStopPlaceMapper(),
@@ -227,6 +242,177 @@ public class StopPlaceUpdaterTest {
         var result = stopPlaceUpdater.update(original, update);
 
         assertThat(result.getDescription().getValue()).isEqualTo("Edited description");
+    }
+
+    @Test
+    public void updatesStopPlaceType() {
+        var original = new StopPlace();
+        original.setStopPlaceType(StopTypeEnumeration.BUS_STATION);
+
+        var update = new StopPlace();
+        update.setStopPlaceType(StopTypeEnumeration.RAIL_STATION);
+
+        var result = stopPlaceUpdater.update(original, update);
+
+        assertThat(result.getStopPlaceType()).isEqualTo(StopTypeEnumeration.RAIL_STATION);
+    }
+
+    @Test
+    public void updatesTransportMode() {
+        var original = new StopPlace();
+        original.setTransportMode(VehicleModeEnumeration.BUS);
+
+        var update = new StopPlace();
+        update.setTransportMode(VehicleModeEnumeration.RAIL);
+
+        var result = stopPlaceUpdater.update(original, update);
+
+        assertThat(result.getTransportMode()).isEqualTo(VehicleModeEnumeration.RAIL);
+    }
+
+    @Test
+    public void updatesWeighting() {
+        var original = new StopPlace();
+        original.setWeighting(InterchangeWeightingEnumeration.NO_INTERCHANGE);
+
+        var update = new StopPlace();
+        update.setWeighting(InterchangeWeightingEnumeration.PREFERRED_INTERCHANGE);
+
+        var result = stopPlaceUpdater.update(original, update);
+
+        assertThat(result.getWeighting()).isEqualTo(InterchangeWeightingEnumeration.PREFERRED_INTERCHANGE);
+    }
+
+    @Test
+    public void updatesCovered() {
+        var original = new StopPlace();
+        original.setCovered(CoveredEnumeration.OUTDOORS);
+
+        var update = new StopPlace();
+        update.setCovered(CoveredEnumeration.COVERED);
+
+        var result = stopPlaceUpdater.update(original, update);
+
+        assertThat(result.getCovered()).isEqualTo(CoveredEnumeration.COVERED);
+    }
+
+    @Test
+    public void updatesPublicCode() {
+        var original = new StopPlace();
+        original.setPublicCode("OLD");
+
+        var update = new StopPlace();
+        update.setPublicCode("NEW");
+
+        var result = stopPlaceUpdater.update(original, update);
+
+        assertThat(result.getPublicCode()).isEqualTo("NEW");
+    }
+
+    @Test
+    public void updatesCentroid() {
+        var original = new StopPlace();
+        original.setCentroid(GEOMETRY_FACTORY.createPoint(new Coordinate(10.0, 59.0)));
+
+        var update = new StopPlace();
+        update.setCentroid(GEOMETRY_FACTORY.createPoint(new Coordinate(10.5, 59.5)));
+
+        var result = stopPlaceUpdater.update(original, update);
+
+        assertThat(result.getCentroid().getX()).isEqualTo(10.5);
+        assertThat(result.getCentroid().getY()).isEqualTo(59.5);
+    }
+
+    @Test
+    public void updatesAllAreasWheelchairAccessible() {
+        var original = new StopPlace();
+        original.setAllAreasWheelchairAccessible(false);
+
+        var update = new StopPlace();
+        update.setAllAreasWheelchairAccessible(true);
+
+        var result = stopPlaceUpdater.update(original, update);
+
+        assertThat(result.isAllAreasWheelchairAccessible()).isTrue();
+    }
+
+    @Test
+    public void updatesAccessibilityAssessment() {
+        var original = new StopPlace();
+        var originalAssessment = new AccessibilityAssessment();
+        originalAssessment.setMobilityImpairedAccess(LimitationStatusEnumeration.UNKNOWN);
+        original.setAccessibilityAssessment(originalAssessment);
+
+        var update = new StopPlace();
+        var editedAssessment = new AccessibilityAssessment();
+        editedAssessment.setMobilityImpairedAccess(LimitationStatusEnumeration.TRUE);
+        var limitation = new AccessibilityLimitation();
+        limitation.setWheelchairAccess(LimitationStatusEnumeration.TRUE);
+        editedAssessment.setLimitations(List.of(limitation));
+        update.setAccessibilityAssessment(editedAssessment);
+
+        var result = stopPlaceUpdater.update(original, update);
+
+        assertThat(result.getAccessibilityAssessment().getMobilityImpairedAccess())
+                .isEqualTo(LimitationStatusEnumeration.TRUE);
+        assertThat(result.getAccessibilityAssessment().getLimitations()).hasSize(1);
+        assertThat(result.getAccessibilityAssessment().getLimitations().getFirst().getWheelchairAccess())
+                .isEqualTo(LimitationStatusEnumeration.TRUE);
+    }
+
+    @Test
+    public void updatesAlternativeNames() {
+        var original = new StopPlace();
+        var originalAltName = new AlternativeName();
+        originalAltName.setName(new EmbeddableMultilingualString("Gammel navn"));
+        originalAltName.setNameType(NameTypeEnumeration.ALIAS);
+        original.getAlternativeNames().add(originalAltName);
+
+        var update = new StopPlace();
+        var editedAltName = new AlternativeName();
+        editedAltName.setName(new EmbeddableMultilingualString("Nytt navn"));
+        editedAltName.setNameType(NameTypeEnumeration.TRANSLATION);
+        update.getAlternativeNames().add(editedAltName);
+
+        var result = stopPlaceUpdater.update(original, update);
+
+        assertThat(result.getAlternativeNames()).hasSize(1);
+        assertThat(result.getAlternativeNames().getFirst().getName().getValue()).isEqualTo("Nytt navn");
+        assertThat(result.getAlternativeNames().getFirst().getNameType()).isEqualTo(NameTypeEnumeration.TRANSLATION);
+    }
+
+    @Test
+    public void updatesParentSiteRef() {
+        var original = new StopPlace();
+        var originalRef = new SiteRefStructure();
+        originalRef.setRef("NSR:StopPlace:1");
+        original.setParentSiteRef(originalRef);
+
+        var update = new StopPlace();
+        var editedRef = new SiteRefStructure();
+        editedRef.setRef("NSR:StopPlace:2");
+        update.setParentSiteRef(editedRef);
+
+        var result = stopPlaceUpdater.update(original, update);
+
+        assertThat(result.getParentSiteRef().getRef()).isEqualTo("NSR:StopPlace:2");
+    }
+
+    @Test
+    public void preservesTopographicPlace() {
+        var original = new StopPlace();
+        var topographicPlace = new TopographicPlace();
+        topographicPlace.setNetexId("NSR:TopographicPlace:1");
+        original.setTopographicPlace(topographicPlace);
+
+        var update = new StopPlace();
+        var incomingTopographicPlace = new TopographicPlace();
+        incomingTopographicPlace.setNetexId("NSR:TopographicPlace:99");
+        update.setTopographicPlace(incomingTopographicPlace);
+
+        var result = stopPlaceUpdater.update(original, update);
+
+        assertThat(result.getTopographicPlace().getNetexId()).isEqualTo("NSR:TopographicPlace:1");
     }
 
 }
