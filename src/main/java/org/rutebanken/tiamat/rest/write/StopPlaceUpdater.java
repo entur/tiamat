@@ -72,7 +72,7 @@ public class StopPlaceUpdater {
                                 "] on StopPlace [id = " + originalStopPlace.getNetexId() +
                                 "], but the quay does not exist on the stop place"));
 
-                updateStopPlaceMapper.update(editedQuay, existingQuay);
+                updateStopPlaceMapper.update(existingQuay, editedQuay);
                 existingQuay.setChanged(Instant.now());
             } else {
                 Quay newQuay = createStopPlaceMapper.createCopy(editedQuay, Quay.class);

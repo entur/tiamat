@@ -57,15 +57,6 @@ public class UpdateStopPlaceMapper {
         MapperFactory mapperFactory =
                 new DefaultMapperFactory.Builder().build();
 
-        final String stopPlacePassThroughId = "stopPlacePassThroughId";
-
-        mapperFactory
-                .getConverterFactory()
-                .registerConverter(
-                        stopPlacePassThroughId,
-                        new PassThroughConverter(TopographicPlace.class)
-                );
-
         mapperFactory
                 .getConverterFactory()
                 .registerConverter(new PassThroughConverter(Point.class));
@@ -97,7 +88,6 @@ public class UpdateStopPlaceMapper {
                 PlaceEquipment.class,
                 InstalledEquipment_VersionStructure.class,
                 Quay.class,
-                StopPlace.class,
                 AccessibilityAssessment.class,
                 AccessibilityLimitation.class,
                 PostalAddress.class
@@ -113,14 +103,14 @@ public class UpdateStopPlaceMapper {
 
         mapperFactory
                 .classMap(StopPlace.class, StopPlace.class)
-                .fieldMap("topographicPlace")
-                .converter(stopPlacePassThroughId)
-                .add()
                 .exclude(ID_FIELD)
+                .exclude("version")
+                .exclude("netexId")
                 .exclude(VERSION_COMMENT_FIELD)
                 .exclude(CHANGED_BY_FIELD)
                 .exclude(VALID_BETWEEN)
                 .exclude(MODIFICATION_ENUMERATION)
+                .exclude("topographicPlace")
                 .byDefault()
                 .register();
 
@@ -158,6 +148,6 @@ public class UpdateStopPlaceMapper {
             EntityInVersionStructure after
     ) {
         logger.debug("Mapping from {} to {}. Before: {} After: {}", before.getClass(), after.getClass(), before, after);
-        defaultMapperFacade.map(before, after);
+        defaultMapperFacade.map(after, before);
     }
 }

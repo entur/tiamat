@@ -195,4 +195,38 @@ public class StopPlaceUpdaterTest {
         assertThat(result.getKeyValues().get("key2").getItems()).isEqualTo(Set.of("value2"));
     }
 
+    @Test
+    public void updatesName() {
+        var original = new StopPlace();
+        var originalName = new EmbeddableMultilingualString();
+        originalName.setValue("Original name");
+        original.setName(originalName);
+
+        var update = new StopPlace();
+        var editedName = new EmbeddableMultilingualString();
+        editedName.setValue("Edited name");
+        update.setName(editedName);
+
+        var result = stopPlaceUpdater.update(original, update);
+
+        assertThat(result.getName().getValue()).isEqualTo("Edited name");
+    }
+
+    @Test
+    public void updatesDescription() {
+        var original = new StopPlace();
+        var originalDescription = new EmbeddableMultilingualString();
+        originalDescription.setValue("Original description");
+        original.setDescription(originalDescription);
+
+        var update = new StopPlace();
+        var editedDescription = new EmbeddableMultilingualString();
+        editedDescription.setValue("Edited description");
+        update.setDescription(editedDescription);
+
+        var result = stopPlaceUpdater.update(original, update);
+
+        assertThat(result.getDescription().getValue()).isEqualTo("Edited description");
+    }
+
 }
