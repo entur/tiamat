@@ -2,7 +2,6 @@ package org.rutebanken.tiamat.rest.write.controllers;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.rutebanken.helper.organisation.AuthorizationConstants;
 import org.rutebanken.helper.organisation.RoleAssignment;
@@ -522,7 +521,6 @@ public class StopPlaceControllerIntegrationTest extends TiamatIntegrationTest {
     }
 
     @Test
-    @Ignore // TODO: fix and re-enable
     public void shouldNotLetClientAffectVersionNumbersOnUpdate() throws InterruptedException {
         StopPlace stopPlace = new StopPlace(
             new EmbeddableMultilingualString("Original Name")
@@ -547,10 +545,10 @@ public class StopPlaceControllerIntegrationTest extends TiamatIntegrationTest {
                 <StopPlace id="%s" version="666">
                     <Name>Updated Name</Name>
                     <StopPlaceType>busStation</StopPlaceType>
-                    <AccessibilityAssessment modification="new" version="667" id="NSR:AccessibilityAssessment:321">
+                    <AccessibilityAssessment modification="new" version="667" id="NSR:AccessibilityAssessment:1">
                         <MobilityImpairedAccess>unknown</MobilityImpairedAccess>
                         <limitations>
-                            <AccessibilityLimitation modification="new" version="668" id="NSR:AccessibilityLimitation:321">
+                            <AccessibilityLimitation modification="new" version="668" id="NSR:AccessibilityLimitation:1">
                                 <WheelchairAccess>unknown</WheelchairAccess>
                                 <StepFreeAccess>unknown</StepFreeAccess>
                                 <EscalatorFreeAccess>unknown</EscalatorFreeAccess>
@@ -593,7 +591,7 @@ public class StopPlaceControllerIntegrationTest extends TiamatIntegrationTest {
         var responseBody = getResponse.getBody();
 
         assertThat(responseBody).contains("<AccessibilityAssessment modification=\"new\" version=\"2\" id=\"NSR:AccessibilityAssessment:1\">");
-        assertThat(responseBody).contains("<AccessibilityLimitation modification=\"new\" version=\"1\" id=\"NSR:AccessibilityLimitation:2\"/>");
+        assertThat(responseBody).contains("<AccessibilityLimitation modification=\"new\" version=\"1\" id=\"NSR:AccessibilityLimitation:2\">");
     }
 
     private StopPlaceJobDto awaitJobCompletion(Long jobId)

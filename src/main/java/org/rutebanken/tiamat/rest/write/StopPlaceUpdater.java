@@ -37,6 +37,7 @@ public class StopPlaceUpdater {
         updateAdjacentSites(originalStopPlace, editedStopPlace);
         updateTariffZones(originalStopPlace, editedStopPlace);
         updateKeyValues(originalStopPlace, editedStopPlace);
+        updateAccessibilityAssessment(originalStopPlace, editedStopPlace);
 
         // Copy all other fields from editedStopPlace into originalStopPlace
         updateStopPlaceMapper.update(originalStopPlace, editedStopPlace);
@@ -113,6 +114,25 @@ public class StopPlaceUpdater {
         originalStopPlace.getKeyValues().clear();
         if (editedStopPlace.getKeyValues() != null) {
             originalStopPlace.getKeyValues().putAll(editedStopPlace.getKeyValues());
+        }
+    }
+
+    private void updateAccessibilityAssessment(StopPlace originalStopPlace, StopPlace editedStopPlace) {
+        if (editedStopPlace.getAccessibilityAssessment() != null) {
+            if (originalStopPlace.getAccessibilityAssessment() == null) {
+                originalStopPlace.setAccessibilityAssessment(createStopPlaceMapper.createCopy(editedStopPlace.getAccessibilityAssessment(), originalStopPlace.getAccessibilityAssessment().getClass()));
+            } else {
+                var editedAccessibilityAssessmentNetexId = editedStopPlace.getAccessibilityAssessment().getNetexId();
+                var originalAccessibilityAssessmentNetexId = originalStopPlace.getAccessibilityAssessment().getNetexId();
+                if (!editedAccessibilityAssessmentNetexId.equals(originalAccessibilityAssessmentNetexId)) {
+                    throw new IllegalArgumentException("Cannot update accessibility assessment with netex id " + editedAccessibilityAssessmentNetexId +
+                            " on stop place " + originalStopPlace.getNetexId() +
+                            " because it does not match the existing accessibility assessment netex id " + originalAccessibilityAssessmentNetexId);
+                }
+                updateStopPlaceMapper.update(originalStopPlace.getAccessibilityAssessment(), editedStopPlace.getAccessibilityAssessment());
+            }
+        } else {
+            originalStopPlace.setAccessibilityAssessment(null);
         }
     }
 }

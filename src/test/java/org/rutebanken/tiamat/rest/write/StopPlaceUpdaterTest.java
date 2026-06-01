@@ -340,11 +340,13 @@ public class StopPlaceUpdaterTest {
     public void updatesAccessibilityAssessment() {
         var original = new StopPlace();
         var originalAssessment = new AccessibilityAssessment();
+        originalAssessment.setNetexId("NSR:AccessibilityAssessment:1");
         originalAssessment.setMobilityImpairedAccess(LimitationStatusEnumeration.UNKNOWN);
         original.setAccessibilityAssessment(originalAssessment);
 
         var update = new StopPlace();
         var editedAssessment = new AccessibilityAssessment();
+        editedAssessment.setNetexId("NSR:AccessibilityAssessment:1");
         editedAssessment.setMobilityImpairedAccess(LimitationStatusEnumeration.TRUE);
         var limitation = new AccessibilityLimitation();
         limitation.setWheelchairAccess(LimitationStatusEnumeration.TRUE);
@@ -358,6 +360,44 @@ public class StopPlaceUpdaterTest {
         assertThat(result.getAccessibilityAssessment().getLimitations()).hasSize(1);
         assertThat(result.getAccessibilityAssessment().getLimitations().getFirst().getWheelchairAccess())
                 .isEqualTo(LimitationStatusEnumeration.TRUE);
+    }
+
+    @Test
+    public void clearsAccessibilityAssessmentWhenEditedIsNull() {
+        var original = new StopPlace();
+        var originalAssessment = new AccessibilityAssessment();
+        originalAssessment.setNetexId("NSR:AccessibilityAssessment:1");
+        originalAssessment.setMobilityImpairedAccess(LimitationStatusEnumeration.TRUE);
+        original.setAccessibilityAssessment(originalAssessment);
+
+        var update = new StopPlace();
+        // no accessibility assessment set on update
+
+        var result = stopPlaceUpdater.update(original, update);
+
+        assertThat(result.getAccessibilityAssessment()).isNull();
+    }
+
+    @Test
+    public void throwsWhenAccessibilityAssessmentNetexIdDoesNotMatch() {
+        var original = new StopPlace();
+        original.setNetexId("NSR:StopPlace:1");
+        var originalAssessment = new AccessibilityAssessment();
+        originalAssessment.setNetexId("NSR:AccessibilityAssessment:1");
+        original.setAccessibilityAssessment(originalAssessment);
+
+        var update = new StopPlace();
+        var editedAssessment = new AccessibilityAssessment();
+        editedAssessment.setNetexId("NSR:AccessibilityAssessment:999");
+        update.setAccessibilityAssessment(editedAssessment);
+
+        try {
+            stopPlaceUpdater.update(original, update);
+        } catch (IllegalArgumentException e) {
+            assertThat(e.getMessage()).contains("NSR:AccessibilityAssessment:999")
+                    .contains("NSR:StopPlace:1")
+                    .contains("NSR:AccessibilityAssessment:1");
+        }
     }
 
     @Test
