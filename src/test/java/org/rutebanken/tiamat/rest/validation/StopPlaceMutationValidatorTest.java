@@ -158,7 +158,7 @@ public class StopPlaceMutationValidatorTest {
 
         assertThatThrownBy(() -> stopPlaceMutationValidator.validateStopPlaceUpdate(existingStopPlace.getNetexId(), true))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Stop place [id = id] is not a parent");
+                .hasMessageContaining("Cannot update Stop place [id = id] as parent when it is not a parent");
     }
 
     @Test
