@@ -41,9 +41,7 @@ public class HazelCastConfig {
         JoinConfig joinConfig = config.getNetworkConfig().getJoin();
         joinConfig.getMulticastConfig().setEnabled(false);
 
-        if (awsEnabled) {
-            joinConfig.getAwsConfig().setEnabled(true);
-        }
+        joinConfig.getAwsConfig().setEnabled(awsEnabled);
 
         joinConfig.getKubernetesConfig().setEnabled(kubernetesEnabled);
         joinConfig.getKubernetesConfig().setProperty("namespace", hazelcastNamespace);
