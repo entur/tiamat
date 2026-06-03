@@ -72,7 +72,8 @@ public class FintrafficNetexRepository extends AbstractNetexRepository {
                 WHEN 'StopPlace' THEN 4
                 WHEN 'Parking' THEN 5
                 ELSE 6
-            END
+            END,
+            id
         """);
 
         return jdbc.queryForStream(

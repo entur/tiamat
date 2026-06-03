@@ -8,9 +8,9 @@ import org.rutebanken.tiamat.ext.fintraffic.api.repository.NetexRepository;
 import org.rutebanken.tiamat.netex.id.ValidPrefixList;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
-import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.rutebanken.tiamat.time.ExportTimeZone;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -18,6 +18,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 @Profile("fintraffic-read-api")
 @Configuration
+@EnableConfigurationProperties(AreaCodeMappingConfig.class)
 public class FintrafficReadApiConfig {
     @Bean
     public NetexRepository netexRepository(
@@ -47,12 +48,12 @@ public class FintrafficReadApiConfig {
     @Bean
     public SearchKeyService searchKeyService(
             ObjectMapper objectMapper,
-            TopographicPlaceRepository topographicPlaceRepository,
+            AreaCodeMappingConfig areaCodeMappingConfig,
             StopPlaceRepository stopPlaceRepository
     ) {
         return new FintrafficSearchKeyService(
                 objectMapper,
-                topographicPlaceRepository,
+                areaCodeMappingConfig,
                 stopPlaceRepository
         );
     }

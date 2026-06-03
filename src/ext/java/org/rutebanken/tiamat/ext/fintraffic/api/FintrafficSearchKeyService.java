@@ -2,15 +2,6 @@ package org.rutebanken.tiamat.ext.fintraffic.api;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
-import jakarta.annotation.Nonnull;
-import org.locationtech.jts.geom.Point;
-import org.locationtech.jts.geom.Polygonal;
-import org.locationtech.jts.geom.prep.PreparedPolygon;
-import org.rutebanken.tiamat.exporter.params.ExportParams;
-import org.rutebanken.tiamat.exporter.params.TopographicPlaceSearch;
 import org.rutebanken.tiamat.ext.fintraffic.api.model.FintrafficReadApiSearchKey;
 import org.rutebanken.tiamat.ext.fintraffic.api.model.ReadApiSearchKey;
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
@@ -19,66 +10,39 @@ import org.rutebanken.tiamat.model.PrivateCodeStructure;
 import org.rutebanken.tiamat.model.SiteRefStructure;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.TopographicPlace;
-import org.rutebanken.tiamat.model.TopographicPlaceTypeEnumeration;
 import org.rutebanken.tiamat.model.VehicleModeEnumeration;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
-import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Duration;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Stream;
 
 @Transactional(readOnly = true)
 public class FintrafficSearchKeyService implements SearchKeyService {
     private final Logger logger = LoggerFactory.getLogger(FintrafficSearchKeyService.class);
     private final ObjectMapper objectMapper;
-    private final TopographicPlaceRepository topographicPlaceRepository;
+    private final AreaCodeMappingConfig areaCodeMappingConfig;
     private final StopPlaceRepository stopPlaceRepository;
-    private static final String CODESPACE_KEY = "codespace";
-    private final LoadingCache<String, List<PolygonAndAreaCodes>> administrativeZoneGeometryIndex;
-
-    private record PolygonAndAreaCodes(PreparedPolygon polygon, Set<String> areaCodes) {
-    }
 
     public FintrafficSearchKeyService(
             ObjectMapper objectMapper,
-            TopographicPlaceRepository topographicPlaceRepository,
+            AreaCodeMappingConfig areaCodeMappingConfig,
             StopPlaceRepository stopPlaceRepository
     ) {
         this.objectMapper = objectMapper;
-        this.topographicPlaceRepository = topographicPlaceRepository;
+        this.areaCodeMappingConfig = areaCodeMappingConfig;
         this.stopPlaceRepository = stopPlaceRepository;
-
-        // Use a loading cache to store administrative zone geometries for efficient spatial queries
-        this.administrativeZoneGeometryIndex = CacheBuilder.newBuilder()
-                .maximumSize(1)
-                .expireAfterWrite(Duration.ofMinutes(5))
-                .build(new CacheLoader<>() {
-                    @Override
-                    @Nonnull
-                    public List<PolygonAndAreaCodes> load(@Nonnull String ignoredKey) {
-                        return loadPolygonsAndAreaCodes();
-                    }
-                });
     }
 
-    @Nonnull
     @Override
     public String generateSearchKeyJSON(EntityInVersionStructure entity) {
         FintrafficReadApiSearchKey searchKey = this.extractSearchKey(entity);
         return createJSONString(searchKey);
     }
 
-    @Nonnull
     private FintrafficReadApiSearchKey extractSearchKey(EntityInVersionStructure entity) {
         Optional<StopPlace> parentStopPlace = fetchParentStopPlace(entity);
         Optional<FintrafficReadApiSearchKey> searchKeyFromParent = parentStopPlace.map(this::extractSearchKey);
@@ -166,16 +130,22 @@ public class FintrafficSearchKeyService implements SearchKeyService {
                     .toArray(String[]::new);
         }
 
-        Optional<Point> stopPlaceCentroid = Optional.ofNullable(stopPlace.getCentroid());
-        Optional<String[]> areaCodes = stopPlaceCentroid.map(this::getAdministrativeZonesForPoint);
+        String[] areaCodes = getMunicipalityCode(stopPlace)
+                .map(areaCodeMappingConfig::getAreaCodesForMunicipalityCode)
+                .map(codes -> codes.toArray(String[]::new))
+                .orElse(new String[]{});
 
-        String[] municipalityCodes = Optional.ofNullable(stopPlace.getTopographicPlace())
-                .map(TopographicPlace::getPrivateCode)
-                .map(PrivateCodeStructure::getValue)
+        String[] municipalityCodes = getMunicipalityCode(stopPlace)
                 .map(code -> new String[]{code})
                 .orElse(new String[]{});
 
-        return new FintrafficReadApiSearchKey(transportModes, areaCodes.orElse(new String[]{}), municipalityCodes);
+        return new FintrafficReadApiSearchKey(transportModes, areaCodes, municipalityCodes);
+    }
+
+    private Optional<String> getMunicipalityCode(StopPlace stopPlace) {
+        return Optional.ofNullable(stopPlace.getTopographicPlace())
+                .map(TopographicPlace::getPrivateCode)
+                .map(PrivateCodeStructure::getValue);
     }
 
     private String createJSONString(ReadApiSearchKey searchKey) {
@@ -185,42 +155,5 @@ public class FintrafficSearchKeyService implements SearchKeyService {
             throw new RuntimeException("Failed to convert search key to JSON", e);
         }
     }
-
-    private String[] getAdministrativeZonesForPoint(Point point) {
-        try {
-            List<PolygonAndAreaCodes> polygons = administrativeZoneGeometryIndex.get("ALL_ZONES");
-            return new ArrayList<>(polygons).stream()
-                    .filter(p -> p.polygon().contains(point))
-                    .map(p -> p.areaCodes)
-                    .filter(Objects::nonNull)
-                    .flatMap(Collection::stream)
-                    .toArray(String[]::new);
-        } catch (Exception e) {
-            logger.error("Error retrieving administrative zones for point: {}", point, e);
-            throw new RuntimeException("Error retrieving administrative zones for point: " + point, e);
-        }
-    }
-
-    private List<PolygonAndAreaCodes> loadPolygonsAndAreaCodes() {
-        Instant start = Instant.now();
-        TopographicPlaceSearch search = TopographicPlaceSearch.newTopographicPlaceSearchBuilder()
-                .versionValidity(ExportParams.VersionValidity.CURRENT).build();
-
-        List<TopographicPlace> topographicPlaces = topographicPlaceRepository.findTopographicPlace(search);
-        List<PolygonAndAreaCodes> polygonAndAreaCodes = topographicPlaces.stream()
-                .filter(tp -> tp.getTopographicPlaceType().equals(TopographicPlaceTypeEnumeration.REGION))
-                .filter(tp -> tp.getKeyValues().containsKey(CODESPACE_KEY))
-                .filter(tp -> tp.getPolygon() != null)
-                .map(tp -> new PolygonAndAreaCodes(
-                        // Create prepared polygon for efficient spatial queries
-                        new PreparedPolygon((Polygonal) tp.getPolygon().copy()),
-                        // Create a copy to ensure immutability
-                        Set.copyOf(tp.getKeyValues().get(CODESPACE_KEY).getItems())
-                ))
-                .toList();
-        Instant end = Instant.now();
-        long duration = Duration.between(start, end).toMillis();
-        logger.info("Prepared {} zone geometries for spatial queries in {} ms", polygonAndAreaCodes.size(), duration);
-        return polygonAndAreaCodes;
-    }
 }
+
