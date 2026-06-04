@@ -64,7 +64,7 @@ public class StopPlaceWriteDomainService {
         var tiamatStopPlace = netexMapper.mapToTiamatModel(newStopPlace);
         var cleanStopPlace = createStopPlaceMapper.createCopy(tiamatStopPlace, StopPlace.class);
 
-        stopPlaceMutationValidator.validateStopPlaceName(cleanStopPlace);
+        stopPlaceMutationValidator.validateStopPlaceMutation(cleanStopPlace);
         return mutateLock.executeInLock(() -> stopPlaceVersionedSaverService.saveNewVersion(cleanStopPlace));
     }
 
@@ -80,7 +80,7 @@ public class StopPlaceWriteDomainService {
             var updatedStopPlace = versionCreator.createCopy(existingStopPlace, StopPlace.class);
             stopPlaceUpdater.update(updatedStopPlace, tiamatStop);
 
-            stopPlaceMutationValidator.validateStopPlaceName(updatedStopPlace);
+            stopPlaceMutationValidator.validateStopPlaceMutation(updatedStopPlace);
 
             return stopPlaceVersionedSaverService.saveNewVersion(
                     existingStopPlace,

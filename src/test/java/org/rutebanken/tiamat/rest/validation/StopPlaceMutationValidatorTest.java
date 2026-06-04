@@ -5,6 +5,8 @@ import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.ModificationEnumeration;
 import org.rutebanken.tiamat.model.SiteRefStructure;
 import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.StopTypeEnumeration;
+import org.rutebanken.tiamat.model.VehicleModeEnumeration;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -190,4 +192,75 @@ public class StopPlaceMutationValidatorTest {
                 .hasMessageContaining("Cannot update stop place [id = id] which has parent. Edit parent instead");
     }
 
+    @Test
+    public void givenMutationWithNameAndValidStopTypeModeCombination_whenValidateStopPlaceMutation_thenPassValidation() {
+        StopPlace mutatedStopPlace = new StopPlace();
+        mutatedStopPlace.setNetexId("id");
+        mutatedStopPlace.setName(new EmbeddableMultilingualString("name", "en"));
+        mutatedStopPlace.setStopPlaceType(StopTypeEnumeration.BUS_STATION);
+        mutatedStopPlace.setTransportMode(VehicleModeEnumeration.BUS);
+
+        assertThatCode(() -> stopPlaceMutationValidator.validateStopPlaceMutation(mutatedStopPlace))
+                .doesNotThrowAnyException();
+    }
+
+    @Test
+    public void givenMutationWithoutName_whenValidateStopPlaceMutation_thenThrowException() {
+        StopPlace mutatedStopPlace = new StopPlace();
+        mutatedStopPlace.setNetexId("id");
+
+        assertThatThrownBy(() -> stopPlaceMutationValidator.validateStopPlaceMutation(mutatedStopPlace))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Stop place must have name set: StopPlace{netexId=id, version=0, keyValues={}, quays=[], isParentStopPlace=false, children=0}");
+    }
+
+    @Test
+    public void givenMutationWithInvalidStopTypeModeCombination_whenValidateStopPlaceMutation_thenThrowException() {
+        StopPlace mutatedStopPlace = new StopPlace();
+        mutatedStopPlace.setNetexId("id");
+        mutatedStopPlace.setName(new EmbeddableMultilingualString("name", "en"));
+        mutatedStopPlace.setStopPlaceType(StopTypeEnumeration.BUS_STATION);
+        mutatedStopPlace.setTransportMode(VehicleModeEnumeration.RAIL);
+
+        assertThatThrownBy(() -> stopPlaceMutationValidator.validateStopPlaceMutation(mutatedStopPlace))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("StopPlaceType BUS_STATION is not valid for TransportMode RAIL. Valid types are: [RAIL_STATION, VEHICLE_RAIL_INTERCHANGE, OTHER]");
+    }
+
+    @Test
+    public void givenNoTypeOrMode_whenValidateStopPlaceTypeForTransportMode_thenPassValidation() {
+        StopPlace stopPlace = new StopPlace();
+
+        assertThatCode(() -> StopPlaceMutationValidator.validateStopPlaceTypeForTransportMode(stopPlace))
+                .doesNotThrowAnyException();
+    }
+
+    @Test
+    public void givenOnlyMode_whenValidateStopPlaceTypeForTransportMode_thenPassValidation() {
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setTransportMode(VehicleModeEnumeration.BUS);
+
+        assertThatCode(() -> StopPlaceMutationValidator.validateStopPlaceTypeForTransportMode(stopPlace))
+                .doesNotThrowAnyException();
+    }
+
+    @Test
+    public void givenOnlyType_whenValidateStopPlaceTypeForTransportMode_thenPassValidation() {
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setStopPlaceType(StopTypeEnumeration.BUS_STATION);
+
+        assertThatCode(() -> StopPlaceMutationValidator.validateStopPlaceTypeForTransportMode(stopPlace))
+                .doesNotThrowAnyException();
+    }
+
+    @Test
+    public void givenInvalidStopTypeModeCombination_whenValidateStopPlaceTypeForTransportMode_thenThrowException() {
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setStopPlaceType(StopTypeEnumeration.BUS_STATION);
+        stopPlace.setTransportMode(VehicleModeEnumeration.RAIL);
+
+        assertThatThrownBy(() -> StopPlaceMutationValidator.validateStopPlaceTypeForTransportMode(stopPlace))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("StopPlaceType BUS_STATION is not valid for TransportMode RAIL. Valid types are: [RAIL_STATION, VEHICLE_RAIL_INTERCHANGE, OTHER]");
+    }
 }

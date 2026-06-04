@@ -25,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
@@ -88,7 +89,7 @@ class StopPlaceWriteDomainServiceTest {
     }
 
     @Test
-    void updateStopPlace_UpdatesSuccessfully() throws Exception {
+    void updateStopPlace_UpdatesSuccessfully() {
         String stopPlaceId = "NSR:StopPlace:100";
         StopPlace existingStopPlace = createTiamatStopPlace(stopPlaceId, "Old Name", 1L);
         StopPlace updatedTiamatStopPlace = createTiamatStopPlace(stopPlaceId, "New Name", 1L);
@@ -97,7 +98,7 @@ class StopPlaceWriteDomainServiceTest {
 
         when(validator.validateStopPlaceUpdate(stopPlaceId, false)).thenReturn(existingStopPlace);
         when(versionCreator.createCopy(existingStopPlace, StopPlace.class)).thenReturn(updatedTiamatStopPlace);
-        when(stopPlaceVersionedSaverService.saveNewVersion(eq(existingStopPlace), eq(updatedTiamatStopPlace), any(java.util.Set.class)))
+        when(stopPlaceVersionedSaverService.saveNewVersion(eq(existingStopPlace), eq(updatedTiamatStopPlace), anySet()))
             .thenReturn(savedStopPlace);
 
         StopPlace result = domainService.updateStopPlace(updatedNetexStopPlace);
@@ -105,8 +106,8 @@ class StopPlaceWriteDomainServiceTest {
         assertNotNull(result);
         assertEquals("New Name", result.getName().getValue());
         verify(validator).validateStopPlaceUpdate(stopPlaceId, false);
-        verify(validator).validateStopPlaceName(updatedTiamatStopPlace);
-        verify(stopPlaceVersionedSaverService).saveNewVersion(eq(existingStopPlace), eq(updatedTiamatStopPlace), any(java.util.Set.class));
+        verify(validator).validateStopPlaceMutation(updatedTiamatStopPlace);
+        verify(stopPlaceVersionedSaverService).saveNewVersion(eq(existingStopPlace), eq(updatedTiamatStopPlace), anySet());
     }
 
     @Test
@@ -125,7 +126,7 @@ class StopPlaceWriteDomainServiceTest {
         assertNotNull(result);
         assertEquals("NSR:StopPlace:200", result.getNetexId());
         assertEquals("New Stop", result.getName().getValue());
-        verify(validator).validateStopPlaceName(newTiamatStopPlace);
+        verify(validator).validateStopPlaceMutation(newTiamatStopPlace);
         verify(stopPlaceVersionedSaverService).saveNewVersion(newTiamatStopPlace);
     }
 
@@ -172,14 +173,14 @@ class StopPlaceWriteDomainServiceTest {
         when(versionCreator.createCopy(existingStopPlace, StopPlace.class)).thenReturn(updatedTiamatStopPlace);
         doThrow(new IllegalArgumentException("Stop place name is required"))
             .when(validator)
-            .validateStopPlaceName(updatedTiamatStopPlace);
+            .validateStopPlaceMutation(updatedTiamatStopPlace);
 
         assertThrows(IllegalArgumentException.class, () ->
             domainService.updateStopPlace(updatedNetexStopPlace)
         );
 
         verify(validator).validateStopPlaceUpdate(stopPlaceId, false);
-        verify(validator).validateStopPlaceName(updatedTiamatStopPlace);
+        verify(validator).validateStopPlaceMutation(updatedTiamatStopPlace);
         verify(stopPlaceVersionedSaverService, never()).saveNewVersion(any(), any());
     }
 

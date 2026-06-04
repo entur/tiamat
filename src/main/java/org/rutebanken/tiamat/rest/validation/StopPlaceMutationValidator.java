@@ -19,14 +19,42 @@ import com.google.api.client.util.Preconditions;
 import com.google.api.client.util.Strings;
 import org.rutebanken.tiamat.model.ModificationEnumeration;
 import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.StopTypeEnumeration;
+import org.rutebanken.tiamat.model.VehicleModeEnumeration;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.EnumSet;
+import java.util.Map;
+import java.util.Set;
 
 @Component
 public class StopPlaceMutationValidator {
 
     private final StopPlaceRepository stopPlaceRepository;
+
+    private static final Map<VehicleModeEnumeration, Set<StopTypeEnumeration>> VALID_STOP_TYPES_FOR_MODE;
+
+    static {
+        Map<VehicleModeEnumeration, Set<StopTypeEnumeration>> map = new EnumMap<>(VehicleModeEnumeration.class);
+        map.put(VehicleModeEnumeration.AIR,         EnumSet.of(StopTypeEnumeration.AIRPORT,        StopTypeEnumeration.OTHER));
+        map.put(VehicleModeEnumeration.BUS,         EnumSet.of(StopTypeEnumeration.ONSTREET_BUS,   StopTypeEnumeration.BUS_STATION,    StopTypeEnumeration.OTHER));
+        map.put(VehicleModeEnumeration.CABLEWAY,    EnumSet.of(StopTypeEnumeration.LIFT_STATION,   StopTypeEnumeration.OTHER));
+        map.put(VehicleModeEnumeration.COACH,       EnumSet.of(StopTypeEnumeration.COACH_STATION,  StopTypeEnumeration.OTHER));
+        map.put(VehicleModeEnumeration.FERRY,       EnumSet.of(StopTypeEnumeration.FERRY_PORT,     StopTypeEnumeration.FERRY_STOP,     StopTypeEnumeration.HARBOUR_PORT, StopTypeEnumeration.OTHER));
+        map.put(VehicleModeEnumeration.FUNICULAR,   EnumSet.of(StopTypeEnumeration.LIFT_STATION,   StopTypeEnumeration.OTHER));
+        map.put(VehicleModeEnumeration.LIFT,        EnumSet.of(StopTypeEnumeration.LIFT_STATION,   StopTypeEnumeration.OTHER));
+        map.put(VehicleModeEnumeration.METRO,       EnumSet.of(StopTypeEnumeration.METRO_STATION,  StopTypeEnumeration.OTHER));
+        map.put(VehicleModeEnumeration.RAIL,        EnumSet.of(StopTypeEnumeration.RAIL_STATION,   StopTypeEnumeration.VEHICLE_RAIL_INTERCHANGE, StopTypeEnumeration.OTHER));
+        map.put(VehicleModeEnumeration.TRAM,        EnumSet.of(StopTypeEnumeration.ONSTREET_TRAM,  StopTypeEnumeration.TRAM_STATION,   StopTypeEnumeration.OTHER));
+        map.put(VehicleModeEnumeration.TROLLEY_BUS, EnumSet.of(StopTypeEnumeration.ONSTREET_BUS,   StopTypeEnumeration.BUS_STATION,    StopTypeEnumeration.OTHER));
+        map.put(VehicleModeEnumeration.WATER,       EnumSet.of(StopTypeEnumeration.HARBOUR_PORT,   StopTypeEnumeration.FERRY_PORT,     StopTypeEnumeration.FERRY_STOP,   StopTypeEnumeration.OTHER));
+        map.put(VehicleModeEnumeration.OTHER,       EnumSet.of(StopTypeEnumeration.OTHER));
+        VALID_STOP_TYPES_FOR_MODE = Collections.unmodifiableMap(map);
+    }
 
     @Autowired
     public StopPlaceMutationValidator(StopPlaceRepository stopPlaceRepository) {
@@ -45,6 +73,11 @@ public class StopPlaceMutationValidator {
                 stopPlace.getName() != null && !Strings.isNullOrEmpty(stopPlace.getName().getValue()),
                 "Stop place must have name set: %s", stopPlace
         );
+    }
+
+    public void validateStopPlaceMutation(StopPlace mutatedStopPlace) throws IllegalArgumentException {
+        validateStopPlaceName(mutatedStopPlace);
+        validateStopPlaceTypeForTransportMode(mutatedStopPlace);
     }
 
     public void validateChildBelongsToParent(StopPlace child, StopPlace parent) throws IllegalArgumentException {
@@ -68,6 +101,22 @@ public class StopPlaceMutationValidator {
 
     public void verifyStopPlaceNotNull(StopPlace stopPlace, String netexId) throws IllegalArgumentException {
         Preconditions.checkArgument(stopPlace != null, "Attempting to update StopPlace [id = %s], but StopPlace does not exist.", netexId);
+    }
+
+    public static void validateStopPlaceTypeForTransportMode(StopPlace stopPlace) {
+        VehicleModeEnumeration transportMode = stopPlace.getTransportMode();
+        StopTypeEnumeration stopPlaceType = stopPlace.getStopPlaceType();
+
+        if (transportMode == null || stopPlaceType == null) {
+            return;
+        }
+
+        Set<StopTypeEnumeration> validTypes = VALID_STOP_TYPES_FOR_MODE.get(transportMode);
+        Preconditions.checkArgument(
+                validTypes != null && validTypes.contains(stopPlaceType),
+                "StopPlaceType %s is not valid for TransportMode %s. Valid types are: %s",
+                stopPlaceType, transportMode, validTypes
+        );
     }
 
     private StopPlace findAndVerifyExists(String netexId) {
