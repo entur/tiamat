@@ -1402,6 +1402,12 @@ public class StopPlaceRegisterGraphQLSchema {
                 .type(GraphQLString)
                 .description(SEARCH_WITH_CODE_SPACE_ARG_DESCRIPTION)
                 .build());
+        arguments.add(GraphQLArgument.newArgument()
+                .name(WITH_QUAY_PUBLIC_AND_PRIVATE_CODES)
+                .type(GraphQLBoolean)
+                .defaultValueLiteral(BooleanValue.of(false))
+                .description(WITH_QUAY_PUBLIC_AND_PRIVATE_CODES_DESCRIPTION)
+                .build());
         return arguments;
     }
 

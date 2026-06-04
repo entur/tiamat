@@ -47,36 +47,7 @@ import java.util.stream.Collectors;
 
 import static org.rutebanken.tiamat.exporter.params.ExportParams.newExportParamsBuilder;
 import static org.rutebanken.tiamat.exporter.params.StopPlaceSearch.newStopPlaceSearchBuilder;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ALL_VERSIONS;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.COUNTRY_REF;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.COUNTY_REF;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.HAS_PARKING;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ID;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.IGNORE_STOPPLACE_ID;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.IMPORTED_ID_QUERY;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.INCLUDE_EXPIRED;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.KEY;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.LATITUDE_MAX;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.LATITUDE_MIN;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.LONGITUDE_MAX;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.LONGITUDE_MIN;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.MUNICIPALITY_REF;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ONLY_MONOMODAL_STOPPLACES;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PAGE;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.POINT_IN_TIME;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.QUERY;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.SEARCH_WITH_CODE_SPACE;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.SIZE;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.STOP_PLACE_TYPE;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.TAGS;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.VALUES;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.VERSION;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.VERSION_VALIDITY_ARG;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.WITHOUT_LOCATION_ONLY;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.WITHOUT_QUAYS_ONLY;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.WITH_DUPLICATED_QUAY_IMPORTED_IDS;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.WITH_NEARBY_SIMILAR_DUPLICATES;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.WITH_TAGS;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 
 @Service("stopPlaceFetcher")
 @Transactional
@@ -124,6 +95,7 @@ class StopPlaceFetcher implements DataFetcher {
         setIfNonNull(environment, WITH_NEARBY_SIMILAR_DUPLICATES, stopPlaceSearchBuilder::setWithNearbySimilarDuplicates);
         setIfNonNull(environment, HAS_PARKING, stopPlaceSearchBuilder::setHasParking);
         setIfNonNull(environment, WITH_TAGS, stopPlaceSearchBuilder::setWithTags);
+        setIfNonNull(environment, WITH_QUAY_PUBLIC_AND_PRIVATE_CODES, stopPlaceSearchBuilder::setWithQuayPublicAndPrivateCodes);
 
         Instant pointInTime ;
         if (environment.getArgument(POINT_IN_TIME) != null) {
