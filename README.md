@@ -28,8 +28,11 @@ A frontend for Tiamat is available. It's name is Abzu.
 See https://github.com/entur/abzu
 
 ### Supports running multiple instances
-Tiamat uses Hazelcast memory grid to communicate with other instances in kubernetes.
-This means that you can run multiple instances.
+Tiamat uses a Hazelcast memory grid to communicate with other instances in Kubernetes or AWS Fargate.
+This means that you can run multiple instances. If multiple instances are running, the Hazelcast cluster **must** be 
+configured correctly. The application instances **must** be able to accept incoming connections to the configured 
+service port `tiamat.hazelcast.service-port`. Additionally, one of the properties `tiamat.hazelcast.kubernetes.enabled` 
+or `tiamat.hazelcast.aws.enabled` **must** be set to true.
 
 ### Mapping of IDs
 After import stop places and assigning new IDs to stop places, tiamat keeps olds IDs in a mapping table.
