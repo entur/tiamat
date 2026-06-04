@@ -15,9 +15,11 @@
 
 package org.rutebanken.tiamat.importer;
 
+import org.rutebanken.netex.model.FareFrame;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.netex.model.SiteFrame;
 import org.rutebanken.tiamat.auth.AuthorizationService;
+import org.rutebanken.tiamat.config.FareZoneConfig;
 import org.rutebanken.tiamat.exporter.PublicationDeliveryCreator;
 import org.rutebanken.tiamat.importer.handler.GroupOfTariffZonesImportHandler;
 import org.rutebanken.tiamat.importer.handler.ParkingsImportHandler;
@@ -30,6 +32,7 @@ import org.rutebanken.tiamat.importer.log.ImportLoggerTask;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.netex.mapping.PublicationDeliveryHelper;
 import org.rutebanken.tiamat.service.batch.BackgroundJobs;
+import org.rutebanken.tiamat.versioning.save.FareZoneSaverService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -38,6 +41,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
+import java.util.Set;
 import java.util.Timer;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -61,6 +66,8 @@ public class PublicationDeliveryImporter {
     private final TopographicPlaceImportHandler topographicPlaceImportHandler;
     private final BackgroundJobs backgroundJobs;
     private final AuthorizationService authorizationService;
+    private final FareZoneConfig fareZoneConfig;
+    private final FareZoneSaverService fareZoneSaverService;
     private final boolean authorizationEnabled;
 
     @Autowired
@@ -74,6 +81,8 @@ public class PublicationDeliveryImporter {
                                        ParkingsImportHandler parkingsImportHandler,
                                        BackgroundJobs backgroundJobs,
                                        AuthorizationService authorizationService,
+                                       FareZoneConfig fareZoneConfig,
+                                       FareZoneSaverService fareZoneSaverService,
                                        @Value("${authorization.enabled:true}") boolean authorizationEnabled) {
         this.publicationDeliveryHelper = publicationDeliveryHelper;
         this.parkingsImportHandler = parkingsImportHandler;
@@ -85,6 +94,8 @@ public class PublicationDeliveryImporter {
         this.stopPlaceImportHandler = stopPlaceImportHandler;
         this.backgroundJobs = backgroundJobs;
         this.authorizationService = authorizationService;
+        this.fareZoneConfig = fareZoneConfig;
+        this.fareZoneSaverService = fareZoneSaverService;
         this.authorizationEnabled = authorizationEnabled;
     }
 
@@ -125,6 +136,10 @@ public class PublicationDeliveryImporter {
         // Currently only supporting one site frame per publication delivery
         SiteFrame netexSiteFrame = publicationDeliveryHelper.findSiteFrame(incomingPublicationDelivery);
 
+        // A FareFrame may accompany the SiteFrame (Nordic profile: FareZones live in the FareFrame,
+        // while the GroupOfTariffZones referencing them lives in the SiteFrame).
+        FareFrame netexFareFrame = publicationDeliveryHelper.findFareFrame(incomingPublicationDelivery);
+
         String requestId = netexSiteFrame.getId();
 
         updateMappingContext(netexSiteFrame);
@@ -141,7 +156,22 @@ public class PublicationDeliveryImporter {
 
             topographicPlaceImportHandler.handleTopographicPlaces(netexSiteFrame, importParams, topographicPlaceCounter ,responseSiteFrame);
             tariffZoneImportHandler.handleTariffZones(netexSiteFrame, importParams, tariffZoneCounter, responseSiteFrame);
-            groupOfTariffZonesImportHandler.handleGroupOfTariffZones(netexSiteFrame,importParams,responseSiteFrame);
+
+            // Import fare zones carried in an accompanying FareFrame, so that a GroupOfTariffZones
+            // in the SiteFrame can reference them within the same delivery.
+            Set<String> fareFrameZoneIds = Collections.emptySet();
+            if (netexFareFrame != null) {
+                FareFrame responseFareFrame = new FareFrame().withId(requestId + "-fareframe-response").withVersion("1");
+                fareFrameZoneIds = tariffZoneImportHandler.handleFareZonesFromFareFrame(netexFareFrame, importParams, tariffZoneCounter, responseFareFrame);
+
+                // With external versioning the import is a full replace: prune FareZones not present in this delivery.
+                if (fareZoneConfig.isExternalVersioning() && !fareFrameZoneIds.isEmpty()) {
+                    int deletedCount = fareZoneSaverService.deleteAllExcept(fareFrameZoneIds);
+                    logger.info("External versioning cleanup: deleted {} orphaned FareZones", deletedCount);
+                }
+            }
+
+            groupOfTariffZonesImportHandler.handleGroupOfTariffZones(netexSiteFrame, importParams, responseSiteFrame, fareFrameZoneIds);
             stopPlaceImportHandler.handleStops(netexSiteFrame, importParams, stopPlaceCounter, responseSiteFrame);
             parkingsImportHandler.handleParkings(netexSiteFrame, importParams, parkingCounter, responseSiteFrame);
             pathLinkImportHandler.handlePathLinks(netexSiteFrame, importParams, pathLinkCounter, responseSiteFrame);

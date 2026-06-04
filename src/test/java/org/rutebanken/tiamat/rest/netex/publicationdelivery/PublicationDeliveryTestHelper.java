@@ -112,6 +112,19 @@ public class PublicationDeliveryTestHelper {
                 .withCompositeFrameOrCommonFrame(new ObjectFactory().createFareFrame(fareFrame)));
     }
 
+    @SuppressWarnings("unchecked")
+    public PublicationDeliveryStructure publicationDelivery(SiteFrame siteFrame, FareFrame fareFrame) {
+        ObjectFactory objectFactory = new ObjectFactory();
+        return new PublicationDeliveryStructure()
+                .withPublicationTimestamp(LocalDateTime.now())
+                .withVersion("1")
+                .withParticipantRef("test")
+                .withDataObjects(new PublicationDeliveryStructure.DataObjects()
+                        .withCompositeFrameOrCommonFrame(
+                                objectFactory.createSiteFrame(siteFrame),
+                                objectFactory.createFareFrame(fareFrame)));
+    }
+
     public SiteFrame siteFrame() {
         SiteFrame siteFrame = new SiteFrame();
         siteFrame.setVersion("1");
