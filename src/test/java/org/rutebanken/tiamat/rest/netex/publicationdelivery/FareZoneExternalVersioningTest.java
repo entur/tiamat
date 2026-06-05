@@ -19,14 +19,21 @@ import org.junit.Test;
 import org.rutebanken.netex.model.FareFrame;
 import org.rutebanken.netex.model.FareZone;
 import org.rutebanken.netex.model.FareZonesInFrame_RelStructure;
+import org.rutebanken.netex.model.GroupOfTariffZones;
+import org.rutebanken.netex.model.GroupsOfTariffZonesInFrame_RelStructure;
 import org.rutebanken.netex.model.MultilingualString;
+import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
+import org.rutebanken.netex.model.SiteFrame;
+import org.rutebanken.netex.model.TariffZoneRef;
+import org.rutebanken.netex.model.TariffZoneRefs_RelStructure;
 import org.rutebanken.netex.model.ValidBetween;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.config.FareZoneConfig;
 import org.rutebanken.tiamat.importer.FareZoneFrameSource;
 import org.rutebanken.tiamat.importer.ImportParams;
 import org.rutebanken.tiamat.importer.ImportType;
+import org.rutebanken.tiamat.importer.PublicationDeliveryImporter;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -36,6 +43,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Integration tests for FareZone external versioning feature.
@@ -47,7 +55,12 @@ public class FareZoneExternalVersioningTest extends TiamatIntegrationTest {
     private PublicationDeliveryTestHelper publicationDeliveryTestHelper;
 
     @Autowired
+    private PublicationDeliveryImporter publicationDeliveryImporter;
+
+    @Autowired
     private FareZoneConfig fareZoneConfig;
+
+    private final ObjectFactory objectFactory = new ObjectFactory();
 
     /**
      * Test that external versioning creates new FareZones on first import
@@ -643,6 +656,75 @@ public class FareZoneExternalVersioningTest extends TiamatIntegrationTest {
         } finally {
             ReflectionTestUtils.setField(fareZoneConfig, "externalVersioning", false);
         }
+    }
+
+    /**
+     * Regression test: a failed GroupOfTariffZones member validation must not leave the external
+     * versioning FareZone cleanup committed. The cleanup and the group import run in a single
+     * transaction, so a rejected import rolls back the deletes instead of permanently losing FareZones.
+     */
+    @Test
+    public void externalVersioning_failedGroupValidationRollsBackFareZoneCleanup() {
+        ReflectionTestUtils.setField(fareZoneConfig, "externalVersioning", true);
+
+        try {
+            ImportParams importParams = new ImportParams();
+            importParams.importType = ImportType.INITIAL;
+
+            // GIVEN: two FareZones persisted by a first delivery
+            publicationDeliveryImporter.importPublicationDelivery(
+                    publicationDeliveryTestHelper.publicationDelivery(
+                            publicationDeliveryTestHelper.siteFrame(),
+                            fareFrameWithFareZones("NSR:FareZone:901", "NSR:FareZone:902")),
+                    importParams);
+            assertThat(fareZoneRepository.findByNetexId("NSR:FareZone:902")).isNotEmpty();
+
+            // WHEN: a later delivery keeps only one zone, while its group still references the now-orphaned zone.
+            // The cleanup deletes the orphan before member validation, so validation fails.
+            SiteFrame siteFrame = publicationDeliveryTestHelper.siteFrame();
+            siteFrame.withGroupsOfTariffZones(new GroupsOfTariffZonesInFrame_RelStructure()
+                    .withGroupOfTariffZones(groupOfTariffZones("NSR:GroupOfTariffZones:901", "NSR:FareZone:902")));
+
+            PublicationDeliveryStructure delivery = publicationDeliveryTestHelper.publicationDelivery(
+                    siteFrame, fareFrameWithFareZones("NSR:FareZone:901"));
+
+            assertThatThrownBy(() -> publicationDeliveryImporter.importPublicationDelivery(delivery, importParams))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("NSR:FareZone:902");
+
+            // THEN: the cleanup is rolled back together with the rejected group import - no data loss
+            assertThat(fareZoneRepository.findByNetexId("NSR:FareZone:901")).isNotEmpty();
+            assertThat(fareZoneRepository.findByNetexId("NSR:FareZone:902")).isNotEmpty();
+            assertThat(groupOfTariffZonesRepository.findAll()).isEmpty();
+        } finally {
+            ReflectionTestUtils.setField(fareZoneConfig, "externalVersioning", false);
+        }
+    }
+
+    private FareFrame fareFrameWithFareZones(String... fareZoneIds) {
+        LocalDateTime validFrom = LocalDateTime.now().minusDays(3);
+        FareFrame fareFrame = publicationDeliveryTestHelper.fareFrame();
+        fareFrame.setFareZones(new FareZonesInFrame_RelStructure());
+        for (String id : fareZoneIds) {
+            fareFrame.getFareZones().getFareZone().add(new FareZone()
+                    .withId(id)
+                    .withVersion("1")
+                    .withName(new MultilingualString().withValue(id))
+                    .withValidBetween(new ValidBetween().withFromDate(validFrom)));
+        }
+        return fareFrame;
+    }
+
+    private GroupOfTariffZones groupOfTariffZones(String groupId, String... memberRefs) {
+        TariffZoneRefs_RelStructure members = new TariffZoneRefs_RelStructure();
+        for (String ref : memberRefs) {
+            members.getTariffZoneRef_().add(objectFactory.createTariffZoneRef(new TariffZoneRef().withRef(ref)));
+        }
+        return new GroupOfTariffZones()
+                .withId(groupId)
+                .withVersion("1")
+                .withName(new MultilingualString().withValue(groupId))
+                .withMembers(members);
     }
 
 }

@@ -40,6 +40,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.Collections;
 import java.util.Set;
@@ -68,6 +70,7 @@ public class PublicationDeliveryImporter {
     private final AuthorizationService authorizationService;
     private final FareZoneConfig fareZoneConfig;
     private final FareZoneSaverService fareZoneSaverService;
+    private final TransactionTemplate transactionTemplate;
     private final boolean authorizationEnabled;
 
     @Autowired
@@ -83,6 +86,7 @@ public class PublicationDeliveryImporter {
                                        AuthorizationService authorizationService,
                                        FareZoneConfig fareZoneConfig,
                                        FareZoneSaverService fareZoneSaverService,
+                                       PlatformTransactionManager transactionManager,
                                        @Value("${authorization.enabled:true}") boolean authorizationEnabled) {
         this.publicationDeliveryHelper = publicationDeliveryHelper;
         this.parkingsImportHandler = parkingsImportHandler;
@@ -96,6 +100,7 @@ public class PublicationDeliveryImporter {
         this.authorizationService = authorizationService;
         this.fareZoneConfig = fareZoneConfig;
         this.fareZoneSaverService = fareZoneSaverService;
+        this.transactionTemplate = new TransactionTemplate(transactionManager);
         this.authorizationEnabled = authorizationEnabled;
     }
 
@@ -104,7 +109,6 @@ public class PublicationDeliveryImporter {
         return importPublicationDelivery(incomingPublicationDelivery, null);
     }
 
-    @SuppressWarnings("unchecked")
     public PublicationDeliveryStructure importPublicationDelivery(PublicationDeliveryStructure incomingPublicationDelivery, ImportParams importParams) {
         if(authorizationEnabled && !authorizationService.canEditAllEntities()){
                 throw new AccessDeniedException("Insufficient privileges for operation");
@@ -159,19 +163,27 @@ public class PublicationDeliveryImporter {
 
             // Import fare zones carried in an accompanying FareFrame, so that a GroupOfTariffZones
             // in the SiteFrame can reference them within the same delivery.
-            Set<String> fareFrameZoneIds = Collections.emptySet();
+            final Set<String> fareFrameZoneIds;
             if (netexFareFrame != null) {
                 FareFrame responseFareFrame = new FareFrame().withId(requestId + "-fareframe-response").withVersion("1");
                 fareFrameZoneIds = tariffZoneImportHandler.handleFareZonesFromFareFrame(netexFareFrame, importParams, tariffZoneCounter, responseFareFrame);
+                } else {
+                fareFrameZoneIds = Collections.emptySet();
+            }
 
+            // Run the external versioning FareZone cleanup and the GroupOfTariffZones import in a single
+            // transaction, so that a failed group member validation rolls back the deletes instead of
+            // leaving FareZones permanently removed by a rejected import.
+            final ImportParams finalImportParams = importParams;
+            transactionTemplate.executeWithoutResult(transactionStatus -> {
                 // With external versioning the import is a full replace: prune FareZones not present in this delivery.
                 if (fareZoneConfig.isExternalVersioning() && !fareFrameZoneIds.isEmpty()) {
                     int deletedCount = fareZoneSaverService.deleteAllExcept(fareFrameZoneIds);
                     logger.info("External versioning cleanup: deleted {} orphaned FareZones", deletedCount);
                 }
-            }
 
-            groupOfTariffZonesImportHandler.handleGroupOfTariffZones(netexSiteFrame, importParams, responseSiteFrame, fareFrameZoneIds);
+                groupOfTariffZonesImportHandler.handleGroupOfTariffZones(netexSiteFrame, finalImportParams, responseSiteFrame, fareFrameZoneIds);
+            });
             stopPlaceImportHandler.handleStops(netexSiteFrame, importParams, stopPlaceCounter, responseSiteFrame);
             parkingsImportHandler.handleParkings(netexSiteFrame, importParams, parkingCounter, responseSiteFrame);
             pathLinkImportHandler.handlePathLinks(netexSiteFrame, importParams, pathLinkCounter, responseSiteFrame);
