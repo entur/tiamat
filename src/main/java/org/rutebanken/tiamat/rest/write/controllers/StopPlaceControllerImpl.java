@@ -10,6 +10,7 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.rutebanken.tiamat.jersey.interceptor.XmlWhitelist;
 import org.rutebanken.tiamat.rest.write.StopPlaceWriteService;
 import org.rutebanken.tiamat.rest.write.dto.StopPlacesDto;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +53,7 @@ public class StopPlaceControllerImpl implements StopPlaceController {
             MediaType.APPLICATION_XML + "; charset=utf-8",
         }
     )
+    @XmlWhitelist(SupportedStopPlaceElement.class)
     public Response createStopPlace(StopPlacesDto stopPlacesDto) {
         return Response.accepted(
             stopPlaceWriteService.createStopPlaces(stopPlacesDto)
@@ -66,6 +68,7 @@ public class StopPlaceControllerImpl implements StopPlaceController {
             MediaType.APPLICATION_XML + "; charset=utf-8",
         }
     )
+    @XmlWhitelist(SupportedStopPlaceElement.class)
     public Response updateStopPlace(StopPlacesDto stopPlacesDto) {
         return Response.accepted(
             stopPlaceWriteService.updateStopPlace(stopPlacesDto)

@@ -140,6 +140,23 @@ public class StopPlaceControllerIntegrationTest extends TiamatIntegrationTest {
     }
 
     @Test
+    public void createStopPlaceWithUnsupportedXmlReturnsBadRequest() {
+        String xml = """
+            <stopPlaces xmlns="http://www.netex.org.uk/netex">
+                <StopPlace version="1">
+                    <Name>Station A</Name>
+                    <StopPlaceType>busStation</StopPlaceType>
+                    <notAValidTag>asd</notAValidTag>
+                </StopPlace>
+            </stopPlaces>
+            """;
+
+        ResponseEntity<String> response = postXml(xml, String.class);
+
+        assertThat(response.getStatusCode().is4xxClientError()).isTrue();
+    }
+
+    @Test
     public void deleteStopPlaceReturnsAcceptedWithProcessingJob() throws InterruptedException {
         StopPlace stopPlace = new StopPlace(
             new EmbeddableMultilingualString("To Be Deleted")
@@ -199,16 +216,7 @@ public class StopPlaceControllerIntegrationTest extends TiamatIntegrationTest {
             saved.getNetexId()
         );
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_XML);
-        HttpEntity<String> request = new HttpEntity<>(xml, headers);
-
-        ResponseEntity<StopPlaceJobDto> response = restTemplate.exchange(
-            WRITE_ENDPOINT,
-            HttpMethod.PUT,
-            request,
-            StopPlaceJobDto.class
-        );
+        ResponseEntity<StopPlaceJobDto> response = putXml(xml, StopPlaceJobDto.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
         assertThat(response.getBody()).isNotNull();
@@ -221,6 +229,42 @@ public class StopPlaceControllerIntegrationTest extends TiamatIntegrationTest {
         StopPlaceJobDto finalJob = awaitJobCompletion(jobId);
 
         assertThat(finalJob.status()).isEqualTo(AsyncStopPlaceJobStatus.FINISHED);
+    }
+
+
+    @Test
+    public void updateStopPlaceWithUnsupportedXmlReturnsBadRequest() {
+        StopPlace stopPlace = new StopPlace(
+                new EmbeddableMultilingualString("Original Name")
+        );
+        stopPlace.setStopPlaceType(StopTypeEnumeration.BUS_STATION);
+        var quay = new Quay();
+        quay.setNetexId("NSR:Quay:123");
+        quay.setVersion(1L);
+        stopPlace.setQuays(Set.of(quay));
+        StopPlace saved = stopPlaceRepository.save(stopPlace);
+
+        String xml = String.format(
+                """
+                <stopPlaces xmlns="http://www.netex.org.uk/netex">
+                    <StopPlace id="%s">
+                        <Name>Updated Name</Name>
+                        <StopPlaceType>busStation</StopPlaceType>
+                        <quays>
+                            <Quay id="NSR:Quay:123" version="666">
+                                <Name>Quay 1</Name>
+                                <NotAValidTag>asd</NotAValidTag>
+                            </Quay>
+                        </quays>
+                    </StopPlace>
+                </stopPlaces>
+                """,
+                saved.getNetexId()
+        );
+
+        ResponseEntity<String> response = putXml(xml, String.class);
+
+        assertThat(response.getStatusCode().is4xxClientError()).isTrue();
     }
 
     @Test

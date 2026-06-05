@@ -21,6 +21,7 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
 import org.rutebanken.tiamat.filter.LoggingFilter;
 import org.rutebanken.tiamat.jersey.JerseyJava8TimeConverterProvider;
+import org.rutebanken.tiamat.jersey.interceptor.XmlWhitelistReaderInterceptor;
 import org.rutebanken.tiamat.rest.dto.DtoJbvCodeMappingResource;
 import org.rutebanken.tiamat.rest.dto.DtoQuayResource;
 import org.rutebanken.tiamat.rest.dto.DtoStopPlaceResource;
@@ -95,6 +96,7 @@ public class JerseyConfig {
         if (writeApiEnabled) {
             publicResources.add(StopPlaceControllerImpl.class);
             publicResources.add(JobControllerImpl.class);
+            publicResources.add(XmlWhitelistReaderInterceptor.class);
         }
 
         publicResources.add(GeneralExceptionMapper.class);
