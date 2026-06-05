@@ -13,12 +13,14 @@ import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.InterchangeWeightingEnumeration;
 import org.rutebanken.tiamat.model.LimitationStatusEnumeration;
 import org.rutebanken.tiamat.model.NameTypeEnumeration;
+import org.rutebanken.tiamat.model.PlaceEquipment;
 import org.rutebanken.tiamat.model.PostalAddress;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.SiteRefStructure;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.rutebanken.tiamat.model.TariffZoneRef;
+import org.rutebanken.tiamat.model.TicketingEquipment;
 import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.model.ValidBetween;
 import org.rutebanken.tiamat.model.Value;
@@ -31,6 +33,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 @ExtendWith(MockitoExtension.class)
 public class StopPlaceUpdaterTest {
@@ -436,6 +439,84 @@ public class StopPlaceUpdaterTest {
         var result = stopPlaceUpdater.update(original, update);
 
         assertThat(result.getParentSiteRef().getRef()).isEqualTo("NSR:StopPlace:2");
+    }
+
+    @Test
+    public void updatesInstalledEquipmentOnStopPlaceAndQuay() {
+        var originalQuay = new Quay();
+        originalQuay.setNetexId("quay-1");
+        originalQuay.setName(new EmbeddableMultilingualString("quay with place equipments"));
+        var originalQuayEquipment = new PlaceEquipment();
+        originalQuayEquipment.getInstalledEquipment().add(new TicketingEquipment());
+        originalQuay.setPlaceEquipments(originalQuayEquipment);
+
+        var original = new StopPlace();
+        original.getQuays().add(originalQuay);
+        var originalStopEquipment = new PlaceEquipment();
+        originalStopEquipment.setNetexId("NSR:PlaceEquipment:1");
+        originalStopEquipment.setVersion(1L);
+        originalStopEquipment.getInstalledEquipment().add(new TicketingEquipment());
+        original.setPlaceEquipments(originalStopEquipment);
+
+        var editedQuay = new Quay();
+        editedQuay.setNetexId("quay-1");
+        var editedQuayEquipment = new PlaceEquipment();
+        editedQuayEquipment.setNetexId("NSR:PlaceEquipment:2");
+        editedQuayEquipment.setVersion(3L);
+        editedQuayEquipment.getInstalledEquipment().add(new TicketingEquipment());
+        editedQuay.setPlaceEquipments(editedQuayEquipment);
+
+        var update = new StopPlace();
+        update.getQuays().add(editedQuay);
+        var editedStopEquipment = new PlaceEquipment();
+        editedStopEquipment.setNetexId("NSR:PlaceEquipment:1");
+        editedStopEquipment.setVersion(2L);
+        editedStopEquipment.getInstalledEquipment().add(new TicketingEquipment());
+        update.setPlaceEquipments(editedStopEquipment);
+
+        var result = stopPlaceUpdater.update(original, update);
+
+        assertThat(result.getPlaceEquipments().getInstalledEquipment()).hasSize(1);
+        // version is incremented by stopPlaceVersionSaverService,
+        // so we should just pass the original version through the update
+        assertThat(result.getPlaceEquipments().getVersion()).isEqualTo(1L);
+
+        var resultQuay = result.getQuays().iterator().next();
+        assertThat(resultQuay.getPlaceEquipments().getInstalledEquipment()).hasSize(1);
+    }
+
+    @Test
+    public void clearsInstalledEquipmentWhenEditedIsNull() {
+        var original = new StopPlace();
+        var originalStopEquipment = new PlaceEquipment();
+        originalStopEquipment.setNetexId("NSR:PlaceEquipment:1");
+        originalStopEquipment.getInstalledEquipment().add(new TicketingEquipment());
+        original.setPlaceEquipments(originalStopEquipment);
+
+        var update = new StopPlace();
+        // no place equipment set on update
+
+        var result = stopPlaceUpdater.update(original, update);
+
+        assertThat(result.getPlaceEquipments()).isNull();
+    }
+
+    @Test
+    public void throwsWhenPlaceEquipmentNetexIdDoesNotMatch() {
+        var original = new StopPlace();
+        original.setNetexId("NSR:StopPlace:1");
+        var originalStopEquipment = new PlaceEquipment();
+        originalStopEquipment.setNetexId("NSR:PlaceEquipment:1");
+        original.setPlaceEquipments(originalStopEquipment);
+
+        var update = new StopPlace();
+        var editedStopEquipment = new PlaceEquipment();
+        editedStopEquipment.setNetexId("NSR:PlaceEquipment:999");
+        update.setPlaceEquipments(editedStopEquipment);
+
+        assertThatThrownBy(() -> stopPlaceUpdater.update(original, update)).hasMessageContaining("NSR:PlaceEquipment:999")
+                .hasMessageContaining("NSR:StopPlace:1")
+                .hasMessageContaining("NSR:PlaceEquipment:1");
     }
 
     @Test

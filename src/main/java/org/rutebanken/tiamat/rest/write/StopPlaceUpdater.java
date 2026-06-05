@@ -38,6 +38,7 @@ public class StopPlaceUpdater {
         updateTariffZones(originalStopPlace, editedStopPlace);
         updateKeyValues(originalStopPlace, editedStopPlace);
         updateAccessibilityAssessment(originalStopPlace, editedStopPlace);
+        updatePlaceEquipments(originalStopPlace, editedStopPlace);
 
         // Copy all other fields from editedStopPlace into originalStopPlace
         updateStopPlaceMapper.update(originalStopPlace, editedStopPlace);
@@ -133,6 +134,25 @@ public class StopPlaceUpdater {
             }
         } else {
             originalStopPlace.setAccessibilityAssessment(null);
+        }
+    }
+
+    private void updatePlaceEquipments(StopPlace originalStopPlace, StopPlace editedStopPlace) {
+        if (editedStopPlace.getPlaceEquipments() != null) {
+            if (originalStopPlace.getPlaceEquipments() == null) {
+                originalStopPlace.setPlaceEquipments(createStopPlaceMapper.createCopy(editedStopPlace.getPlaceEquipments(), originalStopPlace.getPlaceEquipments().getClass()));
+            } else {
+                var editedPlaceEquipmentNetexId = editedStopPlace.getPlaceEquipments().getNetexId();
+                var originalPlaceEquipmentNetexId = originalStopPlace.getPlaceEquipments().getNetexId();
+                if (!Objects.equals(editedPlaceEquipmentNetexId, originalPlaceEquipmentNetexId)) {
+                    throw new IllegalArgumentException("Cannot update place equipment with netex id " + editedPlaceEquipmentNetexId +
+                            " on stop place " + originalStopPlace.getNetexId() +
+                            " because it does not match the existing place equipment netex id " + originalPlaceEquipmentNetexId);
+                }
+                updateStopPlaceMapper.update(originalStopPlace.getPlaceEquipments(), editedStopPlace.getPlaceEquipments());
+            }
+        } else {
+            originalStopPlace.setPlaceEquipments(null);
         }
     }
 }
