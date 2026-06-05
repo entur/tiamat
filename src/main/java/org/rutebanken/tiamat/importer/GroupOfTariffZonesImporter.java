@@ -61,9 +61,7 @@ public class GroupOfTariffZonesImporter {
                     ? groupOffTariffZonesSaverService.saveWithExternalVersioning(incomingGroup)
                     : groupOffTariffZonesSaverService.saveNewVersion(incomingGroup);
 
-            if (saved != null && saved.getNetexId() != null) {
-                importedNetexIds.add(saved.getNetexId());
-            }
+            importedNetexIds.add(saved.getNetexId());
             importedGroups.add(netexMapper.getFacade().map(saved, GroupOfTariffZones.class));
         }
 
