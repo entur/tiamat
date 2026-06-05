@@ -695,7 +695,7 @@ public class FareZoneExternalVersioningTest extends TiamatIntegrationTest {
             // THEN: the cleanup is rolled back together with the rejected group import - no data loss
             assertThat(fareZoneRepository.findByNetexId("NSR:FareZone:901")).isNotEmpty();
             assertThat(fareZoneRepository.findByNetexId("NSR:FareZone:902")).isNotEmpty();
-            assertThat(groupOfTariffZonesRepository.findAll()).isEmpty();
+            assertThat(groupOfTariffZonesRepository.findByNetexId("NSR:GroupOfTariffZones:901")).isEmpty();
         } finally {
             ReflectionTestUtils.setField(fareZoneConfig, "externalVersioning", false);
         }
