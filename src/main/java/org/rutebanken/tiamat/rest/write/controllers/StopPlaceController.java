@@ -95,7 +95,8 @@ interface StopPlaceController {
                     schema = @Schema(implementation = StopPlaceJobDto.class)
                 )
             ),
-            @ApiResponse(responseCode = "400", description = "Malformed input"),
+            @ApiResponse(responseCode = "400", description = "Malformed input or unsupported stop place field"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "503", description = "Job queue full"),
         }
     )
@@ -150,7 +151,8 @@ interface StopPlaceController {
                     schema = @Schema(implementation = StopPlaceJobDto.class)
                 )
             ),
-            @ApiResponse(responseCode = "400", description = "Malformed input"),
+            @ApiResponse(responseCode = "400", description = "Malformed input or unsupported stop place field"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "503", description = "Job queue full"),
         }
     )
@@ -179,6 +181,7 @@ interface StopPlaceController {
                 )
             ),
             @ApiResponse(responseCode = "404", description = "Stop place by NeTEx ID not found"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "503", description = "Job queue full"),
         }
     )
