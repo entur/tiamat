@@ -80,6 +80,7 @@ import org.rutebanken.tiamat.rest.graphql.fetchers.PathLinkGeometryFetcher;
 import org.rutebanken.tiamat.rest.graphql.mappers.GeometryMapper;
 import org.rutebanken.tiamat.rest.graphql.mappers.PostalAddressMapper;
 import org.rutebanken.tiamat.rest.graphql.mappers.ValidBetweenMapper;
+import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.rest.graphql.operations.MultiModalityOperationsBuilder;
 import org.rutebanken.tiamat.rest.graphql.operations.ParkingOperationsBuilder;
 import org.rutebanken.tiamat.rest.graphql.operations.StopPlaceOperationsBuilder;
@@ -1119,7 +1120,12 @@ public class StopPlaceRegisterGraphQLSchema {
     private static DataFetcher<Object> getOriginalIdsFetcher(){
         return env -> {
             if(env.getSource() instanceof DataManagedObjectStructure dataManagedObjectStructure){
-                return dataManagedObjectStructure.getOriginalIds();
+                // Use getValues() instead of getOriginalIds() to avoid creating a phantom
+                // empty Value entry in keyValues when the imported-id key is absent.
+                // getOriginalIds() calls getOrCreateValues() which mutates the Hibernate-managed
+                // keyValues map, dirtying the session and causing a phantom INSERT on auto-flush
+                // before any subsequent native SQL query (e.g. from StopPlaceGroupsFetcher).
+                return dataManagedObjectStructure.getValues(NetexIdMapper.ORIGINAL_ID_KEY);
             }
             return null;
         };
