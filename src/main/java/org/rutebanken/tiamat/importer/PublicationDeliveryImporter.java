@@ -188,7 +188,9 @@ public class PublicationDeliveryImporter {
             parkingsImportHandler.handleParkings(netexSiteFrame, importParams, parkingCounter, responseSiteFrame);
             pathLinkImportHandler.handlePathLinks(netexSiteFrame, importParams, pathLinkCounter, responseSiteFrame);
 
-            if(responseSiteFrame.getTariffZones() != null || responseSiteFrame.getTopographicPlaces() != null) {
+            if(responseSiteFrame.getTariffZones() != null
+                    || responseSiteFrame.getTopographicPlaces() != null
+                    || !fareFrameZoneIds.isEmpty()) {
                 backgroundJobs.triggerStopPlaceUpdate();
             }
             return publicationDeliveryCreator.createPublicationDelivery(responseSiteFrame);
