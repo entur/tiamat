@@ -31,9 +31,9 @@ public class GroupOfTariffZonesImporterTest extends TiamatIntegrationTest {
         groupOfTariffZones.getMembers().addAll(members);
 
 
-        final List<org.rutebanken.netex.model.GroupOfTariffZones> imported = groupOfTariffZonesImporter.importGroupOfTariffZones(List.of(groupOfTariffZones));
+        final GroupOfTariffZonesImportResult importResult = groupOfTariffZonesImporter.importGroupOfTariffZones(List.of(groupOfTariffZones));
 
-        assertThat(imported).isNotNull().hasSize(1);
+        assertThat(importResult.importedGroupsOfTariffZones()).isNotNull().hasSize(1);
 
 
         final List<GroupOfTariffZones> result = groupOfTariffZonesRepository.findByNetexId(groupOfTariffZones.getNetexId());

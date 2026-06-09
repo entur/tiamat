@@ -54,6 +54,7 @@ import org.rutebanken.netex.model.SiteFrame;
 import org.rutebanken.netex.model.TariffZone;
 import org.rutebanken.netex.model.TariffZonesInFrame_RelStructure;
 import org.rutebanken.netex.model.Zone_VersionStructure;
+import org.rutebanken.tiamat.config.TariffZoneConfig;
 import org.rutebanken.tiamat.importer.FareZoneImporter;
 import org.rutebanken.tiamat.importer.ImportParams;
 import org.rutebanken.tiamat.importer.ImportType;
@@ -64,6 +65,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -81,14 +83,18 @@ public class TariffZoneImportHandler {
 
     private final FareZoneImporter fareZoneImporter;
 
+    private final TariffZoneConfig tariffZoneConfig;
+
     public TariffZoneImportHandler(PublicationDeliveryHelper publicationDeliveryHelper,
                                    NetexMapper netexMapper,
                                    TariffZoneImporter tariffZoneImporter,
-                                   FareZoneImporter fareZoneImporter) {
+                                   FareZoneImporter fareZoneImporter,
+                                   TariffZoneConfig tariffZoneConfig) {
         this.publicationDeliveryHelper = publicationDeliveryHelper;
         this.netexMapper = netexMapper;
         this.tariffZoneImporter = tariffZoneImporter;
         this.fareZoneImporter = fareZoneImporter;
+        this.tariffZoneConfig = tariffZoneConfig;
     }
 
 
@@ -96,11 +102,20 @@ public class TariffZoneImportHandler {
 
 
         if (publicationDeliveryHelper.hasTariffZones(netexSiteFrame) && importParams.importType != ImportType.ID_MATCH) {
-            List<org.rutebanken.tiamat.model.TariffZone> tiamatTariffZones = netexSiteFrame.getTariffZones().getTariffZone().stream()
-                    .filter(this::isTariffZone)
-                    .map(jaxbElement -> (TariffZone) jaxbElement.getValue())
-                    .map(netexMapper::mapToTiamatModel)
-                    .collect(Collectors.toList());
+            List<org.rutebanken.tiamat.model.TariffZone> tiamatTariffZones;
+            if (tariffZoneConfig.isIgnoreImport()) {
+                long ignored = netexSiteFrame.getTariffZones().getTariffZone().stream().filter(this::isTariffZone).count();
+                if (ignored > 0) {
+                    logger.info("Ignoring {} deprecated TariffZones on import (ignoreTariffZoneImport=true)", ignored);
+                }
+                tiamatTariffZones = Collections.emptyList();
+            } else {
+                tiamatTariffZones = netexSiteFrame.getTariffZones().getTariffZone().stream()
+                        .filter(this::isTariffZone)
+                        .map(jaxbElement -> (TariffZone) jaxbElement.getValue())
+                        .map(netexMapper::mapToTiamatModel)
+                        .collect(Collectors.toList());
+            }
 
             List<org.rutebanken.tiamat.model.FareZone> tiamatFareZones = netexSiteFrame.getTariffZones().getTariffZone().stream()
                     .filter(this::isFareZone)

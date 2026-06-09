@@ -271,6 +271,15 @@ tiamat.locals.language.default=eng
 
 tariffZoneLookupService.resetReferences=true
 
+# External versioning (Tiamat as replica of master register): keep a single version per netexId
+# using the incoming version number, and clean up entities not present in the delivery
+fareZone.externalVersioning=false
+groupOfTariffZones.externalVersioning=false
+
+# TariffZones are deprecated. When enabled, plain TariffZones are skipped on import
+# (FareZones and GroupOfTariffZones are still imported)
+ignoreTariffZoneImport=false
+
 debug=true
 
 # Disable feature detection by this undocumented parameter. Check the org.hibernate.engine.jdbc.internal.JdbcServiceImpl.configure method for more details.
@@ -539,6 +548,35 @@ curl -XPOST -H"Content-Type: application/xml" \
 - `FARE_FRAME` mode returns FareFrame with fareZones only
 
 **Note:** When using `FARE_FRAME` mode, ensure your input XML has the correct NeTEx structure with FrameDefaults before ValidBetween elements.
+
+### Combined SiteFrame and FareFrame deliveries
+
+A publication delivery may contain both a SiteFrame and a FareFrame (Nordic profile: FareZones live in the FareFrame, while the GroupOfTariffZones referencing them lives in the SiteFrame). When both frames are present:
+
+- FareZones in the FareFrame are imported first, so a GroupOfTariffZones in the SiteFrame can reference them within the same delivery.
+- Group members not supplied in the delivery are resolved against already persisted FareZones in the database. The import fails if a referenced zone cannot be resolved either way.
+
+### External versioning for GroupOfTariffZones
+
+When Tiamat acts as a replica of a master register, version numbers can be managed externally:
+
+```properties
+groupOfTariffZones.externalVersioning=false
+```
+
+When enabled:
+- Only a single version is kept per netexId, updated in place using the incoming version number.
+- After import, groups not present in the delivery are deleted (full replace semantics).
+
+The equivalent property for FareZones is `fareZone.externalVersioning`. When enabled, FareZones not present in an incoming FareFrame delivery are pruned after import.
+
+### Ignoring deprecated TariffZones on import
+
+Plain TariffZones are deprecated in favour of FareZones. To skip them during import while still importing FareZones and GroupOfTariffZones:
+
+```properties
+ignoreTariffZoneImport=false
+```
 
 ## GraphQL
 GraphQL endpoint is available on
