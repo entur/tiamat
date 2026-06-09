@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.ext.fintraffic.api;
 
+import com.sun.xml.txw2.output.IndentingXMLStreamWriter;
 import jakarta.annotation.PostConstruct;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBElement;
@@ -214,9 +215,11 @@ public class ReadApiNetexMarshallingService {
 
         try (StringWriter stringWriter = new StringWriter(512)) {
             XMLStreamWriter xsw = new NoNameSpaceXMLStreamWriter(xof.createXMLStreamWriter(stringWriter));
+            XMLStreamWriter indentedXSW = new IndentingXMLStreamWriter(xsw);
+
             JAXBElement<?> jaxbElement = createJAXBElementForEntity(netexEntity);
             Marshaller marshaller = createMarshaller(netexEntity.getClass());
-            marshaller.marshal(jaxbElement, xsw);
+            marshaller.marshal(jaxbElement, indentedXSW);
             xsw.flush();
             return stringWriter.toString();
         } catch (JAXBException | XMLStreamException | IOException e) {

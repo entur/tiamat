@@ -38,6 +38,8 @@ public class ReadApiNetexPublicationDeliveryService {
     private static final byte[] END_TAG_STOP_PLACES = "</stopPlaces>".getBytes(StandardCharsets.UTF_8);
     private static final byte[] END_TAG_PARKINGS = "</parkings>".getBytes(StandardCharsets.UTF_8);
     private static final byte[] NEWLINE = "\n".getBytes(StandardCharsets.UTF_8);
+    private static final byte[] COLLECTION_TAG_SPACING = "            ".getBytes(StandardCharsets.UTF_8);
+    private static final byte[] COLLECTION_ITEM_TAG_SPACING = "                ".getBytes(StandardCharsets.UTF_8);
 
     private static final String TIMESTAMP_PLACEHOLDER = "\\{timeStamp}";
     private static final String PREFIX_PLACEHOLDER = "\\{prefix}";
@@ -163,11 +165,13 @@ public class ReadApiNetexPublicationDeliveryService {
             while (netexIterator.hasNext()) {
                 ReadApiEntityOutRecord netexEntityRow = netexIterator.next();
                 String type = netexEntityRow.type();
-                byte[] xmlEntity = netexEntityRow.xml();
+                String xmlEntity = netexEntityRow.xml();
+                String[] xmlEntityByLine = xmlEntity.split("\\n");
 
                 if (!Objects.equals(previousType, type)) {
                     // Close previous collection if needed
                     if (previousType != null) {
+                        outputStream.write(COLLECTION_TAG_SPACING);
                         outputStream.write(getCollectionEndTag(previousType));
                         outputStream.write(NEWLINE);
                     }
@@ -175,6 +179,7 @@ public class ReadApiNetexPublicationDeliveryService {
                     // Type has changed, need to move to the correct collection
                     while ((line = xmlReader.readLine()) != null) {
                         if (line.trim().equals(getCollectionTag(type))) {
+                            outputStream.write(COLLECTION_TAG_SPACING);
                             outputStream.write(getCollectionStartTag(type));
                             outputStream.write(NEWLINE);
                             break;
@@ -186,13 +191,23 @@ public class ReadApiNetexPublicationDeliveryService {
                     previousType = type;
                 }
 
-                outputStream.write(xmlEntity);
+                int i = 0;
+                for (String xmlEntityLine : xmlEntityByLine) {
+                    outputStream.write(COLLECTION_ITEM_TAG_SPACING);
+                    outputStream.write(xmlEntityLine.getBytes(StandardCharsets.UTF_8));
+                    i ++;
+                    if (i != xmlEntityByLine.length) {
+                        outputStream.write(NEWLINE);
+                    }
+                }
+
                 outputStream.write(NEWLINE);
                 entities++;
             }
 
             if (previousType != null) {
                 // Close last collection
+                outputStream.write(COLLECTION_TAG_SPACING);
                 outputStream.write(getCollectionEndTag(previousType));
                 outputStream.write(NEWLINE);
             }
