@@ -109,8 +109,6 @@ public class FintrafficSearchKeyService implements SearchKeyService {
         } else if (entity instanceof Parking) {
             // For Parking, use parent StopPlace search key if available
             return searchKeyFromParent.orElse(FintrafficReadApiSearchKey.empty());
-        } else if (entity instanceof TopographicPlace) {
-            return FintrafficReadApiSearchKey.empty();
         } else {
             return FintrafficReadApiSearchKey.empty();
         }

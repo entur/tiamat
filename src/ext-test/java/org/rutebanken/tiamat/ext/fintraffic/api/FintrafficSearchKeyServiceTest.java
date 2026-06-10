@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.rutebanken.tiamat.ext.fintraffic.api.model.FintrafficReadApiSearchKey;
+import org.rutebanken.tiamat.model.FareZone;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.VehicleModeEnumeration;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -148,6 +149,19 @@ class FintrafficSearchKeyServiceTest {
         String json = service.generateSearchKeyJSON(parentStopPlace);
 
         assertThat(json).contains("\"transportModes\":[]");
+    }
+
+    @Test
+    void generateSearchKeyJSON_fareZone_returnsEmptySearchKey() {
+        FareZone fareZone = new FareZone();
+        fareZone.setNetexId("TKL:FareZone:A");
+        fareZone.setVersion(1L);
+
+        FintrafficReadApiSearchKey searchKey = parseSearchKey(service.generateSearchKeyJSON(fareZone));
+
+        assertThat(searchKey.transportModes()).isEmpty();
+        assertThat(searchKey.areaCodes()).isEmpty();
+        assertThat(searchKey.municipalityCodes()).isEmpty();
     }
 
     private FintrafficReadApiSearchKey parseSearchKey(String json) {

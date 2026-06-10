@@ -29,6 +29,7 @@ public class FintrafficNetexRepository extends AbstractNetexRepository {
                 'ScheduledStopPoint',
                 'PassengerStopAssignment',
                 'TopographicPlace',
+                'FareZone',
                 'StopPlace',
                 'Parking'
             )
@@ -55,9 +56,9 @@ public class FintrafficNetexRepository extends AbstractNetexRepository {
             }
 
             if (!filters.isEmpty()) {
-                // TopographicPlace is always included regardless of search filters because it provides geographic
-                // context needed for all stop place data
-                sql.append(" AND (type = 'TopographicPlace' OR (");
+                // TopographicPlace and FareZone are always included regardless of search filters
+                // because they provide reference data needed for all stop place data
+                sql.append(" AND (type IN ('TopographicPlace', 'FareZone') OR (");
                 sql.append(String.join(" AND ", filters));
                 sql.append("))");
             }
@@ -69,9 +70,10 @@ public class FintrafficNetexRepository extends AbstractNetexRepository {
                 WHEN 'ScheduledStopPoint' THEN 1
                 WHEN 'PassengerStopAssignment' THEN 2
                 WHEN 'TopographicPlace' THEN 3
-                WHEN 'StopPlace' THEN 4
-                WHEN 'Parking' THEN 5
-                ELSE 6
+                WHEN 'FareZone' THEN 4
+                WHEN 'StopPlace' THEN 5
+                WHEN 'Parking' THEN 6
+                ELSE 7
             END
         """);
 

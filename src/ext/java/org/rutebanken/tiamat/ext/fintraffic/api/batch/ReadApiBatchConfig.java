@@ -2,6 +2,7 @@ package org.rutebanken.tiamat.ext.fintraffic.api.batch;
 
 import org.rutebanken.tiamat.ext.fintraffic.api.ReadApiNetexMarshallingService;
 import org.rutebanken.tiamat.ext.fintraffic.api.repository.NetexRepository;
+import org.rutebanken.tiamat.repository.FareZoneRepository;
 import org.rutebanken.tiamat.repository.ParkingRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
@@ -18,13 +19,15 @@ public class ReadApiBatchConfig {
             ReadApiNetexMarshallingService marshallingService,
             StopPlaceRepository stopPlaceRepository,
             ParkingRepository parkingRepository,
-            TopographicPlaceRepository topographicPlaceRepository
+            TopographicPlaceRepository topographicPlaceRepository,
+            FareZoneRepository fareZoneRepository
     ) {
         return new ReadApiBatchUpdateService(
                 marshallingService,
                 stopPlaceRepository,
                 parkingRepository,
-                topographicPlaceRepository
+                topographicPlaceRepository,
+                fareZoneRepository
         );
     }
 
