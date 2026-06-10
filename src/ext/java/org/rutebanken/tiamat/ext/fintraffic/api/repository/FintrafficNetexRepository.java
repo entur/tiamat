@@ -78,7 +78,7 @@ public class FintrafficNetexRepository extends AbstractNetexRepository {
 
         return jdbc.queryForStream(
                 sql.toString(),
-                (rs, rn) -> new ReadApiEntityOutRecord(rs.getString("type"), rs.getBytes("xml")),
+                (rs, rn) -> new ReadApiEntityOutRecord(rs.getString("type"), rs.getString("xml")),
                 params.toArray()
         );
     }
