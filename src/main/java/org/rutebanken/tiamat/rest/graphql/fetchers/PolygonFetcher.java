@@ -27,7 +27,7 @@ public class PolygonFetcher implements DataFetcher {
     @Override
     public Object get(DataFetchingEnvironment environment) {
         if(environment.getSource() instanceof Zone_VersionStructure zoneVersionStructure) {
-            return zoneVersionStructure.getPolygon();
+            return zoneVersionStructure.getGeometry();
         }
         return null;
     }
