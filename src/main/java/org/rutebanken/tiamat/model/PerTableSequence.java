@@ -15,27 +15,18 @@
 
 package org.rutebanken.tiamat.model;
 
+import org.hibernate.annotations.IdGeneratorType;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import org.locationtech.jts.geom.Polygon;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 
-import java.io.Serializable;
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-@Entity
-public class PersistablePolygon implements Serializable {
-
-    @Id
-    @PerTableSequence
-    protected Long id;
-
-    private Polygon polygon;
-
-    public Polygon getPolygon() {
-        return polygon;
-    }
-
-    public void setPolygon(Polygon polygon) {
-        this.polygon = polygon;
-    }
+@IdGeneratorType(PerTableSequenceGenerator.class)
+@Target({METHOD, FIELD})
+@Retention(RUNTIME)
+public @interface PerTableSequence {
+    int allocationSize() default 10;
 }
