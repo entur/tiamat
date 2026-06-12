@@ -13,22 +13,17 @@
  * limitations under the Licence.
  */
 
-package org.rutebanken.tiamat.rest.graphql.fetchers;
+package org.rutebanken.tiamat.importer;
 
+import org.rutebanken.netex.model.GroupOfTariffZones;
 
-import graphql.schema.DataFetcher;
-import graphql.schema.DataFetchingEnvironment;
-import org.rutebanken.tiamat.model.Zone_VersionStructure;
-import org.springframework.stereotype.Component;
+import java.util.List;
+import java.util.Set;
 
-@Component
-public class PolygonFetcher implements DataFetcher {
+/**
+ * Result of GroupOfTariffZones import operation.
+ * Contains the imported groups and their netexIds for cleanup tracking.
+ */
+public record GroupOfTariffZonesImportResult(List<GroupOfTariffZones> importedGroupsOfTariffZones, Set<String> importedNetexIds) {
 
-    @Override
-    public Object get(DataFetchingEnvironment environment) {
-        if(environment.getSource() instanceof Zone_VersionStructure zoneVersionStructure) {
-            return zoneVersionStructure.getGeometry();
-        }
-        return null;
-    }
 }

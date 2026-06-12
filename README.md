@@ -28,8 +28,11 @@ A frontend for Tiamat is available. It's name is Abzu.
 See https://github.com/entur/abzu
 
 ### Supports running multiple instances
-Tiamat uses Hazelcast memory grid to communicate with other instances in kubernetes.
-This means that you can run multiple instances.
+Tiamat uses a Hazelcast memory grid to communicate with other instances in Kubernetes or AWS Fargate.
+This means that you can run multiple instances. If multiple instances are running, the Hazelcast cluster **must** be 
+configured correctly. The application instances **must** be able to accept incoming connections to the configured 
+service port `tiamat.hazelcast.service-port`. Additionally, one of the properties `tiamat.hazelcast.kubernetes.enabled` 
+or `tiamat.hazelcast.aws.enabled` **must** be set to true.
 
 ### Mapping of IDs
 After import stop places and assigning new IDs to stop places, tiamat keeps olds IDs in a mapping table.
@@ -267,6 +270,15 @@ spring.datasource.hikari.leakDetectionThreshold=30000
 tiamat.locals.language.default=eng
 
 tariffZoneLookupService.resetReferences=true
+
+# External versioning (Tiamat as replica of master register): keep a single version per netexId
+# using the incoming version number, and clean up entities not present in the delivery
+fareZone.externalVersioning=false
+groupOfTariffZones.externalVersioning=false
+
+# TariffZones are deprecated. When enabled, plain TariffZones are skipped on import
+# (FareZones and GroupOfTariffZones are still imported)
+ignoreTariffZoneImport=false
 
 debug=true
 
@@ -536,6 +548,35 @@ curl -XPOST -H"Content-Type: application/xml" \
 - `FARE_FRAME` mode returns FareFrame with fareZones only
 
 **Note:** When using `FARE_FRAME` mode, ensure your input XML has the correct NeTEx structure with FrameDefaults before ValidBetween elements.
+
+### Combined SiteFrame and FareFrame deliveries
+
+A publication delivery may contain both a SiteFrame and a FareFrame (Nordic profile: FareZones live in the FareFrame, while the GroupOfTariffZones referencing them lives in the SiteFrame). When both frames are present:
+
+- FareZones in the FareFrame are imported first, so a GroupOfTariffZones in the SiteFrame can reference them within the same delivery.
+- Group members not supplied in the delivery are resolved against already persisted FareZones in the database. The import fails if a referenced zone cannot be resolved either way.
+
+### External versioning for GroupOfTariffZones
+
+When Tiamat acts as a replica of a master register, version numbers can be managed externally:
+
+```properties
+groupOfTariffZones.externalVersioning=false
+```
+
+When enabled:
+- Only a single version is kept per netexId, updated in place using the incoming version number.
+- After import, groups not present in the delivery are deleted (full replace semantics).
+
+The equivalent property for FareZones is `fareZone.externalVersioning`. When enabled, FareZones not present in an incoming FareFrame delivery are pruned after import.
+
+### Ignoring deprecated TariffZones on import
+
+Plain TariffZones are deprecated in favour of FareZones. To skip them during import while still importing FareZones and GroupOfTariffZones:
+
+```properties
+ignoreTariffZoneImport=false
+```
 
 ## GraphQL
 GraphQL endpoint is available on

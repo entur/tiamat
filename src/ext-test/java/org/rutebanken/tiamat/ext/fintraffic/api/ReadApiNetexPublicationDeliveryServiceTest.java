@@ -60,7 +60,7 @@ class ReadApiNetexPublicationDeliveryServiceTest {
     @Test
     void streamPublicationDelivery_withFareZone_includesTariffZonesCollection() throws Exception {
         String fareZoneXml = "<FareZone id=\"TKL:FareZone:A\" version=\"1\"><Name>Zone A</Name></FareZone>";
-        ReadApiEntityOutRecord fareZoneRecord = new ReadApiEntityOutRecord("FareZone", fareZoneXml.getBytes());
+        ReadApiEntityOutRecord fareZoneRecord = new ReadApiEntityOutRecord("FareZone", fareZoneXml);
 
         when(netexRepository.streamStopPlaces(any(ReadApiSearchKey.class)))
                 .thenReturn(Stream.of(fareZoneRecord));
@@ -78,8 +78,8 @@ class ReadApiNetexPublicationDeliveryServiceTest {
     void streamPublicationDelivery_fareZoneAppearsBeforeStopPlaces() throws Exception {
         String fareZoneXml = "<FareZone id=\"TKL:FareZone:A\" version=\"1\"/>";
         String stopPlaceXml = "<StopPlace id=\"FSR:StopPlace:1\" version=\"1\"/>";
-        ReadApiEntityOutRecord fareZoneRecord = new ReadApiEntityOutRecord("FareZone", fareZoneXml.getBytes());
-        ReadApiEntityOutRecord stopPlaceRecord = new ReadApiEntityOutRecord("StopPlace", stopPlaceXml.getBytes());
+        ReadApiEntityOutRecord fareZoneRecord = new ReadApiEntityOutRecord("FareZone", fareZoneXml);
+        ReadApiEntityOutRecord stopPlaceRecord = new ReadApiEntityOutRecord("StopPlace", stopPlaceXml);
 
         when(netexRepository.streamStopPlaces(any(ReadApiSearchKey.class)))
                 .thenReturn(Stream.of(fareZoneRecord, stopPlaceRecord));

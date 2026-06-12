@@ -13,22 +13,18 @@
  * limitations under the Licence.
  */
 
-package org.rutebanken.tiamat.rest.graphql.fetchers;
+package org.rutebanken.tiamat.config;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Configuration;
 
-import graphql.schema.DataFetcher;
-import graphql.schema.DataFetchingEnvironment;
-import org.rutebanken.tiamat.model.Zone_VersionStructure;
-import org.springframework.stereotype.Component;
+@Configuration
+public class GroupOfTariffZonesConfig {
 
-@Component
-public class PolygonFetcher implements DataFetcher {
+    @Value("${groupOfTariffZones.externalVersioning:false}")
+    private boolean externalVersioning;
 
-    @Override
-    public Object get(DataFetchingEnvironment environment) {
-        if(environment.getSource() instanceof Zone_VersionStructure zoneVersionStructure) {
-            return zoneVersionStructure.getGeometry();
-        }
-        return null;
+    public boolean isExternalVersioning() {
+        return externalVersioning;
     }
 }

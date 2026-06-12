@@ -101,7 +101,7 @@ public class PublicationDeliveryTariffZoneImporter {
             responseSiteFrame.withId(requestId + "-response").withVersion("1");
 
             tariffZoneImportHandler.handleTariffZones(netexSiteFrame, importParams, tariffZoneCounter, responseSiteFrame);
-            groupOfTariffZonesImportHandler.handleGroupOfTariffZones(netexSiteFrame,importParams,responseSiteFrame);
+            groupOfTariffZonesImportHandler.handleGroupOfTariffZones(netexSiteFrame, importParams, responseSiteFrame, java.util.Collections.emptySet());
 
             if(responseSiteFrame.getTariffZones() != null || responseSiteFrame.getTopographicPlaces() != null) {
                 backgroundJobs.triggerStopPlaceUpdate();

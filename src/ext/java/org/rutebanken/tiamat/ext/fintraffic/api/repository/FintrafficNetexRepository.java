@@ -74,12 +74,13 @@ public class FintrafficNetexRepository extends AbstractNetexRepository {
                 WHEN 'StopPlace' THEN 5
                 WHEN 'Parking' THEN 6
                 ELSE 7
-            END
+            END,
+            id
         """);
 
         return jdbc.queryForStream(
                 sql.toString(),
-                (rs, rn) -> new ReadApiEntityOutRecord(rs.getString("type"), rs.getBytes("xml")),
+                (rs, rn) -> new ReadApiEntityOutRecord(rs.getString("type"), rs.getString("xml")),
                 params.toArray()
         );
     }

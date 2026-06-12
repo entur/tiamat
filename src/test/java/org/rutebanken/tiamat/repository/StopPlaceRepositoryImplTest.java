@@ -25,16 +25,7 @@ import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.exporter.params.StopPlaceSearch;
-import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
-import org.rutebanken.tiamat.model.EntityStructure;
-import org.rutebanken.tiamat.model.Quay;
-import org.rutebanken.tiamat.model.SiteRefStructure;
-import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.model.StopTypeEnumeration;
-import org.rutebanken.tiamat.model.TopographicPlace;
-import org.rutebanken.tiamat.model.TopographicPlaceRefStructure;
-import org.rutebanken.tiamat.model.ValidBetween;
-import org.rutebanken.tiamat.model.Value;
+import org.rutebanken.tiamat.model.*;
 import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
 import org.rutebanken.tiamat.model.tag.Tag;
 import org.rutebanken.tiamat.repository.search.ChangedStopPlaceSearch;
@@ -1520,6 +1511,57 @@ public class StopPlaceRepositoryImplTest extends TiamatIntegrationTest {
         assertThat(searchResult).isEmpty();
     }
 
+    @Test
+    public void findByQuayPrivatePublicCodes() {
+        StopPlace stopPlace = new StopPlace();
+        String stopPlaceName = "someStopPlaceName";
+        stopPlace.setName(new EmbeddableMultilingualString(stopPlaceName, ""));
+
+        Quay quay = new Quay();
+        String privateCode = "somePrivateCode";
+        String publicCode = "somePublicCode";
+        quay.setPublicCode(publicCode);
+        quay.setPrivateCode(new PrivateCodeStructure(privateCode, "type"));
+        stopPlace.setQuays(Set.of(quay));
+
+        stopPlaceRepository.save(stopPlace);
+
+        // By private code:
+        ExportParams exportParamsWithPrivateCode = newExportParamsBuilder().setStopPlaceSearch(newStopPlaceSearchBuilder()
+                        .setQuery(privateCode)
+                        .setWithQuayPublicAndPrivateCodes(true)
+                        .setVersionValidity(ExportParams.VersionValidity.MAX_VERSION)
+                        .build())
+                .build();
+        Page<StopPlace> searchResult = stopPlaceRepository.findStopPlace(exportParamsWithPrivateCode);
+        assertThat(searchResult).isNotEmpty();
+        assertThat(searchResult.getContent().size()).isEqualTo(1);
+        assertThat(searchResult.getContent()).extracting(s -> s.getName().getValue()).contains(stopPlace.getName().getValue());
+
+        // By public code:
+        exportParamsWithPrivateCode = newExportParamsBuilder().setStopPlaceSearch(newStopPlaceSearchBuilder()
+                        .setQuery(publicCode)
+                        .setWithQuayPublicAndPrivateCodes(true)
+                        .setVersionValidity(ExportParams.VersionValidity.MAX_VERSION)
+                        .build())
+                .build();
+        searchResult = stopPlaceRepository.findStopPlace(exportParamsWithPrivateCode);
+        assertThat(searchResult).isNotEmpty();
+        assertThat(searchResult.getContent().size()).isEqualTo(1);
+        assertThat(searchResult.getContent()).extracting(s -> s.getName().getValue()).contains(stopPlace.getName().getValue());
+
+        // Normal search by stop place name also still works:
+        exportParamsWithPrivateCode = newExportParamsBuilder().setStopPlaceSearch(newStopPlaceSearchBuilder()
+                        .setQuery(stopPlaceName)
+                        .setWithQuayPublicAndPrivateCodes(true)
+                        .setVersionValidity(ExportParams.VersionValidity.MAX_VERSION)
+                        .build())
+                .build();
+        searchResult = stopPlaceRepository.findStopPlace(exportParamsWithPrivateCode);
+        assertThat(searchResult).isNotEmpty();
+        assertThat(searchResult.getContent().size()).isEqualTo(1);
+        assertThat(searchResult.getContent()).extracting(s -> s.getName().getValue()).contains(stopPlace.getName().getValue());
+    }
 
     private Quay saveQuay(StopPlace stopPlace, String id, Long version, String orgIdKeyName, String orgId) {
         Quay quay = new Quay(new EmbeddableMultilingualString("Quay"));
