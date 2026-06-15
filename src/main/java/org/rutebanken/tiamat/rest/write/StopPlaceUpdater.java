@@ -1,5 +1,7 @@
 package org.rutebanken.tiamat.rest.write;
 
+import org.rutebanken.tiamat.model.AccessibilityAssessment;
+import org.rutebanken.tiamat.model.PlaceEquipment;
 import org.rutebanken.tiamat.model.PostalAddress;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -121,11 +123,11 @@ public class StopPlaceUpdater {
     private void updateAccessibilityAssessment(StopPlace originalStopPlace, StopPlace editedStopPlace) {
         if (editedStopPlace.getAccessibilityAssessment() != null) {
             if (originalStopPlace.getAccessibilityAssessment() == null) {
-                originalStopPlace.setAccessibilityAssessment(createStopPlaceMapper.createCopy(editedStopPlace.getAccessibilityAssessment(), originalStopPlace.getAccessibilityAssessment().getClass()));
+                originalStopPlace.setAccessibilityAssessment(createStopPlaceMapper.createCopy(editedStopPlace.getAccessibilityAssessment(), AccessibilityAssessment.class));
             } else {
                 var editedAccessibilityAssessmentNetexId = editedStopPlace.getAccessibilityAssessment().getNetexId();
                 var originalAccessibilityAssessmentNetexId = originalStopPlace.getAccessibilityAssessment().getNetexId();
-                if (!editedAccessibilityAssessmentNetexId.equals(originalAccessibilityAssessmentNetexId)) {
+                if (!Objects.equals(editedAccessibilityAssessmentNetexId, originalAccessibilityAssessmentNetexId)) {
                     throw new IllegalArgumentException("Cannot update accessibility assessment with netex id " + editedAccessibilityAssessmentNetexId +
                             " on stop place " + originalStopPlace.getNetexId() +
                             " because it does not match the existing accessibility assessment netex id " + originalAccessibilityAssessmentNetexId);
@@ -140,7 +142,7 @@ public class StopPlaceUpdater {
     private void updatePlaceEquipments(StopPlace originalStopPlace, StopPlace editedStopPlace) {
         if (editedStopPlace.getPlaceEquipments() != null) {
             if (originalStopPlace.getPlaceEquipments() == null) {
-                originalStopPlace.setPlaceEquipments(createStopPlaceMapper.createCopy(editedStopPlace.getPlaceEquipments(), originalStopPlace.getPlaceEquipments().getClass()));
+                originalStopPlace.setPlaceEquipments(createStopPlaceMapper.createCopy(editedStopPlace.getPlaceEquipments(), PlaceEquipment.class));
             } else {
                 var editedPlaceEquipmentNetexId = editedStopPlace.getPlaceEquipments().getNetexId();
                 var originalPlaceEquipmentNetexId = originalStopPlace.getPlaceEquipments().getNetexId();
