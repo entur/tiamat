@@ -151,8 +151,8 @@ public class StopPlaceUpdaterTest {
     @Test
     public void doesIncrementVersionIfPostalAddressIsChanged() {
         var original = new StopPlace();
-        original.setVersion(1L);
         var originalPostalAddress = new PostalAddress();
+        originalPostalAddress.setVersion(1L);
         originalPostalAddress.setPostCode("1234");
         original.setPostalAddress(originalPostalAddress);
 
@@ -163,7 +163,7 @@ public class StopPlaceUpdaterTest {
 
         var result = stopPlaceUpdater.update(original, update);
 
-        assertThat(result.getVersion()).isEqualTo(2L);
+        assertThat(result.getPostalAddress().getVersion()).isEqualTo(2L);
     }
 
     @Test

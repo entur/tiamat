@@ -47,7 +47,7 @@ public class StopPlaceUpdater {
 
         if (updatePostalAddressVersion) {
             logger.info("Postal address for stop place {} updated, incrementing version.", originalStopPlace.getNetexId());
-            originalStopPlace.setVersion(originalStopPlace.getVersion() + 1);
+            originalStopPlace.getPostalAddress().setVersion(originalStopPlace.getPostalAddress().getVersion() + 1);
         }
 
         // Put the correctly merged quays back
