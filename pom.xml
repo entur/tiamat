@@ -594,7 +594,7 @@
                 </dependencies>
                 <configuration>
                     <from>
-                        <image>eclipse-temurin:21.0.1_12-jdk-alpine</image>
+                        <image>eclipse-temurin:25.0.3_9-jdk-alpine</image>
                     </from>
                     <to>
                         <image>${env.CONTAINER_REPO}</image>
