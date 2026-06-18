@@ -33,6 +33,7 @@ import org.rutebanken.tiamat.model.AddressablePlaceRefStructure;
 import org.rutebanken.tiamat.model.AlternativeName;
 import org.rutebanken.tiamat.model.CountryRef;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
+import org.rutebanken.tiamat.model.FareZone;
 import org.rutebanken.tiamat.model.GroupOfStopPlaces;
 import org.rutebanken.tiamat.model.IanaCountryTldEnumeration;
 import org.rutebanken.tiamat.model.LightingEnumeration;
@@ -41,6 +42,7 @@ import org.rutebanken.tiamat.model.NameTypeEnumeration;
 import org.rutebanken.tiamat.model.PathLink;
 import org.rutebanken.tiamat.model.PathLinkEnd;
 import org.rutebanken.tiamat.model.Quay;
+import org.rutebanken.tiamat.model.ScopingMethodEnumeration;
 import org.rutebanken.tiamat.model.SiteFrame;
 import org.rutebanken.tiamat.model.SiteRefStructure;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -48,10 +50,12 @@ import org.rutebanken.tiamat.model.StopPlaceReference;
 import org.rutebanken.tiamat.model.StopPlacesInFrame_RelStructure;
 import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.model.TopographicPlaceRefStructure;
+import org.rutebanken.tiamat.model.ValidBetween;
 import org.rutebanken.tiamat.model.Value;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.Instant;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -612,5 +616,49 @@ public class NetexMapperTest extends TiamatIntegrationTest {
         assertThat(
                 firstSiteRef.getRef())
                 .isEqualTo("NSR:StopPlace:1");
+    }
+
+    /**
+     * A FareZone with EXPLICIT_STOPS scoping stores its members as StopPlace references.
+     * On export each member is rewritten to a ScheduledStopPoint ref with an "S" prefix,
+     * so the import must strip that prefix to restore the original StopPlace ref.
+     * This verifies the export -> import round-trip is stable.
+     */
+    @Test
+    public void fareZoneExplicitStopsMembersSurviveNetexRoundTrip() {
+        NetexMappingContext mappingContext = new NetexMappingContext();
+        mappingContext.defaultTimeZone = ZoneId.of("Europe/Oslo");
+        NetexMappingContextThreadLocal.set(mappingContext);
+        try {
+            FareZone tiamatFareZone = new FareZone();
+            tiamatFareZone.setNetexId("NSR:FareZone:1");
+            tiamatFareZone.setVersion(1L);
+            tiamatFareZone.setName(new EmbeddableMultilingualString("Round trip zone"));
+            tiamatFareZone.setValidBetween(new ValidBetween(Instant.now().minusSeconds(3600)));
+            tiamatFareZone.setScopingMethod(ScopingMethodEnumeration.EXPLICIT_STOPS);
+            tiamatFareZone.getFareZoneMembers().add(new StopPlaceReference("NSR:StopPlace:123"));
+
+            // Export: StopPlace ref -> ScheduledStopPoint ref with "S" prefix added.
+            org.rutebanken.netex.model.FareZone netexFareZone = netexMapper.mapToNetexModel(tiamatFareZone);
+
+            assertThat(netexFareZone.getScopingMethod())
+                    .as("scoping method preserved on export")
+                    .isEqualTo(org.rutebanken.netex.model.ScopingMethodEnumeration.EXPLICIT_STOPS);
+            assertThat(netexFareZone.getMembers()).as("members").isNotNull();
+            assertThat(netexFareZone.getMembers().getPointRef())
+                    .as("exported member point refs")
+                    .extracting(pointRef -> pointRef.getValue().getRef())
+                    .containsExactly("NSR:ScheduledStopPoint:S123");
+
+            // Import: ScheduledStopPoint ref -> StopPlace ref, "S" prefix stripped.
+            FareZone roundTripped = netexMapper.mapToTiamatModel(netexFareZone);
+
+            assertThat(roundTripped.getFareZoneMembers())
+                    .as("round-tripped fare zone members")
+                    .extracting(StopPlaceReference::getRef)
+                    .containsExactly("NSR:StopPlace:123");
+        } finally {
+            NetexMappingContextThreadLocal.set(null);
+        }
     }
 }
