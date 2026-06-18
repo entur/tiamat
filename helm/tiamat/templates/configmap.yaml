@@ -51,6 +51,9 @@ data:
     tiamat.hazelcast.service-port=5701
     tiamat.hazelcast.kubernetes.enabled=false
 
+    # External farezone
+    fareZone.externalVersioning = {{ .Values.farezone.externalVersioning }}
+
 
 
     # Security config with auth0

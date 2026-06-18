@@ -10,6 +10,9 @@ configMap:
   pubsbuTopicName: ror.tiamat.changelog
   gcsBucketName: ror-tiamat-gcp2-dev
 
+farezone:
+  externalVersioning: true
+
 auth0:
   entur:
     internal:
