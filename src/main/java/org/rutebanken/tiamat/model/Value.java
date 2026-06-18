@@ -19,8 +19,6 @@ import com.google.common.base.MoreObjects;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import org.hibernate.annotations.Cache;
@@ -37,7 +35,7 @@ import java.util.Set;
 public class Value implements Serializable {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence_per_table_generator")
+    @PerTableSequence
     private long id;
 
     @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)

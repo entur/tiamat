@@ -31,6 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.List;
 
 @Component
@@ -71,7 +72,7 @@ public class LineStringConverter extends BidirectionalConverter<LineStringType, 
         DirectPositionListType directPositionListType = new DirectPositionListType();
 
         if(lineString.getCoordinates() != null) {
-            logger.debug("Converting coordinates {}", lineString.getCoordinates());
+            logger.debug("Converting coordinates {}", Arrays.toString(lineString.getCoordinates()));
             List<Double> positions = directPositionListType.getValue();
             for(Coordinate coordinate : lineString.getCoordinates()) {
                 positions.add(coordinate.y);
