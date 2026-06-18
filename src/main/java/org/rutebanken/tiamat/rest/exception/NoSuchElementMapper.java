@@ -27,9 +27,11 @@ public class NoSuchElementMapper implements ExceptionMapper<NoSuchElementExcepti
     public Response toResponse(NoSuchElementException ex) {
         // Return a serializable text/plain body. Previously the raw exception was set as the
         // entity with no media type, which had no MessageBodyWriter and collapsed to a generic 500.
+        // Fall back to toString() when the exception carries no message.
+        String message = ex.getMessage() != null ? ex.getMessage() : ex.toString();
         return Response.status(Response.Status.NOT_FOUND)
                 .type(MediaType.TEXT_PLAIN_TYPE)
-                .entity(new ErrorResponseEntity(ex.getMessage()))
+                .entity(new ErrorResponseEntity(message))
                 .build();
     }
 }

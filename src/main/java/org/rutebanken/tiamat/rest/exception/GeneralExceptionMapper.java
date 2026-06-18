@@ -59,13 +59,17 @@ public class GeneralExceptionMapper implements ExceptionMapper<Exception> {
             status = toStatus(rootCause);
         }
 
+        // Fall back to toString() (class name) when the exception carries no message,
+        // so the client still gets something meaningful (e.g. "java.lang.NullPointerException").
+        String message = rootCause.getMessage() != null ? rootCause.getMessage() : rootCause.toString();
+
         // Pin the media type to text/plain so ErrorResponseEntityMessageBodyWriter (also text/plain)
         // can serialize the body. Without this the response inherits the resource's @Produces
         // (e.g. application/xml on the import endpoint), no writer matches ErrorResponseEntity,
         // and the real cause is silently replaced by a generic 500.
         return Response.status(status)
                        .type(MediaType.TEXT_PLAIN_TYPE)
-                       .entity(new ErrorResponseEntity(rootCause.getMessage()))
+                       .entity(new ErrorResponseEntity(message))
                        .build();
     }
 

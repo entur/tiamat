@@ -56,7 +56,9 @@ public class ErrorResponseEntityMessageBodyWriter implements MessageBodyWriter<E
         Optional.ofNullable(errorResponseEntity.errors)
                 .ifPresent(errors -> errors.forEach(error -> {
                     try {
-                        writer.write(error.message);
+                        // Guard against null messages (e.g. a NullPointerException has none):
+                        // PrintWriter.write(String) NPEs on null, which would itself fail the response.
+                        writer.write(error.message != null ? error.message : "");
                         writer.write("\n");
                     } catch (IOException e) {
                         logger.error("Cannot write error message when serializing error response entity", e);
