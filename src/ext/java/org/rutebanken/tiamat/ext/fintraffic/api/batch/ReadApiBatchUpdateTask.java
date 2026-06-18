@@ -53,12 +53,12 @@ public class ReadApiBatchUpdateTask implements ApplicationRunner {
 
         try {
             // Step 1: Mark all rows as STALE
-            logger.info("Step 1/5: Marking all entities as STALE");
+            logger.info("Step 1/6: Marking all entities as STALE");
             int markedStale = netexRepository.markAllEntitiesAsStale();
             logger.info("Marked {} entities as STALE", markedStale);
 
             // Step 2: Process TopographicPlaces (municipalities only)
-            logger.info("Step 2/5: Processing TopographicPlaces");
+            logger.info("Step 2/6: Processing TopographicPlaces");
             ReadApiBatchUpdateService.ProcessingStats topographicPlaceStats =
                 readApiBatchUpdateService.processTopographicPlacesInBatches(DEFAULT_BATCH_SIZE, batch -> {
                     readApiBatchWriteService.upsertBatch(batch);
@@ -75,8 +75,26 @@ public class ReadApiBatchUpdateTask implements ApplicationRunner {
                 topographicPlaceStats.entitiesFailed(),
                 formatDuration(topographicPlaceStats.duration()));
 
-            // Step 3: Process StopPlaces in batches (streaming)
-            logger.info("Step 3/5: Processing StopPlaces (this may take 1-2 hours)");
+            // Step 3: Process FareZones
+            logger.info("Step 3/6: Processing FareZones");
+            ReadApiBatchUpdateService.ProcessingStats fareZoneStats =
+                readApiBatchUpdateService.processFareZonesInBatches(DEFAULT_BATCH_SIZE, batch -> {
+                    readApiBatchWriteService.upsertBatch(batch);
+                    logger.debug("Upserted batch of {} FareZone records", batch.size());
+                });
+
+            totalEntitiesProcessed += fareZoneStats.entitiesProcessed();
+            totalRecordsGenerated += fareZoneStats.recordsGenerated();
+            totalEntitiesFailed += fareZoneStats.entitiesFailed();
+
+            logger.info("FareZone processing completed: {} entities → {} records ({} failed) in {}",
+                fareZoneStats.entitiesProcessed(),
+                fareZoneStats.recordsGenerated(),
+                fareZoneStats.entitiesFailed(),
+                formatDuration(fareZoneStats.duration()));
+
+            // Step 4: Process StopPlaces in batches (streaming)
+            logger.info("Step 4/6: Processing StopPlaces (this may take 1-2 hours)");
             ReadApiBatchUpdateService.ProcessingStats stopPlaceStats =
                 readApiBatchUpdateService.processStopPlacesInBatches(DEFAULT_BATCH_SIZE, batch -> {
                     readApiBatchWriteService.upsertBatch(batch);
@@ -93,8 +111,8 @@ public class ReadApiBatchUpdateTask implements ApplicationRunner {
                 stopPlaceStats.entitiesFailed(),
                 formatDuration(stopPlaceStats.duration()));
 
-            // Step 4: Process Parkings in batches (streaming)
-            logger.info("Step 4/5: Processing Parkings");
+            // Step 5: Process Parkings in batches (streaming)
+            logger.info("Step 5/6: Processing Parkings");
             ReadApiBatchUpdateService.ProcessingStats parkingStats =
                 readApiBatchUpdateService.processParkingsInBatches(DEFAULT_BATCH_SIZE, batch -> {
                     readApiBatchWriteService.upsertBatch(batch);
@@ -111,8 +129,8 @@ public class ReadApiBatchUpdateTask implements ApplicationRunner {
                 parkingStats.entitiesFailed(),
                 formatDuration(parkingStats.duration()));
 
-            // Step 5: Clean up deleted entities
-            logger.info("Step 5/5: Cleaning up stale entities");
+            // Step 6: Clean up deleted entities
+            logger.info("Step 6/6: Cleaning up stale entities");
             int deletedCount = -1;
             if (totalEntitiesFailed > 0) {
                 logger.warn("There were {} failed entities during processing. " +

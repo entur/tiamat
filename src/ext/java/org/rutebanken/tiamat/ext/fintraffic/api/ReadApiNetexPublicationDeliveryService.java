@@ -25,16 +25,19 @@ public class ReadApiNetexPublicationDeliveryService {
     private static final String COLLECTION_TAG_SCHEDULED_STOP_POINTS = "<scheduledStopPoints/>";
     private static final String COLLECTION_TAG_STOP_ASSIGNMENTS = "<stopAssignments/>";
     private static final String COLLECTION_TAG_TOPOGRAPHIC_PLACES = "<topographicPlaces/>";
+    private static final String COLLECTION_TAG_TARIFF_ZONES = "<tariffZones/>";
     private static final String COLLECTION_TAG_STOP_PLACES = "<stopPlaces/>";
     private static final String COLLECTION_TAG_PARKINGS = "<parkings/>";
     private static final byte[] START_TAG_SCHEDULED_STOP_POINTS = "<scheduledStopPoints>".getBytes(StandardCharsets.UTF_8);
     private static final byte[] START_TAG_STOP_ASSIGNMENTS = "<stopAssignments>".getBytes(StandardCharsets.UTF_8);
     private static final byte[] START_TAG_TOPOGRAPHIC_PLACES = "<topographicPlaces>".getBytes(StandardCharsets.UTF_8);
+    private static final byte[] START_TAG_TARIFF_ZONES = "<tariffZones>".getBytes(StandardCharsets.UTF_8);
     private static final byte[] START_TAG_STOP_PLACES = "<stopPlaces>".getBytes(StandardCharsets.UTF_8);
     private static final byte[] START_TAG_PARKINGS = "<parkings>".getBytes(StandardCharsets.UTF_8);
     private static final byte[] END_TAG_SCHEDULED_STOP_POINTS = "</scheduledStopPoints>".getBytes(StandardCharsets.UTF_8);
     private static final byte[] END_TAG_STOP_ASSIGNMENTS = "</stopAssignments>".getBytes(StandardCharsets.UTF_8);
     private static final byte[] END_TAG_TOPOGRAPHIC_PLACES = "</topographicPlaces>".getBytes(StandardCharsets.UTF_8);
+    private static final byte[] END_TAG_TARIFF_ZONES = "</tariffZones>".getBytes(StandardCharsets.UTF_8);
     private static final byte[] END_TAG_STOP_PLACES = "</stopPlaces>".getBytes(StandardCharsets.UTF_8);
     private static final byte[] END_TAG_PARKINGS = "</parkings>".getBytes(StandardCharsets.UTF_8);
     private static final byte[] NEWLINE = "\n".getBytes(StandardCharsets.UTF_8);
@@ -66,6 +69,7 @@ public class ReadApiNetexPublicationDeliveryService {
                             </DefaultLocale>
                         </FrameDefaults>
                         <topographicPlaces/>
+                        <tariffZones/>
                         <stopPlaces/>
                         <parkings/>
                     </SiteFrame>
@@ -110,6 +114,7 @@ public class ReadApiNetexPublicationDeliveryService {
             case "ScheduledStopPoint" -> COLLECTION_TAG_SCHEDULED_STOP_POINTS;
             case "PassengerStopAssignment" -> COLLECTION_TAG_STOP_ASSIGNMENTS;
             case "TopographicPlace" -> COLLECTION_TAG_TOPOGRAPHIC_PLACES;
+            case "FareZone" -> COLLECTION_TAG_TARIFF_ZONES;
             case "StopPlace" -> COLLECTION_TAG_STOP_PLACES;
             case "Parking" -> COLLECTION_TAG_PARKINGS;
             default -> throw new IllegalArgumentException("Unsupported type for collection tag: " + type);
@@ -121,6 +126,7 @@ public class ReadApiNetexPublicationDeliveryService {
             case "ScheduledStopPoint" -> START_TAG_SCHEDULED_STOP_POINTS;
             case "PassengerStopAssignment" -> START_TAG_STOP_ASSIGNMENTS;
             case "TopographicPlace" -> START_TAG_TOPOGRAPHIC_PLACES;
+            case "FareZone" -> START_TAG_TARIFF_ZONES;
             case "StopPlace" -> START_TAG_STOP_PLACES;
             case "Parking" -> START_TAG_PARKINGS;
             default -> throw new IllegalArgumentException("Unsupported type for collection start tag: " + type);
@@ -132,6 +138,7 @@ public class ReadApiNetexPublicationDeliveryService {
             case "ScheduledStopPoint" -> END_TAG_SCHEDULED_STOP_POINTS;
             case "PassengerStopAssignment" -> END_TAG_STOP_ASSIGNMENTS;
             case "TopographicPlace" -> END_TAG_TOPOGRAPHIC_PLACES;
+            case "FareZone" -> END_TAG_TARIFF_ZONES;
             case "StopPlace" -> END_TAG_STOP_PLACES;
             case "Parking" -> END_TAG_PARKINGS;
             default -> throw new IllegalArgumentException("Unsupported type for collection end tag: " + type);
@@ -143,6 +150,7 @@ public class ReadApiNetexPublicationDeliveryService {
         if (trimmed.equals(COLLECTION_TAG_SCHEDULED_STOP_POINTS)
                 || trimmed.equals(COLLECTION_TAG_STOP_ASSIGNMENTS)
                 || trimmed.equals(COLLECTION_TAG_TOPOGRAPHIC_PLACES)
+                || trimmed.equals(COLLECTION_TAG_TARIFF_ZONES)
                 || trimmed.equals(COLLECTION_TAG_STOP_PLACES)
                 || trimmed.equals(COLLECTION_TAG_PARKINGS)) {
             return new byte[]{};

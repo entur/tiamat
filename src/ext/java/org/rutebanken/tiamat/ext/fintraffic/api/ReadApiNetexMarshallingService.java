@@ -14,6 +14,7 @@ import org.rutebanken.tiamat.ext.fintraffic.api.model.ReadApiEntityStatus;
 import org.rutebanken.tiamat.ext.fintraffic.api.repository.NetexRepository;
 import org.rutebanken.tiamat.ext.fintraffic.xml.NoNameSpaceXMLStreamWriter;
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
+import org.rutebanken.tiamat.model.FareZone;
 import org.rutebanken.tiamat.model.Parking;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.TopographicPlace;
@@ -48,6 +49,7 @@ public class ReadApiNetexMarshallingService {
             org.rutebanken.netex.model.StopPlace.class, e -> objectFactory.createStopPlace((org.rutebanken.netex.model.StopPlace) e),
             org.rutebanken.netex.model.Parking.class, e -> objectFactory.createParking((org.rutebanken.netex.model.Parking) e),
             org.rutebanken.netex.model.TopographicPlace.class, e -> objectFactory.createTopographicPlace((org.rutebanken.netex.model.TopographicPlace) e),
+            org.rutebanken.netex.model.FareZone.class, e -> objectFactory.createFareZone((org.rutebanken.netex.model.FareZone) e),
             org.rutebanken.netex.model.ScheduledStopPoint.class, e -> objectFactory.createScheduledStopPoint((org.rutebanken.netex.model.ScheduledStopPoint) e),
             org.rutebanken.netex.model.PassengerStopAssignment.class, e -> objectFactory.createPassengerStopAssignment((org.rutebanken.netex.model.PassengerStopAssignment) e)
     );
@@ -76,6 +78,7 @@ public class ReadApiNetexMarshallingService {
                     org.rutebanken.netex.model.StopPlace.class,
                     org.rutebanken.netex.model.Parking.class,
                     org.rutebanken.netex.model.TopographicPlace.class,
+                    org.rutebanken.netex.model.FareZone.class,
                     org.rutebanken.netex.model.ScheduledStopPoint.class,
                     org.rutebanken.netex.model.PassengerStopAssignment.class
             );
@@ -191,6 +194,7 @@ public class ReadApiNetexMarshallingService {
             case StopPlace stopPlace -> netexMapper.mapToNetexModel(stopPlace);
             case Parking parking -> netexMapper.mapToNetexModel(parking);
             case TopographicPlace topographicPlace -> netexMapper.mapToNetexModel(topographicPlace);
+            case FareZone fareZone -> netexMapper.mapToNetexModel(fareZone);
             default ->
                     throw new IllegalArgumentException("Unsupported entity type for NeTEx mapping: " + entity.getClass().getName());
         };

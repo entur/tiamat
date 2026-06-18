@@ -8,10 +8,12 @@ import org.rutebanken.tiamat.ext.fintraffic.api.ReadApiNetexMarshallingService;
 import org.rutebanken.tiamat.ext.fintraffic.api.model.ReadApiEntityInRecord;
 import org.rutebanken.tiamat.ext.fintraffic.api.model.ReadApiEntityStatus;
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
+import org.rutebanken.tiamat.model.FareZone;
 import org.rutebanken.tiamat.model.Parking;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.model.TopographicPlaceTypeEnumeration;
+import org.rutebanken.tiamat.repository.FareZoneRepository;
 import org.rutebanken.tiamat.repository.ParkingRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
@@ -34,16 +36,19 @@ public class ReadApiBatchUpdateService {
     private final StopPlaceRepository stopPlaceRepository;
     private final ParkingRepository parkingRepository;
     private final TopographicPlaceRepository topographicPlaceRepository;
+    private final FareZoneRepository fareZoneRepository;
 
     public ReadApiBatchUpdateService(
             ReadApiNetexMarshallingService marshallingService,
             StopPlaceRepository stopPlaceRepository,
             ParkingRepository parkingRepository,
-            TopographicPlaceRepository topographicPlaceRepository) {
+            TopographicPlaceRepository topographicPlaceRepository,
+            FareZoneRepository fareZoneRepository) {
         this.marshallingService = marshallingService;
         this.stopPlaceRepository = stopPlaceRepository;
         this.parkingRepository = parkingRepository;
         this.topographicPlaceRepository = topographicPlaceRepository;
+        this.fareZoneRepository = fareZoneRepository;
     }
 
     /**
@@ -112,6 +117,21 @@ public class ReadApiBatchUpdateService {
 
         Iterator<TopographicPlace> municipalityIterator = municipalities.iterator();
         return processEntitiesInBatches(municipalityIterator, batchSize, batchConsumer, "TopographicPlace");
+    }
+
+    /**
+     * Process FareZones in batches.
+     *
+     * FareZones are very few in number (typically 3 per authority area), so they are loaded as a list.
+     *
+     * @param batchSize Number of entities to process before flushing to database
+     * @param batchConsumer Consumer that handles each batch (typically database upsert)
+     * @return Statistics about the processing
+     */
+    @Transactional(readOnly = true)
+    public ProcessingStats processFareZonesInBatches(int batchSize, Consumer<List<ReadApiEntityInRecord>> batchConsumer) {
+        List<FareZone> fareZones = fareZoneRepository.findAllValidFareZones();
+        return processEntitiesInBatches(fareZones.iterator(), batchSize, batchConsumer, "FareZone");
     }
 
     /**
