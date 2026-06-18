@@ -17,19 +17,19 @@ package org.rutebanken.tiamat.rest.exception;
 
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.ext.ExceptionMapper;
-import jakarta.ws.rs.ext.Provider;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.NoSuchElementException;
 
-@Provider
-public class NoSuchElementMapper implements ExceptionMapper<NoSuchElementException> {
-    public Response toResponse(NoSuchElementException ex) {
-        // Return a serializable text/plain body. Previously the raw exception was set as the
-        // entity with no media type, which had no MessageBodyWriter and collapsed to a generic 500.
-        return Response.status(Response.Status.NOT_FOUND)
-                .type(MediaType.TEXT_PLAIN_TYPE)
-                .entity(new ErrorResponseEntity(ex.getMessage()))
-                .build();
+
+public class NoSuchElementMapperTest {
+
+    @Test
+    public void yieldsNotFoundWithSerializableTextPlainBody() {
+        Response rsp = new NoSuchElementMapper().toResponse(new NoSuchElementException("missing"));
+        Assert.assertEquals(Response.Status.NOT_FOUND.getStatusCode(), rsp.getStatus());
+        Assert.assertEquals(MediaType.TEXT_PLAIN_TYPE, rsp.getMediaType());
+        Assert.assertEquals("missing", ((ErrorResponseEntity) rsp.getEntity()).errors.getFirst().message);
     }
 }

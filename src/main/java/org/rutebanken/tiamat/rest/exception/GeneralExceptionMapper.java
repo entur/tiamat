@@ -22,6 +22,7 @@ import jakarta.persistence.OptimisticLockException;
 import jakarta.validation.ValidationException;
 import jakarta.ws.rs.NotAuthorizedException;
 import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
@@ -58,7 +59,12 @@ public class GeneralExceptionMapper implements ExceptionMapper<Exception> {
             status = toStatus(rootCause);
         }
 
+        // Pin the media type to text/plain so ErrorResponseEntityMessageBodyWriter (also text/plain)
+        // can serialize the body. Without this the response inherits the resource's @Produces
+        // (e.g. application/xml on the import endpoint), no writer matches ErrorResponseEntity,
+        // and the real cause is silently replaced by a generic 500.
         return Response.status(status)
+                       .type(MediaType.TEXT_PLAIN_TYPE)
                        .entity(new ErrorResponseEntity(rootCause.getMessage()))
                        .build();
     }
