@@ -97,7 +97,6 @@ public class CreateStopPlaceMapper {
             PlaceEquipment.class,
             InstalledEquipment_VersionStructure.class,
             Quay.class,
-            StopPlace.class,
             AccessibilityAssessment.class,
             AccessibilityLimitation.class,
             PostalAddress.class
@@ -117,6 +116,8 @@ public class CreateStopPlaceMapper {
             .fieldMap("topographicPlace")
             .converter(stopPlacePassThroughId)
             .add()
+            .exclude("netexId")
+            .exclude("version")
             .exclude(ID_FIELD)
             .exclude(VERSION_COMMENT_FIELD)
             .exclude(CHANGED_BY_FIELD)
