@@ -7,15 +7,6 @@ import org.rutebanken.tiamat.model.StopPlace;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * Tests that the second StopPlace.class classMap registration (lines 115-126 of
- * CreateStopPlaceMapper) does not overwrite the netexId/version exclusions set
- * up in the first registration (lines 106-113).
- *
- * If the second registration silently replaces the first, netexId and version
- * from the user payload would be copied into the new StopPlace, breaking the
- * contract that a user cannot supply their own IDs or version numbers on create.
- */
 public class CreateStopPlaceMapperTest {
 
     private final CreateStopPlaceMapper mapper = new CreateStopPlaceMapper();
