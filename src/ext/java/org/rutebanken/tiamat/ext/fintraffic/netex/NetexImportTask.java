@@ -11,7 +11,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 
+import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.function.IntConsumer;
@@ -34,6 +39,9 @@ public class NetexImportTask implements ApplicationRunner {
 
     static final String ENV_S3_KEY = "NETEX_S3_KEY";
     static final String ENV_IMPORT_TYPE = "NETEX_IMPORT_TYPE";
+    static final String STATUS_S3_KEY = "netex/processing/status";
+    static final String STATUS_DONE = "done";
+    static final String STATUS_FAILED = "failed";
 
     private final BlobStoreService blobStoreService;
     private final PublicationDeliveryUnmarshaller unmarshaller;
@@ -70,52 +78,96 @@ public class NetexImportTask implements ApplicationRunner {
         }
 
         ImportType importType = resolveImportType(getenv(ENV_IMPORT_TYPE));
-        logger.info("Starting NeTEx import: key={}, importType={}", s3Key, importType);
-        Instant start = Instant.now();
+        boolean localFile = isLocalPath(s3Key);
+        logger.info("Starting NeTEx import: key={}, importType={}, source={}", s3Key, importType,
+                localFile ? "local file" : "S3");
 
         int exitCode = 1;
+        Instant start = Instant.now();
         try {
-            logger.info("Downloading {} from S3...", s3Key);
-            InputStream inputStream = blobStoreService.download(s3Key);
-            if (inputStream == null) {
-                throw new IllegalStateException("S3 object not found: " + s3Key);
-            }
-
-            logger.info("Unmarshalling NeTEx XML...");
-            PublicationDeliveryStructure delivery = unmarshaller.unmarshal(inputStream);
-
-            ImportParams params = new ImportParams();
-            params.importType = importType;
-
-            logger.info("Running import (importType={})...", importType);
-            importer.importPublicationDelivery(delivery, params);
-
-            Duration elapsed = Duration.between(start, Instant.now());
-            logger.info("""
-                ════════════════════════════════════════════════════
-                NeTEx import completed successfully
-                ────────────────────────────────────────────────────
-                S3 key:      {}
-                Import type: {}
-                Duration:    {}
-                ════════════════════════════════════════════════════
-                """, s3Key, importType, formatDuration(elapsed));
+            InputStream inputStream = openSource(s3Key, localFile);
+            PublicationDeliveryStructure delivery = unmarshal(inputStream);
+            runImport(delivery, importType);
+            logSuccess(s3Key, importType, Duration.between(start, Instant.now()));
+            writeStatus(STATUS_DONE, localFile);
             exitCode = 0;
-
         } catch (Exception e) {
-            Duration elapsed = Duration.between(start, Instant.now());
-            logger.error("""
-                ════════════════════════════════════════════════════
-                NeTEx import FAILED after {}
-                ────────────────────────────────────────────────────
-                S3 key:      {}
-                Import type: {}
-                ════════════════════════════════════════════════════
-                """, formatDuration(elapsed), s3Key, importType, e);
+            logFailure(s3Key, importType, Duration.between(start, Instant.now()), e);
+            writeStatus(STATUS_FAILED, localFile);
         } finally {
             logger.info("Shutting down application...");
             exitHandler.accept(exitCode);
         }
+    }
+
+    private InputStream openSource(String s3Key, boolean localFile) throws Exception {
+        if (localFile) {
+            String filePath = s3Key.startsWith("file://") ? s3Key.substring("file://".length()) : s3Key;
+            logger.info("Opening local file {}...", filePath);
+            if (!Files.exists(Paths.get(filePath))) {
+                throw new IllegalStateException("Local file not found: " + filePath);
+            }
+            return new FileInputStream(filePath);
+        } else {
+            logger.info("Downloading {} from S3...", s3Key);
+            InputStream stream = blobStoreService.download(s3Key);
+            if (stream == null) {
+                throw new IllegalStateException("S3 object not found: " + s3Key);
+            }
+            return stream;
+        }
+    }
+
+    private PublicationDeliveryStructure unmarshal(InputStream inputStream) throws Exception {
+        logger.info("Unmarshalling NeTEx XML...");
+        return unmarshaller.unmarshal(inputStream);
+    }
+
+    private void runImport(PublicationDeliveryStructure delivery, ImportType importType) throws Exception {
+        ImportParams params = new ImportParams();
+        params.importType = importType;
+        logger.info("Running import (importType={})...", importType);
+        importer.importPublicationDelivery(delivery, params);
+    }
+
+    private static void logSuccess(String s3Key, ImportType importType, Duration elapsed) {
+        logger.info("""
+            ════════════════════════════════════════════════════
+            NeTEx import completed successfully
+            ────────────────────────────────────────────────────
+            S3 key:      {}
+            Import type: {}
+            Duration:    {}
+            ════════════════════════════════════════════════════
+            """, s3Key, importType, formatDuration(elapsed));
+    }
+
+    private static void logFailure(String s3Key, ImportType importType, Duration elapsed, Exception e) {
+        logger.error("""
+            ════════════════════════════════════════════════════
+            NeTEx import FAILED after {}
+            ────────────────────────────────────────────────────
+            S3 key:      {}
+            Import type: {}
+            ════════════════════════════════════════════════════
+            """, formatDuration(elapsed), s3Key, importType, e);
+    }
+
+    private void writeStatus(String status, boolean localFile) {
+        if (localFile) {
+            return;
+        }
+        try {
+            byte[] bytes = status.getBytes(StandardCharsets.UTF_8);
+            blobStoreService.upload(STATUS_S3_KEY, new ByteArrayInputStream(bytes));
+            logger.info("Wrote status '{}' to {}", status, STATUS_S3_KEY);
+        } catch (Exception e) {
+            logger.error("Failed to write status '{}' to {}", status, STATUS_S3_KEY, e);
+        }
+    }
+
+    static boolean isLocalPath(String key) {
+        return key.startsWith("/") || key.startsWith("./") || key.startsWith("../") || key.startsWith("file://");
     }
 
     private static ImportType resolveImportType(String value) {
