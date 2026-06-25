@@ -19,6 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.function.IntConsumer;
 
 /**
@@ -39,6 +40,7 @@ public class NetexImportTask implements ApplicationRunner {
 
     static final String ENV_S3_KEY = "NETEX_S3_KEY";
     static final String ENV_IMPORT_TYPE = "NETEX_IMPORT_TYPE";
+    static final String ENV_DISABLE_PRE_POST_PROCESSING = "NETEX_DISABLE_PRE_POST_PROCESSING";
     static final String STATUS_S3_KEY = "netex/processing/status";
     static final String STATUS_DONE = "done";
     static final String STATUS_FAILED = "failed";
@@ -70,35 +72,62 @@ public class NetexImportTask implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
-        String s3Key = getenv(ENV_S3_KEY);
-        if (s3Key == null || s3Key.isBlank()) {
-            logger.error("Environment variable {} is required but not set. Aborting.", ENV_S3_KEY);
+        final ImportConfig config;
+        try {
+            config = readConfig();
+        } catch (IllegalStateException e) {
             exitHandler.accept(1);
             return;
         }
 
-        ImportType importType = resolveImportType(getenv(ENV_IMPORT_TYPE));
-        boolean localFile = isLocalPath(s3Key);
-        logger.info("Starting NeTEx import: key={}, importType={}, source={}", s3Key, importType,
-                localFile ? "local file" : "S3");
+        logger.info("Starting NeTEx import: key={}, importType={}, disablePrePostProcessing={}, source={}",
+                config.s3Key(), config.importType(), config.disablePrePostProcessing(),
+                config.localFile() ? "local file" : "S3");
 
         int exitCode = 1;
         Instant start = Instant.now();
         try {
-            InputStream inputStream = openSource(s3Key, localFile);
+            InputStream inputStream = openSource(config.s3Key(), config.localFile());
             PublicationDeliveryStructure delivery = unmarshal(inputStream);
-            runImport(delivery, importType);
-            logSuccess(s3Key, importType, Duration.between(start, Instant.now()));
-            writeStatus(STATUS_DONE, localFile);
+            runImport(delivery, config.importType(), config.disablePrePostProcessing());
+            logSuccess(config.s3Key(), config.importType(), Duration.between(start, Instant.now()));
+            writeStatus(STATUS_DONE, config.localFile());
             exitCode = 0;
         } catch (Exception e) {
-            logFailure(s3Key, importType, Duration.between(start, Instant.now()), e);
-            writeStatus(STATUS_FAILED, localFile);
+            logFailure(config.s3Key(), config.importType(), Duration.between(start, Instant.now()), e);
+            writeStatus(STATUS_FAILED, config.localFile());
         } finally {
             logger.info("Shutting down application...");
             exitHandler.accept(exitCode);
         }
     }
+
+    private ImportConfig readConfig() {
+        String s3Key = requireEnv(ENV_S3_KEY);
+        ImportType importType = requireImportType(requireEnv(ENV_IMPORT_TYPE));
+        boolean disablePrePostProcessing = "true".equalsIgnoreCase(requireEnv(ENV_DISABLE_PRE_POST_PROCESSING));
+        return new ImportConfig(s3Key, importType, disablePrePostProcessing, isLocalPath(s3Key));
+    }
+
+    private String requireEnv(String name) {
+        String value = getenv(name);
+        if (value == null || value.isBlank()) {
+            logger.error("Environment variable {} is required but not set. Aborting.", name);
+            throw new IllegalStateException("Missing required environment variable: " + name);
+        }
+        return value;
+    }
+
+    private static ImportType requireImportType(String value) {
+        ImportType type = resolveImportType(value);
+        if (type == null) {
+            logger.error("Unknown import type '{}'. Valid values: {}. Aborting.", value, Arrays.toString(ImportType.values()));
+            throw new IllegalStateException("Invalid import type: " + value);
+        }
+        return type;
+    }
+
+    private record ImportConfig(String s3Key, ImportType importType, boolean disablePrePostProcessing, boolean localFile) {}
 
     private InputStream openSource(String s3Key, boolean localFile) throws Exception {
         if (localFile) {
@@ -123,10 +152,13 @@ public class NetexImportTask implements ApplicationRunner {
         return unmarshaller.unmarshal(inputStream);
     }
 
-    private void runImport(PublicationDeliveryStructure delivery, ImportType importType) throws Exception {
+    private void runImport(PublicationDeliveryStructure delivery, ImportType importType,
+                           boolean disablePrePostProcessing) throws Exception {
         ImportParams params = new ImportParams();
         params.importType = importType;
-        logger.info("Running import (importType={})...", importType);
+        params.disablePreAndPostProcessing = disablePrePostProcessing;
+        logger.info("Running import (importType={}, disablePrePostProcessing={})...",
+                importType, disablePrePostProcessing);
         importer.importPublicationDelivery(delivery, params);
     }
 
@@ -171,14 +203,10 @@ public class NetexImportTask implements ApplicationRunner {
     }
 
     private static ImportType resolveImportType(String value) {
-        if (value == null || value.isBlank()) {
-            return ImportType.INITIAL;
-        }
         try {
             return ImportType.valueOf(value.toUpperCase());
         } catch (IllegalArgumentException e) {
-            logger.warn("Unknown import type '{}', defaulting to INITIAL", value);
-            return ImportType.INITIAL;
+            return null;
         }
     }
 

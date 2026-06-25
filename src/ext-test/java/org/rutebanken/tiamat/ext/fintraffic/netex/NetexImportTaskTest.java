@@ -64,7 +64,7 @@ class NetexImportTaskTest {
         when(blobStoreService.download(s3Key)).thenReturn(fakeStream);
         when(unmarshaller.unmarshal(fakeStream)).thenReturn(delivery);
 
-        var result = runWith(s3Key, null);
+        var result = runWith(s3Key, "INITIAL");
 
         ArgumentCaptor<ImportParams> paramsCaptor = ArgumentCaptor.forClass(ImportParams.class);
         verify(importer).importPublicationDelivery(eq(delivery), paramsCaptor.capture());
@@ -92,7 +92,24 @@ class NetexImportTaskTest {
     }
 
     @Test
-    void unknownImportType_defaultsToInitial() throws Exception {
+    void disablePrePostProcessing_passedToImporter() throws Exception {
+        String s3Key = "netex/parking.xml";
+        InputStream fakeStream = new ByteArrayInputStream(new byte[0]);
+        PublicationDeliveryStructure delivery = new PublicationDeliveryStructure();
+
+        when(blobStoreService.download(s3Key)).thenReturn(fakeStream);
+        when(unmarshaller.unmarshal(fakeStream)).thenReturn(delivery);
+
+        var result = runWith(s3Key, "MERGE", "true");
+
+        ArgumentCaptor<ImportParams> paramsCaptor = ArgumentCaptor.forClass(ImportParams.class);
+        verify(importer).importPublicationDelivery(eq(delivery), paramsCaptor.capture());
+        assertThat(paramsCaptor.getValue().disablePreAndPostProcessing).isTrue();
+        assertThat(result.exitCodes).containsExactly(0);
+    }
+
+    @Test
+    void disablePrePostProcessing_notSetByDefault() throws Exception {
         String s3Key = "netex/stops.xml";
         InputStream fakeStream = new ByteArrayInputStream(new byte[0]);
         PublicationDeliveryStructure delivery = new PublicationDeliveryStructure();
@@ -100,20 +117,43 @@ class NetexImportTaskTest {
         when(blobStoreService.download(s3Key)).thenReturn(fakeStream);
         when(unmarshaller.unmarshal(fakeStream)).thenReturn(delivery);
 
-        var result = runWith(s3Key, "NOT_A_REAL_TYPE");
+        var result = runWith(s3Key, "INITIAL", "false");
 
         ArgumentCaptor<ImportParams> paramsCaptor = ArgumentCaptor.forClass(ImportParams.class);
         verify(importer).importPublicationDelivery(eq(delivery), paramsCaptor.capture());
-        assertThat(paramsCaptor.getValue().importType).isEqualTo(ImportType.INITIAL);
+        assertThat(paramsCaptor.getValue().disablePreAndPostProcessing).isFalse();
         assertThat(result.exitCodes).containsExactly(0);
-        verify(blobStoreService).upload(eq(NetexImportTask.STATUS_S3_KEY), any());
+    }
+
+    @Test
+    void missingImportType_exitsWithCode1() {
+        var result = runWith("netex/stops.xml", null);
+
+        assertThat(result.exitCodes).containsExactly(1);
+        verifyNoInteractions(blobStoreService, unmarshaller, importer);
+    }
+
+    @Test
+    void missingDisablePrePostProcessing_exitsWithCode1() {
+        var result = runWith("netex/stops.xml", "INITIAL", null);
+
+        assertThat(result.exitCodes).containsExactly(1);
+        verifyNoInteractions(blobStoreService, unmarshaller, importer);
+    }
+
+    @Test
+    void unknownImportType_exitsWithCode1() {
+        var result = runWith("netex/stops.xml", "NOT_A_REAL_TYPE");
+
+        assertThat(result.exitCodes).containsExactly(1);
+        verifyNoInteractions(blobStoreService, unmarshaller, importer);
     }
 
     @Test
     void s3ObjectNotFound_exitsWithCode1() {
         when(blobStoreService.download(any())).thenReturn(null);
 
-        var result = runWith("netex/missing.xml", null);
+        var result = runWith("netex/missing.xml", "MERGE");
 
         assertThat(result.exitCodes).containsExactly(1);
         verifyNoInteractions(unmarshaller, importer);
@@ -131,7 +171,7 @@ class NetexImportTaskTest {
         doThrow(new RuntimeException("import failed")).when(importer)
                 .importPublicationDelivery(any(), any());
 
-        var result = runWith(s3Key, null);
+        var result = runWith(s3Key, "INITIAL");
 
         assertThat(result.exitCodes).containsExactly(1);
         verifyStatusWritten(NetexImportTask.STATUS_FAILED);
@@ -145,7 +185,7 @@ class NetexImportTaskTest {
         when(blobStoreService.download(s3Key)).thenReturn(fakeStream);
         when(unmarshaller.unmarshal(fakeStream)).thenThrow(new RuntimeException("bad XML"));
 
-        var result = runWith(s3Key, null);
+        var result = runWith(s3Key, "INITIAL");
 
         assertThat(result.exitCodes).containsExactly(1);
         verifyNoInteractions(importer);
@@ -159,7 +199,7 @@ class NetexImportTaskTest {
         when(blobStoreService.download(s3Key)).thenReturn(fakeStream);
         when(unmarshaller.unmarshal(fakeStream)).thenReturn(new PublicationDeliveryStructure());
 
-        runWith(s3Key, null);
+        runWith(s3Key, "INITIAL");
 
         verifyStatusWritten(NetexImportTask.STATUS_DONE);
     }
@@ -172,7 +212,7 @@ class NetexImportTaskTest {
         when(unmarshaller.unmarshal(fakeStream)).thenReturn(new PublicationDeliveryStructure());
         doThrow(new RuntimeException("boom")).when(importer).importPublicationDelivery(any(), any());
 
-        runWith(s3Key, null);
+        runWith(s3Key, "INITIAL");
 
         verifyStatusWritten(NetexImportTask.STATUS_FAILED);
     }
@@ -186,7 +226,7 @@ class NetexImportTaskTest {
 
         when(unmarshaller.unmarshal(any())).thenReturn(delivery);
 
-        var result = runWith(localPath, null);
+        var result = runWith(localPath, "MERGE");
 
         assertThat(result.exitCodes).containsExactly(0);
         verify(blobStoreService, never()).download(any());
@@ -198,7 +238,7 @@ class NetexImportTaskTest {
     void localFilePath_missingFile_exitsWithCode1(@TempDir java.nio.file.Path tempDir) {
         String localPath = tempDir.resolve("nonexistent.xml").toAbsolutePath().toString();
 
-        var result = runWith(localPath, null);
+        var result = runWith(localPath, "MERGE");
 
         assertThat(result.exitCodes).containsExactly(1);
         verify(blobStoreService, never()).download(any());
@@ -215,7 +255,7 @@ class NetexImportTaskTest {
 
         when(unmarshaller.unmarshal(any())).thenReturn(delivery);
 
-        var result = runWith(fileUrl, null);
+        var result = runWith(fileUrl, "MERGE");
 
         assertThat(result.exitCodes).containsExactly(0);
         verify(blobStoreService, never()).download(any());
@@ -249,6 +289,10 @@ class NetexImportTaskTest {
     }
 
     private RunResult runWith(String s3Key, String importType) {
+        return runWith(s3Key, importType, "false");
+    }
+
+    private RunResult runWith(String s3Key, String importType, String disablePrePostProcessing) {
         List<Integer> exitCodes = new ArrayList<>();
         NetexImportTask task = new NetexImportTask(blobStoreService, unmarshaller, importer, exitCodes::add) {
             @Override
@@ -256,6 +300,7 @@ class NetexImportTaskTest {
                 return switch (name) {
                     case ENV_S3_KEY -> s3Key;
                     case ENV_IMPORT_TYPE -> importType;
+                    case ENV_DISABLE_PRE_POST_PROCESSING -> disablePrePostProcessing;
                     default -> null;
                 };
             }
