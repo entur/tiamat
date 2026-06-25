@@ -10,12 +10,14 @@ import org.rutebanken.tiamat.rest.write.JobService;
 import org.rutebanken.tiamat.rest.write.dto.StopPlaceJobDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 
 @Component
 @ConditionalOnProperty(name = "tiamat.write-api.enabled", havingValue = "true")
 @Produces(MediaType.APPLICATION_JSON)
 @Path("write/jobs")
+@PreAuthorize("@authorizationService.canUseWriteApi()")
 public class JobControllerImpl implements JobController {
 
     private final JobService jobService;
