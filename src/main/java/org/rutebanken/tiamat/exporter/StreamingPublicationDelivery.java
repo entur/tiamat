@@ -217,7 +217,7 @@ public class StreamingPublicationDelivery {
         final Set<Long> exportedStopPlaceIds = new HashSet<>(stopPlacePrimaryIds);
         exportedStopPlaceIds.addAll(stopPlaceRepository.getParentStopPlaceIds(stopPlacePrimaryIds));
         if (exportedStopPlaceIds.size() > stopPlacePrimaryIds.size()) {
-            logger.info("Added {} parent stop place IDs for entity gathering", exportedStopPlaceIds.size() - stopPlacePrimaryIds.size());
+            logger.debug("Added {} parent stop place IDs for entity gathering", exportedStopPlaceIds.size() - stopPlacePrimaryIds.size());
         }
 
         tiamatSiteFrameExporter.addRelevantPathLinks(stopPlacePrimaryIds, siteFrame);
