@@ -241,7 +241,7 @@ public class StreamingPublicationDelivery {
         prepareTariffZones(exportParams, exportedStopPlaceIds, mappedTariffZonesCount, netexSiteFrame, entitiesEvictor);
         prepareParkings(exportParams, exportedStopPlaceIds, mappedParkingCount, netexSiteFrame, entitiesEvictor);
         prepareGroupOfStopPlaces(exportParams, stopPlacePrimaryIds, mappedGroupOfStopPlacesCount, netexSiteFrame,netexResourceFrame, entitiesEvictor);
-        prepareFareZones(exportParams,stopPlacePrimaryIds,mappedFareZonesCount,mappedGroupOfTariffZonesCount,netexSiteFrame,netexFareFrame,entitiesEvictor);
+        prepareFareZones(exportParams,exportedStopPlaceIds,mappedFareZonesCount,mappedGroupOfTariffZonesCount,netexSiteFrame,netexFareFrame,entitiesEvictor);
         prepareScheduledStopPoints(stopPlacePrimaryIds, netexServiceFrame);
 
 
