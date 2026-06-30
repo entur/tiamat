@@ -17,6 +17,7 @@ package org.rutebanken.tiamat.rest.exception;
 
 import jakarta.validation.ValidationException;
 import jakarta.ws.rs.NotAuthorizedException;
+import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.junit.Assert;
 import org.junit.Test;
@@ -65,5 +66,21 @@ public class GeneralExceptionMapperTest {
     public void rawUnknownExceptionYieldsInternalServerError() {
         Response rsp = new GeneralExceptionMapper().toResponse(new FileNotFoundException());
         Assert.assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), rsp.getStatus());
+    }
+
+    @Test
+    public void errorResponseIsTextPlainSoTheCauseCanBeSerialized() {
+        Response rsp = new GeneralExceptionMapper().toResponse(new TransactionSystemException("", new RuntimeException("boom")));
+        Assert.assertEquals(MediaType.TEXT_PLAIN_TYPE, rsp.getMediaType());
+        Assert.assertEquals("boom", ((ErrorResponseEntity) rsp.getEntity()).errors.getFirst().message);
+    }
+
+    @Test
+    public void exceptionWithoutMessageStillYieldsNonNullMessage() {
+        Response rsp = new GeneralExceptionMapper().toResponse(new NullPointerException());
+        Assert.assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), rsp.getStatus());
+        String message = ((ErrorResponseEntity) rsp.getEntity()).errors.getFirst().message;
+        Assert.assertNotNull("message must never be null or the body writer NPEs", message);
+        Assert.assertTrue(message.contains("NullPointerException"));
     }
 }
