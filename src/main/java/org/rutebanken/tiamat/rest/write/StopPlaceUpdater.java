@@ -62,8 +62,15 @@ public class StopPlaceUpdater {
                 : new HashSet<>();
 
         if (editedStopPlace.getQuays() == null || editedStopPlace.getQuays().isEmpty()) {
-            return originalQuays;
+            return new HashSet<>();
         }
+
+        Set<String> editedQuayNetexIds = editedStopPlace.getQuays().stream()
+                .map(Quay::getNetexId)
+                .filter(Objects::nonNull)
+                .collect(java.util.stream.Collectors.toSet());
+
+        originalQuays.removeIf(q -> q.getNetexId() != null && !editedQuayNetexIds.contains(q.getNetexId()));
 
         for (Quay editedQuay : editedStopPlace.getQuays()) {
             if (editedQuay.getNetexId() != null) {

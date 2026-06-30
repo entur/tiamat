@@ -520,6 +520,46 @@ public class StopPlaceUpdaterTest {
     }
 
     @Test
+    public void removesAllQuaysWhenEditedStopPlaceHasNoQuays() {
+        var original = new StopPlace();
+        var quay = new Quay();
+        quay.setNetexId("quay-1");
+        quay.setName(new EmbeddableMultilingualString("A quay"));
+        original.getQuays().add(quay);
+
+        var update = new StopPlace();
+        // no quays on the edited stop place
+
+        var result = stopPlaceUpdater.update(original, update);
+
+        assertThat(result.getQuays()).isEmpty();
+    }
+
+    @Test
+    public void removesQuaysThatAreAbsentFromEditedStopPlace() {
+        var original = new StopPlace();
+        var quayToKeep = new Quay();
+        quayToKeep.setNetexId("quay-1");
+        quayToKeep.setName(new EmbeddableMultilingualString("Quay to keep"));
+        var quayToRemove = new Quay();
+        quayToRemove.setNetexId("quay-2");
+        quayToRemove.setName(new EmbeddableMultilingualString("Quay to remove"));
+        original.getQuays().add(quayToKeep);
+        original.getQuays().add(quayToRemove);
+
+        var update = new StopPlace();
+        var editedQuay = new Quay();
+        editedQuay.setNetexId("quay-1");
+        editedQuay.setName(new EmbeddableMultilingualString("Quay to keep"));
+        update.getQuays().add(editedQuay);
+
+        var result = stopPlaceUpdater.update(original, update);
+
+        assertThat(result.getQuays()).hasSize(1);
+        assertThat(result.getQuays().iterator().next().getNetexId()).isEqualTo("quay-1");
+    }
+
+    @Test
     public void preservesTopographicPlace() {
         var original = new StopPlace();
         var topographicPlace = new TopographicPlace();
