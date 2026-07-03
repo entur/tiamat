@@ -6,47 +6,24 @@ metadata:
   labels:
   {{- include "common.labels" . | indent 4 }}
 data:
+  # Environment-specific values only. Application defaults ship in the jar
+  # (application.properties / application-entur.properties in the tiamat image).
   application.properties: |-
     server.port={{ .Values.service.http.internalPort }}
-    nearbyStopsWithSameTypeFinder.limits={railStation:'200',airport:'3000'}
-    tariffzoneLookupService.resetReferences=true
-    netex.import.enabled.types=MERGE
-    changelog.publish.enabled=true
-    netex.id.valid.prefix.list={TopographicPlace:{'KVE','WOF','OSM','ENT','LAN'},TariffZone:{'*'},FareZone:{'*'},GroupOfTariffZones:{'*'}}
-    netex.profile.version=1.15:NO-NeTEx-stops:1.5
 
-    # GCS properties
+    # GCS blobstore
     blobstore.gcs.bucket.name={{.Values.configMap.gcsBucketName}}
-    blobstore.gcs.blob.path=export
     blobstore.gcs.project.id={{.Values.configMap.blobstoreProjectId}}
 
-    # Database properties
-    spring.jpa.properties.jakarta.persistence.query.timeout=30000
-    spring.jpa.properties.hibernate.cache.region.factory_class=com.hazelcast.hibernate.HazelcastCacheRegionFactory
-    spring.jpa.properties.hibernate.cache.use_second_level_cache=true
-    spring.jpa.properties.hibernate.cache.use_minimal_puts=true
-    spring.jpa.properties.hibernate.cache.use_query_cache=true
-    spring.jpa.hibernate.ddl-auto=none
-    spring.jpa.open-in-view=false
-    spring.jpa.database=POSTGRESQL
-    spring.jpa.show-sql=false
-    spring.datasource.hikari.maximumPoolSize=30
+    # Database via cloudsql-proxy sidecar
     spring.datasource.url=jdbc:postgresql://localhost:5432/{{ .Values.deployment.name }}
     spring.datasource.username=tiamat
 
-    #flyway
-    spring.flyway.table =schema_version
-
-
     # External farezone
-    fareZone.externalVersioning = {{ .Values.farezone.externalVersioning }}
+    fareZone.externalVersioning={{ .Values.farezone.externalVersioning }}
 
-
-
-    # Security config with auth0
-    tiamat.security.role.assignment.extractor={{ .Values.roleAssignmentExtractor }}
+    # Organisation registry (role assignments)
     tiamat.user.permission.rest.service.url={{ .Values.organisation.service }}/services/organisations/users
-
 
     # OAuth2 Resource Server for Entur Partner tenant
     tiamat.oauth2.resourceserver.auth0.entur.partner.jwt.issuer-uri={{ .Values.auth0.entur.partner.url }}
@@ -57,33 +34,12 @@ data:
     tiamat.oauth2.resourceserver.auth0.entur.internal.jwt.audience={{ .Values.auth0.entur.internal.audience }}
 
     # OAuth Entur Internal client
-    spring.security.oauth2.client.registration.internal.authorization-grant-type=client_credentials
     spring.security.oauth2.client.registration.internal.client-id={{ .Values.auth0.client.id }}
     spring.security.oauth2.client.provider.internal.token-uri={{ .Values.auth0.client.url }}
     tiamat.oauth2.client.audience={{ .Values.auth0.client.audience }}
 
-    # Logging Properties
-    logging.level.org.rutebanken.tiamat=INFO
-    logging.level.org.rutebanken.tiamat.repository=DEBUG
-    logging.level.org.rutebanken.tiamat.repository.reference=WARN
-    logging.level.org.rutebanken.tiamat.importer.finder=INFO
-    logging.level.org.rutebanken.tiamat.dtoassembling.disassembler.StopPlaceSearchDisassembler=WARN
-    logging.level.org.rutebanken.tiamat.rest.netex.publicationdelivery=INFO
-    logging.level.org.hibernate.SQL=WARN
-    logging.level.org.hibernate.tool.hbm2ddl=INFO
-    logging.level.org.hibernate.type=WARN
-    logging.level.org.hibernate.id.enhanced=INFO
-    logging.level.io.micrometer.prometheus=WARN
-    logging.level.org.geotools=WARN
-    logging.level.org.rutebanken.helper.organisation.ReflectionAuthorizationService=ERROR
-
-    #Profile
+    # Profiles
     spring.profiles.active=gcs-blobstore,google-pubsub,entur
-    spring.main.allow-bean-definition-overriding=true
 
     # pubsub
     spring.cloud.gcp.project-id={{ .Values.configMap.pubsubProjectId }}
-
-    # Compression
-    server.compression.enabled=true
-    server.compression.mime-types=application/json,application/xml,text/html,text/xml,text/plain

@@ -28,7 +28,6 @@ auth0:
 organisation:
   service: http://baba.dev.entur.internal
 
-roleAssignmentExtractor: baba
 
 rbac:
   enabled: true
