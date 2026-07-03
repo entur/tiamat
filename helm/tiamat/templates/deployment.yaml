@@ -72,6 +72,8 @@ spec:
                 --add-opens jdk.management/com.sun.management.internal=ALL-UNNAMED
             - name: TZ
               value: Europe/Oslo
+            - name: SERVER_PORT
+              value: "{{ .Values.service.http.internalPort }}"
           envFrom:
             - secretRef:
                 name: tiamat-psql-credentials

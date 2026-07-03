@@ -9,8 +9,6 @@ data:
   # Environment-specific values only. Application defaults ship in the jar
   # (application.properties / application-entur.properties in the tiamat image).
   application.properties: |-
-    server.port={{ .Values.service.http.internalPort }}
-
     # GCS blobstore
     blobstore.gcs.bucket.name={{.Values.configMap.gcsBucketName}}
     blobstore.gcs.project.id={{.Values.configMap.blobstoreProjectId}}
