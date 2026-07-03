@@ -19,6 +19,7 @@ spec:
   template:
     metadata:
       annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
         cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
         prometheus.io/path: /health/scrape
         prometheus.io/port: "{{ .Values.service.http.internalPort }}"
@@ -60,7 +61,7 @@ spec:
           imagePullPolicy: {{ .Values.image.imagePullPolicy }}
           env:
             - name: JDK_JAVA_OPTIONS
-              value: -server -Xss{{ .Values.resources.xss }} -Xmx{{ .Values.resources.xmx }} -Dspring.config.location=/etc/application-config/application.properties
+              value: -server -Xss{{ .Values.resources.xss }} -Xmx{{ .Values.resources.xmx }} -Dspring.config.additional-location=file:/etc/application-config/
                 -Dfile.encoding=UTF-8
                 -Dhazelcast.ignoreXxeProtectionFailures=true
                 --add-modules java.se

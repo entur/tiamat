@@ -7,7 +7,6 @@ sql:
 configMap:
   blobstoreProjectId: ent-tiamat-dev
   pubsubProjectId: ent-tiamat-dev
-  pubsbuTopicName: ror.tiamat.changelog
   gcsBucketName: ror-tiamat-gcp2-dev
 
 farezone:

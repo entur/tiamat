@@ -10,8 +10,6 @@ data:
     server.port={{ .Values.service.http.internalPort }}
     nearbyStopsWithSameTypeFinder.limits={railStation:'200',airport:'3000'}
     tariffzoneLookupService.resetReferences=true
-    publicationDeliveryStreamingOutput.validateAgainstSchema=true
-    publicationDeliveryUnmarshaller.validateAgainstSchema=true
     netex.import.enabled.types=MERGE
     changelog.publish.enabled=true
     netex.id.valid.prefix.list={TopographicPlace:{'KVE','WOF','OSM','ENT','LAN'},TariffZone:{'*'},FareZone:{'*'},GroupOfTariffZones:{'*'}}
@@ -29,27 +27,16 @@ data:
     spring.jpa.properties.hibernate.cache.use_minimal_puts=true
     spring.jpa.properties.hibernate.cache.use_query_cache=true
     spring.jpa.hibernate.ddl-auto=none
-    spring.jpa.hibernate.use-new-id-generator-mappings=true
     spring.jpa.open-in-view=false
     spring.jpa.database=POSTGRESQL
     spring.jpa.show-sql=false
-    spring.database.driverClassName=org.postgresql.Driver
     spring.datasource.hikari.maximumPoolSize=30
     spring.datasource.url=jdbc:postgresql://localhost:5432/{{ .Values.deployment.name }}
     spring.datasource.username=tiamat
-    spring.datasource.platform=postgres
-    graphql.query.max.depth =100
-
 
     #flyway
     spring.flyway.table =schema_version
 
-
-    # Hazelcast properties
-    tiamat.hazelcast.cluster.name=tiamat
-    tiamat.hazelcast.service-name=tiamat
-    tiamat.hazelcast.service-port=5701
-    tiamat.hazelcast.kubernetes.enabled=false
 
     # External farezone
     fareZone.externalVersioning = {{ .Values.farezone.externalVersioning }}
@@ -57,7 +44,6 @@ data:
 
 
     # Security config with auth0
-    authorization.enabled=true
     tiamat.security.role.assignment.extractor={{ .Values.roleAssignmentExtractor }}
     tiamat.user.permission.rest.service.url={{ .Values.organisation.service }}/services/organisations/users
 
@@ -82,17 +68,13 @@ data:
     logging.level.org.rutebanken.tiamat.repository.reference=WARN
     logging.level.org.rutebanken.tiamat.importer.finder=INFO
     logging.level.org.rutebanken.tiamat.dtoassembling.disassembler.StopPlaceSearchDisassembler=WARN
-    logging.level.org.rutebanken.tiamat.rest.netex.publicationdelivery.PublicationDeliveryUnmarshaller=INFO
     logging.level.org.rutebanken.tiamat.rest.netex.publicationdelivery=INFO
-    logging.level.org.rutebanken.tiamat.rest.netex.publicationdelivery.PublicationDeliveryStreamingOutput=INFO
-    logging.level.org.springframework.orm.hibernate4.support=WARN
     logging.level.org.hibernate.SQL=WARN
     logging.level.org.hibernate.tool.hbm2ddl=INFO
     logging.level.org.hibernate.type=WARN
     logging.level.org.hibernate.id.enhanced=INFO
     logging.level.io.micrometer.prometheus=WARN
     logging.level.org.geotools=WARN
-    logging.level.hsqldb.db=WARN
     logging.level.org.rutebanken.helper.organisation.ReflectionAuthorizationService=ERROR
 
     #Profile
@@ -101,7 +83,6 @@ data:
 
     # pubsub
     spring.cloud.gcp.project-id={{ .Values.configMap.pubsubProjectId }}
-    changelog.topic.name={{ .Values.configMap.pubsbuTopicName }}
 
     # Compression
     server.compression.enabled=true
