@@ -33,3 +33,4 @@ ingress:
 secrets:
   tiamat-psql-credentials:
     - SPRING_DATASOURCE_PASSWORD
+    - SPRING_DATASOURCE_USERNAME
