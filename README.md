@@ -234,7 +234,7 @@ docker compose up
 ```
 
 This will start Tiamat with PostgreSQL and Hazelcast. and you can access Tiamat on http://localhost:1888 and the database on http://localhost:5433 
-and graphiql on http://localhost:8777/services/stop_places/graphql , At start up tiamat copy empty schema to the database. Spring properties for this setup are mounted from [docker-compose/spring/application.properties](./docker-compose/spring/application.properties) via `SPRING_CONFIG_LOCATION`.
+and graphiql on http://localhost:8777/services/stop_places/graphql , At start up tiamat copy empty schema to the database. Setup-specific Spring properties are mounted from [docker-compose/spring/application.properties](./docker-compose/spring/application.properties) via `SPRING_CONFIG_ADDITIONAL_LOCATION`, layered on top of the defaults shipped in the jar.
 Security is disabled in this setup.
 
 ## Run with external properties file and PostgreSQL
