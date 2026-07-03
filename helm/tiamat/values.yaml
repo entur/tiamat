@@ -3,6 +3,9 @@ replicas: 2
 deployment:
   name: tiamat
 
+database:
+  url: jdbc:postgresql://localhost:5432/tiamat
+
 rollingUpdate:
   maxSurge: 1
   maxUnavailable: 1

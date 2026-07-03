@@ -77,7 +77,7 @@ spec:
               value: gcs-blobstore,google-pubsub,entur
             # Database via cloudsql-proxy sidecar
             - name: SPRING_DATASOURCE_URL
-              value: jdbc:postgresql://localhost:5432/{{ .Values.deployment.name }}
+              value: {{ .Values.database.url }}
             # Environment facts from values-<env>.yaml
             {{- range $name, $value := .Values.envVars }}
             - name: {{ $name }}
