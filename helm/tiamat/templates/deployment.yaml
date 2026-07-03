@@ -19,7 +19,6 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
         cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
         prometheus.io/path: /health/scrape
         prometheus.io/port: "{{ .Values.service.http.internalPort }}"
@@ -61,7 +60,7 @@ spec:
           imagePullPolicy: {{ .Values.image.imagePullPolicy }}
           env:
             - name: JDK_JAVA_OPTIONS
-              value: -server -Xss{{ .Values.resources.xss }} -Xmx{{ .Values.resources.xmx }} -Dspring.config.additional-location=file:/etc/application-config/
+              value: -server -Xss{{ .Values.resources.xss }} -Xmx{{ .Values.resources.xmx }}
                 -Dfile.encoding=UTF-8
                 -Dhazelcast.ignoreXxeProtectionFailures=true
                 --add-modules java.se
@@ -74,6 +73,44 @@ spec:
               value: Europe/Oslo
             - name: SERVER_PORT
               value: "{{ .Values.service.http.internalPort }}"
+            - name: SPRING_PROFILES_ACTIVE
+              value: gcs-blobstore,google-pubsub,entur
+            # Database via cloudsql-proxy sidecar
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:postgresql://localhost:5432/{{ .Values.deployment.name }}
+            - name: SPRING_DATASOURCE_USERNAME
+              value: tiamat
+            # GCS blobstore
+            - name: BLOBSTORE_GCS_BUCKET_NAME
+              value: "{{ .Values.gcp.gcsBucketName }}"
+            - name: BLOBSTORE_GCS_PROJECT_ID
+              value: "{{ .Values.gcp.blobstoreProjectId }}"
+            # pubsub
+            - name: SPRING_CLOUD_GCP_PROJECT_ID
+              value: "{{ .Values.gcp.pubsubProjectId }}"
+            # External farezone
+            - name: FAREZONE_EXTERNALVERSIONING
+              value: "{{ .Values.farezone.externalVersioning }}"
+            # Organisation registry (role assignments)
+            - name: TIAMAT_USER_PERMISSION_REST_SERVICE_URL
+              value: "{{ .Values.organisation.service }}/services/organisations/users"
+            # OAuth2 Resource Server for Entur Partner tenant
+            - name: TIAMAT_OAUTH2_RESOURCESERVER_AUTH0_ENTUR_PARTNER_JWT_ISSUER_URI
+              value: "{{ .Values.auth0.entur.partner.url }}"
+            - name: TIAMAT_OAUTH2_RESOURCESERVER_AUTH0_ENTUR_PARTNER_JWT_AUDIENCE
+              value: "{{ .Values.auth0.entur.partner.audience }}"
+            # OAuth2 Resource Server for Entur internal tenant
+            - name: TIAMAT_OAUTH2_RESOURCESERVER_AUTH0_ENTUR_INTERNAL_JWT_ISSUER_URI
+              value: "{{ .Values.auth0.entur.internal.url }}"
+            - name: TIAMAT_OAUTH2_RESOURCESERVER_AUTH0_ENTUR_INTERNAL_JWT_AUDIENCE
+              value: "{{ .Values.auth0.entur.internal.audience }}"
+            # OAuth Entur Internal client
+            - name: SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_INTERNAL_CLIENT_ID
+              value: "{{ .Values.auth0.client.id }}"
+            - name: SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_INTERNAL_TOKEN_URI
+              value: "{{ .Values.auth0.client.url }}"
+            - name: TIAMAT_OAUTH2_CLIENT_AUDIENCE
+              value: "{{ .Values.auth0.client.audience }}"
           envFrom:
             - secretRef:
                 name: tiamat-psql-credentials
@@ -93,10 +130,6 @@ spec:
             runAsNonRoot: true
             seccompProfile:
               type: RuntimeDefault
-          volumeMounts:
-            - mountPath: /etc/application-config
-              name: application-config
-              readOnly: true
           ports:
             - containerPort: {{ .Values.service.http.internalPort }}
               name: http
@@ -148,8 +181,3 @@ spec:
           labelSelector:
             matchLabels:
               app: {{ .Values.deployment.name }}
-      volumes:
-        - name: application-config
-          configMap:
-            name: {{ .Values.configMapMount.name }}
-            defaultMode: 420

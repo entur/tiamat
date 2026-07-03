@@ -4,7 +4,7 @@ gcp2:
 sql:
   instance: ent-tiamat-prd:europe-west1:tiamat-db-1=tcp:5432
 
-configMap:
+gcp:
   blobstoreProjectId: ent-tiamat-prd
   pubsubProjectId: ent-tiamat-prd
   gcsBucketName: ror-tiamat-gcp2-prd

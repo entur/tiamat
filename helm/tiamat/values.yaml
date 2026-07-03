@@ -14,9 +14,6 @@ resources:
   xss: 1024m
   xmx: 7g
 
-configMapMount:
-   name: tiamat-config
-
 image:
   identifier: <+artifacts.primary.image>
   imagePullPolicy: Always
