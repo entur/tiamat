@@ -60,7 +60,7 @@ spec:
           imagePullPolicy: {{ .Values.image.imagePullPolicy }}
           env:
             - name: JDK_JAVA_OPTIONS
-              value: -server -Xss{{ .Values.resources.xss }} -Xmx{{ .Values.resources.xmx }} -Dspring.config.location=/etc/application-config/application.properties
+              value: -server -Xss{{ .Values.resources.xss }} -Xmx{{ .Values.resources.xmx }}
                 -Dfile.encoding=UTF-8
                 -Dhazelcast.ignoreXxeProtectionFailures=true
                 --add-modules java.se
@@ -71,6 +71,18 @@ spec:
                 --add-opens jdk.management/com.sun.management.internal=ALL-UNNAMED
             - name: TZ
               value: Europe/Oslo
+            - name: SERVER_PORT
+              value: "{{ .Values.service.http.internalPort }}"
+            - name: SPRING_PROFILES_ACTIVE
+              value: gcs-blobstore,google-pubsub,entur
+            # Database via cloudsql-proxy sidecar
+            - name: SPRING_DATASOURCE_URL
+              value: {{ .Values.database.url }}
+            # Environment facts from values-<env>.yaml
+            {{- range $name, $value := .Values.envVars }}
+            - name: {{ $name }}
+              value: {{ $value | quote }}
+            {{- end }}
           envFrom:
             - secretRef:
                 name: tiamat-psql-credentials
@@ -90,10 +102,6 @@ spec:
             runAsNonRoot: true
             seccompProfile:
               type: RuntimeDefault
-          volumeMounts:
-            - mountPath: /etc/application-config
-              name: application-config
-              readOnly: true
           ports:
             - containerPort: {{ .Values.service.http.internalPort }}
               name: http
@@ -145,8 +153,3 @@ spec:
           labelSelector:
             matchLabels:
               app: {{ .Values.deployment.name }}
-      volumes:
-        - name: application-config
-          configMap:
-            name: {{ .Values.configMapMount.name }}
-            defaultMode: 420
