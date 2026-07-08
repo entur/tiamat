@@ -594,7 +594,18 @@
                 </dependencies>
                 <configuration>
                     <from>
-                        <image>eclipse-temurin:25.0.3_9-jdk-alpine</image>
+                        <!-- JRE on glibc (noble), matching the runtime the Dockerfile image always ran on -->
+                        <image>eclipse-temurin:25.0.3_9-jre-noble</image>
+                        <platforms>
+                            <platform>
+                                <architecture>amd64</architecture>
+                                <os>linux</os>
+                            </platform>
+                            <platform>
+                                <architecture>arm64</architecture>
+                                <os>linux</os>
+                            </platform>
+                        </platforms>
                     </from>
                     <to>
                         <image>${env.CONTAINER_REPO}</image>
@@ -604,6 +615,8 @@
                         </auth>
                     </to>
                     <container>
+                        <user>2000:2000</user>
+                        <workingDirectory>/deployments</workingDirectory>
                         <!-- Same as EXPOSE, doesn't actually publish the ports but acts as documentation -->
                         <ports>
                             <port>8777</port>
