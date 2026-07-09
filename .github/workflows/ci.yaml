@@ -52,7 +52,7 @@ jobs:
 
       - name: Build container image with Jib, push to container repo
         run: |
-          mvn --batch-mode -pl tiamat-entur compile com.google.cloud.tools:jib-maven-plugin:build -Djib.to.tags=latest,${{ env.GHA_DOCKER_PUSH_IMAGE_TAG }}
+          mvn --batch-mode -pl tiamat-entur -am compile com.google.cloud.tools:jib-maven-plugin:build -Djib.to.tags=latest,${{ env.GHA_DOCKER_PUSH_IMAGE_TAG }}
 
       - name: Tag default branch with the container image tag ${{ env.GHA_DOCKER_PUSH_IMAGE_TAG }}
         id: tag-version
