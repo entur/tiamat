@@ -9,6 +9,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -158,6 +161,14 @@ public class ReadApiNetexPublicationDeliveryService {
         return bytes;
     }
 
+    /**
+     * Streams a full NeTEx PublicationDelivery to the given output stream, incrementally writing
+     * stop place entities as they are read from the database. The transaction spans the entire
+     * method so that the underlying JDBC {@link java.sql.ResultSet} from
+     * {@link org.rutebanken.tiamat.ext.fintraffic.api.repository.NetexRepository#streamStopPlaces}
+     * remains open until all entities have been written.
+     */
+    @Transactional(isolation = Isolation.READ_COMMITTED, readOnly = true)
     public void streamPublicationDelivery(
             ReadApiSearchKey searchKey,
             OutputStream outputStream
