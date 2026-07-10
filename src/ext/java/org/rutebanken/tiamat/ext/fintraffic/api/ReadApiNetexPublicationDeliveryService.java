@@ -168,7 +168,7 @@ public class ReadApiNetexPublicationDeliveryService {
      * {@link org.rutebanken.tiamat.ext.fintraffic.api.repository.NetexRepository#streamStopPlaces}
      * remains open until all entities have been written.
      */
-    @Transactional(isolation = Isolation.READ_COMMITTED)
+    @Transactional(isolation = Isolation.READ_COMMITTED, readOnly = true)
     public void streamPublicationDelivery(
             ReadApiSearchKey searchKey,
             OutputStream outputStream
