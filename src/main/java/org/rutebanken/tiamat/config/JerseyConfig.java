@@ -21,6 +21,7 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
 import org.rutebanken.tiamat.filter.LoggingFilter;
 import org.rutebanken.tiamat.jersey.JerseyJava8TimeConverterProvider;
+import org.rutebanken.tiamat.jersey.interceptor.XmlWhitelistReaderInterceptor;
 import org.rutebanken.tiamat.rest.dto.DtoJbvCodeMappingResource;
 import org.rutebanken.tiamat.rest.dto.DtoQuayResource;
 import org.rutebanken.tiamat.rest.dto.DtoStopPlaceResource;
@@ -32,7 +33,10 @@ import org.rutebanken.tiamat.rest.netex.publicationdelivery.AsyncExportResource;
 import org.rutebanken.tiamat.rest.netex.publicationdelivery.ExportResource;
 import org.rutebanken.tiamat.rest.netex.publicationdelivery.ImportResource;
 import org.rutebanken.tiamat.rest.promethouse.PrometheusResource;
+import org.rutebanken.tiamat.rest.write.controllers.JobControllerImpl;
+import org.rutebanken.tiamat.rest.write.controllers.StopPlaceControllerImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -43,6 +47,9 @@ import java.util.Set;
 
 @Configuration
 public class JerseyConfig {
+
+    @Value("${tiamat.write-api.enabled:false}")
+    private boolean writeApiEnabled;
 
     /**
      * Client ID header.
@@ -86,6 +93,11 @@ public class JerseyConfig {
         publicResources.add(AsyncExportResource.class);
         publicResources.add(ExportResource.class);
         publicResources.add(GraphQLResource.class);
+        if (writeApiEnabled) {
+            publicResources.add(StopPlaceControllerImpl.class);
+            publicResources.add(JobControllerImpl.class);
+            publicResources.add(XmlWhitelistReaderInterceptor.class);
+        }
 
         publicResources.add(GeneralExceptionMapper.class);
         publicResources.add(ErrorResponseEntityMessageBodyWriter.class);
@@ -124,7 +136,6 @@ public class JerseyConfig {
         ServletRegistrationBean healthServicesJersey = new ServletRegistrationBean(new ServletContainer(resourceConfig));
 
 
-
         healthServicesJersey.addUrlMappings(SERVICES_HEALTH_PATH + "/*");
         healthServicesJersey.setName("HealthJersey");
 
@@ -150,7 +161,6 @@ public class JerseyConfig {
 
         ResourceConfig resourceConfig = new ResourceConfig(resources);
         ServletRegistrationBean prometheusServicesJersey = new ServletRegistrationBean(new ServletContainer(resourceConfig));
-
 
 
         prometheusServicesJersey.addUrlMappings(SERVICES_HEALTH_PATH + "/scrape/*");
