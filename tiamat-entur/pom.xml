@@ -88,6 +88,7 @@
                     </dependency>
                 </dependencies>
                 <configuration>
+                    <skip>false</skip>
                     <from>
                         <image>eclipse-temurin:25.0.3_9-jdk-alpine</image>
                     </from>
