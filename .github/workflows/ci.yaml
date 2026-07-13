@@ -79,15 +79,15 @@ jobs:
 
       - name: Build multi-arch image with Jib, push to Docker Hub
         run: |
-          mvn --batch-mode compile com.google.cloud.tools:jib-maven-plugin:build \
+          mvn --batch-mode -pl tiamat-entur -am compile com.google.cloud.tools:jib-maven-plugin:build \
               -Djib.to.tags=latest,${{ env.IMAGE_TAG }} \
               -Djib.container.labels=org.opencontainers.image.revision=${{ github.sha }},org.opencontainers.image.source=https://github.com/${{ github.repository }}
 
       - name: Build image tar for security scan (single-arch)
         run: |
-          mvn --batch-mode com.google.cloud.tools:jib-maven-plugin:buildTar \
+          mvn --batch-mode -pl tiamat-entur -am com.google.cloud.tools:jib-maven-plugin:buildTar \
               -Djib.from.platforms=linux/amd64
-          mv target/jib-image.tar tiamat.tar
+          mv tiamat-entur/target/jib-image.tar tiamat.tar
 
       - name: Upload image tar for security scan
         uses: actions/upload-artifact@v4
