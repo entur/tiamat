@@ -7,6 +7,7 @@ metadata:
     traffic-type: api
   annotations:
     kubernetes.io/ingress.class: traefik
+    {{- include "common.annotations" . | indent 4 }}
   name: {{ .Values.ingress.name }}
   namespace: {{ .Release.Namespace }}
 spec:

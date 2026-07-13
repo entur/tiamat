@@ -5,7 +5,7 @@ import org.rutebanken.tiamat.ext.fintraffic.api.model.ReadApiEntityOutRecord;
 import org.rutebanken.tiamat.ext.fintraffic.api.model.FintrafficReadApiSearchKey;
 import org.rutebanken.tiamat.ext.fintraffic.api.model.ReadApiSearchKey;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -20,7 +20,13 @@ public class FintrafficNetexRepository extends AbstractNetexRepository {
         super(jdbc, objectMapper);
     }
 
-    @Transactional(isolation = Isolation.READ_COMMITTED)
+    /**
+     * Streams all stop place entities matching the given search key from the Read API cache table.
+     * Returns a lazy {@link Stream} backed by an open JDBC {@link java.sql.ResultSet} — the stream must be
+     * consumed before the transaction commits. The caller must own the transaction. Closing the
+     * transaction here would close the ResultSet before the stream is consumed.
+     */
+    @Transactional(propagation = Propagation.MANDATORY)
     public Stream<ReadApiEntityOutRecord> streamStopPlaces(ReadApiSearchKey searchKey) {
         StringBuilder sql = new StringBuilder("""
             SELECT type, xml
