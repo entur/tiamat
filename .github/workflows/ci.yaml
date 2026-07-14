@@ -9,55 +9,117 @@ on:
       - master
 
 jobs:
-  tests:
-    runs-on: ubuntu-latest
+  verify:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     env:
       TZ: Europe/Oslo
     steps:
       - uses: actions/checkout@v4
-      - name: Set up JDK 21
+      - name: Set up JDK 25
         uses: actions/setup-java@v4
         with:
-          java-version: 21
+          java-version: 25
           distribution: temurin
           cache: maven
 
       - name: Run tests
         run: |
           sudo timedatectl set-timezone "Europe/Oslo"
-          mvn --batch-mode test
+          mvn --batch-mode verify
 
+      - name: Sonar Scan
+        if: github.repository_owner == 'entur' && github.ref == 'refs/heads/master'
+        env:
+          SONAR_TOKEN: ${{ secrets.ENTUR_SONAR_PASSWORD }}
+          SONAR_PROJECT_NAME: ${{ github.event.repository.name }}
+          SONAR_PROJECT_KEY: entur_${{ github.event.repository.name }}
+        run: |
+          mvn --batch-mode org.jacoco:jacoco-maven-plugin:prepare-agent verify \
+              org.jacoco:jacoco-maven-plugin:report sonar:sonar \
+              -Dmaven.main.skip \
+              -DskipTests \
+              -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
+              -Dsonar.organization=enturas-github \
+              -Dsonar.projectName=${SONAR_PROJECT_NAME} \
+              -Dsonar.host.url=https://sonarcloud.io \
+              -Dsonar.login=${SONAR_TOKEN}
 
   image:
     # only build and push the image when it's a commit to master in Entur's repository
     if: github.repository_owner == 'entur' && github.event_name == 'push'
-    runs-on: ubuntu-latest
-    needs: [ tests ]
+    runs-on: ubuntu-24.04
+    needs: [ verify ]
+    permissions:
+      contents: write   # git tag (Harness chart checkout, until GitHub CD cutover)
+      id-token: write   # GCP workload identity for the temporary GAR mirror
     env:
       CONTAINER_REPO: docker.io/entur/tiamat
       CONTAINER_REGISTRY_USER: ${{ secrets.DOCKERHUB_LOGIN }}
       CONTAINER_REGISTRY_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
+      GAR_MIRROR_REPO: eu.gcr.io/entur-system-1287/tiamat
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up JDK 21
+      - name: Set up JDK 25
         uses: actions/setup-java@v4
         with:
-          java-version: 21
+          java-version: 25
           distribution: temurin
           cache: maven
-      - name: set variables
-        run: |
-          echo "GHA_DOCKER_PUSH_IMAGE_TAG=`date +%Y-%m-%dT%H-%M`" >> $GITHUB_ENV
 
-      - name: Build container image with Jib, push to container repo
+      - name: Set image tags
         run: |
-          mvn --batch-mode compile com.google.cloud.tools:jib-maven-plugin:build -Djib.to.tags=latest,${{ env.GHA_DOCKER_PUSH_IMAGE_TAG }}
+          echo "IMAGE_TAG=$(date +%Y-%m-%dT%H-%M)-${GITHUB_SHA:0:7}" >> $GITHUB_ENV
+          # Mirror tag keeps the gha-docker scheme: the Harness trigger condition
+          # requires the tag to contain "master", and Harness checks out the chart
+          # at the git tag matching the artifact tag. Delete at GitHub CD cutover.
+          echo "MIRROR_TAG=master.$(date +%Y%m%d)-SHA${GITHUB_SHA:0:7}" >> $GITHUB_ENV
 
-      - name: Tag default branch with the container image tag ${{ env.GHA_DOCKER_PUSH_IMAGE_TAG }}
-        id: tag-version
+      - name: Build multi-arch image with Jib, push to Docker Hub
+        run: |
+          mvn --batch-mode compile com.google.cloud.tools:jib-maven-plugin:build \
+              -Djib.to.tags=latest,${{ env.IMAGE_TAG }} \
+              -Djib.container.labels=org.opencontainers.image.revision=${{ github.sha }},org.opencontainers.image.source=https://github.com/${{ github.repository }}
+
+      - name: Build image tar for security scan (single-arch)
+        run: |
+          mvn --batch-mode com.google.cloud.tools:jib-maven-plugin:buildTar \
+              -Djib.from.platforms=linux/amd64
+          mv target/jib-image.tar tiamat.tar
+
+      - name: Upload image tar for security scan
+        uses: actions/upload-artifact@v4
+        with:
+          name: tiamat
+          path: tiamat.tar
+          retention-days: 4
+
+      # Temporary: keep Harness fed from the Entur registry until GitHub CD cutover.
+      # Copies the exact Docker Hub manifest (same digest), no second build.
+      - name: Authenticate to GCP registry
+        uses: entur/gha-meta/.github/actions/docker-auth@v1
+        with:
+          cloud_provider: gcp
+          gcp_workload_identity_provider: ${{ vars.CI_WORKLOAD_IDENTITY_PROVIDER }}
+          gcp_service_account: ${{ vars.CI_SERVICE_ACCOUNT }}
+
+      - name: Mirror image to Entur registry for Harness
+        run: |
+          docker buildx imagetools create \
+            --tag ${{ env.GAR_MIRROR_REPO }}:${{ env.MIRROR_TAG }} \
+            ${{ env.CONTAINER_REPO }}:${{ env.IMAGE_TAG }}
+
+      - name: Tag repository with the Harness deploy tag ${{ env.MIRROR_TAG }}
         run: |
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git tag --annotate "$GHA_DOCKER_PUSH_IMAGE_TAG" -m "chore(tag): $GHA_DOCKER_PUSH_IMAGE_TAG [skip ci]" --force
-          git push origin "$GHA_DOCKER_PUSH_IMAGE_TAG" --force
+          git tag --annotate "$MIRROR_TAG" -m "chore(tag): $MIRROR_TAG [skip ci]"
+          git push origin "$MIRROR_TAG"
+
+  docker-scan:
+    needs: [ image ]
+    uses: entur/gha-security/.github/workflows/docker-scan.yml@v2
+    with:
+      image_artifact: tiamat

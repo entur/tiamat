@@ -51,6 +51,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -437,10 +440,13 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
 
     private Instant parseInstant(Object timestampObject) {
-        if (timestampObject instanceof Timestamp) {
-            return ((Timestamp)timestampObject).toInstant();
-        }
-        return null;
+        return switch (timestampObject) {
+            case Instant instant -> instant;
+            case OffsetDateTime odt -> odt.toInstant();
+            case LocalDateTime ldt -> ldt.atZone(ZoneId.systemDefault()).toInstant();
+            case Timestamp ts -> ts.toInstant();
+            case null, default -> null;
+        };
     }
 
 
@@ -641,6 +647,31 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
 
         }
 
+        return result;
+    }
+
+    @Override
+    public Set<Long> getParentStopPlaceIds(Set<Long> stopPlaceDatabaseIds) {
+        if (stopPlaceDatabaseIds == null || stopPlaceDatabaseIds.isEmpty()) {
+            return new HashSet<>();
+        }
+        // The exact parent stop versions referenced by the given stops, matching ParentStopFetchingIterator
+        // which appends the parent version each child references (findFirstByNetexIdAndVersion). Matching on
+        // both netex_id and version (parent_site_ref_version is stored as text) avoids gathering entities for
+        // unrelated parent versions. These parents are not part of the search result, so their referenced
+        // topographic places / tariff zones / parkings would otherwise be missing and break schema validation.
+        Query query = entityManager.createNativeQuery(
+                "SELECT DISTINCT parent.id " +
+                "FROM stop_place child " +
+                "JOIN stop_place parent ON parent.netex_id = child.parent_site_ref " +
+                "    AND CAST(parent.version AS text) = child.parent_site_ref_version " +
+                "WHERE child.id IN (:ids) AND child.parent_site_ref IS NOT NULL");
+        query.setParameter("ids", stopPlaceDatabaseIds);
+
+        Set<Long> result = new HashSet<>();
+        for (Object object : query.getResultList()) {
+            result.add(((Number) object).longValue());
+        }
         return result;
     }
 
