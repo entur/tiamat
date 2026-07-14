@@ -23,16 +23,20 @@ import java.util.Arrays;
 import java.util.function.IntConsumer;
 
 /**
- * ApplicationRunner that imports a single NeTEx file from S3 into Tiamat.
+ * Imports a single NeTEx file into Tiamat and shuts down the application when done.
  * <p>
- * Reads the S3 object key from the {@code NETEX_S3_KEY} environment variable and the
- * optional import type from {@code NETEX_IMPORT_TYPE} (default: {@code INITIAL}).
- * Downloads the file via {@link BlobStoreService}, unmarshals it, and calls
- * {@link PublicationDeliveryImporter} directly — no HTTP, no Trivore authentication.
+ * All three environment variables are required:
+ * <ul>
+ *   <li>{@code NETEX_S3_KEY} — S3 object key to import, or a local file path
+ *       ({@code /abs/path}, {@code ./rel/path}, {@code file://...}) for local testing</li>
+ *   <li>{@code NETEX_IMPORT_TYPE} — import mode, e.g. {@code INITIAL} or {@code MERGE}</li>
+ *   <li>{@code NETEX_DISABLE_PRE_POST_PROCESSING} — {@code true} or {@code false}</li>
+ * </ul>
+ * On completion, writes {@code done} or {@code failed} to {@value #STATUS_S3_KEY} in S3
+ * (skipped for local file paths), then calls {@code System.exit}.
  * <p>
- * Must be activated via the {@code fintraffic-netex-import-task} Spring profile, which sets
- * {@code authorization.enabled=false} and {@code spring.main.web-application-type=none}.
- * Shuts down the application when complete.
+ * For local file paths the S3 download and status write are bypassed, which makes
+ * local testing straightforward without any AWS credentials.
  */
 public class NetexImportTask implements ApplicationRunner {
 
