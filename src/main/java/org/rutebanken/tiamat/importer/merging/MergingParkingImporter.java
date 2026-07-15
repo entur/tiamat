@@ -15,10 +15,11 @@
 
 package org.rutebanken.tiamat.importer.merging;
 
-import org.rutebanken.tiamat.importer.KeyValueListAppender;
+import org.rutebanken.tiamat.model.factory.ParkingEntityFactory;
 import org.rutebanken.tiamat.importer.finder.NearbyParkingFinder;
-import org.rutebanken.tiamat.importer.finder.ParkingFromOriginalIdFinder;
 import org.rutebanken.tiamat.model.DataManagedObjectStructure;
+import org.rutebanken.tiamat.importer.finder.ParkingFromOriginalIdFinder;
+import org.rutebanken.tiamat.importer.KeyValueListAppender;
 import org.rutebanken.tiamat.model.Parking;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
@@ -56,11 +57,14 @@ public class MergingParkingImporter {
 
     private final VersionCreator versionCreator;
 
+    private final ParkingEntityFactory parkingEntityFactory;
+
     @Autowired
     public MergingParkingImporter(ParkingFromOriginalIdFinder parkingFromOriginalIdFinder,
                                   NearbyParkingFinder nearbyParkingFinder, ReferenceResolver referenceResolver,
                                   KeyValueListAppender keyValueListAppender, NetexMapper netexMapper,
-                                  ParkingVersionedSaverService parkingVersionedSaverService, VersionCreator versionCreator) {
+                                  ParkingVersionedSaverService parkingVersionedSaverService, VersionCreator versionCreator,
+                                  ParkingEntityFactory parkingEntityFactory) {
         this.parkingFromOriginalIdFinder = parkingFromOriginalIdFinder;
         this.nearbyParkingFinder = nearbyParkingFinder;
         this.referenceResolver = referenceResolver;
@@ -68,6 +72,7 @@ public class MergingParkingImporter {
         this.netexMapper = netexMapper;
         this.parkingVersionedSaverService = parkingVersionedSaverService;
         this.versionCreator = versionCreator;
+        this.parkingEntityFactory = parkingEntityFactory;
     }
 
     /**
@@ -125,16 +130,27 @@ public class MergingParkingImporter {
 
         // Ignore incoming version. Always set version to 1 for new parkings.
         logger.debug("New parking: {}. Setting version to \"1\"", incomingParking.getName());
-        // versionCreator.createCopy(incomingParking, Parking.class);
 
-        incomingParking = parkingVersionedSaverService.saveNewVersion(incomingParking);
-        return updateCache(incomingParking);
+        // When the factory produces a different concrete type than the incoming entity
+        // (e.g. an extension subclass), copy into that type so the correct dtype is
+        // persisted and extended fields can be populated via mergeExtendedFields.
+        // Otherwise keep the incoming instance directly to avoid an unnecessary copy.
+        Parking newParking;
+        if (!parkingEntityFactory.getEntityClass().equals(incomingParking.getClass())) {
+            newParking = versionCreator.createCopy(incomingParking, parkingEntityFactory.getEntityClass());
+            mergeExtendedFields(incomingParking, newParking);
+        } else {
+            newParking = incomingParking;
+        }
+
+        newParking = parkingVersionedSaverService.saveNewVersion(newParking);
+        return updateCache(newParking);
     }
 
     public Parking handleAlreadyExistingParking(Parking existingParking, Parking incomingParking) {
         logger.debug("Found existing parking {} from incoming {}", existingParking, incomingParking);
 
-        Parking copy = versionCreator.createCopy(existingParking, Parking.class);
+        Parking copy = versionCreator.createCopy(existingParking, parkingEntityFactory.getEntityClass());
 
         boolean keyValuesChanged = keyValueListAppender.appendToOriginalId(NetexIdMapper.ORIGINAL_ID_KEY, incomingParking, copy);
         boolean centroidChanged = (copy.getCentroid() != null && incomingParking.getCentroid() != null && !copy.getCentroid().equals(incomingParking.getCentroid()));
@@ -159,7 +175,9 @@ public class MergingParkingImporter {
         }
 
 
-        if (keyValuesChanged || typeChanged || centroidChanged || vehicleType) {
+        boolean extendedFieldsChanged = mergeExtendedFields(incomingParking, copy);
+
+        if (keyValuesChanged || typeChanged || centroidChanged || vehicleType || extendedFieldsChanged) {
             logger.info("Updated existing parking {}. ", copy);
             copy = parkingVersionedSaverService.saveNewVersion(copy);
             return updateCache(copy);
@@ -168,6 +186,19 @@ public class MergingParkingImporter {
         logger.debug("No changes. Returning existing parking {}", existingParking);
         return existingParking;
 
+    }
+
+    /**
+     * Extension hook for merging additional fields from an incoming parking into a version copy.
+     * Called during {@link #handleAlreadyExistingParking} after core fields are merged.
+     * Subclasses may override to merge fields that are not part of the core {@link Parking} model.
+     *
+     * @param incomingParking the incoming (source) parking from the NeTEx import
+     * @param copy            the version copy being prepared for persistence
+     * @return {@code true} if any field was changed on {@code copy}, {@code false} otherwise
+     */
+    protected boolean mergeExtendedFields(Parking incomingParking, Parking copy) {
+        return false;
     }
 
     private Parking updateCache(Parking parking) {

@@ -661,4 +661,35 @@ public class NetexMapperTest extends TiamatIntegrationTest {
             NetexMappingContextThreadLocal.set(null);
         }
     }
+
+    @Test
+    public void parkingPaymentMethodsExcludedByDefault() {
+        // Default ParkingEntityFactory excludes paymentMethods — they must not survive NeTEx → Tiamat mapping
+        org.rutebanken.netex.model.Parking netexParking = new org.rutebanken.netex.model.Parking()
+                .withId("NSR:Parking:1")
+                .withVersion("1")
+                .withPaymentMethods(
+                        org.rutebanken.netex.model.PaymentMethodEnumeration.CASH,
+                        org.rutebanken.netex.model.PaymentMethodEnumeration.CREDIT_CARD);
+
+        org.rutebanken.tiamat.model.Parking tiamatParking = netexMapper.mapToTiamatModel(netexParking);
+
+        assertThat(tiamatParking.getPaymentMethods())
+                .as("paymentMethods should be excluded from mapping by default")
+                .isEmpty();
+    }
+
+    @Test
+    public void parkingPaymentMethodsExcludedOnExport() {
+        // Default factory — paymentMethods on Tiamat model should not appear in exported NeTEx
+        org.rutebanken.tiamat.model.Parking tiamatParking = new org.rutebanken.tiamat.model.Parking();
+        tiamatParking.setNetexId("NSR:Parking:2");
+        tiamatParking.getPaymentMethods().add(org.rutebanken.tiamat.model.PaymentMethodEnumeration.CASH);
+
+        org.rutebanken.netex.model.Parking netexParking = netexMapper.mapToNetexModel(tiamatParking);
+
+        assertThat(netexParking.getPaymentMethods())
+                .as("paymentMethods should not be exported with default factory")
+                .isEmpty();
+    }
 }

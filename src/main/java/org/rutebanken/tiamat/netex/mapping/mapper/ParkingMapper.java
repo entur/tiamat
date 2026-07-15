@@ -23,9 +23,20 @@ import org.rutebanken.netex.model.Parking;
 import org.rutebanken.netex.model.ParkingArea;
 import org.rutebanken.netex.model.ParkingAreas_RelStructure;
 
+import java.util.Collections;
 import java.util.List;
 
 public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.model.Parking> {
+
+    private final List<ParkingMapperContributor> contributors;
+
+    public ParkingMapper() {
+        this.contributors = Collections.emptyList();
+    }
+
+    public ParkingMapper(List<ParkingMapperContributor> contributors) {
+        this.contributors = contributors;
+    }
 
     @Override
     public void mapAtoB(Parking parking, org.rutebanken.tiamat.model.Parking parking2, MappingContext context) {
@@ -38,6 +49,7 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
                 parking2.setParkingAreas(parkingAreas);
             }
         }
+        contributors.forEach(c -> c.mapFromNetex(parking, parking2, context));
     }
 
     @Override
@@ -58,5 +70,6 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
                 netexParking.setParkingAreas(parkingAreas_relStructure);
             }
         }
+        contributors.forEach(c -> c.mapToNetex(tiamatParking, netexParking, context));
     }
 }
