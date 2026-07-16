@@ -236,13 +236,16 @@ public class NetexMapper {
         facade = mapperFactory.getMapperFacade();
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     private void registerParkingClassMap(ParkingEntityFactory factory) {
-        ClassMapBuilder builder = mapperFactoryWithNetexIdClassBuilder(Parking.class, factory.getEntityClass());
-        factory.getMappingExclusions().forEach(builder::exclude);
-        builder.customize(new ParkingMapper(parkingMapperContributors))
-               .byDefault()
-               .register();
+        registerParkingClassMap(factory.getEntityClass(), factory.getMappingExclusions());
+    }
+
+    private <P extends org.rutebanken.tiamat.model.Parking> void registerParkingClassMap(Class<P> parkingEntityClass, List<String> mappingExclusions) {
+        ClassMapBuilder<Parking, P> builder = mapperFactoryWithNetexIdClassBuilder(Parking.class, parkingEntityClass);
+        mappingExclusions.forEach(builder::exclude);
+        builder.customize(new ParkingMapper<>(parkingMapperContributors))
+                .byDefault()
+                .register();
     }
 
     public TopographicPlace mapToNetexModel(org.rutebanken.tiamat.model.TopographicPlace topographicPlace) {
@@ -339,9 +342,13 @@ public class NetexMapper {
     }
 
     public List<org.rutebanken.tiamat.model.Parking> mapParkingsToTiamatModel(List<Parking> parking) {
-        @SuppressWarnings("unchecked")
-        List<org.rutebanken.tiamat.model.Parking> result =
-                (List<org.rutebanken.tiamat.model.Parking>) facade.mapAsList(parking, parkingEntityFactory.getEntityClass());
+        return mapParkingsToTiamatModel(parking, parkingEntityFactory.getEntityClass());
+    }
+
+    private <P extends org.rutebanken.tiamat.model.Parking> List<org.rutebanken.tiamat.model.Parking> mapParkingsToTiamatModel(List<Parking> parking, Class<P> parkingEntityClass) {
+        List<P> mappedParkings = facade.mapAsList(parking, parkingEntityClass);
+        List<org.rutebanken.tiamat.model.Parking> result = new java.util.ArrayList<>(mappedParkings.size());
+        result.addAll(mappedParkings);
         return result;
     }
 
@@ -364,10 +371,11 @@ public class NetexMapper {
 
 
     public org.rutebanken.tiamat.model.Parking mapToTiamatModel(Parking netexParking) {
-        @SuppressWarnings("unchecked")
-        org.rutebanken.tiamat.model.Parking result =
-                (org.rutebanken.tiamat.model.Parking) facade.map(netexParking, parkingEntityFactory.getEntityClass());
-        return result;
+        return mapToTiamatModel(netexParking, parkingEntityFactory.getEntityClass());
+    }
+
+    private <P extends org.rutebanken.tiamat.model.Parking> org.rutebanken.tiamat.model.Parking mapToTiamatModel(Parking netexParking, Class<P> parkingEntityClass) {
+        return facade.map(netexParking, parkingEntityClass);
     }
 
     public Quay mapToNetexModel(org.rutebanken.tiamat.model.Quay tiamatQuay) {
