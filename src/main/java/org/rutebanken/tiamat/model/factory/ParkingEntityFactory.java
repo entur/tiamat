@@ -34,6 +34,18 @@ public class ParkingEntityFactory {
         return new Parking();
     }
 
+    /**
+     * Returns the entity class to instantiate and register Orika classmaps for.
+     * <p>
+     * Override in an extension module to substitute a subclass of {@link Parking}.
+     * <p>
+     * <strong>Hibernate inheritance:</strong> the core Flyway schema includes the
+     * {@code dtype} discriminator column on the {@code parking} table (required because
+     * any {@code @Entity} subclass on the classpath causes Hibernate to add discriminator
+     * predicates to all queries, regardless of active Spring profiles).  Extension modules
+     * that add further columns or auxiliary tables must provide their own Flyway migrations
+     * for those additions.
+     */
     public Class<? extends Parking> getEntityClass() {
         return Parking.class;
     }
