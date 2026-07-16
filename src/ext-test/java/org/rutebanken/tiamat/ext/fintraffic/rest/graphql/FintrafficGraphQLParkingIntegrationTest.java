@@ -263,6 +263,59 @@ public class FintrafficGraphQLParkingIntegrationTest {
     }
 
     /**
+     * Verifies that {@code paymentMethods} persisted via {@code mutateParking} are returned by
+     * the GraphQL {@code parking} query. This exercises the full read path:
+     * {@code parkingFetcher} → {@link org.rutebanken.tiamat.repository.ParkingRepository} →
+     * {@link org.rutebanken.tiamat.netex.mapping.NetexMapper#mapToNetexModel} →
+     * {@link org.rutebanken.tiamat.ext.fintraffic.rest.graphql.FintrafficParkingGraphQLTypeContributor}.
+     */
+    @Test
+    public void parkingQuery_returnsPaymentMethods_whenFintrafficProfileActive() {
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("Test stop"));
+        stopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
+        stopPlace = stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+        String stopNetexId = stopPlace.getNetexId();
+
+        // Create parking with paymentMethods via mutation
+        String createMutation = """
+                {
+                  "query": "mutation { parking: %s (Parking: { name: { value: \\"Test\\" lang: \\"fi\\" } parkingType: parkAndRide parentSiteRef: \\"%s\\" paymentMethods: [cash, creditCard] }) { id } }",
+                  "variables": ""
+                }
+                """.formatted(GraphQLNames.MUTATE_PARKING, stopNetexId);
+
+        String parkingNetexId = given()
+                .port(port)
+                .contentType(ContentType.JSON)
+                .body(createMutation)
+                .when()
+                .post(BASE_URI_GRAPHQL)
+                .then()
+                .statusCode(200)
+                .extract()
+                .path("data.parking[0].id");
+
+        // Query it back via the parking read query
+        String query = """
+                {
+                  "query": "{ parking(id: \\"%s\\") { id paymentMethods } }"
+                }
+                """.formatted(parkingNetexId);
+
+        given()
+                .port(port)
+                .contentType(ContentType.JSON)
+                .body(query)
+                .when()
+                .post(BASE_URI_GRAPHQL)
+                .then()
+                .log().body()
+                .statusCode(200)
+                .body("data.parking[0].id", notNullValue())
+                .body("data.parking[0].paymentMethods", hasItems("cash", "creditCard"));
+    }
+
+    /**
      * Regression test: when {@code fintraffic} profile is active, the {@code stopPlace} GraphQL
      * query must be served by {@code stopPlaceFetcher}, not hijacked by any {@code @Primary}
      * bean override intended only for {@code parkingUpdater}. The field must never be {@code null}
