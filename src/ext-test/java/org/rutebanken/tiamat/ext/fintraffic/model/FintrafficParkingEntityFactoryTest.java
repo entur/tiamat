@@ -25,12 +25,12 @@ class FintrafficParkingEntityFactoryTest {
     }
 
     @Test
-    void getMappingExclusions_doesNotContainPaymentMethods() {
+    void getMappingExclusions_containsPaymentMethods() {
         List<String> exclusions = factory.getMappingExclusions();
 
         assertThat(exclusions)
-                .as("paymentMethods must not be excluded so Orika maps it through")
-                .doesNotContain("paymentMethods");
+                .as("paymentMethods must be excluded from Orika auto-mapping: the two PaymentMethodEnumeration types differ and require explicit conversion in FintrafficParkingMapperContributor")
+                .contains("paymentMethods");
     }
 
     @Test
