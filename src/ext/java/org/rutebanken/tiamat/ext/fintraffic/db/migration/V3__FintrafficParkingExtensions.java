@@ -8,20 +8,17 @@ import java.sql.Statement;
 /**
  * Adds DDL required by {@code FintrafficParking}:
  * <ul>
- *   <li>{@code dtype} discriminator column on the {@code parking} table
- *       (Hibernate SINGLE_TABLE inheritance; existing rows default to "Parking")</li>
  *   <li>{@code parking_payment_methods} collection table for persisted payment methods</li>
  * </ul>
- * Entur's core migrations are not modified.
+ * Note: the {@code dtype} discriminator column is added by the core Flyway migration V62,
+ * because {@code FintrafficParking} is compiled into the same jar and Hibernate always
+ * requires {@code dtype} regardless of active Spring profiles.
  */
 public class V3__FintrafficParkingExtensions extends BaseJavaMigration {
 
     @Override
     public void migrate(Context context) throws Exception {
         String sql = """
-                ALTER TABLE parking ADD COLUMN IF NOT EXISTS dtype VARCHAR(31) DEFAULT 'Parking';
-                UPDATE parking SET dtype = 'Parking' WHERE dtype IS NULL;
-
                 CREATE TABLE IF NOT EXISTS parking_payment_methods (
                     parking_id  BIGINT      NOT NULL REFERENCES parking(id),
                     payment_method VARCHAR(64) NOT NULL
