@@ -12,9 +12,10 @@ import java.util.List;
  * Fintraffic override of {@link ParkingEntityFactory}.
  * <p>
  * Active when the {@code fintraffic} Spring profile is present. Tells the
- * core to instantiate {@link FintrafficParking} instead of {@link Parking},
- * and removes {@code paymentMethods} from the Orika exclusion list so the
- * field is mapped during NeTEx import and export.
+ * core to instantiate {@link FintrafficParking} instead of {@link Parking}.
+ * {@code paymentMethods} is kept in the exclusion list because the enum types
+ * differ between the NeTEx and Tiamat models; {@link org.rutebanken.tiamat.ext.fintraffic.importer.FintrafficParkingMapperContributor}
+ * handles the conversion instead.
  */
 @Primary
 @Component
@@ -33,7 +34,6 @@ public class FintrafficParkingEntityFactory extends ParkingEntityFactory {
 
     @Override
     public List<String> getMappingExclusions() {
-        // paymentMethods intentionally absent — it is persisted by FintrafficParking
-        return List.of("cardsAccepted", "currenciesAccepted", "accessModes");
+        return List.of("paymentMethods", "cardsAccepted", "currenciesAccepted", "accessModes");
     }
 }
