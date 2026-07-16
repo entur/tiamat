@@ -15,6 +15,7 @@ import org.rutebanken.tiamat.repository.ParkingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,6 +43,7 @@ import static org.assertj.core.api.Assertions.assertThat;
         classes = FintrafficTiamatTestApplication.class
 )
 @ActiveProfiles({"test", "gcs-blobstore", "fintraffic"})
+@TestPropertySource(properties = "spring.main.allow-bean-definition-overriding=true")
 public class FintrafficParkingIntegrationTest {
 
     @MockitoBean

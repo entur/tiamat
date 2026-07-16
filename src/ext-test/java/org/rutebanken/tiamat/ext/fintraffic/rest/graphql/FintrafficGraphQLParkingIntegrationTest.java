@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import static io.restassured.RestAssured.given;
@@ -45,6 +46,7 @@ import static org.rutebanken.tiamat.config.JerseyConfig.SERVICES_STOP_PLACE_PATH
         classes = FintrafficTiamatTestApplication.class
 )
 @ActiveProfiles({"test", "gcs-blobstore", "fintraffic"})
+@TestPropertySource(properties = "spring.main.allow-bean-definition-overriding=true")
 public class FintrafficGraphQLParkingIntegrationTest {
 
     private static final String BASE_URI_GRAPHQL = SERVICES_STOP_PLACE_PATH + "/graphql/";
