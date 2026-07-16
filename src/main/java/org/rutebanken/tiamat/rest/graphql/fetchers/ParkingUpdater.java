@@ -329,8 +329,8 @@ public class ParkingUpdater implements DataFetcher {
      * input retain their current values rather than being silently cleared.
      * <p>
      * The default implementation does nothing.  Subclasses override to copy fields that
-     *      Orika does not transfer (e.g. private fields on a {@link org.rutebanken.tiamat.model.Parking}
-      * extension subclass).
+     * Orika does not transfer (e.g. private fields on a {@link org.rutebanken.tiamat.model.Parking}
+     * extension subclass).
      *
      * @param existingVersion the current persisted parking entity
      * @param copy            the newly created version copy that will be saved

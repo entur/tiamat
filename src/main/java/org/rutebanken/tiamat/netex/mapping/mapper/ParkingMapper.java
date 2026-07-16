@@ -23,16 +23,11 @@ import org.rutebanken.netex.model.Parking;
 import org.rutebanken.netex.model.ParkingArea;
 import org.rutebanken.netex.model.ParkingAreas_RelStructure;
 
-import java.util.Collections;
 import java.util.List;
 
 public class ParkingMapper<P extends org.rutebanken.tiamat.model.Parking> extends CustomMapper<Parking, P> {
 
     private final List<ParkingMapperContributor> contributors;
-
-    public ParkingMapper() {
-        this.contributors = Collections.emptyList();
-    }
 
     public ParkingMapper(List<ParkingMapperContributor> contributors) {
         this.contributors = contributors;

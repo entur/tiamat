@@ -52,12 +52,12 @@ import org.rutebanken.netex.model.TopographicPlace;
 import org.rutebanken.netex.model.WaitingRoomEquipment;
 import org.rutebanken.tiamat.model.factory.ParkingEntityFactory;
 import org.rutebanken.tiamat.netex.mapping.mapper.*;
-import org.rutebanken.tiamat.netex.mapping.mapper.ParkingMapperContributor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -82,7 +82,7 @@ public class NetexMapper {
                        PublicationDeliveryHelper publicationDeliveryHelper,
                        AccessibilityAssessmentMapper accessibilityAssessmentMapper,
                        ParkingEntityFactory parkingEntityFactory,
-                       @org.springframework.beans.factory.annotation.Autowired(required = false)
+                       @Autowired(required = false)
                        List<ParkingMapperContributor> parkingMapperContributors) {
 
         logger.info("Setting up netexMapper with DI");
@@ -356,9 +356,7 @@ public class NetexMapper {
 
     private <P extends org.rutebanken.tiamat.model.Parking> List<org.rutebanken.tiamat.model.Parking> mapParkingsToTiamatModel(List<Parking> parking, Class<P> parkingEntityClass) {
         List<P> mappedParkings = facade.mapAsList(parking, parkingEntityClass);
-        List<org.rutebanken.tiamat.model.Parking> result = new java.util.ArrayList<>(mappedParkings.size());
-        result.addAll(mappedParkings);
-        return result;
+        return new ArrayList<>(mappedParkings);
     }
 
     public List<org.rutebanken.tiamat.model.PathLink> mapPathLinksToTiamatModel(List<PathLink> pathLinks) {

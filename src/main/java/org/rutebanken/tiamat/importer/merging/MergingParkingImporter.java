@@ -15,12 +15,12 @@
 
 package org.rutebanken.tiamat.importer.merging;
 
-import org.rutebanken.tiamat.model.factory.ParkingEntityFactory;
-import org.rutebanken.tiamat.importer.finder.NearbyParkingFinder;
-import org.rutebanken.tiamat.model.DataManagedObjectStructure;
-import org.rutebanken.tiamat.importer.finder.ParkingFromOriginalIdFinder;
 import org.rutebanken.tiamat.importer.KeyValueListAppender;
+import org.rutebanken.tiamat.importer.finder.NearbyParkingFinder;
+import org.rutebanken.tiamat.importer.finder.ParkingFromOriginalIdFinder;
+import org.rutebanken.tiamat.model.DataManagedObjectStructure;
 import org.rutebanken.tiamat.model.Parking;
+import org.rutebanken.tiamat.model.factory.ParkingEntityFactory;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 import org.rutebanken.tiamat.repository.reference.ReferenceResolver;
