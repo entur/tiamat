@@ -237,7 +237,16 @@ public class NetexMapper {
     }
 
     private void registerParkingClassMap(ParkingEntityFactory factory) {
-        registerParkingClassMap(factory.getEntityClass(), factory.getMappingExclusions());
+        Class<? extends org.rutebanken.tiamat.model.Parking> entityClass = factory.getEntityClass();
+        List<String> exclusions = factory.getMappingExclusions();
+        registerParkingClassMap(entityClass, exclusions);
+        // When a subclass is active, Hibernate may still return base-class Parking instances
+        // (e.g. rows whose dtype discriminator resolves to the base type). Register a classmap
+        // for the base class so Orika applies the same exclusions instead of falling back to
+        // its auto-generated default mapping and losing them.
+        if (!entityClass.equals(org.rutebanken.tiamat.model.Parking.class)) {
+            registerParkingClassMap(org.rutebanken.tiamat.model.Parking.class, exclusions);
+        }
     }
 
     private <P extends org.rutebanken.tiamat.model.Parking> void registerParkingClassMap(Class<P> parkingEntityClass, List<String> mappingExclusions) {

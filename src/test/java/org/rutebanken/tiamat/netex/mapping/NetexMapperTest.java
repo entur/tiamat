@@ -39,6 +39,7 @@ import org.rutebanken.tiamat.model.IanaCountryTldEnumeration;
 import org.rutebanken.tiamat.model.LightingEnumeration;
 import org.rutebanken.tiamat.model.LimitationStatusEnumeration;
 import org.rutebanken.tiamat.model.NameTypeEnumeration;
+import org.rutebanken.tiamat.model.Parking;
 import org.rutebanken.tiamat.model.PathLink;
 import org.rutebanken.tiamat.model.PathLinkEnd;
 import org.rutebanken.tiamat.model.Quay;
@@ -52,7 +53,13 @@ import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.model.TopographicPlaceRefStructure;
 import org.rutebanken.tiamat.model.ValidBetween;
 import org.rutebanken.tiamat.model.Value;
+import org.rutebanken.tiamat.model.factory.ParkingEntityFactory;
+import org.rutebanken.tiamat.netex.mapping.mapper.AccessibilityAssessmentMapper;
+import org.rutebanken.tiamat.netex.mapping.mapper.DataManagedObjectStructureMapper;
+import org.rutebanken.tiamat.netex.mapping.mapper.KeyListToKeyValuesMapMapper;
+import org.rutebanken.tiamat.netex.mapping.PublicationDeliveryHelper;
 import org.springframework.beans.factory.annotation.Autowired;
+import ma.glasnost.orika.Converter;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -66,6 +73,18 @@ public class NetexMapperTest extends TiamatIntegrationTest {
 
     @Autowired
     private NetexMapper netexMapper;
+
+    // Extra dependencies for constructing a NetexMapper with a custom ParkingEntityFactory
+    @Autowired
+    private List<Converter> converters;
+    @Autowired
+    private KeyListToKeyValuesMapMapper keyListToKeyValuesMapMapper;
+    @Autowired
+    private DataManagedObjectStructureMapper dataManagedObjectStructureMapper;
+    @Autowired
+    private PublicationDeliveryHelper publicationDeliveryHelper;
+    @Autowired
+    private AccessibilityAssessmentMapper accessibilityAssessmentMapper;
 
     @Test
     public void mapKeyValuesToInternalList() throws Exception {
@@ -691,5 +710,81 @@ public class NetexMapperTest extends TiamatIntegrationTest {
         assertThat(netexParking.getPaymentMethods())
                 .as("paymentMethods should not be exported with default factory")
                 .isEmpty();
+    }
+
+    @Test
+    public void parkingPaymentMethodsMappedWhenFactoryHasNoExclusions() {
+        // A custom ParkingEntityFactory with an empty exclusion list must cause
+        // paymentMethods to survive the NeTEx → Tiamat mapping round trip.
+        ParkingEntityFactory emptyExclusionFactory = new ParkingEntityFactory() {
+            @Override
+            public List<String> getMappingExclusions() {
+                return List.of();
+            }
+        };
+        NetexMapper customMapper = new NetexMapper(
+                converters, keyListToKeyValuesMapMapper, dataManagedObjectStructureMapper,
+                publicationDeliveryHelper, accessibilityAssessmentMapper,
+                emptyExclusionFactory, List.of());
+
+        // Import: paymentMethods should be mapped
+        org.rutebanken.netex.model.Parking netexParking = new org.rutebanken.netex.model.Parking()
+                .withId("NSR:Parking:3")
+                .withVersion("1")
+                .withPaymentMethods(
+                        org.rutebanken.netex.model.PaymentMethodEnumeration.CASH,
+                        org.rutebanken.netex.model.PaymentMethodEnumeration.CREDIT_CARD);
+
+        Parking tiamatParking = customMapper.mapToTiamatModel(netexParking);
+
+        assertThat(tiamatParking.getPaymentMethods())
+                .as("paymentMethods should be imported when factory has no exclusions")
+                .isNotEmpty();
+
+        // Export: paymentMethods should appear in the NeTEx output
+        org.rutebanken.netex.model.Parking exported = customMapper.mapToNetexModel(tiamatParking);
+
+        assertThat(exported.getPaymentMethods())
+                .as("paymentMethods should be exported when factory has no exclusions")
+                .isNotEmpty();
+    }
+
+    @Test
+    public void baseParkingInstanceUsesCustomizerEvenWhenSubclassFactoryActive() {
+        // When a subclass factory is active, the base classmap must also be registered
+        // so that the ParkingMapper customizer is invoked for legacy Parking rows
+        // (dtype='Parking') loaded from the DB as base-class instances.
+        // Without the fix, Orika falls back to auto-generated mapping and skips the
+        // customizer, causing parkingAreas to be lost on export (JAXBElement wrapping
+        // in ParkingMapper.mapBtoA is not performed).
+        ParkingEntityFactory subclassFactory = new ParkingEntityFactory() {
+            @Override
+            public Class<? extends org.rutebanken.tiamat.model.Parking> getEntityClass() {
+                return ParkingSubclassForTest.class;
+            }
+            @Override
+            public List<String> getMappingExclusions() {
+                return List.of("paymentMethods");
+            }
+        };
+        NetexMapper customMapper = new NetexMapper(
+                converters, keyListToKeyValuesMapMapper, dataManagedObjectStructureMapper,
+                publicationDeliveryHelper, accessibilityAssessmentMapper,
+                subclassFactory, List.of());
+
+        // Export a base-class Parking instance with a parkingArea set.
+        // The ParkingMapper customizer wraps areas in JAXBElement; without it they are lost.
+        org.rutebanken.tiamat.model.ParkingArea area = new org.rutebanken.tiamat.model.ParkingArea();
+        org.rutebanken.tiamat.model.Parking baseParkingInstance = new org.rutebanken.tiamat.model.Parking();
+        baseParkingInstance.setParkingAreas(List.of(area));
+
+        org.rutebanken.netex.model.Parking exported = customMapper.mapToNetexModel(baseParkingInstance);
+
+        assertThat(exported.getParkingAreas())
+                .as("parkingAreas must be exported via ParkingMapper customizer even for base Parking instances")
+                .isNotNull();
+        assertThat(exported.getParkingAreas().getParkingAreaRefOrParkingArea_())
+                .as("parkingAreas list must contain the area wrapped by ParkingMapper.mapBtoA")
+                .isNotEmpty();
     }
 }
