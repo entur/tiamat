@@ -7,6 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.rutebanken.tiamat.auth.AuthorizationService;
+import org.rutebanken.tiamat.ext.fintraffic.FintrafficIntegrationTest;
 import org.rutebanken.tiamat.ext.fintraffic.FintrafficTiamatTestApplication;
 import org.rutebanken.tiamat.ext.fintraffic.model.FintrafficParking;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
@@ -47,7 +48,7 @@ import static org.rutebanken.tiamat.config.JerseyConfig.SERVICES_STOP_PLACE_PATH
 )
 @ActiveProfiles({"test", "gcs-blobstore", "fintraffic"})
 @TestPropertySource(properties = "spring.main.allow-bean-definition-overriding=true")
-public class FintrafficGraphQLParkingIntegrationTest {
+public class FintrafficGraphQLParkingIntegrationTest extends FintrafficIntegrationTest {
 
     private static final String BASE_URI_GRAPHQL = SERVICES_STOP_PLACE_PATH + "/graphql/";
 

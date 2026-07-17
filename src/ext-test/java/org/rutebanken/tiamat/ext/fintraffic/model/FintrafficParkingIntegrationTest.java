@@ -6,6 +6,7 @@ import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.rutebanken.tiamat.auth.AuthorizationService;
+import org.rutebanken.tiamat.ext.fintraffic.FintrafficIntegrationTest;
 import org.rutebanken.tiamat.ext.fintraffic.FintrafficTiamatTestApplication;
 import org.rutebanken.tiamat.model.Parking;
 import org.rutebanken.tiamat.model.PaymentMethodEnumeration;
@@ -44,7 +45,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 )
 @ActiveProfiles({"test", "gcs-blobstore", "fintraffic"})
 @TestPropertySource(properties = "spring.main.allow-bean-definition-overriding=true")
-public class FintrafficParkingIntegrationTest {
+public class FintrafficParkingIntegrationTest extends FintrafficIntegrationTest {
 
     @MockitoBean
     private AuthorizationService authorizationService;

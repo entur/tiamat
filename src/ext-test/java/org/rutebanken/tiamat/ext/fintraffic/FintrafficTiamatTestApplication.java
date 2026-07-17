@@ -1,7 +1,9 @@
 package org.rutebanken.tiamat.ext.fintraffic;
 
 import org.rutebanken.tiamat.auth.TiamatSecurityConfig;
+import org.rutebanken.tiamat.config.ApplicationContextProvider;
 import org.rutebanken.tiamat.ext.fintraffic.auth.FintrafficSecurityConfig;
+import org.rutebanken.tiamat.ext.fintraffic.config.FintrafficTestContextConfiguration;
 import org.rutebanken.tiamat.ext.fintraffic.model.FintrafficParking;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.springframework.boot.SpringApplication;
@@ -15,6 +17,7 @@ import org.springframework.boot.security.autoconfigure.web.servlet.ServletWebSec
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
@@ -41,8 +44,10 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
         basePackages = "org.rutebanken.tiamat",
         excludeFilters = {
         @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = TiamatSecurityConfig.class),
-        @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = FintrafficSecurityConfig.class)
+        @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = FintrafficSecurityConfig.class),
+        @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = ApplicationContextProvider.class)
 })
+@Import(FintrafficTestContextConfiguration.class)
 public class FintrafficTiamatTestApplication {
     public static void main(String[] args) {
         SpringApplication.run(FintrafficTiamatTestApplication.class, args);
