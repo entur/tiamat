@@ -36,6 +36,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 import java.util.concurrent.ExecutionException;
 
+import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
+
 @Component
 @Qualifier("mergingParkingImporter")
 @Transactional
@@ -215,6 +217,12 @@ public class MergingParkingImporter {
         final Parking existingParking = parkingFromOriginalIdFinder.find(newParking);
         if (existingParking != null) {
             return existingParking;
+        }
+        // If the parking has a known source ID but was not found by it, it is definitively new.
+        // Skip proximity matching to avoid incorrectly merging distinct facilities that happen to
+        // share a name and are geographically close (e.g., two lots at the same station).
+        if (!newParking.getOrCreateValues(ORIGINAL_ID_KEY).isEmpty()) {
+            return null;
         }
 
         if (newParking.getName() != null) {
