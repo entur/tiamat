@@ -16,15 +16,25 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import javax.sql.DataSource;
+
 @Profile("fintraffic-read-api")
 @Configuration
 @EnableConfigurationProperties(AreaCodeMappingConfig.class)
 public class FintrafficReadApiConfig {
     @Bean
     public NetexRepository netexRepository(
-            JdbcTemplate jdbc,
+            DataSource dataSource,
             ObjectMapper objectMapper
     ) {
+        // A dedicated JdbcTemplate with fetchSize enables PostgreSQL server-side cursors
+        // in queryForStream. Without fetchSize > 0, the driver fetches all rows at once
+        // — the entire ext_fintraffic_netex_entity table (~300 MB) into the heap, causing OOM.
+        // fetchSize=1000 instructs the driver to stream rows in batches of 1000 from the DB.
+        // This only works because streamStopPlaces() is always called inside a transaction
+        // (autoCommit=false is required for PostgreSQL server-side cursors).
+        JdbcTemplate jdbc = new JdbcTemplate(dataSource);
+        jdbc.setFetchSize(1000);
         return new FintrafficNetexRepository(jdbc, objectMapper);
     }
 
