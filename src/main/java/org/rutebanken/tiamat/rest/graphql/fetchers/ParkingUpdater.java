@@ -25,6 +25,7 @@ import org.rutebanken.tiamat.model.AccessibilityLimitation;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.LimitationStatusEnumeration;
 import org.rutebanken.tiamat.model.Parking;
+import org.rutebanken.tiamat.model.factory.ParkingEntityFactory;
 import org.rutebanken.tiamat.model.ParkingArea;
 import org.rutebanken.tiamat.model.ParkingCapacity;
 import org.rutebanken.tiamat.model.ParkingLayoutEnumeration;
@@ -90,7 +91,7 @@ import static org.rutebanken.tiamat.rest.graphql.mappers.EmbeddableMultilingualS
 
 @Service("parkingUpdater")
 @Transactional
-class ParkingUpdater implements DataFetcher {
+public class ParkingUpdater implements DataFetcher {
 
     private static final Logger logger = LoggerFactory.getLogger(ParkingUpdater.class);
 
@@ -111,6 +112,9 @@ class ParkingUpdater implements DataFetcher {
 
     @Autowired
     private VersionCreator versionCreator;
+
+    @Autowired
+    private ParkingEntityFactory parkingEntityFactory;
 
     @Autowired
     private AccessibilityLimitationMapper accessibilityLimitationMapper;
@@ -136,11 +140,12 @@ class ParkingUpdater implements DataFetcher {
             logger.info("Updating Parking {}", netexId);
             existingVersion = parkingRepository.findFirstByNetexIdOrderByVersionDesc(netexId);
             Preconditions.checkArgument(existingVersion != null, "Attempting to update Parking [id = %s], but Parking does not exist.", netexId);
-            updatedParking = versionCreator.createCopy(existingVersion, Parking.class);
+            updatedParking = versionCreator.createCopy(existingVersion, parkingEntityFactory.getEntityClass());
+            preserveExtendedFields(existingVersion, updatedParking);
 
         } else {
             logger.info("Creating new Parking");
-            updatedParking = new Parking();
+            updatedParking = parkingEntityFactory.create();
         }
         boolean isUpdated = populateParking(input, updatedParking);
 
@@ -157,7 +162,7 @@ class ParkingUpdater implements DataFetcher {
         return existingVersion;
     }
 
-    private boolean populateParking(Map input, Parking updatedParking) {
+    protected boolean populateParking(Map input, Parking updatedParking) {
         boolean isUpdated = false;
         if (input.get(NAME) != null) {
             EmbeddableMultilingualString name = getEmbeddableString((Map) input.get(NAME));
@@ -298,7 +303,39 @@ class ParkingUpdater implements DataFetcher {
             }
         }
 
+        boolean extendedFieldsUpdated = populateExtendedFields(input, updatedParking);
+        isUpdated = isUpdated || extendedFieldsUpdated;
+
         return isUpdated;
+    }
+
+    /**
+     * Extension hook for populating additional fields from the GraphQL input map onto the parking entity.
+     * Called at the end of {@link #populateParking} after all core fields are processed.
+     * Subclasses may override to handle fields contributed via {@link org.rutebanken.tiamat.rest.graphql.types.ParkingGraphQLTypeContributor}.
+     *
+     * @param input          the raw GraphQL input map
+     * @param updatedParking the parking entity being created or updated
+     * @return {@code true} if any field was changed on {@code updatedParking}, {@code false} otherwise
+     */
+    protected boolean populateExtendedFields(Map input, Parking updatedParking) {
+        return false;
+    }
+
+    /**
+     * Extension hook for copying extended fields from an existing version into its version copy
+     * during a GraphQL update.  Called immediately after {@link org.rutebanken.tiamat.versioning.VersionCreator#createCopy}
+     * and before {@link #populateParking} so that extended fields not present in the update
+     * input retain their current values rather than being silently cleared.
+     * <p>
+     * The default implementation does nothing.  Subclasses override to copy fields that
+     * Orika does not transfer (e.g. private fields on a {@link org.rutebanken.tiamat.model.Parking}
+     * extension subclass).
+     *
+     * @param existingVersion the current persisted parking entity
+     * @param copy            the newly created version copy that will be saved
+     */
+    protected void preserveExtendedFields(Parking existingVersion, Parking copy) {
     }
 
     private List<ParkingProperties> resolveParkingPropertiesList(List propertyList) {
