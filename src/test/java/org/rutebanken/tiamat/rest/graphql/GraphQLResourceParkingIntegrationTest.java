@@ -455,5 +455,27 @@ public class GraphQLResourceParkingIntegrationTest extends AbstractGraphQLResour
 
     }
 
+    @Test
+    public void testMutateParkingWithLightingShouldPersistAndReturn() throws Exception {
+
+        StopPlace stopPlace = stopPlaceRepository.save(new StopPlace());
+
+        String graphQlQuery = "{\n" +
+                "\"query\": \"mutation { " +
+                "  parking: " + GraphQLNames.MUTATE_PARKING + " (Parking : {" +
+                "    geometry: { type:Point coordinates:[10.5, 59.0] } " +
+                "    parentSiteRef:\\\"" + stopPlace.getNetexId() + "\\\" " +
+                "    lighting: wellLit " +
+                "  }) {" +
+                "    id " +
+                "    lighting " +
+                "  }" +
+                "}\",\"variables\": \"\"}";
+
+        executeGraphQL(graphQlQuery)
+                .body("data.parking[0].id", notNullValue())
+                .body("data.parking[0].lighting", equalTo("wellLit"));
+    }
+
 
 }

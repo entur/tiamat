@@ -27,6 +27,7 @@ import org.rutebanken.tiamat.model.LimitationStatusEnumeration;
 import org.rutebanken.tiamat.model.Parking;
 import org.rutebanken.tiamat.model.ParkingArea;
 import org.rutebanken.tiamat.model.ParkingCapacity;
+import org.rutebanken.tiamat.model.LightingEnumeration;
 import org.rutebanken.tiamat.model.ParkingLayoutEnumeration;
 import org.rutebanken.tiamat.model.ParkingPaymentProcessEnumeration;
 import org.rutebanken.tiamat.model.ParkingProperties;
@@ -63,6 +64,7 @@ import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.FREE_PARKING_OUT_O
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.GEOMETRY;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ID;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.LABEL;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.LIGHTING;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.NAME;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.NUMBER_OF_SPACES;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.NUMBER_OF_SPACES_WITH_RECHARGE_POINT;
@@ -227,6 +229,12 @@ class ParkingUpdater implements DataFetcher {
             Boolean isSecure = (Boolean) input.get(SECURE);
             isUpdated = isUpdated || (!isSecure.equals(updatedParking.isSecure()));
             updatedParking.setSecure(isSecure);
+        }
+
+        if (input.get(LIGHTING) != null) {
+            LightingEnumeration lighting = (LightingEnumeration) input.get(LIGHTING);
+            isUpdated = isUpdated || (!lighting.equals(updatedParking.getLighting()));
+            updatedParking.setLighting(lighting);
         }
 
         if (input.get(REAL_TIME_OCCUPANCY_AVAILABLE) != null) {
