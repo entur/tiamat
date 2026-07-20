@@ -574,4 +574,135 @@ public class FintrafficGraphQLParkingIntegrationTest extends FintrafficIntegrati
                 .hasSize(1);
         assertThat(latest.getFintrafficVehicleEntrances().getFirst().getLabel()).isEqualTo("Main");
     }
+
+    @Test
+    public void mutateParking_lighting_persistedAndReturnedInResponse() {
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("Test stop"));
+        stopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
+        stopPlace = stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+        String stopNetexId = stopPlace.getNetexId();
+
+        String mutation = """
+                {
+                  "query": "mutation { parking: %s (Parking: { name: { value: \\"Test\\" lang: \\"fi\\" } parkingType: parkAndRide parentSiteRef: \\"%s\\" lighting: wellLit }) { id lighting } }",
+                  "variables": ""
+                }
+                """.formatted(GraphQLNames.MUTATE_PARKING, stopNetexId);
+
+        String parkingNetexId = given()
+                .port(port)
+                .contentType(ContentType.JSON)
+                .body(mutation)
+                .when()
+                .post(BASE_URI_GRAPHQL)
+                .then()
+                .log().body()
+                .statusCode(200)
+                .body("data.parking[0].id", notNullValue())
+                .body("data.parking[0].lighting", equalTo("wellLit"))
+                .extract()
+                .path("data.parking[0].id");
+
+        FintrafficParking saved = (FintrafficParking)
+                parkingRepository.findFirstByNetexIdOrderByVersionDesc(parkingNetexId);
+
+        assertThat(saved.getLighting())
+                .as("lighting must be persisted to DB via FintrafficParkingUpdater")
+                .isEqualTo(org.rutebanken.tiamat.model.LightingEnumeration.WELL_LIT);
+    }
+
+    @Test
+    public void mutateParking_lighting_persistedAndReadBack_viaQuery() {
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("Test stop"));
+        stopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
+        stopPlace = stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+        String stopNetexId = stopPlace.getNetexId();
+
+        String mutation = """
+                {
+                  "query": "mutation { parking: %s (Parking: { name: { value: \\"Test\\" lang: \\"fi\\" } parkingType: parkAndRide parentSiteRef: \\"%s\\" lighting: wellLit }) { id } }",
+                  "variables": ""
+                }
+                """.formatted(GraphQLNames.MUTATE_PARKING, stopNetexId);
+
+        String parkingNetexId = given()
+                .port(port)
+                .contentType(ContentType.JSON)
+                .body(mutation)
+                .when()
+                .post(BASE_URI_GRAPHQL)
+                .then()
+                .statusCode(200)
+                .extract()
+                .path("data.parking[0].id");
+
+        // Separate read query — proves persistence, not just response echo
+        String query = """
+                {
+                  "query": "{ parking(id: \\"%s\\") { id lighting } }"
+                }
+                """.formatted(parkingNetexId);
+
+        given()
+                .port(port)
+                .contentType(ContentType.JSON)
+                .body(query)
+                .when()
+                .post(BASE_URI_GRAPHQL)
+                .then()
+                .log().body()
+                .statusCode(200)
+                .body("data.parking[0].lighting", equalTo("wellLit"));
+    }
+
+    @Test
+    public void mutateParking_updateWithoutLighting_preservesExistingLighting() {
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("Test stop"));
+        stopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
+        stopPlace = stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+        String stopNetexId = stopPlace.getNetexId();
+
+        String createMutation = """
+                {
+                  "query": "mutation { parking: %s (Parking: { name: { value: \\"Test\\" lang: \\"fi\\" } parkingType: parkAndRide parentSiteRef: \\"%s\\" lighting: wellLit }) { id } }",
+                  "variables": ""
+                }
+                """.formatted(GraphQLNames.MUTATE_PARKING, stopNetexId);
+
+        String parkingNetexId = given()
+                .port(port)
+                .contentType(ContentType.JSON)
+                .body(createMutation)
+                .when()
+                .post(BASE_URI_GRAPHQL)
+                .then()
+                .statusCode(200)
+                .extract()
+                .path("data.parking[0].id");
+
+        // Update without lighting — should be preserved
+        String updateMutation = """
+                {
+                  "query": "mutation { parking: %s (Parking: { id: \\"%s\\" name: { value: \\"Updated\\" lang: \\"fi\\" } }) { id lighting } }",
+                  "variables": ""
+                }
+                """.formatted(GraphQLNames.MUTATE_PARKING, parkingNetexId);
+
+        given()
+                .port(port)
+                .contentType(ContentType.JSON)
+                .body(updateMutation)
+                .when()
+                .post(BASE_URI_GRAPHQL)
+                .then()
+                .log().body()
+                .statusCode(200)
+                .body("data.parking[0].lighting", equalTo("wellLit"));
+
+        FintrafficParking latest = (FintrafficParking)
+                parkingRepository.findFirstByNetexIdOrderByVersionDesc(parkingNetexId);
+        assertThat(latest.getLighting())
+                .as("lighting must be preserved when not included in update input")
+                .isEqualTo(org.rutebanken.tiamat.model.LightingEnumeration.WELL_LIT);
+    }
 }

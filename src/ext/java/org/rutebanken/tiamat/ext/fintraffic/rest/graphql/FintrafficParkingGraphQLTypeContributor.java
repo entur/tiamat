@@ -7,6 +7,7 @@ import graphql.schema.GraphQLNonNull;
 import graphql.schema.GraphQLObjectType;
 import org.rutebanken.netex.model.EntranceEnumeration;
 import org.rutebanken.netex.model.TypeOfInfolinkEnumeration;
+import org.rutebanken.tiamat.model.LightingEnumeration;
 import org.rutebanken.tiamat.model.PaymentMethodEnumeration;
 import org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes;
 import org.rutebanken.tiamat.rest.graphql.types.ParkingGraphQLTypeContributor;
@@ -24,6 +25,7 @@ import static graphql.schema.GraphQLInputObjectType.newInputObject;
 /**
  * Contributes Fintraffic-specific fields to the GraphQL parking types:
  * <ul>
+ *   <li>{@code lighting} — {@link LightingEnumeration} scalar</li>
  *   <li>{@code paymentMethods} — list of {@link PaymentMethodEnumeration} values</li>
  *   <li>{@code infoLinks} — list of info link objects with {@code uri} and {@code typeOfInfoLink}</li>
  *   <li>{@code vehicleEntrances} — list of vehicle entrance objects</li>
@@ -33,6 +35,7 @@ import static graphql.schema.GraphQLInputObjectType.newInputObject;
 @Component
 public class FintrafficParkingGraphQLTypeContributor implements ParkingGraphQLTypeContributor {
 
+    static final String LIGHTING = "lighting";
     static final String PAYMENT_METHODS = "paymentMethods";
     static final String PAYMENT_METHOD_ENUM = "PaymentMethodEnum";
     static final String INFO_LINKS = "infoLinks";
@@ -99,6 +102,16 @@ public class FintrafficParkingGraphQLTypeContributor implements ParkingGraphQLTy
     @Override
     public void contributeToOutputType(GraphQLObjectType.Builder builder) {
         builder.field(newFieldDefinition()
+                .name(LIGHTING)
+                .type(CustomGraphQLTypes.lightingEnumType)
+                .dataFetcher(env -> {
+                    Object source = env.getSource();
+                    if (!(source instanceof org.rutebanken.tiamat.ext.fintraffic.model.FintrafficParking fp)) {
+                        return null;
+                    }
+                    return fp.getLighting();
+                }));
+        builder.field(newFieldDefinition()
                 .name(PAYMENT_METHODS)
                 .type(new GraphQLList(paymentMethodEnum)));
         builder.field(newFieldDefinition()
@@ -158,6 +171,9 @@ public class FintrafficParkingGraphQLTypeContributor implements ParkingGraphQLTy
 
     @Override
     public void contributeToInputType(GraphQLInputObjectType.Builder builder) {
+        builder.field(newInputObjectField()
+                .name(LIGHTING)
+                .type(CustomGraphQLTypes.lightingEnumType));
         builder.field(newInputObjectField()
                 .name(PAYMENT_METHODS)
                 .type(new GraphQLList(paymentMethodEnum)));

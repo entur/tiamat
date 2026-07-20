@@ -9,6 +9,7 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
+import org.rutebanken.tiamat.model.LightingEnumeration;
 import org.rutebanken.tiamat.model.Parking;
 import org.rutebanken.tiamat.model.PaymentMethodEnumeration;
 
@@ -18,14 +19,20 @@ import java.util.List;
 /**
  * Fintraffic extension of the core {@link Parking} entity.
  * <p>
- * Persists fields that are {@code @Transient} in the core model, using a
- * separate collection table so Entur's core DDL remains unmodified.
+ * Persists fields that are {@code @Transient} in the core model. Scalar fields
+ * (e.g. {@code lighting}) are added as columns on the shared {@code parking} table
+ * (populated only for {@code dtype = 'FintrafficParking'} rows).  Collection fields
+ * use separate collection tables so Entur's core DDL remains unmodified.
  * Activated when the {@code fintraffic} Spring profile is active via
  * {@link FintrafficParkingEntityFactory}.
  */
 @Entity
 @DiscriminatorValue("FintrafficParking")
 public class FintrafficParking extends Parking {
+
+    @Column(name = "lighting")
+    @Enumerated(EnumType.STRING)
+    private LightingEnumeration lighting;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
@@ -49,6 +56,16 @@ public class FintrafficParking extends Parking {
             joinColumns = @JoinColumn(name = "parking_id")
     )
     private List<FintrafficParkingEntranceForVehicles> fintrafficVehicleEntrances;
+
+    @Override
+    public LightingEnumeration getLighting() {
+        return lighting;
+    }
+
+    @Override
+    public void setLighting(LightingEnumeration value) {
+        this.lighting = value;
+    }
 
     @Override
     public List<PaymentMethodEnumeration> getPaymentMethods() {

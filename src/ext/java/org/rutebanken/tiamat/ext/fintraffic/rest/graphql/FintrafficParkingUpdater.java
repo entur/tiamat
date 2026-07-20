@@ -7,6 +7,7 @@ import jakarta.persistence.PersistenceContext;
 import org.rutebanken.tiamat.ext.fintraffic.model.FintrafficInfoLink;
 import org.rutebanken.tiamat.ext.fintraffic.model.FintrafficParking;
 import org.rutebanken.tiamat.ext.fintraffic.model.FintrafficParkingEntranceForVehicles;
+import org.rutebanken.tiamat.model.LightingEnumeration;
 import org.rutebanken.tiamat.model.Parking;
 import org.rutebanken.tiamat.model.PaymentMethodEnumeration;
 import org.rutebanken.tiamat.rest.graphql.fetchers.ParkingUpdater;
@@ -20,6 +21,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import static org.rutebanken.tiamat.ext.fintraffic.rest.graphql.FintrafficParkingGraphQLTypeContributor.INFO_LINKS;
+import static org.rutebanken.tiamat.ext.fintraffic.rest.graphql.FintrafficParkingGraphQLTypeContributor.LIGHTING;
 import static org.rutebanken.tiamat.ext.fintraffic.rest.graphql.FintrafficParkingGraphQLTypeContributor.PAYMENT_METHODS;
 import static org.rutebanken.tiamat.ext.fintraffic.rest.graphql.FintrafficParkingGraphQLTypeContributor.TYPE_OF_INFO_LINK;
 import static org.rutebanken.tiamat.ext.fintraffic.rest.graphql.FintrafficParkingGraphQLTypeContributor.URI;
@@ -69,6 +71,12 @@ public class FintrafficParkingUpdater extends ParkingUpdater {
         }
 
         boolean changed = false;
+
+        LightingEnumeration lighting = (LightingEnumeration) input.get(LIGHTING);
+        if (lighting != null && !lighting.equals(target.getLighting())) {
+            target.setLighting(lighting);
+            changed = true;
+        }
 
         @SuppressWarnings("unchecked")
         List<PaymentMethodEnumeration> incomingMethods = (List<PaymentMethodEnumeration>) input.get(PAYMENT_METHODS);
@@ -150,6 +158,7 @@ public class FintrafficParkingUpdater extends ParkingUpdater {
     @Override
     protected void preserveExtendedFields(Parking existingVersion, Parking copy) {
         if (existingVersion instanceof FintrafficParking source && copy instanceof FintrafficParking target) {
+            target.setLighting(source.getLighting());
             target.setPaymentMethods(new ArrayList<>(source.getPaymentMethods()));
             target.setInfoLinks(new ArrayList<>(source.getInfoLinks()));
             target.setFintrafficVehicleEntrances(new ArrayList<>(source.getFintrafficVehicleEntrances()));
