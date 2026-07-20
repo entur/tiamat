@@ -479,8 +479,26 @@ public class GraphQLResourceParkingIntegrationTest extends AbstractGraphQLResour
                 "  }" +
                 "}\",\"variables\": \"\"}";
 
-        executeGraphQL(graphQlQuery)
+        String parkingId = executeGraphQL(graphQlQuery)
                 .body("data.parking[0].id", notNullValue())
+                .body("data.parking[0].placeEquipments.cycleStorageEquipment[0].cycleStorageType", equalTo("bars"))
+                .body("data.parking[0].placeEquipments.cycleStorageEquipment[0].numberOfSpaces", equalTo(10))
+                .extract()
+                .path("data.parking[0].id");
+
+        String findParkingQuery = "{" +
+                "\"query\":\"{" +
+                "  parking: " + GraphQLNames.FIND_PARKING + " (id:\\\"" + parkingId + "\\\") { " +
+                "    id " +
+                "    placeEquipments { " +
+                "      cycleStorageEquipment { numberOfSpaces cycleStorageType } " +
+                "    } " +
+                "  } " +
+                "}\"," +
+                "\"variables\":\"\"}";
+
+        executeGraphQL(findParkingQuery)
+                .body("data.parking[0].id", equalTo(parkingId))
                 .body("data.parking[0].placeEquipments.cycleStorageEquipment[0].cycleStorageType", equalTo("bars"))
                 .body("data.parking[0].placeEquipments.cycleStorageEquipment[0].numberOfSpaces", equalTo(10));
     }
