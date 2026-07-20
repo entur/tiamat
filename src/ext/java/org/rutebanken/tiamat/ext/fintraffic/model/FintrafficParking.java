@@ -19,10 +19,10 @@ import java.util.List;
 /**
  * Fintraffic extension of the core {@link Parking} entity.
  * <p>
- * Persists fields that are {@code @Transient} in the core model. Scalar fields
- * (e.g. {@code lighting}) are added as columns on the shared {@code parking} table
- * (populated only for {@code dtype = 'FintrafficParking'} rows).  Collection fields
- * use separate collection tables so Entur's core DDL remains unmodified.
+ * Persists fields that are {@code @Transient} in the core model. All ext fields
+ * use separate collection tables so Entur's core DDL (the {@code parking} table) remains
+ * unmodified — this prevents Hibernate from selecting ext columns in core tests that do
+ * not run the Fintraffic Flyway migrations.
  * Activated when the {@code fintraffic} Spring profile is active via
  * {@link FintrafficParkingEntityFactory}.
  */
@@ -30,9 +30,14 @@ import java.util.List;
 @DiscriminatorValue("FintrafficParking")
 public class FintrafficParking extends Parking {
 
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(
+            name = "parking_fintraffic_lighting",
+            joinColumns = @JoinColumn(name = "parking_id")
+    )
     @Column(name = "lighting")
     @Enumerated(EnumType.STRING)
-    private LightingEnumeration lighting;
+    private List<LightingEnumeration> lightingList = new ArrayList<>();
 
     @ElementCollection(fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
@@ -59,12 +64,12 @@ public class FintrafficParking extends Parking {
 
     @Override
     public LightingEnumeration getLighting() {
-        return lighting;
+        return lightingList.isEmpty() ? null : lightingList.get(0);
     }
 
     @Override
     public void setLighting(LightingEnumeration value) {
-        this.lighting = value;
+        this.lightingList = value == null ? new ArrayList<>() : new ArrayList<>(List.of(value));
     }
 
     @Override
