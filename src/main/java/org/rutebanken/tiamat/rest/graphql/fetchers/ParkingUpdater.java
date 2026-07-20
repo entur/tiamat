@@ -29,6 +29,8 @@ import org.rutebanken.tiamat.model.factory.ParkingEntityFactory;
 import org.rutebanken.tiamat.model.ParkingArea;
 import org.rutebanken.tiamat.model.ParkingCapacity;
 import org.rutebanken.tiamat.model.ParkingLayoutEnumeration;
+import org.rutebanken.tiamat.model.PlaceEquipment;
+import org.rutebanken.tiamat.rest.graphql.mappers.PlaceEquipmentMapper;
 import org.rutebanken.tiamat.model.ParkingPaymentProcessEnumeration;
 import org.rutebanken.tiamat.model.ParkingProperties;
 import org.rutebanken.tiamat.model.ParkingReservationEnumeration;
@@ -56,6 +58,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ACCESSIBILITY_ASSESSMENT;
@@ -64,6 +67,7 @@ import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.FREE_PARKING_OUT_O
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.GEOMETRY;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ID;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.LABEL;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PLACE_EQUIPMENTS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.NAME;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.NUMBER_OF_SPACES;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.NUMBER_OF_SPACES_WITH_RECHARGE_POINT;
@@ -119,7 +123,8 @@ public class ParkingUpdater implements DataFetcher {
     @Autowired
     private AccessibilityLimitationMapper accessibilityLimitationMapper;
 
-    @Override
+    @Autowired
+    private PlaceEquipmentMapper placeEquipmentMapper;
     public Object get(DataFetchingEnvironment environment) {
 
         List<Map> input = environment.getArgument(OUTPUT_TYPE_PARKING);
@@ -290,6 +295,12 @@ public class ParkingUpdater implements DataFetcher {
             List<ParkingArea> parkingAreasList = resolveParkingAreasList((List) input.get(PARKING_AREAS));
             isUpdated = true;
             updatedParking.setParkingAreas(parkingAreasList);
+        }
+
+        Optional<PlaceEquipment> placeEquipment = placeEquipmentMapper.map(input);
+        if (placeEquipment.isPresent()) {
+            isUpdated = isUpdated || !Objects.equals(placeEquipment.get(), updatedParking.getPlaceEquipments());
+            updatedParking.setPlaceEquipments(placeEquipment.get());
         }
 
         if (input.get(ACCESSIBILITY_ASSESSMENT) != null) {

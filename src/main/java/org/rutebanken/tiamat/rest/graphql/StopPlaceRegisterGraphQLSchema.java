@@ -768,6 +768,7 @@ public class StopPlaceRegisterGraphQLSchema {
         dataFetcherPlaceEquipments(codeRegistryBuilder, OUTPUT_TYPE_STOPPLACE);
         dataFetcherPlaceEquipments(codeRegistryBuilder, OUTPUT_TYPE_PARENT_STOPPLACE);
         dataFetcherPlaceEquipments(codeRegistryBuilder, OUTPUT_TYPE_QUAY);
+        dataFetcherPlaceEquipments(codeRegistryBuilder, OUTPUT_TYPE_PARKING);
 
 
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_STOPPLACE, STOP_PLACE_GROUPS, stopPlaceGroupsFetcher);
@@ -998,6 +999,8 @@ public class StopPlaceRegisterGraphQLSchema {
                 return stopPlace.getPlaceEquipments();
             } else if (env.getSource() instanceof Quay quay) {
                 return quay.getPlaceEquipments();
+            } else if (env.getSource() instanceof Parking parking) {
+                return parking.getPlaceEquipments();
             }
             return null;
         });
