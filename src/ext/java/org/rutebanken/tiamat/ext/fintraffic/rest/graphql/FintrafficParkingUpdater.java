@@ -13,6 +13,7 @@ import org.rutebanken.tiamat.rest.graphql.fetchers.ParkingUpdater;
 import org.springframework.context.annotation.Profile;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -124,8 +125,8 @@ public class FintrafficParkingUpdater extends ParkingUpdater {
                 converted.add(new FintrafficParkingEntranceForVehicles(
                         labelObj != null ? labelObj.toString() : null,
                         entranceTypeStr,
-                        widthObj instanceof java.math.BigDecimal bd ? bd : null,
-                        heightObj instanceof java.math.BigDecimal bd ? bd : null,
+                        toBigDecimal(widthObj),
+                        toBigDecimal(heightObj),
                         isEntryObj instanceof Boolean b ? b : null,
                         isExitObj instanceof Boolean b ? b : null,
                         publicCodeObj != null ? publicCodeObj.toString() : null
@@ -154,5 +155,14 @@ public class FintrafficParkingUpdater extends ParkingUpdater {
             target.setFintrafficVehicleEntrances(new ArrayList<>(source.getFintrafficVehicleEntrances()));
         }
     }
-}
 
+    private static BigDecimal toBigDecimal(Object value) {
+        if (value instanceof BigDecimal bd) {
+            return bd;
+        }
+        if (value instanceof Number number) {
+            return BigDecimal.valueOf(number.doubleValue());
+        }
+        return null;
+    }
+}

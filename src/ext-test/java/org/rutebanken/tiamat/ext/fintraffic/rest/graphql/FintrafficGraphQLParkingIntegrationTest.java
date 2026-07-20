@@ -28,6 +28,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.rutebanken.tiamat.config.JerseyConfig.SERVICES_STOP_PLACE_PATH;
@@ -481,6 +482,46 @@ public class FintrafficGraphQLParkingIntegrationTest extends FintrafficIntegrati
         assertThat(entrance.getIsEntry()).isTrue();
         assertThat(entrance.getIsExit()).isFalse();
         assertThat(entrance.getPublicCode()).isEqualTo("A1");
+    }
+
+    @Test
+    public void mutateParking_vehicleEntrances_widthAndHeight_persistedAndReturnedInResponse() {
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("Test stop"));
+        stopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
+        stopPlace = stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+        String stopNetexId = stopPlace.getNetexId();
+
+        String mutation = """
+                {
+                  "query": "mutation { parking: %s (Parking: { name: { value: \\"Test\\" lang: \\"fi\\" } parkingType: parkAndRide parentSiteRef: \\"%s\\" vehicleEntrances: [{ label: \\"Main\\" entranceType: door width: 2.75 height: 3.5 isEntry: true isExit: false publicCode: \\"A1\\" }] }) { id vehicleEntrances { label entranceType width height isEntry isExit publicCode } } }",
+                  "variables": ""
+                }
+                """.formatted(GraphQLNames.MUTATE_PARKING, stopNetexId);
+
+        String parkingNetexId = given()
+                .port(port)
+                .contentType(ContentType.JSON)
+                .body(mutation)
+                .when()
+                .post(BASE_URI_GRAPHQL)
+                .then()
+                .statusCode(200)
+                .body("data.parking[0].id", notNullValue())
+                .body("data.parking[0].vehicleEntrances[0].width", equalTo(2.75f))
+                .body("data.parking[0].vehicleEntrances[0].height", equalTo(3.5f))
+                .extract()
+                .path("data.parking[0].id");
+
+        FintrafficParking saved = (FintrafficParking)
+                parkingRepository.findFirstByNetexIdOrderByVersionDesc(parkingNetexId);
+
+        assertThat(saved.getFintrafficVehicleEntrances()).hasSize(1);
+        org.rutebanken.tiamat.ext.fintraffic.model.FintrafficParkingEntranceForVehicles entrance =
+                saved.getFintrafficVehicleEntrances().getFirst();
+        assertThat(entrance.getWidth()).isNotNull();
+        assertThat(entrance.getHeight()).isNotNull();
+        assertThat(entrance.getWidth()).isEqualByComparingTo("2.75");
+        assertThat(entrance.getHeight()).isEqualByComparingTo("3.5");
     }
 
     @Test
