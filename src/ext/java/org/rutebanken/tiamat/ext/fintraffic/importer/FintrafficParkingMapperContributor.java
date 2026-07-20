@@ -1,24 +1,29 @@
 package org.rutebanken.tiamat.ext.fintraffic.importer;
 
 import ma.glasnost.orika.MappingContext;
+import org.rutebanken.netex.model.InfoLinkStructure;
+import org.rutebanken.tiamat.ext.fintraffic.model.FintrafficInfoLink;
 import org.rutebanken.tiamat.ext.fintraffic.model.FintrafficParking;
 import org.rutebanken.tiamat.model.PaymentMethodEnumeration;
 import org.rutebanken.tiamat.netex.mapping.mapper.ParkingMapperContributor;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Fintraffic extension of {@link ParkingMapperContributor} that wires
- * {@code paymentMethods} through the NeTEx ↔ Tiamat mapping in both directions.
+ * {@code paymentMethods} and {@code infoLinks} through the NeTEx ↔ Tiamat
+ * mapping in both directions.
  *
- * <p><b>Import ({@link #mapFromNetex}):</b> copies the NeTEx
- * {@code paymentMethods} list onto the Tiamat {@link org.rutebanken.tiamat.model.Parking}
- * {@code @Transient} field so that the
- * {@link FintrafficMergingParkingImporter#mergeExtendedFields} hook can persist it.
+ * <p><b>Import ({@link #mapFromNetex}):</b> copies the NeTEx fields onto the
+ * {@link FintrafficParking} so that the
+ * {@link FintrafficMergingParkingImporter#mergeExtendedFields} hook can persist them.
  *
- * <p><b>Export ({@link #mapToNetex}):</b> reads {@code paymentMethods} from a
- * {@link FintrafficParking} and writes it back into the NeTEx output so that the
- * field survives the export roundtrip.
+ * <p><b>Export ({@link #mapToNetex}):</b> reads the persisted fields from a
+ * {@link FintrafficParking} and writes them back into the NeTEx output so that the
+ * fields survive the export roundtrip.
  */
 @Profile("fintraffic")
 @Component
@@ -28,6 +33,25 @@ public class FintrafficParkingMapperContributor implements ParkingMapperContribu
     public void mapFromNetex(org.rutebanken.netex.model.Parking source,
                              org.rutebanken.tiamat.model.Parking target,
                              MappingContext context) {
+        mapPaymentMethodsFromNetex(source, target);
+        mapInfoLinksFromNetex(source, target);
+    }
+
+    @Override
+    public void mapToNetex(org.rutebanken.tiamat.model.Parking source,
+                           org.rutebanken.netex.model.Parking target,
+                           MappingContext context) {
+        if (!(source instanceof FintrafficParking fp)) {
+            return;
+        }
+        mapPaymentMethodsToNetex(fp, target);
+        mapInfoLinksToNetex(fp, target);
+    }
+
+    // --- paymentMethods ---
+
+    private void mapPaymentMethodsFromNetex(org.rutebanken.netex.model.Parking source,
+                                             org.rutebanken.tiamat.model.Parking target) {
         var netexMethods = source.getPaymentMethods();
         if (netexMethods == null || netexMethods.isEmpty()) {
             return;
@@ -43,14 +67,9 @@ public class FintrafficParkingMapperContributor implements ParkingMapperContribu
         }
     }
 
-    @Override
-    public void mapToNetex(org.rutebanken.tiamat.model.Parking source,
-                           org.rutebanken.netex.model.Parking target,
-                           MappingContext context) {
-        if (!(source instanceof FintrafficParking fp)) {
-            return;
-        }
-        var methods = fp.getPaymentMethods();
+    private void mapPaymentMethodsToNetex(FintrafficParking source,
+                                          org.rutebanken.netex.model.Parking target) {
+        var methods = source.getPaymentMethods();
         if (methods.isEmpty()) {
             return;
         }
@@ -64,4 +83,60 @@ public class FintrafficParkingMapperContributor implements ParkingMapperContribu
             }
         }
     }
+
+    // --- infoLinks ---
+
+    private void mapInfoLinksFromNetex(org.rutebanken.netex.model.Parking source,
+                                        org.rutebanken.tiamat.model.Parking target) {
+        if (!(target instanceof FintrafficParking fp)) {
+            return;
+        }
+        var infoLinksRelStruct = source.getInfoLinks();
+        if (infoLinksRelStruct == null) {
+            return;
+        }
+        List<InfoLinkStructure> netexLinks = infoLinksRelStruct.getInfoLink();
+        if (netexLinks == null || netexLinks.isEmpty()) {
+            return;
+        }
+
+        List<FintrafficInfoLink> converted = new ArrayList<>();
+        for (InfoLinkStructure link : netexLinks) {
+            if (link.getValue() == null || link.getValue().isBlank()) {
+                continue;
+            }
+            String typeValue = null;
+            var types = link.getTypeOfInfoLink();
+            if (types != null && !types.isEmpty()) {
+                typeValue = types.getFirst().value();
+            }
+            converted.add(new FintrafficInfoLink(link.getValue(), typeValue));
+        }
+        fp.setInfoLinks(converted);
+    }
+
+    private void mapInfoLinksToNetex(FintrafficParking source,
+                                      org.rutebanken.netex.model.Parking target) {
+        var links = source.getInfoLinks();
+        if (links.isEmpty()) {
+            return;
+        }
+
+        var relStruct = new org.rutebanken.netex.model.GroupOfEntities_VersionStructure.InfoLinks();
+        for (FintrafficInfoLink link : links) {
+            InfoLinkStructure netexLink = new InfoLinkStructure();
+            netexLink.setValue(link.getUri());
+            if (link.getTypeOfInfoLink() != null) {
+                try {
+                    netexLink.getTypeOfInfoLink().add(
+                            org.rutebanken.netex.model.TypeOfInfolinkEnumeration.fromValue(link.getTypeOfInfoLink()));
+                } catch (IllegalArgumentException ignored) {
+                    // stored value no longer valid — skip type
+                }
+            }
+            relStruct.getInfoLink().add(netexLink);
+        }
+        target.setInfoLinks(relStruct);
+    }
 }
+

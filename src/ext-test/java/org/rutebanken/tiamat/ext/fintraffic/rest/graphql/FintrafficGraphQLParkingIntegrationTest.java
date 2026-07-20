@@ -348,4 +348,93 @@ public class FintrafficGraphQLParkingIntegrationTest extends FintrafficIntegrati
                     "by an unrelated @Primary bean (e.g. FintrafficParkingUpdater)")
                 .isNotNull();
     }
+
+    @Test
+    public void mutateParking_infoLinks_persistedAndReturnedInResponse() {
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("Test stop"));
+        stopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
+        stopPlace = stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+        String stopNetexId = stopPlace.getNetexId();
+
+        String mutation = """
+                {
+                  "query": "mutation { parking: %s (Parking: { name: { value: \\"Test\\" lang: \\"fi\\" } parkingType: parkAndRide parentSiteRef: \\"%s\\" infoLinks: [{ uri: \\"https://example.com\\" typeOfInfoLink: resource }] }) { id infoLinks { uri typeOfInfoLink } } }",
+                  "variables": ""
+                }
+                """.formatted(GraphQLNames.MUTATE_PARKING, stopNetexId);
+
+        String parkingNetexId = given()
+                .port(port)
+                .contentType(ContentType.JSON)
+                .body(mutation)
+                .when()
+                .post(BASE_URI_GRAPHQL)
+                .then()
+                .log().body()
+                .statusCode(200)
+                .body("data.parking[0].id", notNullValue())
+                .body("data.parking[0].infoLinks[0].uri", org.hamcrest.Matchers.equalTo("https://example.com"))
+                .body("data.parking[0].infoLinks[0].typeOfInfoLink", org.hamcrest.Matchers.equalTo("resource"))
+                .extract()
+                .path("data.parking[0].id");
+
+        FintrafficParking saved = (FintrafficParking)
+                parkingRepository.findFirstByNetexIdOrderByVersionDesc(parkingNetexId);
+
+        assertThat(saved.getInfoLinks())
+                .as("infoLinks must be persisted to DB via FintrafficParkingUpdater")
+                .containsExactly(new org.rutebanken.tiamat.ext.fintraffic.model.FintrafficInfoLink("https://example.com", "resource"));
+    }
+
+    @Test
+    public void mutateParking_updateWithoutInfoLinks_preservesExistingInfoLinks() {
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("Test stop"));
+        stopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
+        stopPlace = stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+        String stopNetexId = stopPlace.getNetexId();
+
+        // Create with infoLinks
+        String createMutation = """
+                {
+                  "query": "mutation { parking: %s (Parking: { name: { value: \\"Test\\" lang: \\"fi\\" } parkingType: parkAndRide parentSiteRef: \\"%s\\" infoLinks: [{ uri: \\"https://example.com\\" typeOfInfoLink: resource }] }) { id } }",
+                  "variables": ""
+                }
+                """.formatted(GraphQLNames.MUTATE_PARKING, stopNetexId);
+
+        String parkingNetexId = given()
+                .port(port)
+                .contentType(ContentType.JSON)
+                .body(createMutation)
+                .when()
+                .post(BASE_URI_GRAPHQL)
+                .then()
+                .statusCode(200)
+                .extract()
+                .path("data.parking[0].id");
+
+        // Update without infoLinks — field should be preserved
+        String updateMutation = """
+                {
+                  "query": "mutation { parking: %s (Parking: { id: \\"%s\\" name: { value: \\"Updated\\" lang: \\"fi\\" } }) { id infoLinks { uri typeOfInfoLink } } }",
+                  "variables": ""
+                }
+                """.formatted(GraphQLNames.MUTATE_PARKING, parkingNetexId);
+
+        given()
+                .port(port)
+                .contentType(ContentType.JSON)
+                .body(updateMutation)
+                .when()
+                .post(BASE_URI_GRAPHQL)
+                .then()
+                .log().body()
+                .statusCode(200)
+                .body("data.parking[0].infoLinks[0].uri", org.hamcrest.Matchers.equalTo("https://example.com"));
+
+        FintrafficParking latest = (FintrafficParking)
+                parkingRepository.findFirstByNetexIdOrderByVersionDesc(parkingNetexId);
+        assertThat(latest.getInfoLinks())
+                .as("infoLinks must be preserved when not included in update input")
+                .containsExactly(new org.rutebanken.tiamat.ext.fintraffic.model.FintrafficInfoLink("https://example.com", "resource"));
+    }
 }

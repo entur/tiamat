@@ -36,6 +36,13 @@ public class FintrafficParking extends Parking {
     @Column(name = "payment_method")
     private List<PaymentMethodEnumeration> paymentMethods;
 
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(
+            name = "parking_info_links",
+            joinColumns = @JoinColumn(name = "parking_id")
+    )
+    private List<FintrafficInfoLink> infoLinks;
+
     @Override
     public List<PaymentMethodEnumeration> getPaymentMethods() {
         if (paymentMethods == null) {
@@ -47,4 +54,16 @@ public class FintrafficParking extends Parking {
     public void setPaymentMethods(List<PaymentMethodEnumeration> value) {
         this.paymentMethods = value;
     }
+
+    public List<FintrafficInfoLink> getInfoLinks() {
+        if (infoLinks == null) {
+            infoLinks = new ArrayList<>();
+        }
+        return infoLinks;
+    }
+
+    public void setInfoLinks(List<FintrafficInfoLink> infoLinks) {
+        this.infoLinks = infoLinks;
+    }
 }
+

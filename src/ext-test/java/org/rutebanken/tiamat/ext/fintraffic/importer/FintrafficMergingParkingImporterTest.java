@@ -6,6 +6,7 @@ import org.junit.runner.RunWith;
 import org.rutebanken.tiamat.auth.AuthorizationService;
 import org.rutebanken.tiamat.ext.fintraffic.FintrafficIntegrationTest;
 import org.rutebanken.tiamat.ext.fintraffic.FintrafficTiamatTestApplication;
+import org.rutebanken.tiamat.ext.fintraffic.model.FintrafficInfoLink;
 import org.rutebanken.tiamat.ext.fintraffic.model.FintrafficParking;
 import org.rutebanken.tiamat.importer.merging.MergingParkingImporter;
 import org.rutebanken.tiamat.model.Parking;
@@ -183,5 +184,69 @@ public class FintrafficMergingParkingImporterTest extends FintrafficIntegrationT
         assertThat(((FintrafficParking) result).getPaymentMethods())
                 .as("paymentMethods from plain NeTEx-derived Parking must overwrite existing")
                 .containsExactlyInAnyOrder(PaymentMethodEnumeration.CREDIT_CARD);
+    }
+
+    @Test
+    @Transactional
+    public void handleCompletelyNewParking_preservesInfoLinks() throws Exception {
+        StopPlace stopPlace = new StopPlace();
+        stopPlaceRepository.save(stopPlace);
+
+        FintrafficParking incoming = new FintrafficParking();
+        incoming.setParentSiteRef(new SiteRefStructure(stopPlace.getNetexId()));
+        incoming.setInfoLinks(List.of(
+                new FintrafficInfoLink("https://example.com/parking", "resource")));
+
+        Parking saved = mergingParkingImporter.handleCompletelyNewParking(incoming);
+
+        assertThat(saved).isInstanceOf(FintrafficParking.class);
+        assertThat(((FintrafficParking) saved).getInfoLinks())
+                .as("infoLinks must be preserved when importing a completely new parking")
+                .containsExactly(new FintrafficInfoLink("https://example.com/parking", "resource"));
+    }
+
+    @Test
+    @Transactional
+    public void handleAlreadyExistingParking_mergesInfoLinks() {
+        StopPlace stopPlace = new StopPlace();
+        stopPlaceRepository.save(stopPlace);
+
+        FintrafficParking existing = new FintrafficParking();
+        existing.setParentSiteRef(new SiteRefStructure(stopPlace.getNetexId()));
+        existing.setInfoLinks(List.of(new FintrafficInfoLink("https://old.example.com", "info")));
+        existing = (FintrafficParking) parkingVersionedSaverService.saveNewVersion(existing);
+
+        FintrafficParking incoming = new FintrafficParking();
+        incoming.setParentSiteRef(new SiteRefStructure(stopPlace.getNetexId()));
+        incoming.setInfoLinks(List.of(new FintrafficInfoLink("https://new.example.com", "resource")));
+
+        Parking result = mergingParkingImporter.handleAlreadyExistingParking(existing, incoming);
+
+        assertThat(result).isInstanceOf(FintrafficParking.class);
+        assertThat(((FintrafficParking) result).getInfoLinks())
+                .as("infoLinks from incoming parking must replace those on the version copy")
+                .containsExactly(new FintrafficInfoLink("https://new.example.com", "resource"));
+    }
+
+    @Test
+    @Transactional
+    public void handleAlreadyExistingParking_unchangedInfoLinks_doesNotCreateNewVersion() {
+        StopPlace stopPlace = new StopPlace();
+        stopPlaceRepository.save(stopPlace);
+
+        FintrafficParking existing = new FintrafficParking();
+        existing.setParentSiteRef(new SiteRefStructure(stopPlace.getNetexId()));
+        existing.setInfoLinks(List.of(new FintrafficInfoLink("https://example.com", "resource")));
+        existing = (FintrafficParking) parkingVersionedSaverService.saveNewVersion(existing);
+        long existingVersion = existing.getVersion();
+
+        FintrafficParking incoming = new FintrafficParking();
+        incoming.setInfoLinks(List.of(new FintrafficInfoLink("https://example.com", "resource")));
+
+        Parking result = mergingParkingImporter.handleAlreadyExistingParking(existing, incoming);
+
+        assertThat(result.getVersion())
+                .as("no new version must be created when infoLinks are unchanged")
+                .isEqualTo(existingVersion);
     }
 }

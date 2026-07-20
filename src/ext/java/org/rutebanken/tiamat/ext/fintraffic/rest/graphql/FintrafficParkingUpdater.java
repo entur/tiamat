@@ -4,6 +4,7 @@ import graphql.schema.DataFetchingEnvironment;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import org.rutebanken.tiamat.ext.fintraffic.model.FintrafficInfoLink;
 import org.rutebanken.tiamat.ext.fintraffic.model.FintrafficParking;
 import org.rutebanken.tiamat.model.Parking;
 import org.rutebanken.tiamat.model.PaymentMethodEnumeration;
@@ -16,11 +17,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import static org.rutebanken.tiamat.ext.fintraffic.rest.graphql.FintrafficParkingGraphQLTypeContributor.INFO_LINKS;
 import static org.rutebanken.tiamat.ext.fintraffic.rest.graphql.FintrafficParkingGraphQLTypeContributor.PAYMENT_METHODS;
+import static org.rutebanken.tiamat.ext.fintraffic.rest.graphql.FintrafficParkingGraphQLTypeContributor.TYPE_OF_INFO_LINK;
+import static org.rutebanken.tiamat.ext.fintraffic.rest.graphql.FintrafficParkingGraphQLTypeContributor.URI;
 
 /**
  * Fintraffic extension of {@link ParkingUpdater} that handles the
- * {@code paymentMethods} input field contributed by
+ * {@code paymentMethods} and {@code infoLinks} input fields contributed by
  * {@link FintrafficParkingGraphQLTypeContributor}.
  */
 @Profile("fintraffic")
@@ -32,11 +36,7 @@ public class FintrafficParkingUpdater extends ParkingUpdater {
 
     /**
      * Extends the parent's {@code get()} to flush pending collection inserts and
-     * refresh entities before the transaction closes.  This ensures that
-     * {@code @ElementCollection} fields (e.g. {@code paymentMethods}) on newly
-     * persisted {@link FintrafficParking} instances are fully loaded from the
-     * database and not left in Hibernate's "pending-insert" state, which would
-     * cause them to appear empty when the GraphQL response is serialised.
+     * refresh entities before the transaction closes.
      */
     @SuppressWarnings("unchecked")
     @Override
@@ -58,18 +58,41 @@ public class FintrafficParkingUpdater extends ParkingUpdater {
             return false;
         }
 
+        boolean changed = false;
+
         @SuppressWarnings("unchecked")
-        List<PaymentMethodEnumeration> incoming = (List<PaymentMethodEnumeration>) input.get(PAYMENT_METHODS);
-        if (incoming == null) {
-            return false;
+        List<PaymentMethodEnumeration> incomingMethods = (List<PaymentMethodEnumeration>) input.get(PAYMENT_METHODS);
+        if (incomingMethods != null && !incomingMethods.equals(target.getPaymentMethods())) {
+            target.setPaymentMethods(List.copyOf(incomingMethods));
+            changed = true;
         }
 
-        if (incoming.equals(target.getPaymentMethods())) {
-            return false;
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> incomingLinks = (List<Map<String, Object>>) input.get(INFO_LINKS);
+        if (incomingLinks != null) {
+            List<FintrafficInfoLink> converted = new ArrayList<>();
+            for (Map<String, Object> linkInput : incomingLinks) {
+                Object uriObj = linkInput.get(URI);
+                if (uriObj == null) {
+                    continue;
+                }
+                String uri = uriObj.toString();
+                Object typeObj = linkInput.get(TYPE_OF_INFO_LINK);
+                String type = null;
+                if (typeObj instanceof org.rutebanken.netex.model.TypeOfInfolinkEnumeration enumVal) {
+                    type = enumVal.value();
+                } else if (typeObj != null) {
+                    type = typeObj.toString();
+                }
+                converted.add(new FintrafficInfoLink(uri, type));
+            }
+            if (!converted.equals(target.getInfoLinks())) {
+                target.setInfoLinks(converted);
+                changed = true;
+            }
         }
 
-        target.setPaymentMethods(List.copyOf(incoming));
-        return true;
+        return changed;
     }
 
     /**
@@ -77,15 +100,13 @@ public class FintrafficParkingUpdater extends ParkingUpdater {
      * the newly created version copy.  Called by the parent's update path immediately
      * after {@link org.rutebanken.tiamat.versioning.VersionCreator#createCopy}, before
      * {@link #populateExtendedFields} overwrites them with the GraphQL input values.
-     * <p>
-     * This ensures that fields omitted from the update mutation (e.g. the caller did not
-     * include {@code paymentMethods} in the input) retain their current values rather than
-     * being silently reset to the default.
      */
     @Override
     protected void preserveExtendedFields(Parking existingVersion, Parking copy) {
         if (existingVersion instanceof FintrafficParking source && copy instanceof FintrafficParking target) {
             target.setPaymentMethods(new ArrayList<>(source.getPaymentMethods()));
+            target.setInfoLinks(new ArrayList<>(source.getInfoLinks()));
         }
     }
 }
+

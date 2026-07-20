@@ -34,6 +34,6 @@ public class FintrafficParkingEntityFactory extends ParkingEntityFactory {
 
     @Override
     public List<String> getMappingExclusions() {
-        return List.of("paymentMethods", "cardsAccepted", "currenciesAccepted", "accessModes");
+        return List.of("paymentMethods", "cardsAccepted", "currenciesAccepted", "accessModes", "infoLinks");
     }
 }
