@@ -2,6 +2,7 @@ package org.rutebanken.tiamat.ext.fintraffic.importer;
 
 import org.rutebanken.tiamat.ext.fintraffic.model.FintrafficInfoLink;
 import org.rutebanken.tiamat.ext.fintraffic.model.FintrafficParking;
+import org.rutebanken.tiamat.ext.fintraffic.model.FintrafficParkingEntranceForVehicles;
 import org.rutebanken.tiamat.importer.KeyValueListAppender;
 import org.rutebanken.tiamat.importer.finder.NearbyParkingFinder;
 import org.rutebanken.tiamat.importer.finder.ParkingFromOriginalIdFinder;
@@ -67,6 +68,13 @@ public class FintrafficMergingParkingImporter extends MergingParkingImporter {
             List<FintrafficInfoLink> existingLinks = target.getInfoLinks();
             if (!incomingLinks.equals(existingLinks)) {
                 target.setInfoLinks(new ArrayList<>(incomingLinks));
+                changed = true;
+            }
+
+            List<FintrafficParkingEntranceForVehicles> incomingEntrances = incomingFP.getFintrafficVehicleEntrances();
+            List<FintrafficParkingEntranceForVehicles> existingEntrances = target.getFintrafficVehicleEntrances();
+            if (!incomingEntrances.equals(existingEntrances)) {
+                target.setFintrafficVehicleEntrances(new ArrayList<>(incomingEntrances));
                 changed = true;
             }
         }

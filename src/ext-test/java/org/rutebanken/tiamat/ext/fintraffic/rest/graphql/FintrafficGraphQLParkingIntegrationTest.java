@@ -437,4 +437,100 @@ public class FintrafficGraphQLParkingIntegrationTest extends FintrafficIntegrati
                 .as("infoLinks must be preserved when not included in update input")
                 .containsExactly(new org.rutebanken.tiamat.ext.fintraffic.model.FintrafficInfoLink("https://example.com", "resource"));
     }
+
+    @Test
+    public void mutateParking_vehicleEntrances_persistedAndReturnedInResponse() {
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("Test stop"));
+        stopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
+        stopPlace = stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+        String stopNetexId = stopPlace.getNetexId();
+
+        String mutation = """
+                {
+                  "query": "mutation { parking: %s (Parking: { name: { value: \\"Test\\" lang: \\"fi\\" } parkingType: parkAndRide parentSiteRef: \\"%s\\" vehicleEntrances: [{ label: \\"Main\\" entranceType: door isEntry: true isExit: false publicCode: \\"A1\\" }] }) { id vehicleEntrances { label entranceType isEntry isExit publicCode } } }",
+                  "variables": ""
+                }
+                """.formatted(GraphQLNames.MUTATE_PARKING, stopNetexId);
+
+        String parkingNetexId = given()
+                .port(port)
+                .contentType(ContentType.JSON)
+                .body(mutation)
+                .when()
+                .post(BASE_URI_GRAPHQL)
+                .then()
+                .log().body()
+                .statusCode(200)
+                .body("data.parking[0].id", notNullValue())
+                .body("data.parking[0].vehicleEntrances[0].label", org.hamcrest.Matchers.equalTo("Main"))
+                .body("data.parking[0].vehicleEntrances[0].entranceType", org.hamcrest.Matchers.equalTo("door"))
+                .body("data.parking[0].vehicleEntrances[0].isEntry", org.hamcrest.Matchers.equalTo(true))
+                .body("data.parking[0].vehicleEntrances[0].isExit", org.hamcrest.Matchers.equalTo(false))
+                .body("data.parking[0].vehicleEntrances[0].publicCode", org.hamcrest.Matchers.equalTo("A1"))
+                .extract()
+                .path("data.parking[0].id");
+
+        FintrafficParking saved = (FintrafficParking)
+                parkingRepository.findFirstByNetexIdOrderByVersionDesc(parkingNetexId);
+
+        assertThat(saved.getFintrafficVehicleEntrances()).hasSize(1);
+        org.rutebanken.tiamat.ext.fintraffic.model.FintrafficParkingEntranceForVehicles entrance =
+                saved.getFintrafficVehicleEntrances().getFirst();
+        assertThat(entrance.getLabel()).isEqualTo("Main");
+        assertThat(entrance.getEntranceType()).isEqualTo("door");
+        assertThat(entrance.getIsEntry()).isTrue();
+        assertThat(entrance.getIsExit()).isFalse();
+        assertThat(entrance.getPublicCode()).isEqualTo("A1");
+    }
+
+    @Test
+    public void mutateParking_updateWithoutVehicleEntrances_preservesExistingVehicleEntrances() {
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("Test stop"));
+        stopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
+        stopPlace = stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+        String stopNetexId = stopPlace.getNetexId();
+
+        String createMutation = """
+                {
+                  "query": "mutation { parking: %s (Parking: { name: { value: \\"Test\\" lang: \\"fi\\" } parkingType: parkAndRide parentSiteRef: \\"%s\\" vehicleEntrances: [{ label: \\"Main\\" entranceType: door isEntry: true }] }) { id } }",
+                  "variables": ""
+                }
+                """.formatted(GraphQLNames.MUTATE_PARKING, stopNetexId);
+
+        String parkingNetexId = given()
+                .port(port)
+                .contentType(ContentType.JSON)
+                .body(createMutation)
+                .when()
+                .post(BASE_URI_GRAPHQL)
+                .then()
+                .statusCode(200)
+                .extract()
+                .path("data.parking[0].id");
+
+        String updateMutation = """
+                {
+                  "query": "mutation { parking: %s (Parking: { id: \\"%s\\" name: { value: \\"Updated\\" lang: \\"fi\\" } }) { id vehicleEntrances { label } } }",
+                  "variables": ""
+                }
+                """.formatted(GraphQLNames.MUTATE_PARKING, parkingNetexId);
+
+        given()
+                .port(port)
+                .contentType(ContentType.JSON)
+                .body(updateMutation)
+                .when()
+                .post(BASE_URI_GRAPHQL)
+                .then()
+                .log().body()
+                .statusCode(200)
+                .body("data.parking[0].vehicleEntrances[0].label", org.hamcrest.Matchers.equalTo("Main"));
+
+        FintrafficParking latest = (FintrafficParking)
+                parkingRepository.findFirstByNetexIdOrderByVersionDesc(parkingNetexId);
+        assertThat(latest.getFintrafficVehicleEntrances())
+                .as("vehicleEntrances must be preserved when not included in update input")
+                .hasSize(1);
+        assertThat(latest.getFintrafficVehicleEntrances().getFirst().getLabel()).isEqualTo("Main");
+    }
 }

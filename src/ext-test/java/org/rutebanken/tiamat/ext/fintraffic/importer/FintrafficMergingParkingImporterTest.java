@@ -8,6 +8,7 @@ import org.rutebanken.tiamat.ext.fintraffic.FintrafficIntegrationTest;
 import org.rutebanken.tiamat.ext.fintraffic.FintrafficTiamatTestApplication;
 import org.rutebanken.tiamat.ext.fintraffic.model.FintrafficInfoLink;
 import org.rutebanken.tiamat.ext.fintraffic.model.FintrafficParking;
+import org.rutebanken.tiamat.ext.fintraffic.model.FintrafficParkingEntranceForVehicles;
 import org.rutebanken.tiamat.importer.merging.MergingParkingImporter;
 import org.rutebanken.tiamat.model.Parking;
 import org.rutebanken.tiamat.model.PaymentMethodEnumeration;
@@ -247,6 +248,76 @@ public class FintrafficMergingParkingImporterTest extends FintrafficIntegrationT
 
         assertThat(result.getVersion())
                 .as("no new version must be created when infoLinks are unchanged")
+                .isEqualTo(existingVersion);
+    }
+
+    @Test
+    @Transactional
+    public void handleCompletelyNewParking_preservesVehicleEntrances() throws Exception {
+        StopPlace stopPlace = new StopPlace();
+        stopPlaceRepository.save(stopPlace);
+
+        FintrafficParkingEntranceForVehicles entrance = new FintrafficParkingEntranceForVehicles(
+                "Main", "door", null, null, true, false, "A1");
+        FintrafficParking incoming = new FintrafficParking();
+        incoming.setParentSiteRef(new SiteRefStructure(stopPlace.getNetexId()));
+        incoming.setFintrafficVehicleEntrances(List.of(entrance));
+
+        Parking saved = mergingParkingImporter.handleCompletelyNewParking(incoming);
+
+        assertThat(saved).isInstanceOf(FintrafficParking.class);
+        assertThat(((FintrafficParking) saved).getFintrafficVehicleEntrances())
+                .as("vehicleEntrances must be preserved when importing a completely new parking")
+                .containsExactly(entrance);
+    }
+
+    @Test
+    @Transactional
+    public void handleAlreadyExistingParking_mergesVehicleEntrances() {
+        StopPlace stopPlace = new StopPlace();
+        stopPlaceRepository.save(stopPlace);
+
+        FintrafficParking existing = new FintrafficParking();
+        existing.setParentSiteRef(new SiteRefStructure(stopPlace.getNetexId()));
+        existing.setFintrafficVehicleEntrances(List.of(
+                new FintrafficParkingEntranceForVehicles("Old", "gate", null, null, true, true, null)));
+        existing = (FintrafficParking) parkingVersionedSaverService.saveNewVersion(existing);
+
+        FintrafficParkingEntranceForVehicles newEntrance =
+                new FintrafficParkingEntranceForVehicles("New", "door", null, null, true, false, "B2");
+        FintrafficParking incoming = new FintrafficParking();
+        incoming.setParentSiteRef(new SiteRefStructure(stopPlace.getNetexId()));
+        incoming.setFintrafficVehicleEntrances(List.of(newEntrance));
+
+        Parking result = mergingParkingImporter.handleAlreadyExistingParking(existing, incoming);
+
+        assertThat(result).isInstanceOf(FintrafficParking.class);
+        assertThat(((FintrafficParking) result).getFintrafficVehicleEntrances())
+                .as("vehicleEntrances from incoming parking must replace those on the version copy")
+                .containsExactly(newEntrance);
+    }
+
+    @Test
+    @Transactional
+    public void handleAlreadyExistingParking_unchangedVehicleEntrances_doesNotCreateNewVersion() {
+        StopPlace stopPlace = new StopPlace();
+        stopPlaceRepository.save(stopPlace);
+
+        FintrafficParkingEntranceForVehicles entrance =
+                new FintrafficParkingEntranceForVehicles("Main", "door", null, null, true, false, "A1");
+        FintrafficParking existing = new FintrafficParking();
+        existing.setParentSiteRef(new SiteRefStructure(stopPlace.getNetexId()));
+        existing.setFintrafficVehicleEntrances(List.of(entrance));
+        existing = (FintrafficParking) parkingVersionedSaverService.saveNewVersion(existing);
+        long existingVersion = existing.getVersion();
+
+        FintrafficParking incoming = new FintrafficParking();
+        incoming.setFintrafficVehicleEntrances(List.of(entrance));
+
+        Parking result = mergingParkingImporter.handleAlreadyExistingParking(existing, incoming);
+
+        assertThat(result.getVersion())
+                .as("no new version must be created when vehicleEntrances are unchanged")
                 .isEqualTo(existingVersion);
     }
 }

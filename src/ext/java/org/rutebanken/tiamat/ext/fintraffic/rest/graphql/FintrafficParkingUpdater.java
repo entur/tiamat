@@ -6,6 +6,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.rutebanken.tiamat.ext.fintraffic.model.FintrafficInfoLink;
 import org.rutebanken.tiamat.ext.fintraffic.model.FintrafficParking;
+import org.rutebanken.tiamat.ext.fintraffic.model.FintrafficParkingEntranceForVehicles;
 import org.rutebanken.tiamat.model.Parking;
 import org.rutebanken.tiamat.model.PaymentMethodEnumeration;
 import org.rutebanken.tiamat.rest.graphql.fetchers.ParkingUpdater;
@@ -21,6 +22,14 @@ import static org.rutebanken.tiamat.ext.fintraffic.rest.graphql.FintrafficParkin
 import static org.rutebanken.tiamat.ext.fintraffic.rest.graphql.FintrafficParkingGraphQLTypeContributor.PAYMENT_METHODS;
 import static org.rutebanken.tiamat.ext.fintraffic.rest.graphql.FintrafficParkingGraphQLTypeContributor.TYPE_OF_INFO_LINK;
 import static org.rutebanken.tiamat.ext.fintraffic.rest.graphql.FintrafficParkingGraphQLTypeContributor.URI;
+import static org.rutebanken.tiamat.ext.fintraffic.rest.graphql.FintrafficParkingGraphQLTypeContributor.VEHICLE_ENTRANCES;
+import static org.rutebanken.tiamat.ext.fintraffic.rest.graphql.FintrafficParkingGraphQLTypeContributor.ENTRANCE_TYPE;
+import static org.rutebanken.tiamat.ext.fintraffic.rest.graphql.FintrafficParkingGraphQLTypeContributor.VEHICLE_ENTRANCE_LABEL;
+import static org.rutebanken.tiamat.ext.fintraffic.rest.graphql.FintrafficParkingGraphQLTypeContributor.WIDTH;
+import static org.rutebanken.tiamat.ext.fintraffic.rest.graphql.FintrafficParkingGraphQLTypeContributor.HEIGHT;
+import static org.rutebanken.tiamat.ext.fintraffic.rest.graphql.FintrafficParkingGraphQLTypeContributor.IS_ENTRY;
+import static org.rutebanken.tiamat.ext.fintraffic.rest.graphql.FintrafficParkingGraphQLTypeContributor.IS_EXIT;
+import static org.rutebanken.tiamat.ext.fintraffic.rest.graphql.FintrafficParkingGraphQLTypeContributor.PUBLIC_CODE;
 
 /**
  * Fintraffic extension of {@link ParkingUpdater} that handles the
@@ -92,6 +101,42 @@ public class FintrafficParkingUpdater extends ParkingUpdater {
             }
         }
 
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> incomingEntrances = (List<Map<String, Object>>) input.get(VEHICLE_ENTRANCES);
+        if (incomingEntrances != null) {
+            List<FintrafficParkingEntranceForVehicles> converted = new ArrayList<>();
+            for (Map<String, Object> entranceInput : incomingEntrances) {
+                Object labelObj = entranceInput.get(VEHICLE_ENTRANCE_LABEL);
+                Object typeObj = entranceInput.get(ENTRANCE_TYPE);
+                Object widthObj = entranceInput.get(WIDTH);
+                Object heightObj = entranceInput.get(HEIGHT);
+                Object isEntryObj = entranceInput.get(IS_ENTRY);
+                Object isExitObj = entranceInput.get(IS_EXIT);
+                Object publicCodeObj = entranceInput.get(PUBLIC_CODE);
+
+                String entranceTypeStr = null;
+                if (typeObj instanceof org.rutebanken.netex.model.EntranceEnumeration enumVal) {
+                    entranceTypeStr = enumVal.value();
+                } else if (typeObj != null) {
+                    entranceTypeStr = typeObj.toString();
+                }
+
+                converted.add(new FintrafficParkingEntranceForVehicles(
+                        labelObj != null ? labelObj.toString() : null,
+                        entranceTypeStr,
+                        widthObj instanceof java.math.BigDecimal bd ? bd : null,
+                        heightObj instanceof java.math.BigDecimal bd ? bd : null,
+                        isEntryObj instanceof Boolean b ? b : null,
+                        isExitObj instanceof Boolean b ? b : null,
+                        publicCodeObj != null ? publicCodeObj.toString() : null
+                ));
+            }
+            if (!converted.equals(target.getFintrafficVehicleEntrances())) {
+                target.setFintrafficVehicleEntrances(converted);
+                changed = true;
+            }
+        }
+
         return changed;
     }
 
@@ -106,6 +151,7 @@ public class FintrafficParkingUpdater extends ParkingUpdater {
         if (existingVersion instanceof FintrafficParking source && copy instanceof FintrafficParking target) {
             target.setPaymentMethods(new ArrayList<>(source.getPaymentMethods()));
             target.setInfoLinks(new ArrayList<>(source.getInfoLinks()));
+            target.setFintrafficVehicleEntrances(new ArrayList<>(source.getFintrafficVehicleEntrances()));
         }
     }
 }

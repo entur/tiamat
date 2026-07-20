@@ -6,6 +6,7 @@ import org.flywaydb.core.api.migration.JavaMigration;
 import org.rutebanken.tiamat.ext.fintraffic.db.migration.V2__CreateExtFintrafficNetexEntityTable;
 import org.rutebanken.tiamat.ext.fintraffic.db.migration.V3__FintrafficParkingExtensions;
 import org.rutebanken.tiamat.ext.fintraffic.db.migration.V4__FintrafficParkingInfoLinks;
+import org.rutebanken.tiamat.ext.fintraffic.db.migration.V5__FintrafficParkingVehicleEntrances;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Configuration;
@@ -24,7 +25,8 @@ public class FintrafficFlywayConfig {
     private static final List<Class<? extends JavaMigration>> migrations = List.of(
         V2__CreateExtFintrafficNetexEntityTable.class,
         V3__FintrafficParkingExtensions.class,
-        V4__FintrafficParkingInfoLinks.class
+        V4__FintrafficParkingInfoLinks.class,
+        V5__FintrafficParkingVehicleEntrances.class
     );
 
     public FintrafficFlywayConfig(DataSource dataSource) {

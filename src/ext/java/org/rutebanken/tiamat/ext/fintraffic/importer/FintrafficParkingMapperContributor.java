@@ -1,9 +1,13 @@
 package org.rutebanken.tiamat.ext.fintraffic.importer;
 
 import ma.glasnost.orika.MappingContext;
+import org.rutebanken.netex.model.EntranceEnumeration;
 import org.rutebanken.netex.model.InfoLinkStructure;
+import org.rutebanken.netex.model.ParkingEntranceForVehicles;
+import org.rutebanken.netex.model.ParkingEntrancesForVehicles_RelStructure;
 import org.rutebanken.tiamat.ext.fintraffic.model.FintrafficInfoLink;
 import org.rutebanken.tiamat.ext.fintraffic.model.FintrafficParking;
+import org.rutebanken.tiamat.ext.fintraffic.model.FintrafficParkingEntranceForVehicles;
 import org.rutebanken.tiamat.model.PaymentMethodEnumeration;
 import org.rutebanken.tiamat.netex.mapping.mapper.ParkingMapperContributor;
 import org.springframework.context.annotation.Profile;
@@ -35,6 +39,7 @@ public class FintrafficParkingMapperContributor implements ParkingMapperContribu
                              MappingContext context) {
         mapPaymentMethodsFromNetex(source, target);
         mapInfoLinksFromNetex(source, target);
+        mapVehicleEntrancesFromNetex(source, target);
     }
 
     @Override
@@ -46,6 +51,7 @@ public class FintrafficParkingMapperContributor implements ParkingMapperContribu
         }
         mapPaymentMethodsToNetex(fp, target);
         mapInfoLinksToNetex(fp, target);
+        mapVehicleEntrancesToNetex(fp, target);
     }
 
     // --- paymentMethods ---
@@ -137,6 +143,72 @@ public class FintrafficParkingMapperContributor implements ParkingMapperContribu
             relStruct.getInfoLink().add(netexLink);
         }
         target.setInfoLinks(relStruct);
+    }
+
+    // --- vehicleEntrances ---
+
+    private void mapVehicleEntrancesFromNetex(org.rutebanken.netex.model.Parking source,
+                                               org.rutebanken.tiamat.model.Parking target) {
+        if (!(target instanceof FintrafficParking fp)) {
+            return;
+        }
+        ParkingEntrancesForVehicles_RelStructure relStruct = source.getVehicleEntrances();
+        if (relStruct == null) {
+            return;
+        }
+        List<Object> items = relStruct.getParkingEntranceForVehiclesRefOrParkingEntranceForVehicles();
+        if (items == null || items.isEmpty()) {
+            return;
+        }
+
+        List<FintrafficParkingEntranceForVehicles> converted = new ArrayList<>();
+        for (Object item : items) {
+            if (!(item instanceof ParkingEntranceForVehicles entrance)) {
+                continue;
+            }
+            String label = entrance.getLabel() != null ? entrance.getLabel().getValue() : null;
+            String entranceType = entrance.getEntranceType() != null ? entrance.getEntranceType().value() : null;
+            converted.add(new FintrafficParkingEntranceForVehicles(
+                    label,
+                    entranceType,
+                    entrance.getWidth(),
+                    entrance.getHeight(),
+                    entrance.isIsEntry(),
+                    entrance.isIsExit(),
+                    entrance.getPublicCode()
+            ));
+        }
+        fp.setFintrafficVehicleEntrances(converted);
+    }
+
+    private void mapVehicleEntrancesToNetex(FintrafficParking source,
+                                             org.rutebanken.netex.model.Parking target) {
+        var entrances = source.getFintrafficVehicleEntrances();
+        if (entrances.isEmpty()) {
+            return;
+        }
+
+        ParkingEntrancesForVehicles_RelStructure relStruct = new ParkingEntrancesForVehicles_RelStructure();
+        for (FintrafficParkingEntranceForVehicles entrance : entrances) {
+            ParkingEntranceForVehicles netexEntrance = new ParkingEntranceForVehicles();
+            if (entrance.getLabel() != null) {
+                netexEntrance.setLabel(new org.rutebanken.netex.model.MultilingualString().withValue(entrance.getLabel()));
+            }
+            if (entrance.getEntranceType() != null) {
+                try {
+                    netexEntrance.setEntranceType(EntranceEnumeration.fromValue(entrance.getEntranceType()));
+                } catch (IllegalArgumentException ignored) {
+                    // stored value no longer valid — skip type
+                }
+            }
+            netexEntrance.setWidth(entrance.getWidth());
+            netexEntrance.setHeight(entrance.getHeight());
+            netexEntrance.setIsEntry(entrance.getIsEntry());
+            netexEntrance.setIsExit(entrance.getIsExit());
+            netexEntrance.setPublicCode(entrance.getPublicCode());
+            relStruct.getParkingEntranceForVehiclesRefOrParkingEntranceForVehicles().add(netexEntrance);
+        }
+        target.setVehicleEntrances(relStruct);
     }
 }
 

@@ -5,6 +5,7 @@ import graphql.schema.GraphQLInputObjectType;
 import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLNonNull;
 import graphql.schema.GraphQLObjectType;
+import org.rutebanken.netex.model.EntranceEnumeration;
 import org.rutebanken.netex.model.TypeOfInfolinkEnumeration;
 import org.rutebanken.tiamat.model.PaymentMethodEnumeration;
 import org.rutebanken.tiamat.rest.graphql.types.CustomGraphQLTypes;
@@ -12,6 +13,8 @@ import org.rutebanken.tiamat.rest.graphql.types.ParkingGraphQLTypeContributor;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
+import static graphql.Scalars.GraphQLBoolean;
+import static graphql.Scalars.GraphQLFloat;
 import static graphql.Scalars.GraphQLString;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLInputObjectField.newInputObjectField;
@@ -23,6 +26,7 @@ import static graphql.schema.GraphQLInputObjectType.newInputObject;
  * <ul>
  *   <li>{@code paymentMethods} — list of {@link PaymentMethodEnumeration} values</li>
  *   <li>{@code infoLinks} — list of info link objects with {@code uri} and {@code typeOfInfoLink}</li>
+ *   <li>{@code vehicleEntrances} — list of vehicle entrance objects</li>
  * </ul>
  */
 @Profile("fintraffic")
@@ -37,12 +41,26 @@ public class FintrafficParkingGraphQLTypeContributor implements ParkingGraphQLTy
     static final String TYPE_OF_INFO_LINK_ENUM = "TypeOfInfoLinkEnum";
     static final String URI = "uri";
     static final String TYPE_OF_INFO_LINK = "typeOfInfoLink";
+    static final String VEHICLE_ENTRANCES = "vehicleEntrances";
+    static final String VEHICLE_ENTRANCE_OUTPUT_TYPE = "FintrafficVehicleEntrance";
+    static final String VEHICLE_ENTRANCE_INPUT_TYPE = "FintrafficVehicleEntranceInput";
+    static final String ENTRANCE_TYPE_ENUM = "EntranceTypeEnum";
+    static final String VEHICLE_ENTRANCE_LABEL = "label";
+    static final String ENTRANCE_TYPE = "entranceType";
+    static final String WIDTH = "width";
+    static final String HEIGHT = "height";
+    static final String IS_ENTRY = "isEntry";
+    static final String IS_EXIT = "isExit";
+    static final String PUBLIC_CODE = "publicCode";
 
     static final GraphQLEnumType paymentMethodEnum =
             CustomGraphQLTypes.createCustomEnumType(PAYMENT_METHOD_ENUM, PaymentMethodEnumeration.class);
 
     static final GraphQLEnumType typeOfInfoLinkEnum =
             CustomGraphQLTypes.createCustomEnumType(TYPE_OF_INFO_LINK_ENUM, TypeOfInfolinkEnumeration.class);
+
+    static final GraphQLEnumType entranceTypeEnum =
+            CustomGraphQLTypes.createCustomEnumType(ENTRANCE_TYPE_ENUM, EntranceEnumeration.class);
 
     static final GraphQLObjectType infoLinkOutputType = newObject()
             .name(INFO_LINK_OUTPUT_TYPE)
@@ -54,6 +72,28 @@ public class FintrafficParkingGraphQLTypeContributor implements ParkingGraphQLTy
             .name(INFO_LINK_INPUT_TYPE)
             .field(newInputObjectField().name(URI).type(GraphQLNonNull.nonNull(GraphQLString)))
             .field(newInputObjectField().name(TYPE_OF_INFO_LINK).type(typeOfInfoLinkEnum))
+            .build();
+
+    static final GraphQLObjectType vehicleEntranceOutputType = newObject()
+            .name(VEHICLE_ENTRANCE_OUTPUT_TYPE)
+            .field(newFieldDefinition().name(VEHICLE_ENTRANCE_LABEL).type(GraphQLString))
+            .field(newFieldDefinition().name(ENTRANCE_TYPE).type(entranceTypeEnum))
+            .field(newFieldDefinition().name(WIDTH).type(GraphQLFloat))
+            .field(newFieldDefinition().name(HEIGHT).type(GraphQLFloat))
+            .field(newFieldDefinition().name(IS_ENTRY).type(GraphQLBoolean))
+            .field(newFieldDefinition().name(IS_EXIT).type(GraphQLBoolean))
+            .field(newFieldDefinition().name(PUBLIC_CODE).type(GraphQLString))
+            .build();
+
+    static final GraphQLInputObjectType vehicleEntranceInputType = newInputObject()
+            .name(VEHICLE_ENTRANCE_INPUT_TYPE)
+            .field(newInputObjectField().name(VEHICLE_ENTRANCE_LABEL).type(GraphQLString))
+            .field(newInputObjectField().name(ENTRANCE_TYPE).type(entranceTypeEnum))
+            .field(newInputObjectField().name(WIDTH).type(GraphQLFloat))
+            .field(newInputObjectField().name(HEIGHT).type(GraphQLFloat))
+            .field(newInputObjectField().name(IS_ENTRY).type(GraphQLBoolean))
+            .field(newInputObjectField().name(IS_EXIT).type(GraphQLBoolean))
+            .field(newInputObjectField().name(PUBLIC_CODE).type(GraphQLString))
             .build();
 
     @Override
@@ -85,6 +125,35 @@ public class FintrafficParkingGraphQLTypeContributor implements ParkingGraphQLTy
                             })
                             .collect(java.util.stream.Collectors.toList());
                 }));
+        builder.field(newFieldDefinition()
+                .name(VEHICLE_ENTRANCES)
+                .type(new GraphQLList(vehicleEntranceOutputType))
+                .dataFetcher(env -> {
+                    Object source = env.getSource();
+                    if (!(source instanceof org.rutebanken.tiamat.ext.fintraffic.model.FintrafficParking fp)) {
+                        return java.util.List.of();
+                    }
+                    return fp.getFintrafficVehicleEntrances().stream()
+                            .map(entrance -> {
+                                var m = new java.util.HashMap<String, Object>();
+                                m.put(VEHICLE_ENTRANCE_LABEL, entrance.getLabel());
+                                if (entrance.getEntranceType() != null) {
+                                    try {
+                                        m.put(ENTRANCE_TYPE,
+                                                EntranceEnumeration.fromValue(entrance.getEntranceType()));
+                                    } catch (IllegalArgumentException ignored) {
+                                        // stored value no longer valid; skip
+                                    }
+                                }
+                                m.put(WIDTH, entrance.getWidth() != null ? entrance.getWidth().doubleValue() : null);
+                                m.put(HEIGHT, entrance.getHeight() != null ? entrance.getHeight().doubleValue() : null);
+                                m.put(IS_ENTRY, entrance.getIsEntry());
+                                m.put(IS_EXIT, entrance.getIsExit());
+                                m.put(PUBLIC_CODE, entrance.getPublicCode());
+                                return m;
+                            })
+                            .collect(java.util.stream.Collectors.toList());
+                }));
     }
 
     @Override
@@ -95,6 +164,9 @@ public class FintrafficParkingGraphQLTypeContributor implements ParkingGraphQLTy
         builder.field(newInputObjectField()
                 .name(INFO_LINKS)
                 .type(new GraphQLList(infoLinkInputType)));
+        builder.field(newInputObjectField()
+                .name(VEHICLE_ENTRANCES)
+                .type(new GraphQLList(vehicleEntranceInputType)));
     }
 }
 
