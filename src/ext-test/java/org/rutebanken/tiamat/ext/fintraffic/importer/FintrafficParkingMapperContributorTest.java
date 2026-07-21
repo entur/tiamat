@@ -331,6 +331,28 @@ public class FintrafficParkingMapperContributorTest {
     }
 
     @Test
+    public void mapToNetex_exportsTimebandWhenOnlyEndTimeIsSet() {
+        FintrafficParking source = new FintrafficParking();
+        source.setAvailabilityConditions(List.of(
+                new FintrafficParkingAvailabilityCondition("FSR:DayType:Sunday", true, null, LocalTime.of(22, 0))));
+
+        org.rutebanken.netex.model.Parking target = new org.rutebanken.netex.model.Parking();
+
+        contributor.mapToNetex(source, target, mappingContext);
+
+        List<Object> entries = target.getValidityConditions()
+                .getValidityConditionRefOrValidBetweenOrValidityCondition_();
+        assertThat(entries).hasSize(1);
+        AvailabilityCondition mapped = (AvailabilityCondition)
+                ((JAXBElement<?>) entries.getFirst()).getValue();
+        assertThat(mapped.getTimebands()).isNotNull();
+        Timeband timeband = (Timeband)
+                ((JAXBElement<?>) mapped.getTimebands().getTimebandRefOrTimeband().getFirst()).getValue();
+        assertThat(timeband.getStartTime()).isNull();
+        assertThat(timeband.getEndTime()).isEqualTo(LocalTime.of(22, 0));
+    }
+
+    @Test
     public void mapFromNetex_deduplicatesAvailabilityConditionsByDayTypeRef_keepingLast() {
         ObjectFactory objectFactory = new ObjectFactory();
 

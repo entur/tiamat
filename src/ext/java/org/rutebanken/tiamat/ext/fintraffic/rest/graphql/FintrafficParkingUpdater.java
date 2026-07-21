@@ -230,6 +230,9 @@ public class FintrafficParkingUpdater extends ParkingUpdater {
         }
         try {
             String[] parts = timeValue.split(":");
+            if (parts.length == 0 || parts[0].isEmpty()) {
+                throw new IllegalArgumentException("Invalid time value: '" + timeValue + "'. Expected HH:mm or HH:mm:ss.");
+            }
             int hour = Integer.parseInt(parts[0]);
             int minute = parts.length > 1 ? Integer.parseInt(parts[1]) : 0;
             int second = parts.length > 2 ? Integer.parseInt(parts[2]) : 0;

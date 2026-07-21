@@ -855,6 +855,10 @@ public class FintrafficGraphQLParkingIntegrationTest extends FintrafficIntegrati
                 .then()
                 .log().body()
                 .statusCode(org.hamcrest.Matchers.anyOf(equalTo(200), equalTo(400)));
+
+        assertThat(parkingRepository.count())
+                .as("no parking must be persisted when duplicate dayTypeRef is submitted")
+                .isZero();
     }
 
     @Test
@@ -880,5 +884,9 @@ public class FintrafficGraphQLParkingIntegrationTest extends FintrafficIntegrati
                 .then()
                 .log().body()
                 .statusCode(org.hamcrest.Matchers.anyOf(equalTo(200), equalTo(400)));
+
+        assertThat(parkingRepository.count())
+                .as("no parking must be persisted when invalid time value is submitted")
+                .isZero();
     }
 }
