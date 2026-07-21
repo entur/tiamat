@@ -90,7 +90,7 @@ jobs:
           mv target/jib-image.tar tiamat.tar
 
       - name: Upload image tar for security scan
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: tiamat
           path: tiamat.tar
