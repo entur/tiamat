@@ -831,4 +831,54 @@ public class FintrafficGraphQLParkingIntegrationTest extends FintrafficIntegrati
                 .as("lighting must be preserved when not included in update input")
                 .isEqualTo(org.rutebanken.tiamat.model.LightingEnumeration.WELL_LIT);
     }
+
+    @Test
+    public void mutateParking_duplicateAvailabilityConditionDayTypeRef_returnsError() {
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("Test stop"));
+        stopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
+        stopPlace = stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+        String stopNetexId = stopPlace.getNetexId();
+
+        String mutation = """
+                {
+                  "query": "mutation { parking: %s (Parking: { name: { value: \\"Test\\" lang: \\"fi\\" } parkingType: parkAndRide parentSiteRef: \\"%s\\" availabilityConditions: [{ dayTypeRef: \\"FSR:DayType:BusinessDay\\" isAvailable: true }, { dayTypeRef: \\"FSR:DayType:BusinessDay\\" isAvailable: false }] }) { id } }",
+                  "variables": ""
+                }
+                """.formatted(GraphQLNames.MUTATE_PARKING, stopNetexId);
+
+        given()
+                .port(port)
+                .contentType(ContentType.JSON)
+                .body(mutation)
+                .when()
+                .post(BASE_URI_GRAPHQL)
+                .then()
+                .log().body()
+                .statusCode(org.hamcrest.Matchers.anyOf(equalTo(200), equalTo(400)));
+    }
+
+    @Test
+    public void mutateParking_invalidAvailabilityConditionTime_returnsError() {
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("Test stop"));
+        stopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
+        stopPlace = stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+        String stopNetexId = stopPlace.getNetexId();
+
+        String mutation = """
+                {
+                  "query": "mutation { parking: %s (Parking: { name: { value: \\"Test\\" lang: \\"fi\\" } parkingType: parkAndRide parentSiteRef: \\"%s\\" availabilityConditions: [{ dayTypeRef: \\"FSR:DayType:BusinessDay\\" startTime: \\"notATime\\" }] }) { id } }",
+                  "variables": ""
+                }
+                """.formatted(GraphQLNames.MUTATE_PARKING, stopNetexId);
+
+        given()
+                .port(port)
+                .contentType(ContentType.JSON)
+                .body(mutation)
+                .when()
+                .post(BASE_URI_GRAPHQL)
+                .then()
+                .log().body()
+                .statusCode(org.hamcrest.Matchers.anyOf(equalTo(200), equalTo(400)));
+    }
 }

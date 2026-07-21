@@ -15,7 +15,8 @@ public class V7__FintrafficParkingAvailabilityConditions extends BaseJavaMigrati
                     day_type_ref VARCHAR(128) NOT NULL,
                     is_available BOOLEAN NOT NULL DEFAULT TRUE,
                     start_time   TIME,
-                    end_time     TIME
+                    end_time     TIME,
+                    UNIQUE (parking_id, day_type_ref)
                 );
 
                 CREATE INDEX IF NOT EXISTS idx_parking_avail_cond_parking_id

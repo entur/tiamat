@@ -329,4 +329,44 @@ public class FintrafficParkingMapperContributorTest {
                 .isEqualTo("FSR:DayType:Sunday");
         assertThat(mapped.getTimebands()).isNull();
     }
+
+    @Test
+    public void mapFromNetex_deduplicatesAvailabilityConditionsByDayTypeRef_keepingLast() {
+        ObjectFactory objectFactory = new ObjectFactory();
+
+        AvailabilityCondition first = new AvailabilityCondition()
+                .withIsAvailable(true)
+                .withDayTypes(new DayTypes_RelStructure()
+                        .withDayTypeRefOrDayType_(objectFactory.createDayTypeRef(
+                                new DayTypeRefStructure().withRef("FSR:DayType:BusinessDay"))))
+                .withTimebands(new Timebands_RelStructure()
+                        .withTimebandRefOrTimeband(objectFactory.createTimeband(
+                                new Timeband().withStartTime(LocalTime.of(6, 0)).withEndTime(LocalTime.of(18, 0)))));
+
+        AvailabilityCondition duplicate = new AvailabilityCondition()
+                .withIsAvailable(true)
+                .withDayTypes(new DayTypes_RelStructure()
+                        .withDayTypeRefOrDayType_(objectFactory.createDayTypeRef(
+                                new DayTypeRefStructure().withRef("FSR:DayType:BusinessDay"))))
+                .withTimebands(new Timebands_RelStructure()
+                        .withTimebandRefOrTimeband(objectFactory.createTimeband(
+                                new Timeband().withStartTime(LocalTime.of(7, 0)).withEndTime(LocalTime.of(22, 0)))));
+
+        ValidityConditions_RelStructure validityConditions = new ValidityConditions_RelStructure();
+        validityConditions.getValidityConditionRefOrValidBetweenOrValidityCondition_()
+                .add(objectFactory.createAvailabilityCondition(first));
+        validityConditions.getValidityConditionRefOrValidBetweenOrValidityCondition_()
+                .add(objectFactory.createAvailabilityCondition(duplicate));
+
+        org.rutebanken.netex.model.Parking source = new org.rutebanken.netex.model.Parking();
+        source.setValidityConditions(validityConditions);
+        FintrafficParking target = new FintrafficParking();
+
+        contributor.mapFromNetex(source, target, mappingContext);
+
+        assertThat(target.getAvailabilityConditions()).hasSize(1);
+        assertThat(target.getAvailabilityConditions().getFirst().getStartTime())
+                .as("last duplicate wins")
+                .isEqualTo(LocalTime.of(7, 0));
+    }
 }

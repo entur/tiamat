@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -156,11 +157,16 @@ public class FintrafficParkingUpdater extends ParkingUpdater {
         @SuppressWarnings("unchecked")
         List<Map<String, Object>> incomingConditions = (List<Map<String, Object>>) input.get(AVAILABILITY_CONDITIONS);
         if (incomingConditions != null) {
-            List<FintrafficParkingAvailabilityCondition> converted = new ArrayList<>();
+            LinkedHashMap<String, FintrafficParkingAvailabilityCondition> byDayType = new LinkedHashMap<>();
             for (Map<String, Object> conditionInput : incomingConditions) {
                 Object dayTypeRefObj = conditionInput.get(DAY_TYPE_REF);
                 if (dayTypeRefObj == null) {
                     continue;
+                }
+                String dayTypeRef = dayTypeRefObj.toString();
+                if (byDayType.containsKey(dayTypeRef)) {
+                    throw new IllegalArgumentException(
+                            "Duplicate dayTypeRef '" + dayTypeRef + "' in availabilityConditions input");
                 }
                 Object isAvailableObj = conditionInput.get(IS_AVAILABLE);
                 Object startTimeObj = conditionInput.get(START_TIME);
@@ -170,13 +176,14 @@ public class FintrafficParkingUpdater extends ParkingUpdater {
                 LocalTime startTime = parseLocalTime(startTimeObj);
                 LocalTime endTime = parseLocalTime(endTimeObj);
 
-                converted.add(new FintrafficParkingAvailabilityCondition(
-                        dayTypeRefObj.toString(),
+                byDayType.put(dayTypeRef, new FintrafficParkingAvailabilityCondition(
+                        dayTypeRef,
                         isAvailable,
                         startTime,
                         endTime
                 ));
             }
+            List<FintrafficParkingAvailabilityCondition> converted = new ArrayList<>(byDayType.values());
             if (!converted.equals(target.getAvailabilityConditions())) {
                 target.setAvailabilityConditions(converted);
                 changed = true;
@@ -221,10 +228,17 @@ public class FintrafficParkingUpdater extends ParkingUpdater {
         if (timeValue.isEmpty()) {
             return null;
         }
-        String[] parts = timeValue.split(":");
-        int hour = Integer.parseInt(parts[0]);
-        int minute = parts.length > 1 ? Integer.parseInt(parts[1]) : 0;
-        int second = parts.length > 2 ? Integer.parseInt(parts[2]) : 0;
-        return LocalTime.of(hour, minute, second);
+        try {
+            String[] parts = timeValue.split(":");
+            int hour = Integer.parseInt(parts[0]);
+            int minute = parts.length > 1 ? Integer.parseInt(parts[1]) : 0;
+            int second = parts.length > 2 ? Integer.parseInt(parts[2]) : 0;
+            if (hour == 24 && minute == 0 && second == 0) {
+                return LocalTime.MIDNIGHT;
+            }
+            return LocalTime.of(hour, minute, second);
+        } catch (NumberFormatException | java.time.DateTimeException e) {
+            throw new IllegalArgumentException("Invalid time value: '" + timeValue + "'. Expected HH:mm or HH:mm:ss.", e);
+        }
     }
 }

@@ -26,6 +26,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 /**
@@ -240,7 +241,7 @@ public class FintrafficParkingMapperContributor implements ParkingMapperContribu
             return;
         }
 
-        List<FintrafficParkingAvailabilityCondition> conditions = new ArrayList<>();
+        LinkedHashMap<String, FintrafficParkingAvailabilityCondition> byDayType = new LinkedHashMap<>();
         for (Object entry : validityConditions.getValidityConditionRefOrValidBetweenOrValidityCondition_()) {
             if (!(entry instanceof JAXBElement<?> jaxbElement)) {
                 continue;
@@ -263,10 +264,14 @@ public class FintrafficParkingMapperContributor implements ParkingMapperContribu
             }
 
             boolean isAvailable = availabilityCondition.isIsAvailable() == null || availabilityCondition.isIsAvailable();
-            conditions.add(new FintrafficParkingAvailabilityCondition(dayTypeRef, isAvailable, startTime, endTime));
+            if (byDayType.containsKey(dayTypeRef)) {
+                logger.warn("Parking {} has duplicate AvailabilityCondition for dayTypeRef '{}'; keeping the last one",
+                        source.getId(), dayTypeRef);
+            }
+            byDayType.put(dayTypeRef, new FintrafficParkingAvailabilityCondition(dayTypeRef, isAvailable, startTime, endTime));
         }
 
-        fp.setAvailabilityConditions(conditions);
+        fp.setAvailabilityConditions(new ArrayList<>(byDayType.values()));
     }
 
     private String extractDayTypeRef(org.rutebanken.netex.model.Parking source, AvailabilityCondition availabilityCondition) {
@@ -338,7 +343,7 @@ public class FintrafficParkingMapperContributor implements ParkingMapperContribu
             dayTypes.getDayTypeRefOrDayType_().add(OBJECT_FACTORY.createDayTypeRef(dayTypeRef));
             availabilityCondition.withDayTypes(dayTypes);
 
-            if (condition.getStartTime() != null) {
+            if (condition.getStartTime() != null || condition.getEndTime() != null) {
                 Timeband timeband = new Timeband()
                         .withId(source.getId() + ":Timeband:" + index)
                         .withVersion("1")
