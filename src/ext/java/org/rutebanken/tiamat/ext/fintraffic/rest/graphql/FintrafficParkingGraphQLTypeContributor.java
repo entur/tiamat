@@ -55,6 +55,13 @@ public class FintrafficParkingGraphQLTypeContributor implements ParkingGraphQLTy
     static final String IS_ENTRY = "isEntry";
     static final String IS_EXIT = "isExit";
     static final String PUBLIC_CODE = "publicCode";
+    static final String AVAILABILITY_CONDITIONS = "availabilityConditions";
+    static final String AVAILABILITY_CONDITION_OUTPUT_TYPE = "FintrafficAvailabilityCondition";
+    static final String AVAILABILITY_CONDITION_INPUT_TYPE = "FintrafficAvailabilityConditionInput";
+    static final String DAY_TYPE_REF = "dayTypeRef";
+    static final String IS_AVAILABLE = "isAvailable";
+    static final String START_TIME = "startTime";
+    static final String END_TIME = "endTime";
 
     static final GraphQLEnumType paymentMethodEnum =
             CustomGraphQLTypes.createCustomEnumType(PAYMENT_METHOD_ENUM, PaymentMethodEnumeration.class);
@@ -97,6 +104,22 @@ public class FintrafficParkingGraphQLTypeContributor implements ParkingGraphQLTy
             .field(newInputObjectField().name(IS_ENTRY).type(GraphQLBoolean))
             .field(newInputObjectField().name(IS_EXIT).type(GraphQLBoolean))
             .field(newInputObjectField().name(PUBLIC_CODE).type(GraphQLString))
+            .build();
+
+    static final GraphQLObjectType availabilityConditionOutputType = newObject()
+            .name(AVAILABILITY_CONDITION_OUTPUT_TYPE)
+            .field(newFieldDefinition().name(DAY_TYPE_REF).type(GraphQLNonNull.nonNull(GraphQLString)))
+            .field(newFieldDefinition().name(IS_AVAILABLE).type(GraphQLBoolean))
+            .field(newFieldDefinition().name(START_TIME).type(GraphQLString))
+            .field(newFieldDefinition().name(END_TIME).type(GraphQLString))
+            .build();
+
+    static final GraphQLInputObjectType availabilityConditionInputType = newInputObject()
+            .name(AVAILABILITY_CONDITION_INPUT_TYPE)
+            .field(newInputObjectField().name(DAY_TYPE_REF).type(GraphQLNonNull.nonNull(GraphQLString)))
+            .field(newInputObjectField().name(IS_AVAILABLE).type(GraphQLBoolean))
+            .field(newInputObjectField().name(START_TIME).type(GraphQLString))
+            .field(newInputObjectField().name(END_TIME).type(GraphQLString))
             .build();
 
     @Override
@@ -167,6 +190,25 @@ public class FintrafficParkingGraphQLTypeContributor implements ParkingGraphQLTy
                             })
                             .collect(java.util.stream.Collectors.toList());
                 }));
+        builder.field(newFieldDefinition()
+                .name(AVAILABILITY_CONDITIONS)
+                .type(new GraphQLList(availabilityConditionOutputType))
+                .dataFetcher(env -> {
+                    Object source = env.getSource();
+                    if (!(source instanceof org.rutebanken.tiamat.ext.fintraffic.model.FintrafficParking fp)) {
+                        return java.util.List.of();
+                    }
+                    return fp.getAvailabilityConditions().stream()
+                            .map(condition -> {
+                                var m = new java.util.HashMap<String, Object>();
+                                m.put(DAY_TYPE_REF, condition.getDayTypeRef());
+                                m.put(IS_AVAILABLE, condition.isAvailable());
+                                m.put(START_TIME, condition.getStartTime() != null ? condition.getStartTime().toString() : null);
+                                m.put(END_TIME, condition.getEndTime() != null ? condition.getEndTime().toString() : null);
+                                return m;
+                            })
+                            .collect(java.util.stream.Collectors.toList());
+                }));
     }
 
     @Override
@@ -183,6 +225,8 @@ public class FintrafficParkingGraphQLTypeContributor implements ParkingGraphQLTy
         builder.field(newInputObjectField()
                 .name(VEHICLE_ENTRANCES)
                 .type(new GraphQLList(vehicleEntranceInputType)));
+        builder.field(newInputObjectField()
+                .name(AVAILABILITY_CONDITIONS)
+                .type(new GraphQLList(availabilityConditionInputType)));
     }
 }
-

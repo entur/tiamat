@@ -8,6 +8,7 @@ import org.rutebanken.tiamat.ext.fintraffic.db.migration.V3__FintrafficParkingEx
 import org.rutebanken.tiamat.ext.fintraffic.db.migration.V4__FintrafficParkingInfoLinks;
 import org.rutebanken.tiamat.ext.fintraffic.db.migration.V5__FintrafficParkingVehicleEntrances;
 import org.rutebanken.tiamat.ext.fintraffic.db.migration.V6__FintrafficParkingLighting;
+import org.rutebanken.tiamat.ext.fintraffic.db.migration.V7__FintrafficParkingAvailabilityConditions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Configuration;
@@ -28,7 +29,8 @@ public class FintrafficFlywayConfig {
         V3__FintrafficParkingExtensions.class,
         V4__FintrafficParkingInfoLinks.class,
         V5__FintrafficParkingVehicleEntrances.class,
-        V6__FintrafficParkingLighting.class
+        V6__FintrafficParkingLighting.class,
+        V7__FintrafficParkingAvailabilityConditions.class
     );
 
     public FintrafficFlywayConfig(DataSource dataSource) {

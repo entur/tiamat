@@ -6,6 +6,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.rutebanken.tiamat.ext.fintraffic.model.FintrafficInfoLink;
 import org.rutebanken.tiamat.ext.fintraffic.model.FintrafficParking;
+import org.rutebanken.tiamat.ext.fintraffic.model.FintrafficParkingAvailabilityCondition;
 import org.rutebanken.tiamat.ext.fintraffic.model.FintrafficParkingEntranceForVehicles;
 import org.rutebanken.tiamat.model.LightingEnumeration;
 import org.rutebanken.tiamat.model.Parking;
@@ -15,11 +16,16 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import static org.rutebanken.tiamat.ext.fintraffic.rest.graphql.FintrafficParkingGraphQLTypeContributor.AVAILABILITY_CONDITIONS;
+import static org.rutebanken.tiamat.ext.fintraffic.rest.graphql.FintrafficParkingGraphQLTypeContributor.DAY_TYPE_REF;
+import static org.rutebanken.tiamat.ext.fintraffic.rest.graphql.FintrafficParkingGraphQLTypeContributor.END_TIME;
+import static org.rutebanken.tiamat.ext.fintraffic.rest.graphql.FintrafficParkingGraphQLTypeContributor.IS_AVAILABLE;
 import static org.rutebanken.tiamat.ext.fintraffic.rest.graphql.FintrafficParkingGraphQLTypeContributor.INFO_LINKS;
 import static org.rutebanken.tiamat.ext.fintraffic.rest.graphql.FintrafficParkingGraphQLTypeContributor.LIGHTING;
 import static org.rutebanken.tiamat.ext.fintraffic.rest.graphql.FintrafficParkingGraphQLTypeContributor.PAYMENT_METHODS;
@@ -33,6 +39,7 @@ import static org.rutebanken.tiamat.ext.fintraffic.rest.graphql.FintrafficParkin
 import static org.rutebanken.tiamat.ext.fintraffic.rest.graphql.FintrafficParkingGraphQLTypeContributor.IS_ENTRY;
 import static org.rutebanken.tiamat.ext.fintraffic.rest.graphql.FintrafficParkingGraphQLTypeContributor.IS_EXIT;
 import static org.rutebanken.tiamat.ext.fintraffic.rest.graphql.FintrafficParkingGraphQLTypeContributor.PUBLIC_CODE;
+import static org.rutebanken.tiamat.ext.fintraffic.rest.graphql.FintrafficParkingGraphQLTypeContributor.START_TIME;
 
 /**
  * Fintraffic extension of {@link ParkingUpdater} that handles the
@@ -146,6 +153,36 @@ public class FintrafficParkingUpdater extends ParkingUpdater {
             }
         }
 
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> incomingConditions = (List<Map<String, Object>>) input.get(AVAILABILITY_CONDITIONS);
+        if (incomingConditions != null) {
+            List<FintrafficParkingAvailabilityCondition> converted = new ArrayList<>();
+            for (Map<String, Object> conditionInput : incomingConditions) {
+                Object dayTypeRefObj = conditionInput.get(DAY_TYPE_REF);
+                if (dayTypeRefObj == null) {
+                    continue;
+                }
+                Object isAvailableObj = conditionInput.get(IS_AVAILABLE);
+                Object startTimeObj = conditionInput.get(START_TIME);
+                Object endTimeObj = conditionInput.get(END_TIME);
+
+                boolean isAvailable = !(isAvailableObj instanceof Boolean b) || b;
+                LocalTime startTime = parseLocalTime(startTimeObj);
+                LocalTime endTime = parseLocalTime(endTimeObj);
+
+                converted.add(new FintrafficParkingAvailabilityCondition(
+                        dayTypeRefObj.toString(),
+                        isAvailable,
+                        startTime,
+                        endTime
+                ));
+            }
+            if (!converted.equals(target.getAvailabilityConditions())) {
+                target.setAvailabilityConditions(converted);
+                changed = true;
+            }
+        }
+
         return changed;
     }
 
@@ -162,6 +199,7 @@ public class FintrafficParkingUpdater extends ParkingUpdater {
             target.setPaymentMethods(new ArrayList<>(source.getPaymentMethods()));
             target.setInfoLinks(new ArrayList<>(source.getInfoLinks()));
             target.setFintrafficVehicleEntrances(new ArrayList<>(source.getFintrafficVehicleEntrances()));
+            target.setAvailabilityConditions(new ArrayList<>(source.getAvailabilityConditions()));
         }
     }
 
@@ -173,5 +211,20 @@ public class FintrafficParkingUpdater extends ParkingUpdater {
             return BigDecimal.valueOf(number.doubleValue());
         }
         return null;
+    }
+
+    private static LocalTime parseLocalTime(Object value) {
+        if (value == null) {
+            return null;
+        }
+        String timeValue = value.toString().strip();
+        if (timeValue.isEmpty()) {
+            return null;
+        }
+        String[] parts = timeValue.split(":");
+        int hour = Integer.parseInt(parts[0]);
+        int minute = parts.length > 1 ? Integer.parseInt(parts[1]) : 0;
+        int second = parts.length > 2 ? Integer.parseInt(parts[2]) : 0;
+        return LocalTime.of(hour, minute, second);
     }
 }

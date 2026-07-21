@@ -10,6 +10,7 @@ import org.rutebanken.tiamat.auth.AuthorizationService;
 import org.rutebanken.tiamat.ext.fintraffic.FintrafficIntegrationTest;
 import org.rutebanken.tiamat.ext.fintraffic.FintrafficTiamatTestApplication;
 import org.rutebanken.tiamat.ext.fintraffic.model.FintrafficParking;
+import org.rutebanken.tiamat.ext.fintraffic.model.FintrafficParkingAvailabilityCondition;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.Parking;
 import org.rutebanken.tiamat.model.PaymentMethodEnumeration;
@@ -26,6 +27,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import java.time.LocalTime;
+
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -573,6 +577,128 @@ public class FintrafficGraphQLParkingIntegrationTest extends FintrafficIntegrati
                 .as("vehicleEntrances must be preserved when not included in update input")
                 .hasSize(1);
         assertThat(latest.getFintrafficVehicleEntrances().getFirst().getLabel()).isEqualTo("Main");
+    }
+
+    @Test
+    public void mutateParking_availabilityConditions_persistedAndReadBackViaQuery() {
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("Test stop"));
+        stopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
+        stopPlace = stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+        String stopNetexId = stopPlace.getNetexId();
+
+        String mutation = """
+                {
+                  "query": "mutation { parking: %s (Parking: { name: { value: \\"Test\\" lang: \\"fi\\" } parkingType: parkAndRide parentSiteRef: \\"%s\\" availabilityConditions: [{ dayTypeRef: \\"FSR:DayType:BusinessDay\\" isAvailable: true startTime: \\"06:00\\" endTime: \\"22:00\\" }, { dayTypeRef: \\"FSR:DayType:Sunday\\" isAvailable: false }] }) { id availabilityConditions { dayTypeRef isAvailable startTime endTime } } }",
+                  "variables": ""
+                }
+                """.formatted(GraphQLNames.MUTATE_PARKING, stopNetexId);
+
+        String parkingNetexId = given()
+                .port(port)
+                .contentType(ContentType.JSON)
+                .body(mutation)
+                .when()
+                .post(BASE_URI_GRAPHQL)
+                .then()
+                .log().body()
+                .statusCode(200)
+                .body("data.parking[0].id", notNullValue())
+                .body("data.parking[0].availabilityConditions[0].dayTypeRef", equalTo("FSR:DayType:BusinessDay"))
+                .body("data.parking[0].availabilityConditions[0].isAvailable", equalTo(true))
+                .body("data.parking[0].availabilityConditions[0].startTime", equalTo("06:00"))
+                .body("data.parking[0].availabilityConditions[0].endTime", equalTo("22:00"))
+                .body("data.parking[0].availabilityConditions[1].dayTypeRef", equalTo("FSR:DayType:Sunday"))
+                .body("data.parking[0].availabilityConditions[1].isAvailable", equalTo(false))
+                .extract()
+                .path("data.parking[0].id");
+
+        FintrafficParking saved = (FintrafficParking)
+                parkingRepository.findFirstByNetexIdOrderByVersionDesc(parkingNetexId);
+
+        assertThat(saved.getAvailabilityConditions())
+                .containsExactly(
+                        new FintrafficParkingAvailabilityCondition("FSR:DayType:BusinessDay", true, LocalTime.of(6, 0), LocalTime.of(22, 0)),
+                        new FintrafficParkingAvailabilityCondition("FSR:DayType:Sunday", false, null, null)
+                );
+
+        String query = """
+                {
+                  "query": "{ parking(id: \\"%s\\") { id availabilityConditions { dayTypeRef isAvailable startTime endTime } } }"
+                }
+                """.formatted(parkingNetexId);
+
+        given()
+                .port(port)
+                .contentType(ContentType.JSON)
+                .body(query)
+                .when()
+                .post(BASE_URI_GRAPHQL)
+                .then()
+                .log().body()
+                .statusCode(200)
+                .body("data.parking[0].availabilityConditions[0].dayTypeRef", equalTo("FSR:DayType:BusinessDay"))
+                .body("data.parking[0].availabilityConditions[0].isAvailable", equalTo(true))
+                .body("data.parking[0].availabilityConditions[0].startTime", equalTo("06:00"))
+                .body("data.parking[0].availabilityConditions[0].endTime", equalTo("22:00"))
+                .body("data.parking[0].availabilityConditions[1].dayTypeRef", equalTo("FSR:DayType:Sunday"))
+                .body("data.parking[0].availabilityConditions[1].isAvailable", equalTo(false));
+    }
+
+    @Test
+    public void mutateParking_updateWithoutAvailabilityConditions_preservesExistingAvailabilityConditions() {
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("Test stop"));
+        stopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
+        stopPlace = stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+        String stopNetexId = stopPlace.getNetexId();
+
+        String createMutation = """
+                {
+                  "query": "mutation { parking: %s (Parking: { name: { value: \\"Test\\" lang: \\"fi\\" } parkingType: parkAndRide parentSiteRef: \\"%s\\" availabilityConditions: [{ dayTypeRef: \\"FSR:DayType:BusinessDay\\" isAvailable: true startTime: \\"06:00\\" endTime: \\"22:00\\" }] }) { id } }",
+                  "variables": ""
+                }
+                """.formatted(GraphQLNames.MUTATE_PARKING, stopNetexId);
+
+        String parkingNetexId = given()
+                .port(port)
+                .contentType(ContentType.JSON)
+                .body(createMutation)
+                .when()
+                .post(BASE_URI_GRAPHQL)
+                .then()
+                .statusCode(200)
+                .extract()
+                .path("data.parking[0].id");
+
+        String updateMutation = """
+                {
+                  "query": "mutation { parking: %s (Parking: { id: \\"%s\\" name: { value: \\"Updated\\" lang: \\"fi\\" } }) { id availabilityConditions { dayTypeRef startTime endTime } } }",
+                  "variables": ""
+                }
+                """.formatted(GraphQLNames.MUTATE_PARKING, parkingNetexId);
+
+        given()
+                .port(port)
+                .contentType(ContentType.JSON)
+                .body(updateMutation)
+                .when()
+                .post(BASE_URI_GRAPHQL)
+                .then()
+                .log().body()
+                .statusCode(200)
+                .body("data.parking[0].availabilityConditions[0].dayTypeRef", equalTo("FSR:DayType:BusinessDay"))
+                .body("data.parking[0].availabilityConditions[0].startTime", equalTo("06:00"))
+                .body("data.parking[0].availabilityConditions[0].endTime", equalTo("22:00"));
+
+        FintrafficParking latest = (FintrafficParking)
+                parkingRepository.findFirstByNetexIdOrderByVersionDesc(parkingNetexId);
+        assertThat(latest.getAvailabilityConditions())
+                .as("availabilityConditions must be preserved when not included in update input")
+                .containsExactly(new FintrafficParkingAvailabilityCondition(
+                        "FSR:DayType:BusinessDay",
+                        true,
+                        LocalTime.of(6, 0),
+                        LocalTime.of(22, 0)
+                ));
     }
 
     @Test

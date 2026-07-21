@@ -8,6 +8,7 @@ import org.rutebanken.tiamat.ext.fintraffic.FintrafficIntegrationTest;
 import org.rutebanken.tiamat.ext.fintraffic.FintrafficTiamatTestApplication;
 import org.rutebanken.tiamat.ext.fintraffic.model.FintrafficInfoLink;
 import org.rutebanken.tiamat.ext.fintraffic.model.FintrafficParking;
+import org.rutebanken.tiamat.ext.fintraffic.model.FintrafficParkingAvailabilityCondition;
 import org.rutebanken.tiamat.ext.fintraffic.model.FintrafficParkingEntranceForVehicles;
 import org.rutebanken.tiamat.importer.merging.MergingParkingImporter;
 import org.rutebanken.tiamat.model.Parking;
@@ -25,6 +26,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -318,6 +320,55 @@ public class FintrafficMergingParkingImporterTest extends FintrafficIntegrationT
 
         assertThat(result.getVersion())
                 .as("no new version must be created when vehicleEntrances are unchanged")
+                .isEqualTo(existingVersion);
+    }
+
+    @Test
+    @Transactional
+    public void handleAlreadyExistingParking_mergesAvailabilityConditions() {
+        StopPlace stopPlace = new StopPlace();
+        stopPlaceRepository.save(stopPlace);
+
+        FintrafficParking existing = new FintrafficParking();
+        existing.setParentSiteRef(new SiteRefStructure(stopPlace.getNetexId()));
+        existing.setAvailabilityConditions(List.of(
+                new FintrafficParkingAvailabilityCondition("FSR:DayType:BusinessDay", true, LocalTime.of(8, 0), LocalTime.of(18, 0))));
+        existing = (FintrafficParking) parkingVersionedSaverService.saveNewVersion(existing);
+
+        FintrafficParking incoming = new FintrafficParking();
+        incoming.setParentSiteRef(new SiteRefStructure(stopPlace.getNetexId()));
+        incoming.setAvailabilityConditions(List.of(
+                new FintrafficParkingAvailabilityCondition("FSR:DayType:Sunday", false, null, null)));
+
+        Parking result = mergingParkingImporter.handleAlreadyExistingParking(existing, incoming);
+
+        assertThat(result).isInstanceOf(FintrafficParking.class);
+        assertThat(((FintrafficParking) result).getAvailabilityConditions())
+                .as("availabilityConditions from incoming parking must replace those on the version copy")
+                .containsExactly(new FintrafficParkingAvailabilityCondition("FSR:DayType:Sunday", false, null, null));
+    }
+
+    @Test
+    @Transactional
+    public void handleAlreadyExistingParking_unchangedAvailabilityConditions_doesNotCreateNewVersion() {
+        StopPlace stopPlace = new StopPlace();
+        stopPlaceRepository.save(stopPlace);
+
+        FintrafficParkingAvailabilityCondition condition =
+                new FintrafficParkingAvailabilityCondition("FSR:DayType:BusinessDay", true, LocalTime.of(6, 0), LocalTime.of(22, 0));
+        FintrafficParking existing = new FintrafficParking();
+        existing.setParentSiteRef(new SiteRefStructure(stopPlace.getNetexId()));
+        existing.setAvailabilityConditions(List.of(condition));
+        existing = (FintrafficParking) parkingVersionedSaverService.saveNewVersion(existing);
+        long existingVersion = existing.getVersion();
+
+        FintrafficParking incoming = new FintrafficParking();
+        incoming.setAvailabilityConditions(List.of(condition));
+
+        Parking result = mergingParkingImporter.handleAlreadyExistingParking(existing, incoming);
+
+        assertThat(result.getVersion())
+                .as("no new version must be created when availabilityConditions are unchanged")
                 .isEqualTo(existingVersion);
     }
 }

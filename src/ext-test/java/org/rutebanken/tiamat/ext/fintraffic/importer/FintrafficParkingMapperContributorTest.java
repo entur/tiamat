@@ -1,15 +1,25 @@
 package org.rutebanken.tiamat.ext.fintraffic.importer;
 
 import ma.glasnost.orika.MappingContext;
+import jakarta.xml.bind.JAXBElement;
 import org.junit.Before;
 import org.junit.Test;
+import org.rutebanken.netex.model.AvailabilityCondition;
+import org.rutebanken.netex.model.DayTypeRefStructure;
+import org.rutebanken.netex.model.DayTypes_RelStructure;
 import org.rutebanken.netex.model.EntranceEnumeration;
 import org.rutebanken.netex.model.GroupOfEntities_VersionStructure;
 import org.rutebanken.netex.model.InfoLinkStructure;
 import org.rutebanken.netex.model.MultilingualString;
+import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.ParkingEntranceForVehicles;
 import org.rutebanken.netex.model.ParkingEntrancesForVehicles_RelStructure;
+import org.rutebanken.netex.model.Timeband;
+import org.rutebanken.netex.model.Timebands_RelStructure;
 import org.rutebanken.netex.model.TypeOfInfolinkEnumeration;
+import org.rutebanken.netex.model.ValidBetween;
+import org.rutebanken.netex.model.ValidityConditions_RelStructure;
+import org.rutebanken.tiamat.ext.fintraffic.model.FintrafficParkingAvailabilityCondition;
 import org.rutebanken.tiamat.ext.fintraffic.model.FintrafficInfoLink;
 import org.rutebanken.tiamat.ext.fintraffic.model.FintrafficParking;
 import org.rutebanken.tiamat.ext.fintraffic.model.FintrafficParkingEntranceForVehicles;
@@ -17,6 +27,8 @@ import org.rutebanken.tiamat.model.Parking;
 import org.rutebanken.tiamat.model.PaymentMethodEnumeration;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -240,5 +252,81 @@ public class FintrafficParkingMapperContributorTest {
         contributor.mapToNetex(source, target, mappingContext);
 
         assertThat(target.getVehicleEntrances()).isNull();
+    }
+
+    // --- availabilityConditions ---
+
+    @Test
+    public void mapFromNetex_copiesAvailabilityConditionsToFintrafficParking() {
+        ObjectFactory objectFactory = new ObjectFactory();
+
+        AvailabilityCondition availabilityCondition = new AvailabilityCondition()
+                .withIsAvailable(true)
+                .withDayTypes(new DayTypes_RelStructure()
+                        .withDayTypeRefOrDayType_(objectFactory.createDayTypeRef(
+                                new DayTypeRefStructure().withRef("FSR:DayType:BusinessDay"))))
+                .withTimebands(new Timebands_RelStructure()
+                        .withTimebandRefOrTimeband(objectFactory.createTimeband(
+                                new Timeband()
+                                        .withStartTime(LocalTime.of(6, 0))
+                                        .withEndTime(LocalTime.of(22, 0)))));
+
+        ValidityConditions_RelStructure validityConditions = new ValidityConditions_RelStructure();
+        validityConditions.getValidityConditionRefOrValidBetweenOrValidityCondition_()
+                .add(objectFactory.createAvailabilityCondition(availabilityCondition));
+        validityConditions.getValidityConditionRefOrValidBetweenOrValidityCondition_()
+                .add(new ValidBetween().withFromDate(LocalDateTime.of(2026, 1, 1, 0, 0)));
+
+        org.rutebanken.netex.model.Parking source = new org.rutebanken.netex.model.Parking();
+        source.setValidityConditions(validityConditions);
+        FintrafficParking target = new FintrafficParking();
+
+        contributor.mapFromNetex(source, target, mappingContext);
+
+        assertThat(target.getAvailabilityConditions())
+                .containsExactly(new FintrafficParkingAvailabilityCondition(
+                        "FSR:DayType:BusinessDay",
+                        true,
+                        LocalTime.of(6, 0),
+                        LocalTime.of(22, 0)
+                ));
+    }
+
+    @Test
+    public void mapToNetex_appendsAvailabilityConditionsWithoutRemovingValidBetween() {
+        FintrafficParking source = new FintrafficParking();
+        source.setAvailabilityConditions(List.of(
+                new FintrafficParkingAvailabilityCondition("FSR:DayType:Sunday", false, null, null)));
+
+        ValidityConditions_RelStructure validityConditions = new ValidityConditions_RelStructure();
+        ValidBetween validBetween = new ValidBetween().withFromDate(LocalDateTime.of(2026, 1, 1, 0, 0));
+        validityConditions.getValidityConditionRefOrValidBetweenOrValidityCondition_().add(validBetween);
+
+        org.rutebanken.netex.model.Parking target = new org.rutebanken.netex.model.Parking();
+        target.setValidityConditions(validityConditions);
+
+        contributor.mapToNetex(source, target, mappingContext);
+
+        assertThat(target.getValidityConditions()).isNotNull();
+        assertThat(target.getValidityConditions().getValidityConditionRefOrValidBetweenOrValidityCondition_())
+                .hasSize(2)
+                .contains(validBetween);
+
+        Object availabilityEntry = target.getValidityConditions()
+                .getValidityConditionRefOrValidBetweenOrValidityCondition_()
+                .stream()
+                .filter(entry -> entry instanceof JAXBElement<?> jaxb &&
+                        jaxb.getValue() instanceof AvailabilityCondition)
+                .findFirst()
+                .orElseThrow();
+
+        AvailabilityCondition mapped = (AvailabilityCondition) ((JAXBElement<?>) availabilityEntry).getValue();
+        assertThat(mapped.isIsAvailable()).isFalse();
+        assertThat(mapped.getDayTypes().getDayTypeRefOrDayType_()).hasSize(1);
+        assertThat(mapped.getDayTypes().getDayTypeRefOrDayType_().getFirst().getValue())
+                .isInstanceOf(DayTypeRefStructure.class);
+        assertThat(((DayTypeRefStructure) mapped.getDayTypes().getDayTypeRefOrDayType_().getFirst().getValue()).getRef())
+                .isEqualTo("FSR:DayType:Sunday");
+        assertThat(mapped.getTimebands()).isNull();
     }
 }

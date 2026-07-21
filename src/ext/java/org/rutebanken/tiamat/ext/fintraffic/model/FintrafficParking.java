@@ -62,6 +62,13 @@ public class FintrafficParking extends Parking {
     )
     private List<FintrafficParkingEntranceForVehicles> fintrafficVehicleEntrances;
 
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(
+            name = "parking_availability_conditions",
+            joinColumns = @JoinColumn(name = "parking_id")
+    )
+    private List<FintrafficParkingAvailabilityCondition> availabilityConditions;
+
     @Override
     public LightingEnumeration getLighting() {
         return lightingList.isEmpty() ? null : lightingList.get(0);
@@ -105,5 +112,15 @@ public class FintrafficParking extends Parking {
     public void setFintrafficVehicleEntrances(List<FintrafficParkingEntranceForVehicles> vehicleEntrances) {
         this.fintrafficVehicleEntrances = vehicleEntrances;
     }
-}
 
+    public List<FintrafficParkingAvailabilityCondition> getAvailabilityConditions() {
+        if (availabilityConditions == null) {
+            availabilityConditions = new ArrayList<>();
+        }
+        return availabilityConditions;
+    }
+
+    public void setAvailabilityConditions(List<FintrafficParkingAvailabilityCondition> availabilityConditions) {
+        this.availabilityConditions = availabilityConditions;
+    }
+}
