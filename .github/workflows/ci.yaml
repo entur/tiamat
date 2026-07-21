@@ -16,9 +16,9 @@ jobs:
     env:
       TZ: Europe/Oslo
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4.4.0
       - name: Set up JDK 25
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v4.8.0
         with:
           java-version: 25
           distribution: temurin
@@ -60,10 +60,10 @@ jobs:
       CONTAINER_REGISTRY_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
       GAR_MIRROR_REPO: eu.gcr.io/entur-system-1287/tiamat
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4.4.0
 
       - name: Set up JDK 25
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v4.8.0
         with:
           java-version: 25
           distribution: temurin
@@ -90,7 +90,7 @@ jobs:
           mv target/jib-image.tar tiamat.tar
 
       - name: Upload image tar for security scan
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v4.6.2
         with:
           name: tiamat
           path: tiamat.tar
@@ -99,7 +99,7 @@ jobs:
       # Temporary: keep Harness fed from the Entur registry until GitHub CD cutover.
       # Copies the exact Docker Hub manifest (same digest), no second build.
       - name: Authenticate to GCP registry
-        uses: entur/gha-meta/.github/actions/docker-auth@v1
+        uses: entur/gha-meta/.github/actions/docker-auth@v1.8.4
         with:
           cloud_provider: gcp
           gcp_workload_identity_provider: ${{ vars.CI_WORKLOAD_IDENTITY_PROVIDER }}
@@ -120,6 +120,6 @@ jobs:
 
   docker-scan:
     needs: [ image ]
-    uses: entur/gha-security/.github/workflows/docker-scan.yml@v2
+    uses: entur/gha-security/.github/workflows/docker-scan.yml@v2.15.0
     with:
       image_artifact: tiamat
