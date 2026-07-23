@@ -1,0 +1,112 @@
+package org.rutebanken.tiamat.ext.fintraffic.rest.graphql;
+
+import graphql.schema.DataFetchingEnvironment;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import org.rutebanken.tiamat.ext.fintraffic.model.FintrafficInfoLink;
+import org.rutebanken.tiamat.ext.fintraffic.model.FintrafficParking;
+import org.rutebanken.tiamat.model.Parking;
+import org.rutebanken.tiamat.model.PaymentMethodEnumeration;
+import org.rutebanken.tiamat.rest.graphql.fetchers.ParkingUpdater;
+import org.springframework.context.annotation.Profile;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
+import static org.rutebanken.tiamat.ext.fintraffic.rest.graphql.FintrafficParkingGraphQLTypeContributor.INFO_LINKS;
+import static org.rutebanken.tiamat.ext.fintraffic.rest.graphql.FintrafficParkingGraphQLTypeContributor.PAYMENT_METHODS;
+import static org.rutebanken.tiamat.ext.fintraffic.rest.graphql.FintrafficParkingGraphQLTypeContributor.TYPE_OF_INFO_LINK;
+import static org.rutebanken.tiamat.ext.fintraffic.rest.graphql.FintrafficParkingGraphQLTypeContributor.URI;
+
+/**
+ * Fintraffic extension of {@link ParkingUpdater} that handles the
+ * {@code paymentMethods} and {@code infoLinks} input fields contributed by
+ * {@link FintrafficParkingGraphQLTypeContributor}.
+ */
+@Profile("fintraffic")
+@Transactional
+public class FintrafficParkingUpdater extends ParkingUpdater {
+
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    /**
+     * Extends the parent's {@code get()} to flush pending collection inserts and
+     * refresh entities before the transaction closes.
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public Object get(DataFetchingEnvironment environment) {
+        List<Parking> parkings = (List<Parking>) super.get(environment);
+        if (parkings != null) {
+            entityManager.flush();
+            parkings.stream()
+                    .filter(Objects::nonNull)
+                    .filter(entityManager::contains)
+                    .forEach(entityManager::refresh);
+        }
+        return parkings;
+    }
+
+    @Override
+    protected boolean populateExtendedFields(Map input, Parking parking) {
+        if (!(parking instanceof FintrafficParking target)) {
+            return false;
+        }
+
+        boolean changed = false;
+
+        @SuppressWarnings("unchecked")
+        List<PaymentMethodEnumeration> incomingMethods = (List<PaymentMethodEnumeration>) input.get(PAYMENT_METHODS);
+        if (incomingMethods != null && !incomingMethods.equals(target.getPaymentMethods())) {
+            target.setPaymentMethods(List.copyOf(incomingMethods));
+            changed = true;
+        }
+
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> incomingLinks = (List<Map<String, Object>>) input.get(INFO_LINKS);
+        if (incomingLinks != null) {
+            List<FintrafficInfoLink> converted = new ArrayList<>();
+            for (Map<String, Object> linkInput : incomingLinks) {
+                Object uriObj = linkInput.get(URI);
+                if (uriObj == null) {
+                    continue;
+                }
+                String uri = uriObj.toString();
+                Object typeObj = linkInput.get(TYPE_OF_INFO_LINK);
+                String type = null;
+                if (typeObj instanceof org.rutebanken.netex.model.TypeOfInfolinkEnumeration enumVal) {
+                    type = enumVal.value();
+                } else if (typeObj != null) {
+                    type = typeObj.toString();
+                }
+                converted.add(new FintrafficInfoLink(uri, type));
+            }
+            if (!converted.equals(target.getInfoLinks())) {
+                target.setInfoLinks(converted);
+                changed = true;
+            }
+        }
+
+        return changed;
+    }
+
+    /**
+     * Copies extended fields that Orika does not transfer from the existing version into
+     * the newly created version copy.  Called by the parent's update path immediately
+     * after {@link org.rutebanken.tiamat.versioning.VersionCreator#createCopy}, before
+     * {@link #populateExtendedFields} overwrites them with the GraphQL input values.
+     */
+    @Override
+    protected void preserveExtendedFields(Parking existingVersion, Parking copy) {
+        if (existingVersion instanceof FintrafficParking source && copy instanceof FintrafficParking target) {
+            target.setPaymentMethods(new ArrayList<>(source.getPaymentMethods()));
+            target.setInfoLinks(new ArrayList<>(source.getInfoLinks()));
+        }
+    }
+}
+
