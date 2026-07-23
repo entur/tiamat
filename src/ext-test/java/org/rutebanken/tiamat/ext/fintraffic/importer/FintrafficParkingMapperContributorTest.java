@@ -4,6 +4,7 @@ import ma.glasnost.orika.MappingContext;
 import jakarta.xml.bind.JAXBElement;
 import org.junit.Before;
 import org.junit.Test;
+import org.rutebanken.netex.model.AccessModeEnumeration;
 import org.rutebanken.netex.model.AvailabilityCondition;
 import org.rutebanken.netex.model.DayTypeRefStructure;
 import org.rutebanken.netex.model.DayTypes_RelStructure;
@@ -190,7 +191,8 @@ public class FintrafficParkingMapperContributorTest {
                 .withHeight(new BigDecimal("2.20"))
                 .withIsEntry(true)
                 .withIsExit(false)
-                .withPublicCode("A1");
+                .withPublicCode("A1")
+                .withAccessModes(AccessModeEnumeration.FOOT, AccessModeEnumeration.BICYCLE);
         ParkingEntrancesForVehicles_RelStructure relStruct = new ParkingEntrancesForVehicles_RelStructure()
                 .withParkingEntranceForVehiclesRefOrParkingEntranceForVehicles(entrance);
         org.rutebanken.netex.model.Parking source = new org.rutebanken.netex.model.Parking();
@@ -208,6 +210,23 @@ public class FintrafficParkingMapperContributorTest {
         assertThat(mapped.getIsEntry()).isTrue();
         assertThat(mapped.getIsExit()).isFalse();
         assertThat(mapped.getPublicCode()).isEqualTo("A1");
+        assertThat(mapped.getAccessModesList()).containsExactly("foot", "bicycle");
+    }
+
+    @Test
+    public void mapFromNetex_noAccessModes_leavesAccessModesEmpty() {
+        ParkingEntranceForVehicles entrance = new ParkingEntranceForVehicles()
+                .withIsEntry(true)
+                .withIsExit(true);
+        ParkingEntrancesForVehicles_RelStructure relStruct = new ParkingEntrancesForVehicles_RelStructure()
+                .withParkingEntranceForVehiclesRefOrParkingEntranceForVehicles(entrance);
+        org.rutebanken.netex.model.Parking source = new org.rutebanken.netex.model.Parking();
+        source.setVehicleEntrances(relStruct);
+        FintrafficParking target = new FintrafficParking();
+
+        contributor.mapFromNetex(source, target, mappingContext);
+
+        assertThat(target.getFintrafficVehicleEntrances().getFirst().getAccessModesList()).isEmpty();
     }
 
     @Test
@@ -223,9 +242,10 @@ public class FintrafficParkingMapperContributorTest {
     @Test
     public void mapToNetex_copiesVehicleEntrancesFromFintrafficParking() {
         FintrafficParking source = new FintrafficParking();
-        source.setFintrafficVehicleEntrances(List.of(
-                new FintrafficParkingEntranceForVehicles("Exit", "gate",
-                        new BigDecimal("4.00"), new BigDecimal("3.00"), false, true, "B2")));
+        FintrafficParkingEntranceForVehicles entrance = new FintrafficParkingEntranceForVehicles("Exit", "gate",
+                new BigDecimal("4.00"), new BigDecimal("3.00"), false, true, "B2");
+        entrance.setAccessModesList(List.of("foot"));
+        source.setFintrafficVehicleEntrances(List.of(entrance));
         org.rutebanken.netex.model.Parking target = new org.rutebanken.netex.model.Parking();
 
         contributor.mapToNetex(source, target, mappingContext);
@@ -242,6 +262,22 @@ public class FintrafficParkingMapperContributorTest {
         assertThat(netex.isIsEntry()).isFalse();
         assertThat(netex.isIsExit()).isTrue();
         assertThat(netex.getPublicCode()).isEqualTo("B2");
+        assertThat(netex.getAccessModes()).containsExactly(AccessModeEnumeration.FOOT);
+    }
+
+    @Test
+    public void mapToNetex_noAccessModes_doesNotSetAccessModes() {
+        FintrafficParking source = new FintrafficParking();
+        source.setFintrafficVehicleEntrances(List.of(
+                new FintrafficParkingEntranceForVehicles("Exit", "gate",
+                        new BigDecimal("4.00"), new BigDecimal("3.00"), false, true, "B2")));
+        org.rutebanken.netex.model.Parking target = new org.rutebanken.netex.model.Parking();
+
+        contributor.mapToNetex(source, target, mappingContext);
+
+        ParkingEntranceForVehicles netex = (ParkingEntranceForVehicles) target.getVehicleEntrances()
+                .getParkingEntranceForVehiclesRefOrParkingEntranceForVehicles().getFirst();
+        assertThat(netex.getAccessModes()).isEmpty();
     }
 
     @Test
@@ -253,6 +289,7 @@ public class FintrafficParkingMapperContributorTest {
 
         assertThat(target.getVehicleEntrances()).isNull();
     }
+
 
     // --- availabilityConditions ---
 

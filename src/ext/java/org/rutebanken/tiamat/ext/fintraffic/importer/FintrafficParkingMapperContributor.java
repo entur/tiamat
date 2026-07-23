@@ -3,6 +3,7 @@ package org.rutebanken.tiamat.ext.fintraffic.importer;
 import ma.glasnost.orika.MappingContext;
 import jakarta.xml.bind.JAXBElement;
 import org.rutebanken.netex.model.AvailabilityCondition;
+import org.rutebanken.netex.model.AccessModeEnumeration;
 import org.rutebanken.netex.model.DayTypeRefStructure;
 import org.rutebanken.netex.model.DayTypes_RelStructure;
 import org.rutebanken.netex.model.EntranceEnumeration;
@@ -186,7 +187,7 @@ public class FintrafficParkingMapperContributor implements ParkingMapperContribu
             }
             String label = entrance.getLabel() != null ? entrance.getLabel().getValue() : null;
             String entranceType = entrance.getEntranceType() != null ? entrance.getEntranceType().value() : null;
-            converted.add(new FintrafficParkingEntranceForVehicles(
+            FintrafficParkingEntranceForVehicles convertedEntrance = new FintrafficParkingEntranceForVehicles(
                     label,
                     entranceType,
                     entrance.getWidth(),
@@ -194,7 +195,13 @@ public class FintrafficParkingMapperContributor implements ParkingMapperContribu
                     entrance.isIsEntry(),
                     entrance.isIsExit(),
                     entrance.getPublicCode()
-            ));
+            );
+            if (entrance.getAccessModes() != null && !entrance.getAccessModes().isEmpty()) {
+                convertedEntrance.setAccessModesList(entrance.getAccessModes().stream()
+                        .map(AccessModeEnumeration::value)
+                        .toList());
+            }
+            converted.add(convertedEntrance);
         }
         fp.setFintrafficVehicleEntrances(converted);
     }
@@ -224,6 +231,20 @@ public class FintrafficParkingMapperContributor implements ParkingMapperContribu
             netexEntrance.setIsEntry(entrance.getIsEntry());
             netexEntrance.setIsExit(entrance.getIsExit());
             netexEntrance.setPublicCode(entrance.getPublicCode());
+            List<String> accessModeValues = entrance.getAccessModesList();
+            if (!accessModeValues.isEmpty()) {
+                List<AccessModeEnumeration> accessModes = new ArrayList<>();
+                for (String value : accessModeValues) {
+                    try {
+                        accessModes.add(AccessModeEnumeration.fromValue(value));
+                    } catch (IllegalArgumentException ignored) {
+                        // stored value no longer valid — skip
+                    }
+                }
+                if (!accessModes.isEmpty()) {
+                    netexEntrance.withAccessModes(accessModes);
+                }
+            }
             relStruct.getParkingEntranceForVehiclesRefOrParkingEntranceForVehicles().add(netexEntrance);
         }
         target.setVehicleEntrances(relStruct);

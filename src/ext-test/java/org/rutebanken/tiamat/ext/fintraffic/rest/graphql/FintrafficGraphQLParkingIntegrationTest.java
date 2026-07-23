@@ -529,6 +529,44 @@ public class FintrafficGraphQLParkingIntegrationTest extends FintrafficIntegrati
     }
 
     @Test
+    public void mutateParking_vehicleEntrances_accessModes_persistedAndReturnedInResponse() {
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("Test stop"));
+        stopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
+        stopPlace = stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+        String stopNetexId = stopPlace.getNetexId();
+
+        String mutation = """
+                {
+                  "query": "mutation { parking: %s (Parking: { name: { value: \\"Test\\" lang: \\"fi\\" } parkingType: parkAndRide parentSiteRef: \\"%s\\" vehicleEntrances: [{ label: \\"Main\\" entranceType: door isEntry: true isExit: false publicCode: \\"A1\\" accessModes: [foot, bicycle] }] }) { id vehicleEntrances { label accessModes } } }",
+                  "variables": ""
+                }
+                """.formatted(GraphQLNames.MUTATE_PARKING, stopNetexId);
+
+        String parkingNetexId = given()
+                .port(port)
+                .contentType(ContentType.JSON)
+                .body(mutation)
+                .when()
+                .post(BASE_URI_GRAPHQL)
+                .then()
+                .log().body()
+                .statusCode(200)
+                .body("data.parking[0].id", notNullValue())
+                .body("data.parking[0].vehicleEntrances[0].accessModes",
+                        org.hamcrest.Matchers.containsInAnyOrder("foot", "bicycle"))
+                .extract()
+                .path("data.parking[0].id");
+
+        FintrafficParking saved = (FintrafficParking)
+                parkingRepository.findFirstByNetexIdOrderByVersionDesc(parkingNetexId);
+
+        assertThat(saved.getFintrafficVehicleEntrances()).hasSize(1);
+        org.rutebanken.tiamat.ext.fintraffic.model.FintrafficParkingEntranceForVehicles entrance =
+                saved.getFintrafficVehicleEntrances().getFirst();
+        assertThat(entrance.getAccessModesList()).containsExactlyInAnyOrder("foot", "bicycle");
+    }
+
+    @Test
     public void mutateParking_updateWithoutVehicleEntrances_preservesExistingVehicleEntrances() {
         StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("Test stop"));
         stopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);

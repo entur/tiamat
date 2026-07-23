@@ -5,6 +5,7 @@ import graphql.schema.GraphQLInputObjectType;
 import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLNonNull;
 import graphql.schema.GraphQLObjectType;
+import org.rutebanken.netex.model.AccessModeEnumeration;
 import org.rutebanken.netex.model.EntranceEnumeration;
 import org.rutebanken.netex.model.TypeOfInfolinkEnumeration;
 import org.rutebanken.tiamat.model.LightingEnumeration;
@@ -55,6 +56,8 @@ public class FintrafficParkingGraphQLTypeContributor implements ParkingGraphQLTy
     static final String IS_ENTRY = "isEntry";
     static final String IS_EXIT = "isExit";
     static final String PUBLIC_CODE = "publicCode";
+    static final String ACCESS_MODES = "accessModes";
+    static final String ACCESS_MODE_ENUM = "AccessModeEnum";
     static final String AVAILABILITY_CONDITIONS = "availabilityConditions";
     static final String AVAILABILITY_CONDITION_OUTPUT_TYPE = "FintrafficAvailabilityCondition";
     static final String AVAILABILITY_CONDITION_INPUT_TYPE = "FintrafficAvailabilityConditionInput";
@@ -71,6 +74,9 @@ public class FintrafficParkingGraphQLTypeContributor implements ParkingGraphQLTy
 
     static final GraphQLEnumType entranceTypeEnum =
             CustomGraphQLTypes.createCustomEnumType(ENTRANCE_TYPE_ENUM, EntranceEnumeration.class);
+
+    static final GraphQLEnumType accessModeEnum =
+            CustomGraphQLTypes.createCustomEnumType(ACCESS_MODE_ENUM, AccessModeEnumeration.class);
 
     static final GraphQLObjectType infoLinkOutputType = newObject()
             .name(INFO_LINK_OUTPUT_TYPE)
@@ -93,6 +99,7 @@ public class FintrafficParkingGraphQLTypeContributor implements ParkingGraphQLTy
             .field(newFieldDefinition().name(IS_ENTRY).type(GraphQLBoolean))
             .field(newFieldDefinition().name(IS_EXIT).type(GraphQLBoolean))
             .field(newFieldDefinition().name(PUBLIC_CODE).type(GraphQLString))
+            .field(newFieldDefinition().name(ACCESS_MODES).type(new GraphQLList(accessModeEnum)))
             .build();
 
     static final GraphQLInputObjectType vehicleEntranceInputType = newInputObject()
@@ -104,6 +111,7 @@ public class FintrafficParkingGraphQLTypeContributor implements ParkingGraphQLTy
             .field(newInputObjectField().name(IS_ENTRY).type(GraphQLBoolean))
             .field(newInputObjectField().name(IS_EXIT).type(GraphQLBoolean))
             .field(newInputObjectField().name(PUBLIC_CODE).type(GraphQLString))
+            .field(newInputObjectField().name(ACCESS_MODES).type(new GraphQLList(accessModeEnum)))
             .build();
 
     static final GraphQLObjectType availabilityConditionOutputType = newObject()
@@ -186,6 +194,16 @@ public class FintrafficParkingGraphQLTypeContributor implements ParkingGraphQLTy
                                 m.put(IS_ENTRY, entrance.getIsEntry());
                                 m.put(IS_EXIT, entrance.getIsExit());
                                 m.put(PUBLIC_CODE, entrance.getPublicCode());
+                                m.put(ACCESS_MODES, entrance.getAccessModesList().stream()
+                                        .map(value -> {
+                                            try {
+                                                return AccessModeEnumeration.fromValue(value);
+                                            } catch (IllegalArgumentException ignored) {
+                                                return null;
+                                            }
+                                        })
+                                        .filter(java.util.Objects::nonNull)
+                                        .collect(java.util.stream.Collectors.toList()));
                                 return m;
                             })
                             .collect(java.util.stream.Collectors.toList());

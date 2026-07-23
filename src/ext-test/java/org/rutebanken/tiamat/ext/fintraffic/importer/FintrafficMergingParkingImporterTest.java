@@ -325,6 +325,35 @@ public class FintrafficMergingParkingImporterTest extends FintrafficIntegrationT
 
     @Test
     @Transactional
+    public void handleAlreadyExistingParking_changedAccessModesOnly_createsNewVersion() {
+        StopPlace stopPlace = new StopPlace();
+        stopPlaceRepository.save(stopPlace);
+
+        FintrafficParkingEntranceForVehicles entrance =
+                new FintrafficParkingEntranceForVehicles("Main", "door", null, null, true, false, "A1");
+        FintrafficParking existing = new FintrafficParking();
+        existing.setParentSiteRef(new SiteRefStructure(stopPlace.getNetexId()));
+        existing.setFintrafficVehicleEntrances(List.of(entrance));
+        existing = (FintrafficParking) parkingVersionedSaverService.saveNewVersion(existing);
+        long existingVersion = existing.getVersion();
+
+        FintrafficParkingEntranceForVehicles entranceWithAccessModes =
+                new FintrafficParkingEntranceForVehicles("Main", "door", null, null, true, false, "A1");
+        entranceWithAccessModes.setAccessModesList(List.of("foot", "bicycle"));
+        FintrafficParking incoming = new FintrafficParking();
+        incoming.setFintrafficVehicleEntrances(List.of(entranceWithAccessModes));
+
+        Parking result = mergingParkingImporter.handleAlreadyExistingParking(existing, incoming);
+
+        assertThat(result.getVersion())
+                .as("a new version must be created when only accessModes changed")
+                .isGreaterThan(existingVersion);
+        assertThat(((FintrafficParking) result).getFintrafficVehicleEntrances().getFirst().getAccessModesList())
+                .containsExactly("foot", "bicycle");
+    }
+
+    @Test
+    @Transactional
     public void handleAlreadyExistingParking_mergesAvailabilityConditions() {
         StopPlace stopPlace = new StopPlace();
         stopPlaceRepository.save(stopPlace);

@@ -40,6 +40,7 @@ import static org.rutebanken.tiamat.ext.fintraffic.rest.graphql.FintrafficParkin
 import static org.rutebanken.tiamat.ext.fintraffic.rest.graphql.FintrafficParkingGraphQLTypeContributor.IS_ENTRY;
 import static org.rutebanken.tiamat.ext.fintraffic.rest.graphql.FintrafficParkingGraphQLTypeContributor.IS_EXIT;
 import static org.rutebanken.tiamat.ext.fintraffic.rest.graphql.FintrafficParkingGraphQLTypeContributor.PUBLIC_CODE;
+import static org.rutebanken.tiamat.ext.fintraffic.rest.graphql.FintrafficParkingGraphQLTypeContributor.ACCESS_MODES;
 import static org.rutebanken.tiamat.ext.fintraffic.rest.graphql.FintrafficParkingGraphQLTypeContributor.START_TIME;
 
 /**
@@ -130,6 +131,7 @@ public class FintrafficParkingUpdater extends ParkingUpdater {
                 Object isEntryObj = entranceInput.get(IS_ENTRY);
                 Object isExitObj = entranceInput.get(IS_EXIT);
                 Object publicCodeObj = entranceInput.get(PUBLIC_CODE);
+                Object accessModesObj = entranceInput.get(ACCESS_MODES);
 
                 String entranceTypeStr = null;
                 if (typeObj instanceof org.rutebanken.netex.model.EntranceEnumeration enumVal) {
@@ -138,7 +140,7 @@ public class FintrafficParkingUpdater extends ParkingUpdater {
                     entranceTypeStr = typeObj.toString();
                 }
 
-                converted.add(new FintrafficParkingEntranceForVehicles(
+                FintrafficParkingEntranceForVehicles entrance = new FintrafficParkingEntranceForVehicles(
                         labelObj != null ? labelObj.toString() : null,
                         entranceTypeStr,
                         toBigDecimal(widthObj),
@@ -146,7 +148,15 @@ public class FintrafficParkingUpdater extends ParkingUpdater {
                         isEntryObj instanceof Boolean b ? b : null,
                         isExitObj instanceof Boolean b ? b : null,
                         publicCodeObj != null ? publicCodeObj.toString() : null
-                ));
+                );
+                if (accessModesObj instanceof List<?> accessModesList) {
+                    entrance.setAccessModesList(accessModesList.stream()
+                            .map(value -> value instanceof org.rutebanken.netex.model.AccessModeEnumeration enumVal
+                                    ? enumVal.value()
+                                    : value.toString())
+                            .toList());
+                }
+                converted.add(entrance);
             }
             if (!converted.equals(target.getFintrafficVehicleEntrances())) {
                 target.setFintrafficVehicleEntrances(converted);
