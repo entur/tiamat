@@ -428,4 +428,70 @@ public class FintrafficParkingMapperContributorTest {
                 .as("last duplicate wins")
                 .isEqualTo(LocalTime.of(7, 0));
     }
+
+    // --- lighting ---
+
+    @Test
+    public void mapFromNetex_copiesLightingToFintrafficParking() {
+        org.rutebanken.netex.model.Parking source = new org.rutebanken.netex.model.Parking()
+                .withLighting(org.rutebanken.netex.model.LightingEnumeration.WELL_LIT);
+        FintrafficParking target = new FintrafficParking();
+
+        contributor.mapFromNetex(source, target, mappingContext);
+
+        assertThat(target.getLighting()).isEqualTo(org.rutebanken.tiamat.model.LightingEnumeration.WELL_LIT);
+    }
+
+    @Test
+    public void mapFromNetex_noLighting_leavesTargetUnset() {
+        org.rutebanken.netex.model.Parking source = new org.rutebanken.netex.model.Parking();
+        FintrafficParking target = new FintrafficParking();
+
+        contributor.mapFromNetex(source, target, mappingContext);
+
+        assertThat(target.getLighting()).isNull();
+    }
+
+    @Test
+    public void mapFromNetex_plainParking_lightingIgnored() {
+        org.rutebanken.netex.model.Parking source = new org.rutebanken.netex.model.Parking()
+                .withLighting(org.rutebanken.netex.model.LightingEnumeration.WELL_LIT);
+        Parking target = new Parking(); // plain, not FintrafficParking
+
+        contributor.mapFromNetex(source, target, mappingContext);
+
+        // no exception, just silently ignored
+    }
+
+    @Test
+    public void mapToNetex_copiesLightingFromFintrafficParking() {
+        FintrafficParking source = new FintrafficParking();
+        source.setLighting(org.rutebanken.tiamat.model.LightingEnumeration.POORLY_LIT);
+        org.rutebanken.netex.model.Parking target = new org.rutebanken.netex.model.Parking();
+
+        contributor.mapToNetex(source, target, mappingContext);
+
+        assertThat(target.getLighting()).isEqualTo(org.rutebanken.netex.model.LightingEnumeration.POORLY_LIT);
+    }
+
+    @Test
+    public void mapToNetex_noLighting_doesNotSetField() {
+        FintrafficParking source = new FintrafficParking();
+        org.rutebanken.netex.model.Parking target = new org.rutebanken.netex.model.Parking();
+
+        contributor.mapToNetex(source, target, mappingContext);
+
+        assertThat(target.getLighting()).isNull();
+    }
+
+    @Test
+    public void mapToNetex_plainParking_doesNothingForLighting() {
+        Parking source = new Parking();
+        source.setLighting(org.rutebanken.tiamat.model.LightingEnumeration.UNLIT);
+        org.rutebanken.netex.model.Parking target = new org.rutebanken.netex.model.Parking();
+
+        contributor.mapToNetex(source, target, mappingContext);
+
+        assertThat(target.getLighting()).isNull();
+    }
 }
