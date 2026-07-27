@@ -57,6 +57,7 @@ public class FintrafficParkingMapperContributor implements ParkingMapperContribu
         mapInfoLinksFromNetex(source, target);
         mapVehicleEntrancesFromNetex(source, target);
         mapAvailabilityConditionsFromNetex(source, target);
+        mapLightingFromNetex(source, target);
     }
 
     @Override
@@ -70,6 +71,49 @@ public class FintrafficParkingMapperContributor implements ParkingMapperContribu
         mapInfoLinksToNetex(fp, target);
         mapVehicleEntrancesToNetex(fp, target);
         mapAvailabilityConditionsToNetex(fp, target);
+        mapLightingToNetex(fp, target);
+    }
+
+    // --- lighting ---
+
+    /**
+     * {@code Lighting} is declared on {@link org.rutebanken.netex.model.SiteElement_VersionStructure},
+     * an ancestor of NeTEx's {@link org.rutebanken.netex.model.Parking}, so it is a valid NeTEx
+     * element for parking (confirmed via {@code Parking.withLighting(LightingEnumeration)}).
+     * The core {@link org.rutebanken.tiamat.model.Parking#getLighting()}/{@code setLighting(...)}
+     * accessors are only overridden (non-transient) on {@link FintrafficParking}, so this
+     * contributor is the only place that carries the value across the NeTEx boundary in either
+     * direction — without it, lighting set via GraphQL/persisted in
+     * {@code parking_fintraffic_lighting} would silently be dropped from NeTEx export and the
+     * Fintraffic Read API output.
+     */
+    private void mapLightingFromNetex(org.rutebanken.netex.model.Parking source,
+                                       org.rutebanken.tiamat.model.Parking target) {
+        if (!(target instanceof FintrafficParking fp)) {
+            return;
+        }
+        var lighting = source.getLighting();
+        if (lighting == null) {
+            return;
+        }
+        try {
+            fp.setLighting(org.rutebanken.tiamat.model.LightingEnumeration.fromValue(lighting.value()));
+        } catch (IllegalArgumentException ignored) {
+            // unknown value — skip
+        }
+    }
+
+    private void mapLightingToNetex(FintrafficParking source,
+                                     org.rutebanken.netex.model.Parking target) {
+        var lighting = source.getLighting();
+        if (lighting == null) {
+            return;
+        }
+        try {
+            target.setLighting(org.rutebanken.netex.model.LightingEnumeration.fromValue(lighting.value()));
+        } catch (IllegalArgumentException ignored) {
+            // stored value no longer valid — skip
+        }
     }
 
     // --- paymentMethods ---
