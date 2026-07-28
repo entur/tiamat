@@ -47,10 +47,12 @@ public class TiamatEntityResolver implements EntityResolver {
                 if (parking.getParentSiteRef() != null && parking.getParentSiteRef().getRef() != null) {
                     StopPlace stopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(parking.getParentSiteRef().getRef());
 
-                    if (stopPlace == null) {
-                        throw new IllegalArgumentException("Cannot resolve stop place from parking: " + entity);
+                    if (stopPlace != null) {
+                        return stopPlace;
                     }
-                    return stopPlace;
+                    // The referenced parent stop place no longer exists. Fall back to
+                    // checking permission on the parking itself instead of throwing -
+                    // same as the case below where the parking has no parent site ref.
                 }
             }
             default -> {
