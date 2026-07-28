@@ -161,7 +161,7 @@ public class ReadApiNetexMarshallingService {
         Optional<String> parentRef = parentRef(entity);
         return new ReadApiEntityInRecord(
                 entity.getNetexId(),
-                entity.getClass().getSimpleName(),
+                entityTypeName(entity),
                 searchKey,
                 xml,
                 entity.getVersion(),
@@ -169,6 +169,31 @@ public class ReadApiNetexMarshallingService {
                 status,
                 parentRef.map(ref -> new String[]{ref}).orElse(new String[]{})
         );
+    }
+
+    /**
+     * The cache table's {@code type} column must hold the NeTEx element type
+     * ("StopPlace", "Parking", ...) so that {@code streamStopPlaces}' hardcoded {@code type IN
+     * (...)} filter matches it. Using {@code entity.getClass().getSimpleName()} directly breaks
+     * for entities backed by a Tiamat JPA subclass (e.g. {@code FintrafficParking}, produced by
+     * {@code ParkingEntityFactory} for every Parking under the fintraffic profile) since the
+     * runtime simple name ("FintrafficParking") never matches the filter, silently hiding the
+     * entity from the Read API even though the row was written successfully.
+     */
+    private static String entityTypeName(EntityInVersionStructure entity) {
+        if (entity instanceof StopPlace) {
+            return "StopPlace";
+        }
+        if (entity instanceof Parking) {
+            return "Parking";
+        }
+        if (entity instanceof TopographicPlace) {
+            return "TopographicPlace";
+        }
+        if (entity instanceof FareZone) {
+            return "FareZone";
+        }
+        return entity.getClass().getSimpleName();
     }
 
     private static JAXBContext createJAXBContext(Class<?> clazz) {
