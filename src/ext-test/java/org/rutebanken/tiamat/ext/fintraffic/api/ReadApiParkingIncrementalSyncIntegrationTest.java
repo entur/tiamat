@@ -23,6 +23,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
@@ -66,8 +67,15 @@ public class ReadApiParkingIncrementalSyncIntegrationTest extends FintrafficInte
      * {@code test}/{@code local-changelog} with {@code fintraffic-read-api}), so this ambiguity
      * is a test-only artifact. Marking the real Read API publisher {@code @Primary} here
      * reproduces the production wiring for this test without changing any production bean.
+     * <p>
+     * This class is a static nested {@code @TestConfiguration}, so the shared
+     * {@code FintrafficTiamatTestApplication}'s {@code @ComponentScan(basePackages =
+     * "org.rutebanken.tiamat")} picks it up as a real component in every test that boots that
+     * application context, not just this one. Gating it with {@code @Profile("fintraffic-read-api")}
+     * keeps it a no-op wherever that profile isn't active, so it can't break unrelated tests.
      */
     @TestConfiguration
+    @Profile("fintraffic-read-api")
     static class PrimaryEntityChangedListenerConfig {
         @Bean
         @Primary
