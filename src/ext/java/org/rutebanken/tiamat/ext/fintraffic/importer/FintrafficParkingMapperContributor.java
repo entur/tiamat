@@ -188,9 +188,23 @@ public class FintrafficParkingMapperContributor implements ParkingMapperContribu
             return;
         }
 
+        // FintrafficParkingEntranceForVehicles is an @Embeddable value object (no netex id
+        // of its own, unlike e.g. ParkingProperties/ParkingCapacity). NeTEx's schema requires
+        // every ParkingEntranceForVehicles element to carry a unique id+version (identity
+        // constraint ParkingEntranceForVehicles_AnyVersionedKey) or export fails with a
+        // MarshalException. Synthesize a stable, unique id per entrance from the parent
+        // Parking's own netex id plus the entrance's position in the list.
+        String syntheticIdPrefix = syntheticEntranceIdPrefix(source.getNetexId());
+
+        int index = 0;
         ParkingEntrancesForVehicles_RelStructure relStruct = new ParkingEntrancesForVehicles_RelStructure();
         for (FintrafficParkingEntranceForVehicles entrance : entrances) {
+            index++;
             ParkingEntranceForVehicles netexEntrance = new ParkingEntranceForVehicles();
+            if (syntheticIdPrefix != null) {
+                netexEntrance.setId(syntheticIdPrefix + "_" + index);
+                netexEntrance.setVersion("1");
+            }
             if (entrance.getLabel() != null) {
                 netexEntrance.setLabel(new org.rutebanken.netex.model.MultilingualString().withValue(entrance.getLabel()));
             }
@@ -209,6 +223,22 @@ public class FintrafficParkingMapperContributor implements ParkingMapperContribu
             relStruct.getParkingEntranceForVehiclesRefOrParkingEntranceForVehicles().add(netexEntrance);
         }
         target.setVehicleEntrances(relStruct);
+    }
+
+    /**
+     * Builds a {@code codespace:ParkingEntranceForVehicles:<parkingNumericId>} id prefix from
+     * the parent Parking's own netex id (e.g. {@code NSR:FintrafficParking:220} →
+     * {@code NSR:ParkingEntranceForVehicles:220}), to which the caller appends
+     * {@code _<index>} for uniqueness across multiple entrances. Returns {@code null} if the
+     * parking has no netex id yet (should not happen for a persisted entity being exported).
+     */
+    private String syntheticEntranceIdPrefix(String parkingNetexId) {
+        if (parkingNetexId == null || parkingNetexId.chars().filter(c -> c == ':').count() != 2) {
+            return null;
+        }
+        String prefix = parkingNetexId.substring(0, parkingNetexId.indexOf(':'));
+        String numericValue = parkingNetexId.substring(parkingNetexId.lastIndexOf(':') + 1);
+        return prefix + ":ParkingEntranceForVehicles:" + numericValue;
     }
 }
 
