@@ -889,4 +889,44 @@ public class FintrafficGraphQLParkingIntegrationTest extends FintrafficIntegrati
                 .as("no parking must be persisted when invalid time value is submitted")
                 .isZero();
     }
+
+    @Test
+    public void export_stopPlaceWithGraphQlSetAvailabilityConditions_doesNotFail() throws Exception {
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("Test stop"));
+        stopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
+        stopPlace = stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+        String stopNetexId = stopPlace.getNetexId();
+
+        String mutation = """
+                {
+                  "query": "mutation { parking: %s (Parking: { name: { value: \\"Test\\" lang: \\"fi\\" } parkingType: parkAndRide parentSiteRef: \\"%s\\" availabilityConditions: [{ dayTypeRef: \\"FSR:DayType:BusinessDay\\" isAvailable: true startTime: \\"06:00\\" endTime: \\"22:00\\" }, { dayTypeRef: \\"FSR:DayType:Sunday\\" isAvailable: false }] }) { id } }",
+                  "variables": ""
+                }
+                """.formatted(GraphQLNames.MUTATE_PARKING, stopNetexId);
+
+        given()
+                .port(port)
+                .contentType(ContentType.JSON)
+                .body(mutation)
+                .when()
+                .post(BASE_URI_GRAPHQL)
+                .then()
+                .statusCode(200)
+                .body("data.parking[0].id", notNullValue());
+
+        java.net.http.HttpClient client = java.net.http.HttpClient.newHttpClient();
+        java.net.http.HttpRequest request = java.net.http.HttpRequest.newBuilder()
+                .uri(java.net.URI.create("http://localhost:" + port + SERVICES_STOP_PLACE_PATH
+                        + "/netex?idList=" + stopNetexId))
+                .GET()
+                .build();
+        java.net.http.HttpResponse<String> response = client.send(request,
+                java.net.http.HttpResponse.BodyHandlers.ofString());
+
+        assertThat(response.statusCode())
+                .as("NeTEx export of a StopPlace whose Parking has GraphQL-set availabilityConditions "
+                        + "must not fail. Response body:\n" + response.body())
+                .isEqualTo(200);
+        assertThat(response.body()).contains("<PublicationDelivery");
+    }
 }

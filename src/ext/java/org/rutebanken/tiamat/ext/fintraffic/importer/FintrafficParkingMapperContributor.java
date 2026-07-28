@@ -10,7 +10,7 @@ import org.rutebanken.netex.model.InfoLinkStructure;
 import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.ParkingEntranceForVehicles;
 import org.rutebanken.netex.model.ParkingEntrancesForVehicles_RelStructure;
-import org.rutebanken.netex.model.Timeband;
+import org.rutebanken.netex.model.Timeband_VersionedChildStructure;
 import org.rutebanken.netex.model.Timebands_RelStructure;
 import org.rutebanken.netex.model.ValidityConditions_RelStructure;
 import org.rutebanken.tiamat.ext.fintraffic.model.FintrafficParkingAvailabilityCondition;
@@ -301,7 +301,7 @@ public class FintrafficParkingMapperContributor implements ParkingMapperContribu
 
             LocalTime startTime = null;
             LocalTime endTime = null;
-            Timeband inlineTimeband = extractInlineTimeband(source, availabilityCondition);
+            Timeband_VersionedChildStructure inlineTimeband = extractInlineTimeband(source, availabilityCondition);
             if (inlineTimeband != null) {
                 startTime = inlineTimeband.getStartTime();
                 endTime = inlineTimeband.getEndTime();
@@ -335,17 +335,26 @@ public class FintrafficParkingMapperContributor implements ParkingMapperContribu
         return null;
     }
 
-    private Timeband extractInlineTimeband(org.rutebanken.netex.model.Parking source, AvailabilityCondition availabilityCondition) {
+    private Timeband_VersionedChildStructure extractInlineTimeband(org.rutebanken.netex.model.Parking source, AvailabilityCondition availabilityCondition) {
         Timebands_RelStructure timebands = availabilityCondition.getTimebands();
         if (timebands == null || timebands.getTimebandRefOrTimeband().isEmpty()) {
             return null;
         }
 
-        Timeband firstInlineTimeband = null;
+        Timeband_VersionedChildStructure firstInlineTimeband = null;
         int inlineTimebandCount = 0;
         for (Object timebandEntry : timebands.getTimebandRefOrTimeband()) {
-            if (timebandEntry instanceof JAXBElement<?> timebandJaxb
-                    && timebandJaxb.getValue() instanceof Timeband timeband) {
+            // Timebands_RelStructure.timebandRefOrTimeband is @XmlElements (type-matched, not JAXBElement-wrapped),
+            // so a schema-valid inline Timeband is a raw Timeband_VersionedChildStructure. Also accept a
+            // JAXBElement-wrapped value defensively, in case some producer wraps it non-standardly.
+            Timeband_VersionedChildStructure timeband = null;
+            if (timebandEntry instanceof Timeband_VersionedChildStructure raw) {
+                timeband = raw;
+            } else if (timebandEntry instanceof JAXBElement<?> timebandJaxb
+                    && timebandJaxb.getValue() instanceof Timeband_VersionedChildStructure wrapped) {
+                timeband = wrapped;
+            }
+            if (timeband != null) {
                 inlineTimebandCount++;
                 if (firstInlineTimeband == null) {
                     firstInlineTimeband = timeband;
@@ -374,6 +383,14 @@ public class FintrafficParkingMapperContributor implements ParkingMapperContribu
             target.setValidityConditions(validityConditions);
         }
         List<Object> validityConditionEntries = validityConditions.getValidityConditionRefOrValidBetweenOrValidityCondition_();
+        // The NeTEx export pipeline maps the same Parking to NeTEx more than once per export (e.g. once per
+        // frame that embeds it). Unlike vehicleEntrances (which overwrites via a plain setter), this method
+        // appends to a list that may already carry entries from another Tiamat mapper, so a repeat invocation
+        // must remove only the AvailabilityCondition entries it previously added itself - otherwise the second
+        // invocation duplicates them with identical ids, violating NeTEx's ValidityCondition_AnyVersionedKey
+        // uniqueness constraint on export.
+        validityConditionEntries.removeIf(entry -> entry instanceof JAXBElement<?> jaxbElement
+                && jaxbElement.getValue() instanceof AvailabilityCondition);
 
         int index = 1;
         for (FintrafficParkingAvailabilityCondition condition : conditions) {
@@ -388,13 +405,19 @@ public class FintrafficParkingMapperContributor implements ParkingMapperContribu
             availabilityCondition.withDayTypes(dayTypes);
 
             if (condition.getStartTime() != null || condition.getEndTime() != null) {
-                Timeband timeband = new Timeband()
+                // Timebands_RelStructure.timebandRefOrTimeband is @XmlElements(name="Timeband",
+                // type=Timeband_VersionedChildStructure.class) - not JAXBElement-wrapped, and requiring an exact
+                // type match since Timeband_VersionedChildStructure (like its Timeband subtype) is an anonymous
+                // XSD type with no name JAXB can substitute via xsi:type. Using the Timeband subtype or wrapping
+                // it in a JAXBElement (via ObjectFactory) both made JAXB try (and fail) to marshal a substitute
+                // for this anonymous type, crashing NeTEx export.
+                Timeband_VersionedChildStructure timeband = new Timeband_VersionedChildStructure()
                         .withId(source.getId() + ":Timeband:" + index)
                         .withVersion("1")
                         .withStartTime(condition.getStartTime())
                         .withEndTime(condition.getEndTime());
                 Timebands_RelStructure timebands = new Timebands_RelStructure();
-                timebands.getTimebandRefOrTimeband().add(OBJECT_FACTORY.createTimeband(timeband));
+                timebands.getTimebandRefOrTimeband().add(timeband);
                 availabilityCondition.withTimebands(timebands);
             }
 

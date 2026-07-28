@@ -15,6 +15,7 @@ import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.ParkingEntranceForVehicles;
 import org.rutebanken.netex.model.ParkingEntrancesForVehicles_RelStructure;
 import org.rutebanken.netex.model.Timeband;
+import org.rutebanken.netex.model.Timeband_VersionedChildStructure;
 import org.rutebanken.netex.model.Timebands_RelStructure;
 import org.rutebanken.netex.model.TypeOfInfolinkEnumeration;
 import org.rutebanken.netex.model.ValidBetween;
@@ -331,6 +332,43 @@ public class FintrafficParkingMapperContributorTest {
     }
 
     @Test
+    public void mapToNetex_calledTwiceOnSameTarget_doesNotDuplicateAvailabilityConditions() {
+        // The NeTEx export pipeline maps the same Parking to NeTEx more than once per export
+        // (e.g. once per frame that embeds it), reusing the same target Parking NeTEx object. A naive
+        // append would duplicate AvailabilityCondition/Timeband entries with identical (deterministic) ids,
+        // violating NeTEx's ValidityCondition_AnyVersionedKey uniqueness constraint on export.
+        FintrafficParking source = new FintrafficParking();
+        source.setAvailabilityConditions(List.of(
+                new FintrafficParkingAvailabilityCondition("FSR:DayType:BusinessDay", true, LocalTime.of(6, 0), LocalTime.of(22, 0)),
+                new FintrafficParkingAvailabilityCondition("FSR:DayType:Sunday", false, null, null)));
+
+        ValidityConditions_RelStructure validityConditions = new ValidityConditions_RelStructure();
+        ValidBetween validBetween = new ValidBetween().withFromDate(LocalDateTime.of(2026, 1, 1, 0, 0));
+        validityConditions.getValidityConditionRefOrValidBetweenOrValidityCondition_().add(validBetween);
+
+        org.rutebanken.netex.model.Parking target = new org.rutebanken.netex.model.Parking();
+        target.setValidityConditions(validityConditions);
+
+        contributor.mapToNetex(source, target, mappingContext);
+        contributor.mapToNetex(source, target, mappingContext);
+
+        List<Object> entries = target.getValidityConditions()
+                .getValidityConditionRefOrValidBetweenOrValidityCondition_();
+        assertThat(entries).contains(validBetween);
+
+        List<AvailabilityCondition> availabilityConditions = entries.stream()
+                .filter(entry -> entry instanceof JAXBElement<?> jaxb && jaxb.getValue() instanceof AvailabilityCondition)
+                .map(entry -> (AvailabilityCondition) ((JAXBElement<?>) entry).getValue())
+                .toList();
+        assertThat(availabilityConditions)
+                .as("a repeat mapToNetex call must not duplicate previously-added AvailabilityConditions")
+                .hasSize(2);
+        assertThat(availabilityConditions.stream().map(AvailabilityCondition::getId).distinct().count())
+                .as("all AvailabilityCondition ids must remain unique")
+                .isEqualTo(2);
+    }
+
+    @Test
     public void mapToNetex_exportsTimebandWhenOnlyEndTimeIsSet() {
         FintrafficParking source = new FintrafficParking();
         source.setAvailabilityConditions(List.of(
@@ -346,10 +384,46 @@ public class FintrafficParkingMapperContributorTest {
         AvailabilityCondition mapped = (AvailabilityCondition)
                 ((JAXBElement<?>) entries.getFirst()).getValue();
         assertThat(mapped.getTimebands()).isNotNull();
-        Timeband timeband = (Timeband)
-                ((JAXBElement<?>) mapped.getTimebands().getTimebandRefOrTimeband().getFirst()).getValue();
+        Timeband_VersionedChildStructure timeband =
+                (Timeband_VersionedChildStructure) mapped.getTimebands().getTimebandRefOrTimeband().getFirst();
         assertThat(timeband.getStartTime()).isNull();
         assertThat(timeband.getEndTime()).isEqualTo(LocalTime.of(22, 0));
+    }
+
+    @Test
+    public void mapFromNetex_acceptsRawUnwrappedInlineTimeband() {
+        // A schema-valid inline Timeband is a raw (non-JAXBElement-wrapped)
+        // Timeband_VersionedChildStructure, per Timebands_RelStructure's @XmlElements mapping. This is exactly
+        // what a re-import of Tiamat's own corrected NeTEx export produces.
+        ObjectFactory objectFactory = new ObjectFactory();
+
+        AvailabilityCondition availabilityCondition = new AvailabilityCondition()
+                .withIsAvailable(true)
+                .withDayTypes(new DayTypes_RelStructure()
+                        .withDayTypeRefOrDayType_(objectFactory.createDayTypeRef(
+                                new DayTypeRefStructure().withRef("FSR:DayType:BusinessDay"))))
+                .withTimebands(new Timebands_RelStructure()
+                        .withTimebandRefOrTimeband(new Timeband_VersionedChildStructure()
+                                .withStartTime(LocalTime.of(6, 0))
+                                .withEndTime(LocalTime.of(22, 0))));
+
+        ValidityConditions_RelStructure validityConditions = new ValidityConditions_RelStructure();
+        validityConditions.getValidityConditionRefOrValidBetweenOrValidityCondition_()
+                .add(objectFactory.createAvailabilityCondition(availabilityCondition));
+
+        org.rutebanken.netex.model.Parking source = new org.rutebanken.netex.model.Parking();
+        source.setValidityConditions(validityConditions);
+        FintrafficParking target = new FintrafficParking();
+
+        contributor.mapFromNetex(source, target, mappingContext);
+
+        assertThat(target.getAvailabilityConditions())
+                .containsExactly(new FintrafficParkingAvailabilityCondition(
+                        "FSR:DayType:BusinessDay",
+                        true,
+                        LocalTime.of(6, 0),
+                        LocalTime.of(22, 0)
+                ));
     }
 
     @Test
