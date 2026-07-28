@@ -929,4 +929,50 @@ public class FintrafficGraphQLParkingIntegrationTest extends FintrafficIntegrati
                 .isEqualTo(200);
         assertThat(response.body()).contains("<PublicationDelivery");
     }
+
+    /**
+     * Reproduces the exact reported scenario: setting {@code vehicleEntrances} via the
+     * GraphQL editor path (not via NeTEx import), then exporting the parent StopPlace via
+     * the real {@code GET /api/services/stop_places/netex?idList=} endpoint (the same one
+     * Kooste/PETI's publication pipeline uses).
+     */
+    @Test
+    public void export_stopPlaceWithGraphQlSetVehicleEntrances_doesNotFail() throws Exception {
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("Test stop"));
+        stopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
+        stopPlace = stopPlaceVersionedSaverService.saveNewVersion(stopPlace);
+        String stopNetexId = stopPlace.getNetexId();
+
+        String mutation = """
+                {
+                  "query": "mutation { parking: %s (Parking: { name: { value: \\"Test\\" lang: \\"fi\\" } parkingType: parkAndRide parentSiteRef: \\"%s\\" vehicleEntrances: [{ label: \\"Main\\" entranceType: door width: 2.75 height: 3.5 isEntry: true isExit: false publicCode: \\"A1\\" }] }) { id } }",
+                  "variables": ""
+                }
+                """.formatted(GraphQLNames.MUTATE_PARKING, stopNetexId);
+
+        given()
+                .port(port)
+                .contentType(ContentType.JSON)
+                .body(mutation)
+                .when()
+                .post(BASE_URI_GRAPHQL)
+                .then()
+                .statusCode(200)
+                .body("data.parking[0].id", notNullValue());
+
+        java.net.http.HttpClient client = java.net.http.HttpClient.newHttpClient();
+        java.net.http.HttpRequest request = java.net.http.HttpRequest.newBuilder()
+                .uri(java.net.URI.create("http://localhost:" + port + SERVICES_STOP_PLACE_PATH
+                        + "/netex?idList=" + stopNetexId))
+                .GET()
+                .build();
+        java.net.http.HttpResponse<String> response = client.send(request,
+                java.net.http.HttpResponse.BodyHandlers.ofString());
+
+        assertThat(response.statusCode())
+                .as("NeTEx export of a StopPlace whose Parking has GraphQL-set vehicleEntrances "
+                        + "must not fail. Response body:\n" + response.body())
+                .isEqualTo(200);
+        assertThat(response.body()).contains("<PublicationDelivery");
+    }
 }

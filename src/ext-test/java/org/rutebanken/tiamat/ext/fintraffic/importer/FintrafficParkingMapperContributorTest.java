@@ -245,6 +245,51 @@ public class FintrafficParkingMapperContributorTest {
         assertThat(netex.getPublicCode()).isEqualTo("B2");
     }
 
+    /**
+     * Every exported {@code ParkingEntranceForVehicles} must carry a unique id+version,
+     * or NeTEx export fails schema validation with "no value for the key
+     * ParkingEntranceForVehicles_AnyVersionedKey" — see {@code
+     * FintrafficGraphQLParkingIntegrationTest
+     * #export_stopPlaceWithGraphQlSetVehicleEntrances_doesNotFail} for the full
+     * end-to-end reproduction/regression test.
+     */
+    @Test
+    public void mapToNetex_vehicleEntrances_assignsUniqueIdAndVersionPerEntrance() {
+        FintrafficParking source = new FintrafficParking();
+        source.setNetexId("NSR:FintrafficParking:220");
+        source.setFintrafficVehicleEntrances(List.of(
+                new FintrafficParkingEntranceForVehicles("Main", "door", null, null, true, false, "A1"),
+                new FintrafficParkingEntranceForVehicles("Exit", "gate", null, null, false, true, "B2")));
+        org.rutebanken.netex.model.Parking target = new org.rutebanken.netex.model.Parking();
+
+        contributor.mapToNetex(source, target, mappingContext);
+
+        var items = target.getVehicleEntrances()
+                .getParkingEntranceForVehiclesRefOrParkingEntranceForVehicles();
+        ParkingEntranceForVehicles first = (ParkingEntranceForVehicles) items.get(0);
+        ParkingEntranceForVehicles second = (ParkingEntranceForVehicles) items.get(1);
+
+        assertThat(first.getId()).isEqualTo("NSR:ParkingEntranceForVehicles:220_1");
+        assertThat(first.getVersion()).isEqualTo("1");
+        assertThat(second.getId()).isEqualTo("NSR:ParkingEntranceForVehicles:220_2");
+        assertThat(second.getVersion()).isEqualTo("1");
+        assertThat(first.getId()).isNotEqualTo(second.getId());
+    }
+
+    @Test
+    public void mapToNetex_vehicleEntrances_withoutParkingNetexId_leavesIdUnset() {
+        FintrafficParking source = new FintrafficParking(); // no netexId set
+        source.setFintrafficVehicleEntrances(List.of(
+                new FintrafficParkingEntranceForVehicles("Main", "door", null, null, true, false, "A1")));
+        org.rutebanken.netex.model.Parking target = new org.rutebanken.netex.model.Parking();
+
+        contributor.mapToNetex(source, target, mappingContext);
+
+        ParkingEntranceForVehicles netex = (ParkingEntranceForVehicles) target.getVehicleEntrances()
+                .getParkingEntranceForVehiclesRefOrParkingEntranceForVehicles().getFirst();
+        assertThat(netex.getId()).isNull();
+    }
+
     @Test
     public void mapToNetex_emptyVehicleEntrances_doesNotSetField() {
         FintrafficParking source = new FintrafficParking();
