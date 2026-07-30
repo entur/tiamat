@@ -28,8 +28,6 @@ import org.rutebanken.tiamat.model.Parking;
 import org.rutebanken.tiamat.model.ParkingArea;
 import org.rutebanken.tiamat.model.ParkingCapacity;
 import org.rutebanken.tiamat.model.ParkingLayoutEnumeration;
-import org.rutebanken.tiamat.model.PlaceEquipment;
-import org.rutebanken.tiamat.rest.graphql.mappers.PlaceEquipmentMapper;
 import org.rutebanken.tiamat.model.ParkingPaymentProcessEnumeration;
 import org.rutebanken.tiamat.model.ParkingProperties;
 import org.rutebanken.tiamat.model.ParkingReservationEnumeration;
@@ -37,10 +35,12 @@ import org.rutebanken.tiamat.model.ParkingStayEnumeration;
 import org.rutebanken.tiamat.model.ParkingTypeEnumeration;
 import org.rutebanken.tiamat.model.ParkingUserEnumeration;
 import org.rutebanken.tiamat.model.ParkingVehicleEnumeration;
+import org.rutebanken.tiamat.model.PlaceEquipment;
 import org.rutebanken.tiamat.model.SiteRefStructure;
 import org.rutebanken.tiamat.repository.ParkingRepository;
 import org.rutebanken.tiamat.rest.graphql.mappers.AccessibilityLimitationMapper;
 import org.rutebanken.tiamat.rest.graphql.mappers.GeometryMapper;
+import org.rutebanken.tiamat.rest.graphql.mappers.PlaceEquipmentMapper;
 import org.rutebanken.tiamat.rest.graphql.mappers.ValidBetweenMapper;
 import org.rutebanken.tiamat.versioning.VersionCreator;
 import org.rutebanken.tiamat.versioning.save.ParkingVersionedSaverService;
@@ -66,7 +66,6 @@ import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.FREE_PARKING_OUT_O
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.GEOMETRY;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ID;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.LABEL;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PLACE_EQUIPMENTS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.NAME;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.NUMBER_OF_SPACES;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.NUMBER_OF_SPACES_WITH_RECHARGE_POINT;
@@ -83,6 +82,7 @@ import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PARKING_TYPE;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PARKING_USER_TYPE;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PARKING_VEHICLE_TYPE;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PARKING_VEHICLE_TYPES;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PLACE_EQUIPMENTS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PRINCIPAL_CAPACITY;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.REAL_TIME_OCCUPANCY_AVAILABLE;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.RECHARGING_AVAILABLE;
@@ -121,6 +121,8 @@ class ParkingUpdater implements DataFetcher {
 
     @Autowired
     private PlaceEquipmentMapper placeEquipmentMapper;
+
+    @Override
     public Object get(DataFetchingEnvironment environment) {
 
         List<Map> input = environment.getArgument(OUTPUT_TYPE_PARKING);
