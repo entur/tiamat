@@ -51,7 +51,7 @@
 
     <modules>
         <module>tiamat-core</module>
-        <module>tiamat-entur</module>
+        <module>tiamat-app</module>
     </modules>
 
     <build>

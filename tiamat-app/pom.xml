@@ -24,10 +24,10 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>tiamat-entur</artifactId>
+    <artifactId>tiamat-app</artifactId>
     <packaging>jar</packaging>
 
-    <name>Tiamat Entur</name>
+    <name>Tiamat App</name>
     <description>Entur deployment of the Tiamat stop place register</description>
 
     <dependencies>

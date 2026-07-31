@@ -25,10 +25,16 @@ import org.rutebanken.netex.model.ParkingAreas_RelStructure;
 
 import java.util.List;
 
-public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.model.Parking> {
+public class ParkingMapper<P extends org.rutebanken.tiamat.model.Parking> extends CustomMapper<Parking, P> {
+
+    private final List<ParkingMapperContributor> contributors;
+
+    public ParkingMapper(List<ParkingMapperContributor> contributors) {
+        this.contributors = contributors;
+    }
 
     @Override
-    public void mapAtoB(Parking parking, org.rutebanken.tiamat.model.Parking parking2, MappingContext context) {
+    public void mapAtoB(Parking parking, P parking2, MappingContext context) {
         super.mapAtoB(parking, parking2, context);
         if (parking.getParkingAreas() != null &&
                 parking.getParkingAreas().getParkingAreaRefOrParkingArea_() != null &&
@@ -38,10 +44,11 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
                 parking2.setParkingAreas(parkingAreas);
             }
         }
+        contributors.forEach(c -> c.mapFromNetex(parking, parking2, context));
     }
 
     @Override
-    public void mapBtoA(org.rutebanken.tiamat.model.Parking tiamatParking, Parking netexParking, MappingContext context) {
+    public void mapBtoA(P tiamatParking, Parking netexParking, MappingContext context) {
         super.mapBtoA(tiamatParking, netexParking, context);
         if (tiamatParking.getParkingAreas() != null &&
                 !tiamatParking.getParkingAreas().isEmpty()) {
@@ -58,5 +65,6 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
                 netexParking.setParkingAreas(parkingAreas_relStructure);
             }
         }
+        contributors.forEach(c -> c.mapToNetex(tiamatParking, netexParking, context));
     }
 }
