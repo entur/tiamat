@@ -15,6 +15,7 @@
 
 package org.rutebanken.tiamat;
 
+import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
@@ -62,6 +63,7 @@ import java.time.Instant;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import static org.rutebanken.tiamat.netex.id.GaplessIdGeneratorService.INITIAL_LAST_ID;
 
@@ -235,10 +237,18 @@ public abstract class TiamatIntegrationTest {
         EntityTransaction transaction = entityManager.getTransaction();
         transaction.begin();
 
-        generatedIdState.getRegisteredEntityNames().forEach(entityName -> {
-            hazelcastInstance.getQueue(entityName).clear();
-            generatedIdState.setLastIdForEntity(entityName, INITIAL_LAST_ID);
-            generatedIdState.getClaimedIdListForEntity(entityName).clear();
+        // Several Spring test contexts stay alive in the same JVM, and each one builds its own
+        // HazelcastInstance. The GaplessIdGeneratorService that actually assigns ids is not
+        // necessarily the one from this test's context, so resetting only the injected instance
+        // silently leaves the generator's pre-fetched id queue (DEFAULT_FETCH_SIZE entries)
+        // untouched. Reset the id state on every live instance.
+        Hazelcast.getAllHazelcastInstances().forEach(instance -> {
+            Set<String> registeredEntityNames = instance.getSet(GeneratedIdState.ENTITY_NAMES_REGISTERED);
+            registeredEntityNames.forEach(entityName -> {
+                instance.getQueue(entityName).clear();
+                instance.getMap(GeneratedIdState.LAST_IDS_FOR_ENTITY).put(entityName, INITIAL_LAST_ID);
+                instance.getSet(GeneratedIdState.CLAIMED_IDS_FOR_ENTITY_PREFIX + "-" + entityName).clear();
+            });
         });
 
         int updated = entityManager.createNativeQuery("DELETE FROM id_generator").executeUpdate();
