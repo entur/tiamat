@@ -16,6 +16,9 @@ interface JobController {
         summary = "Get status of a stop place write job",
         description = """
         Returns the current status of a stop place write job.
+
+        A job is only visible to the principal that submitted it. Jobs submitted by someone else
+        are reported as not found rather than as forbidden, so that job ids cannot be probed.
         """,
         parameters = {
             @Parameter(
@@ -35,7 +38,7 @@ interface JobController {
             ),
             @ApiResponse(
                 responseCode = "404",
-                description = "Job not found",
+                description = "No such job, or the job was submitted by a different principal",
                 content = @Content(
                     examples = @ExampleObject(
                         value = """

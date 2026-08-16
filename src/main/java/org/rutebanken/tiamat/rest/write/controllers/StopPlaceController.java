@@ -14,15 +14,20 @@ import jakarta.ws.rs.core.Response;
 import java.io.InputStream;
 import org.rutebanken.netex.model.StopPlace;
 import org.rutebanken.tiamat.rest.write.dto.StopPlaceJobDto;
-import org.rutebanken.tiamat.rest.write.dto.StopPlacesDto;
 
 @Tag(
     name = "Stop Places write API",
     description = """
     Write mono-modal StopPlace entities asynchronously.
-    
+
     Version and ValidBetween attributes in the submitted NeTEx XML are ignored, and will be managed by the system.
     Timestamps in the returned NeTEx XML will always use the systems timezone, without any timezone information.
+
+    Write requests are not parsed before they are accepted. A syntactically valid request is
+    answered with 202 and a job id, and the payload is then parsed and validated asynchronously.
+    Rejections that a synchronous API would report as 400, such as malformed XML or an
+    unsupported element, are therefore reported as a FAILED job with a reason. Poll the job
+    endpoint to determine the outcome of a write.
     """
 )
 interface StopPlaceController {
@@ -49,11 +54,12 @@ interface StopPlaceController {
     @Operation(
         summary = "Creates a stop place from a NeTEx XML representation",
         description = """
-        Accepts a StopPlacesDto containing a NeTEx StopPlace XML.
+        Accepts a NeTEx StopPlace XML document as the request body.
         The NeTEx ID submitted will be overwritten by the system-generated ID for the created stop place.
         Only a single mono-modal stop place is allowed.
         Returns a job representing the asynchronous creation process.
         On successful creation, the job result will include the generated NeTEx ID of the created stop place.
+        Malformed XML and unsupported elements are reported on the job, not as a 400.
         """,
         requestBody = @RequestBody(
             required = true,
@@ -97,8 +103,9 @@ interface StopPlaceController {
                     schema = @Schema(implementation = StopPlaceJobDto.class)
                 )
             ),
-            @ApiResponse(responseCode = "400", description = "Malformed input or unsupported stop place field"),
+            @ApiResponse(responseCode = "400", description = "Request payload could not be read"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "413", description = "Payload exceeds the maximum supported size"),
             @ApiResponse(responseCode = "503", description = "Job queue full"),
         }
     )
@@ -107,9 +114,16 @@ interface StopPlaceController {
     @Operation(
         summary = "Updates a stop place from a NeTEx XML representation",
         description = """
-        Accepts a StopPlacesDto containing a NeTEx StopPlace XML.
+        Accepts a NeTEx StopPlace XML document as the request body.
         Only a single mono-modal stop place is allowed.
-        Returns a job representing the asynchronous creation process.
+        Returns a job representing the asynchronous update process.
+
+        The submitted document replaces the stop place: the entire entity must be sent. Quays,
+        AccessibilityAssessment and placeEquipments that are absent from the submitted document
+        are removed from the stop place. Submitting a quay with an unknown NeTEx ID fails the
+        job; a quay without an ID is added as a new quay.
+
+        Malformed XML and unsupported elements are reported on the job, not as a 400.
         """,
         requestBody = @RequestBody(
             required = true,
@@ -153,8 +167,9 @@ interface StopPlaceController {
                     schema = @Schema(implementation = StopPlaceJobDto.class)
                 )
             ),
-            @ApiResponse(responseCode = "400", description = "Malformed input or unsupported stop place field"),
+            @ApiResponse(responseCode = "400", description = "Request payload could not be read"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "413", description = "Payload exceeds the maximum supported size"),
             @ApiResponse(responseCode = "503", description = "Job queue full"),
         }
     )
