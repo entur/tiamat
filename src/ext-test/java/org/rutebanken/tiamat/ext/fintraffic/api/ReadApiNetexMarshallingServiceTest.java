@@ -7,6 +7,7 @@ import org.rutebanken.tiamat.exporter.ServiceFrameElementCreator;
 import org.rutebanken.tiamat.ext.fintraffic.api.model.ReadApiEntityInRecord;
 import org.rutebanken.tiamat.ext.fintraffic.api.model.ReadApiEntityStatus;
 import org.rutebanken.tiamat.ext.fintraffic.api.repository.NetexRepository;
+import org.rutebanken.tiamat.model.FareZone;
 import org.rutebanken.tiamat.model.Parking;
 import org.rutebanken.tiamat.model.SiteRefStructure;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -210,6 +211,51 @@ class ReadApiNetexMarshallingServiceTest {
 
         ReadApiEntityInRecord record = records.iterator().next();
         assertThat(record.status(), equalTo(ReadApiEntityStatus.DELETED));
+    }
+
+    @Test
+    void createEntityRecordsForFareZone() {
+        FareZone fareZone = new FareZone();
+        fareZone.setNetexId("TKL:FareZone:A");
+        fareZone.setVersion(1L);
+        fareZone.setChanged(Instant.now());
+
+        org.rutebanken.netex.model.FareZone netexFareZone = new org.rutebanken.netex.model.FareZone();
+        netexFareZone.setId(fareZone.getNetexId());
+        netexFareZone.setVersion(String.valueOf(fareZone.getVersion()));
+
+        when(netexMapper.mapToNetexModel(fareZone)).thenReturn(netexFareZone);
+        when(searchKeyService.generateSearchKeyJSON(fareZone)).thenReturn("{}");
+
+        Collection<ReadApiEntityInRecord> records = marshallingService.createEntityRecords(fareZone, ReadApiEntityStatus.CURRENT);
+
+        assertThat(records, notNullValue());
+        assertThat(records.size(), equalTo(1));
+
+        ReadApiEntityInRecord record = records.iterator().next();
+        assertThat(record.id(), equalTo("TKL:FareZone:A"));
+        assertThat(record.type(), equalTo("FareZone"));
+        assertThat(record.status(), equalTo(ReadApiEntityStatus.CURRENT));
+    }
+
+    @Test
+    void marshallToXMLForFareZoneProducesValidXML() {
+        FareZone fareZone = new FareZone();
+        fareZone.setNetexId("TKL:FareZone:A");
+        fareZone.setVersion(1L);
+        fareZone.setChanged(Instant.now());
+
+        org.rutebanken.netex.model.FareZone netexFareZone = new org.rutebanken.netex.model.FareZone();
+        netexFareZone.setId(fareZone.getNetexId());
+        netexFareZone.setVersion(String.valueOf(fareZone.getVersion()));
+
+        when(netexMapper.mapToNetexModel(fareZone)).thenReturn(netexFareZone);
+
+        String xml = marshallingService.marshallToXML(fareZone);
+
+        assertThat(xml, notNullValue());
+        assertThat(xml, containsString("FareZone"));
+        assertThat(xml, containsString("TKL:FareZone:A"));
     }
 }
 

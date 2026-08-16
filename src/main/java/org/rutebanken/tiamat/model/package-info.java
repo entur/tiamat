@@ -1,4 +1,3 @@
-
 /*
  * Licensed under the EUPL, Version 1.2 or – as soon they will be approved by
  * the European Commission - subsequent versions of the EUPL (the "Licence");
@@ -14,16 +13,4 @@
  * limitations under the Licence.
  */
 
-@GenericGenerator(
-        name = "sequence_per_table_generator",
-        type = org.hibernate.id.enhanced.SequenceStyleGenerator.class,
-        parameters = {
-                @Parameter(name = SequenceStyleGenerator.CONFIG_SEQUENCE_PER_ENTITY_SUFFIX, value = "_seq"),
-                @Parameter(name = OptimizableGenerator.INCREMENT_PARAM, value = "10")
-        })
 package org.rutebanken.tiamat.model;
-
-import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.Parameter;
-import org.hibernate.id.OptimizableGenerator;
-import org.hibernate.id.enhanced.SequenceStyleGenerator;

@@ -4,16 +4,14 @@ import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
+import jakarta.persistence.FetchType;
 
 import java.util.List;
 
 @Entity
 public class AssistanceService extends LocalService {
 
-    @ElementCollection(targetClass = AssistanceFacilityEnumeration.class)
-    @LazyCollection(LazyCollectionOption.FALSE)
+    @ElementCollection(targetClass = AssistanceFacilityEnumeration.class, fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
     protected List<AssistanceFacilityEnumeration> assistanceFacilityList;
 

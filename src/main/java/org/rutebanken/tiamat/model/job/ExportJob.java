@@ -18,9 +18,9 @@ package org.rutebanken.tiamat.model.job;
 import com.google.common.base.MoreObjects;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Transient;
+import org.rutebanken.tiamat.model.PerTableSequence;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 
@@ -34,7 +34,7 @@ import static org.rutebanken.tiamat.rest.netex.publicationdelivery.AsyncExportRe
 public class ExportJob {
 
     @Id
-    @GeneratedValue(generator = "sequence_per_table_generator")
+    @PerTableSequence
     @Schema(description = "Unique id for the entity")
     private Long id;
 

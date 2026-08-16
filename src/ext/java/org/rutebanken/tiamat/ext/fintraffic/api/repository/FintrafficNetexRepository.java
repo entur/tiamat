@@ -5,7 +5,7 @@ import org.rutebanken.tiamat.ext.fintraffic.api.model.ReadApiEntityOutRecord;
 import org.rutebanken.tiamat.ext.fintraffic.api.model.FintrafficReadApiSearchKey;
 import org.rutebanken.tiamat.ext.fintraffic.api.model.ReadApiSearchKey;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -20,7 +20,13 @@ public class FintrafficNetexRepository extends AbstractNetexRepository {
         super(jdbc, objectMapper);
     }
 
-    @Transactional(isolation = Isolation.READ_COMMITTED)
+    /**
+     * Streams all stop place entities matching the given search key from the Read API cache table.
+     * Returns a lazy {@link Stream} backed by an open JDBC {@link java.sql.ResultSet} — the stream must be
+     * consumed before the transaction commits. The caller must own the transaction. Closing the
+     * transaction here would close the ResultSet before the stream is consumed.
+     */
+    @Transactional(propagation = Propagation.MANDATORY)
     public Stream<ReadApiEntityOutRecord> streamStopPlaces(ReadApiSearchKey searchKey) {
         StringBuilder sql = new StringBuilder("""
             SELECT type, xml
@@ -29,6 +35,7 @@ public class FintrafficNetexRepository extends AbstractNetexRepository {
                 'ScheduledStopPoint',
                 'PassengerStopAssignment',
                 'TopographicPlace',
+                'FareZone',
                 'StopPlace',
                 'Parking'
             )
@@ -55,9 +62,9 @@ public class FintrafficNetexRepository extends AbstractNetexRepository {
             }
 
             if (!filters.isEmpty()) {
-                // TopographicPlace is always included regardless of search filters because it provides geographic
-                // context needed for all stop place data
-                sql.append(" AND (type = 'TopographicPlace' OR (");
+                // TopographicPlace and FareZone are always included regardless of search filters
+                // because they provide reference data needed for all stop place data
+                sql.append(" AND (type IN ('TopographicPlace', 'FareZone') OR (");
                 sql.append(String.join(" AND ", filters));
                 sql.append("))");
             }
@@ -69,15 +76,17 @@ public class FintrafficNetexRepository extends AbstractNetexRepository {
                 WHEN 'ScheduledStopPoint' THEN 1
                 WHEN 'PassengerStopAssignment' THEN 2
                 WHEN 'TopographicPlace' THEN 3
-                WHEN 'StopPlace' THEN 4
-                WHEN 'Parking' THEN 5
-                ELSE 6
-            END
+                WHEN 'FareZone' THEN 4
+                WHEN 'StopPlace' THEN 5
+                WHEN 'Parking' THEN 6
+                ELSE 7
+            END,
+            id
         """);
 
         return jdbc.queryForStream(
                 sql.toString(),
-                (rs, rn) -> new ReadApiEntityOutRecord(rs.getString("type"), rs.getBytes("xml")),
+                (rs, rn) -> new ReadApiEntityOutRecord(rs.getString("type"), rs.getString("xml")),
                 params.toArray()
         );
     }

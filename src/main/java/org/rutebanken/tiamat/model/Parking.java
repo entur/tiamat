@@ -21,10 +21,9 @@ import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Transient;
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -61,13 +60,11 @@ public class Parking
     @Enumerated(EnumType.STRING)
     protected ParkingTypeEnumeration parkingType;
 
-    @ElementCollection(targetClass = ParkingPaymentProcessEnumeration.class)
-    @LazyCollection(LazyCollectionOption.FALSE)
+    @ElementCollection(targetClass = ParkingPaymentProcessEnumeration.class, fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
     protected List<ParkingPaymentProcessEnumeration> parkingPaymentProcess;
 
-    @ElementCollection(targetClass = ParkingVehicleEnumeration.class)
-    @LazyCollection(LazyCollectionOption.FALSE)
+    @ElementCollection(targetClass = ParkingVehicleEnumeration.class, fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
     protected List<ParkingVehicleEnumeration> parkingVehicleTypes;
     protected ParkingLayoutEnumeration parkingLayout;

@@ -143,6 +143,9 @@ public class StopPlaceQueryFromSearchBuilder {
      */
     private static final ExportParams.VersionValidity defaultVersionValidity = ExportParams.VersionValidity.CURRENT;
 
+    public static final String SQL_WITH_QUAY_PRIVATE_OR_PUBLIC_CODES = " OR exists (select quay_query_search.id from quay quay_query_search " +
+            "              INNER JOIN stop_place_quays spq_query_search ON spq_query_search.quays_id = quay_query_search.id " +
+            "              WHERE spq_query_search.stop_place_id = s.id and (lower(quay_query_search.public_code) LIKE concat('%', lower(:query), '%') or lower(quay_query_search.private_code_value) LIKE concat('%', lower(:query), '%'))) ";;
 
     @Autowired
     private SearchHelper searchHelper;
@@ -388,17 +391,26 @@ public class StopPlaceQueryFromSearchBuilder {
                 }
             }
         } else {
-
             parameters.put("query", handleCommonWordsInQuery(query));
 
             final String startingWithLowerMatchQuerySql = "concat(lower(:query), '%') ";
             final String containsLowerMatchQuerySql = "concat('%', lower(:query), '%') ";
             final String orNameMatchInParentStopSql = "or lower(p.name_value) like ";
+            String nameMatchClause;
             if (query.length() <= 3) {
-                wheres.add("(lower (s.name_value) like " + startingWithLowerMatchQuerySql + orNameMatchInParentStopSql + startingWithLowerMatchQuerySql + ")");
+                nameMatchClause = "lower (s.name_value) like " + startingWithLowerMatchQuerySql + orNameMatchInParentStopSql + startingWithLowerMatchQuerySql;
             } else {
-                wheres.add("(lower(s.name_value) like " + containsLowerMatchQuerySql + orNameMatchInParentStopSql + containsLowerMatchQuerySql + ")");
+                nameMatchClause ="lower(s.name_value) like " + containsLowerMatchQuerySql + orNameMatchInParentStopSql + containsLowerMatchQuerySql;
             }
+
+            String quayPublicAndPrivateCodesMatchClause;
+            if (query.length() >= 3 && stopPlaceSearch.isWithQuayPublicAndPrivateCodes()) {
+                quayPublicAndPrivateCodesMatchClause = SQL_WITH_QUAY_PRIVATE_OR_PUBLIC_CODES;
+            } else {
+                quayPublicAndPrivateCodesMatchClause = "";
+            }
+
+            wheres.add("(" +nameMatchClause + quayPublicAndPrivateCodesMatchClause + ")");
 
             orderByStatements.add("similarity(concat(s.name_value, p.name_value), :query) desc");
         }

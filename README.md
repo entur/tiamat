@@ -1,4 +1,4 @@
-# Tiamat ![Build](https://github.com/entur/tiamat/actions/workflows/entur-push.yml/badge.svg)
+# Tiamat ![Build](https://github.com/entur/tiamat/actions/workflows/ci.yaml/badge.svg)
 
 Tiamat is the Stop Place Register.
 It is used nationally in Norway, and other places.
@@ -28,8 +28,11 @@ A frontend for Tiamat is available. It's name is Abzu.
 See https://github.com/entur/abzu
 
 ### Supports running multiple instances
-Tiamat uses Hazelcast memory grid to communicate with other instances in kubernetes.
-This means that you can run multiple instances.
+Tiamat uses a Hazelcast memory grid to communicate with other instances in Kubernetes or AWS Fargate.
+This means that you can run multiple instances. If multiple instances are running, the Hazelcast cluster **must** be 
+configured correctly. The application instances **must** be able to accept incoming connections to the configured 
+service port `tiamat.hazelcast.service-port`. Additionally, one of the properties `tiamat.hazelcast.kubernetes.enabled` 
+or `tiamat.hazelcast.aws.enabled` **must** be set to true.
 
 ### Mapping of IDs
 After import stop places and assigning new IDs to stop places, tiamat keeps olds IDs in a mapping table.
@@ -56,7 +59,27 @@ performs the build.
 Tiamat uses testcontainers to run integration tests against a real database.  To run Testcontainers-based tests, you need a Docker-API compatible container runtime
 for more detail see https://www.testcontainers.org/supported_docker_environment/
 
-(default profiles are set in application.properties)
+(tests run with the `test` profile; test configuration lives in `src/test/resources/application.properties`)
+
+## Configuration
+
+Tiamat ships its configuration defaults inside the jar and only needs environment-specific
+values from the outside:
+
+| File | Loaded | Contents |
+|:-----|:-------|:---------|
+| `application.properties` | always | environment-neutral defaults: JPA/Hibernate, connection pool, `spring.flyway.table`, logging, tuning |
+| `application-entur.properties` | `entur` profile | Entur/Norway constants: NeTEx profile version, NSR ID prefix list, import types |
+| `application-local.properties` | `local` profile | local development settings matching `docker-compose.yml` |
+
+What must be supplied per environment/instance: active profiles, database connection,
+blobstore location, OAuth2 issuers — see the example under
+[Run with external properties file and PostgreSQL](#run-with-external-properties-file-and-postgresql).
+Values can be given as an external properties file (`spring.config.additional-location`), as
+environment variables via Spring's relaxed binding (`blobstore.gcs.bucket.name` →
+`BLOBSTORE_GCS_BUCKET_NAME`), or as `-D` system properties; env vars and system properties
+override everything shipped in the jar. Entur's own Kubernetes deployment supplies them as
+environment variables in the helm chart (`helm/tiamat`).
 
 ## Running the service
 
@@ -211,113 +234,54 @@ docker compose up
 ```
 
 This will start Tiamat with PostgreSQL and Hazelcast. and you can access Tiamat on http://localhost:1888 and the database on http://localhost:5433 
-and graphiql on http://localhost:8777/services/stop_places/graphql , At start up tiamat copy empty schema to the database. Spring properties are set in application.properties.
+and graphiql on http://localhost:8777/services/stop_places/graphql , At start up tiamat copy empty schema to the database. Setup-specific Spring properties are mounted from [docker-compose/spring/application.properties](./docker-compose/spring/application.properties) via `SPRING_CONFIG_ADDITIONAL_LOCATION`, layered on top of the defaults shipped in the jar.
 Security is disabled in this setup.
 
 ## Run with external properties file and PostgreSQL
-To run with PostgreSQL you need an external `application.properties`. Below is an example of `application.properties`:
+
+The jar contains working defaults for everything except instance-specific values (see
+[Configuration](#configuration)), so an external properties file only needs to supply those.
+Example `tiamat.properties`:
 
 ```properties
-spring.jpa.database=POSTGRESQL
-spring.datasource.platform=postgres
-spring.jpa.properties.hibernate.hbm2ddl.import_files_sql_extractor=org.hibernate.tool.hbm2ddl.MultipleLinesSqlCommandExtractor
-spring.jpa.hibernate.hbm2ddl.import_files_sql_extractor=org.hibernate.tool.hbm2ddl.MultipleLinesSqlCommandExtractor
-spring.jpa.hibernate.ddl-auto=none
+# One storage profile and one changelog profile are required (see Available Spring Boot Profiles)
+spring.profiles.active=local-blobstore,local-changelog
 
-spring.http.gzip.enabled=true
-
-#spring.jpa.properties.hibernate.format_sql=true
-
-spring.jpa.properties.hibernate.order_updates=true
-spring.jpa.properties.hibernate.batch_versioned_data=true
-
-spring.flyway.enabled=true
-spring.flyway.table=schema_version
-
-server.compression.mime-types=application/json,application/xml,text/html,text/xml,text/plain
-
-spring.jpa.hibernate.id.new_generator_mappings=true
-spring.jpa.hibernate.use-new-id-generator-mappings=true
-spring.jpa.properties.hibernate.cache.use_second_level_cache=false
-spring.jpa.properties.hibernate.cache.use_query_cache=false
-spring.jpa.properties.hibernate.cache.use_minimal_puts=false
-spring.jpa.properties.hibernate.cache.region.factory_class=org.rutebanken.tiamat.hazelcast.TiamatHazelcastCacheRegionFactory
-
-netex.import.enabled.types=MERGE,INITIAL,ID_MATCH,MATCH
-
-hazelcast.performance.monitoring.enabled=true
-hazelcast.performance.monitoring.delay.seconds=2
-
-management.endpoints.web.exposure.include=info,env,metrics
-management.endpoints.prometheus.enabled=true
-management.metrics.endpoint.export.prometheus.enabled=true
-
-spring.jpa.properties.hibernate.jdbc.batch_size=20
-spring.jpa.properties.hibernate.default_batch_fetch_size=16
-spring.jpa.properties.hibernate.generate_statistics=false
-
-changelog.publish.enabled=false
-
-jettyMaxThreads=10
-jettyMinThreads=1
-
-spring.datasource.hikari.maximumPoolSize=40
-spring.datasource.hikari.leakDetectionThreshold=30000
-
-tiamat.locals.language.default=eng
-
-tariffZoneLookupService.resetReferences=true
-
-debug=true
-
-# Disable feature detection by this undocumented parameter. Check the org.hibernate.engine.jdbc.internal.JdbcServiceImpl.configure method for more details.
-spring.jpa.properties.hibernate.temp.use_jdbc_metadata_defaults = false
-
-# Because detection is disabled you have to set correct dialect by hand.
-spring.jpa.database-platform=org.hibernate.dialect.PostgreSQL9Dialect
-
-tariffzoneLookupService.resetReferences=true
-
-spring.jpa.properties.hibernate.dialect=org.hibernate.spatial.dialect.postgis.PostgisDialect
-
-spring.database.driverClassName=org.postgresql.Driver
 spring.datasource.url=jdbc:postgresql://localhost:5436/tiamat
 spring.datasource.username=tiamat
 spring.datasource.password=tiamat
 
-#OAuth2 Resource Server
-spring.security.oauth2.resourceserver.jwt.issuer-uri=https:http://localhost:8082/realms/entur
+server.port=1888
+
+# Blobstore for NeTEx exports (local-blobstore profile)
+blobstore.local.folder=/tmp/local-gcs-storage/tiamat/export
+async.export.path=/tmp
+
+# OAuth2 Resource Server (e.g. local Keycloak, see Keycloak_Setup_Guide.md)
+spring.security.oauth2.resourceserver.jwt.issuer-uri=http://localhost:8082/realms/entur
 
 spring.cloud.gcp.pubsub.enabled=false
 
-aspect.enabled=true
-
-netex.id.valid.prefix.list={TopographicPlace:{'KVE','WOF','OSM','ENT','LAN'},TariffZone:{'*'},FareZone:{'*'},GroupOfTariffZones:{'*'}}
-
-server.port=1888
-
-blobstore.gcs.blob.path=exports
-blobstore.gcs.bucket.name=tiamat-test
-blobstore.gcs.project.id=carbon-1287
-
-security.basic.enabled=false
-management.security.enabled=false
-authorization.enabled = true
-rutebanken.kubernetes.enabled=false
-
-async.export.path=/tmp
-
-publicationDeliveryUnmarshaller.validateAgainstSchema=false
-publicationDeliveryStreamingOutput.validateAgainstSchema=false
-netex.validPrefix=NSR
-netex.profile.version=1.12:NO-NeTEx-stops:1.4
-blobstore.local.folder=/tmp/local-gcs-storage/tiamat/export
-spring.profiles.active=local-blobstore,activemq
+# Optional overrides — sensible defaults ship in the jar
+# (see src/main/resources/application.properties and application-entur.properties):
+#netex.import.enabled.types=MERGE,INITIAL,ID_MATCH,MATCH
+#netex.id.valid.prefix.list={TopographicPlace:{'KVE','WOF','OSM','ENT','LAN'},TariffZone:{'*'},FareZone:{'*'},GroupOfTariffZones:{'*'}}
+#publicationDeliveryUnmarshaller.validateAgainstSchema=false
+#publicationDeliveryStreamingOutput.validateAgainstSchema=false
+#fareZone.externalVersioning=false
+#groupOfTariffZones.externalVersioning=false
+#ignoreTariffZoneImport=false
 ```
 
-To start Tiamat with this configuration, specify **spring.config.location**:
+Start Tiamat with **spring.config.additional-location** so the file layers on top of the
+defaults shipped in the jar:
 
-`java -jar -Dspring.config.location=/path/to/tiamat.properties --add-opens java.base/java.lang=ALL-UNNAMED -Denv=dev tiamat-0.0.2-SNAPSHOT.jar`
+`java -Dspring.config.additional-location=file:/path/to/tiamat.properties --add-opens java.base/java.lang=ALL-UNNAMED -jar tiamat-0.0.2-SNAPSHOT.jar`
+
+> **Note!** Using `-Dspring.config.location=` (without `additional-`) still works, but it
+> *replaces* the jar's config files entirely, so your file must then contain the complete
+> configuration — including `spring.flyway.table=schema_version`, without which Flyway
+> looks for the wrong schema history table and startup fails.
 
 ## Database
 
@@ -536,6 +500,35 @@ curl -XPOST -H"Content-Type: application/xml" \
 - `FARE_FRAME` mode returns FareFrame with fareZones only
 
 **Note:** When using `FARE_FRAME` mode, ensure your input XML has the correct NeTEx structure with FrameDefaults before ValidBetween elements.
+
+### Combined SiteFrame and FareFrame deliveries
+
+A publication delivery may contain both a SiteFrame and a FareFrame (Nordic profile: FareZones live in the FareFrame, while the GroupOfTariffZones referencing them lives in the SiteFrame). When both frames are present:
+
+- FareZones in the FareFrame are imported first, so a GroupOfTariffZones in the SiteFrame can reference them within the same delivery.
+- Group members not supplied in the delivery are resolved against already persisted FareZones in the database. The import fails if a referenced zone cannot be resolved either way.
+
+### External versioning for GroupOfTariffZones
+
+When Tiamat acts as a replica of a master register, version numbers can be managed externally:
+
+```properties
+groupOfTariffZones.externalVersioning=false
+```
+
+When enabled:
+- Only a single version is kept per netexId, updated in place using the incoming version number.
+- After import, groups not present in the delivery are deleted (full replace semantics).
+
+The equivalent property for FareZones is `fareZone.externalVersioning`. When enabled, FareZones not present in an incoming FareFrame delivery are pruned after import.
+
+### Ignoring deprecated TariffZones on import
+
+Plain TariffZones are deprecated in favour of FareZones. To skip them during import while still importing FareZones and GroupOfTariffZones:
+
+```properties
+ignoreTariffZoneImport=false
+```
 
 ## GraphQL
 GraphQL endpoint is available on

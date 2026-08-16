@@ -27,20 +27,7 @@ import org.springframework.data.domain.Pageable;
 import java.time.Instant;
 import java.util.List;
 
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ALL_VERSIONS_ARG_DESCRIPTION;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.HAS_PARKING;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PAGE_ARG_DESCRIPTION;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.POINT_IN_TIME_ARG_DESCRIPTION;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.QUERY_ARG_DESCRIPTION;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.SIZE_ARG_DESCRIPTION;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.STOP_PLACE_TYPE_ARG_DESCRIPTION;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.TAGS_ARG_DESCRIPTION;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.VERSION_VALIDITY_ARG_DESCRIPTION;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.WITHOUT_LOCATION_ONLY_ARG_DESCRIPTION;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.WITHOUT_QUAYS_ONLY_ARG_DESCRIPTION;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.WITH_DUPLICATED_QUAY_IMPORTED_IDS_ARG_DESCRIPTION;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.WITH_NEARBY_SIMILAR_DUPLICATES_ARG_DESCRIPTION;
-import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.WITH_TAGS_ARG_DESCRIPTION;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.*;
 
 /**
  * Search params relevant for searching for stop places.
@@ -123,6 +110,10 @@ public class StopPlaceSearch implements SearchObject {
     @Parameter(description = POINT_IN_TIME_ARG_DESCRIPTION)
     private Instant pointInTime;
 
+    @QueryParam(value = "withQuayPublicAndPrivateCodes")
+    @Parameter(description = WITH_QUAY_PUBLIC_AND_PRIVATE_CODES_DESCRIPTION)
+    private boolean withQuayPublicAndPrivateCodes;
+
     public StopPlaceSearch() {}
 
     private StopPlaceSearch(String query,
@@ -140,7 +131,8 @@ public class StopPlaceSearch implements SearchObject {
                             List<String> tags,
                             boolean withTags,
                             String submode,
-                            int page, int size) {
+                            int page, int size,
+                            boolean withQuayPublicAndPrivateCodes) {
         this.query = query;
         this.stopTypeEnumerations = stopTypeEnumerations;
         this.netexIdList = netexIdList;
@@ -158,6 +150,7 @@ public class StopPlaceSearch implements SearchObject {
         this.submode = submode;
         this.page = page;
         this.size = size;
+        this.withQuayPublicAndPrivateCodes = withQuayPublicAndPrivateCodes;
     }
 
     public String getQuery() {
@@ -212,7 +205,6 @@ public class StopPlaceSearch implements SearchObject {
         return withTags;
     }
 
-
     public Instant getPointInTime() {
         return pointInTime;
     }
@@ -223,6 +215,10 @@ public class StopPlaceSearch implements SearchObject {
 
     public List<String> getTags() {
         return tags;
+    }
+
+    public boolean isWithQuayPublicAndPrivateCodes() {
+        return withQuayPublicAndPrivateCodes;
     }
 
     @Override
@@ -243,6 +239,7 @@ public class StopPlaceSearch implements SearchObject {
                 .add("tags", tags)
                 .add("page", page)
                 .add("size", size)
+                .add("withQuayPublicAndPrivateCodes", withQuayPublicAndPrivateCodes)
                 .toString();
     }
 
@@ -269,6 +266,7 @@ public class StopPlaceSearch implements SearchObject {
         private List<String> tags;
         private int page = DEFAULT_PAGE;
         private int size = DEFAULT_PAGE_SIZE;
+        private boolean withQuayPublicAndPrivateCodes;
 
         private Builder() {
         }
@@ -355,6 +353,11 @@ public class StopPlaceSearch implements SearchObject {
             return this;
         }
 
+        public Builder setWithQuayPublicAndPrivateCodes(boolean withQuayPublicAndPrivateCodes) {
+            this.withQuayPublicAndPrivateCodes = withQuayPublicAndPrivateCodes;
+            return this;
+        }
+
         public StopPlaceSearch build() {
             return new StopPlaceSearch(query,
                     stopTypeEnumerations,
@@ -372,8 +375,10 @@ public class StopPlaceSearch implements SearchObject {
                     withTags,
                     submode,
                     page,
-                    size);
+                    size,
+                    withQuayPublicAndPrivateCodes);
         }
 
     }
 }
+

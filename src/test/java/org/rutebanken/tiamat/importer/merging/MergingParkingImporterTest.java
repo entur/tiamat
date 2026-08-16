@@ -202,6 +202,40 @@ public class MergingParkingImporterTest extends TiamatIntegrationTest {
         assertThat(parking.getParkingType()).isNull();
     }
 
+    /**
+     * Two parkings with the same name and coordinates but different importedIds must be kept as separate parkings.
+     * The proximity-based merge must not fire when the incoming parking has a known source ID.
+     */
+    @Test
+    public void parkingsWithDifferentImportedIdsMustNotBeMergedByProximity() throws ExecutionException, InterruptedException {
+        String name = "Shared Station Parking";
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlaceRepository.save(stopPlace);
+
+        double longitude = 24.934288;
+        double latitude = 60.198294;
+
+        Parking firstParking = createParking(name, longitude, latitude, null);
+        firstParking.setParkingType(ParkingTypeEnumeration.PARK_AND_RIDE);
+        firstParking.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("FIN:Parking:liipi-100");
+        firstParking.setParentSiteRef(new SiteRefStructure(stopPlace.getNetexId()));
+
+        Parking firstResult = mergingParkingImporter.importParkingWithoutNetexMapping(firstParking);
+
+        Parking secondParking = createParking(name, longitude, latitude, null);
+        secondParking.setParkingType(ParkingTypeEnumeration.PARK_AND_RIDE);
+        secondParking.getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY).add("FIN:Parking:liipi-200");
+        secondParking.setParentSiteRef(new SiteRefStructure(stopPlace.getNetexId()));
+
+        Parking secondResult = mergingParkingImporter.importParkingWithoutNetexMapping(secondParking);
+
+        assertThat(secondResult.getNetexId())
+                .as("Two parkings with distinct importedIds must not be merged by proximity")
+                .isNotEqualTo(firstResult.getNetexId());
+        assertThat(secondResult.getVersion()).isEqualTo(1L);
+    }
+
     @Test
     public void testHandleAlreadyExistingParkingUpdatedParkingVehicleTypes() {
 

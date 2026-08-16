@@ -15,7 +15,6 @@
 
 package org.rutebanken.tiamat.rest.dto;
 
-import io.restassured.RestAssured;
 import org.junit.Before;
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
@@ -24,11 +23,11 @@ import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.rutebanken.tiamat.versioning.save.StopPlaceVersionedSaverService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.web.servlet.client.RestTestClient;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.rutebanken.tiamat.config.JerseyConfig.SERVICES_ADMIN_PATH;
 import static org.rutebanken.tiamat.config.JerseyConfig.SERVICES_STOP_PLACE_PATH;
@@ -43,10 +42,11 @@ public class DtoResourceIntegrationTest extends TiamatIntegrationTest {
     @Autowired
     StopPlaceVersionedSaverService saverService;
 
+    RestTestClient restTestClient;
+
     @Before
-    public void configureRestAssured() {
-        RestAssured.baseURI = "http://localhost";
-        RestAssured.port = port;
+    public void setUpRestTestClient() {
+        restTestClient = RestTestClient.bindToServer().baseUrl("http://localhost:" + port).build();
     }
 
     @Test
@@ -159,9 +159,7 @@ public class DtoResourceIntegrationTest extends TiamatIntegrationTest {
 
 
     private String getIdMapping(String url) {
-        return given()
-                .port(port)
-                .get(url)
-                .prettyPrint();
+
+        return restTestClient.get().uri(url).exchange().expectBody(String.class).returnResult().getResponseBody();
     }
 }

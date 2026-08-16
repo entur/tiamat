@@ -3,6 +3,8 @@ kind: Service
 metadata:
   labels:
     {{- include "common.labels" . | indent 4 }}
+  annotations:
+    {{- include "common.annotations" . | indent 4 }}
   name: {{ .Values.deployment.name }}
   namespace: {{ .Release.Namespace }}
 spec:

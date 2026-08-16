@@ -1,8 +1,8 @@
 package org.rutebanken.tiamat.changelog;
 
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.jms.JmsAutoConfiguration;
-import org.springframework.boot.autoconfigure.jms.activemq.ActiveMQAutoConfiguration;
+import org.springframework.boot.jms.autoconfigure.JmsAutoConfiguration;
+import org.springframework.boot.activemq.autoconfigure.ActiveMQAutoConfiguration;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 

@@ -18,10 +18,9 @@ package org.rutebanken.tiamat.model;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.Transient;
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -35,8 +34,7 @@ public class SanitaryEquipment_VersionStructure
     protected GenderLimitationEnumeration gender;
     protected BigInteger numberOfToilets;
 
-    @ElementCollection(targetClass = SanitaryFacilityEnumeration.class)
-    @LazyCollection(LazyCollectionOption.FALSE)
+    @ElementCollection(targetClass = SanitaryFacilityEnumeration.class, fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
     protected List<SanitaryFacilityEnumeration> sanitaryFacilityList;
 

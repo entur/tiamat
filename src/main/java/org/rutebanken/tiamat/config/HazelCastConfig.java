@@ -21,9 +21,15 @@ public class HazelCastConfig {
     @Value("${tiamat.hazelcast.kubernetes.enabled:false}")
     private boolean kubernetesEnabled;
 
+    @Value("${tiamat.hazelcast.aws.enabled:false}")
+    private boolean awsEnabled;
+
     @Value("${tiamat.hazelcast.cluster.name:tiamat}")
     private String hazelcastClusterName;
 
+
+    @Value("${tiamat.hazelcast.port.auto-increment:false}")
+    private boolean portAutoIncrement;
 
     @Bean
     public Config hazelcastConfig() {
@@ -33,11 +39,12 @@ public class HazelCastConfig {
         config.setClusterName(hazelcastClusterName);
 
         // Configure network settings
-        config.getNetworkConfig().setPortAutoIncrement(false);
+        config.getNetworkConfig().setPortAutoIncrement(portAutoIncrement);
 
-        // Configure Kubernetes discovery
         JoinConfig joinConfig = config.getNetworkConfig().getJoin();
         joinConfig.getMulticastConfig().setEnabled(false);
+
+        joinConfig.getAwsConfig().setEnabled(awsEnabled);
 
         joinConfig.getKubernetesConfig().setEnabled(kubernetesEnabled);
         joinConfig.getKubernetesConfig().setProperty("namespace", hazelcastNamespace);

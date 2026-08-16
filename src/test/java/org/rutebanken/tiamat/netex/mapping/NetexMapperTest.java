@@ -33,14 +33,17 @@ import org.rutebanken.tiamat.model.AddressablePlaceRefStructure;
 import org.rutebanken.tiamat.model.AlternativeName;
 import org.rutebanken.tiamat.model.CountryRef;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
+import org.rutebanken.tiamat.model.FareZone;
 import org.rutebanken.tiamat.model.GroupOfStopPlaces;
 import org.rutebanken.tiamat.model.IanaCountryTldEnumeration;
 import org.rutebanken.tiamat.model.LightingEnumeration;
 import org.rutebanken.tiamat.model.LimitationStatusEnumeration;
 import org.rutebanken.tiamat.model.NameTypeEnumeration;
+import org.rutebanken.tiamat.model.Parking;
 import org.rutebanken.tiamat.model.PathLink;
 import org.rutebanken.tiamat.model.PathLinkEnd;
 import org.rutebanken.tiamat.model.Quay;
+import org.rutebanken.tiamat.model.ScopingMethodEnumeration;
 import org.rutebanken.tiamat.model.SiteFrame;
 import org.rutebanken.tiamat.model.SiteRefStructure;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -48,10 +51,18 @@ import org.rutebanken.tiamat.model.StopPlaceReference;
 import org.rutebanken.tiamat.model.StopPlacesInFrame_RelStructure;
 import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.model.TopographicPlaceRefStructure;
+import org.rutebanken.tiamat.model.ValidBetween;
 import org.rutebanken.tiamat.model.Value;
+import org.rutebanken.tiamat.model.factory.ParkingEntityFactory;
+import org.rutebanken.tiamat.netex.mapping.mapper.AccessibilityAssessmentMapper;
+import org.rutebanken.tiamat.netex.mapping.mapper.DataManagedObjectStructureMapper;
+import org.rutebanken.tiamat.netex.mapping.mapper.KeyListToKeyValuesMapMapper;
+import org.rutebanken.tiamat.netex.mapping.PublicationDeliveryHelper;
 import org.springframework.beans.factory.annotation.Autowired;
+import ma.glasnost.orika.Converter;
 
 import java.time.Instant;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -62,6 +73,18 @@ public class NetexMapperTest extends TiamatIntegrationTest {
 
     @Autowired
     private NetexMapper netexMapper;
+
+    // Extra dependencies for constructing a NetexMapper with a custom ParkingEntityFactory
+    @Autowired
+    private List<Converter> converters;
+    @Autowired
+    private KeyListToKeyValuesMapMapper keyListToKeyValuesMapMapper;
+    @Autowired
+    private DataManagedObjectStructureMapper dataManagedObjectStructureMapper;
+    @Autowired
+    private PublicationDeliveryHelper publicationDeliveryHelper;
+    @Autowired
+    private AccessibilityAssessmentMapper accessibilityAssessmentMapper;
 
     @Test
     public void mapKeyValuesToInternalList() throws Exception {
@@ -612,5 +635,156 @@ public class NetexMapperTest extends TiamatIntegrationTest {
         assertThat(
                 firstSiteRef.getRef())
                 .isEqualTo("NSR:StopPlace:1");
+    }
+
+    /**
+     * A FareZone with EXPLICIT_STOPS scoping stores its members as StopPlace references.
+     * On export each member is rewritten to a ScheduledStopPoint ref with an "S" prefix,
+     * so the import must strip that prefix to restore the original StopPlace ref.
+     * This verifies the export -> import round-trip is stable.
+     */
+    @Test
+    public void fareZoneExplicitStopsMembersSurviveNetexRoundTrip() {
+        NetexMappingContext mappingContext = new NetexMappingContext();
+        mappingContext.defaultTimeZone = ZoneId.of("Europe/Oslo");
+        NetexMappingContextThreadLocal.set(mappingContext);
+        try {
+            FareZone tiamatFareZone = new FareZone();
+            tiamatFareZone.setNetexId("NSR:FareZone:1");
+            tiamatFareZone.setVersion(1L);
+            tiamatFareZone.setName(new EmbeddableMultilingualString("Round trip zone"));
+            tiamatFareZone.setValidBetween(new ValidBetween(Instant.now().minusSeconds(3600)));
+            tiamatFareZone.setScopingMethod(ScopingMethodEnumeration.EXPLICIT_STOPS);
+            tiamatFareZone.getFareZoneMembers().add(new StopPlaceReference("NSR:StopPlace:123"));
+
+            // Export: StopPlace ref -> ScheduledStopPoint ref with "S" prefix added.
+            org.rutebanken.netex.model.FareZone netexFareZone = netexMapper.mapToNetexModel(tiamatFareZone);
+
+            assertThat(netexFareZone.getScopingMethod())
+                    .as("scoping method preserved on export")
+                    .isEqualTo(org.rutebanken.netex.model.ScopingMethodEnumeration.EXPLICIT_STOPS);
+            assertThat(netexFareZone.getMembers()).as("members").isNotNull();
+            assertThat(netexFareZone.getMembers().getPointRef())
+                    .as("exported member point refs")
+                    .extracting(pointRef -> pointRef.getValue().getRef())
+                    .containsExactly("NSR:ScheduledStopPoint:S123");
+
+            // Import: ScheduledStopPoint ref -> StopPlace ref, "S" prefix stripped.
+            FareZone roundTripped = netexMapper.mapToTiamatModel(netexFareZone);
+
+            assertThat(roundTripped.getFareZoneMembers())
+                    .as("round-tripped fare zone members")
+                    .extracting(StopPlaceReference::getRef)
+                    .containsExactly("NSR:StopPlace:123");
+        } finally {
+            NetexMappingContextThreadLocal.set(null);
+        }
+    }
+
+    @Test
+    public void parkingPaymentMethodsExcludedByDefault() {
+        // Default ParkingEntityFactory excludes paymentMethods — they must not survive NeTEx → Tiamat mapping
+        org.rutebanken.netex.model.Parking netexParking = new org.rutebanken.netex.model.Parking()
+                .withId("NSR:Parking:1")
+                .withVersion("1")
+                .withPaymentMethods(
+                        org.rutebanken.netex.model.PaymentMethodEnumeration.CASH,
+                        org.rutebanken.netex.model.PaymentMethodEnumeration.CREDIT_CARD);
+
+        org.rutebanken.tiamat.model.Parking tiamatParking = netexMapper.mapToTiamatModel(netexParking);
+
+        assertThat(tiamatParking.getPaymentMethods())
+                .as("paymentMethods should be excluded from mapping by default")
+                .isEmpty();
+    }
+
+    @Test
+    public void parkingPaymentMethodsExcludedOnExport() {
+        // Default factory — paymentMethods on Tiamat model should not appear in exported NeTEx
+        org.rutebanken.tiamat.model.Parking tiamatParking = new org.rutebanken.tiamat.model.Parking();
+        tiamatParking.setNetexId("NSR:Parking:2");
+        tiamatParking.getPaymentMethods().add(org.rutebanken.tiamat.model.PaymentMethodEnumeration.CASH);
+
+        org.rutebanken.netex.model.Parking netexParking = netexMapper.mapToNetexModel(tiamatParking);
+
+        assertThat(netexParking.getPaymentMethods())
+                .as("paymentMethods should not be exported with default factory")
+                .isEmpty();
+    }
+
+    @Test
+    public void parkingPaymentMethodsMappedWhenFactoryHasNoExclusions() {
+        // A custom ParkingEntityFactory with an empty exclusion list must cause
+        // paymentMethods to survive the NeTEx → Tiamat mapping round trip.
+        ParkingEntityFactory emptyExclusionFactory = new ParkingEntityFactory() {
+            @Override
+            public List<String> getMappingExclusions() {
+                return List.of();
+            }
+        };
+        NetexMapper customMapper = new NetexMapper(
+                converters, keyListToKeyValuesMapMapper, dataManagedObjectStructureMapper,
+                publicationDeliveryHelper, accessibilityAssessmentMapper,
+                emptyExclusionFactory, List.of());
+
+        // Import: paymentMethods should be mapped
+        org.rutebanken.netex.model.Parking netexParking = new org.rutebanken.netex.model.Parking()
+                .withId("NSR:Parking:3")
+                .withVersion("1")
+                .withPaymentMethods(
+                        org.rutebanken.netex.model.PaymentMethodEnumeration.CASH,
+                        org.rutebanken.netex.model.PaymentMethodEnumeration.CREDIT_CARD);
+
+        Parking tiamatParking = customMapper.mapToTiamatModel(netexParking);
+
+        assertThat(tiamatParking.getPaymentMethods())
+                .as("paymentMethods should be imported when factory has no exclusions")
+                .isNotEmpty();
+
+        // Export: paymentMethods should appear in the NeTEx output
+        org.rutebanken.netex.model.Parking exported = customMapper.mapToNetexModel(tiamatParking);
+
+        assertThat(exported.getPaymentMethods())
+                .as("paymentMethods should be exported when factory has no exclusions")
+                .isNotEmpty();
+    }
+
+    @Test
+    public void baseParkingInstanceUsesCustomizerEvenWhenSubclassFactoryActive() {
+        // When a subclass factory is active, the base classmap must also be registered
+        // so that the ParkingMapper customizer is invoked for legacy Parking rows
+        // (dtype='Parking') loaded from the DB as base-class instances.
+        // Without the fix, Orika falls back to auto-generated mapping and skips the
+        // customizer, causing parkingAreas to be lost on export (JAXBElement wrapping
+        // in ParkingMapper.mapBtoA is not performed).
+        ParkingEntityFactory subclassFactory = new ParkingEntityFactory() {
+            @Override
+            public Class<? extends org.rutebanken.tiamat.model.Parking> getEntityClass() {
+                return ParkingSubclassForTest.class;
+            }
+            @Override
+            public List<String> getMappingExclusions() {
+                return List.of("paymentMethods");
+            }
+        };
+        NetexMapper customMapper = new NetexMapper(
+                converters, keyListToKeyValuesMapMapper, dataManagedObjectStructureMapper,
+                publicationDeliveryHelper, accessibilityAssessmentMapper,
+                subclassFactory, List.of());
+
+        // Export a base-class Parking instance with a parkingArea set.
+        // The ParkingMapper customizer wraps areas in JAXBElement; without it they are lost.
+        org.rutebanken.tiamat.model.ParkingArea area = new org.rutebanken.tiamat.model.ParkingArea();
+        org.rutebanken.tiamat.model.Parking baseParkingInstance = new org.rutebanken.tiamat.model.Parking();
+        baseParkingInstance.setParkingAreas(List.of(area));
+
+        org.rutebanken.netex.model.Parking exported = customMapper.mapToNetexModel(baseParkingInstance);
+
+        assertThat(exported.getParkingAreas())
+                .as("parkingAreas must be exported via ParkingMapper customizer even for base Parking instances")
+                .isNotNull();
+        assertThat(exported.getParkingAreas().getParkingAreaRefOrParkingArea_())
+                .as("parkingAreas list must contain the area wrapped by ParkingMapper.mapBtoA")
+                .isNotEmpty();
     }
 }

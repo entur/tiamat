@@ -9,7 +9,7 @@ services:
     depends_on:
       - db
     environment:
-      - SPRING_CONFIG_LOCATION=/etc/application-config/application.properties
+      - SPRING_CONFIG_ADDITIONAL_LOCATION=file:/etc/application-config/
       - env=dev
       - JDK_JAVA_OPTIONS=-server -Xss128m -Xmx8000m
         -Dfile.encoding=UTF-8

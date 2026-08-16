@@ -4,29 +4,18 @@ gcp2:
 sql:
   instance: ent-tiamat-prd:europe-west1:tiamat-db-1=tcp:5432
 
-configMap:
-  blobstoreProjectId: ent-tiamat-prd
-  pubsubProjectId: ent-tiamat-prd
-  pubsbuTopicName: ror.tiamat.changelog
-  gcsBucketName: ror-tiamat-gcp2-prd
-
-auth0:
-  entur:
-    internal:
-      url: https://internal.entur.org/
-      audience: https://api.entur.io
-    partner:
-      url: https://partner.entur.org/
-      audience: https://api.entur.io
-  client:
-    id: ga01hAU7XrM8cPOSuYXOocFoM8c1wB42
-    url: https://internal.entur.org/oauth/token
-    audience: https://api.entur.io
-
-organisation:
-  service: http://baba.prd.entur.internal
-
-roleAssignmentExtractor: baba
+envVars:
+  BLOBSTORE_GCS_BUCKET_NAME: ror-tiamat-gcp2-prd
+  BLOBSTORE_GCS_PROJECT_ID: ent-tiamat-prd
+  SPRING_CLOUD_GCP_PROJECT_ID: ent-tiamat-prd
+  FAREZONE_EXTERNALVERSIONING: "false"
+  TIAMAT_USER_PERMISSION_REST_SERVICE_URL: http://baba.prd.entur.internal/services/organisations/users
+  TIAMAT_OAUTH2_RESOURCESERVER_AUTH0_ENTUR_PARTNER_JWT_ISSUER_URI: https://partner.entur.org/
+  TIAMAT_OAUTH2_RESOURCESERVER_AUTH0_ENTUR_PARTNER_JWT_AUDIENCE: https://api.entur.io
+  TIAMAT_OAUTH2_RESOURCESERVER_AUTH0_ENTUR_INTERNAL_JWT_ISSUER_URI: https://internal.entur.org/
+  TIAMAT_OAUTH2_RESOURCESERVER_AUTH0_ENTUR_INTERNAL_JWT_AUDIENCE: https://api.entur.io
+  SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_INTERNAL_TOKEN_URI: https://internal.entur.org/oauth/token
+  TIAMAT_OAUTH2_CLIENT_AUDIENCE: https://api.entur.io
 
 rbac:
   enabled: true

@@ -5,4 +5,4 @@ package org.rutebanken.tiamat.ext.fintraffic.api.model;
  * @param type Entity type
  * @param xml Entity XML content as byte array
  */
-public record ReadApiEntityOutRecord(String type, byte[] xml) {}
+public record ReadApiEntityOutRecord(String type, String xml) {}

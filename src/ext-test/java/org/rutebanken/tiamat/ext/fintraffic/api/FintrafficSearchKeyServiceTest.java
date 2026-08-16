@@ -4,20 +4,20 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.rutebanken.tiamat.ext.fintraffic.api.model.FintrafficReadApiSearchKey;
+import org.rutebanken.tiamat.model.FareZone;
+import org.rutebanken.tiamat.model.PrivateCodeStructure;
 import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.model.VehicleModeEnumeration;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
-import org.rutebanken.tiamat.repository.TopographicPlaceRepository;
 
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 class FintrafficSearchKeyServiceTest {
 
@@ -25,13 +25,18 @@ class FintrafficSearchKeyServiceTest {
 
     @BeforeEach
     void setUp() {
-        TopographicPlaceRepository topographicPlaceRepositoryMock = mock(TopographicPlaceRepository.class);
         StopPlaceRepository stopPlaceRepositoryMock = mock(StopPlaceRepository.class);
-        when(topographicPlaceRepositoryMock.findTopographicPlace(any())).thenReturn(List.of());
+
+        AreaCodeMappingConfig areaCodeMappingConfig = new AreaCodeMappingConfig();
+        areaCodeMappingConfig.setAreaCodes(Map.of(
+                "lft", "499,905",
+                "hsl", "049,091,092,235,245,257,753,755,858"
+        ));
+        areaCodeMappingConfig.buildReverseIndex();
 
         service = new FintrafficSearchKeyService(
                 new ObjectMapper(),
-                topographicPlaceRepositoryMock,
+                areaCodeMappingConfig,
                 stopPlaceRepositoryMock
         );
     }
@@ -45,6 +50,16 @@ class FintrafficSearchKeyServiceTest {
         stopPlace.setNetexId(netexId);
         stopPlace.setTransportMode(transportMode);
         stopPlace.setVersion(version);
+        return stopPlace;
+    }
+
+    private StopPlace createStopPlaceWithMunicipality(String netexId, VehicleModeEnumeration transportMode, String municipalityCode) {
+        StopPlace stopPlace = createStopPlace(netexId, transportMode);
+        TopographicPlace topographicPlace = new TopographicPlace();
+        PrivateCodeStructure privateCode = new PrivateCodeStructure();
+        privateCode.setValue(municipalityCode);
+        topographicPlace.setPrivateCode(privateCode);
+        stopPlace.setTopographicPlace(topographicPlace);
         return stopPlace;
     }
 
@@ -150,11 +165,63 @@ class FintrafficSearchKeyServiceTest {
         assertThat(json).contains("\"transportModes\":[]");
     }
 
+    @Test
+    void generateSearchKeyJSON_fareZone_returnsEmptySearchKey() {
+        FareZone fareZone = new FareZone();
+        fareZone.setNetexId("TKL:FareZone:A");
+        fareZone.setVersion(1L);
+
+        FintrafficReadApiSearchKey searchKey = parseSearchKey(service.generateSearchKeyJSON(fareZone));
+
+        assertThat(searchKey.transportModes()).isEmpty();
+        assertThat(searchKey.areaCodes()).isEmpty();
+        assertThat(searchKey.municipalityCodes()).isEmpty();
+    }
+
     private FintrafficReadApiSearchKey parseSearchKey(String json) {
         try {
             return new ObjectMapper().readValue(json, FintrafficReadApiSearchKey.class);
         } catch (Exception e) {
             throw new RuntimeException("Failed to parse search key JSON: " + json, e);
         }
+    }
+
+    @Test
+    void generateSearchKeyJSON_stopPlaceWithMunicipality_containsAreaCode() {
+        StopPlace stopPlace = createStopPlaceWithMunicipality("FSR:StopPlace:100", VehicleModeEnumeration.BUS, "499");
+
+        FintrafficReadApiSearchKey searchKey = parseSearchKey(service.generateSearchKeyJSON(stopPlace));
+
+        assertThat(searchKey.areaCodes()).containsExactly("LFT");
+        assertThat(searchKey.municipalityCodes()).containsExactly("499");
+    }
+
+    @Test
+    void generateSearchKeyJSON_stopPlaceWithNoTopographicPlace_emptyAreaCodes() {
+        StopPlace stopPlace = createStopPlace("FSR:StopPlace:101", VehicleModeEnumeration.BUS);
+
+        FintrafficReadApiSearchKey searchKey = parseSearchKey(service.generateSearchKeyJSON(stopPlace));
+
+        assertThat(searchKey.areaCodes()).isEmpty();
+        assertThat(searchKey.municipalityCodes()).isEmpty();
+    }
+
+    @Test
+    void generateSearchKeyJSON_stopPlaceWithUnknownMunicipalityCode_emptyAreaCodes() {
+        StopPlace stopPlace = createStopPlaceWithMunicipality("FSR:StopPlace:102", VehicleModeEnumeration.BUS, "999");
+
+        FintrafficReadApiSearchKey searchKey = parseSearchKey(service.generateSearchKeyJSON(stopPlace));
+
+        assertThat(searchKey.areaCodes()).isEmpty();
+        assertThat(searchKey.municipalityCodes()).containsExactly("999");
+    }
+
+    @Test
+    void generateSearchKeyJSON_stopPlaceWithMunicipality_areaCodeIsUppercase() {
+        StopPlace stopPlace = createStopPlaceWithMunicipality("FSR:StopPlace:103", VehicleModeEnumeration.BUS, "091");
+
+        FintrafficReadApiSearchKey searchKey = parseSearchKey(service.generateSearchKeyJSON(stopPlace));
+
+        assertThat(searchKey.areaCodes()).containsExactly("HSL");
     }
 }

@@ -19,7 +19,7 @@ import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.web.embedded.jetty.JettyServletWebServerFactory;
+import org.springframework.boot.jetty.servlet.JettyServletWebServerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -35,12 +35,8 @@ public class JettyConfig {
 
         logger.info("Configuring jetty with minThreads: {} and maxThreads: {}", jettyMinThreads, jettyMaxThreads);
 
-        final JettyServletWebServerFactory factory = new JettyServletWebServerFactory() {
-            @Override
-            public QueuedThreadPool getThreadPool() {
-                return new QueuedThreadPool(jettyMaxThreads, jettyMinThreads);
-            }
-        };
+        JettyServletWebServerFactory factory = new JettyServletWebServerFactory();
+        factory.setThreadPool(new QueuedThreadPool(jettyMaxThreads, jettyMinThreads));
         return factory;
     }
 }

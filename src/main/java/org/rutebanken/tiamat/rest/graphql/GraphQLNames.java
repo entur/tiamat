@@ -385,6 +385,9 @@ public class GraphQLNames {
     public static final String WITH_NEARBY_SIMILAR_DUPLICATES = "withNearbySimilarDuplicates";
     public static final String WITH_NEARBY_SIMILAR_DUPLICATES_ARG_DESCRIPTION = "withNearbySimilarDuplicates";
 
+    public static final String WITH_QUAY_PUBLIC_AND_PRIVATE_CODES = "withQuayPublicAndPrivateCodes";
+    public static final String WITH_QUAY_PUBLIC_AND_PRIVATE_CODES_DESCRIPTION = "Used in the reports export page to use the value of a search word also for matching quay private or public code";
+
     public static final String HAS_PARKING = "hasParking";
     public static final String ONLY_MONOMODAL_STOPPLACES = "onlyMonomodalStopPlaces";
     public static final String ONLY_MONOMODAL_STOPPLACES_DESCRIPTION = "Set to true to only return mono modal stop places.";

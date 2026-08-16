@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.entur.ror</groupId>
         <artifactId>superpom</artifactId>
-        <version>5.6.0</version>
+        <version>6.5.0</version>
     </parent>
     <groupId>org.rutebanken</groupId>
     <artifactId>tiamat</artifactId>
@@ -49,7 +49,7 @@
     </scm>
 
     <properties>
-        <java.version>21</java.version>
+        <java.version>25</java.version>
         <spring-cloud-gcp.version>5.13.11</spring-cloud-gcp.version>
         <geotools.version>30.2</geotools.version>
         <orika-core.version>1.5.4</orika-core.version>
@@ -57,22 +57,37 @@
         <graphql-java-extended-scalars.version>20.2</graphql-java-extended-scalars.version>
         <hazelcast-hibernate53.version>5.2.0</hazelcast-hibernate53.version>
         <hazelcast.version>5.2.5</hazelcast.version>
-        <swagger-jersey2.version>2.2.46</swagger-jersey2.version>
+        <swagger-jersey2.version>2.2.53</swagger-jersey2.version>
         <netex-java-model.version>2.0.16</netex-java-model.version>
-        <entur.helpers.version>5.50.0</entur.helpers.version>
+        <entur.helpers.version>7.2.0</entur.helpers.version>
         <jts-core.version>1.20.0</jts-core.version>
-        <groovy-all.version>4.0.31</groovy-all.version>
+        <groovy-all.version>4.0.33</groovy-all.version>
         <rest-assured.version>5.5.7</rest-assured.version>
-        <spring-cloud-aws-secrets-manager.version>3.1.1</spring-cloud-aws-secrets-manager.version>
-        <aws-secretsmanager.version>2.0.4</aws-secretsmanager.version>
+        <spring-cloud-aws.version>4.0.2</spring-cloud-aws.version>
+        <aws-secretsmanager.version>2.1.3</aws-secretsmanager.version>
         <argLine/>
 
         <xercesImpl.version>2.12.2</xercesImpl.version>
         <maven.compiler.args>--add-opens java.base/java.lang=ALL-UNNAMED</maven.compiler.args>
         <testcontainers.version>1.21.4</testcontainers.version>
         <build-helper-maven-plugin.version>3.6.1</build-helper-maven-plugin.version>
-        <metrics-graphite.version>4.2.38</metrics-graphite.version>
+        <metrics-graphite.version>4.2.39</metrics-graphite.version>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- Aligns all io.awspring.cloud:* artifacts (incl. transitive spring-cloud-aws-autoconfigure)
+                 to a single, Spring Boot 4 compatible version. Without this BOM, bumping only the
+                 starter version leaves the transitive autoconfigure unmanaged and prone to version skew. -->
+            <dependency>
+                <groupId>io.awspring.cloud</groupId>
+                <artifactId>spring-cloud-aws-dependencies</artifactId>
+                <version>${spring-cloud-aws.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
 
@@ -88,6 +103,10 @@
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-database-postgresql</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-flyway</artifactId>
         </dependency>
 
         <dependency>
@@ -172,6 +191,11 @@
             <groupId>com.hazelcast</groupId>
             <artifactId>hazelcast-spring</artifactId>
             <version>${hazelcast.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-hazelcast</artifactId>
         </dependency>
 
         <dependency>
@@ -286,6 +310,16 @@
         </dependency>
 
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webclient</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-config</artifactId>
         </dependency>
@@ -341,7 +375,11 @@
             <version>${testcontainers.version}</version>
             <scope>test</scope>
         </dependency>
-
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-restclient-test</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>xerces</groupId>
             <artifactId>xercesImpl</artifactId>
@@ -442,7 +480,6 @@
         <dependency>
             <groupId>io.awspring.cloud</groupId>
             <artifactId>spring-cloud-aws-starter-secrets-manager</artifactId>
-            <version>${spring-cloud-aws-secrets-manager.version}</version>
         </dependency>
         <!-- AWS: acquire and refresh jdbc credentials from Secrets Manager in cloud environments -->
         <dependency>
@@ -467,6 +504,15 @@
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <compilerArgs>
+                        <arg>-Xlint:-path</arg>
+                    </compilerArgs>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
@@ -555,7 +601,7 @@
             <plugin>
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
-                <version>3.5.1</version>
+                <version>3.5.2</version>
                 <dependencies>
                     <!-- Include jib-spring-boot-extension-maven to prevent spring-boot-devtools from being packaged.-->
                     <dependency>
@@ -566,7 +612,18 @@
                 </dependencies>
                 <configuration>
                     <from>
-                        <image>eclipse-temurin:21.0.1_12-jdk-alpine</image>
+                        <!-- JRE on glibc (noble), matching the runtime the Dockerfile image always ran on -->
+                        <image>eclipse-temurin:25.0.3_9-jre-noble</image>
+                        <platforms>
+                            <platform>
+                                <architecture>amd64</architecture>
+                                <os>linux</os>
+                            </platform>
+                            <platform>
+                                <architecture>arm64</architecture>
+                                <os>linux</os>
+                            </platform>
+                        </platforms>
                     </from>
                     <to>
                         <image>${env.CONTAINER_REPO}</image>
@@ -576,6 +633,8 @@
                         </auth>
                     </to>
                     <container>
+                        <user>2000:2000</user>
+                        <workingDirectory>/deployments</workingDirectory>
                         <!-- Same as EXPOSE, doesn't actually publish the ports but acts as documentation -->
                         <ports>
                             <port>8777</port>

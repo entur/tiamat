@@ -16,7 +16,6 @@
 package org.rutebanken.tiamat.model;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import org.locationtech.jts.geom.MultiPolygon;
 
@@ -26,7 +25,7 @@ import java.io.Serializable;
 public class PersistableMultiPolygon implements Serializable {
 
     @Id
-    @GeneratedValue(generator = "sequence_per_table_generator")
+    @PerTableSequence
     protected Long id;
 
     private MultiPolygon multiPolygon;

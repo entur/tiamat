@@ -106,7 +106,11 @@ public class FareZoneMapper extends CustomMapper<FareZone, org.rutebanken.tiamat
             if (Objects.equals(refType, "StopPlace")) {
                 return netexId;
             } else if (Objects.equals(refType, "ScheduledStopPoint")) {
-                return String.format("%s:StopPlace:%s", idParts[0], idParts[2]);
+                var id = idParts[2];
+                if (id.startsWith("S")) {
+                    id = id.substring(1);
+                }
+                return String.format("%s:StopPlace:%s", idParts[0], id);
             }
         }
         return null;

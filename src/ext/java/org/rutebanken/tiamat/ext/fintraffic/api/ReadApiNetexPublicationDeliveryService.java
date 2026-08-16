@@ -9,6 +9,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -25,19 +28,24 @@ public class ReadApiNetexPublicationDeliveryService {
     private static final String COLLECTION_TAG_SCHEDULED_STOP_POINTS = "<scheduledStopPoints/>";
     private static final String COLLECTION_TAG_STOP_ASSIGNMENTS = "<stopAssignments/>";
     private static final String COLLECTION_TAG_TOPOGRAPHIC_PLACES = "<topographicPlaces/>";
+    private static final String COLLECTION_TAG_TARIFF_ZONES = "<tariffZones/>";
     private static final String COLLECTION_TAG_STOP_PLACES = "<stopPlaces/>";
     private static final String COLLECTION_TAG_PARKINGS = "<parkings/>";
     private static final byte[] START_TAG_SCHEDULED_STOP_POINTS = "<scheduledStopPoints>".getBytes(StandardCharsets.UTF_8);
     private static final byte[] START_TAG_STOP_ASSIGNMENTS = "<stopAssignments>".getBytes(StandardCharsets.UTF_8);
     private static final byte[] START_TAG_TOPOGRAPHIC_PLACES = "<topographicPlaces>".getBytes(StandardCharsets.UTF_8);
+    private static final byte[] START_TAG_TARIFF_ZONES = "<tariffZones>".getBytes(StandardCharsets.UTF_8);
     private static final byte[] START_TAG_STOP_PLACES = "<stopPlaces>".getBytes(StandardCharsets.UTF_8);
     private static final byte[] START_TAG_PARKINGS = "<parkings>".getBytes(StandardCharsets.UTF_8);
     private static final byte[] END_TAG_SCHEDULED_STOP_POINTS = "</scheduledStopPoints>".getBytes(StandardCharsets.UTF_8);
     private static final byte[] END_TAG_STOP_ASSIGNMENTS = "</stopAssignments>".getBytes(StandardCharsets.UTF_8);
     private static final byte[] END_TAG_TOPOGRAPHIC_PLACES = "</topographicPlaces>".getBytes(StandardCharsets.UTF_8);
+    private static final byte[] END_TAG_TARIFF_ZONES = "</tariffZones>".getBytes(StandardCharsets.UTF_8);
     private static final byte[] END_TAG_STOP_PLACES = "</stopPlaces>".getBytes(StandardCharsets.UTF_8);
     private static final byte[] END_TAG_PARKINGS = "</parkings>".getBytes(StandardCharsets.UTF_8);
     private static final byte[] NEWLINE = "\n".getBytes(StandardCharsets.UTF_8);
+    private static final byte[] COLLECTION_TAG_SPACING = "            ".getBytes(StandardCharsets.UTF_8);
+    private static final byte[] COLLECTION_ITEM_TAG_SPACING = "                ".getBytes(StandardCharsets.UTF_8);
 
     private static final String TIMESTAMP_PLACEHOLDER = "\\{timeStamp}";
     private static final String PREFIX_PLACEHOLDER = "\\{prefix}";
@@ -64,6 +72,7 @@ public class ReadApiNetexPublicationDeliveryService {
                             </DefaultLocale>
                         </FrameDefaults>
                         <topographicPlaces/>
+                        <tariffZones/>
                         <stopPlaces/>
                         <parkings/>
                     </SiteFrame>
@@ -108,6 +117,7 @@ public class ReadApiNetexPublicationDeliveryService {
             case "ScheduledStopPoint" -> COLLECTION_TAG_SCHEDULED_STOP_POINTS;
             case "PassengerStopAssignment" -> COLLECTION_TAG_STOP_ASSIGNMENTS;
             case "TopographicPlace" -> COLLECTION_TAG_TOPOGRAPHIC_PLACES;
+            case "FareZone" -> COLLECTION_TAG_TARIFF_ZONES;
             case "StopPlace" -> COLLECTION_TAG_STOP_PLACES;
             case "Parking" -> COLLECTION_TAG_PARKINGS;
             default -> throw new IllegalArgumentException("Unsupported type for collection tag: " + type);
@@ -119,6 +129,7 @@ public class ReadApiNetexPublicationDeliveryService {
             case "ScheduledStopPoint" -> START_TAG_SCHEDULED_STOP_POINTS;
             case "PassengerStopAssignment" -> START_TAG_STOP_ASSIGNMENTS;
             case "TopographicPlace" -> START_TAG_TOPOGRAPHIC_PLACES;
+            case "FareZone" -> START_TAG_TARIFF_ZONES;
             case "StopPlace" -> START_TAG_STOP_PLACES;
             case "Parking" -> START_TAG_PARKINGS;
             default -> throw new IllegalArgumentException("Unsupported type for collection start tag: " + type);
@@ -130,6 +141,7 @@ public class ReadApiNetexPublicationDeliveryService {
             case "ScheduledStopPoint" -> END_TAG_SCHEDULED_STOP_POINTS;
             case "PassengerStopAssignment" -> END_TAG_STOP_ASSIGNMENTS;
             case "TopographicPlace" -> END_TAG_TOPOGRAPHIC_PLACES;
+            case "FareZone" -> END_TAG_TARIFF_ZONES;
             case "StopPlace" -> END_TAG_STOP_PLACES;
             case "Parking" -> END_TAG_PARKINGS;
             default -> throw new IllegalArgumentException("Unsupported type for collection end tag: " + type);
@@ -141,6 +153,7 @@ public class ReadApiNetexPublicationDeliveryService {
         if (trimmed.equals(COLLECTION_TAG_SCHEDULED_STOP_POINTS)
                 || trimmed.equals(COLLECTION_TAG_STOP_ASSIGNMENTS)
                 || trimmed.equals(COLLECTION_TAG_TOPOGRAPHIC_PLACES)
+                || trimmed.equals(COLLECTION_TAG_TARIFF_ZONES)
                 || trimmed.equals(COLLECTION_TAG_STOP_PLACES)
                 || trimmed.equals(COLLECTION_TAG_PARKINGS)) {
             return new byte[]{};
@@ -148,6 +161,14 @@ public class ReadApiNetexPublicationDeliveryService {
         return bytes;
     }
 
+    /**
+     * Streams a full NeTEx PublicationDelivery to the given output stream, incrementally writing
+     * stop place entities as they are read from the database. The transaction spans the entire
+     * method so that the underlying JDBC {@link java.sql.ResultSet} from
+     * {@link org.rutebanken.tiamat.ext.fintraffic.api.repository.NetexRepository#streamStopPlaces}
+     * remains open until all entities have been written.
+     */
+    @Transactional(isolation = Isolation.READ_COMMITTED, readOnly = true)
     public void streamPublicationDelivery(
             ReadApiSearchKey searchKey,
             OutputStream outputStream
@@ -163,11 +184,13 @@ public class ReadApiNetexPublicationDeliveryService {
             while (netexIterator.hasNext()) {
                 ReadApiEntityOutRecord netexEntityRow = netexIterator.next();
                 String type = netexEntityRow.type();
-                byte[] xmlEntity = netexEntityRow.xml();
+                String xmlEntity = netexEntityRow.xml();
+                String[] xmlEntityByLine = xmlEntity.split("\\n");
 
                 if (!Objects.equals(previousType, type)) {
                     // Close previous collection if needed
                     if (previousType != null) {
+                        outputStream.write(COLLECTION_TAG_SPACING);
                         outputStream.write(getCollectionEndTag(previousType));
                         outputStream.write(NEWLINE);
                     }
@@ -175,6 +198,7 @@ public class ReadApiNetexPublicationDeliveryService {
                     // Type has changed, need to move to the correct collection
                     while ((line = xmlReader.readLine()) != null) {
                         if (line.trim().equals(getCollectionTag(type))) {
+                            outputStream.write(COLLECTION_TAG_SPACING);
                             outputStream.write(getCollectionStartTag(type));
                             outputStream.write(NEWLINE);
                             break;
@@ -186,13 +210,23 @@ public class ReadApiNetexPublicationDeliveryService {
                     previousType = type;
                 }
 
-                outputStream.write(xmlEntity);
+                int i = 0;
+                for (String xmlEntityLine : xmlEntityByLine) {
+                    outputStream.write(COLLECTION_ITEM_TAG_SPACING);
+                    outputStream.write(xmlEntityLine.getBytes(StandardCharsets.UTF_8));
+                    i ++;
+                    if (i != xmlEntityByLine.length) {
+                        outputStream.write(NEWLINE);
+                    }
+                }
+
                 outputStream.write(NEWLINE);
                 entities++;
             }
 
             if (previousType != null) {
                 // Close last collection
+                outputStream.write(COLLECTION_TAG_SPACING);
                 outputStream.write(getCollectionEndTag(previousType));
                 outputStream.write(NEWLINE);
             }

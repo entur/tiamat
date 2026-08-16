@@ -266,8 +266,10 @@ public class FareZoneRepositoryImpl implements FareZoneRepositoryCustom {
         final Query explicitStopsQuery = entityManager.createNativeQuery(generateSqlQuery(true));
         final Query implicitStopsQuery = entityManager.createNativeQuery(generateSqlQuery(false));
 
-        explicitStopsQuery.executeUpdate();
-        implicitStopsQuery.executeUpdate();
+        final int executeUpdateExplictStops = explicitStopsQuery.executeUpdate();
+        logger.info("Updated {} explicit stop place tariff zone references(Farezone)", executeUpdateExplictStops);
+        final int executeUpdateImpilict = implicitStopsQuery.executeUpdate();
+        logger.info("Updated {} implicit stop place tariff zone references(Farezone)", executeUpdateImpilict);
     }
 
     private String generateSqlQuery(boolean explicitStops) {

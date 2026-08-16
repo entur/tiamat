@@ -8,17 +8,17 @@
 - **Organization**: Entur AS (Norwegian public transport authority)
 - **Repository**: https://github.com/entur/tiamat
 - **License**: EUPL-1.2 with modifications
-- **Main Language**: Java 21
-- **Framework**: Spring Boot 3.x
+- **Main Language**: Java 25
+- **Framework**: Spring Boot 4.x
 - **Build Tool**: Maven
 - **Main Package**: `org.rutebanken.tiamat`
 
 ## Technology Stack
 
 ### Core Technologies
-- **Java 21** (JDK 21.0.1+)
-- **Spring Boot** (latest 3.x version from parent superpom)
-- **Hibernate 6.5.3** (with Spatial extensions for PostGIS)
+- **Java 25** (JDK 25.0.3+)
+- **Spring Boot** (latest 4.x version from parent superpom)
+- **Hibernate 7.x** (with Spatial extensions for PostGIS)
 - **PostgreSQL + PostGIS** (geographic database)
 - **Jersey** (JAX-RS REST framework)
 - **GraphQL Java 20.9** (GraphQL API)
@@ -173,7 +173,7 @@ All entities are versioned and support NeTEx format:
 ## Development Setup
 
 ### Prerequisites
-- Java 21 JDK
+- Java 25 JDK
 - Maven 3+
 - Docker & Docker Compose
 - PostgreSQL with PostGIS (via Docker)

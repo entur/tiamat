@@ -17,9 +17,9 @@ package org.rutebanken.tiamat.model.identification;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.EntityListeners;
-import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
+import org.rutebanken.tiamat.model.PerTableSequence;
 import org.rutebanken.tiamat.repository.listener.IdentifiedEntityListener;
 
 @MappedSuperclass
@@ -27,7 +27,7 @@ import org.rutebanken.tiamat.repository.listener.IdentifiedEntityListener;
 public abstract class IdentifiedEntity {
 
     @Id
-    @GeneratedValue(generator = "sequence_per_table_generator")
+    @PerTableSequence
     protected Long id;
 
     protected String netexId;

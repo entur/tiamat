@@ -27,6 +27,7 @@ import org.rutebanken.tiamat.exporter.params.StopPlaceSearch;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.GroupOfStopPlaces;
 import org.rutebanken.tiamat.model.PurposeOfGrouping;
+import org.rutebanken.tiamat.model.SiteRefStructure;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopPlaceReference;
 import org.rutebanken.tiamat.model.TariffZone;
@@ -425,6 +426,95 @@ public class StreamingPublicationDeliveryIntegrationTest extends TiamatIntegrati
 
         List<org.rutebanken.netex.model.StopPlace> stopPlaces = publicationDeliveryTestHelper.extractStopPlaces(publicationDeliveryStructure);
         assertThat(stopPlaces).hasSize(2);
+    }
+
+    /**
+     * Reproduces the export failure where a multimodal parent stop references a topographic place
+     * that none of its children reference.
+     *
+     * The parent stop is appended to the export by {@link org.rutebanken.tiamat.exporter.async.ParentStopFetchingIterator}
+     * but is not part of the stop place search result (here the export is requested by the child id). Before the fix,
+     * topographic places were gathered only from the search result, so the parent's TopographicPlaceRef had no matching
+     * TopographicPlace in the document and the (schema validating) sync export threw a MarshalException
+     * (cvc-identity-constraint.4.3: Key 'TopographicPlace_KeyRef' ... not found).
+     */
+    @Test
+    public void exportMultimodalParentReferencingTopographicPlaceNotReferencedByChildren() throws Exception {
+
+        TopographicPlace county = new TopographicPlace(new EmbeddableMultilingualString("County"));
+        county.setTopographicPlaceType(TopographicPlaceTypeEnumeration.COUNTY);
+        county = topographicPlaceVersionedSaverService.saveNewVersion(county);
+
+        // Two versions of the same municipality. The parent references v1, the child references v2 -
+        // mirroring a parent left pointing at an older topographic place version than its children.
+        // Two distinct municipalities under the county. The parent references one, its child the other.
+        // (In production the same mismatch arises from a parent pointing at an older *version* of one
+        // municipality than its children - e.g. a pre-municipality-reform code.)
+        TopographicPlace parentMunicipality = new TopographicPlace(new EmbeddableMultilingualString("Parent municipality"));
+        parentMunicipality.setTopographicPlaceType(TopographicPlaceTypeEnumeration.MUNICIPALITY);
+        parentMunicipality.setParentTopographicPlaceRef(new TopographicPlaceRefStructure(county.getNetexId(), String.valueOf(county.getVersion())));
+        parentMunicipality = topographicPlaceVersionedSaverService.saveNewVersion(parentMunicipality);
+
+        TopographicPlace childMunicipality = new TopographicPlace(new EmbeddableMultilingualString("Child municipality"));
+        childMunicipality.setTopographicPlaceType(TopographicPlaceTypeEnumeration.MUNICIPALITY);
+        childMunicipality.setParentTopographicPlaceRef(new TopographicPlaceRefStructure(county.getNetexId(), String.valueOf(county.getVersion())));
+        childMunicipality = topographicPlaceVersionedSaverService.saveNewVersion(childMunicipality);
+
+        // Multimodal parent stop referencing the municipality that none of its children reference.
+        StopPlace parent = new StopPlace(new EmbeddableMultilingualString("Multimodal parent"));
+        parent.setParentStopPlace(true);
+        parent.setVersion(1L);
+        parent.setTopographicPlace(parentMunicipality);
+        stopPlaceRepository.save(parent);
+
+        // Child stop referencing the other municipality, linked to the parent via parentSiteRef.
+        StopPlace child = new StopPlace(new EmbeddableMultilingualString("Child stop"));
+        child.setVersion(1L);
+        child.setTopographicPlace(childMunicipality);
+        child.setParentSiteRef(new SiteRefStructure(parent.getNetexId(), String.valueOf(parent.getVersion())));
+        stopPlaceRepository.save(child);
+
+        stopPlaceRepository.flush();
+
+        ExportParams exportParams = ExportParams.newExportParamsBuilder()
+                .setStopPlaceSearch(
+                        StopPlaceSearch.newStopPlaceSearchBuilder()
+                                .setNetexIdList(List.of(child.getNetexId()))
+                                .setAllVersions(true)
+                                .build())
+                .setTopographicPlaceExportMode(ExportParams.ExportMode.RELEVANT)
+                .setTariffZoneExportMode(ExportParams.ExportMode.NONE)
+                .build();
+
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
+        // The sync streaming delivery validates against the schema, so before the fix this call itself throws
+        // (cvc-identity-constraint.4.3: Key 'TopographicPlace_KeyRef' ... not found).
+        streamingPublicationDelivery.stream(exportParams, byteArrayOutputStream);
+
+        String xml = byteArrayOutputStream.toString();
+
+        validate(xml);
+        netexXmlReferenceValidator.validateNetexReferences(new ByteArrayInputStream(xml.getBytes()), "publicationDelivery");
+
+        PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryUnmarshaller.unmarshal(new ByteArrayInputStream(xml.getBytes()));
+        org.rutebanken.netex.model.SiteFrame siteFrame = publicationDeliveryHelper.findSiteFrame(publicationDeliveryStructure);
+
+        // The parent stop must have been appended to the export.
+        List<org.rutebanken.netex.model.StopPlace> stops = siteFrame.getStopPlaces().getStopPlace_().stream()
+                .map(sp -> (org.rutebanken.netex.model.StopPlace) sp.getValue())
+                .toList();
+        assertThat(stops)
+                .as("both the searched child and its appended parent must be exported")
+                .extracting(org.rutebanken.netex.model.StopPlace::getId)
+                .contains(child.getNetexId(), parent.getNetexId());
+
+        // Both municipalities must be present: the one referenced by the child and the one referenced only by the parent.
+        assertThat(siteFrame.getTopographicPlaces()).isNotNull();
+        assertThat(siteFrame.getTopographicPlaces().getTopographicPlace())
+                .as("the topographic place referenced only by the parent must also be exported")
+                .extracting(org.rutebanken.netex.model.TopographicPlace::getId)
+                .contains(parentMunicipality.getNetexId(), childMunicipality.getNetexId());
     }
 
     private void validate(String xml) throws JAXBException, IOException, SAXException {

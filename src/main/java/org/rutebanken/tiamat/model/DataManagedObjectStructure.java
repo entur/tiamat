@@ -74,6 +74,31 @@ public abstract class DataManagedObjectStructure
         return keyValues.get(key).getItems();
     }
 
+    /**
+     * Returns the items for the given key, or an empty set if the key is absent.
+     * Unlike {@link #getOrCreateValues(String)}, this method never modifies
+     * the {@code keyValues} map — safe to call on Hibernate-managed entities
+     * and from {@code hashCode()}/{@code equals()}.
+     */
+    public Set<String> getValues(String key) {
+        Value value = keyValues.get(key);
+        return value != null ? value.getItems() : Set.of();
+    }
+
+    /**
+     * Returns the imported IDs ({@code imported-id} key) for this entity.
+     *
+     * <p><strong>Warning:</strong> this method calls {@link #getOrCreateValues(String)}, which
+     * inserts an empty {@link Value} entry into the Hibernate-managed {@code keyValues} map when
+     * the key is absent. This dirties the session even on read paths, and will cause a phantom
+     * INSERT into the key_values table on the next Hibernate auto-flush (e.g. before any native
+     * SQL or JPQL query in the same transaction). This has caused production duplicate-key
+     * violations twice — once via {@code hashCode()}/{@code equals()} (fixed in Quay) and once
+     * via {@code getOriginalIdsFetcher()} in the GraphQL schema.
+     *
+     * <p>For read-only access on Hibernate-managed entities use
+     * {@code getValues(NetexIdMapper.ORIGINAL_ID_KEY)} instead.
+     */
     public Set<String> getOriginalIds() {
         return getOrCreateValues(NetexIdMapper.ORIGINAL_ID_KEY);
     }

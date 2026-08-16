@@ -80,22 +80,22 @@ class FintrafficApiControllerTest {
 
         ReadApiEntityOutRecord scheduledStopPoint = new ReadApiEntityOutRecord(
                 "ScheduledStopPoint",
-                "<ScheduledStopPoint id=\"FSR:ScheduledStopPoint:1\" version=\"1\"/>".getBytes(StandardCharsets.UTF_8)
+                "<ScheduledStopPoint id=\"FSR:ScheduledStopPoint:1\" version=\"1\"/>"
         );
 
         ReadApiEntityOutRecord topographicPlace = new ReadApiEntityOutRecord(
                 "TopographicPlace",
-                "<TopographicPlace id=\"FSR:TopographicPlace:91\" version=\"1\"/>".getBytes(StandardCharsets.UTF_8)
+                "<TopographicPlace id=\"FSR:TopographicPlace:91\" version=\"1\"/>"
         );
 
         ReadApiEntityOutRecord stopPlace = new ReadApiEntityOutRecord(
                 "StopPlace",
-                "<StopPlace id=\"FSR:StopPlace:1\" version=\"1\"/>".getBytes(StandardCharsets.UTF_8)
+                "<StopPlace id=\"FSR:StopPlace:1\" version=\"1\"/>"
         );
 
         ReadApiEntityOutRecord parking = new ReadApiEntityOutRecord(
                 "Parking",
-                "<Parking id=\"FSR:Parking:1\" version=\"1\"/>".getBytes(StandardCharsets.UTF_8)
+                "<Parking id=\"FSR:Parking:1\" version=\"1\"/>"
         );
 
         when(netexRepository.streamStopPlaces(any(ReadApiSearchKey.class)))

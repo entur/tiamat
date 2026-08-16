@@ -11,6 +11,7 @@ import org.rutebanken.tiamat.exporter.params.TopographicPlaceSearch;
 import org.rutebanken.tiamat.model.GroupOfStopPlaces;
 import org.rutebanken.tiamat.model.Parking;
 import org.rutebanken.tiamat.model.Quay;
+import org.rutebanken.tiamat.model.SiteRefStructure;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.model.TopographicPlaceTypeEnumeration;
@@ -302,6 +303,25 @@ class FintrafficAuthorizationServiceTest {
         // Both disabled — all geographic edits denied
         assertThat(authorizationService.canEditEntity(getPoint(new Coordinate(0.5, 0.5))), equalTo(false));
         assertThat(authorizationService.canEditEntity(getPoint(new Coordinate(2.5, 2.5))), equalTo(false));
+    }
+
+    @Test
+    public void testCanEditEntityWithNullCentroidAndParentSiteRef() {
+        // Parking without centroid but with parentSiteRef — parent was already geographically authorized
+        Parking parkingWithoutGeometry = getParking("FSR:Parking:99", null);
+        parkingWithoutGeometry.setParentSiteRef(new SiteRefStructure("FSR:StopPlace:50"));
+
+        FintrafficAuthorizationService authorizationService = getAuthorizationService();
+        assertThat(authorizationService.canEditEntity(parkingWithoutGeometry), equalTo(true));
+    }
+
+    @Test
+    public void testCanEditEntityWithNullCentroidAndNoParent() {
+        // Entity without centroid and without parent — editing is denied
+        Parking parkingWithoutGeometry = getParking("FSR:Parking:99", null);
+
+        FintrafficAuthorizationService authorizationService = getAuthorizationService();
+        assertThat(authorizationService.canEditEntity(parkingWithoutGeometry), equalTo(false));
     }
 
     @Test

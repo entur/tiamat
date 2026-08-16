@@ -10,6 +10,7 @@ import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.exporter.params.TopographicPlaceSearch;
 import org.rutebanken.tiamat.model.EntityStructure;
 import org.rutebanken.tiamat.model.FareZone;
+import org.rutebanken.tiamat.model.Site_VersionStructure;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.rutebanken.tiamat.model.TopographicPlace;
@@ -167,7 +168,20 @@ public class FintrafficAuthorizationService implements AuthorizationService {
         }
 
         if (entity instanceof Zone_VersionStructure zone) {
-            return canEditEntity(zone.getCentroid(), logAuthorizationCheck);
+            Point centroid = zone.getCentroid();
+            if (centroid == null && entity instanceof Site_VersionStructure site && site.getParentSiteRef() != null) {
+                // Parent entity was already geographically authorized — skip geographic check for this child
+                return true;
+            }
+            if (centroid == null) {
+                // Allow administrators to edit entities with missing centroid
+                if (trivoreAuthorizations.hasAccess(ENTITY_TYPE_ALL, TRANSPORT_MODE_ALL, ADMINISTER)) {
+                    return true;
+                }
+                logger.warn("Entity {} has no centroid and no parent site ref — denying edit.", entity.getNetexId());
+                return false;
+            }
+            return canEditEntity(centroid, logAuthorizationCheck);
         }
         return true;
     }

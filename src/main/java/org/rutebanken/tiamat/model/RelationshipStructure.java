@@ -15,7 +15,6 @@
 
 package org.rutebanken.tiamat.model;
 
-import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
 
@@ -24,7 +23,7 @@ import jakarta.persistence.MappedSuperclass;
 public class RelationshipStructure {
 
     @Id
-    @GeneratedValue(generator = "sequence_per_table_generator")
+    @PerTableSequence
     protected String id;
 
     public String getId() {
