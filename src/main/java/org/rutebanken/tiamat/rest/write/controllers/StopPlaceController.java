@@ -28,6 +28,11 @@ import org.rutebanken.tiamat.rest.write.dto.StopPlaceJobDto;
     Rejections that a synchronous API would report as 400, such as malformed XML or an
     unsupported element, are therefore reported as a FAILED job with a reason. Poll the job
     endpoint to determine the outcome of a write.
+
+    Only the coarse check that the caller may use the write API at all is applied synchronously,
+    and it answers 403. The per entity authorization, which restricts a caller to certain stop
+    place types and administrative zones, runs during processing and is reported as a FAILED job.
+    An unauthorized write is therefore answered with 202 and fails afterwards.
     """
 )
 interface StopPlaceController {
@@ -104,7 +109,7 @@ interface StopPlaceController {
                 )
             ),
             @ApiResponse(responseCode = "400", description = "Request payload could not be read"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Missing the role required to use the write API"),
             @ApiResponse(responseCode = "413", description = "Payload exceeds the maximum supported size"),
             @ApiResponse(responseCode = "503", description = "Job queue full"),
         }
@@ -168,7 +173,7 @@ interface StopPlaceController {
                 )
             ),
             @ApiResponse(responseCode = "400", description = "Request payload could not be read"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Missing the role required to use the write API"),
             @ApiResponse(responseCode = "413", description = "Payload exceeds the maximum supported size"),
             @ApiResponse(responseCode = "503", description = "Job queue full"),
         }
@@ -198,7 +203,7 @@ interface StopPlaceController {
                 )
             ),
             @ApiResponse(responseCode = "404", description = "Stop place by NeTEx ID not found"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Missing the role required to use the write API"),
             @ApiResponse(responseCode = "503", description = "Job queue full"),
         }
     )
