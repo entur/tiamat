@@ -12,6 +12,8 @@ import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
+import org.rutebanken.tiamat.netex.mapping.NetexMappingContext;
+import org.rutebanken.tiamat.netex.mapping.NetexMappingContextThreadLocal;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.rest.validation.StopPlaceMutationValidator;
 import org.rutebanken.tiamat.rest.write.mapper.CreateStopPlaceMapper;
@@ -19,6 +21,7 @@ import org.rutebanken.tiamat.service.stopplace.StopPlaceTerminator;
 import org.rutebanken.tiamat.versioning.VersionCreator;
 import org.rutebanken.tiamat.versioning.save.StopPlaceVersionedSaverService;
 
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -182,6 +185,67 @@ class StopPlaceWriteDomainServiceTest {
         verify(validator).validateStopPlaceUpdate(stopPlaceId, false);
         verify(validator).validateStopPlaceMutation(updatedTiamatStopPlace);
         verify(stopPlaceVersionedSaverService, never()).saveNewVersion(any(), any());
+    }
+
+    /**
+     * The mapping runs on the async worker thread, not the HTTP request thread, so the
+     * processing unit must establish its own NetexMappingContext. Otherwise
+     * ValidBetweenConverter dereferences a null context and every payload containing
+     * ValidBetween fails.
+     */
+    @Test
+    void createStopPlace_EstablishesNetexMappingContextBeforeMapping() {
+        NetexMappingContextThreadLocal.set(null);
+
+        org.rutebanken.netex.model.StopPlace newNetexStopPlace = createNetexStopPlace(null, "New Stop", 1L);
+        StopPlace mappedStopPlace = createTiamatStopPlace(null, "New Stop", 1L);
+        StopPlace cleanStopPlace = createTiamatStopPlace(null, "New Stop", 1L);
+        StopPlace savedStopPlace = createTiamatStopPlace("NSR:StopPlace:200", "New Stop", 1L);
+
+        AtomicReference<NetexMappingContext> contextDuringMapping = new AtomicReference<>();
+        when(netexMapper.mapToTiamatModel(newNetexStopPlace)).thenAnswer(invocation -> {
+            contextDuringMapping.set(NetexMappingContextThreadLocal.get());
+            return mappedStopPlace;
+        });
+        when(createStopPlaceMapper.createCopy(eq(mappedStopPlace), eq(StopPlace.class))).thenReturn(cleanStopPlace);
+        when(stopPlaceVersionedSaverService.saveNewVersion(cleanStopPlace)).thenReturn(savedStopPlace);
+
+        domainService.createStopPlace(newNetexStopPlace);
+
+        assertNotNull(
+            contextDuringMapping.get(),
+            "NetexMappingContext must be set on the thread performing the mapping"
+        );
+        assertNotNull(contextDuringMapping.get().defaultTimeZone);
+    }
+
+    @Test
+    void updateStopPlace_EstablishesNetexMappingContextBeforeMapping() {
+        NetexMappingContextThreadLocal.set(null);
+
+        String stopPlaceId = "NSR:StopPlace:100";
+        StopPlace existingStopPlace = createTiamatStopPlace(stopPlaceId, "Old Name", 1L);
+        StopPlace updatedTiamatStopPlace = createTiamatStopPlace(stopPlaceId, "New Name", 1L);
+        org.rutebanken.netex.model.StopPlace updatedNetexStopPlace = createNetexStopPlace(stopPlaceId, "New Name", 1L);
+        StopPlace savedStopPlace = createTiamatStopPlace(stopPlaceId, "New Name", 2L);
+
+        AtomicReference<NetexMappingContext> contextDuringMapping = new AtomicReference<>();
+        when(validator.validateStopPlaceUpdate(stopPlaceId, false)).thenReturn(existingStopPlace);
+        when(netexMapper.mapToTiamatModel(updatedNetexStopPlace)).thenAnswer(invocation -> {
+            contextDuringMapping.set(NetexMappingContextThreadLocal.get());
+            return updatedTiamatStopPlace;
+        });
+        when(versionCreator.createCopy(existingStopPlace, StopPlace.class)).thenReturn(updatedTiamatStopPlace);
+        when(stopPlaceVersionedSaverService.saveNewVersion(eq(existingStopPlace), eq(updatedTiamatStopPlace), anySet()))
+            .thenReturn(savedStopPlace);
+
+        domainService.updateStopPlace(updatedNetexStopPlace);
+
+        assertNotNull(
+            contextDuringMapping.get(),
+            "NetexMappingContext must be set on the thread performing the mapping"
+        );
+        assertNotNull(contextDuringMapping.get().defaultTimeZone);
     }
 
     private StopPlace createTiamatStopPlace(String netexId, String name, Long version) {

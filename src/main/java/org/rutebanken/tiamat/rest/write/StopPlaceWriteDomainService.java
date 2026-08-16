@@ -1,9 +1,13 @@
 package org.rutebanken.tiamat.rest.write;
 
+import org.rutebanken.netex.model.LocaleStructure;
+import org.rutebanken.netex.model.SiteFrame;
+import org.rutebanken.netex.model.VersionFrameDefaultsStructure;
 import org.rutebanken.tiamat.lock.MutateLock;
 import org.rutebanken.tiamat.model.ModificationEnumeration;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
+import org.rutebanken.tiamat.netex.mapping.NetexMappingContextThreadLocal;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
 import org.rutebanken.tiamat.rest.validation.StopPlaceMutationValidator;
 import org.rutebanken.tiamat.rest.write.mapper.CreateStopPlaceMapper;
@@ -17,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.Set;
+import java.util.TimeZone;
 
 @Service
 public class StopPlaceWriteDomainService {
@@ -59,8 +64,26 @@ public class StopPlaceWriteDomainService {
         return stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlaceId);
     }
 
+    /**
+     * The NetexMappingContext must be established on the thread that performs the mapping.
+     * This service runs on a worker thread (async executor today, a message subscriber later),
+     * not on the thread that accepted the request, so the context cannot be inherited from the
+     * caller. Set unconditionally: worker threads are pooled and may hold a context from a
+     * previous task.
+     */
+    private void establishNetexMappingContext() {
+        NetexMappingContextThreadLocal.updateMappingContext(
+                new SiteFrame().withFrameDefaults(
+                        new VersionFrameDefaultsStructure().withDefaultLocale(
+                                new LocaleStructure().withTimeZone(TimeZone.getDefault().getID())
+                        )
+                )
+        );
+    }
+
     @Transactional
     public StopPlace createStopPlace(org.rutebanken.netex.model.StopPlace newStopPlace) {
+        establishNetexMappingContext();
         var tiamatStopPlace = netexMapper.mapToTiamatModel(newStopPlace);
         var cleanStopPlace = createStopPlaceMapper.createCopy(tiamatStopPlace, StopPlace.class);
 
@@ -70,6 +93,7 @@ public class StopPlaceWriteDomainService {
 
     @Transactional
     public StopPlace updateStopPlace(org.rutebanken.netex.model.StopPlace newStopPlace) {
+        establishNetexMappingContext();
         return mutateLock.executeInLock(() -> {
             var existingStopPlace = stopPlaceMutationValidator.validateStopPlaceUpdate(
                     newStopPlace.getId(),

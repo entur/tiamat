@@ -4,12 +4,8 @@ import jakarta.transaction.Transactional;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.ServiceUnavailableException;
 import jakarta.ws.rs.core.StreamingOutput;
-import org.rutebanken.netex.model.LocaleStructure;
-import org.rutebanken.netex.model.SiteFrame;
-import org.rutebanken.netex.model.VersionFrameDefaultsStructure;
 import org.rutebanken.tiamat.model.job.AsyncStopPlaceJob;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
-import org.rutebanken.tiamat.netex.mapping.NetexMappingContextThreadLocal;
 import org.rutebanken.tiamat.rest.write.async.StopPlaceAsyncProcessor;
 import org.rutebanken.tiamat.rest.write.dto.StopPlaceJobDto;
 import org.rutebanken.tiamat.rest.write.dto.StopPlacesDto;
@@ -18,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
-import java.util.TimeZone;
 import java.util.concurrent.RejectedExecutionException;
 
 @Service
@@ -47,7 +42,6 @@ public class StopPlaceWriteService {
 
     @Transactional
     public StreamingOutput getStopPlace(String netexId) {
-        updateMappingContext();
         var tiamatStopPlace = Optional.ofNullable(stopPlaceWriteDomainService.getStopPlace(netexId))
                 .orElseThrow(() -> new NotFoundException("Stop place not found: " + netexId));
         org.rutebanken.netex.model.StopPlace netexStopPlace =
@@ -56,7 +50,6 @@ public class StopPlaceWriteService {
     }
 
     public StopPlaceJobDto createStopPlaces(StopPlacesDto dto) {
-        updateMappingContext();
         var job = jobService.createJob();
         try {
             asyncProcessor.processCreateStopPlace(job.getId(), dto);
@@ -71,7 +64,6 @@ public class StopPlaceWriteService {
     }
 
     public StopPlaceJobDto updateStopPlace(StopPlacesDto dto) {
-        updateMappingContext();
         var job = jobService.createJob();
         try {
             asyncProcessor.processUpdateStopPlace(job.getId(), dto);
@@ -95,18 +87,6 @@ public class StopPlaceWriteService {
         } catch (Exception e) {
             return StopPlaceJobDto.from(
                     jobService.fail(job.getId(), e)
-            );
-        }
-    }
-
-    private void updateMappingContext() {
-        if (NetexMappingContextThreadLocal.get() == null) {
-            NetexMappingContextThreadLocal.updateMappingContext(
-                    new SiteFrame().withFrameDefaults(
-                            new VersionFrameDefaultsStructure().withDefaultLocale(
-                                    new LocaleStructure().withTimeZone(TimeZone.getDefault().getID())
-                            )
-                    )
             );
         }
     }
