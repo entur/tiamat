@@ -192,6 +192,12 @@ public class DefaultAuthorizationService implements AuthorizationService {
 
     @Override
     public boolean canUseWriteApi() {
+        // Consistent with the rest of the stack, where disabled authorization is permissive.
+        // Unlike other checks this one is reached through @PreAuthorize, so there is no call
+        // site that can skip it when authorization is turned off.
+        if (!authorizationEnabled) {
+            return true;
+        }
         if (hasNoAuthentications()) {
             return false;
         }
