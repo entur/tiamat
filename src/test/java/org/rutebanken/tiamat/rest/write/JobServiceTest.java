@@ -8,6 +8,7 @@ import org.rutebanken.tiamat.model.job.AsyncStopPlaceJobStatus;
 import org.rutebanken.tiamat.model.job.StopPlaceIdMapping;
 import org.rutebanken.tiamat.repository.AsyncStopPlaceJobRepository;
 
+import java.time.Instant;
 import java.util.Optional;
 import java.util.concurrent.RejectedExecutionException;
 
@@ -37,6 +38,23 @@ public class JobServiceTest {
         ArgumentCaptor<AsyncStopPlaceJob> captor = ArgumentCaptor.forClass(AsyncStopPlaceJob.class);
         verify(repository).save(captor.capture());
         assertThat(captor.getValue().getCreatedBy()).isEqualTo("alice");
+    }
+
+    /**
+     * Without a creation time the table cannot be purged on a retention policy, and a reaper
+     * cannot tell a job that is genuinely in progress from one orphaned by a restart.
+     */
+    @Test
+    public void shouldRecordCreationTimeOnNewJob() {
+        Instant before = Instant.now();
+
+        jobService.createJob();
+
+        ArgumentCaptor<AsyncStopPlaceJob> captor = ArgumentCaptor.forClass(AsyncStopPlaceJob.class);
+        verify(repository).save(captor.capture());
+        assertThat(captor.getValue().getCreatedAt())
+                .isNotNull()
+                .isBetween(before, Instant.now());
     }
 
     @Test

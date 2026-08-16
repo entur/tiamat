@@ -9,6 +9,7 @@ import jakarta.persistence.Id;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
@@ -34,6 +35,9 @@ public class AsyncStopPlaceJob {
 
     @Schema(description = "Username of the principal that submitted the job")
     private String createdBy;
+
+    @Schema(description = "When the job was submitted")
+    private Instant createdAt;
 
     public Long getId() {
         return id;
@@ -73,5 +77,13 @@ public class AsyncStopPlaceJob {
 
     public void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
+    }
+
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Instant createdAt) {
+        this.createdAt = createdAt;
     }
 }

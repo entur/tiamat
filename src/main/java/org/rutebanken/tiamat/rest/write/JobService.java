@@ -9,6 +9,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -31,6 +32,7 @@ public class JobService {
         job.setStatus(AsyncStopPlaceJobStatus.PROCESSING);
         job.setCreatedIds(Collections.emptyList());
         job.setCreatedBy(usernameFetcher.getUserNameForAuthenticatedUser());
+        job.setCreatedAt(Instant.now());
         return repo.save(job);
     }
 
