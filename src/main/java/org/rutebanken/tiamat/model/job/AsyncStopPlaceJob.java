@@ -32,6 +32,9 @@ public class AsyncStopPlaceJob {
     @Schema(description = "Reason for failure if the job has failed")
     private String reason;
 
+    @Schema(description = "Username of the principal that submitted the job")
+    private String createdBy;
+
     public Long getId() {
         return id;
     }
@@ -62,5 +65,13 @@ public class AsyncStopPlaceJob {
 
     public void setReason(String errorMessage) {
         this.reason = errorMessage;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
     }
 }

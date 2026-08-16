@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.rest.write;
 
+import org.rutebanken.tiamat.auth.UsernameFetcher;
 import org.rutebanken.tiamat.model.job.AsyncStopPlaceJob;
 import org.rutebanken.tiamat.model.job.AsyncStopPlaceJobStatus;
 import org.rutebanken.tiamat.model.job.StopPlaceIdMapping;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.RejectedExecutionException;
 
@@ -17,20 +19,30 @@ import java.util.concurrent.RejectedExecutionException;
 public class JobService {
 
     private final AsyncStopPlaceJobRepository repo;
+    private final UsernameFetcher usernameFetcher;
 
-    public JobService(AsyncStopPlaceJobRepository repo) {
+    public JobService(AsyncStopPlaceJobRepository repo, UsernameFetcher usernameFetcher) {
         this.repo = repo;
+        this.usernameFetcher = usernameFetcher;
     }
 
     public AsyncStopPlaceJob createJob() {
         var job = new AsyncStopPlaceJob();
         job.setStatus(AsyncStopPlaceJobStatus.PROCESSING);
         job.setCreatedIds(Collections.emptyList());
+        job.setCreatedBy(usernameFetcher.getUserNameForAuthenticatedUser());
         return repo.save(job);
     }
 
+    /**
+     * Job ids are sequential, so a job is only returned to the principal that submitted it.
+     * Jobs belonging to someone else are reported as absent rather than forbidden, so that
+     * callers cannot probe which ids exist.
+     */
     public Optional<AsyncStopPlaceJob> getJob(Long jobId) {
-        return repo.findById(jobId);
+        String currentUser = usernameFetcher.getUserNameForAuthenticatedUser();
+        return repo.findById(jobId)
+                .filter(job -> Objects.equals(job.getCreatedBy(), currentUser));
     }
 
     public void succeed(Long id, List<StopPlaceIdMapping> createdStopPlaceIds) {

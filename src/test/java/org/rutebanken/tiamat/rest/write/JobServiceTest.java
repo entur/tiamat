@@ -2,6 +2,7 @@ package org.rutebanken.tiamat.rest.write;
 
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.rutebanken.tiamat.auth.UsernameFetcher;
 import org.rutebanken.tiamat.model.job.AsyncStopPlaceJob;
 import org.rutebanken.tiamat.model.job.AsyncStopPlaceJobStatus;
 import org.rutebanken.tiamat.model.job.StopPlaceIdMapping;
@@ -23,7 +24,64 @@ public class JobServiceTest {
         AsyncStopPlaceJobRepository.class
     );
 
-    private final JobService jobService = new JobService(repository);
+    private final UsernameFetcher usernameFetcher = mock(UsernameFetcher.class);
+
+    private final JobService jobService = new JobService(repository, usernameFetcher);
+
+    @Test
+    public void shouldRecordSubmittingUserOnNewJob() {
+        when(usernameFetcher.getUserNameForAuthenticatedUser()).thenReturn("alice");
+
+        jobService.createJob();
+
+        ArgumentCaptor<AsyncStopPlaceJob> captor = ArgumentCaptor.forClass(AsyncStopPlaceJob.class);
+        verify(repository).save(captor.capture());
+        assertThat(captor.getValue().getCreatedBy()).isEqualTo("alice");
+    }
+
+    @Test
+    public void shouldNotReturnJobSubmittedByAnotherUser() {
+        AsyncStopPlaceJob job = new AsyncStopPlaceJob();
+        job.setCreatedBy("alice");
+        when(repository.findById(1L)).thenReturn(Optional.of(job));
+        when(usernameFetcher.getUserNameForAuthenticatedUser()).thenReturn("bob");
+
+        assertThat(jobService.getJob(1L)).isEmpty();
+    }
+
+    @Test
+    public void shouldReturnJobSubmittedByTheSameUser() {
+        AsyncStopPlaceJob job = new AsyncStopPlaceJob();
+        job.setCreatedBy("alice");
+        when(repository.findById(1L)).thenReturn(Optional.of(job));
+        when(usernameFetcher.getUserNameForAuthenticatedUser()).thenReturn("alice");
+
+        assertThat(jobService.getJob(1L)).contains(job);
+    }
+
+    /**
+     * With authorization disabled there is no username, and jobs are stored without one, so
+     * an unauthenticated deployment keeps working. A job that does have an owner stays
+     * inaccessible to a caller without one.
+     */
+    @Test
+    public void shouldReturnUnownedJobWhenThereIsNoAuthenticatedUser() {
+        AsyncStopPlaceJob job = new AsyncStopPlaceJob();
+        when(repository.findById(1L)).thenReturn(Optional.of(job));
+        when(usernameFetcher.getUserNameForAuthenticatedUser()).thenReturn(null);
+
+        assertThat(jobService.getJob(1L)).contains(job);
+    }
+
+    @Test
+    public void shouldNotReturnOwnedJobWhenThereIsNoAuthenticatedUser() {
+        AsyncStopPlaceJob job = new AsyncStopPlaceJob();
+        job.setCreatedBy("alice");
+        when(repository.findById(1L)).thenReturn(Optional.of(job));
+        when(usernameFetcher.getUserNameForAuthenticatedUser()).thenReturn(null);
+
+        assertThat(jobService.getJob(1L)).isEmpty();
+    }
 
     @Test
     public void shouldCreateJob() {
