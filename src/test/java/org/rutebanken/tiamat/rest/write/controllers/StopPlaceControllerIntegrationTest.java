@@ -285,6 +285,20 @@ public class StopPlaceControllerIntegrationTest extends TiamatIntegrationTest {
         assertThat(finalJob.errorMessage()).contains("NotAValidTag");
     }
 
+    /**
+     * The endpoint declares @Produces(application/xml), so the mapped error response is written
+     * as XML. ErrorResponseEntity is @XmlRootElement annotated and relies on the JAXB message
+     * body writer for that; without it Jersey cannot serialise the response and answers 500
+     * instead of the mapped status.
+     */
+    @Test
+    public void getUnknownStopPlaceReturnsNotFound() {
+        ResponseEntity<String> response = restTemplate.getForEntity(
+                WRITE_ENDPOINT + "/NSR:StopPlace:99999999", String.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
     @Test
     public void getStopPlaceReturnsXml() {
         StopPlace stopPlace = new StopPlace(
