@@ -146,7 +146,9 @@ public class StopPlaceMutationValidatorTest {
 
         assertThatThrownBy(() -> stopPlaceMutationValidator.validateStopPlaceUpdate(existingStopPlace.getNetexId(), false))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Cannot update/reactivate terminated stop place");
+                .hasMessageContaining("Cannot update/reactivate terminated stop place")
+                .as("the existing stop place may belong to someone else, so only its id may be surfaced")
+                .hasMessageNotContaining("StopPlace{");
     }
 
     @Test
@@ -211,7 +213,9 @@ public class StopPlaceMutationValidatorTest {
 
         assertThatThrownBy(() -> stopPlaceMutationValidator.validateStopPlaceMutation(mutatedStopPlace))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Stop place must have name set: StopPlace{netexId=id, version=0, keyValues={}, quays=[], isParentStopPlace=false, children=0}");
+                .hasMessageContaining("Stop place must have name set: id")
+                .as("the failure reason is surfaced to the caller, so it must identify the stop place without dumping the entity")
+                .hasMessageNotContaining("StopPlace{");
     }
 
     @Test

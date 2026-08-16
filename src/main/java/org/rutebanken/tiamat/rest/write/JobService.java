@@ -19,6 +19,8 @@ import java.util.concurrent.RejectedExecutionException;
 @Service
 public class JobService {
 
+    private static final String GENERIC_REASON = "An unexpected error occurred.";
+
     private final AsyncStopPlaceJobRepository repo;
     private final UsernameFetcher usernameFetcher;
 
@@ -61,9 +63,16 @@ public class JobService {
         return repo.save(job);
     }
 
+    /**
+     * The reason is returned to the caller, so only messages meant for them are surfaced.
+     * IllegalArgumentException carries the validation feedback for the submitted payload and is
+     * the only explanation a caller gets for a failed write, since the payload is no longer
+     * validated on the request thread. Everything else is reported generically, because the
+     * message may describe internals.
+     */
     private String formatException(Exception e) {
         if (e instanceof IllegalArgumentException) {
-            return e.getMessage();
+            return e.getMessage() != null ? e.getMessage() : GENERIC_REASON;
         } else if (e instanceof AccessDeniedException) {
             return "You do not have permission to perform this operation.";
         } else if (e instanceof RejectedExecutionException) {
@@ -71,6 +80,6 @@ public class JobService {
         } else if (e instanceof DataIntegrityViolationException) {
             return "A database constraint was violated. This may be due to invalid input data or a conflict with existing data.";
         }
-        return "An unexpected error occurred.";
+        return GENERIC_REASON;
     }
 }

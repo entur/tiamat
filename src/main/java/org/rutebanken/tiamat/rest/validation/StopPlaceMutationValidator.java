@@ -71,7 +71,7 @@ public class StopPlaceMutationValidator {
     public void validateStopPlaceName(StopPlace stopPlace) throws IllegalArgumentException {
         Preconditions.checkArgument(
                 stopPlace.getName() != null && !Strings.isNullOrEmpty(stopPlace.getName().getValue()),
-                "Stop place must have name set: %s", stopPlace
+                "Stop place must have name set: %s", stopPlace.getNetexId()
         );
     }
 
@@ -132,7 +132,7 @@ public class StopPlaceMutationValidator {
         Preconditions.checkArgument(
                 stopPlace.getModificationEnumeration() == null ||
                         !stopPlace.getModificationEnumeration().equals(ModificationEnumeration.DELETE),
-                "Cannot update/reactivate terminated stop place: %s", stopPlace
+                "Cannot update/reactivate terminated stop place: %s", stopPlace.getNetexId()
         );
     }
 

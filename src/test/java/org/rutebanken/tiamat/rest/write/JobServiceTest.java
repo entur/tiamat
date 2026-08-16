@@ -195,6 +195,22 @@ public class JobServiceTest {
         assertThat(saved.getReason()).isEqualTo("Invalid input");
     }
 
+    /**
+     * The reason is the only explanation a caller gets for a failed write, so a message-less
+     * exception must not leave it empty.
+     */
+    @Test
+    public void shouldFallBackToGenericReasonWhenExceptionHasNoMessage() {
+        AsyncStopPlaceJob job = new AsyncStopPlaceJob();
+        when(repository.findById(1L)).thenReturn(Optional.of(job));
+
+        jobService.fail(1L, new IllegalArgumentException());
+
+        ArgumentCaptor<AsyncStopPlaceJob> captor = ArgumentCaptor.forClass(AsyncStopPlaceJob.class);
+        verify(repository).save(captor.capture());
+        assertThat(captor.getValue().getReason()).isEqualTo("An unexpected error occurred.");
+    }
+
     @Test
     public void shouldFormatRejectionExecutionReason() {
         RejectedExecutionException exception = new RejectedExecutionException(
