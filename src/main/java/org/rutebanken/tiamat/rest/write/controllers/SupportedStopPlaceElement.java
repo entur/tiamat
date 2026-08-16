@@ -1,6 +1,5 @@
 package org.rutebanken.tiamat.rest.write.controllers;
 
-import org.rutebanken.tiamat.jersey.interceptor.XmlWhitelist;
 import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
@@ -11,7 +10,7 @@ import java.util.Set;
  * Element not listed here will cause a rejection.
  */
 @Component
-public class SupportedStopPlaceElement implements XmlWhitelist.XmlWhitelistProvider {
+public class SupportedStopPlaceElement {
 
     private static final String STOP_PLACE = "stopPlaces/StopPlace";
     private static final String QUAY = STOP_PLACE + "/quays/Quay";
@@ -19,7 +18,6 @@ public class SupportedStopPlaceElement implements XmlWhitelist.XmlWhitelistProvi
 
     private static final Set<String> ALLOWED_PATHS = buildAllowedPaths();
 
-    @Override
     public Set<String> allowedPaths() {
         return ALLOWED_PATHS;
     }

@@ -127,8 +127,12 @@ public class StopPlaceControllerIntegrationTest extends TiamatIntegrationTest {
         );
     }
 
+    /**
+     * The payload is not parsed on the request thread, so a malformed body is accepted with 202
+     * and reported as a failed job rather than as a 400.
+     */
     @Test
-    public void createStopPlaceWithMalformedXmlReturnsBadRequest() {
+    public void createStopPlaceWithMalformedXmlReturnsFailedJob() throws InterruptedException {
         String xml = """
             <stopPlaces xmlns="http://www.netex.org.uk/netex">
                 <StopPlace version="1">
@@ -136,13 +140,17 @@ public class StopPlaceControllerIntegrationTest extends TiamatIntegrationTest {
             </stopPlaces>
             """;
 
-        ResponseEntity<String> response = postXml(xml, String.class);
+        ResponseEntity<StopPlaceJobDto> response = postXml(xml, StopPlaceJobDto.class);
 
-        assertThat(response.getStatusCode().is4xxClientError()).isTrue();
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
+        StopPlaceJobDto finalJob = awaitJobCompletion(response.getBody().jobId());
+
+        assertThat(finalJob.status()).isEqualTo(AsyncStopPlaceJobStatus.FAILED);
+        assertThat(finalJob.errorMessage()).contains("Malformed XML");
     }
 
     @Test
-    public void createStopPlaceWithUnsupportedXmlReturnsBadRequest() {
+    public void createStopPlaceWithUnsupportedXmlReturnsFailedJob() throws InterruptedException {
         String xml = """
             <stopPlaces xmlns="http://www.netex.org.uk/netex">
                 <StopPlace version="1">
@@ -153,9 +161,13 @@ public class StopPlaceControllerIntegrationTest extends TiamatIntegrationTest {
             </stopPlaces>
             """;
 
-        ResponseEntity<String> response = postXml(xml, String.class);
+        ResponseEntity<StopPlaceJobDto> response = postXml(xml, StopPlaceJobDto.class);
 
-        assertThat(response.getStatusCode().is4xxClientError()).isTrue();
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
+        StopPlaceJobDto finalJob = awaitJobCompletion(response.getBody().jobId());
+
+        assertThat(finalJob.status()).isEqualTo(AsyncStopPlaceJobStatus.FAILED);
+        assertThat(finalJob.errorMessage()).contains("notAValidTag");
     }
 
     @Test
@@ -235,7 +247,7 @@ public class StopPlaceControllerIntegrationTest extends TiamatIntegrationTest {
 
 
     @Test
-    public void updateStopPlaceWithUnsupportedXmlReturnsBadRequest() {
+    public void updateStopPlaceWithUnsupportedXmlReturnsFailedJob() throws InterruptedException {
         StopPlace stopPlace = new StopPlace(
                 new EmbeddableMultilingualString("Original Name")
         );
@@ -264,9 +276,13 @@ public class StopPlaceControllerIntegrationTest extends TiamatIntegrationTest {
                 saved.getNetexId()
         );
 
-        ResponseEntity<String> response = putXml(xml, String.class);
+        ResponseEntity<StopPlaceJobDto> response = putXml(xml, StopPlaceJobDto.class);
 
-        assertThat(response.getStatusCode().is4xxClientError()).isTrue();
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
+        StopPlaceJobDto finalJob = awaitJobCompletion(response.getBody().jobId());
+
+        assertThat(finalJob.status()).isEqualTo(AsyncStopPlaceJobStatus.FAILED);
+        assertThat(finalJob.errorMessage()).contains("NotAValidTag");
     }
 
     @Test

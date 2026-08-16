@@ -1,6 +1,5 @@
 package org.rutebanken.tiamat.jersey.interceptor;
 
-import jakarta.ws.rs.BadRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -53,7 +52,7 @@ public class XmlPathValidator {
     private static void validateLeafElement(String path, Set<String> allowedPaths) {
         if (!allowedPaths.contains(path)) {
             logger.warn("XML field not allowed: " + path);
-            throw new BadRequestException("XML field not allowed: " + path);
+            throw new IllegalArgumentException("XML field not allowed: " + path);
         }
     }
 
@@ -79,7 +78,7 @@ public class XmlPathValidator {
             return factory.newDocumentBuilder().parse(new ByteArrayInputStream(xml));
         } catch (Exception e) {
             logger.warn("Receieved malformed XML");
-            throw new BadRequestException("Malformed XML: " + e.getMessage());
+            throw new IllegalArgumentException("Malformed XML: " + e.getMessage());
         }
     }
 }

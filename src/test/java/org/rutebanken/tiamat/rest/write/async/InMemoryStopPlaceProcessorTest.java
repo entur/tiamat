@@ -11,6 +11,7 @@ import org.rutebanken.netex.model.SiteRefStructure;
 import org.rutebanken.netex.model.StopPlace;
 import org.rutebanken.tiamat.model.job.StopPlaceIdMapping;
 import org.rutebanken.tiamat.rest.write.JobService;
+import org.rutebanken.tiamat.rest.write.StopPlacesPayloadUnmarshaller;
 import org.rutebanken.tiamat.rest.write.StopPlaceWriteDomainService;
 import org.rutebanken.tiamat.rest.write.dto.StopPlacesDto;
 
@@ -33,13 +34,17 @@ class InMemoryStopPlaceProcessorTest {
     @Mock
     private StopPlaceWriteDomainService domainService;
 
+    @Mock
+    private StopPlacesPayloadUnmarshaller payloadUnmarshaller;
+
     private InMemoryStopPlaceProcessor processor;
 
     private static final Long JOB_ID = 42L;
+    private static final byte[] PAYLOAD = "<stopPlaces/>".getBytes(java.nio.charset.StandardCharsets.UTF_8);
 
     @BeforeEach
     void setup() {
-        processor = new InMemoryStopPlaceProcessor(jobService, domainService);
+        processor = new InMemoryStopPlaceProcessor(jobService, domainService, payloadUnmarshaller);
     }
 
     @Test
@@ -50,7 +55,8 @@ class InMemoryStopPlaceProcessorTest {
 
         when(domainService.createStopPlace(netexStop)).thenReturn(tiamatStop);
 
-        processor.processCreateStopPlace(JOB_ID, dto);
+        when(payloadUnmarshaller.unmarshal(PAYLOAD)).thenReturn(dto);
+        processor.processCreateStopPlace(JOB_ID, PAYLOAD);
 
         verify(domainService).createStopPlace(netexStop);
         verify(jobService).succeed(
@@ -67,7 +73,8 @@ class InMemoryStopPlaceProcessorTest {
 
         when(domainService.createStopPlace(netexStop)).thenThrow(exception);
 
-        processor.processCreateStopPlace(JOB_ID, dto);
+        when(payloadUnmarshaller.unmarshal(PAYLOAD)).thenReturn(dto);
+        processor.processCreateStopPlace(JOB_ID, PAYLOAD);
 
         verify(jobService).fail(JOB_ID, exception);
         verify(jobService, never()).succeed(any(), any());
@@ -78,7 +85,8 @@ class InMemoryStopPlaceProcessorTest {
         var dto = new StopPlacesDto();
         dto.setStopPlaces(Collections.emptyList());
 
-        processor.processCreateStopPlace(JOB_ID, dto);
+        when(payloadUnmarshaller.unmarshal(PAYLOAD)).thenReturn(dto);
+        processor.processCreateStopPlace(JOB_ID, PAYLOAD);
 
         verify(jobService).fail(eq(JOB_ID), any(IllegalArgumentException.class));
         verify(domainService, never()).createStopPlace(any());
@@ -89,7 +97,8 @@ class InMemoryStopPlaceProcessorTest {
         var dto = new StopPlacesDto();
         dto.setStopPlaces(List.of(new StopPlace(), new StopPlace()));
 
-        processor.processCreateStopPlace(JOB_ID, dto);
+        when(payloadUnmarshaller.unmarshal(PAYLOAD)).thenReturn(dto);
+        processor.processCreateStopPlace(JOB_ID, PAYLOAD);
 
         verify(jobService).fail(eq(JOB_ID), any(IllegalArgumentException.class));
         verify(domainService, never()).createStopPlace(any());
@@ -103,7 +112,8 @@ class InMemoryStopPlaceProcessorTest {
         var kv = new KeyValueStructure().withKey("IS_PARENT_STOP_PLACE").withValue("true");
         netexStop.setKeyList(new KeyListStructure().withKeyValue(kv));
 
-        processor.processCreateStopPlace(JOB_ID, dto);
+        when(payloadUnmarshaller.unmarshal(PAYLOAD)).thenReturn(dto);
+        processor.processCreateStopPlace(JOB_ID, PAYLOAD);
 
         verify(jobService).fail(eq(JOB_ID), any(IllegalArgumentException.class));
         verify(domainService, never()).createStopPlace(any());
@@ -116,7 +126,8 @@ class InMemoryStopPlaceProcessorTest {
         var netexStop = dto.getStopPlaces().getFirst();
         netexStop.setParentSiteRef(new SiteRefStructure().withRef("NSR:StopPlace:999"));
 
-        processor.processCreateStopPlace(JOB_ID, dto);
+        when(payloadUnmarshaller.unmarshal(PAYLOAD)).thenReturn(dto);
+        processor.processCreateStopPlace(JOB_ID, PAYLOAD);
 
         verify(jobService).fail(eq(JOB_ID), any(IllegalArgumentException.class));
         verify(domainService, never()).createStopPlace(any());
@@ -127,7 +138,8 @@ class InMemoryStopPlaceProcessorTest {
         var dto = singleStopPlaceDto("NSR:StopPlace:200");
         var netexStop = dto.getStopPlaces().getFirst();
 
-        processor.processUpdateStopPlace(JOB_ID, dto);
+        when(payloadUnmarshaller.unmarshal(PAYLOAD)).thenReturn(dto);
+        processor.processUpdateStopPlace(JOB_ID, PAYLOAD);
 
         verify(domainService).updateStopPlace(netexStop);
         verify(jobService).succeed(JOB_ID, null);
@@ -141,7 +153,8 @@ class InMemoryStopPlaceProcessorTest {
 
         doThrow(exception).when(domainService).updateStopPlace(netexStop);
 
-        processor.processUpdateStopPlace(JOB_ID, dto);
+        when(payloadUnmarshaller.unmarshal(PAYLOAD)).thenReturn(dto);
+        processor.processUpdateStopPlace(JOB_ID, PAYLOAD);
 
         verify(jobService).fail(JOB_ID, exception);
         verify(jobService, never()).succeed(any(), any());
@@ -154,7 +167,8 @@ class InMemoryStopPlaceProcessorTest {
         var kv = new KeyValueStructure().withKey("IS_PARENT_STOP_PLACE").withValue("true");
         netexStop.setKeyList(new KeyListStructure().withKeyValue(kv));
 
-        processor.processUpdateStopPlace(JOB_ID, dto);
+        when(payloadUnmarshaller.unmarshal(PAYLOAD)).thenReturn(dto);
+        processor.processUpdateStopPlace(JOB_ID, PAYLOAD);
 
         verify(jobService).fail(eq(JOB_ID), any(IllegalArgumentException.class));
         verify(domainService, never()).updateStopPlace(any());

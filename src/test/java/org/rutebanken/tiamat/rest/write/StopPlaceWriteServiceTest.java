@@ -50,6 +50,10 @@ class StopPlaceWriteServiceTest {
 
     private StopPlaceWriteService facade;
 
+    private static java.io.InputStream stream() {
+        return new java.io.ByteArrayInputStream("<stopPlaces/>".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+    }
+
     @BeforeEach
     void setup() {
         facade = new StopPlaceWriteService(
@@ -57,7 +61,8 @@ class StopPlaceWriteServiceTest {
             jobService,
             asyncProcessor,
                 stopPlaceWriteDomainService,
-            stopPlaceXmlWriter
+            stopPlaceXmlWriter,
+            10485760
         );
     }
 
@@ -109,12 +114,12 @@ class StopPlaceWriteServiceTest {
 
         when(jobService.createJob()).thenReturn(job);
 
-        StopPlaceJobDto result = facade.createStopPlaces(dto);
+        StopPlaceJobDto result = facade.createStopPlaces(stream());
 
         assertNotNull(result);
         assertEquals(1L, result.jobId());
         assertEquals(AsyncStopPlaceJobStatus.PROCESSING, result.status());
-        verify(asyncProcessor).processCreateStopPlace(1L, dto);
+        verify(asyncProcessor).processCreateStopPlace(eq(1L), any(byte[].class));
     }
 
     @Test
@@ -128,7 +133,7 @@ class StopPlaceWriteServiceTest {
             .processCreateStopPlace(anyLong(), any());
         when(jobService.fail(eq(1L), any(Exception.class))).thenReturn(job);
 
-        StopPlaceJobDto result = facade.createStopPlaces(dto);
+        StopPlaceJobDto result = facade.createStopPlaces(stream());
 
         assertEquals(AsyncStopPlaceJobStatus.FAILED, result.status());
         verify(jobService).fail(eq(1L), any(Exception.class));
@@ -145,7 +150,7 @@ class StopPlaceWriteServiceTest {
             .processCreateStopPlace(anyLong(), any());
 
         assertThrows(ServiceUnavailableException.class, () ->
-            facade.createStopPlaces(dto)
+            facade.createStopPlaces(stream())
         );
         verify(jobService).fail(eq(1L), any(RejectedExecutionException.class));
     }
@@ -160,12 +165,12 @@ class StopPlaceWriteServiceTest {
 
         when(jobService.createJob()).thenReturn(job);
 
-        StopPlaceJobDto result = facade.updateStopPlace(dto);
+        StopPlaceJobDto result = facade.updateStopPlace(stream());
 
         assertNotNull(result);
         assertEquals(2L, result.jobId());
         assertEquals(AsyncStopPlaceJobStatus.PROCESSING, result.status());
-        verify(asyncProcessor).processUpdateStopPlace(2L, dto);
+        verify(asyncProcessor).processUpdateStopPlace(eq(2L), any(byte[].class));
     }
 
     @Test
@@ -179,7 +184,7 @@ class StopPlaceWriteServiceTest {
             .processUpdateStopPlace(anyLong(), any());
         when(jobService.fail(eq(2L), any(Exception.class))).thenReturn(job);
 
-        StopPlaceJobDto result = facade.updateStopPlace(dto);
+        StopPlaceJobDto result = facade.updateStopPlace(stream());
 
         assertEquals(AsyncStopPlaceJobStatus.FAILED, result.status());
         verify(jobService).fail(eq(2L), any(Exception.class));
@@ -196,7 +201,7 @@ class StopPlaceWriteServiceTest {
             .processUpdateStopPlace(anyLong(), any());
 
         assertThrows(ServiceUnavailableException.class, () ->
-            facade.updateStopPlace(dto)
+            facade.updateStopPlace(stream())
         );
         verify(jobService).fail(eq(2L), any(RejectedExecutionException.class));
     }

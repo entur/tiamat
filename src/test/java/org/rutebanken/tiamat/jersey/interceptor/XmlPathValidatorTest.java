@@ -1,6 +1,5 @@
 package org.rutebanken.tiamat.jersey.interceptor;
 
-import jakarta.ws.rs.BadRequestException;
 import org.junit.Test;
 
 import java.nio.charset.StandardCharsets;
@@ -29,7 +28,7 @@ public class XmlPathValidatorTest {
         Set<String> allowed = Set.of("root/name");
 
         assertThatThrownBy(() -> XmlPathValidator.validate(xml, allowed))
-                .isInstanceOf(BadRequestException.class)
+                .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("root/secret");
     }
 
@@ -53,7 +52,7 @@ public class XmlPathValidatorTest {
         Set<String> allowed = Set.of("root/name");
 
         assertThatThrownBy(() -> XmlPathValidator.validate(xml, allowed))
-                .isInstanceOf(BadRequestException.class)
+                .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("root/secret");
     }
 
@@ -79,7 +78,7 @@ public class XmlPathValidatorTest {
         Set<String> allowed = Set.of("root/stop/name");
 
         assertThatThrownBy(() -> XmlPathValidator.validate(xml, allowed))
-                .isInstanceOf(BadRequestException.class)
+                .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("root/stop/secret");
     }
 
@@ -97,7 +96,7 @@ public class XmlPathValidatorTest {
         Set<String> allowed = Set.of("other");
 
         assertThatThrownBy(() -> XmlPathValidator.validate(xml, allowed))
-                .isInstanceOf(BadRequestException.class)
+                .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("root");
     }
 
@@ -107,7 +106,7 @@ public class XmlPathValidatorTest {
         Set<String> allowed = Set.of();
 
         assertThatThrownBy(() -> XmlPathValidator.validate(xml, allowed))
-                .isInstanceOf(BadRequestException.class);
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
@@ -115,7 +114,7 @@ public class XmlPathValidatorTest {
         byte[] xml = xml("<root><unclosed>");
 
         assertThatThrownBy(() -> XmlPathValidator.validate(xml, Set.of("root")))
-                .isInstanceOf(BadRequestException.class)
+                .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Malformed XML");
     }
 
@@ -128,6 +127,6 @@ public class XmlPathValidatorTest {
                 """);
 
         assertThatThrownBy(() -> XmlPathValidator.validate(xml, Set.of("root/name")))
-                .isInstanceOf(BadRequestException.class);
+                .isInstanceOf(IllegalArgumentException.class);
     }
 }

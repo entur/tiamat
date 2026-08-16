@@ -10,9 +10,9 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import org.rutebanken.tiamat.jersey.interceptor.XmlWhitelist;
 import org.rutebanken.tiamat.rest.write.StopPlaceWriteService;
-import org.rutebanken.tiamat.rest.write.dto.StopPlacesDto;
+
+import java.io.InputStream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -53,10 +53,9 @@ public class StopPlaceControllerImpl implements StopPlaceController {
             MediaType.APPLICATION_XML + "; charset=utf-8",
         }
     )
-    @XmlWhitelist(SupportedStopPlaceElement.class)
-    public Response createStopPlace(StopPlacesDto stopPlacesDto) {
+    public Response createStopPlace(InputStream body) {
         return Response.accepted(
-            stopPlaceWriteService.createStopPlaces(stopPlacesDto)
+            stopPlaceWriteService.createStopPlaces(body)
         ).build();
     }
 
@@ -68,10 +67,9 @@ public class StopPlaceControllerImpl implements StopPlaceController {
             MediaType.APPLICATION_XML + "; charset=utf-8",
         }
     )
-    @XmlWhitelist(SupportedStopPlaceElement.class)
-    public Response updateStopPlace(StopPlacesDto stopPlacesDto) {
+    public Response updateStopPlace(InputStream body) {
         return Response.accepted(
-            stopPlaceWriteService.updateStopPlace(stopPlacesDto)
+            stopPlaceWriteService.updateStopPlace(body)
         ).build();
     }
 

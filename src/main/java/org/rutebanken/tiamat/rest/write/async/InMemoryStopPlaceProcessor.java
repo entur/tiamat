@@ -3,6 +3,7 @@ package org.rutebanken.tiamat.rest.write.async;
 import org.rutebanken.netex.model.StopPlace;
 import org.rutebanken.tiamat.model.job.StopPlaceIdMapping;
 import org.rutebanken.tiamat.rest.write.JobService;
+import org.rutebanken.tiamat.rest.write.StopPlacesPayloadUnmarshaller;
 import org.rutebanken.tiamat.rest.write.StopPlaceWriteDomainService;
 import org.rutebanken.tiamat.rest.write.dto.StopPlacesDto;
 import org.slf4j.Logger;
@@ -24,18 +25,22 @@ public class InMemoryStopPlaceProcessor implements StopPlaceAsyncProcessor {
     );
     private final JobService jobService;
     private final StopPlaceWriteDomainService domainService;
+    private final StopPlacesPayloadUnmarshaller payloadUnmarshaller;
 
     public InMemoryStopPlaceProcessor(
         JobService jobService,
-        StopPlaceWriteDomainService domainService
+        StopPlaceWriteDomainService domainService,
+        StopPlacesPayloadUnmarshaller payloadUnmarshaller
     ) {
         this.jobService = jobService;
         this.domainService = domainService;
+        this.payloadUnmarshaller = payloadUnmarshaller;
     }
 
     @Async("stopPlaceWriteExecutor")
-    public void processCreateStopPlace(Long jobId, StopPlacesDto dto) {
+    public void processCreateStopPlace(Long jobId, byte[] payload) {
         try {
+            var dto = payloadUnmarshaller.unmarshal(payload);
             var structure = classify(dto.getStopPlaces());
             if (structure == StopPlaceStructure.MONOMODAL) {
                 var newStopPlace = dto.getStopPlaces().getFirst();
@@ -65,8 +70,9 @@ public class InMemoryStopPlaceProcessor implements StopPlaceAsyncProcessor {
     }
 
     @Async("stopPlaceWriteExecutor")
-    public void processUpdateStopPlace(Long jobId, StopPlacesDto dto) {
+    public void processUpdateStopPlace(Long jobId, byte[] payload) {
         try {
+            var dto = payloadUnmarshaller.unmarshal(payload);
             var structure = classify(dto.getStopPlaces());
             if (structure == StopPlaceStructure.MONOMODAL) {
                 domainService.updateStopPlace(dto.getStopPlaces().getFirst());

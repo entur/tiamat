@@ -10,6 +10,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.core.Response;
+
+import java.io.InputStream;
 import org.rutebanken.netex.model.StopPlace;
 import org.rutebanken.tiamat.rest.write.dto.StopPlaceJobDto;
 import org.rutebanken.tiamat.rest.write.dto.StopPlacesDto;
@@ -100,7 +102,7 @@ interface StopPlaceController {
             @ApiResponse(responseCode = "503", description = "Job queue full"),
         }
     )
-    Response createStopPlace(StopPlacesDto stopPlacesDto);
+    Response createStopPlace(InputStream body);
 
     @Operation(
         summary = "Updates a stop place from a NeTEx XML representation",
@@ -156,7 +158,7 @@ interface StopPlaceController {
             @ApiResponse(responseCode = "503", description = "Job queue full"),
         }
     )
-    Response updateStopPlace(StopPlacesDto stopPlacesDto);
+    Response updateStopPlace(InputStream body);
 
     @Operation(
         summary = "Deletes a stop place by NeTEx ID",
