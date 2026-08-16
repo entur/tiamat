@@ -15,6 +15,7 @@ import org.rutebanken.tiamat.model.job.AsyncStopPlaceJobStatus;
 import org.rutebanken.tiamat.rest.write.dto.StopPlaceJobDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.resttestclient.TestRestTemplate;
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -36,6 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * request reaches the lock first will hold it, and the second request will fail after the
  * configured wait-timeout ({@link MutateLock#WAIT_FOR_LOCK_SECONDS} s).
  */
+@AutoConfigureTestRestTemplate
 public class ConcurrentStopPlaceUpdateIntegrationTest extends TiamatIntegrationTest {
 
     private static final String WRITE_ENDPOINT = "/services/stop_places/write";
