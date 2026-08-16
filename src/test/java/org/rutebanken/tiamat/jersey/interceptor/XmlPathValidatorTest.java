@@ -33,6 +33,38 @@ public class XmlPathValidatorTest {
                 .hasMessageContaining("root/secret");
     }
 
+    /**
+     * JAXB binds by namespace URI and local name, so prefixed NeTEx unmarshals exactly like the
+     * default namespace form. Most NeTEx tooling, including Tiamat's own export, emits prefixed
+     * elements, so validating the qualified name would reject payloads the unmarshaller accepts
+     * and break an export, edit and resubmit round trip.
+     */
+    @Test
+    public void namespacePrefixedElementsAreValidatedByLocalName() {
+        byte[] xml = xml("<ns2:root xmlns:ns2=\"http://www.netex.org.uk/netex\"><ns2:name>Oslo</ns2:name></ns2:root>");
+        Set<String> allowed = Set.of("root/name");
+
+        assertThatCode(() -> XmlPathValidator.validate(xml, allowed)).doesNotThrowAnyException();
+    }
+
+    @Test
+    public void disallowedLeafIsStillRejectedWhenNamespacePrefixed() {
+        byte[] xml = xml("<ns2:root xmlns:ns2=\"http://www.netex.org.uk/netex\"><ns2:secret>hidden</ns2:secret></ns2:root>");
+        Set<String> allowed = Set.of("root/name");
+
+        assertThatThrownBy(() -> XmlPathValidator.validate(xml, allowed))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessageContaining("root/secret");
+    }
+
+    @Test
+    public void defaultNamespaceElementsAreValidatedByLocalName() {
+        byte[] xml = xml("<root xmlns=\"http://www.netex.org.uk/netex\"><name>Oslo</name></root>");
+        Set<String> allowed = Set.of("root/name");
+
+        assertThatCode(() -> XmlPathValidator.validate(xml, allowed)).doesNotThrowAnyException();
+    }
+
     @Test
     public void allLeavesInDeepTreeMustBeAllowed() {
         byte[] xml = xml("<root><stop><name>X</name><type>bus</type></stop></root>");

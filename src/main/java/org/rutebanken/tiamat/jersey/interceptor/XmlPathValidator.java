@@ -25,7 +25,16 @@ public class XmlPathValidator {
     public static void validate(byte[] xml, Set<String> allowedPaths) {
         Document doc = parse(xml);
         Element root = doc.getDocumentElement();
-        validateElement(root, root.getTagName(), allowedPaths);
+        validateElement(root, localName(root), allowedPaths);
+    }
+
+    /**
+     * JAXB binds by namespace URI and local name, so the whitelist is matched on the local name.
+     * Matching the qualified name would reject prefixed NeTEx, which the unmarshaller accepts and
+     * which most NeTEx tooling emits.
+     */
+    private static String localName(Element element) {
+        return element.getLocalName() != null ? element.getLocalName() : element.getTagName();
     }
 
     private static void validateElement(Element element, String path, Set<String> allowedPaths) {
@@ -36,7 +45,7 @@ public class XmlPathValidator {
         } else {
 
             for (Element child : childElements) {
-                validateElement(child, path + "/" + child.getTagName(), allowedPaths);
+                validateElement(child, path + "/" + localName(child), allowedPaths);
             }
         }
     }
@@ -62,6 +71,7 @@ public class XmlPathValidator {
     private static Document parse(byte[] xml) {
         try {
             DocumentBuilderFactory factory = javax.xml.parsers.DocumentBuilderFactory.newInstance();
+            factory.setNamespaceAware(true);
             // XXE protection
             factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
             factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
