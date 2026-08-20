@@ -10,7 +10,7 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import org.rutebanken.tiamat.rest.write.StopPlaceWriteService;
+import org.rutebanken.tiamat.writer.AsyncStopPlaceWriter;
 
 import java.io.InputStream;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,11 +25,11 @@ import org.springframework.stereotype.Component;
 @PreAuthorize("@authorizationService.canUseWriteApi()")
 public class StopPlaceControllerImpl implements StopPlaceController {
 
-    private final StopPlaceWriteService stopPlaceWriteService;
+    private final AsyncStopPlaceWriter asyncStopPlaceWriter;
 
     @Autowired
-    public StopPlaceControllerImpl(StopPlaceWriteService stopPlaceWriteService) {
-        this.stopPlaceWriteService = stopPlaceWriteService;
+    public StopPlaceControllerImpl(AsyncStopPlaceWriter asyncStopPlaceWriter) {
+        this.asyncStopPlaceWriter = asyncStopPlaceWriter;
     }
 
     @Override
@@ -42,7 +42,7 @@ public class StopPlaceControllerImpl implements StopPlaceController {
     )
     @Path("/{stopPlaceId}")
     public Response getStopPlace(@PathParam("stopPlaceId") String stopPlaceId) {
-        return Response.ok(stopPlaceWriteService.getStopPlace(stopPlaceId)).build();
+        return Response.ok(asyncStopPlaceWriter.getStopPlace(stopPlaceId)).build();
     }
 
     @Override
@@ -55,7 +55,7 @@ public class StopPlaceControllerImpl implements StopPlaceController {
     )
     public Response createStopPlace(InputStream body) {
         return Response.accepted(
-            stopPlaceWriteService.createStopPlaces(body)
+            asyncStopPlaceWriter.createStopPlaces(body)
         ).build();
     }
 
@@ -69,7 +69,7 @@ public class StopPlaceControllerImpl implements StopPlaceController {
     )
     public Response updateStopPlace(InputStream body) {
         return Response.accepted(
-            stopPlaceWriteService.updateStopPlace(body)
+            asyncStopPlaceWriter.updateStopPlace(body)
         ).build();
     }
 
@@ -80,7 +80,7 @@ public class StopPlaceControllerImpl implements StopPlaceController {
         @PathParam("stopPlaceId") String stopPlaceId
     ) {
         return Response.accepted(
-            stopPlaceWriteService.deleteStopPlace(stopPlaceId)
+            asyncStopPlaceWriter.deleteStopPlace(stopPlaceId)
         ).build();
     }
 }

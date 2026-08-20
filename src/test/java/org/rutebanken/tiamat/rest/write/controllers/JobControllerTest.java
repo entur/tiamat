@@ -5,7 +5,7 @@ import org.junit.Test;
 import org.rutebanken.tiamat.model.job.AsyncStopPlaceJob;
 import org.rutebanken.tiamat.model.job.AsyncStopPlaceJobStatus;
 import org.rutebanken.tiamat.model.job.StopPlaceIdMapping;
-import org.rutebanken.tiamat.rest.write.JobService;
+import org.rutebanken.tiamat.writer.JobService;
 import org.rutebanken.tiamat.rest.write.dto.StopPlaceJobDto;
 
 import java.util.Optional;
