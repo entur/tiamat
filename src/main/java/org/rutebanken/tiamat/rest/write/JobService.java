@@ -1,11 +1,11 @@
 package org.rutebanken.tiamat.rest.write;
 
-import org.rutebanken.tiamat.auth.UsernameFetcher;
 import org.rutebanken.tiamat.model.job.AsyncStopPlaceJob;
 import org.rutebanken.tiamat.model.job.AsyncStopPlaceJobStatus;
 import org.rutebanken.tiamat.model.job.StopPlaceIdMapping;
 import org.rutebanken.tiamat.repository.AsyncStopPlaceJobRepository;
 import org.rutebanken.tiamat.rest.write.async.WriteJobNotOwnedException;
+import org.rutebanken.tiamat.rest.write.async.WriteJobPrincipal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -18,6 +18,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.RejectedExecutionException;
@@ -30,18 +31,19 @@ public class JobService {
     private static final String GENERIC_REASON = "An unexpected error occurred.";
 
     private final AsyncStopPlaceJobRepository repo;
-    private final UsernameFetcher usernameFetcher;
+    private final WriteJobPrincipal principal;
 
-    public JobService(AsyncStopPlaceJobRepository repo, UsernameFetcher usernameFetcher) {
+    public JobService(AsyncStopPlaceJobRepository repo, WriteJobPrincipal principal) {
         this.repo = repo;
-        this.usernameFetcher = usernameFetcher;
+        this.principal = principal;
     }
 
     public AsyncStopPlaceJob createJob() {
         var job = new AsyncStopPlaceJob();
         job.setStatus(AsyncStopPlaceJobStatus.PROCESSING);
         job.setCreatedIds(Collections.emptyList());
-        job.setCreatedBy(usernameFetcher.getUserNameForAuthenticatedUser());
+        job.setCreatedBy(principal.currentSubject());
+        job.setPrincipalClaims(principal.capture());
         job.setCreatedAt(Instant.now());
         return repo.save(job);
     }
@@ -97,14 +99,45 @@ public class JobService {
     }
 
     /**
+     * The claims identifying whoever submitted the job, for reinstating them before the write.
+     * Not scoped to the caller: this is the processing unit acting on the submitter's behalf, not
+     * a client reading someone else's job.
+     */
+    public Map<String, Object> principalClaimsFor(Long jobId) {
+        return repo.findById(jobId)
+                .map(AsyncStopPlaceJob::getPrincipalClaims)
+                .orElse(Map.of());
+    }
+
+    /**
+     * Reports a job as having never completed, for reasons unrelated to its payload. Recorded in
+     * its own transaction for the same reason as a failure.
+     */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void timeOut(Long jobId, String reason) {
+        int moved = repo.transition(
+                jobId,
+                List.of(AsyncStopPlaceJobStatus.PROCESSING, AsyncStopPlaceJobStatus.IN_PROGRESS),
+                AsyncStopPlaceJobStatus.TIMED_OUT
+        );
+        if (moved != 1) {
+            logger.warn("Job {} already reached a terminal state, not recording a timeout", jobId);
+            return;
+        }
+        var job = repo.findById(jobId).orElseThrow();
+        job.setReason(reason);
+        repo.save(job);
+    }
+
+    /**
      * Job ids are sequential, so a job is only returned to the principal that submitted it.
      * Jobs belonging to someone else are reported as absent rather than forbidden, so that
      * callers cannot probe which ids exist.
      */
     public Optional<AsyncStopPlaceJob> getJob(Long jobId) {
-        String currentUser = usernameFetcher.getUserNameForAuthenticatedUser();
+        String currentSubject = principal.currentSubject();
         return repo.findById(jobId)
-                .filter(job -> Objects.equals(job.getCreatedBy(), currentUser));
+                .filter(job -> Objects.equals(job.getCreatedBy(), currentSubject));
     }
 
     /**

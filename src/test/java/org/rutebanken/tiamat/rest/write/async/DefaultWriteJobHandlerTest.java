@@ -7,10 +7,16 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.rutebanken.tiamat.rest.write.JobService;
 
+import org.mockito.InOrder;
+
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -29,11 +35,14 @@ class DefaultWriteJobHandlerTest {
     @Mock
     private WriteJobProcessor processor;
 
+    @Mock
+    private WriteJobPrincipal principal;
+
     private DefaultWriteJobHandler handler;
 
     @BeforeEach
     void setup() {
-        handler = new DefaultWriteJobHandler(jobService, processor);
+        handler = new DefaultWriteJobHandler(jobService, processor, principal);
     }
 
     /**
@@ -49,6 +58,54 @@ class DefaultWriteJobHandlerTest {
 
         verifyNoInteractions(processor);
         verify(jobService, never()).fail(any(), any());
+    }
+
+    /**
+     * The write is authorized and attributed where it happens, so the caller has to be reinstated
+     * before the processor runs.
+     */
+    @Test
+    void reinstatesTheCallerBeforeProcessing() {
+        when(jobService.claim(JOB_ID)).thenReturn(true);
+        Map<String, Object> claims = Map.of("sub", "auth0|alice");
+        when(jobService.principalClaimsFor(JOB_ID)).thenReturn(claims);
+
+        handler.handle(WriteJobMessage.create(JOB_ID, PAYLOAD));
+
+        InOrder inOrder = inOrder(principal, processor);
+        inOrder.verify(principal).restore(claims);
+        inOrder.verify(processor).process(any(WriteJobMessage.class));
+    }
+
+    /**
+     * Worker threads are pooled, so a principal left installed would be inherited by whichever job
+     * ran next on that thread.
+     */
+    @Test
+    void clearsTheCallerAfterwardsEvenWhenProcessingFails() {
+        when(jobService.claim(JOB_ID)).thenReturn(true);
+        doThrow(new RuntimeException("boom")).when(processor).process(any(WriteJobMessage.class));
+
+        handler.handle(WriteJobMessage.create(JOB_ID, PAYLOAD));
+
+        verify(principal).clear();
+    }
+
+    /**
+     * Expired credentials mean nothing was written and resubmitting with a fresh token will
+     * succeed, which is TIMED_OUT's contract rather than FAILED's: the payload is not at fault.
+     */
+    @Test
+    void reportsExpiredCredentialsAsTimedOutRatherThanFailed() {
+        when(jobService.claim(JOB_ID)).thenReturn(true);
+        doThrow(new WriteJobCredentialsExpiredException(Instant.now().minusSeconds(60)))
+                .when(principal).restore(any());
+
+        handler.handle(WriteJobMessage.create(JOB_ID, PAYLOAD));
+
+        verify(jobService).timeOut(eq(JOB_ID), anyString());
+        verify(jobService, never()).fail(any(), any());
+        verifyNoInteractions(processor);
     }
 
     @Test

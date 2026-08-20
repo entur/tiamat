@@ -42,6 +42,11 @@ public class AsyncStopPlaceJob {
     @Schema(description = "When a worker claimed the job, refreshed while it is being processed")
     private Instant claimedAt;
 
+    @Schema(description = "Claims identifying the caller, so the write can be authorized and attributed where it is performed")
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb")
+    private Map<String, Object> principalClaims;
+
     public Long getId() {
         return id;
     }
@@ -96,5 +101,13 @@ public class AsyncStopPlaceJob {
 
     public void setClaimedAt(Instant claimedAt) {
         this.claimedAt = claimedAt;
+    }
+
+    public Map<String, Object> getPrincipalClaims() {
+        return principalClaims;
+    }
+
+    public void setPrincipalClaims(Map<String, Object> principalClaims) {
+        this.principalClaims = principalClaims;
     }
 }

@@ -93,8 +93,19 @@ public class WriteJobPrincipal {
         }
         requireNotExpired(claims);
 
-        Jwt jwt = new Jwt("restored", null, null, Map.of("alg", "none"), claims);
+        Jwt jwt = new Jwt("restored", null, null, Map.of("alg", "none"), widenNumbers(claims));
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
+    }
+
+    /**
+     * The subject identifies the caller stably, unlike a preferred username, so it is what job
+     * ownership is keyed on.
+     */
+    public String currentSubject() {
+        if (!(SecurityContextHolder.getContext().getAuthentication() instanceof JwtAuthenticationToken token)) {
+            return null;
+        }
+        return token.getToken().getSubject();
     }
 
     public void clear() {
@@ -117,5 +128,18 @@ public class WriteJobPrincipal {
      */
     private static Object normalise(Object value) {
         return value instanceof Instant instant ? instant.getEpochSecond() : value;
+    }
+
+    /**
+     * JSON has no integer width, so a claim written as a long comes back as an Integer if it is
+     * small enough. That matters because consumers cast rather than convert:
+     * {@code AuthenticatedUser.of} does an unchecked {@code (Long)} on the organisation id, which
+     * would throw a ClassCastException at authorization time for every machine client.
+     */
+    private static Map<String, Object> widenNumbers(Map<String, Object> claims) {
+        Map<String, Object> widened = new LinkedHashMap<>(claims);
+        widened.replaceAll((claim, value) ->
+                value instanceof Integer integer ? integer.longValue() : value);
+        return widened;
     }
 }

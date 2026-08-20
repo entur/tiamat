@@ -3,7 +3,7 @@ package org.rutebanken.tiamat.rest.write;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.rutebanken.tiamat.auth.UsernameFetcher;
+import org.rutebanken.tiamat.rest.write.async.WriteJobPrincipal;
 import org.rutebanken.tiamat.model.job.AsyncStopPlaceJob;
 import org.rutebanken.tiamat.model.job.AsyncStopPlaceJobStatus;
 import org.rutebanken.tiamat.model.job.StopPlaceIdMapping;
@@ -32,9 +32,9 @@ public class JobServiceTest {
         AsyncStopPlaceJobRepository.class
     );
 
-    private final UsernameFetcher usernameFetcher = mock(UsernameFetcher.class);
+    private final WriteJobPrincipal principal = mock(WriteJobPrincipal.class);
 
-    private final JobService jobService = new JobService(repository, usernameFetcher);
+    private final JobService jobService = new JobService(repository, principal);
 
     /**
      * Completion is conditional on the job still being claimed, so the default for these tests is
@@ -47,14 +47,14 @@ public class JobServiceTest {
     }
 
     @Test
-    public void shouldRecordSubmittingUserOnNewJob() {
-        when(usernameFetcher.getUserNameForAuthenticatedUser()).thenReturn("alice");
+    public void shouldRecordSubmittingSubjectOnNewJob() {
+        when(principal.currentSubject()).thenReturn("auth0|alice");
 
         jobService.createJob();
 
         ArgumentCaptor<AsyncStopPlaceJob> captor = ArgumentCaptor.forClass(AsyncStopPlaceJob.class);
         verify(repository).save(captor.capture());
-        assertThat(captor.getValue().getCreatedBy()).isEqualTo("alice");
+        assertThat(captor.getValue().getCreatedBy()).isEqualTo("auth0|alice");
     }
 
     /**
@@ -125,9 +125,9 @@ public class JobServiceTest {
     @Test
     public void shouldNotReturnJobSubmittedByAnotherUser() {
         AsyncStopPlaceJob job = new AsyncStopPlaceJob();
-        job.setCreatedBy("alice");
+        job.setCreatedBy("auth0|alice");
         when(repository.findById(1L)).thenReturn(Optional.of(job));
-        when(usernameFetcher.getUserNameForAuthenticatedUser()).thenReturn("bob");
+        when(principal.currentSubject()).thenReturn("auth0|bob");
 
         assertThat(jobService.getJob(1L)).isEmpty();
     }
@@ -135,9 +135,9 @@ public class JobServiceTest {
     @Test
     public void shouldReturnJobSubmittedByTheSameUser() {
         AsyncStopPlaceJob job = new AsyncStopPlaceJob();
-        job.setCreatedBy("alice");
+        job.setCreatedBy("auth0|alice");
         when(repository.findById(1L)).thenReturn(Optional.of(job));
-        when(usernameFetcher.getUserNameForAuthenticatedUser()).thenReturn("alice");
+        when(principal.currentSubject()).thenReturn("auth0|alice");
 
         assertThat(jobService.getJob(1L)).contains(job);
     }
@@ -151,7 +151,7 @@ public class JobServiceTest {
     public void shouldReturnUnownedJobWhenThereIsNoAuthenticatedUser() {
         AsyncStopPlaceJob job = new AsyncStopPlaceJob();
         when(repository.findById(1L)).thenReturn(Optional.of(job));
-        when(usernameFetcher.getUserNameForAuthenticatedUser()).thenReturn(null);
+        when(principal.currentSubject()).thenReturn(null);
 
         assertThat(jobService.getJob(1L)).contains(job);
     }
@@ -159,9 +159,9 @@ public class JobServiceTest {
     @Test
     public void shouldNotReturnOwnedJobWhenThereIsNoAuthenticatedUser() {
         AsyncStopPlaceJob job = new AsyncStopPlaceJob();
-        job.setCreatedBy("alice");
+        job.setCreatedBy("auth0|alice");
         when(repository.findById(1L)).thenReturn(Optional.of(job));
-        when(usernameFetcher.getUserNameForAuthenticatedUser()).thenReturn(null);
+        when(principal.currentSubject()).thenReturn(null);
 
         assertThat(jobService.getJob(1L)).isEmpty();
     }

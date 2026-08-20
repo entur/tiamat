@@ -5,7 +5,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import org.springframework.security.concurrent.DelegatingSecurityContextExecutor;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -25,6 +24,9 @@ public class AsyncStopPlaceWriterConfig {
         executor.setThreadNamePrefix("StopPlaceWriter-");
         executor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
         executor.initialize();
-        return new DelegatingSecurityContextExecutor(executor);
+        // Not wrapped in a DelegatingSecurityContextExecutor: the principal is carried on the
+        // job and reinstated by the handler, which works for a worker in another pod as well as
+        // one on another thread. Wrapping here would only mask a transport that does not.
+        return executor;
     }
 }

@@ -34,6 +34,16 @@ public class WriteJobTimeoutIntegrationTest extends TiamatIntegrationTest {
     @Autowired
     private WriteJobProcessor processor;
 
+    /**
+     * TiamatIntegrationTest does not clear the job table, so rows left by other test classes would
+     * otherwise be counted here, and the sweep in the rollback case takes everything non terminal.
+     * These assertions are about counts, so the table has to start empty.
+     */
+    @org.junit.Before
+    public void clearJobs() {
+        jobRepository.deleteAll();
+    }
+
     private static final byte[] CREATE_PAYLOAD = ("""
             <stopPlaces xmlns="http://www.netex.org.uk/netex">
                 <StopPlace version="1">
