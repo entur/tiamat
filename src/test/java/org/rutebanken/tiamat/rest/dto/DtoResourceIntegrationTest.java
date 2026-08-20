@@ -77,13 +77,15 @@ public class DtoResourceIntegrationTest extends TiamatIntegrationTest {
 
         String responseWithoutStopPlaceType = getIdMapping(PATH_MAPPING_QUAY);
 
-        assertThat(responseWithoutStopPlaceType).contains(originalId + "," + q1.getNetexId());
-        assertThat(responseWithoutStopPlaceType).contains(originalId2 + "," + q1.getNetexId());
-        assertThat(responseWithoutStopPlaceType).contains(originalId3 + "," + q1.getNetexId());
+        assertThat(responseWithoutStopPlaceType.lines()).contains(
+                originalId + "," + q1.getNetexId(),
+                originalId2 + "," + q1.getNetexId(),
+                originalId3 + "," + q1.getNetexId());
         assertThat(responseWithoutStopPlaceType).doesNotContain(spOrigId);
 
         String responseWithStopPlaceType = getIdMapping(PATH_MAPPING_QUAY + "?includeStopType=true");
-        assertThat(responseWithStopPlaceType).contains(originalId + "," + StopTypeEnumeration.AIRPORT.value() + "," + q1.getNetexId());
+        assertThat(responseWithStopPlaceType.lines()).contains(
+                originalId + "," + StopTypeEnumeration.AIRPORT.value() + "," + q1.getNetexId());
     }
 
     @Test
@@ -112,11 +114,9 @@ public class DtoResourceIntegrationTest extends TiamatIntegrationTest {
 
         String response = getIdMapping(PATH_MAPPING_JBV_CODE);
 
-        assertThat(response)
-                .contains(jbvCode1 + ":" + quay.getPublicCode() + "," + quay.getNetexId())
-                .contains(jbvCode1 + ":" + quay.getPublicCode() + "," + quay.getNetexId())
-                .contains(jbvCode1 + ":" + quay.getPublicCode() + "," + quay.getNetexId())
-                .contains(jbvCode1 + "," + stopPlace.getNetexId());
+        assertThat(response.lines()).contains(
+                jbvCode1 + ":" + quay.getPublicCode() + "," + quay.getNetexId(),
+                jbvCode1 + "," + stopPlace.getNetexId());
 
     }
 
@@ -146,15 +146,17 @@ public class DtoResourceIntegrationTest extends TiamatIntegrationTest {
 
         String responseWithoutStopPlaceType = getIdMapping(PATH_MAPPING_STOP_PLACE);
 
-        assertThat(responseWithoutStopPlaceType).contains(originalId + "," + stopPlace.getNetexId());
-        assertThat(responseWithoutStopPlaceType).contains(originalId2 + "," + stopPlace.getNetexId());
+        assertThat(responseWithoutStopPlaceType.lines()).contains(
+                originalId + "," + stopPlace.getNetexId(),
+                originalId2 + "," + stopPlace.getNetexId());
         assertThat(responseWithoutStopPlaceType).doesNotContain(quayOrigId);
         assertThat(responseWithoutStopPlaceType).doesNotContain(quayOrigId2);
 
         String responseWithStopPlaceType = getIdMapping(PATH_MAPPING_STOP_PLACE +"?includeStopType=true");
 
-        assertThat(responseWithStopPlaceType).contains(originalId + ",," + stopPlace.getNetexId());
-        assertThat(responseWithStopPlaceType).contains(originalId2 + ",," + stopPlace.getNetexId());
+        assertThat(responseWithStopPlaceType.lines()).contains(
+                originalId + ",," + stopPlace.getNetexId(),
+                originalId2 + ",," + stopPlace.getNetexId());
     }
 
 
