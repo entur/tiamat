@@ -38,6 +38,11 @@ public class UsernameFetcher {
      */
     @Nullable
     public String getUserNameForAuthenticatedUser() {
+        // A system import has no user principal and no entry in the user registry, so it is
+        // attributed to its configured name rather than resolved through the extractor.
+        if (SystemImportContext.isActive()) {
+            return SystemImportContext.username();
+        }
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if(authentication == null
                 || authentication.getPrincipal() == null

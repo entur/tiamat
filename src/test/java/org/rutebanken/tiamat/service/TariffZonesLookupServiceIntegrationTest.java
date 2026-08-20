@@ -346,6 +346,46 @@ public class TariffZonesLookupServiceIntegrationTest extends TiamatIntegrationTe
     }
 
     @Test
+    public void shouldNotPopulateFareZoneWithExplicitStopsWhenNoMembers() {
+        // An EXPLICIT_STOPS fare zone with no members must not be attached to every stop
+        // inside its polygon. Regression guard for school-zone style zones with empty members.
+        TariffZone tariffZone = createTariffZoneWithPolygon("NSR:TariffZone:1", "Tariff Zone A",
+                new Coordinate(10.0, 59.0),
+                new Coordinate(10.0, 60.0),
+                new Coordinate(11.0, 60.0),
+                new Coordinate(11.0, 59.0),
+                new Coordinate(10.0, 59.0));
+        tariffZone = tariffZoneRepository.save(tariffZone);
+
+        FareZone fareZone = createFareZoneWithPolygon("NSR:FareZone:1", "Fare Zone Explicit Empty",
+                ScopingMethodEnumeration.EXPLICIT_STOPS,
+                new Coordinate(10.0, 59.0),
+                new Coordinate(10.0, 60.0),
+                new Coordinate(11.0, 60.0),
+                new Coordinate(11.0, 59.0),
+                new Coordinate(10.0, 59.0));
+        // Deliberately no members added
+        fareZoneRepository.save(fareZone);
+
+        tariffZonesLookupService.resetTariffZone();
+        tariffZonesLookupService.resetFareZone();
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setNetexId("NSR:StopPlace:1");
+        stopPlace.setName(new EmbeddableMultilingualString("Test Stop"));
+        stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(10.5, 59.5)));
+        Set<TariffZoneRef> existingRefs = new HashSet<>();
+        existingRefs.add(new TariffZoneRef(tariffZone));
+        stopPlace.setTariffZones(existingRefs);
+
+        boolean changed = tariffZonesLookupService.populateTariffZone(stopPlace);
+
+        assertThat(changed).isFalse();
+        assertThat(stopPlace.getTariffZones()).hasSize(1);
+        assertThat(stopPlace.getTariffZones().iterator().next().getRef()).isEqualTo("NSR:TariffZone:1");
+    }
+
+    @Test
     public void shouldPopulateFareZoneWithExplicitStopsWhenStopIsMember() {
         FareZone fareZone = createFareZoneWithPolygon("NSR:FareZone:1", "Fare Zone Explicit",
                 ScopingMethodEnumeration.EXPLICIT_STOPS,
@@ -369,6 +409,93 @@ public class TariffZonesLookupServiceIntegrationTest extends TiamatIntegrationTe
         assertThat(changed).isTrue();
         assertThat(stopPlace.getTariffZones()).hasSize(1);
         assertThat(stopPlace.getTariffZones().iterator().next().getRef()).isEqualTo("NSR:FareZone:1");
+    }
+
+    /**
+     * Membership, not geometry, defines an EXPLICIT_STOPS scope. Such a zone need not carry a polygon
+     * at all, and the spatial lookup only ever offers zones that have one.
+     */
+    @Test
+    public void shouldPopulateFareZoneWithExplicitStopsWhenStopIsMemberAndZoneHasNoPolygon() {
+        FareZone fareZone = new FareZone();
+        fareZone.setNetexId("NSR:FareZone:1");
+        fareZone.setName(new EmbeddableMultilingualString("Fare Zone Explicit, No Polygon"));
+        fareZone.setVersion(1L);
+        fareZone.setScopingMethod(ScopingMethodEnumeration.EXPLICIT_STOPS);
+        fareZone.getFareZoneMembers().add(new StopPlaceReference("NSR:StopPlace:1"));
+        fareZoneRepository.save(fareZone);
+
+        tariffZonesLookupService.resetFareZone();
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setNetexId("NSR:StopPlace:1");
+        stopPlace.setName(new EmbeddableMultilingualString("Test Stop"));
+        stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(10.5, 59.5)));
+
+        boolean changed = tariffZonesLookupService.populateTariffZone(stopPlace);
+
+        assertThat(changed).isTrue();
+        assertThat(stopPlace.getTariffZones()).hasSize(1);
+        assertThat(stopPlace.getTariffZones().iterator().next().getRef()).isEqualTo("NSR:FareZone:1");
+    }
+
+    /**
+     * A listed member outside the zone's own polygon is still a member.
+     */
+    @Test
+    public void shouldPopulateFareZoneWithExplicitStopsWhenMemberOutsidePolygon() {
+        FareZone fareZone = createFareZoneWithPolygon("NSR:FareZone:1", "Fare Zone Explicit",
+                ScopingMethodEnumeration.EXPLICIT_STOPS,
+                new Coordinate(10.0, 59.0),
+                new Coordinate(10.0, 60.0),
+                new Coordinate(11.0, 60.0),
+                new Coordinate(11.0, 59.0),
+                new Coordinate(10.0, 59.0));
+        fareZone.getFareZoneMembers().add(new StopPlaceReference("NSR:StopPlace:1"));
+        fareZoneRepository.save(fareZone);
+
+        tariffZonesLookupService.resetFareZone();
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setNetexId("NSR:StopPlace:1");
+        stopPlace.setName(new EmbeddableMultilingualString("Test Stop"));
+        // Far outside the zone polygon
+        stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(20.5, 69.5)));
+
+        boolean changed = tariffZonesLookupService.populateTariffZone(stopPlace);
+
+        assertThat(changed).isTrue();
+        assertThat(stopPlace.getTariffZones()).hasSize(1);
+        assertThat(stopPlace.getTariffZones().iterator().next().getRef()).isEqualTo("NSR:FareZone:1");
+    }
+
+    /**
+     * Coverage alone must not attach an explicitly scoped zone, even though its polygon contains the
+     * stop.
+     */
+    @Test
+    public void shouldNotPopulateFareZoneWithExplicitStopsWhenCoveredButNotMember() {
+        FareZone fareZone = createFareZoneWithPolygon("NSR:FareZone:1", "Fare Zone Explicit",
+                ScopingMethodEnumeration.EXPLICIT_STOPS,
+                new Coordinate(10.0, 59.0),
+                new Coordinate(10.0, 60.0),
+                new Coordinate(11.0, 60.0),
+                new Coordinate(11.0, 59.0),
+                new Coordinate(10.0, 59.0));
+        fareZone.getFareZoneMembers().add(new StopPlaceReference("NSR:StopPlace:2"));
+        fareZoneRepository.save(fareZone);
+
+        tariffZonesLookupService.resetFareZone();
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setNetexId("NSR:StopPlace:1");
+        stopPlace.setName(new EmbeddableMultilingualString("Test Stop"));
+        stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(10.5, 59.5)));
+
+        boolean changed = tariffZonesLookupService.populateTariffZone(stopPlace);
+
+        assertThat(changed).isFalse();
+        assertThat(stopPlace.getTariffZones()).isEmpty();
     }
 
     @Test

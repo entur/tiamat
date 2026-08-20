@@ -25,10 +25,12 @@ import org.rutebanken.tiamat.versioning.validate.VersionValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -45,19 +47,42 @@ public class FareZoneSaverService {
     private final UsernameFetcher usernameFetcher;
     private final AuthorizationService authorizationService;
 
+    /**
+     * Minimum fraction of currently stored FareZones that must survive a full-replace prune.
+     * Guards against a truncated or partially generated feed wiping the register. A value of
+     * 0.5 means the incoming delivery must retain at least half of the existing zones.
+     */
+    private final double pruneMinRetainRatio;
+
     @Autowired
     public FareZoneSaverService(FareZoneRepository fareZoneRepository,
                                 TariffZonesLookupService tariffZonesLookupService,
                                 DefaultVersionedSaverService defaultVersionedSaverService,
                                 VersionValidator versionValidator,
                                 UsernameFetcher usernameFetcher,
-                                AuthorizationService authorizationService) {
+                                AuthorizationService authorizationService,
+                                @Value("${fareZone.prune.minRetainRatio:0.5}") double pruneMinRetainRatio) {
         this.fareZoneRepository = fareZoneRepository;
         this.tariffZonesLookupService = tariffZonesLookupService;
         this.defaultVersionedSaverService = defaultVersionedSaverService;
         this.versionValidator = versionValidator;
         this.usernameFetcher = usernameFetcher;
         this.authorizationService = authorizationService;
+        this.pruneMinRetainRatio = validateRetainRatio(pruneMinRetainRatio);
+    }
+
+    /**
+     * Fail startup on a ratio that cannot express a retain floor. A non-finite or negative value
+     * makes the comparison permanently false, silently disabling the guard; above 1 rejects every
+     * prune. Both are worse than a wrong-but-usable number, because neither is visible in operation.
+     */
+    private static double validateRetainRatio(double pruneMinRetainRatio) {
+        if (!Double.isFinite(pruneMinRetainRatio) || pruneMinRetainRatio < 0 || pruneMinRetainRatio > 1) {
+            throw new IllegalArgumentException(
+                    "fareZone.prune.minRetainRatio must be a finite fraction between 0 and 1, but was "
+                            + pruneMinRetainRatio);
+        }
+        return pruneMinRetainRatio;
     }
 
     public FareZone saveNewVersion(FareZone newVersion) {
@@ -85,23 +110,20 @@ public class FareZoneSaverService {
      * Used when Tiamat acts as a replica of a master FareZone register.
      *
      * @param incomingFareZone The fare zone to save/update
-     * @return The saved fare zone, or null if validation fails
+     * @return The saved fare zone
+     * @throws IllegalArgumentException if the incoming fare zone is not valid
      */
     public FareZone saveWithExternalVersioning(FareZone incomingFareZone) {
+        // Before anything is touched, so a rejected zone leaves no trace.
+        validateForExternalVersioning(incomingFareZone);
+
         FareZone existingFareZone = null;
 
         if (incomingFareZone.getNetexId() != null) {
-            existingFareZone = fareZoneRepository.findFirstByNetexIdOrderByVersionDesc(incomingFareZone.getNetexId());
+            existingFareZone = findExistingAndDropSupersededVersions(incomingFareZone.getNetexId());
         }
 
         authorizationService.verifyCanEditEntities(Arrays.asList(existingFareZone, incomingFareZone));
-
-        // Validate ValidBetween constraints
-        if (!validateValidBetween(incomingFareZone)) {
-            logger.warn("Ignoring FareZone {} version {} - invalid ValidBetween: fromDate is after toDate",
-                    incomingFareZone.getNetexId(), incomingFareZone.getVersion());
-            return null;
-        }
 
         String username = usernameFetcher.getUserNameForAuthenticatedUser();
         Instant now = Instant.now();
@@ -135,6 +157,48 @@ public class FareZoneSaverService {
     }
 
     /**
+     * Return the row to update in place under external versioning, deleting any other rows for the
+     * same netexId first.
+     *
+     * <p>External versioning keeps a single row per netexId, holding whatever version the master
+     * sent. Rows left behind by earlier default-versioned saves break that: reads resolve a FareZone
+     * by {@code MAX(version)}, so once the surviving row is set to a lower master version an older
+     * sibling becomes the answer. There is also no unique constraint on (netex_id, version), so a
+     * sibling that happens to carry the incoming version would silently duplicate it.
+     *
+     * <p>This makes the first external-versioning save for a netexId the cutover point from
+     * versioned history to a single mastered row.
+     */
+    private FareZone findExistingAndDropSupersededVersions(String netexId) {
+        List<FareZone> existingVersions = fareZoneRepository.findByNetexId(netexId);
+        if (existingVersions.isEmpty()) {
+            return null;
+        }
+
+        FareZone latest = existingVersions.stream()
+                .max(Comparator.comparingLong(FareZone::getVersion))
+                .orElseThrow();
+
+        List<FareZone> superseded = existingVersions.stream()
+                .filter(fareZone -> !fareZone.getId().equals(latest.getId()))
+                .toList();
+
+        if (!superseded.isEmpty()) {
+            String supersededVersions = superseded.stream()
+                    .map(fareZone -> String.valueOf(fareZone.getVersion()))
+                    .collect(Collectors.joining(", "));
+            logger.info("Dropping {} superseded version(s) of FareZone {} on external versioning: {}. Keeping version {}.",
+                    superseded.size(), netexId, supersededVersions, latest.getVersion());
+            fareZoneRepository.deleteAll(superseded);
+            // Flush before the surviving row is renumbered, so the deletes cannot be ordered after
+            // an update that lands on a version one of them still holds.
+            fareZoneRepository.flush();
+        }
+
+        return latest;
+    }
+
+    /**
      * Copy all relevant fields from source to target FareZone.
      * Preserves the target's database ID.
      */
@@ -145,10 +209,16 @@ public class FareZoneSaverService {
         target.setDescription(source.getDescription());
         target.setPrivateCode(source.getPrivateCode());
         target.setPolygon(source.getPolygon());
+        target.setMultiSurface(source.getMultiSurface());
         target.setValidBetween(source.getValidBetween());
         target.setScopingMethod(source.getScopingMethod());
         target.setZoneTopology(source.getZoneTopology());
         target.setTransportOrganisationRef(source.getTransportOrganisationRef());
+
+        // keyValues carries the tzMapping bridge to the legacy TariffZone ids. Without this
+        // the DB keeps stale mappings on every update after create.
+        target.getKeyValues().clear();
+        target.getKeyValues().putAll(source.getKeyValues());
 
         if (source.getNeighbours() != null) {
             target.getNeighbours().clear();
@@ -162,28 +232,39 @@ public class FareZoneSaverService {
     }
 
     /**
-     * Validate ValidBetween constraints for a FareZone.
-     * If both fromDate and toDate are present, fromDate must not be after toDate.
+     * Validate an incoming FareZone against the constraints external versioning requires: if both
+     * fromDate and toDate are present, fromDate must not be after toDate.
+     *
+     * <p>Rejects the whole save rather than skipping the zone. Under external versioning the import
+     * is an authoritative replacement, and a skipped zone is absent from the set of ids to keep - so
+     * silently ignoring it deletes the copy already stored, on the strength of the very record that
+     * failed validation.
      *
      * @param fareZone The fare zone to validate
-     * @return true if validation passes, false if validation fails
+     * @throws IllegalArgumentException if the fare zone is not valid
      */
-    private boolean validateValidBetween(FareZone fareZone) {
+    public void validateForExternalVersioning(FareZone fareZone) {
         if (fareZone.getValidBetween() == null) {
-            return true; // No ValidBetween is acceptable
+            return; // No ValidBetween is acceptable
         }
 
         Instant fromDate = fareZone.getValidBetween().getFromDate();
         Instant toDate = fareZone.getValidBetween().getToDate();
 
-        // If both dates are present, fromDate must not be after toDate
         if (fromDate != null && toDate != null && fromDate.isAfter(toDate)) {
-            logger.warn("FareZone {} has invalid ValidBetween: fromDate {} is after toDate {}",
-                    fareZone.getNetexId(), fromDate, toDate);
-            return false;
+            throw new IllegalArgumentException(String.format(
+                    "FareZone %s version %d has invalid ValidBetween: fromDate %s is after toDate %s",
+                    fareZone.getNetexId(), fareZone.getVersion(), fromDate, toDate));
         }
+    }
 
-        return true;
+    /**
+     * The number of distinct FareZone netexIds currently stored. Callers capture this before an
+     * authoritative import so {@link #deleteAllExcept(Set, long)} can measure its retain floor
+     * against the register as it was, not as the import has already left it.
+     */
+    public long countDistinctStoredNetexIds() {
+        return fareZoneRepository.countDistinctNetexIds();
     }
 
     /**
@@ -191,10 +272,19 @@ public class FareZoneSaverService {
      * Used for cleanup after external versioning import to remove orphaned FareZones.
      * Respects user permissions and logs all deleted netexIds.
      *
-     * @param netexIdsToKeep Set of netexIds to preserve
+     * <p>The retain floor is measured against {@code existingDistinctCount}, taken before the import
+     * wrote anything. Counting the stored zones here instead would count the incoming ones too - they
+     * have already been saved by the time the prune runs - which inflates the denominator by exactly
+     * the zones the feed brought. That makes the floor unreachable in the case it exists for: a feed
+     * that replaces every id retains nothing of the old register, yet lands on the threshold and
+     * passes.
+     *
+     * @param netexIdsToKeep       Set of netexIds to preserve
+     * @param existingDistinctCount distinct netexIds stored before this import began, from
+     *                              {@link #countDistinctStoredNetexIds()}
      * @return Number of FareZones deleted
      */
-    public int deleteAllExcept(Set<String> netexIdsToKeep) {
+    public int deleteAllExcept(Set<String> netexIdsToKeep, long existingDistinctCount) {
         List<FareZone> allFareZones = fareZoneRepository.findAll();
 
         List<FareZone> toDelete = allFareZones.stream()
@@ -204,6 +294,20 @@ public class FareZoneSaverService {
         if (toDelete.isEmpty()) {
             logger.info("No orphaned FareZones to delete");
             return 0;
+        }
+
+        // Every id being deleted pre-dates the import, so the retained count follows from the baseline.
+        long deletingDistinct = toDelete.stream().map(FareZone::getNetexId).distinct().count();
+        long retainedDistinct = existingDistinctCount - deletingDistinct;
+
+        if (existingDistinctCount > 0 && retainedDistinct < existingDistinctCount * pruneMinRetainRatio) {
+            throw new IllegalStateException(String.format(
+                    "Refusing FareZone prune: would keep %d of the %d zones stored before this import (%.1f%%), "
+                            + "below the safety floor of %.1f%%. This usually indicates a truncated or partial feed. "
+                            + "Aborting to avoid mass deletion.",
+                    retainedDistinct, existingDistinctCount,
+                    100.0 * retainedDistinct / existingDistinctCount,
+                    100.0 * pruneMinRetainRatio));
         }
 
         authorizationService.verifyCanEditEntities(toDelete);

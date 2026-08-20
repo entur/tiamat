@@ -8,7 +8,14 @@ envVars:
   BLOBSTORE_GCS_BUCKET_NAME: ror-tiamat-gcp2-prd
   BLOBSTORE_GCS_PROJECT_ID: ent-tiamat-prd
   SPRING_CLOUD_GCP_PROJECT_ID: ent-tiamat-prd
+  # Kept off until the poller has been validated in dev/tst. These are not inert while the poller is
+  # disabled: they change what a manual NeTEx import does to production data - a delivery carrying
+  # FareZones would prune the ones it omits, and TariffZones in any delivery would be dropped. Flip
+  # them together with NETEX_FAREZONEPOLLER_ENABLED at cutover.
   FAREZONE_EXTERNALVERSIONING: "false"
+  GROUPOFTARIFFZONES_EXTERNALVERSIONING: "false"
+  IGNORETARIFFZONEIMPORT: "false"
+  NETEX_FAREZONEPOLLER_ENABLED: "false"
   TIAMAT_USER_PERMISSION_REST_SERVICE_URL: http://baba.prd.entur.internal/services/organisations/users
   TIAMAT_OAUTH2_RESOURCESERVER_AUTH0_ENTUR_PARTNER_JWT_ISSUER_URI: https://partner.entur.org/
   TIAMAT_OAUTH2_RESOURCESERVER_AUTH0_ENTUR_PARTNER_JWT_AUDIENCE: https://api.entur.io

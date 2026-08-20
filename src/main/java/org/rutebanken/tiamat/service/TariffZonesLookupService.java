@@ -37,8 +37,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -57,6 +59,8 @@ public class TariffZonesLookupService {
 
     private final ResettableMemoizer<List<Pair<String, Geometry>>> tariffZones = new ResettableMemoizer<>(getTariffZones());
     private final ResettableMemoizer<List<Pair<String, Geometry>>> fareZones = new ResettableMemoizer<>(getFareZones());
+    private final ResettableMemoizer<Map<String, Set<TariffZoneRef>>> explicitFareZoneRefsByMember =
+            new ResettableMemoizer<>(getExplicitFareZoneRefsByMember());
 
     private final TariffZoneRepository tariffZoneRepository;
     private final FareZoneRepository fareZoneRepository;
@@ -95,14 +99,19 @@ public class TariffZonesLookupService {
 
             Set<TariffZoneRef> allMatches = new HashSet<>(tariffZoneMatches);
 
+            // Spatially projected zones cover the stop geographically.
             Set<TariffZoneRef> fareZoneMatches = findFareZones(stopPlace.getCentroid())
                     .stream()
-                    .filter(fareZone -> stopPlace.getTariffZones().isEmpty() || isNoneMatch(stopPlace, fareZone))
+                    .filter(fareZone -> shouldAttachSpatialFareZone(stopPlace, fareZone))
                     .map(TariffZoneRef::new)
                     .collect(toSet());
 
-
             allMatches.addAll(fareZoneMatches);
+
+            // Explicitly scoped zones list the stop as a member. Resolved separately, because the
+            // spatial lookup would never offer them: it only considers zones that have a geometry and
+            // whose polygon covers the stop, and neither is what defines this scope.
+            allMatches.addAll(explicitFareZoneRefsFor(stopPlace.getNetexId()));
 
             stopPlace.getTariffZones().addAll(allMatches);
 
@@ -113,19 +122,61 @@ public class TariffZonesLookupService {
         return false;
     }
 
-    private boolean isNoneMatch(StopPlace stopPlace, FareZone fareZone) {
-        if (fareZone.getScopingMethod().equals(ScopingMethodEnumeration.IMPLICIT_SPATIAL_PROJECTION)) {
-            return stopPlace.getTariffZones()
-                    .stream()
-                    .noneMatch(tariffZoneRef -> fareZone.getNetexId().equals(tariffZoneRef.getRef()) && tariffZoneRef.getVersion().equals(String.valueOf(fareZone.getVersion())));
+    /**
+     * Decide whether a fare zone whose polygon covers the stop should be attached to it.
+     *
+     * <p>Coverage is only grounds for attaching a zone that is scoped by spatial projection. An
+     * EXPLICIT_STOPS zone is scoped to a listed set of stops, so it is never attached from here, even
+     * when its polygon happens to cover the stop; membership decides, and
+     * {@link #explicitFareZoneRefsFor(String)} handles it.
+     */
+    private boolean shouldAttachSpatialFareZone(StopPlace stopPlace, FareZone fareZone) {
+        if (ScopingMethodEnumeration.EXPLICIT_STOPS.equals(fareZone.getScopingMethod())) {
+            return false;
         }
-        if (fareZone.getScopingMethod().equals(ScopingMethodEnumeration.EXPLICIT_STOPS) && !fareZone.getFareZoneMembers().isEmpty()) {
-            return fareZone.getFareZoneMembers().stream()
-                    .anyMatch(member -> member.getRef().equals(stopPlace.getNetexId()));
-        }
-        return true;
-
+        return stopPlace.getTariffZones()
+                .stream()
+                .noneMatch(tariffZoneRef -> fareZone.getNetexId().equals(tariffZoneRef.getRef())
+                        && tariffZoneRef.getVersion().equals(String.valueOf(fareZone.getVersion())));
     }
+
+    /**
+     * Refs of the EXPLICIT_STOPS fare zones that list this stop place as a member.
+     */
+    private Set<TariffZoneRef> explicitFareZoneRefsFor(String stopPlaceNetexId) {
+        return explicitFareZoneRefsByMember.get().getOrDefault(stopPlaceNetexId, Set.of());
+    }
+
+    /**
+     * Index of EXPLICIT_STOPS fare zones by the stop place they list as a member, so a membership
+     * lookup costs no query per stop. Memoized and reset alongside {@link #fareZones}.
+     */
+    public Supplier<Map<String, Set<TariffZoneRef>>> getExplicitFareZoneRefsByMember() {
+        return () -> {
+            logger.info("Fetching and memoizing explicitly scoped fare zone members from repository");
+            Map<String, Set<TariffZoneRef>> refsByMember = new HashMap<>();
+
+            fareZoneRepository.findAllValidFareZones()
+                    .stream()
+                    .filter(fareZone -> ScopingMethodEnumeration.EXPLICIT_STOPS.equals(fareZone.getScopingMethod()))
+                    .collect(
+                            groupingBy(FareZone::getNetexId,
+                                    maxBy(Comparator.comparingLong(EntityInVersionStructure::getVersion))))
+                    .values()
+                    .stream()
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .forEach(fareZone -> {
+                        TariffZoneRef ref = new TariffZoneRef(fareZone);
+                        fareZone.getFareZoneMembers().forEach(member ->
+                                refsByMember.computeIfAbsent(member.getRef(), key -> new HashSet<>()).add(ref));
+                    });
+
+            logger.debug("Memoized explicitly scoped fare zone members for {} stop places", refsByMember.size());
+            return refsByMember;
+        };
+    }
+
     private Set<String> mapToIdStrings(Set<TariffZoneRef> tariffZoneRefs) {
         return tariffZoneRefs.stream().map(tzr -> tzr.getRef()).collect(toSet());
     }
@@ -193,6 +244,7 @@ public class TariffZonesLookupService {
     }
 
     public void resetFareZone() {
+        explicitFareZoneRefsByMember.reset();
         fareZones.reset();
     }
 

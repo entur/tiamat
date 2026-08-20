@@ -28,6 +28,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -84,7 +85,7 @@ public class GroupOffTariffZonesSaverService {
         GroupOfTariffZones existingGroupOfTariffZones = null;
 
         if (incomingGroupOfTariffZones.getNetexId() != null) {
-            existingGroupOfTariffZones = groupOfTariffZonesRepository.findFirstByNetexIdOrderByVersionDesc(incomingGroupOfTariffZones.getNetexId());
+            existingGroupOfTariffZones = findExistingAndDropSupersededVersions(incomingGroupOfTariffZones.getNetexId());
         }
 
         authorizationService.verifyCanEditEntities(Arrays.asList(existingGroupOfTariffZones, incomingGroupOfTariffZones));
@@ -117,6 +118,45 @@ public class GroupOffTariffZonesSaverService {
                 saved.getNetexId(), saved.getVersion(), username);
 
         return saved;
+    }
+
+    /**
+     * Return the row to update in place under external versioning, deleting any other rows for the
+     * same netexId first.
+     *
+     * <p>External versioning keeps a single row per netexId, holding whatever version the master
+     * sent. Rows left behind by earlier default-versioned saves break that: reads resolve by
+     * highest version, so once the surviving row is set to a lower master version an older sibling
+     * becomes the answer. This makes the first external-versioning save for a netexId the cutover
+     * point from versioned history to a single mastered row.
+     */
+    private GroupOfTariffZones findExistingAndDropSupersededVersions(String netexId) {
+        List<GroupOfTariffZones> existingVersions = groupOfTariffZonesRepository.findByNetexId(netexId);
+        if (existingVersions.isEmpty()) {
+            return null;
+        }
+
+        GroupOfTariffZones latest = existingVersions.stream()
+                .max(Comparator.comparingLong(GroupOfTariffZones::getVersion))
+                .orElseThrow();
+
+        List<GroupOfTariffZones> superseded = existingVersions.stream()
+                .filter(group -> !group.getId().equals(latest.getId()))
+                .toList();
+
+        if (!superseded.isEmpty()) {
+            String supersededVersions = superseded.stream()
+                    .map(group -> String.valueOf(group.getVersion()))
+                    .collect(Collectors.joining(", "));
+            logger.info("Dropping {} superseded version(s) of GroupOfTariffZones {} on external versioning: {}. Keeping version {}.",
+                    superseded.size(), netexId, supersededVersions, latest.getVersion());
+            groupOfTariffZonesRepository.deleteAll(superseded);
+            // Flush before the surviving row is renumbered, so the deletes cannot be ordered after
+            // an update that lands on a version one of them still holds.
+            groupOfTariffZonesRepository.flush();
+        }
+
+        return latest;
     }
 
     /**

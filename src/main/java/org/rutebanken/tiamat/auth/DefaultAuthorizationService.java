@@ -49,6 +49,9 @@ public class DefaultAuthorizationService implements AuthorizationService {
 
     @Override
     public boolean canEditAllEntities() {
+        if(SystemImportContext.isActive()) {
+            return true;
+        }
         if(hasNoAuthentications()) {
             return false;
         }
@@ -68,28 +71,43 @@ public class DefaultAuthorizationService implements AuthorizationService {
 
     @Override
     public boolean canEditEntities(Collection<? extends EntityStructure> entities) {
+        if(SystemImportContext.isActive()) {
+            return true;
+        }
         return dataScopedAuthorizationService.isAuthorized(ROLE_EDIT_STOPS, entities);
     }
 
 
     @Override
     public void verifyCanEditEntities(Collection<? extends EntityStructure> entities) {
+        if(SystemImportContext.isActive()) {
+            return;
+        }
         dataScopedAuthorizationService.assertAuthorized(ROLE_EDIT_STOPS, entities);
     }
 
     @Override
     public void verifyCanDeleteEntities(Collection<? extends EntityStructure> entities) {
+        if(SystemImportContext.isActive()) {
+            return;
+        }
         dataScopedAuthorizationService.assertAuthorized(ROLE_DELETE_STOPS, entities);
 
     }
 
     @Override
     public boolean canDeleteEntity(EntityStructure entity) {
+        if(SystemImportContext.isActive()) {
+            return true;
+        }
         return canEditDeleteEntity(entity, ROLE_DELETE_STOPS);
     }
 
     @Override
     public boolean canEditEntity(EntityStructure entity) {
+        if(SystemImportContext.isActive()) {
+            return true;
+        }
         return canEditDeleteEntity(entity, ROLE_EDIT_STOPS);
     }
 

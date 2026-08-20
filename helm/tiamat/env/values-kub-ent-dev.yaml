@@ -9,6 +9,11 @@ envVars:
   BLOBSTORE_GCS_PROJECT_ID: ent-tiamat-dev
   SPRING_CLOUD_GCP_PROJECT_ID: ent-tiamat-dev
   FAREZONE_EXTERNALVERSIONING: "true"
+  GROUPOFTARIFFZONES_EXTERNALVERSIONING: "true"
+  IGNORETARIFFZONEIMPORT: "true"
+  NETEX_FAREZONEPOLLER_ENABLED: "true"
+  # Set explicitly: the code default is the production feed, which this environment must not pull.
+  NETEX_FAREZONEPOLLER_URL: "https://api.dev.entur.io/distance/netex/fare-zones"
   TIAMAT_USER_PERMISSION_REST_SERVICE_URL: http://baba.dev.entur.internal/services/organisations/users
   TIAMAT_OAUTH2_RESOURCESERVER_AUTH0_ENTUR_PARTNER_JWT_ISSUER_URI: https://partner.dev.entur.org/
   TIAMAT_OAUTH2_RESOURCESERVER_AUTH0_ENTUR_PARTNER_JWT_AUDIENCE: https://api.dev.entur.io

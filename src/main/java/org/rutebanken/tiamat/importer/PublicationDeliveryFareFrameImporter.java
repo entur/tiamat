@@ -29,6 +29,8 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -49,6 +51,7 @@ public class PublicationDeliveryFareFrameImporter {
     private final BackgroundJobs backgroundJobs;
     private final FareZoneConfig fareZoneConfig;
     private final FareZoneSaverService fareZoneSaverService;
+    private final TransactionTemplate transactionTemplate;
 
     @Autowired
     public PublicationDeliveryFareFrameImporter(
@@ -57,13 +60,15 @@ public class PublicationDeliveryFareFrameImporter {
             TariffZoneImportHandler tariffZoneImportHandler,
             BackgroundJobs backgroundJobs,
             FareZoneConfig fareZoneConfig,
-            FareZoneSaverService fareZoneSaverService) {
+            FareZoneSaverService fareZoneSaverService,
+            PlatformTransactionManager transactionManager) {
         this.publicationDeliveryHelper = publicationDeliveryHelper;
         this.publicationDeliveryCreator = publicationDeliveryCreator;
         this.tariffZoneImportHandler = tariffZoneImportHandler;
         this.backgroundJobs = backgroundJobs;
         this.fareZoneConfig = fareZoneConfig;
         this.fareZoneSaverService = fareZoneSaverService;
+        this.transactionTemplate = new TransactionTemplate(transactionManager);
     }
 
     public PublicationDeliveryStructure importPublicationDelivery(
@@ -114,19 +119,27 @@ public class PublicationDeliveryFareFrameImporter {
             FareFrame responseFareFrame = new FareFrame();
             responseFareFrame.withId(requestId + "-response").withVersion("1");
 
-            // Import fare zones from FareFrame and collect imported netexIds
-            Set<String> importedNetexIds = tariffZoneImportHandler.handleFareZonesFromFareFrame(
-                    netexFareFrame,
-                    importParams,
-                    fareZoneCounter,
-                    responseFareFrame
-            );
+            // Import and orphan cleanup share one transaction: with external versioning they are a
+            // single authoritative replacement, so a rejected zone must not leave the zones already
+            // written committed while the rest of the delivery is discarded.
+            final ImportParams finalImportParams = importParams;
+            transactionTemplate.executeWithoutResult(transactionStatus -> {
+                // Before the import writes anything, so the prune safety floor is measured against
+                // the register as it stands rather than as this delivery leaves it.
+                long fareZonesBeforeImport = fareZoneSaverService.countDistinctStoredNetexIds();
 
-            // Cleanup orphaned FareZones if external versioning is enabled
-            if (fareZoneConfig.isExternalVersioning() && !importedNetexIds.isEmpty()) {
-                int deletedCount = fareZoneSaverService.deleteAllExcept(importedNetexIds);
-                logger.info("External versioning cleanup: deleted {} orphaned FareZones", deletedCount);
-            }
+                Set<String> imported = tariffZoneImportHandler.handleFareZonesFromFareFrame(
+                        netexFareFrame,
+                        finalImportParams,
+                        fareZoneCounter,
+                        responseFareFrame
+                );
+
+                if (fareZoneConfig.isExternalVersioning() && !imported.isEmpty()) {
+                    int deletedCount = fareZoneSaverService.deleteAllExcept(imported, fareZonesBeforeImport);
+                    logger.info("External versioning cleanup: deleted {} orphaned FareZones", deletedCount);
+                }
+            });
 
             // Trigger background job if zones were imported
             if (responseFareFrame.getFareZones() != null) {

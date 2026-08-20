@@ -44,6 +44,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.Collections;
+import java.util.Objects;
 import java.util.Set;
 import java.util.Timer;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -163,27 +164,35 @@ public class PublicationDeliveryImporter {
 
             // Import fare zones carried in an accompanying FareFrame, so that a GroupOfTariffZones
             // in the SiteFrame can reference them within the same delivery.
-            final Set<String> fareFrameZoneIds;
-            if (netexFareFrame != null) {
-                FareFrame responseFareFrame = new FareFrame().withId(requestId + "-fareframe-response").withVersion("1");
-                fareFrameZoneIds = tariffZoneImportHandler.handleFareZonesFromFareFrame(netexFareFrame, importParams, tariffZoneCounter, responseFareFrame);
-                } else {
-                fareFrameZoneIds = Collections.emptySet();
-            }
-
-            // Run the external versioning FareZone cleanup and the GroupOfTariffZones import in a single
-            // transaction, so that a failed group member validation rolls back the deletes instead of
-            // leaving FareZones permanently removed by a rejected import.
+            //
+            // The FareZone import, the external versioning cleanup and the GroupOfTariffZones import
+            // share one transaction: together they are a single authoritative replacement, so a
+            // rejected group membership or an invalid zone must not leave a half-applied snapshot -
+            // updated and newly inserted zones committed, with the rest of the delivery discarded.
             final ImportParams finalImportParams = importParams;
-            transactionTemplate.executeWithoutResult(transactionStatus -> {
-                // With external versioning the import is a full replace: prune FareZones not present in this delivery.
-                if (fareZoneConfig.isExternalVersioning() && !fareFrameZoneIds.isEmpty()) {
-                    int deletedCount = fareZoneSaverService.deleteAllExcept(fareFrameZoneIds);
-                    logger.info("External versioning cleanup: deleted {} orphaned FareZones", deletedCount);
-                }
+            final Set<String> fareFrameZoneIds = Objects.requireNonNullElse(
+                    transactionTemplate.execute(transactionStatus -> {
+                        // Before the import writes anything, so the prune safety floor is measured
+                        // against the register as it stands rather than as this delivery leaves it.
+                        long fareZonesBeforeImport = fareZoneSaverService.countDistinctStoredNetexIds();
 
-                groupOfTariffZonesImportHandler.handleGroupOfTariffZones(netexSiteFrame, finalImportParams, responseSiteFrame, fareFrameZoneIds);
-            });
+                        Set<String> importedZoneIds = Collections.emptySet();
+                        if (netexFareFrame != null) {
+                            FareFrame responseFareFrame = new FareFrame().withId(requestId + "-fareframe-response").withVersion("1");
+                            importedZoneIds = tariffZoneImportHandler.handleFareZonesFromFareFrame(
+                                    netexFareFrame, finalImportParams, tariffZoneCounter, responseFareFrame);
+                        }
+
+                        // With external versioning the import is a full replace: prune FareZones not present in this delivery.
+                        if (fareZoneConfig.isExternalVersioning() && !importedZoneIds.isEmpty()) {
+                            int deletedCount = fareZoneSaverService.deleteAllExcept(importedZoneIds, fareZonesBeforeImport);
+                            logger.info("External versioning cleanup: deleted {} orphaned FareZones", deletedCount);
+                        }
+
+                        groupOfTariffZonesImportHandler.handleGroupOfTariffZones(netexSiteFrame, finalImportParams, responseSiteFrame, importedZoneIds);
+                        return importedZoneIds;
+                    }),
+                    Collections.emptySet());
             stopPlaceImportHandler.handleStops(netexSiteFrame, importParams, stopPlaceCounter, responseSiteFrame);
             parkingsImportHandler.handleParkings(netexSiteFrame, importParams, parkingCounter, responseSiteFrame);
             pathLinkImportHandler.handlePathLinks(netexSiteFrame, importParams, pathLinkCounter, responseSiteFrame);

@@ -21,6 +21,8 @@ import org.rutebanken.netex.model.FareZone;
 import org.rutebanken.netex.model.FareZonesInFrame_RelStructure;
 import org.rutebanken.netex.model.GroupOfTariffZones;
 import org.rutebanken.netex.model.GroupsOfTariffZonesInFrame_RelStructure;
+import org.rutebanken.netex.model.KeyListStructure;
+import org.rutebanken.netex.model.KeyValueStructure;
 import org.rutebanken.netex.model.MultilingualString;
 import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
@@ -557,28 +559,221 @@ public class FareZoneExternalVersioningTest extends TiamatIntegrationTest {
             importParams.fareZoneFrameSource = FareZoneFrameSource.FARE_FRAME;
             importParams.importType = ImportType.INITIAL;
 
+            PublicationDeliveryStructure delivery = publicationDeliveryTestHelper.publicationDelivery(
+                    publicationDeliveryTestHelper.siteFrame(), fareFrame);
+
             // WHEN: Import FareZone with invalid date range
-            PublicationDeliveryStructure response =
-                    publicationDeliveryTestHelper.postAndReturnPublicationDelivery(
-                            publicationDeliveryTestHelper.publicationDelivery(fareFrame), importParams);
+            // THEN: the import is rejected rather than the zone being skipped
+            assertThatThrownBy(() -> publicationDeliveryImporter.importPublicationDelivery(delivery, importParams))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("NSR:FareZone:703");
 
-            // THEN: FareZone should be rejected and not saved
-            org.rutebanken.tiamat.model.FareZone savedZone = fareZoneRepository
-                    .findFirstByNetexIdOrderByVersionDesc("NSR:FareZone:703");
-
-            // Validation should reject this - zone should NOT be saved
-            assertThat(savedZone).isNull();
-
-            // Response should not include the invalid zone
-            FareFrame responseFareFrame = publicationDeliveryTestHelper.findFareFrame(response);
-            assertThat(responseFareFrame).isNotNull();
-            if (responseFareFrame.getFareZones() != null) {
-                assertThat(responseFareFrame.getFareZones().getFareZone()).isEmpty();
-            }
+            assertThat(fareZoneRepository.findFirstByNetexIdOrderByVersionDesc("NSR:FareZone:703")).isNull();
 
         } finally {
             ReflectionTestUtils.setField(fareZoneConfig, "externalVersioning", false);
         }
+    }
+
+    /**
+     * An invalid zone must not cost us the copy already stored. Skipping it would leave its id out of
+     * the set of zones to keep, so the full-replace prune would delete it - on the strength of the
+     * very record that failed validation.
+     */
+    @Test
+    public void validBetween_invalidZoneDoesNotDeleteTheStoredCopy() {
+        ReflectionTestUtils.setField(fareZoneConfig, "externalVersioning", true);
+
+        try {
+            ImportParams importParams = new ImportParams();
+            importParams.importType = ImportType.INITIAL;
+
+            // GIVEN: two zones stored by a valid snapshot
+            publicationDeliveryImporter.importPublicationDelivery(
+                    publicationDeliveryTestHelper.publicationDelivery(
+                            publicationDeliveryTestHelper.siteFrame(),
+                            fareFrameWithFareZones("NSR:FareZone:711", "NSR:FareZone:712")),
+                    importParams);
+            assertThat(fareZoneRepository.findByNetexId("NSR:FareZone:712")).isNotEmpty();
+
+            // WHEN: the next snapshot repeats both, but one now carries an invalid validity
+            FareFrame fareFrame = fareFrameWithFareZones("NSR:FareZone:711");
+            fareFrame.getFareZones().getFareZone().add(new FareZone()
+                    .withId("NSR:FareZone:712")
+                    .withVersion("2")
+                    .withName(new MultilingualString().withValue("NSR:FareZone:712"))
+                    .withValidBetween(new ValidBetween()
+                            .withFromDate(LocalDateTime.now().plusDays(10))
+                            .withToDate(LocalDateTime.now().minusDays(10))));
+
+            PublicationDeliveryStructure delivery = publicationDeliveryTestHelper.publicationDelivery(
+                    publicationDeliveryTestHelper.siteFrame(), fareFrame);
+
+            assertThatThrownBy(() -> publicationDeliveryImporter.importPublicationDelivery(delivery, importParams))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("NSR:FareZone:712");
+
+            // THEN: both stored zones survive - nothing was pruned on the strength of a rejected record
+            assertThat(fareZoneRepository.findByNetexId("NSR:FareZone:711")).isNotEmpty();
+            assertThat(fareZoneRepository.findByNetexId("NSR:FareZone:712")).isNotEmpty();
+        } finally {
+            ReflectionTestUtils.setField(fareZoneConfig, "externalVersioning", false);
+        }
+    }
+
+    /**
+     * Cutover from default versioning: the stored history collapses to the single row the master
+     * mastered. Leaving the siblings behind would let an older version win, because reads resolve a
+     * FareZone by highest version and the master's version can be lower than the local one.
+     */
+    @Test
+    public void externalVersioning_cutoverDropsSupersededVersions() {
+        ImportParams importParams = new ImportParams();
+        importParams.importType = ImportType.INITIAL;
+
+        // GIVEN: three default-versioned imports, leaving versions 1, 2 and 3 stored
+        for (int i = 0; i < 3; i++) {
+            publicationDeliveryImporter.importPublicationDelivery(
+                    publicationDeliveryTestHelper.publicationDelivery(
+                            publicationDeliveryTestHelper.siteFrame(),
+                            fareFrameWithFareZones("NSR:FareZone:721")),
+                    importParams);
+        }
+        assertThat(fareZoneRepository.findByNetexId("NSR:FareZone:721")).hasSize(3);
+
+        ReflectionTestUtils.setField(fareZoneConfig, "externalVersioning", true);
+        try {
+            // WHEN: the master sends a lower version than the local history reached
+            FareFrame fareFrame = publicationDeliveryTestHelper.fareFrame();
+            fareFrame.setFareZones(new FareZonesInFrame_RelStructure());
+            fareFrame.getFareZones().getFareZone().add(new FareZone()
+                    .withId("NSR:FareZone:721")
+                    .withVersion("2")
+                    .withName(new MultilingualString().withValue("Mastered")));
+
+            publicationDeliveryImporter.importPublicationDelivery(
+                    publicationDeliveryTestHelper.publicationDelivery(
+                            publicationDeliveryTestHelper.siteFrame(), fareFrame),
+                    importParams);
+
+            // THEN: exactly one row remains, and it is the one the master sent
+            List<org.rutebanken.tiamat.model.FareZone> stored =
+                    fareZoneRepository.findByNetexId("NSR:FareZone:721");
+            assertThat(stored).hasSize(1);
+            assertThat(stored.getFirst().getVersion()).isEqualTo(2L);
+            assertThat(stored.getFirst().getName().getValue()).isEqualTo("Mastered");
+
+            // And the version-resolving read agrees, rather than returning a stale sibling
+            assertThat(fareZoneRepository.findFirstByNetexIdOrderByVersionDesc("NSR:FareZone:721")
+                    .getName().getValue()).isEqualTo("Mastered");
+        } finally {
+            ReflectionTestUtils.setField(fareZoneConfig, "externalVersioning", false);
+        }
+    }
+
+    /**
+     * On update the incoming keyValues (e.g. the tzMapping bridge to the legacy TariffZone id)
+     * must replace what is stored, not be silently dropped.
+     */
+    @Test
+    public void externalVersioning_updateReplacesKeyValues() throws Exception {
+        ReflectionTestUtils.setField(fareZoneConfig, "externalVersioning", true);
+
+        try {
+            ImportParams importParams = new ImportParams();
+            importParams.fareZoneFrameSource = FareZoneFrameSource.FARE_FRAME;
+            importParams.importType = ImportType.INITIAL;
+
+            FareZone create = new FareZone()
+                    .withName(new MultilingualString().withValue("Zone With Mapping"))
+                    .withVersion("1")
+                    .withId("NSR:FareZone:950")
+                    .withKeyList(new KeyListStructure().withKeyValue(
+                            new KeyValueStructure().withKey("tzMapping").withValue("NSR:TariffZone:OLD")));
+
+            FareFrame createFrame = publicationDeliveryTestHelper.fareFrame();
+            createFrame.setFareZones(new FareZonesInFrame_RelStructure());
+            createFrame.getFareZones().getFareZone().add(create);
+
+            PublicationDeliveryStructure createResponse = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(
+                    publicationDeliveryTestHelper.publicationDelivery(createFrame), importParams);
+            assertThat(tzMappingOf(createResponse)).isEqualTo("NSR:TariffZone:OLD");
+
+            // WHEN: re-import same netexId with an updated tzMapping
+            FareZone update = new FareZone()
+                    .withName(new MultilingualString().withValue("Zone With Mapping"))
+                    .withVersion("2")
+                    .withId("NSR:FareZone:950")
+                    .withKeyList(new KeyListStructure().withKeyValue(
+                            new KeyValueStructure().withKey("tzMapping").withValue("NSR:TariffZone:NEW")));
+
+            FareFrame updateFrame = publicationDeliveryTestHelper.fareFrame();
+            updateFrame.setFareZones(new FareZonesInFrame_RelStructure());
+            updateFrame.getFareZones().getFareZone().add(update);
+
+            PublicationDeliveryStructure updateResponse = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(
+                    publicationDeliveryTestHelper.publicationDelivery(updateFrame), importParams);
+
+            // THEN: the stored mapping reflects the update instead of the stale original
+            assertThat(tzMappingOf(updateResponse)).isEqualTo("NSR:TariffZone:NEW");
+        } finally {
+            ReflectionTestUtils.setField(fareZoneConfig, "externalVersioning", false);
+        }
+    }
+
+    /**
+     * A truncated or partial feed must not be allowed to wipe the register. The prune refuses when
+     * the incoming delivery would drop the stored zone count below the safety floor, and rolls back.
+     */
+    @Test
+    public void externalVersioning_pruneBelowSafetyFloorRejected() {
+        ReflectionTestUtils.setField(fareZoneConfig, "externalVersioning", true);
+
+        try {
+            ImportParams importParams = new ImportParams();
+            importParams.importType = ImportType.INITIAL;
+
+            publicationDeliveryImporter.importPublicationDelivery(
+                    publicationDeliveryTestHelper.publicationDelivery(
+                            publicationDeliveryTestHelper.siteFrame(),
+                            fareFrameWithFareZones("NSR:FareZone:960", "NSR:FareZone:961",
+                                    "NSR:FareZone:962", "NSR:FareZone:963", "NSR:FareZone:964")),
+                    importParams);
+            assertThat(distinctFareZoneCount()).isEqualTo(5);
+
+            // WHEN: a truncated feed carrying a single zone (would delete 4 of 5)
+            PublicationDeliveryStructure truncated = publicationDeliveryTestHelper.publicationDelivery(
+                    publicationDeliveryTestHelper.siteFrame(),
+                    fareFrameWithFareZones("NSR:FareZone:960"));
+
+            assertThatThrownBy(() -> publicationDeliveryImporter.importPublicationDelivery(truncated, importParams))
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessageContaining("Refusing FareZone prune");
+
+            // THEN: nothing was deleted
+            assertThat(distinctFareZoneCount()).isEqualTo(5);
+            assertThat(fareZoneRepository.findByNetexId("NSR:FareZone:964")).isNotEmpty();
+        } finally {
+            ReflectionTestUtils.setField(fareZoneConfig, "externalVersioning", false);
+        }
+    }
+
+    private String tzMappingOf(PublicationDeliveryStructure response) {
+        FareFrame responseFareFrame = publicationDeliveryTestHelper.findFareFrame(response);
+        FareZone fareZone = responseFareFrame.getFareZones().getFareZone().get(0);
+        assertThat(fareZone.getKeyList()).isNotNull();
+        return fareZone.getKeyList().getKeyValue().stream()
+                .filter(kv -> "tzMapping".equals(kv.getKey()))
+                .map(KeyValueStructure::getValue)
+                .findFirst()
+                .orElse(null);
+    }
+
+    private long distinctFareZoneCount() {
+        return fareZoneRepository.findAll().stream()
+                .map(org.rutebanken.tiamat.model.FareZone::getNetexId)
+                .distinct()
+                .count();
     }
 
     /**
@@ -630,6 +825,10 @@ public class FareZoneExternalVersioningTest extends TiamatIntegrationTest {
             FareFrame mainFrame = publicationDeliveryTestHelper.fareFrame();
             mainFrame.setFareZones(new FareZonesInFrame_RelStructure());
             mainFrame.getFareZones().getFareZone().add(mainZone);
+            // Include the neighbour zones as well: with external versioning the delivery is a full
+            // replace, so all surviving zones must be present or the prune safety floor rejects it.
+            mainFrame.getFareZones().getFareZone().add(neighbour1);
+            mainFrame.getFareZones().getFareZone().add(neighbour2);
 
             PublicationDeliveryStructure response =
                     publicationDeliveryTestHelper.postAndReturnPublicationDelivery(
@@ -638,7 +837,7 @@ public class FareZoneExternalVersioningTest extends TiamatIntegrationTest {
             // THEN: Import should succeed with neighbour references
             FareFrame responseFareFrame = publicationDeliveryTestHelper.findFareFrame(response);
             assertThat(responseFareFrame).isNotNull();
-            assertThat(responseFareFrame.getFareZones().getFareZone()).hasSize(1);
+            assertThat(responseFareFrame.getFareZones().getFareZone()).hasSize(3);
 
             // Verify in database - neighbours should be stored
             org.rutebanken.tiamat.model.FareZone savedZone = fareZoneRepository
@@ -696,6 +895,124 @@ public class FareZoneExternalVersioningTest extends TiamatIntegrationTest {
             assertThat(fareZoneRepository.findByNetexId("NSR:FareZone:901")).isNotEmpty();
             assertThat(fareZoneRepository.findByNetexId("NSR:FareZone:902")).isNotEmpty();
             assertThat(groupOfTariffZonesRepository.findByNetexId("NSR:GroupOfTariffZones:901")).isEmpty();
+        } finally {
+            ReflectionTestUtils.setField(fareZoneConfig, "externalVersioning", false);
+        }
+    }
+
+    /**
+     * The rollback must cover what the delivery wrote, not only what it deleted. The FareZone upserts
+     * used to commit in their own transaction before the prune and the group import ran, so a
+     * rejected delivery left updated and newly inserted zones behind.
+     */
+    @Test
+    public void externalVersioning_failedGroupValidationRollsBackFareZoneWrites() {
+        ReflectionTestUtils.setField(fareZoneConfig, "externalVersioning", true);
+
+        try {
+            ImportParams importParams = new ImportParams();
+            importParams.importType = ImportType.INITIAL;
+
+            // GIVEN: two FareZones persisted by a first delivery
+            publicationDeliveryImporter.importPublicationDelivery(
+                    publicationDeliveryTestHelper.publicationDelivery(
+                            publicationDeliveryTestHelper.siteFrame(),
+                            fareFrameWithFareZones("NSR:FareZone:911", "NSR:FareZone:912")),
+                    importParams);
+
+            // WHEN: a later delivery drops one zone, adds a new one, and its group references a zone
+            // that exists nowhere - so the delivery is rejected after the zones have been written.
+            SiteFrame siteFrame = publicationDeliveryTestHelper.siteFrame();
+            siteFrame.withGroupsOfTariffZones(new GroupsOfTariffZonesInFrame_RelStructure()
+                    .withGroupOfTariffZones(groupOfTariffZones("NSR:GroupOfTariffZones:911", "NSR:FareZone:999")));
+
+            PublicationDeliveryStructure delivery = publicationDeliveryTestHelper.publicationDelivery(
+                    siteFrame, fareFrameWithFareZones("NSR:FareZone:911", "NSR:FareZone:913"));
+
+            assertThatThrownBy(() -> publicationDeliveryImporter.importPublicationDelivery(delivery, importParams))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("NSR:FareZone:999");
+
+            // THEN: the insertion is rolled back, and so is the prune of the dropped zone
+            assertThat(fareZoneRepository.findByNetexId("NSR:FareZone:913")).isEmpty();
+            assertThat(fareZoneRepository.findByNetexId("NSR:FareZone:911")).isNotEmpty();
+            assertThat(fareZoneRepository.findByNetexId("NSR:FareZone:912")).isNotEmpty();
+            assertThat(groupOfTariffZonesRepository.findByNetexId("NSR:GroupOfTariffZones:911")).isEmpty();
+        } finally {
+            ReflectionTestUtils.setField(fareZoneConfig, "externalVersioning", false);
+        }
+    }
+
+    /**
+     * The retain floor asks how much of the stored register a snapshot keeps. Measuring it after the
+     * snapshot's own zones are saved inflates the denominator by exactly those zones, which lets the
+     * worst case through: a feed that replaces every id retains nothing yet lands on the threshold.
+     */
+    @Test
+    public void externalVersioning_pruneRejectedWhenSnapshotReplacesEveryId() {
+        ReflectionTestUtils.setField(fareZoneConfig, "externalVersioning", true);
+
+        try {
+            ImportParams importParams = new ImportParams();
+            importParams.importType = ImportType.INITIAL;
+
+            publicationDeliveryImporter.importPublicationDelivery(
+                    publicationDeliveryTestHelper.publicationDelivery(
+                            publicationDeliveryTestHelper.siteFrame(),
+                            fareFrameWithFareZones("NSR:FareZone:970", "NSR:FareZone:971",
+                                    "NSR:FareZone:972", "NSR:FareZone:973")),
+                    importParams);
+            assertThat(distinctFareZoneCount()).isEqualTo(4);
+
+            // WHEN: a snapshot of the same size, but sharing no id with what is stored
+            PublicationDeliveryStructure replacement = publicationDeliveryTestHelper.publicationDelivery(
+                    publicationDeliveryTestHelper.siteFrame(),
+                    fareFrameWithFareZones("NSR:FareZone:980", "NSR:FareZone:981",
+                            "NSR:FareZone:982", "NSR:FareZone:983"));
+
+            assertThatThrownBy(() -> publicationDeliveryImporter.importPublicationDelivery(replacement, importParams))
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessageContaining("Refusing FareZone prune");
+
+            // THEN: nothing was deleted and nothing was inserted
+            assertThat(distinctFareZoneCount()).isEqualTo(4);
+            assertThat(fareZoneRepository.findByNetexId("NSR:FareZone:973")).isNotEmpty();
+            assertThat(fareZoneRepository.findByNetexId("NSR:FareZone:980")).isEmpty();
+        } finally {
+            ReflectionTestUtils.setField(fareZoneConfig, "externalVersioning", false);
+        }
+    }
+
+    /**
+     * A snapshot that keeps enough of the register still passes, including when it also brings new
+     * zones - those must not count towards the baseline either.
+     */
+    @Test
+    public void externalVersioning_pruneAllowedWhenEnoughOfTheRegisterIsRetained() {
+        ReflectionTestUtils.setField(fareZoneConfig, "externalVersioning", true);
+
+        try {
+            ImportParams importParams = new ImportParams();
+            importParams.importType = ImportType.INITIAL;
+
+            publicationDeliveryImporter.importPublicationDelivery(
+                    publicationDeliveryTestHelper.publicationDelivery(
+                            publicationDeliveryTestHelper.siteFrame(),
+                            fareFrameWithFareZones("NSR:FareZone:990", "NSR:FareZone:991",
+                                    "NSR:FareZone:992", "NSR:FareZone:993")),
+                    importParams);
+
+            // Keeps 3 of 4 and adds 2 new ones
+            publicationDeliveryImporter.importPublicationDelivery(
+                    publicationDeliveryTestHelper.publicationDelivery(
+                            publicationDeliveryTestHelper.siteFrame(),
+                            fareFrameWithFareZones("NSR:FareZone:990", "NSR:FareZone:991",
+                                    "NSR:FareZone:992", "NSR:FareZone:994", "NSR:FareZone:995")),
+                    importParams);
+
+            assertThat(distinctFareZoneCount()).isEqualTo(5);
+            assertThat(fareZoneRepository.findByNetexId("NSR:FareZone:993")).isEmpty();
+            assertThat(fareZoneRepository.findByNetexId("NSR:FareZone:995")).isNotEmpty();
         } finally {
             ReflectionTestUtils.setField(fareZoneConfig, "externalVersioning", false);
         }

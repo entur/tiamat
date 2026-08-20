@@ -16,8 +16,11 @@
 package org.rutebanken.tiamat.repository;
 
 import org.rutebanken.tiamat.model.FareZone;
+import org.springframework.data.jpa.repository.Query;
 
 public interface FareZoneRepository extends EntityInVersionRepository<FareZone>, FareZoneRepositoryCustom {
 
+    @Query("select count(distinct fareZone.netexId) from FareZone fareZone")
+    long countDistinctNetexIds();
 }
 

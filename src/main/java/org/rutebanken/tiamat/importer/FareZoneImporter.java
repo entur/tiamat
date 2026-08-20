@@ -27,7 +27,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 
@@ -59,24 +58,21 @@ public class FareZoneImporter {
                     org.rutebanken.tiamat.model.FareZone saved;
 
                     if (fareZoneConfig.isExternalVersioning()) {
+                        // Throws on an invalid zone, failing the import rather than dropping the zone
+                        // from the set of ids to keep - which would delete the stored copy.
                         saved = fareZoneSaverService.saveWithExternalVersioning(incomingFareZone);
-                        if (saved != null) {
-                            logger.debug("Saved FareZone {} with external versioning", saved.getNetexId());
-                        } else {
-                            logger.warn("FareZone {} was not saved due to validation failure", incomingFareZone.getNetexId());
-                        }
+                        logger.debug("Saved FareZone {} with external versioning", saved.getNetexId());
                     } else {
                         saved = fareZoneSaverService.saveNewVersion(incomingFareZone);
                         logger.debug("Saved FareZone {} with default versioning", saved.getNetexId());
                     }
 
-                    if (saved != null && saved.getNetexId() != null) {
+                    if (saved.getNetexId() != null) {
                         importedNetexIds.add(saved.getNetexId());
                     }
 
                     return saved;
                 })
-                .filter(Objects::nonNull) // Filter out validation failures
                 .map(savedFareZone -> netexMapper.getFacade().map(savedFareZone, FareZone.class))
                 .toList();
 
