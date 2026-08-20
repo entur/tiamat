@@ -9,7 +9,9 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.StreamingOutput;
 import org.rutebanken.tiamat.model.job.AsyncStopPlaceJob;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
-import org.rutebanken.tiamat.rest.write.async.StopPlaceAsyncProcessor;
+import org.rutebanken.tiamat.rest.write.async.WriteJobMessage;
+import org.rutebanken.tiamat.rest.write.async.WriteJobPublisher;
+import org.rutebanken.tiamat.rest.write.async.WriteJobRejectedException;
 import org.rutebanken.tiamat.rest.write.dto.StopPlaceJobDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +21,6 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Optional;
-import java.util.concurrent.RejectedExecutionException;
 
 @Service
 public class StopPlaceWriteService {
@@ -28,7 +29,7 @@ public class StopPlaceWriteService {
 
     private final NetexMapper netexMapper;
     private final JobService jobService;
-    private final StopPlaceAsyncProcessor asyncProcessor;
+    private final WriteJobPublisher writeJobPublisher;
     private final StopPlaceWriteDomainService stopPlaceWriteDomainService;
     private final StopPlaceXmlWriter stopPlaceXmlWriter;
     private final int maxPayloadSize;
@@ -36,13 +37,13 @@ public class StopPlaceWriteService {
     public StopPlaceWriteService(
             NetexMapper netexMapper,
             JobService jobService,
-            StopPlaceAsyncProcessor asyncProcessor,
+            WriteJobPublisher writeJobPublisher,
             StopPlaceWriteDomainService stopPlaceWriteDomainService,
             StopPlaceXmlWriter stopPlaceXmlWriter,
             @Value("${tiamat.write-api.max-payload-size-bytes:10485760}") int maxPayloadSize) {
         this.netexMapper = netexMapper;
         this.jobService = jobService;
-        this.asyncProcessor = asyncProcessor;
+        this.writeJobPublisher = writeJobPublisher;
         this.stopPlaceWriteDomainService = stopPlaceWriteDomainService;
         this.stopPlaceXmlWriter = stopPlaceXmlWriter;
         this.maxPayloadSize = maxPayloadSize;
@@ -61,9 +62,9 @@ public class StopPlaceWriteService {
         byte[] payload = readPayload(body);
         var job = jobService.createJob();
         try {
-            asyncProcessor.processCreateStopPlace(job.getId(), payload);
+            writeJobPublisher.publish(WriteJobMessage.create(job.getId(), payload));
             return StopPlaceJobDto.from(job);
-        } catch (RejectedExecutionException e) {
+        } catch (WriteJobRejectedException e) {
             throw rejectJobIfQueueFull(job, e);
         } catch (Exception e) {
             return StopPlaceJobDto.from(
@@ -76,9 +77,9 @@ public class StopPlaceWriteService {
         byte[] payload = readPayload(body);
         var job = jobService.createJob();
         try {
-            asyncProcessor.processUpdateStopPlace(job.getId(), payload);
+            writeJobPublisher.publish(WriteJobMessage.update(job.getId(), payload));
             return StopPlaceJobDto.from(job);
-        } catch (RejectedExecutionException e) {
+        } catch (WriteJobRejectedException e) {
             throw rejectJobIfQueueFull(job, e);
         } catch (Exception e) {
             return StopPlaceJobDto.from(
@@ -90,9 +91,9 @@ public class StopPlaceWriteService {
     public StopPlaceJobDto deleteStopPlace(String id) {
         var job = jobService.createJob();
         try {
-            asyncProcessor.processDeleteStopPlace(job.getId(), id);
+            writeJobPublisher.publish(WriteJobMessage.delete(job.getId(), id));
             return StopPlaceJobDto.from(job);
-        } catch (RejectedExecutionException e) {
+        } catch (WriteJobRejectedException e) {
             throw rejectJobIfQueueFull(job, e);
         } catch (Exception e) {
             return StopPlaceJobDto.from(

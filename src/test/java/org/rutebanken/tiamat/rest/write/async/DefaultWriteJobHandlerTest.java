@@ -26,7 +26,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class InMemoryStopPlaceProcessorTest {
+class DefaultWriteJobHandlerTest {
 
     @Mock
     private JobService jobService;
@@ -37,14 +37,14 @@ class InMemoryStopPlaceProcessorTest {
     @Mock
     private StopPlacesPayloadUnmarshaller payloadUnmarshaller;
 
-    private InMemoryStopPlaceProcessor processor;
+    private DefaultWriteJobHandler handler;
 
     private static final Long JOB_ID = 42L;
     private static final byte[] PAYLOAD = "<stopPlaces/>".getBytes(java.nio.charset.StandardCharsets.UTF_8);
 
     @BeforeEach
     void setup() {
-        processor = new InMemoryStopPlaceProcessor(jobService, domainService, payloadUnmarshaller);
+        handler = new DefaultWriteJobHandler(jobService, domainService, payloadUnmarshaller);
     }
 
     @Test
@@ -56,7 +56,7 @@ class InMemoryStopPlaceProcessorTest {
         when(domainService.createStopPlace(netexStop)).thenReturn(tiamatStop);
 
         when(payloadUnmarshaller.unmarshal(PAYLOAD)).thenReturn(dto);
-        processor.processCreateStopPlace(JOB_ID, PAYLOAD);
+        handler.handle(WriteJobMessage.create(JOB_ID, PAYLOAD));
 
         verify(domainService).createStopPlace(netexStop);
         verify(jobService).succeed(
@@ -74,7 +74,7 @@ class InMemoryStopPlaceProcessorTest {
         when(domainService.createStopPlace(netexStop)).thenThrow(exception);
 
         when(payloadUnmarshaller.unmarshal(PAYLOAD)).thenReturn(dto);
-        processor.processCreateStopPlace(JOB_ID, PAYLOAD);
+        handler.handle(WriteJobMessage.create(JOB_ID, PAYLOAD));
 
         verify(jobService).fail(JOB_ID, exception);
         verify(jobService, never()).succeed(any(), any());
@@ -86,7 +86,7 @@ class InMemoryStopPlaceProcessorTest {
         dto.setStopPlaces(Collections.emptyList());
 
         when(payloadUnmarshaller.unmarshal(PAYLOAD)).thenReturn(dto);
-        processor.processCreateStopPlace(JOB_ID, PAYLOAD);
+        handler.handle(WriteJobMessage.create(JOB_ID, PAYLOAD));
 
         verify(jobService).fail(eq(JOB_ID), any(IllegalArgumentException.class));
         verify(domainService, never()).createStopPlace(any());
@@ -98,7 +98,7 @@ class InMemoryStopPlaceProcessorTest {
         dto.setStopPlaces(List.of(new StopPlace(), new StopPlace()));
 
         when(payloadUnmarshaller.unmarshal(PAYLOAD)).thenReturn(dto);
-        processor.processCreateStopPlace(JOB_ID, PAYLOAD);
+        handler.handle(WriteJobMessage.create(JOB_ID, PAYLOAD));
 
         verify(jobService).fail(eq(JOB_ID), any(IllegalArgumentException.class));
         verify(domainService, never()).createStopPlace(any());
@@ -113,7 +113,7 @@ class InMemoryStopPlaceProcessorTest {
         netexStop.setKeyList(new KeyListStructure().withKeyValue(kv));
 
         when(payloadUnmarshaller.unmarshal(PAYLOAD)).thenReturn(dto);
-        processor.processCreateStopPlace(JOB_ID, PAYLOAD);
+        handler.handle(WriteJobMessage.create(JOB_ID, PAYLOAD));
 
         verify(jobService).fail(eq(JOB_ID), any(IllegalArgumentException.class));
         verify(domainService, never()).createStopPlace(any());
@@ -127,7 +127,7 @@ class InMemoryStopPlaceProcessorTest {
         netexStop.setParentSiteRef(new SiteRefStructure().withRef("NSR:StopPlace:999"));
 
         when(payloadUnmarshaller.unmarshal(PAYLOAD)).thenReturn(dto);
-        processor.processCreateStopPlace(JOB_ID, PAYLOAD);
+        handler.handle(WriteJobMessage.create(JOB_ID, PAYLOAD));
 
         verify(jobService).fail(eq(JOB_ID), any(IllegalArgumentException.class));
         verify(domainService, never()).createStopPlace(any());
@@ -139,7 +139,7 @@ class InMemoryStopPlaceProcessorTest {
         var netexStop = dto.getStopPlaces().getFirst();
 
         when(payloadUnmarshaller.unmarshal(PAYLOAD)).thenReturn(dto);
-        processor.processUpdateStopPlace(JOB_ID, PAYLOAD);
+        handler.handle(WriteJobMessage.update(JOB_ID, PAYLOAD));
 
         verify(domainService).updateStopPlace(netexStop);
         verify(jobService).succeed(JOB_ID, null);
@@ -154,7 +154,7 @@ class InMemoryStopPlaceProcessorTest {
         doThrow(exception).when(domainService).updateStopPlace(netexStop);
 
         when(payloadUnmarshaller.unmarshal(PAYLOAD)).thenReturn(dto);
-        processor.processUpdateStopPlace(JOB_ID, PAYLOAD);
+        handler.handle(WriteJobMessage.update(JOB_ID, PAYLOAD));
 
         verify(jobService).fail(JOB_ID, exception);
         verify(jobService, never()).succeed(any(), any());
@@ -168,7 +168,7 @@ class InMemoryStopPlaceProcessorTest {
         netexStop.setKeyList(new KeyListStructure().withKeyValue(kv));
 
         when(payloadUnmarshaller.unmarshal(PAYLOAD)).thenReturn(dto);
-        processor.processUpdateStopPlace(JOB_ID, PAYLOAD);
+        handler.handle(WriteJobMessage.update(JOB_ID, PAYLOAD));
 
         verify(jobService).fail(eq(JOB_ID), any(IllegalArgumentException.class));
         verify(domainService, never()).updateStopPlace(any());
@@ -176,7 +176,7 @@ class InMemoryStopPlaceProcessorTest {
 
     @Test
     void processDeleteStopPlace_Success_CallsSucceedWithNullCreatedIds() {
-        processor.processDeleteStopPlace(JOB_ID, "NSR:StopPlace:300");
+        handler.handle(WriteJobMessage.delete(JOB_ID, "NSR:StopPlace:300"));
 
         verify(domainService).deleteStopPlace("NSR:StopPlace:300");
         verify(jobService).succeed(JOB_ID, null);
@@ -188,7 +188,7 @@ class InMemoryStopPlaceProcessorTest {
         doThrow(exception)
                 .when(domainService).deleteStopPlace("NSR:StopPlace:300");
 
-        processor.processDeleteStopPlace(JOB_ID, "NSR:StopPlace:300");
+        handler.handle(WriteJobMessage.delete(JOB_ID, "NSR:StopPlace:300"));
 
         verify(jobService).fail(JOB_ID, exception);
         verify(jobService, never()).succeed(any(), any());

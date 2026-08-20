@@ -11,12 +11,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.rutebanken.tiamat.model.job.AsyncStopPlaceJob;
 import org.rutebanken.tiamat.model.job.AsyncStopPlaceJobStatus;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
-import org.rutebanken.tiamat.rest.write.async.StopPlaceAsyncProcessor;
+import org.rutebanken.tiamat.rest.write.async.WriteJobMessage;
+import org.rutebanken.tiamat.rest.write.async.WriteJobPublisher;
+import org.rutebanken.tiamat.rest.write.async.WriteJobRejectedException;
 import org.rutebanken.tiamat.rest.write.dto.StopPlaceJobDto;
 import org.rutebanken.tiamat.rest.write.dto.StopPlacesDto;
 
 import java.util.Collections;
-import java.util.concurrent.RejectedExecutionException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -40,7 +41,7 @@ class StopPlaceWriteServiceTest {
     private JobService jobService;
 
     @Mock
-    private StopPlaceAsyncProcessor asyncProcessor;
+    private WriteJobPublisher writeJobPublisher;
 
     @Mock
     private StopPlaceWriteDomainService stopPlaceWriteDomainService;
@@ -59,7 +60,7 @@ class StopPlaceWriteServiceTest {
         facade = new StopPlaceWriteService(
             netexMapper,
             jobService,
-            asyncProcessor,
+            writeJobPublisher,
                 stopPlaceWriteDomainService,
             stopPlaceXmlWriter,
             10485760
@@ -119,7 +120,7 @@ class StopPlaceWriteServiceTest {
         assertNotNull(result);
         assertEquals(1L, result.jobId());
         assertEquals(AsyncStopPlaceJobStatus.PROCESSING, result.status());
-        verify(asyncProcessor).processCreateStopPlace(eq(1L), any(byte[].class));
+        verify(writeJobPublisher).publish(any(WriteJobMessage.class));
     }
 
     @Test
@@ -129,8 +130,8 @@ class StopPlaceWriteServiceTest {
 
         when(jobService.createJob()).thenReturn(job);
         doThrow(new RuntimeException("Create failed"))
-            .when(asyncProcessor)
-            .processCreateStopPlace(anyLong(), any());
+            .when(writeJobPublisher)
+            .publish(any(WriteJobMessage.class));
         when(jobService.fail(eq(1L), any(Exception.class))).thenReturn(job);
 
         StopPlaceJobDto result = facade.createStopPlaces(stream());
@@ -145,14 +146,14 @@ class StopPlaceWriteServiceTest {
         AsyncStopPlaceJob job = createJob(1L, AsyncStopPlaceJobStatus.FAILED);
 
         when(jobService.createJob()).thenReturn(job);
-        doThrow(new RejectedExecutionException("Queue full"))
-            .when(asyncProcessor)
-            .processCreateStopPlace(anyLong(), any());
+        doThrow(new WriteJobRejectedException("Queue full", null))
+            .when(writeJobPublisher)
+            .publish(any(WriteJobMessage.class));
 
         assertThrows(ServiceUnavailableException.class, () ->
             facade.createStopPlaces(stream())
         );
-        verify(jobService).fail(eq(1L), any(RejectedExecutionException.class));
+        verify(jobService).fail(eq(1L), any(WriteJobRejectedException.class));
     }
 
     @Test
@@ -170,7 +171,7 @@ class StopPlaceWriteServiceTest {
         assertNotNull(result);
         assertEquals(2L, result.jobId());
         assertEquals(AsyncStopPlaceJobStatus.PROCESSING, result.status());
-        verify(asyncProcessor).processUpdateStopPlace(eq(2L), any(byte[].class));
+        verify(writeJobPublisher).publish(any(WriteJobMessage.class));
     }
 
     @Test
@@ -180,8 +181,8 @@ class StopPlaceWriteServiceTest {
 
         when(jobService.createJob()).thenReturn(job);
         doThrow(new RuntimeException("Update failed"))
-            .when(asyncProcessor)
-            .processUpdateStopPlace(anyLong(), any());
+            .when(writeJobPublisher)
+            .publish(any(WriteJobMessage.class));
         when(jobService.fail(eq(2L), any(Exception.class))).thenReturn(job);
 
         StopPlaceJobDto result = facade.updateStopPlace(stream());
@@ -196,14 +197,14 @@ class StopPlaceWriteServiceTest {
         AsyncStopPlaceJob job = createJob(2L, AsyncStopPlaceJobStatus.FAILED);
 
         when(jobService.createJob()).thenReturn(job);
-        doThrow(new RejectedExecutionException("Queue full"))
-            .when(asyncProcessor)
-            .processUpdateStopPlace(anyLong(), any());
+        doThrow(new WriteJobRejectedException("Queue full", null))
+            .when(writeJobPublisher)
+            .publish(any(WriteJobMessage.class));
 
         assertThrows(ServiceUnavailableException.class, () ->
             facade.updateStopPlace(stream())
         );
-        verify(jobService).fail(eq(2L), any(RejectedExecutionException.class));
+        verify(jobService).fail(eq(2L), any(WriteJobRejectedException.class));
     }
 
     @Test
@@ -221,7 +222,7 @@ class StopPlaceWriteServiceTest {
         assertNotNull(result);
         assertEquals(3L, result.jobId());
         assertEquals(AsyncStopPlaceJobStatus.PROCESSING, result.status());
-        verify(asyncProcessor).processDeleteStopPlace(3L, stopPlaceId);
+        verify(writeJobPublisher).publish(any(WriteJobMessage.class));
     }
 
     @Test
@@ -231,8 +232,8 @@ class StopPlaceWriteServiceTest {
 
         when(jobService.createJob()).thenReturn(job);
         doThrow(new RuntimeException("Delete failed"))
-            .when(asyncProcessor)
-            .processDeleteStopPlace(anyLong(), anyString());
+            .when(writeJobPublisher)
+            .publish(any(WriteJobMessage.class));
         when(jobService.fail(eq(3L), any(Exception.class))).thenReturn(job);
 
         StopPlaceJobDto result = facade.deleteStopPlace(stopPlaceId);
@@ -247,14 +248,14 @@ class StopPlaceWriteServiceTest {
         AsyncStopPlaceJob job = createJob(3L, AsyncStopPlaceJobStatus.FAILED);
 
         when(jobService.createJob()).thenReturn(job);
-        doThrow(new RejectedExecutionException("Queue full"))
-            .when(asyncProcessor)
-            .processDeleteStopPlace(anyLong(), anyString());
+        doThrow(new WriteJobRejectedException("Queue full", null))
+            .when(writeJobPublisher)
+            .publish(any(WriteJobMessage.class));
 
         assertThrows(ServiceUnavailableException.class, () ->
             facade.deleteStopPlace(stopPlaceId)
         );
-        verify(jobService).fail(eq(3L), any(RejectedExecutionException.class));
+        verify(jobService).fail(eq(3L), any(WriteJobRejectedException.class));
     }
 
     private StopPlacesDto createStopPlacesDto() {

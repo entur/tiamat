@@ -3,59 +3,54 @@ package org.rutebanken.tiamat.rest.write.async;
 import org.rutebanken.netex.model.StopPlace;
 import org.rutebanken.tiamat.model.job.StopPlaceIdMapping;
 import org.rutebanken.tiamat.rest.write.JobService;
-import org.rutebanken.tiamat.rest.write.StopPlacesPayloadUnmarshaller;
 import org.rutebanken.tiamat.rest.write.StopPlaceWriteDomainService;
+import org.rutebanken.tiamat.rest.write.StopPlacesPayloadUnmarshaller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 /**
- * Development reference implementation of {@link StopPlaceAsyncProcessor}. Not intended for
- * production use, which is why it is disabled unless
- * {@code tiamat.write-api.in-memory-processor.enabled} is set explicitly, separately from the
- * flag that enables the write API itself.
+ * Processes a write job, whichever transport delivered it.
  * <p>
- * The queue lives only in the memory of a single pod. A job row is written as PROCESSING before
- * the work is handed to the executor, and the payload is not persisted anywhere, so a restart
- * loses queued and in flight writes and strands their rows in PROCESSING. Backpressure is per
- * pod as well, so a deployment with several replicas accepts several times the configured queue
- * capacity while the Hazelcast mutate lock still serialises the actual writes.
- * <p>
- * Production is intended to use a message broker behind the same interface, where the broker
- * holds the payload and owns redelivery. Do not address the shortcomings above by adding
- * durability here; that belongs to the broker backed implementation.
+ * Everything here is transport agnostic on purpose. A transport implementation should be a thin
+ * shell that hands the message over; keeping unmarshalling, structure validation, the domain call
+ * and the job outcome in one place means a second transport cannot drift from the first, and in
+ * particular cannot reproduce a subtly different version of the correctness or security handling.
  */
-@Service
-@EnableAsync
-@ConditionalOnProperty(name = "tiamat.write-api.in-memory-processor.enabled", havingValue = "true")
-public class InMemoryStopPlaceProcessor implements StopPlaceAsyncProcessor {
+@Component
+public class DefaultWriteJobHandler implements WriteJobHandler {
 
-    private static final Logger logger = LoggerFactory.getLogger(
-        InMemoryStopPlaceProcessor.class
-    );
+    private static final Logger logger = LoggerFactory.getLogger(DefaultWriteJobHandler.class);
+
     private final JobService jobService;
     private final StopPlaceWriteDomainService domainService;
     private final StopPlacesPayloadUnmarshaller payloadUnmarshaller;
 
-    public InMemoryStopPlaceProcessor(
-        JobService jobService,
-        StopPlaceWriteDomainService domainService,
-        StopPlacesPayloadUnmarshaller payloadUnmarshaller
+    public DefaultWriteJobHandler(
+            JobService jobService,
+            StopPlaceWriteDomainService domainService,
+            StopPlacesPayloadUnmarshaller payloadUnmarshaller
     ) {
         this.jobService = jobService;
         this.domainService = domainService;
         this.payloadUnmarshaller = payloadUnmarshaller;
     }
 
-    @Async("stopPlaceWriteExecutor")
-    public void processCreateStopPlace(Long jobId, byte[] payload) {
+    @Override
+    public void handle(WriteJobMessage message) {
+        switch (message.operation()) {
+            case CREATE -> handleCreate(message);
+            case UPDATE -> handleUpdate(message);
+            case DELETE -> handleDelete(message);
+        }
+    }
+
+    private void handleCreate(WriteJobMessage message) {
+        Long jobId = message.jobId();
         try {
-            var dto = payloadUnmarshaller.unmarshal(payload);
+            var dto = payloadUnmarshaller.unmarshal(message.payload());
             var structure = classify(dto.getStopPlaces());
             if (structure == StopPlaceStructure.MONOMODAL) {
                 var newStopPlace = dto.getStopPlaces().getFirst();
@@ -84,20 +79,20 @@ public class InMemoryStopPlaceProcessor implements StopPlaceAsyncProcessor {
         }
     }
 
-    @Async("stopPlaceWriteExecutor")
-    public void processUpdateStopPlace(Long jobId, byte[] payload) {
+    private void handleUpdate(WriteJobMessage message) {
+        Long jobId = message.jobId();
         try {
-            var dto = payloadUnmarshaller.unmarshal(payload);
+            var dto = payloadUnmarshaller.unmarshal(message.payload());
             var structure = classify(dto.getStopPlaces());
             if (structure == StopPlaceStructure.MONOMODAL) {
                 domainService.updateStopPlace(dto.getStopPlaces().getFirst());
             } else if (structure == StopPlaceStructure.MULTIMODAL) {
-                 throw new IllegalArgumentException(
-                    "Multimodal stop place updates not currently supported in this endpoint."
-                 );
+                throw new IllegalArgumentException(
+                        "Multimodal stop place updates not currently supported in this endpoint."
+                );
             } else if (structure == StopPlaceStructure.INVALID) {
                 throw new IllegalArgumentException(
-                    "Invalid stop place structure."
+                        "Invalid stop place structure."
                 );
             }
             jobService.succeed(jobId, null);
@@ -107,10 +102,10 @@ public class InMemoryStopPlaceProcessor implements StopPlaceAsyncProcessor {
         }
     }
 
-    @Async("stopPlaceWriteExecutor")
-    public void processDeleteStopPlace(Long jobId, String stopPlaceId) {
+    private void handleDelete(WriteJobMessage message) {
+        Long jobId = message.jobId();
         try {
-            domainService.deleteStopPlace(stopPlaceId);
+            domainService.deleteStopPlace(message.payloadAsString());
             jobService.succeed(jobId, null);
         } catch (Exception e) {
             logger.error("Error deleting stop place", e);

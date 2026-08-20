@@ -11,7 +11,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadPoolExecutor;
 
 @Configuration
-@ConditionalOnProperty(name = "tiamat.write-api.in-memory-processor.enabled", havingValue = "true")
+@ConditionalOnProperty(name = "tiamat.write-api.transport", havingValue = "in-memory")
 public class AsyncStopPlaceWriterConfig {
 
     @Bean(name = "stopPlaceWriteExecutor")
