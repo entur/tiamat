@@ -1,23 +1,21 @@
 package org.rutebanken.tiamat.rest.write.async;
 
-import org.rutebanken.netex.model.StopPlace;
-import org.rutebanken.tiamat.model.job.StopPlaceIdMapping;
 import org.rutebanken.tiamat.rest.write.JobService;
-import org.rutebanken.tiamat.rest.write.StopPlaceWriteDomainService;
-import org.rutebanken.tiamat.rest.write.StopPlacesPayloadUnmarshaller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-
 /**
  * Processes a write job, whichever transport delivered it.
  * <p>
- * Everything here is transport agnostic on purpose. A transport implementation should be a thin
- * shell that hands the message over; keeping unmarshalling, structure validation, the domain call
- * and the job outcome in one place means a second transport cannot drift from the first, and in
- * particular cannot reproduce a subtly different version of the correctness or security handling.
+ * Transport agnostic on purpose. A transport implementation should be a thin shell that hands the
+ * message over; keeping the claim, the write and the job outcome in one place means a second
+ * transport cannot drift from the first, and in particular cannot reproduce a subtly different
+ * version of the correctness or security handling.
+ * <p>
+ * Deliberately not transactional. The write and its completion are one transaction, owned by
+ * {@link WriteJobProcessor}, and the failure has to be recorded after that transaction has rolled
+ * back rather than inside it.
  */
 @Component
 public class DefaultWriteJobHandler implements WriteJobHandler {
@@ -25,17 +23,11 @@ public class DefaultWriteJobHandler implements WriteJobHandler {
     private static final Logger logger = LoggerFactory.getLogger(DefaultWriteJobHandler.class);
 
     private final JobService jobService;
-    private final StopPlaceWriteDomainService domainService;
-    private final StopPlacesPayloadUnmarshaller payloadUnmarshaller;
+    private final WriteJobProcessor processor;
 
-    public DefaultWriteJobHandler(
-            JobService jobService,
-            StopPlaceWriteDomainService domainService,
-            StopPlacesPayloadUnmarshaller payloadUnmarshaller
-    ) {
+    public DefaultWriteJobHandler(JobService jobService, WriteJobProcessor processor) {
         this.jobService = jobService;
-        this.domainService = domainService;
-        this.payloadUnmarshaller = payloadUnmarshaller;
+        this.processor = processor;
     }
 
     @Override
@@ -46,116 +38,14 @@ public class DefaultWriteJobHandler implements WriteJobHandler {
             logger.debug("Job {} could not be claimed, discarding delivery", message.jobId());
             return;
         }
-        switch (message.operation()) {
-            case CREATE -> handleCreate(message);
-            case UPDATE -> handleUpdate(message);
-            case DELETE -> handleDelete(message);
-        }
-    }
 
-    private void handleCreate(WriteJobMessage message) {
-        Long jobId = message.jobId();
         try {
-            var dto = payloadUnmarshaller.unmarshal(message.payload());
-            var structure = classify(dto.getStopPlaces());
-            if (structure == StopPlaceStructure.MONOMODAL) {
-                var newStopPlace = dto.getStopPlaces().getFirst();
-                var savedStopPlace = domainService.createStopPlace(newStopPlace);
-                jobService.succeed(
-                        jobId,
-                        List.of(
-                                new StopPlaceIdMapping(
-                                        newStopPlace.getId(),
-                                        savedStopPlace.getNetexId()
-                                )
-                        )
-                );
-            } else if (structure == StopPlaceStructure.MULTIMODAL) {
-                throw new IllegalArgumentException(
-                        "Multimodal stop place creation not currently supported in this endpoint."
-                );
-            } else if (structure == StopPlaceStructure.INVALID) {
-                throw new IllegalArgumentException(
-                        "Invalid stop place structure."
-                );
-            }
+            processor.process(message);
         } catch (Exception e) {
-            logger.error("Error creating stop place", e);
-            jobService.fail(jobId, e);
+            // The write has rolled back by the time we get here, so the job records why in a
+            // transaction of its own.
+            logger.error("Write job {} failed", message.jobId(), e);
+            jobService.fail(message.jobId(), e);
         }
-    }
-
-    private void handleUpdate(WriteJobMessage message) {
-        Long jobId = message.jobId();
-        try {
-            var dto = payloadUnmarshaller.unmarshal(message.payload());
-            var structure = classify(dto.getStopPlaces());
-            if (structure == StopPlaceStructure.MONOMODAL) {
-                domainService.updateStopPlace(dto.getStopPlaces().getFirst());
-            } else if (structure == StopPlaceStructure.MULTIMODAL) {
-                throw new IllegalArgumentException(
-                        "Multimodal stop place updates not currently supported in this endpoint."
-                );
-            } else if (structure == StopPlaceStructure.INVALID) {
-                throw new IllegalArgumentException(
-                        "Invalid stop place structure."
-                );
-            }
-            jobService.succeed(jobId, null);
-        } catch (Exception e) {
-            logger.error("Error updating stop place", e);
-            jobService.fail(jobId, e);
-        }
-    }
-
-    private void handleDelete(WriteJobMessage message) {
-        Long jobId = message.jobId();
-        try {
-            domainService.deleteStopPlace(message.payloadAsString());
-            jobService.succeed(jobId, null);
-        } catch (Exception e) {
-            logger.error("Error deleting stop place", e);
-            jobService.fail(jobId, e);
-        }
-    }
-
-    public enum StopPlaceStructure {
-        MULTIMODAL,
-        MONOMODAL,
-        INVALID
-    }
-
-    public StopPlaceStructure classify(List<StopPlace> stopPlaces) {
-        if (stopPlaces == null || stopPlaces.isEmpty()) {
-            return StopPlaceStructure.INVALID;
-        }
-
-        List<StopPlace> roots = stopPlaces.stream()
-                .filter(sp -> sp.getParentSiteRef() == null)
-                .toList();
-
-        if (stopPlaces.size() == 1 && roots.size() == 1) {
-            var monoModalStopPlace = stopPlaces.getFirst();
-            if (monoModalStopPlace.getKeyList() != null &&
-                    monoModalStopPlace.getKeyList().getKeyValue().stream()
-                            .anyMatch(kv -> "IS_PARENT_STOP_PLACE".equals(kv.getKey()) &&
-                                    "true".equalsIgnoreCase(kv.getValue()))) {
-                return StopPlaceStructure.INVALID;
-            }
-            return StopPlaceStructure.MONOMODAL;
-        }
-
-        if (roots.size() == 1) {
-            String parentId = roots.getFirst().getId();
-            boolean allChildrenReferenceParent = stopPlaces.stream()
-                    .filter(sp -> sp.getParentSiteRef() != null)
-                    .allMatch(sp -> parentId.equals(sp.getParentSiteRef().getRef()));
-
-            if (allChildrenReferenceParent) {
-                return StopPlaceStructure.MULTIMODAL;
-            }
-        }
-
-        return StopPlaceStructure.INVALID;
     }
 }

@@ -5,6 +5,9 @@ import org.rutebanken.tiamat.model.job.AsyncStopPlaceJob;
 import org.rutebanken.tiamat.model.job.AsyncStopPlaceJobStatus;
 import org.rutebanken.tiamat.model.job.StopPlaceIdMapping;
 import org.rutebanken.tiamat.repository.AsyncStopPlaceJobRepository;
+import org.rutebanken.tiamat.rest.write.async.WriteJobNotOwnedException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -20,6 +23,8 @@ import java.util.concurrent.RejectedExecutionException;
 
 @Service
 public class JobService {
+
+    private static final Logger logger = LoggerFactory.getLogger(JobService.class);
 
     private static final String GENERIC_REASON = "An unexpected error occurred.";
 
@@ -75,16 +80,48 @@ public class JobService {
                 .filter(job -> Objects.equals(job.getCreatedBy(), currentUser));
     }
 
+    /**
+     * Completes a job, but only while it is still claimed by this worker.
+     * <p>
+     * Joins the caller's transaction deliberately, so that it commits together with the write. If
+     * a sweeper timed the job out while the write was running the conditional update matches
+     * nothing, and throwing here rolls the write back. That is what lets a client treat TIMED_OUT
+     * as "nothing was written, resubmitting is safe" rather than having to go and look.
+     */
     public void succeed(Long id, List<StopPlaceIdMapping> createdStopPlaceIds) {
+        if (repo.transition(id, List.of(AsyncStopPlaceJobStatus.IN_PROGRESS),
+                AsyncStopPlaceJobStatus.FINISHED) != 1) {
+            throw new WriteJobNotOwnedException(id);
+        }
+        // The conditional update holds the row lock for the rest of the transaction, so nothing
+        // else can change the job before the created ids are written.
         var job = repo.findById(id).orElseThrow();
-        job.setStatus(AsyncStopPlaceJobStatus.FINISHED);
         job.setCreatedIds(createdStopPlaceIds);
         repo.save(job);
     }
 
+    /**
+     * Records a failure, in its own transaction.
+     * <p>
+     * The write it belongs to has usually just rolled back, and a rolled back transaction cannot
+     * carry the record of why. Failing in a separate transaction means the reason survives.
+     * <p>
+     * Accepts a job that is either accepted or claimed, since a failure can happen before a
+     * transport ever takes the job, but will not overwrite one that already reached a terminal
+     * state.
+     */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public AsyncStopPlaceJob fail(Long id, Exception exception) {
+        int moved = repo.transition(
+                id,
+                List.of(AsyncStopPlaceJobStatus.PROCESSING, AsyncStopPlaceJobStatus.IN_PROGRESS),
+                AsyncStopPlaceJobStatus.FAILED
+        );
         var job = repo.findById(id).orElseThrow();
-        job.setStatus(AsyncStopPlaceJobStatus.FAILED);
+        if (moved != 1) {
+            logger.warn("Job {} already reached {}, not recording failure", id, job.getStatus());
+            return job;
+        }
         job.setReason(formatException(exception));
         return repo.save(job);
     }

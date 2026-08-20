@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.rest.write;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.rutebanken.tiamat.auth.UsernameFetcher;
@@ -7,6 +8,7 @@ import org.rutebanken.tiamat.model.job.AsyncStopPlaceJob;
 import org.rutebanken.tiamat.model.job.AsyncStopPlaceJobStatus;
 import org.rutebanken.tiamat.model.job.StopPlaceIdMapping;
 import org.rutebanken.tiamat.repository.AsyncStopPlaceJobRepository;
+import org.rutebanken.tiamat.rest.write.async.WriteJobNotOwnedException;
 
 import java.time.Instant;
 import java.util.Optional;
@@ -14,8 +16,11 @@ import java.util.concurrent.RejectedExecutionException;
 
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -30,6 +35,16 @@ public class JobServiceTest {
     private final UsernameFetcher usernameFetcher = mock(UsernameFetcher.class);
 
     private final JobService jobService = new JobService(repository, usernameFetcher);
+
+    /**
+     * Completion is conditional on the job still being claimed, so the default for these tests is
+     * a job whose claim is intact. The cases that exercise a lost claim override this.
+     */
+    @Before
+    public void jobIsOwnedByDefault() {
+        when(repository.transition(anyLong(), anyCollection(), any(AsyncStopPlaceJobStatus.class)))
+                .thenReturn(1);
+    }
 
     @Test
     public void shouldRecordSubmittingUserOnNewJob() {
@@ -77,6 +92,34 @@ public class JobServiceTest {
                 eq(AsyncStopPlaceJobStatus.IN_PROGRESS), any(Instant.class))).thenReturn(0);
 
         assertThat(jobService.claim(1L)).isFalse();
+    }
+
+    /**
+     * Completion is conditional on still owning the job. If a sweeper timed the job out while the
+     * write was running, the completion must fail so the surrounding transaction rolls the write
+     * back: a job reported as TIMED_OUT has to mean nothing was written.
+     */
+    @Test
+    public void succeedFailsWhenTheClaimWasLost() {
+        when(repository.transition(eq(1L), anyCollection(), eq(AsyncStopPlaceJobStatus.FINISHED)))
+                .thenReturn(0);
+
+        assertThatThrownBy(() -> jobService.succeed(1L, null))
+                .isInstanceOf(WriteJobNotOwnedException.class);
+    }
+
+    @Test
+    public void succeedRecordsCreatedIdsWhenTheClaimIsStillHeld() {
+        AsyncStopPlaceJob job = new AsyncStopPlaceJob();
+        when(repository.transition(eq(1L), anyCollection(), eq(AsyncStopPlaceJobStatus.FINISHED)))
+                .thenReturn(1);
+        when(repository.findById(1L)).thenReturn(Optional.of(job));
+
+        jobService.succeed(1L, singletonList(new StopPlaceIdMapping("submittedId", "createdId")));
+
+        ArgumentCaptor<AsyncStopPlaceJob> captor = ArgumentCaptor.forClass(AsyncStopPlaceJob.class);
+        verify(repository).save(captor.capture());
+        assertEquals("createdId", captor.getValue().getCreatedIds().getFirst().createdId());
     }
 
     @Test
@@ -172,11 +215,10 @@ public class JobServiceTest {
         );
         verify(repository).save(captor.capture());
 
-        AsyncStopPlaceJob saved = captor.getValue();
-        assertThat(saved.getStatus()).isEqualTo(
-            AsyncStopPlaceJobStatus.FINISHED
-        );
-        assertEquals("createdId", saved.getCreatedIds().getFirst().createdId());
+        // The status moves via the conditional update, not by mutating the entity, so that
+        // completion cannot happen unless the job is still claimed.
+        verify(repository).transition(eq(1L), anyCollection(), eq(AsyncStopPlaceJobStatus.FINISHED));
+        assertEquals("createdId", captor.getValue().getCreatedIds().getFirst().createdId());
     }
 
     @Test
@@ -193,9 +235,8 @@ public class JobServiceTest {
         );
         verify(repository).save(captor.capture());
 
-        AsyncStopPlaceJob saved = captor.getValue();
-        assertThat(saved.getStatus()).isEqualTo(AsyncStopPlaceJobStatus.FAILED);
-        assertThat(saved.getReason()).isEqualTo("Error");
+        verify(repository).transition(eq(1L), anyCollection(), eq(AsyncStopPlaceJobStatus.FAILED));
+        assertThat(captor.getValue().getReason()).isEqualTo("Error");
     }
 
     @Test
