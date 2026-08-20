@@ -39,6 +39,9 @@ public class AsyncStopPlaceJob {
     @Schema(description = "When the job was submitted")
     private Instant createdAt;
 
+    @Schema(description = "When a worker claimed the job, refreshed while it is being processed")
+    private Instant claimedAt;
+
     public Long getId() {
         return id;
     }
@@ -85,5 +88,13 @@ public class AsyncStopPlaceJob {
 
     public void setCreatedAt(Instant createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public Instant getClaimedAt() {
+        return claimedAt;
+    }
+
+    public void setClaimedAt(Instant claimedAt) {
+        this.claimedAt = claimedAt;
     }
 }

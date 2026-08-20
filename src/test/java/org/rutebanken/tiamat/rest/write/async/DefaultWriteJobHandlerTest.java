@@ -22,6 +22,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -45,6 +47,33 @@ class DefaultWriteJobHandlerTest {
     @BeforeEach
     void setup() {
         handler = new DefaultWriteJobHandler(jobService, domainService, payloadUnmarshaller);
+        lenient().when(jobService.claim(JOB_ID)).thenReturn(true);
+    }
+
+    /**
+     * Delivery is at least once and processing is not idempotent, so a redelivery of a job that
+     * has already been claimed or finished must do nothing at all. A create that ran twice would
+     * mint a second NSR id and silently produce a duplicate stop place.
+     */
+    @Test
+    void doesNothingWhenTheJobCannotBeClaimed() {
+        when(jobService.claim(JOB_ID)).thenReturn(false);
+
+        handler.handle(WriteJobMessage.create(JOB_ID, PAYLOAD));
+
+        verifyNoInteractions(domainService, payloadUnmarshaller);
+        verify(jobService, never()).succeed(any(), any());
+        verify(jobService, never()).fail(any(), any());
+    }
+
+    @Test
+    void doesNotDeleteWhenTheJobCannotBeClaimed() {
+        when(jobService.claim(JOB_ID)).thenReturn(false);
+
+        handler.handle(WriteJobMessage.delete(JOB_ID, "NSR:StopPlace:300"));
+
+        verifyNoInteractions(domainService);
+        verify(jobService, never()).succeed(any(), any());
     }
 
     @Test

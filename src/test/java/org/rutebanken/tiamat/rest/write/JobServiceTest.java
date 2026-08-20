@@ -15,6 +15,8 @@ import java.util.concurrent.RejectedExecutionException;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -55,6 +57,26 @@ public class JobServiceTest {
         assertThat(captor.getValue().getCreatedAt())
                 .isNotNull()
                 .isBetween(before, Instant.now());
+    }
+
+    /**
+     * The row count is the answer: one caller wins the claim, and any other delivery of the same
+     * job is told to do nothing.
+     */
+    @Test
+    public void claimSucceedsWhenTheJobIsStillUnclaimed() {
+        when(repository.claim(eq(1L), eq(AsyncStopPlaceJobStatus.PROCESSING),
+                eq(AsyncStopPlaceJobStatus.IN_PROGRESS), any(Instant.class))).thenReturn(1);
+
+        assertThat(jobService.claim(1L)).isTrue();
+    }
+
+    @Test
+    public void claimFailsWhenTheJobWasAlreadyClaimedOrIsTerminal() {
+        when(repository.claim(eq(1L), eq(AsyncStopPlaceJobStatus.PROCESSING),
+                eq(AsyncStopPlaceJobStatus.IN_PROGRESS), any(Instant.class))).thenReturn(0);
+
+        assertThat(jobService.claim(1L)).isFalse();
     }
 
     @Test

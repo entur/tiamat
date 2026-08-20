@@ -40,6 +40,12 @@ public class DefaultWriteJobHandler implements WriteJobHandler {
 
     @Override
     public void handle(WriteJobMessage message) {
+        if (!jobService.claim(message.jobId())) {
+            // Already claimed by another delivery, or already terminal. Doing the work anyway
+            // would duplicate it: a create mints a fresh NSR id on every run.
+            logger.debug("Job {} could not be claimed, discarding delivery", message.jobId());
+            return;
+        }
         switch (message.operation()) {
             case CREATE -> handleCreate(message);
             case UPDATE -> handleUpdate(message);

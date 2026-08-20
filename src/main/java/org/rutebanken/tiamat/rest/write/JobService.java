@@ -8,6 +8,8 @@ import org.rutebanken.tiamat.repository.AsyncStopPlaceJobRepository;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.Collections;
@@ -36,6 +38,30 @@ public class JobService {
         job.setCreatedBy(usernameFetcher.getUserNameForAuthenticatedUser());
         job.setCreatedAt(Instant.now());
         return repo.save(job);
+    }
+
+    /**
+     * Takes ownership of a job before it is processed.
+     * <p>
+     * Delivery is at least once, and processing is not idempotent: a create mints a fresh NSR id
+     * each run, so processing a redelivered job twice would silently produce a second stop place.
+     * Claiming makes the job the idempotency key.
+     *
+     * Runs in its own transaction, deliberately. The claim must be visible to other deliveries
+     * immediately, and must not hold a row lock for the duration of the write, so it must not join
+     * the transaction that wraps processing and completion.
+     *
+     * @return true if this caller now owns the job. False means it was already claimed or has
+     *         reached a terminal state, and the delivery should be discarded.
+     */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public boolean claim(Long jobId) {
+        return repo.claim(
+                jobId,
+                AsyncStopPlaceJobStatus.PROCESSING,
+                AsyncStopPlaceJobStatus.IN_PROGRESS,
+                Instant.now()
+        ) == 1;
     }
 
     /**
