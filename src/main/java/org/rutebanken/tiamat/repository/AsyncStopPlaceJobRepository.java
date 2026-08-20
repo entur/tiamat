@@ -45,4 +45,21 @@ public interface AsyncStopPlaceJobRepository
     int transition(@Param("id") Long id,
                    @Param("from") Collection<AsyncStopPlaceJobStatus> from,
                    @Param("to") AsyncStopPlaceJobStatus to);
+
+    /**
+     * Moves jobs that have been in a non terminal state for too long.
+     * <p>
+     * Age is measured from the claim if there is one and from creation otherwise, so a job that
+     * was never claimed, because its publish failed, still ages out, while a job that sat in a
+     * queue for a long time before being picked up is measured from when work actually started.
+     * <p>
+     * A job with neither timestamp is left alone rather than assumed stale; its age is unknown.
+     */
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("update AsyncStopPlaceJob j set j.status = :timedOut"
+            + " where j.status in :nonTerminal"
+            + " and coalesce(j.claimedAt, j.createdAt) < :threshold")
+    int timeOutStale(@Param("nonTerminal") Collection<AsyncStopPlaceJobStatus> nonTerminal,
+                     @Param("timedOut") AsyncStopPlaceJobStatus timedOut,
+                     @Param("threshold") Instant threshold);
 }

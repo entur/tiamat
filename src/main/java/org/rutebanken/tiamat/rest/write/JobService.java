@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
@@ -67,6 +68,32 @@ public class JobService {
                 AsyncStopPlaceJobStatus.IN_PROGRESS,
                 Instant.now()
         ) == 1;
+    }
+
+    /**
+     * Moves jobs that have not reached a terminal state within the timeout to TIMED_OUT.
+     * <p>
+     * Without this a job whose worker died, or whose publish failed before any transport saw it,
+     * stays non terminal forever and the client polls indefinitely. Timing out is deliberately not
+     * a retry: processing is not idempotent, so the safe outcome is to report that nothing
+     * happened and let the client decide whether to resubmit.
+     * <p>
+     * Timing out a job whose write is still running is safe rather than merely unlikely:
+     * completion is conditional on still holding the claim, so the write rolls back. That makes
+     * the timeout a matter of wasted work rather than correctness, which is why there is no
+     * heartbeat yet.
+     */
+    @Transactional
+    public int timeOutStaleJobs(Duration timeout) {
+        int timedOut = repo.timeOutStale(
+                List.of(AsyncStopPlaceJobStatus.PROCESSING, AsyncStopPlaceJobStatus.IN_PROGRESS),
+                AsyncStopPlaceJobStatus.TIMED_OUT,
+                Instant.now().minus(timeout)
+        );
+        if (timedOut > 0) {
+            logger.warn("Timed out {} write job(s) that had not completed within {}", timedOut, timeout);
+        }
+        return timedOut;
     }
 
     /**
