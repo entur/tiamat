@@ -1,156 +1,55 @@
 package org.rutebanken.tiamat.rest.write.mapper;
 
-import ma.glasnost.orika.CustomConverter;
 import ma.glasnost.orika.MapperFacade;
 import ma.glasnost.orika.MapperFactory;
-import ma.glasnost.orika.MappingContext;
-import ma.glasnost.orika.converter.builtin.PassThroughConverter;
-import ma.glasnost.orika.impl.DefaultMapperFactory;
-import ma.glasnost.orika.metadata.Type;
-import org.locationtech.jts.geom.Point;
-import org.rutebanken.tiamat.model.AccessibilityAssessment;
-import org.rutebanken.tiamat.model.AccessibilityLimitation;
-import org.rutebanken.tiamat.model.AlternativeName;
-import org.rutebanken.tiamat.model.CycleStorageEquipment;
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
-import org.rutebanken.tiamat.model.GeneralSign;
-import org.rutebanken.tiamat.model.InstalledEquipment_VersionStructure;
-import org.rutebanken.tiamat.model.PathLink;
-import org.rutebanken.tiamat.model.PathLinkEnd;
-import org.rutebanken.tiamat.model.PlaceEquipment;
-import org.rutebanken.tiamat.model.PostalAddress;
-import org.rutebanken.tiamat.model.Quay;
-import org.rutebanken.tiamat.model.SanitaryEquipment;
-import org.rutebanken.tiamat.model.ShelterEquipment;
 import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.model.TicketingEquipment;
-import org.rutebanken.tiamat.model.TopographicPlace;
-import org.rutebanken.tiamat.model.WaitingRoomEquipment;
+import org.rutebanken.tiamat.versioning.EntityCopyMappings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
-import java.util.Arrays;
-import java.util.List;
-
+/**
+ * Copies a stop place submitted to the write API into one the register can store.
+ * <p>
+ * Identity is dropped throughout the whole graph, which is what separates this from copying an
+ * existing stop place. A submitted payload describes a stop place that does not exist yet, so any
+ * id or version on it describes nothing: ids are the register's to hand out, and honouring a
+ * submitted one would let a caller pick its own identity or collide with something already stored.
+ */
 @Service
 public class CreateStopPlaceMapper {
 
-    private static final Logger logger = LoggerFactory.getLogger(
-        CreateStopPlaceMapper.class
-    );
-
-    private static final String ID_FIELD = "id";
-
-    private static final String VERSION_COMMENT_FIELD = "versionComment";
-    private static final String CHANGED_BY_FIELD = "changedBy";
-
-    private static final String VALID_BETWEEN = "validBetween";
-
-    private static final String MODIFICATION_ENUMERATION =
-        "modificationEnumeration";
+    private static final Logger logger = LoggerFactory.getLogger(CreateStopPlaceMapper.class);
 
     private final MapperFacade defaultMapperFacade;
 
     public CreateStopPlaceMapper() {
-        MapperFactory mapperFactory =
-            new DefaultMapperFactory.Builder().build();
+        MapperFactory mapperFactory = EntityCopyMappings.newMapperFactory();
 
-        final String stopPlacePassThroughId = "stopPlacePassThroughId";
+        EntityCopyMappings.registerPathLinkEnd(mapperFactory);
 
-        mapperFactory
-            .getConverterFactory()
-            .registerConverter(
-                stopPlacePassThroughId,
-                new PassThroughConverter(TopographicPlace.class)
-            );
+        StopPlaceOwnedEntities.ALL.forEach(clazz -> mapperFactory.classMap(clazz, clazz)
+                .exclude(EntityCopyMappings.NETEX_ID_FIELD)
+                .exclude(EntityCopyMappings.VERSION_FIELD)
+                .byDefault()
+                .register());
 
-        mapperFactory
-            .getConverterFactory()
-            .registerConverter(new PassThroughConverter(Point.class));
-
-        mapperFactory
-            .getConverterFactory()
-            .registerConverter(
-                new CustomConverter<Instant, Instant>() {
-                    @Override
-                    public Instant convert(
-                        Instant instant,
-                        Type<? extends Instant> type,
-                        MappingContext mappingContext
-                    ) {
-                        return Instant.from(instant);
-                    }
-                }
-            );
-
-        mapperFactory
-            .classMap(PathLinkEnd.class, PathLinkEnd.class)
-            .exclude(ID_FIELD)
-            .byDefault()
-            .register();
-
-        List<
-            Class<? extends EntityInVersionStructure>
-        > excludeNetexIdAndVersionsForEntities = Arrays.asList(
-            PlaceEquipment.class,
-            InstalledEquipment_VersionStructure.class,
-            Quay.class,
-            AccessibilityAssessment.class,
-            AccessibilityLimitation.class,
-            PostalAddress.class
-        );
-
-        excludeNetexIdAndVersionsForEntities.forEach(clazz -> {
-            mapperFactory
-                .classMap(clazz, clazz)
-                .exclude("netexId")
-                .exclude("version")
+        // The topographic place is resolved from the coordinates rather than submitted, so it is
+        // carried by reference instead of being copied.
+        mapperFactory.classMap(StopPlace.class, StopPlace.class)
+                .fieldMap("topographicPlace").converter(EntityCopyMappings.TOPOGRAPHIC_PLACE_PASS_THROUGH).add()
+                .exclude(EntityCopyMappings.NETEX_ID_FIELD)
+                .exclude(EntityCopyMappings.VERSION_FIELD)
+                .exclude(EntityCopyMappings.ID_FIELD)
+                .exclude(EntityCopyMappings.VERSION_COMMENT_FIELD)
+                .exclude(EntityCopyMappings.CHANGED_BY_FIELD)
+                .exclude(EntityCopyMappings.VALID_BETWEEN_FIELD)
+                .exclude(EntityCopyMappings.MODIFICATION_ENUMERATION_FIELD)
                 .byDefault()
                 .register();
-        });
 
-        mapperFactory
-            .classMap(StopPlace.class, StopPlace.class)
-            .fieldMap("topographicPlace")
-            .converter(stopPlacePassThroughId)
-            .add()
-            .exclude("netexId")
-            .exclude("version")
-            .exclude(ID_FIELD)
-            .exclude(VERSION_COMMENT_FIELD)
-            .exclude(CHANGED_BY_FIELD)
-            .exclude(VALID_BETWEEN)
-            .exclude(MODIFICATION_ENUMERATION)
-            .byDefault()
-            .register();
-
-        List<
-            Class<? extends EntityInVersionStructure>
-        > commonClassesToConfigure = Arrays.asList(
-            TopographicPlace.class,
-            PathLink.class,
-            PlaceEquipment.class,
-            WaitingRoomEquipment.class,
-            SanitaryEquipment.class,
-            TicketingEquipment.class,
-            ShelterEquipment.class,
-            CycleStorageEquipment.class,
-            GeneralSign.class,
-            AlternativeName.class
-        );
-
-        commonClassesToConfigure.forEach(clazz ->
-            mapperFactory
-                .classMap(clazz, clazz)
-                .exclude(VERSION_COMMENT_FIELD)
-                .exclude(CHANGED_BY_FIELD)
-                .exclude(ID_FIELD)
-                .exclude(VALID_BETWEEN)
-                .byDefault()
-                .register()
-        );
+        EntityCopyMappings.registerCommonEntities(mapperFactory);
 
         defaultMapperFacade = mapperFactory.getMapperFacade();
     }
