@@ -2,6 +2,8 @@ package org.rutebanken.tiamat.rest.write.async;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.entur.oauth2.JwtRoleAssignmentExtractor;
+import org.entur.ror.permission.AuthenticatedUser;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -101,6 +103,50 @@ class WriteJobPrincipalTest {
         principal.restore(valid);
 
         assertThat(SecurityContextHolder.getContext().getAuthentication()).isNotNull();
+    }
+
+    /**
+     * The whole premise is that a restored token is indistinguishable, to the code that consumes
+     * it, from the one the caller presented. Asserting that against the real permission store
+     * client rather than against our own idea of it: AuthenticatedUser.of reads the issuer as a
+     * URL and casts the organisation id to Long, and its constructor rejects an incomplete
+     * identity, so any of those would fail here rather than in production.
+     */
+    @Test
+    void restoredTokenSatisfiesThePermissionStoreClient() {
+        principal.restore(Map.of(
+                "sub", "some-client@clients",
+                "iss", "https://internal.entur.org/",
+                "https://entur.io/organisationID", 1L,
+                "permissions", List.of("editStops")
+        ));
+
+        var token = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+        AuthenticatedUser user = AuthenticatedUser.of(token);
+
+        assertThat(user.subject()).isEqualTo("some-client@clients");
+        assertThat(user.isClient()).isTrue();
+        assertThat(user.isInternal()).isTrue();
+        assertThat(user.organisationId()).isEqualTo(1L);
+    }
+
+    /**
+     * The jwt extractor is the other consumer, and reads roles from the token itself rather than
+     * looking them up, so a restored token has to carry them.
+     */
+    @Test
+    void restoredTokenSatisfiesTheJwtRoleAssignmentExtractor() {
+        principal.restore(Map.of(
+                "sub", "auth0|alice",
+                "iss", "https://issuer/",
+                "role_assignments", List.of("{\"r\":\"editStops\",\"o\":\"OST\"}")
+        ));
+
+        var roles = new JwtRoleAssignmentExtractor()
+                .getRoleAssignmentsForUser(SecurityContextHolder.getContext().getAuthentication());
+
+        assertThat(roles).hasSize(1);
+        assertThat(roles.getFirst().getRole()).isEqualTo("editStops");
     }
 
     @Test
