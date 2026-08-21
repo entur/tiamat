@@ -26,7 +26,7 @@ services:
       - "1888:1888"
 
   db:
-    image: 'postgis/postgis:13-master'
+    image: 'postgis/postgis:17-master'
     container_name: db
     hostname: postgres
     networks:
