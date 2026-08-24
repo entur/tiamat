@@ -25,6 +25,8 @@ import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.exporter.params.StopPlaceSearch;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
+import org.rutebanken.tiamat.model.Quay;
+import org.rutebanken.tiamat.model.VehicleModeEnumeration;
 import org.rutebanken.tiamat.model.GroupOfStopPlaces;
 import org.rutebanken.tiamat.model.PurposeOfGrouping;
 import org.rutebanken.tiamat.model.SiteRefStructure;
@@ -515,6 +517,47 @@ public class StreamingPublicationDeliveryIntegrationTest extends TiamatIntegrati
                 .as("the topographic place referenced only by the parent must also be exported")
                 .extracting(org.rutebanken.netex.model.TopographicPlace::getId)
                 .contains(parentMunicipality.getNetexId(), childMunicipality.getNetexId());
+    }
+
+    /**
+     * Tiamat does not store other transport modes: the field is @Transient. Mapping it to the
+     * NeTEx model anyway changed the output, because that model's collection getter turns null
+     * into an empty list and JAXB then marshals an empty element onto every exported stop place
+     * and quay. It was schema valid but meaningless, it reached every consumer of the export,
+     * and the write API refused it on all 120 production stop places tried, because the field
+     * is not one a client can set.
+     */
+    @Test
+    public void doesNotExportEmptyOtherTransportModes() throws Exception {
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("Stop with a quay"));
+        stopPlace.setTransportMode(VehicleModeEnumeration.BUS);
+        stopPlace.getQuays().add(new Quay(new EmbeddableMultilingualString("Quay")));
+        stopPlaceRepository.save(stopPlace);
+        stopPlaceRepository.flush();
+
+        String xml = exportAll();
+
+        assertThat(xml)
+                .as("the stop place must still carry the transport mode it actually has")
+                .contains("<TransportMode>bus</TransportMode>");
+        assertThat(xml)
+                .as("nothing sets other transport modes, so the element has no business being here")
+                .doesNotContain("OtherTransportModes");
+        validate(xml);
+    }
+
+    private String exportAll() throws Exception {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        streamingPublicationDelivery.stream(
+                ExportParams.newExportParamsBuilder()
+                        .setStopPlaceSearch(StopPlaceSearch.newStopPlaceSearchBuilder()
+                                .setVersionValidity(ExportParams.VersionValidity.CURRENT_FUTURE)
+                                .build())
+                        .setTopographicPlaceExportMode(ExportParams.ExportMode.NONE)
+                        .setTariffZoneExportMode(ExportParams.ExportMode.NONE)
+                        .build(),
+                out);
+        return out.toString();
     }
 
     private void validate(String xml) throws JAXBException, IOException, SAXException {
