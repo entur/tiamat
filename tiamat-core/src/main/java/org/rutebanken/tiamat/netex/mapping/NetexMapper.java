@@ -129,6 +129,12 @@ public class NetexMapper {
                 .fieldAToB("topographicPlaceRef.ref", "topographicPlace.netexId")
                 .fieldAToB("topographicPlaceRef.version", "topographicPlace.version")
                 .exclude("roadAddress")
+                // Tiamat does not store other transport modes: the field is @Transient, so a
+                // mapped value goes nowhere. Mapping it anyway would still change the output,
+                // because the netex model's collection getter initialises null to an empty list
+                // and JAXB then marshals <OtherTransportModes></OtherTransportModes> on every
+                // stop place we publish.
+                .exclude("otherTransportModes")
                 .customize(new StopPlaceMapper(publicationDeliveryHelper))
                 .byDefault()
                 .register();
@@ -136,6 +142,8 @@ public class NetexMapper {
         mapperFactoryWithNetexIdClassBuilder(Quay.class, org.rutebanken.tiamat.model.Quay.class)
                 .exclude("postalAddress")
                 .exclude("roadAddress")
+                // Same as on StopPlace: @Transient, and mapping it emits an empty element.
+                .exclude("otherTransportModes")
                 .customize(new QuayMapper())
                 .byDefault()
                 .register();
