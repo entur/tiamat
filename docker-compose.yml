@@ -17,10 +17,16 @@ services:
     ports:
       - "37432:5432"
     volumes:
-      # Named per major version: postgres refuses to start against a data directory written
-      # by a different major, so a shared name would leave everyone with a container that
-      # will not boot after this change rather than a working empty database.
-      - postgres-data-17:/var/lib/postgresql
+      # Must be the PGDATA path itself. The image declares VOLUME /var/lib/postgresql/data,
+      # and docker honours that independently: mounting the parent leaves the declaration
+      # unsatisfied, so postgres writes to an anonymous volume created for the deeper path
+      # and this named volume holds nothing. The database then does not survive the
+      # container being recreated.
+      #
+      # Named per major version because postgres refuses to start against a data directory
+      # written by a different major, so a shared name would leave everyone with a container
+      # that will not boot rather than a working empty database.
+      - postgres-data-17:/var/lib/postgresql/data
     networks:
       - tiamat-net
 
