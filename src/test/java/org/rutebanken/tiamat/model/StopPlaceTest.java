@@ -271,9 +271,13 @@ public class StopPlaceTest extends TiamatIntegrationTest {
 
         StopPlace stopPlace = new StopPlace();
 
+        // Postgres stores timestamps to microsecond precision, so an Instant carrying
+        // nanoseconds does not survive the round trip unchanged. Truncating here keeps the
+        // assertion about whether the value was persisted rather than about clock resolution,
+        // which differs by platform: this passes untruncated on macOS and fails on Linux.
         ValidBetween validBetween = new ValidBetween();
-        validBetween.setFromDate(Instant.now());
-        validBetween.setToDate(Instant.now().plus(70, ChronoUnit.DAYS));
+        validBetween.setFromDate(Instant.now().truncatedTo(ChronoUnit.MICROS));
+        validBetween.setToDate(Instant.now().plus(70, ChronoUnit.DAYS).truncatedTo(ChronoUnit.MICROS));
         
         stopPlace.setValidBetween(validBetween);
 
