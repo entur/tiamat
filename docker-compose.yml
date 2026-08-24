@@ -2,8 +2,11 @@ name: 'tiamat'
 
 services:
   db:
-    container_name: '${COMPOSE_PROJECT_NAME}_postgis13'
-    image: 'postgis/postgis:13-master'
+    container_name: '${COMPOSE_PROJECT_NAME}_postgis17'
+    # Matches the major version running in production, so that a production dump restores
+    # locally and local behaviour is the behaviour that ships. postgis publishes this image
+    # for amd64 only, hence the platform pin below on Apple silicon.
+    image: 'postgis/postgis:17-master'
     hostname: postgres
     platform: linux/amd64
     restart: always
@@ -14,7 +17,10 @@ services:
     ports:
       - "37432:5432"
     volumes:
-      - postgres-data:/var/lib/postgresql
+      # Named per major version: postgres refuses to start against a data directory written
+      # by a different major, so a shared name would leave everyone with a container that
+      # will not boot after this change rather than a working empty database.
+      - postgres-data-17:/var/lib/postgresql
     networks:
       - tiamat-net
 
@@ -41,7 +47,7 @@ services:
       - tiamat-net
 
 volumes:
-  postgres-data:
+  postgres-data-17:
 
 networks:
   tiamat-net:
