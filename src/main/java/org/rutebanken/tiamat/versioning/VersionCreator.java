@@ -15,34 +15,17 @@
 
 package org.rutebanken.tiamat.versioning;
 
-import ma.glasnost.orika.CustomConverter;
 import ma.glasnost.orika.MapperFacade;
 import ma.glasnost.orika.MapperFactory;
-import ma.glasnost.orika.MappingContext;
-import ma.glasnost.orika.converter.builtin.PassThroughConverter;
-import ma.glasnost.orika.impl.DefaultMapperFactory;
-import ma.glasnost.orika.metadata.Type;
-import org.locationtech.jts.geom.Point;
-import org.rutebanken.tiamat.model.AlternativeName;
-import org.rutebanken.tiamat.model.CycleStorageEquipment;
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
-import org.rutebanken.tiamat.model.GeneralSign;
 import org.rutebanken.tiamat.model.InstalledEquipment_VersionStructure;
-import org.rutebanken.tiamat.model.PathLink;
-import org.rutebanken.tiamat.model.PathLinkEnd;
 import org.rutebanken.tiamat.model.PlaceEquipment;
-import org.rutebanken.tiamat.model.SanitaryEquipment;
-import org.rutebanken.tiamat.model.ShelterEquipment;
 import org.rutebanken.tiamat.model.StopPlace;
-import org.rutebanken.tiamat.model.TicketingEquipment;
-import org.rutebanken.tiamat.model.TopographicPlace;
-import org.rutebanken.tiamat.model.WaitingRoomEquipment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 
@@ -71,46 +54,27 @@ public class VersionCreator {
     public VersionCreator(VersionIncrementor versionIncrementor) {
         this.versionIncrementor = versionIncrementor;
 
-        MapperFactory mapperFactory = new DefaultMapperFactory.Builder().build();
+        MapperFactory mapperFactory = EntityCopyMappings.newMapperFactory();
 
+        EntityCopyMappings.registerPathLinkEnd(mapperFactory);
 
-        final String stopPlacePassThroughId = "stopPlacePassThroughId";
-
-        mapperFactory.getConverterFactory()
-                .registerConverter(stopPlacePassThroughId, new PassThroughConverter(TopographicPlace.class));
-
-        mapperFactory.getConverterFactory()
-                .registerConverter(new PassThroughConverter(Point.class));
-
-        mapperFactory.getConverterFactory()
-                .registerConverter(new CustomConverter<Instant, Instant>() {
-                    @Override
-                    public Instant convert(Instant instant, Type<? extends Instant> type, MappingContext mappingContext) {
-                        return Instant.from(instant);
-                    }
-                });
-
-
-        mapperFactory.classMap(PathLinkEnd.class, PathLinkEnd.class)
-                .exclude(ID_FIELD)
-                .byDefault()
-                .register();
-
-
+        // Equipment belongs to the entity it hangs off rather than existing in its own right, so a
+        // copy gets a fresh identity rather than sharing the original's.
         List<Class<? extends EntityInVersionStructure>> excludeNetexIdAndVersionsForEntities =
                 Arrays.asList(PlaceEquipment.class, InstalledEquipment_VersionStructure.class);
 
         excludeNetexIdAndVersionsForEntities.forEach(clazz -> {
             mapperFactory.classMap(clazz, clazz)
-                    .exclude("netexId")
-                    .exclude("version")
+                    .exclude(EntityCopyMappings.NETEX_ID_FIELD)
+                    .exclude(EntityCopyMappings.VERSION_FIELD)
                     .byDefault()
                     .register();
         });
 
-
+        // A new version is the same stop place, so netexId is deliberately carried over. The
+        // topographic place is referred to rather than copied.
         mapperFactory.classMap(StopPlace.class, StopPlace.class)
-                .fieldMap("topographicPlace").converter(stopPlacePassThroughId).add()
+                .fieldMap("topographicPlace").converter(EntityCopyMappings.TOPOGRAPHIC_PLACE_PASS_THROUGH).add()
                 .exclude(ID_FIELD)
                 .exclude(VERSION_COMMENT_FIELD)
                 .exclude(CHANGED_BY_FIELD)
@@ -119,22 +83,9 @@ public class VersionCreator {
                 .byDefault()
                 .register();
 
-        List<Class<? extends EntityInVersionStructure>> commonClassesToConfigure =
-                Arrays.asList(TopographicPlace.class,
-                        PathLink.class, PlaceEquipment.class,
-                        WaitingRoomEquipment.class, SanitaryEquipment.class,
-                        TicketingEquipment.class, ShelterEquipment.class,
-                        CycleStorageEquipment.class, GeneralSign.class,
-                        AlternativeName.class);
-
-
-        commonClassesToConfigure.forEach(clazz -> mapperFactory.classMap(clazz, clazz)
-                .exclude(VERSION_COMMENT_FIELD)
-                .exclude(CHANGED_BY_FIELD)
-                .exclude(ID_FIELD)
-                .exclude(VALID_BETWEEN)
-                .byDefault()
-                .register());
+        // Registered last, as before: this overlaps with the equipment classes above and the order
+        // decides which rules win.
+        EntityCopyMappings.registerCommonEntities(mapperFactory);
 
         defaultMapperFacade = mapperFactory.getMapperFacade();
     }
