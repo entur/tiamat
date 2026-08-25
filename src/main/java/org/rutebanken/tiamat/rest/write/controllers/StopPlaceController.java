@@ -165,6 +165,11 @@ interface StopPlaceController {
         description = """
         Deletes a stop place by its NeTEx ID.
         Returns a job representing the asynchronous deletion process.
+
+        The stop place is not looked up before the job is accepted, so an unknown NeTEx ID is
+        reported as a FAILED job with a reason rather than as a 404. The same applies to a stop
+        place that is already deleted, and to a child of a multimodal stop place, which cannot be
+        deleted on its own.
         """,
         parameters = {
             @Parameter(
@@ -182,7 +187,6 @@ interface StopPlaceController {
                     schema = @Schema(implementation = StopPlaceJobDto.class)
                 )
             ),
-            @ApiResponse(responseCode = "404", description = "Stop place by NeTEx ID not found"),
             @ApiResponse(responseCode = "403", description = "Missing the role required to use the write API"),
             @ApiResponse(responseCode = "503", description = "Job queue full"),
         }

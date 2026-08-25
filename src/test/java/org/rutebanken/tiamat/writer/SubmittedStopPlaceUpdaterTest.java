@@ -247,7 +247,7 @@ public class SubmittedStopPlaceUpdaterTest {
         assertThat(result.getWeighting()).isEqualTo(InterchangeWeightingEnumeration.PREFERRED_INTERCHANGE);
         assertThat(result.getCovered()).isEqualTo(CoveredEnumeration.COVERED);
         assertThat(result.getPublicCode()).isEqualTo("NEW");
-        assertThat(result.getCentroid()).isEqualTo(GEOMETRY_FACTORY.createPoint(new Coordinate(10.5, 59.5)));
+        assertThat(result.getCentroid().getCoordinate()).isEqualTo(new Coordinate(10.5, 59.5));
         assertThat(result.isAllAreasWheelchairAccessible()).isTrue();
     }
 

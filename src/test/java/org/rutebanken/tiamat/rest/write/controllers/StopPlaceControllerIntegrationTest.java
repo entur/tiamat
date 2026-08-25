@@ -203,6 +203,29 @@ public class StopPlaceControllerIntegrationTest extends TiamatIntegrationTest {
         assertThat(finalJob.status()).isEqualTo(AsyncStopPlaceJobStatus.FINISHED);
     }
 
+    /**
+     * The stop place is not looked up before the job is accepted, so an unknown id cannot be
+     * answered with a 404. It has to come back as a failed job carrying a reason the caller can
+     * act on, which is what the endpoint documentation promises.
+     */
+    @Test
+    public void deleteUnknownStopPlaceReturnsAcceptedThenFailedJob() throws InterruptedException {
+        ResponseEntity<StopPlaceJobDto> response = restTemplate.exchange(
+            WRITE_ENDPOINT + "/NSR:StopPlace:doesNotExist",
+            HttpMethod.DELETE,
+            null,
+            StopPlaceJobDto.class
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
+        assertThat(response.getBody()).isNotNull();
+
+        StopPlaceJobDto finalJob = awaitJobCompletion(response.getBody().jobId());
+
+        assertThat(finalJob.status()).isEqualTo(AsyncStopPlaceJobStatus.FAILED);
+        assertThat(finalJob.errorMessage()).contains("Cannot find stop place to terminate");
+    }
+
     @Test
     public void updateStopPlaceReturnsAcceptedWithProcessingJob() throws InterruptedException {
         StopPlace stopPlace = new StopPlace(
