@@ -24,8 +24,8 @@ import org.rutebanken.tiamat.versioning.save.StopPlaceVersionedSaverService;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anySet;
@@ -106,8 +106,7 @@ class StopPlaceWriterTest {
 
         StopPlace result = domainService.updateStopPlace(updatedNetexStopPlace);
 
-        assertNotNull(result);
-        assertEquals("New Name", result.getName().getValue());
+        assertThat(result).isSameAs(savedStopPlace);
         verify(validator).validateStopPlaceUpdate(stopPlaceId, false);
         verify(validator).validateStopPlaceMutation(updatedTiamatStopPlace);
         verify(stopPlaceVersionedSaverService).saveNewVersion(eq(existingStopPlace), eq(updatedTiamatStopPlace), anySet());
@@ -126,9 +125,7 @@ class StopPlaceWriterTest {
 
         StopPlace result = domainService.createStopPlace(newNetexStopPlace);
 
-        assertNotNull(result);
-        assertEquals("NSR:StopPlace:200", result.getNetexId());
-        assertEquals("New Stop", result.getName().getValue());
+        assertThat(result).isSameAs(savedStopPlace);
         verify(validator).validateStopPlaceMutation(newTiamatStopPlace);
         verify(stopPlaceVersionedSaverService).saveNewVersion(newTiamatStopPlace);
     }
@@ -140,7 +137,7 @@ class StopPlaceWriterTest {
         domainService.deleteStopPlace(stopPlaceId);
 
         verify(stopPlaceTerminator).terminateStopPlace(
-            any(String.class),
+            eq(stopPlaceId),
             any(),
             any(String.class),
             any()

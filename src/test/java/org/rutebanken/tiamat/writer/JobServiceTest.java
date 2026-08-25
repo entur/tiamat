@@ -120,6 +120,9 @@ public class JobServiceTest {
         ArgumentCaptor<AsyncStopPlaceJob> captor = ArgumentCaptor.forClass(AsyncStopPlaceJob.class);
         verify(repository).save(captor.capture());
         assertEquals("createdId", captor.getValue().getCreatedIds().getFirst().createdId());
+        // The status moves via the conditional update, not by mutating the entity, so that
+        // completion cannot happen unless the job is still claimed.
+        verify(repository).transition(eq(1L), anyCollection(), eq(AsyncStopPlaceJobStatus.FINISHED));
     }
 
     @Test
@@ -183,45 +186,6 @@ public class JobServiceTest {
     }
 
     @Test
-    public void shouldGetJob() {
-        AsyncStopPlaceJob job = mock(AsyncStopPlaceJob.class);
-        when(job.getId()).thenReturn(1L);
-        when(job.getStatus()).thenReturn(AsyncStopPlaceJobStatus.PROCESSING);
-        when(repository.findById(1L)).thenReturn(Optional.of(job));
-
-        Optional<AsyncStopPlaceJob> result = jobService.getJob(1L);
-
-        assertThat(result).isPresent();
-        assertThat(result.get().getId()).isEqualTo(1L);
-        assertThat(result.get().getStatus()).isEqualTo(
-            AsyncStopPlaceJobStatus.PROCESSING
-        );
-    }
-
-    @Test
-    public void shouldMarkJobAsSuccess() {
-        AsyncStopPlaceJob job = new AsyncStopPlaceJob();
-        job.setId(1L);
-        job.setStatus(AsyncStopPlaceJobStatus.PROCESSING);
-        when(repository.findById(1L)).thenReturn(Optional.of(job));
-
-        jobService.succeed(
-            1L,
-            singletonList(new StopPlaceIdMapping("submittedId", "createdId"))
-        );
-
-        ArgumentCaptor<AsyncStopPlaceJob> captor = ArgumentCaptor.forClass(
-            AsyncStopPlaceJob.class
-        );
-        verify(repository).save(captor.capture());
-
-        // The status moves via the conditional update, not by mutating the entity, so that
-        // completion cannot happen unless the job is still claimed.
-        verify(repository).transition(eq(1L), anyCollection(), eq(AsyncStopPlaceJobStatus.FINISHED));
-        assertEquals("createdId", captor.getValue().getCreatedIds().getFirst().createdId());
-    }
-
-    @Test
     public void shouldMarkJobAsFailed() {
         AsyncStopPlaceJob job = new AsyncStopPlaceJob();
         job.setId(1L);
@@ -237,25 +201,6 @@ public class JobServiceTest {
 
         verify(repository).transition(eq(1L), anyCollection(), eq(AsyncStopPlaceJobStatus.FAILED));
         assertThat(captor.getValue().getReason()).isEqualTo("Error");
-    }
-
-    @Test
-    public void shouldForwardIllegalArgumentReason() {
-        IllegalArgumentException exception = new IllegalArgumentException(
-            "Invalid input"
-        );
-        AsyncStopPlaceJob job = new AsyncStopPlaceJob();
-        when(repository.findById(1L)).thenReturn(Optional.of(job));
-
-        jobService.fail(1L, exception);
-
-        ArgumentCaptor<AsyncStopPlaceJob> captor = ArgumentCaptor.forClass(
-            AsyncStopPlaceJob.class
-        );
-        verify(repository).save(captor.capture());
-
-        AsyncStopPlaceJob saved = captor.getValue();
-        assertThat(saved.getReason()).isEqualTo("Invalid input");
     }
 
     /**

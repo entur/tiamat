@@ -1,10 +1,8 @@
 package org.rutebanken.tiamat.writer;
 
 import org.junit.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.rutebanken.tiamat.model.AccessibilityAssessment;
 import org.rutebanken.tiamat.model.AccessibilityLimitation;
 import org.rutebanken.tiamat.model.AlternativeName;
@@ -35,7 +33,6 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
-@ExtendWith(MockitoExtension.class)
 public class SubmittedStopPlaceUpdaterTest {
 
     private static final GeometryFactory GEOMETRY_FACTORY = new GeometryFactory();
@@ -213,129 +210,44 @@ public class SubmittedStopPlaceUpdaterTest {
         assertThat(result.getKeyValues().get("key2").getItems()).isEqualTo(Set.of("value2"));
     }
 
+    /**
+     * The scalar fields are carried across by the mapper's byDefault() rule rather than by
+     * anything written per field, so they stand or fall together and one case covers them.
+     */
     @Test
-    public void updatesName() {
+    public void copiesScalarFieldsFromTheSubmittedStopPlace() {
         var original = new StopPlace();
-        var originalName = new EmbeddableMultilingualString();
-        originalName.setValue("Original name");
-        original.setName(originalName);
-
-        var update = new StopPlace();
-        var editedName = new EmbeddableMultilingualString();
-        editedName.setValue("Edited name");
-        update.setName(editedName);
-
-        var result = submittedStopPlaceUpdater.update(original, update);
-
-        assertThat(result.getName().getValue()).isEqualTo("Edited name");
-    }
-
-    @Test
-    public void updatesDescription() {
-        var original = new StopPlace();
-        var originalDescription = new EmbeddableMultilingualString();
-        originalDescription.setValue("Original description");
-        original.setDescription(originalDescription);
-
-        var update = new StopPlace();
-        var editedDescription = new EmbeddableMultilingualString();
-        editedDescription.setValue("Edited description");
-        update.setDescription(editedDescription);
-
-        var result = submittedStopPlaceUpdater.update(original, update);
-
-        assertThat(result.getDescription().getValue()).isEqualTo("Edited description");
-    }
-
-    @Test
-    public void updatesStopPlaceType() {
-        var original = new StopPlace();
+        original.setName(new EmbeddableMultilingualString("Original name"));
+        original.setDescription(new EmbeddableMultilingualString("Original description"));
         original.setStopPlaceType(StopTypeEnumeration.BUS_STATION);
-
-        var update = new StopPlace();
-        update.setStopPlaceType(StopTypeEnumeration.RAIL_STATION);
-
-        var result = submittedStopPlaceUpdater.update(original, update);
-
-        assertThat(result.getStopPlaceType()).isEqualTo(StopTypeEnumeration.RAIL_STATION);
-    }
-
-    @Test
-    public void updatesTransportMode() {
-        var original = new StopPlace();
         original.setTransportMode(VehicleModeEnumeration.BUS);
-
-        var update = new StopPlace();
-        update.setTransportMode(VehicleModeEnumeration.RAIL);
-
-        var result = submittedStopPlaceUpdater.update(original, update);
-
-        assertThat(result.getTransportMode()).isEqualTo(VehicleModeEnumeration.RAIL);
-    }
-
-    @Test
-    public void updatesWeighting() {
-        var original = new StopPlace();
         original.setWeighting(InterchangeWeightingEnumeration.NO_INTERCHANGE);
-
-        var update = new StopPlace();
-        update.setWeighting(InterchangeWeightingEnumeration.PREFERRED_INTERCHANGE);
-
-        var result = submittedStopPlaceUpdater.update(original, update);
-
-        assertThat(result.getWeighting()).isEqualTo(InterchangeWeightingEnumeration.PREFERRED_INTERCHANGE);
-    }
-
-    @Test
-    public void updatesCovered() {
-        var original = new StopPlace();
         original.setCovered(CoveredEnumeration.OUTDOORS);
-
-        var update = new StopPlace();
-        update.setCovered(CoveredEnumeration.COVERED);
-
-        var result = submittedStopPlaceUpdater.update(original, update);
-
-        assertThat(result.getCovered()).isEqualTo(CoveredEnumeration.COVERED);
-    }
-
-    @Test
-    public void updatesPublicCode() {
-        var original = new StopPlace();
         original.setPublicCode("OLD");
-
-        var update = new StopPlace();
-        update.setPublicCode("NEW");
-
-        var result = submittedStopPlaceUpdater.update(original, update);
-
-        assertThat(result.getPublicCode()).isEqualTo("NEW");
-    }
-
-    @Test
-    public void updatesCentroid() {
-        var original = new StopPlace();
         original.setCentroid(GEOMETRY_FACTORY.createPoint(new Coordinate(10.0, 59.0)));
-
-        var update = new StopPlace();
-        update.setCentroid(GEOMETRY_FACTORY.createPoint(new Coordinate(10.5, 59.5)));
-
-        var result = submittedStopPlaceUpdater.update(original, update);
-
-        assertThat(result.getCentroid().getX()).isEqualTo(10.5);
-        assertThat(result.getCentroid().getY()).isEqualTo(59.5);
-    }
-
-    @Test
-    public void updatesAllAreasWheelchairAccessible() {
-        var original = new StopPlace();
         original.setAllAreasWheelchairAccessible(false);
 
         var update = new StopPlace();
+        update.setName(new EmbeddableMultilingualString("Edited name"));
+        update.setDescription(new EmbeddableMultilingualString("Edited description"));
+        update.setStopPlaceType(StopTypeEnumeration.RAIL_STATION);
+        update.setTransportMode(VehicleModeEnumeration.RAIL);
+        update.setWeighting(InterchangeWeightingEnumeration.PREFERRED_INTERCHANGE);
+        update.setCovered(CoveredEnumeration.COVERED);
+        update.setPublicCode("NEW");
+        update.setCentroid(GEOMETRY_FACTORY.createPoint(new Coordinate(10.5, 59.5)));
         update.setAllAreasWheelchairAccessible(true);
 
         var result = submittedStopPlaceUpdater.update(original, update);
 
+        assertThat(result.getName().getValue()).isEqualTo("Edited name");
+        assertThat(result.getDescription().getValue()).isEqualTo("Edited description");
+        assertThat(result.getStopPlaceType()).isEqualTo(StopTypeEnumeration.RAIL_STATION);
+        assertThat(result.getTransportMode()).isEqualTo(VehicleModeEnumeration.RAIL);
+        assertThat(result.getWeighting()).isEqualTo(InterchangeWeightingEnumeration.PREFERRED_INTERCHANGE);
+        assertThat(result.getCovered()).isEqualTo(CoveredEnumeration.COVERED);
+        assertThat(result.getPublicCode()).isEqualTo("NEW");
+        assertThat(result.getCentroid()).isEqualTo(GEOMETRY_FACTORY.createPoint(new Coordinate(10.5, 59.5)));
         assertThat(result.isAllAreasWheelchairAccessible()).isTrue();
     }
 
