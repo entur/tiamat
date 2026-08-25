@@ -1,0 +1,11 @@
+-- Removes the discriminator column added by V62, whose feature was reverted.
+--
+-- V62 is restored rather than left deleted on purpose. Flyway validates on migrate, and an
+-- applied version with no local file fails with "Detected applied migration not resolved
+-- locally", so deleting the file breaks startup for any environment that had already run it.
+-- Restoring it byte for byte keeps the recorded checksum valid; this migration then undoes what
+-- it did. Environments that never ran V62 add the column here and drop it immediately, which is
+-- wasted work but correct.
+--
+-- IF EXISTS because both cases have to be safe.
+ALTER TABLE parking DROP COLUMN IF EXISTS dtype;
