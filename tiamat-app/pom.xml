@@ -33,7 +33,7 @@
     <dependencies>
         <dependency>
             <groupId>org.rutebanken</groupId>
-            <artifactId>tiamat</artifactId>
+            <artifactId>tiamat-core</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

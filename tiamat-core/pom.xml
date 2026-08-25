@@ -24,10 +24,10 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>tiamat</artifactId>
+    <artifactId>tiamat-core</artifactId>
     <packaging>jar</packaging>
 
-    <name>Tiamat</name>
+    <name>Tiamat Core</name>
     <description>Stop place register / holdeplassregister</description>
 
     <properties>
