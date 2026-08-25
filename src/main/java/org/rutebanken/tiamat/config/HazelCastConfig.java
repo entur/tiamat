@@ -28,9 +28,6 @@ public class HazelCastConfig {
     private String hazelcastClusterName;
 
 
-    @Value("${tiamat.hazelcast.port.auto-increment:false}")
-    private boolean portAutoIncrement;
-
     @Bean
     public Config hazelcastConfig() {
         Config config = new Config();
@@ -39,7 +36,7 @@ public class HazelCastConfig {
         config.setClusterName(hazelcastClusterName);
 
         // Configure network settings
-        config.getNetworkConfig().setPortAutoIncrement(portAutoIncrement);
+        config.getNetworkConfig().setPortAutoIncrement(false);
 
         JoinConfig joinConfig = config.getNetworkConfig().getJoin();
         joinConfig.getMulticastConfig().setEnabled(false);
