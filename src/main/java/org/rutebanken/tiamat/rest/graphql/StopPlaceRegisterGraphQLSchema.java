@@ -100,7 +100,6 @@ import org.rutebanken.tiamat.rest.graphql.types.PurposeOfGroupingTypeCreator;
 import org.rutebanken.tiamat.rest.graphql.types.StopPlaceInterfaceCreator;
 import org.rutebanken.tiamat.rest.graphql.types.StopPlaceObjectTypeCreator;
 import org.rutebanken.tiamat.rest.graphql.types.TagObjectTypeCreator;
-import org.rutebanken.tiamat.rest.graphql.types.ParkingGraphQLTypeContributor;
 import org.rutebanken.tiamat.rest.graphql.types.TariffZoneObjectTypeCreator;
 import org.rutebanken.tiamat.rest.graphql.types.TopographicPlaceObjectTypeCreator;
 import org.rutebanken.tiamat.rest.graphql.types.ZoneCommonFieldListCreator;
@@ -384,9 +383,6 @@ public class StopPlaceRegisterGraphQLSchema {
     @Autowired
     private PostalAddressMapper postalAddressMapper;
 
-    @Autowired(required = false)
-    private List<ParkingGraphQLTypeContributor> parkingTypeContributors = new ArrayList<>();
-
     @Autowired
     @PostConstruct
     public void init() {
@@ -514,7 +510,7 @@ public class StopPlaceRegisterGraphQLSchema {
 
         GraphQLObjectType pathLinkObjectType = pathLinkObjectTypeCreator.create(pathLinkEndObjectType, netexIdFieldDefinition, geometryFieldDefinition);
 
-        GraphQLObjectType parkingObjectType = createParkingObjectType(validBetweenObjectType, parkingTypeContributors);
+        GraphQLObjectType parkingObjectType = createParkingObjectType(validBetweenObjectType);
 
         GraphQLArgument allVersionsArgument = GraphQLArgument.newArgument()
                 .name(ALL_VERSIONS)
@@ -630,7 +626,7 @@ public class StopPlaceRegisterGraphQLSchema {
 
         GraphQLInputObjectType parentStopPlaceInputObjectType = parentStopPlaceInputObjectTypeCreator.create(commonInputFieldList, validBetweenInputObjectType, stopPlaceInputObjectType);
 
-        GraphQLInputObjectType parkingInputObjectType = createParkingInputObjectType(validBetweenInputObjectType, parkingTypeContributors);
+        GraphQLInputObjectType parkingInputObjectType = createParkingInputObjectType(validBetweenInputObjectType);
 
         GraphQLInputObjectType groupOfStopPlacesInputObjectType = createGroupOfStopPlacesInputObjectType();
 
