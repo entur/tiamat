@@ -36,25 +36,6 @@ import org.rutebanken.tiamat.rest.write.dto.StopPlaceJobDto;
     """
 )
 interface StopPlaceController {
-    @Operation(
-        summary = "Gets a stop place by NeTEx ID",
-        description = """
-        Gets a StopPlace by its NeTEx ID.
-        """,
-        responses = {
-            @ApiResponse(
-                responseCode = "200",
-                content = @Content(
-                    schema = @Schema(implementation = StopPlace.class)
-                )
-            ),
-            @ApiResponse(
-                responseCode = "404",
-                description = "Stop place by NeTEx ID not found"
-            ),
-        }
-    )
-    Response getStopPlace(String stopPlaceId);
 
     @Operation(
         summary = "Creates a stop place from a NeTEx XML representation",

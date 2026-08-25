@@ -32,18 +32,6 @@ public class StopPlaceControllerImpl implements StopPlaceController {
         this.asyncStopPlaceWriter = asyncStopPlaceWriter;
     }
 
-    @Override
-    @GET
-    @Produces(
-        {
-            MediaType.APPLICATION_XML,
-            MediaType.APPLICATION_XML + "; charset=utf-8",
-        }
-    )
-    @Path("/{stopPlaceId}")
-    public Response getStopPlace(@PathParam("stopPlaceId") String stopPlaceId) {
-        return Response.ok(asyncStopPlaceWriter.getStopPlace(stopPlaceId)).build();
-    }
 
     @Override
     @POST

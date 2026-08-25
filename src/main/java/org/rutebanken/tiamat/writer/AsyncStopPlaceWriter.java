@@ -3,13 +3,9 @@ package org.rutebanken.tiamat.writer;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.ClientErrorException;
-import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.ServiceUnavailableException;
 import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.StreamingOutput;
 import org.rutebanken.tiamat.model.job.AsyncStopPlaceJob;
-import org.rutebanken.tiamat.netex.mapping.NetexMapper;
-import org.rutebanken.tiamat.writer.xml.StopPlaceXmlWriter;
 import org.rutebanken.tiamat.writer.async.WriteJobMessage;
 import org.rutebanken.tiamat.writer.async.WriteJobPublisher;
 import org.rutebanken.tiamat.writer.async.WriteJobRejectedException;
@@ -21,43 +17,28 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Optional;
 
 @Service
 public class AsyncStopPlaceWriter {
 
     private static final Logger logger = LoggerFactory.getLogger(AsyncStopPlaceWriter.class);
 
-    private final NetexMapper netexMapper;
     private final JobService jobService;
     private final WriteJobPublisher writeJobPublisher;
     private final StopPlaceWriter stopPlaceWriter;
-    private final StopPlaceXmlWriter stopPlaceXmlWriter;
     private final int maxPayloadSize;
 
     public AsyncStopPlaceWriter(
-            NetexMapper netexMapper,
             JobService jobService,
             WriteJobPublisher writeJobPublisher,
             StopPlaceWriter stopPlaceWriter,
-            StopPlaceXmlWriter stopPlaceXmlWriter,
             @Value("${tiamat.write-api.max-payload-size-bytes:10485760}") int maxPayloadSize) {
-        this.netexMapper = netexMapper;
         this.jobService = jobService;
         this.writeJobPublisher = writeJobPublisher;
         this.stopPlaceWriter = stopPlaceWriter;
-        this.stopPlaceXmlWriter = stopPlaceXmlWriter;
         this.maxPayloadSize = maxPayloadSize;
     }
 
-    @Transactional
-    public StreamingOutput getStopPlace(String netexId) {
-        var tiamatStopPlace = Optional.ofNullable(stopPlaceWriter.getStopPlace(netexId))
-                .orElseThrow(() -> new NotFoundException("Stop place not found: " + netexId));
-        org.rutebanken.netex.model.StopPlace netexStopPlace =
-                netexMapper.mapToNetexModel(tiamatStopPlace);
-        return stopPlaceXmlWriter.write(netexStopPlace);
-    }
 
     public StopPlaceJobDto createStopPlaces(InputStream body) {
         byte[] payload = readPayload(body);

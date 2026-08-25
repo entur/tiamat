@@ -60,9 +60,6 @@ public class StopPlaceWriter {
         this.submittedStopPlaceUpdater = submittedStopPlaceUpdater;
     }
 
-    public StopPlace getStopPlace(String stopPlaceId) {
-        return stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlaceId);
-    }
 
     /**
      * The NetexMappingContext must be established on the thread that performs the mapping.

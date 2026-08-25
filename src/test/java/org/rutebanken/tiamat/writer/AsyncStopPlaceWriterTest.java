@@ -1,6 +1,5 @@
 package org.rutebanken.tiamat.writer;
 
-import org.rutebanken.tiamat.writer.xml.StopPlaceXmlWriter;
 
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.ServiceUnavailableException;
@@ -48,9 +47,6 @@ class AsyncStopPlaceWriterTest {
     @Mock
     private StopPlaceWriter stopPlaceWriter;
 
-    @Mock
-    private StopPlaceXmlWriter stopPlaceXmlWriter;
-
     private AsyncStopPlaceWriter facade;
 
     private static java.io.InputStream stream() {
@@ -60,52 +56,14 @@ class AsyncStopPlaceWriterTest {
     @BeforeEach
     void setup() {
         facade = new AsyncStopPlaceWriter(
-            netexMapper,
-            jobService,
-            writeJobPublisher,
+                jobService,
+                writeJobPublisher,
                 stopPlaceWriter,
-            stopPlaceXmlWriter,
-            10485760
+                10485760
         );
     }
 
-    @Test
-    void getStopPlace_WhenFound_ReturnsStreamingOutput() {
-        String netexId = "NSR:StopPlace:100";
-        var tiamatStopPlace = new org.rutebanken.tiamat.model.StopPlace();
-        var netexStopPlace = new org.rutebanken.netex.model.StopPlace();
-        StreamingOutput expectedOutput = outputStream -> {};
 
-        when(stopPlaceWriter.getStopPlace(netexId)).thenReturn(
-            tiamatStopPlace
-        );
-        when(netexMapper.mapToNetexModel(tiamatStopPlace)).thenReturn(
-            netexStopPlace
-        );
-        when(stopPlaceXmlWriter.write(netexStopPlace)).thenReturn(
-            expectedOutput
-        );
-
-        StreamingOutput result = facade.getStopPlace(netexId);
-
-        assertEquals(expectedOutput, result);
-        verify(stopPlaceWriter).getStopPlace(netexId);
-        verify(netexMapper).mapToNetexModel(tiamatStopPlace);
-        verify(stopPlaceXmlWriter).write(netexStopPlace);
-    }
-
-    @Test
-    void getStopPlace_WhenNotFound_ThrowsNotFoundException() {
-        String netexId = "NSR:StopPlace:999";
-        when(stopPlaceWriter.getStopPlace(netexId)).thenReturn(null);
-
-        assertThrows(NotFoundException.class, () ->
-            facade.getStopPlace(netexId)
-        );
-        verify(netexMapper, never()).mapToNetexModel(
-            any(org.rutebanken.tiamat.model.StopPlace.class)
-        );
-    }
 
     @Test
     void createStopPlaces_Success() {

@@ -69,13 +69,6 @@ public class WriteApiPreAuthorizeTest extends TiamatIntegrationTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
     }
 
-    @Test
-    public void readIsForbiddenWithoutWriteApiRole() {
-        ResponseEntity<String> response = restTemplate.getForEntity(
-                WRITE_ENDPOINT + "/NSR:StopPlace:1", String.class);
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
-    }
 
     @Test
     public void jobStatusIsForbiddenWithoutWriteApiRole() {

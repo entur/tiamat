@@ -17,6 +17,8 @@ import org.rutebanken.tiamat.model.ValidBetween;
 import org.rutebanken.tiamat.model.job.AsyncStopPlaceJobStatus;
 import org.rutebanken.tiamat.rest.write.dto.StopPlaceJobDto;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.boot.resttestclient.TestRestTemplate;
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
 import org.springframework.http.HttpEntity;
@@ -291,36 +293,7 @@ public class StopPlaceControllerIntegrationTest extends TiamatIntegrationTest {
      * body writer for that; without it Jersey cannot serialise the response and answers 500
      * instead of the mapped status.
      */
-    @Test
-    public void getUnknownStopPlaceReturnsNotFound() {
-        ResponseEntity<String> response = restTemplate.getForEntity(
-                WRITE_ENDPOINT + "/NSR:StopPlace:99999999", String.class);
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-    }
-
-    @Test
-    public void getStopPlaceReturnsXml() {
-        StopPlace stopPlace = new StopPlace(
-            new EmbeddableMultilingualString("Test Stop Place")
-        );
-        stopPlace.setStopPlaceType(StopTypeEnumeration.RAIL_STATION);
-        StopPlace saved = stopPlaceRepository.save(stopPlace);
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.set(HttpHeaders.ACCEPT, MediaType.APPLICATION_XML_VALUE);
-        HttpEntity<Void> request = new HttpEntity<>(headers);
-
-        ResponseEntity<String> response = restTemplate.exchange(
-            WRITE_ENDPOINT + "/" + saved.getNetexId(),
-            HttpMethod.GET,
-            request,
-            String.class
-        );
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(response.getBody()).contains("Test Stop Place");
-    }
 
     @Test
     public void ignoresValidBetweenFields() throws InterruptedException {
@@ -356,18 +329,12 @@ public class StopPlaceControllerIntegrationTest extends TiamatIntegrationTest {
 
         assertThat(finalJob.createdIds()).isNotEmpty();
 
-        ResponseEntity<String> getResponse = restTemplate.exchange(
-                WRITE_ENDPOINT + "/" + finalJob.createdIds().getFirst().createdId(),
-                HttpMethod.GET,
-                null,
-                String.class
-        );
+        String createdId = finalJob.createdIds().getFirst().createdId();
 
-        assertThat(getResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
-        String responseBody = getResponse.getBody();
-        assertThat(responseBody).contains("version=\"1\"");
-        assertThat(responseBody).doesNotContain("<FromDate>2024-01-01</FromDate>");
-        assertThat(responseBody).doesNotContain("<ToDate>2024-12-31</ToDate>");
+        Long version = written(createdId, StopPlace::getVersion);
+        assertThat(version).isEqualTo(1L);
+        Instant toDate = written(createdId, sp -> sp.getValidBetween() == null ? null : sp.getValidBetween().getToDate());
+        assertThat(toDate).as("a client supplied validity must not be kept").isNull();
     }
 
     @Test
@@ -400,29 +367,15 @@ public class StopPlaceControllerIntegrationTest extends TiamatIntegrationTest {
 
         assertThat(finalJob.createdIds()).isNotEmpty();
 
-        ResponseEntity<String> getResponse = restTemplate.exchange(
-                WRITE_ENDPOINT + "/" + finalJob.createdIds().getFirst().createdId(),
-                HttpMethod.GET,
-                null,
-                String.class
-        );
+        String createdId = finalJob.createdIds().getFirst().createdId();
 
-        assertThat(getResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
-        String responseBody = getResponse.getBody();
-
-        assertThat(responseBody).contains("version=\"1\"");
-        assertThat(responseBody).doesNotContain("id=\"SAM:StopPlace:999\"");
-        assertThat(responseBody).contains(
-                "id=\"" + finalJob.createdIds().getFirst().createdId() + "\""
-        );
-
-        var flatBody = responseBody.replaceAll("\n", "").replaceAll(" ", "");
-        assertThat(flatBody).contains(
-                "<KeyValue><Key>imported-id</Key><Value>SAM:StopPlace:999</Value></KeyValue>"
-        );
-        assertThat(flatBody).contains(
-                "<KeyValue><Key>imported-id</Key><Value>SAM:Quay:123</Value></KeyValue>"
-        );
+        assertThat(createdId).isNotEqualTo("SAM:StopPlace:999");
+        assertThat(written(createdId, StopPlace::getVersion)).isEqualTo(1L);
+        Set<String> stopImportedIds = written(createdId, sp -> Set.copyOf(sp.getKeyValues().get("imported-id").getItems()));
+        assertThat(stopImportedIds).contains("SAM:StopPlace:999");
+        Set<String> quayImportedIds = written(createdId, sp -> Set.copyOf(sp.getQuays().iterator().next()
+                .getKeyValues().get("imported-id").getItems()));
+        assertThat(quayImportedIds).contains("SAM:Quay:123");
     }
 
     @Test
@@ -458,20 +411,14 @@ public class StopPlaceControllerIntegrationTest extends TiamatIntegrationTest {
 
         assertThat(finalJob.createdIds()).isNotEmpty();
 
-        ResponseEntity<String> getResponse = restTemplate.exchange(
-                WRITE_ENDPOINT + "/" + finalJob.createdIds().getFirst().createdId(),
-                HttpMethod.GET,
-                null,
-                String.class
-        );
+        String createdId = finalJob.createdIds().getFirst().createdId();
 
-        assertThat(getResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
-        String responseBody = getResponse.getBody();
-
-        assertThat(responseBody).contains("<Quay modification=\"new\" version=\"1\" id=\"NSR:Quay:1\">");
-        assertThat(responseBody).contains("<Quay modification=\"new\" version=\"1\" id=\"NSR:Quay:2\">");
-        assertThat(responseBody).doesNotContain("<Quay id=\"NSR:Quay:123\" version=\"666\">");
-        assertThat(responseBody).doesNotContain("<Quay id=\"NSR:Quay:99\">");
+        List<String> quayIds = written(createdId, sp -> sp.getQuays().stream().map(Quay::getNetexId).toList());
+        assertThat(quayIds)
+                .as("the register mints quay ids, it does not take the submitted ones")
+                .containsExactlyInAnyOrder("NSR:Quay:1", "NSR:Quay:2");
+        List<Long> quayVersions = written(createdId, sp -> sp.getQuays().stream().map(Quay::getVersion).toList());
+        assertThat(quayVersions).containsOnly(1L);
     }
 
     @Test
@@ -517,20 +464,17 @@ public class StopPlaceControllerIntegrationTest extends TiamatIntegrationTest {
 
         assertThat(finalJob.createdIds()).isNotEmpty();
 
-        ResponseEntity<String> getResponse = restTemplate.exchange(
-                WRITE_ENDPOINT + "/" + finalJob.createdIds().getFirst().createdId(),
-                HttpMethod.GET,
-                null,
-                String.class
-        );
+        String createdId = finalJob.createdIds().getFirst().createdId();
 
-        assertThat(getResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
-        String responseBody = getResponse.getBody();
+        String assessmentId = written(createdId, sp -> sp.getAccessibilityAssessment().getNetexId());
+        Long assessmentVersion = written(createdId, sp -> sp.getAccessibilityAssessment().getVersion());
+        String limitationId = written(createdId, sp -> sp.getAccessibilityAssessment().getLimitations().getFirst().getNetexId());
+        Long limitationVersion = written(createdId, sp -> sp.getAccessibilityAssessment().getLimitations().getFirst().getVersion());
 
-        assertThat(responseBody).contains("<AccessibilityAssessment modification=\"new\" version=\"1\" id=\"NSR:AccessibilityAssessment:1\">");
-        assertThat(responseBody).contains("<AccessibilityLimitation modification=\"new\" version=\"1\" id=\"NSR:AccessibilityLimitation:1\">");
-        assertThat(responseBody).doesNotContain("<AccessibilityAssessment modification=\"new\" version=\"667\" id=\"NSR:AccessibilityAssessment:321\">");
-        assertThat(responseBody).doesNotContain("<AccessibilityLimitation modification=\"new\" version=\"668\" id=\"NSR:AccessibilityLimitation:321\">");
+        assertThat(assessmentId).as("the submitted accessibility id must be ignored").isEqualTo("NSR:AccessibilityAssessment:1");
+        assertThat(assessmentVersion).isEqualTo(1L);
+        assertThat(limitationId).isEqualTo("NSR:AccessibilityLimitation:1");
+        assertThat(limitationVersion).isEqualTo(1L);
     }
 
     @Test
@@ -581,19 +525,8 @@ public class StopPlaceControllerIntegrationTest extends TiamatIntegrationTest {
 
         assertThat(finalJob.status()).isEqualTo(AsyncStopPlaceJobStatus.FINISHED);
 
-        ResponseEntity<String> getResponse = restTemplate.exchange(
-                WRITE_ENDPOINT + "/" + saved.getNetexId(),
-                HttpMethod.GET,
-                null,
-                String.class
-        );
-
-        assertThat(getResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
-        String responseBody = getResponse.getBody();
-        var flatBody = responseBody.replaceAll("\n", "").replaceAll(" ", "");
-
-        assertThat(flatBody).doesNotContain("<FromDate>2025-01-01T00:00:00</FromDate>");
-        assertThat(flatBody).doesNotContain("<ToDate>2025-12-31T23:59:59</ToDate>");
+        Instant updatedToDate = written(saved.getNetexId(), sp -> sp.getValidBetween() == null ? null : sp.getValidBetween().getToDate());
+        assertThat(updatedToDate).as("a client supplied validity must not be kept on update").isNull();
     }
 
     @Test
@@ -656,18 +589,27 @@ public class StopPlaceControllerIntegrationTest extends TiamatIntegrationTest {
 
         assertThat(finalJob.status()).isEqualTo(AsyncStopPlaceJobStatus.FINISHED);
 
-        ResponseEntity<String> getResponse = restTemplate.exchange(
-                WRITE_ENDPOINT + "/" + saved.getNetexId(),
-                HttpMethod.GET,
-                null,
-                String.class
-        );
+        Long updatedAssessmentVersion = written(saved.getNetexId(), sp -> sp.getAccessibilityAssessment().getVersion());
+        String updatedAssessmentId = written(saved.getNetexId(), sp -> sp.getAccessibilityAssessment().getNetexId());
+        Long updatedLimitationVersion = written(saved.getNetexId(), sp -> sp.getAccessibilityAssessment().getLimitations().getFirst().getVersion());
 
-        assertThat(getResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
-        var responseBody = getResponse.getBody();
+        assertThat(updatedAssessmentVersion).as("the server decides the version, not the client").isEqualTo(2L);
+        assertThat(updatedAssessmentId).isEqualTo("NSR:AccessibilityAssessment:1");
+        assertThat(updatedLimitationVersion).isEqualTo(1L);
+    }
 
-        assertThat(responseBody).contains("<AccessibilityAssessment modification=\"new\" version=\"2\" id=\"NSR:AccessibilityAssessment:1\">");
-        assertThat(responseBody).contains("<AccessibilityLimitation modification=\"new\" version=\"1\" id=\"NSR:AccessibilityLimitation:2\">");
+    @Autowired
+    private PlatformTransactionManager transactionManager;
+
+    /**
+     * Reads what was actually written. These assertions used to go through the write API's own
+     * GET, which no longer exists: reading is served by the read API. Asserting on the stored
+     * entity is closer to what the tests mean anyway, since the question is whether the register
+     * kept what it should, not how it renders. The transaction is for the lazy associations.
+     */
+    private <T> T written(String netexId, java.util.function.Function<StopPlace, T> extract) {
+        return new TransactionTemplate(transactionManager).execute(status ->
+                extract.apply(stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(netexId)));
     }
 
     private StopPlaceJobDto awaitJobCompletion(Long jobId)
