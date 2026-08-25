@@ -12,12 +12,19 @@ import org.rutebanken.tiamat.rest.write.dto.StopPlaceJobDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.InputStream;
 
+/**
+ * Gated on the same property as the controllers it serves. Without the gate this is created in
+ * every deployment and demands a {@link WriteJobPublisher}, which only exists once a transport is
+ * selected, so a deployment that never asked for the write API fails to start.
+ */
 @Service
+@ConditionalOnProperty(name = "tiamat.write-api.enabled", havingValue = "true")
 public class AsyncStopPlaceWriter {
 
     private static final Logger logger = LoggerFactory.getLogger(AsyncStopPlaceWriter.class);
