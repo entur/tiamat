@@ -1,6 +1,5 @@
 package org.rutebanken.tiamat.writer;
 
-import jakarta.transaction.Transactional;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.ClientErrorException;
 import jakarta.ws.rs.ServiceUnavailableException;
@@ -25,17 +24,14 @@ public class AsyncStopPlaceWriter {
 
     private final JobService jobService;
     private final WriteJobPublisher writeJobPublisher;
-    private final StopPlaceWriter stopPlaceWriter;
     private final int maxPayloadSize;
 
     public AsyncStopPlaceWriter(
             JobService jobService,
             WriteJobPublisher writeJobPublisher,
-            StopPlaceWriter stopPlaceWriter,
             @Value("${tiamat.write-api.max-payload-size-bytes:10485760}") int maxPayloadSize) {
         this.jobService = jobService;
         this.writeJobPublisher = writeJobPublisher;
-        this.stopPlaceWriter = stopPlaceWriter;
         this.maxPayloadSize = maxPayloadSize;
     }
 

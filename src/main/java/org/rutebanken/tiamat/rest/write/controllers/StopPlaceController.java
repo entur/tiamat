@@ -12,7 +12,6 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.core.Response;
 
 import java.io.InputStream;
-import org.rutebanken.netex.model.StopPlace;
 import org.rutebanken.tiamat.rest.write.dto.StopPlaceJobDto;
 
 @Tag(

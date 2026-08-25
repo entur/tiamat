@@ -1,34 +1,27 @@
 package org.rutebanken.tiamat.writer;
 
 
-import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.ServiceUnavailableException;
-import jakarta.ws.rs.core.StreamingOutput;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.rutebanken.tiamat.model.job.AsyncStopPlaceJob;
 import org.rutebanken.tiamat.model.job.AsyncStopPlaceJobStatus;
-import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.writer.async.WriteJobMessage;
 import org.rutebanken.tiamat.writer.async.WriteJobPublisher;
 import org.rutebanken.tiamat.writer.async.WriteJobRejectedException;
 import org.rutebanken.tiamat.rest.write.dto.StopPlaceJobDto;
-import org.rutebanken.tiamat.rest.write.dto.StopPlacesDto;
 
-import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -36,16 +29,10 @@ import static org.mockito.Mockito.when;
 class AsyncStopPlaceWriterTest {
 
     @Mock
-    private NetexMapper netexMapper;
-
-    @Mock
     private JobService jobService;
 
     @Mock
     private WriteJobPublisher writeJobPublisher;
-
-    @Mock
-    private StopPlaceWriter stopPlaceWriter;
 
     private AsyncStopPlaceWriter facade;
 
@@ -58,7 +45,6 @@ class AsyncStopPlaceWriterTest {
         facade = new AsyncStopPlaceWriter(
                 jobService,
                 writeJobPublisher,
-                stopPlaceWriter,
                 10485760
         );
     }
@@ -67,7 +53,6 @@ class AsyncStopPlaceWriterTest {
 
     @Test
     void createStopPlaces_Success() {
-        StopPlacesDto dto = createStopPlacesDto();
         AsyncStopPlaceJob job = createJob(
             1L,
             AsyncStopPlaceJobStatus.PROCESSING
@@ -80,12 +65,11 @@ class AsyncStopPlaceWriterTest {
         assertNotNull(result);
         assertEquals(1L, result.jobId());
         assertEquals(AsyncStopPlaceJobStatus.PROCESSING, result.status());
-        verify(writeJobPublisher).publish(any(WriteJobMessage.class));
+        assertPublished(WriteJobMessage.Operation.CREATE, 1);
     }
 
     @Test
     void createStopPlaces_ProcessorThrowsException_ReturnsFailedJob() {
-        StopPlacesDto dto = createStopPlacesDto();
         AsyncStopPlaceJob job = createJob(1L, AsyncStopPlaceJobStatus.FAILED);
 
         when(jobService.createJob()).thenReturn(job);
@@ -102,7 +86,6 @@ class AsyncStopPlaceWriterTest {
 
     @Test
     void createStopPlaces_QueueFull_ThrowsServiceUnavailableException() {
-        StopPlacesDto dto = createStopPlacesDto();
         AsyncStopPlaceJob job = createJob(1L, AsyncStopPlaceJobStatus.FAILED);
 
         when(jobService.createJob()).thenReturn(job);
@@ -118,7 +101,6 @@ class AsyncStopPlaceWriterTest {
 
     @Test
     void updateStopPlace_Success() {
-        var dto = createStopPlacesDto();
         AsyncStopPlaceJob job = createJob(
             2L,
             AsyncStopPlaceJobStatus.PROCESSING
@@ -131,12 +113,11 @@ class AsyncStopPlaceWriterTest {
         assertNotNull(result);
         assertEquals(2L, result.jobId());
         assertEquals(AsyncStopPlaceJobStatus.PROCESSING, result.status());
-        verify(writeJobPublisher).publish(any(WriteJobMessage.class));
+        assertPublished(WriteJobMessage.Operation.UPDATE, 2);
     }
 
     @Test
     void updateStopPlace_ProcessorThrowsException_ReturnsFailedJob() {
-        var dto = createStopPlacesDto();
         AsyncStopPlaceJob job = createJob(2L, AsyncStopPlaceJobStatus.FAILED);
 
         when(jobService.createJob()).thenReturn(job);
@@ -153,7 +134,6 @@ class AsyncStopPlaceWriterTest {
 
     @Test
     void updateStopPlace_QueueFull_ThrowsServiceUnavailableException() {
-        var dto = createStopPlacesDto();
         AsyncStopPlaceJob job = createJob(2L, AsyncStopPlaceJobStatus.FAILED);
 
         when(jobService.createJob()).thenReturn(job);
@@ -182,7 +162,7 @@ class AsyncStopPlaceWriterTest {
         assertNotNull(result);
         assertEquals(3L, result.jobId());
         assertEquals(AsyncStopPlaceJobStatus.PROCESSING, result.status());
-        verify(writeJobPublisher).publish(any(WriteJobMessage.class));
+        assertPublished(WriteJobMessage.Operation.DELETE, 3);
     }
 
     @Test
@@ -218,18 +198,11 @@ class AsyncStopPlaceWriterTest {
         verify(jobService).fail(eq(3L), any(WriteJobRejectedException.class));
     }
 
-    private StopPlacesDto createStopPlacesDto() {
-        StopPlacesDto dto = new StopPlacesDto();
-        org.rutebanken.netex.model.StopPlace netexStopPlace =
-            new org.rutebanken.netex.model.StopPlace()
-                .withId("NSR:StopPlace:100")
-                .withName(
-                    new org.rutebanken.netex.model.MultilingualString().withValue(
-                        "Test Stop"
-                    )
-                );
-        dto.setStopPlaces(Collections.singletonList(netexStopPlace));
-        return dto;
+    private void assertPublished(WriteJobMessage.Operation operation, long jobId) {
+        ArgumentCaptor<WriteJobMessage> captor = ArgumentCaptor.forClass(WriteJobMessage.class);
+        verify(writeJobPublisher).publish(captor.capture());
+        assertEquals(operation, captor.getValue().operation());
+        assertEquals(jobId, captor.getValue().jobId());
     }
 
     private AsyncStopPlaceJob createJob(
