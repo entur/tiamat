@@ -2,6 +2,7 @@ package org.rutebanken.tiamat.writer.async;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.rutebanken.tiamat.auth.DefaultAuthorizationClaims;
 import org.entur.oauth2.JwtRoleAssignmentExtractor;
 import org.entur.ror.permission.AuthenticatedUser;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -22,7 +23,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  */
 class WriteJobPrincipalTest {
 
-    private final WriteJobPrincipal principal = new WriteJobPrincipal();
+    private final WriteJobPrincipal principal = new WriteJobPrincipal(new DefaultAuthorizationClaims());
 
     @AfterEach
     void clearContext() {
@@ -156,6 +157,56 @@ class WriteJobPrincipalTest {
         principal.clear();
 
         assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
+    }
+
+    /**
+     * A deployment carries whatever its own authorization reads. Nothing here knows the Entur claim
+     * names, which is the point: an authorization service that reads something else is served by
+     * declaring a bean, not by editing this class.
+     */
+    @Test
+    void carriesTheClaimsTheDeploymentNames() {
+        WriteJobPrincipal deploymentPrincipal =
+                new WriteJobPrincipal(() -> List.of("https://fintraffic.fi/businessId"));
+
+        authenticateWith(Map.of(
+                "sub", "trivore|alice",
+                "https://fintraffic.fi/businessId", "1234567-8",
+                "https://entur.io/organisationID", 1L
+        ));
+
+        assertThat(deploymentPrincipal.capture())
+                .containsKeys("sub", "https://fintraffic.fi/businessId")
+                .as("a claim this deployment's authorization does not read is not stored")
+                .doesNotContainKey("https://entur.io/organisationID");
+    }
+
+    /**
+     * Empty is a correct answer, not a gap: an authorization service that resolves roles from the
+     * subject alone, as Trivore does through remote lookups, needs no claim carried but the
+     * standard ones.
+     */
+    @Test
+    void carriesTheStandardClaimsEvenWhenTheDeploymentNamesNone() {
+        WriteJobPrincipal deploymentPrincipal = new WriteJobPrincipal(List::of);
+
+        Instant expiry = Instant.now().plusSeconds(3600);
+        authenticateWith(Map.of(
+                "sub", "trivore|alice",
+                "iss", "https://login.trivore.com/",
+                "exp", expiry,
+                "role_assignments", List.of("{\"r\":\"editStops\"}")
+        ));
+
+        Map<String, Object> captured = deploymentPrincipal.capture();
+
+        assertThat(captured)
+                .as("identity and expiry are mechanism, so they are carried regardless")
+                .containsKeys("sub", "iss", "exp")
+                .doesNotContainKey("role_assignments");
+
+        deploymentPrincipal.restore(captured);
+        assertThat(deploymentPrincipal.currentSubject()).isEqualTo("trivore|alice");
     }
 
     private static void authenticateWith(Map<String, Object> claims) {

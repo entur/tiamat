@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.writer.async;
 
+import org.rutebanken.tiamat.auth.AuthorizationClaims;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtClaimNames;
@@ -10,6 +11,7 @@ import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 /**
  * Carries the caller's principal from the request thread to the processing unit.
@@ -21,43 +23,35 @@ import java.util.Map;
  * <p>
  * Only claims are carried, never the token itself: a bearer token at rest in a broker or a dead
  * letter queue is a liability, and one that has expired cannot be replayed.
+ * <p>
+ * Which claims to carry is a deployment's own answer, supplied by {@link AuthorizationClaims},
+ * because it follows from what that deployment's {@link org.rutebanken.tiamat.auth.AuthorizationService}
+ * reads. Carrying too few is not a startup failure but a silent one: the write would be authorized
+ * on different grounds than the request that accepted it.
  */
 @Component
 public class WriteJobPrincipal {
 
     /**
-     * These names are duplicated rather than imported, because the libraries that read them do not
-     * expose them: the permission store declares its own package private, and the oauth2 helper
-     * dropped its constants class after 5.x. Verified against the versions actually resolved,
-     * permission-store-proxy and oauth2 7.2.0; worth rechecking on a major upgrade of either.
+     * Identity and expiry, needed whatever a deployment's authorization reads: the subject is what
+     * job ownership is keyed on, and the expiry bounds how long the captured credentials stay
+     * usable. Which claims carry <em>authority</em> is deployment specific and comes from
+     * {@link AuthorizationClaims}.
      */
-    private static final String CLAIM_ORGANISATION_ID = "https://entur.io/organisationID";
-
-    /** Primary role source for the jwt extractor. */
-    private static final String CLAIM_ROLE_ASSIGNMENTS = "role_assignments";
-
-    /** Fallback role source for the jwt extractor, and part of the permission store request. */
-    private static final String CLAIM_PERMISSIONS = "permissions";
-
-    /** Read by the user info extractor, which supplies the changedBy on the saved stop place. */
-    private static final String CLAIM_PREFERRED_USERNAME = "preferred_username";
-
-    /**
-     * The union of what either role assignment extractor needs, plus what the audit trail needs.
-     * Under the jwt extractor the roles travel in {@code role_assignments}, falling back to
-     * {@code permissions}; under the permission store they are looked up from the identity, for
-     * which the subject and issuer are mandatory and the organisation id is validated against the
-     * stored client for machine callers.
-     */
-    private static final List<String> CARRIED_CLAIMS = List.of(
+    private static final List<String> STANDARD_CLAIMS = List.of(
             JwtClaimNames.SUB,
             JwtClaimNames.ISS,
-            JwtClaimNames.EXP,
-            CLAIM_ROLE_ASSIGNMENTS,
-            CLAIM_PERMISSIONS,
-            CLAIM_ORGANISATION_ID,
-            CLAIM_PREFERRED_USERNAME
+            JwtClaimNames.EXP
     );
+
+    private final List<String> carriedClaims;
+
+    public WriteJobPrincipal(AuthorizationClaims authorizationClaims) {
+        this.carriedClaims = Stream.concat(
+                STANDARD_CLAIMS.stream(),
+                authorizationClaims.claimNames().stream()
+        ).distinct().toList();
+    }
 
     /**
      * @return the claims to carry, or empty when there is no authenticated caller, which is the
@@ -68,7 +62,7 @@ public class WriteJobPrincipal {
             return Map.of();
         }
         Map<String, Object> claims = new LinkedHashMap<>();
-        CARRIED_CLAIMS.forEach(claim -> {
+        carriedClaims.forEach(claim -> {
             Object value = token.getToken().getClaim(claim);
             if (value != null) {
                 claims.put(claim, normalise(value));
