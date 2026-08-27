@@ -991,9 +991,8 @@ public class CustomGraphQLTypes {
             )
             .build();
 
-    public static GraphQLObjectType createParkingObjectType(GraphQLObjectType validBetweenObjectType,
-                                                             List<ParkingGraphQLTypeContributor> contributors) {
-        GraphQLObjectType.Builder builder = newObject()
+    public static GraphQLObjectType createParkingObjectType(GraphQLObjectType validBetweenObjectType) {
+        return newObject()
                 .name(OUTPUT_TYPE_PARKING)
                 .field(netexIdFieldDefinition)
                 .field(newFieldDefinition()
@@ -1057,14 +1056,12 @@ public class CustomGraphQLTypes {
                 .field(geometryFieldDefinition)
                 .field(newFieldDefinition()
                         .name(ACCESSIBILITY_ASSESSMENT)
-                        .type(accessibilityAssessmentObjectType));
-        contributors.forEach(c -> c.contributeToOutputType(builder));
-        return builder.build();
+                        .type(accessibilityAssessmentObjectType))
+                .build();
     }
 
-    public static GraphQLInputObjectType createParkingInputObjectType(GraphQLInputObjectType validBetweenInputObjectType,
-                                                                       List<ParkingGraphQLTypeContributor> contributors) {
-        GraphQLInputObjectType.Builder builder = GraphQLInputObjectType.newInputObject()
+    public static GraphQLInputObjectType createParkingInputObjectType(GraphQLInputObjectType validBetweenInputObjectType) {
+        return GraphQLInputObjectType.newInputObject()
                 .name(INPUT_TYPE_PARKING)
                 .field(newInputObjectField()
                         .name(ID)
@@ -1130,8 +1127,7 @@ public class CustomGraphQLTypes {
                         .type(validBetweenInputObjectType))
                 .field(newInputObjectField()
                         .name(ACCESSIBILITY_ASSESSMENT)
-                        .type(accessibilityAssessmentInputObjectType));
-        contributors.forEach(c -> c.contributeToInputType(builder));
-        return builder.build();
+                        .type(accessibilityAssessmentInputObjectType))
+                .build();
     }
 }

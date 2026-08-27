@@ -28,6 +28,11 @@ public class HazelCastConfig {
     private String hazelcastClusterName;
 
 
+    /**
+     * Off in production, where one instance per pod binds a known port. Tests need it on: each
+     * Spring context starts its own instance, and with several contexts alive the second one
+     * cannot bind and the context fails to load.
+     */
     @Value("${tiamat.hazelcast.port.auto-increment:false}")
     private boolean portAutoIncrement;
 
