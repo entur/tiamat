@@ -204,6 +204,38 @@ public class StopPlaceControllerIntegrationTest extends TiamatIntegrationTest {
     }
 
     /**
+     * A database constraint has its own reason, distinct from the generic one, and it only helps if
+     * the exception still matches by the time it reaches the job. It is raised deep in the write,
+     * translated by Spring, and may be wrapped on its way out of the transactional proxy, so this
+     * goes through the real endpoint rather than calling the formatter directly.
+     * <p>
+     * A name longer than the column is the cheapest violation to provoke deterministically, and it
+     * stands in for the one that actually matters, which is two writers computing the same version.
+     */
+    @Test
+    public void constraintViolationIsReportedWithItsOwnReason() throws InterruptedException {
+        String tooLongName = "x".repeat(300);
+        String xml = """
+            <stopPlaces xmlns="http://www.netex.org.uk/netex">
+                <StopPlace version="1">
+                    <Name>%s</Name>
+                    <StopPlaceType>busStation</StopPlaceType>
+                </StopPlace>
+            </stopPlaces>
+            """.formatted(tooLongName);
+
+        ResponseEntity<StopPlaceJobDto> response = postXml(xml, StopPlaceJobDto.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
+
+        StopPlaceJobDto finalJob = awaitJobCompletion(response.getBody().jobId());
+
+        assertThat(finalJob.status()).isEqualTo(AsyncStopPlaceJobStatus.FAILED);
+        assertThat(finalJob.errorMessage())
+                .as("a constraint violation must not degrade to the generic reason")
+                .isEqualTo("A database constraint was violated. This may be due to invalid input data or a conflict with existing data.");
+    }
+
+    /**
      * The stop place is not looked up before the job is accepted, so an unknown id cannot be
      * answered with a 404. It has to come back as a failed job carrying a reason the caller can
      * act on, which is what the endpoint documentation promises.

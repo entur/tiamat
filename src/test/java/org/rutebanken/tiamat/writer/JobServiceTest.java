@@ -8,6 +8,7 @@ import org.rutebanken.tiamat.model.job.AsyncStopPlaceJob;
 import org.rutebanken.tiamat.model.job.AsyncStopPlaceJobStatus;
 import org.rutebanken.tiamat.model.job.StopPlaceIdMapping;
 import org.rutebanken.tiamat.repository.AsyncStopPlaceJobRepository;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.rutebanken.tiamat.writer.async.WriteJobNotOwnedException;
 
 import java.time.Instant;
@@ -238,6 +239,42 @@ public class JobServiceTest {
         assertThat(saved.getReason()).isEqualTo(
             "The job queue is full. Please try again later."
         );
+    }
+
+    /**
+     * What reaches the handler is whatever escapes a transactional proxy, and a transport that
+     * dispatches jobs itself may add a layer of its own, so a reason that only matched the outermost
+     * exception would go missing exactly when something went wrong.
+     */
+    @Test
+    public void shouldFormatConstantReasonForAWrappedException() {
+        AsyncStopPlaceJob job = new AsyncStopPlaceJob();
+        when(repository.findById(1L)).thenReturn(Optional.of(job));
+
+        jobService.fail(1L, new RuntimeException("dispatch failed",
+                new DataIntegrityViolationException("could not execute statement")));
+
+        ArgumentCaptor<AsyncStopPlaceJob> captor = ArgumentCaptor.forClass(AsyncStopPlaceJob.class);
+        verify(repository).save(captor.capture());
+        assertThat(captor.getValue().getReason())
+                .isEqualTo("A database constraint was violated. This may be due to invalid input data or a conflict with existing data.");
+    }
+
+    /**
+     * The one reason forwarded verbatim stays matched on the exception itself. A message from
+     * somewhere deep in the stack is not written for this caller and should not reach them.
+     */
+    @Test
+    public void shouldNotForwardTheMessageOfAWrappedIllegalArgument() {
+        AsyncStopPlaceJob job = new AsyncStopPlaceJob();
+        when(repository.findById(1L)).thenReturn(Optional.of(job));
+
+        jobService.fail(1L, new RuntimeException("wrapper",
+                new IllegalArgumentException("internal detail from some library")));
+
+        ArgumentCaptor<AsyncStopPlaceJob> captor = ArgumentCaptor.forClass(AsyncStopPlaceJob.class);
+        verify(repository).save(captor.capture());
+        assertThat(captor.getValue().getReason()).isEqualTo("An unexpected error occurred.");
     }
 
     @Test

@@ -28,6 +28,8 @@ public class JobService {
 
     private static final Logger logger = LoggerFactory.getLogger(JobService.class);
 
+    private static final int MAX_CAUSE_DEPTH = 10;
+
     private static final String GENERIC_REASON = "An unexpected error occurred.";
 
     private final AsyncStopPlaceJobRepository repo;
@@ -194,14 +196,35 @@ public class JobService {
      * message may describe internals.
      */
     private String formatException(Exception e) {
+        // Matched on the exception itself rather than anywhere in its causes, deliberately. This is
+        // the one reason forwarded verbatim, so it must stay limited to the messages this codebase
+        // writes for the caller. Unwrapping here would surface text from anywhere in the stack.
         if (e instanceof IllegalArgumentException) {
             return e.getMessage() != null ? e.getMessage() : GENERIC_REASON;
-        } else if (e instanceof AccessDeniedException) {
-            return "You do not have permission to perform this operation.";
-        } else if (e instanceof RejectedExecutionException) {
-            return "The job queue is full. Please try again later.";
-        } else if (e instanceof DataIntegrityViolationException) {
-            return "A database constraint was violated. This may be due to invalid input data or a conflict with existing data.";
+        }
+        return constantReasonFor(e);
+    }
+
+    /**
+     * These reasons are constants, so they are safe to match on a wrapped exception, and they have
+     * to be: what reaches the handler is whatever escapes a transactional proxy, and a transport
+     * that dispatches jobs itself may add a layer of its own. A miss here is silent, costing the
+     * caller a usable reason rather than raising anything.
+     */
+    private String constantReasonFor(Throwable throwable) {
+        Throwable cause = throwable;
+        // Bounded rather than walked to the end: a cause chain can be cyclic, and no wrapping this
+        // has to see through is anywhere near this deep.
+        for (int depth = 0; cause != null && depth < MAX_CAUSE_DEPTH; depth++, cause = cause.getCause()) {
+            if (cause instanceof AccessDeniedException) {
+                return "You do not have permission to perform this operation.";
+            }
+            if (cause instanceof RejectedExecutionException) {
+                return "The job queue is full. Please try again later.";
+            }
+            if (cause instanceof DataIntegrityViolationException) {
+                return "A database constraint was violated. This may be due to invalid input data or a conflict with existing data.";
+            }
         }
         return GENERIC_REASON;
     }
