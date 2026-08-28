@@ -54,6 +54,62 @@
         <module>tiamat-app</module>
     </modules>
 
+    <properties>
+        <hazelcast.version>5.2.5</hazelcast.version>
+        <hazelcast-hibernate53.version>5.2.0</hazelcast-hibernate53.version>
+        <graphql-java.version>20.9</graphql-java.version>
+        <graphql-java-extended-scalars.version>20.2</graphql-java-extended-scalars.version>
+        <spring-cloud-aws.version>4.0.2</spring-cloud-aws.version>
+    </properties>
+
+    <!--
+      Dependency versions pinned here (rather than in tiamat-core/pom.xml) so they apply
+      consistently to every module in the reactor. dependencyManagement declared in a leaf
+      module only affects that module's own resolution - a sibling module (e.g. tiamat-app)
+      that merely depends on tiamat-core as a jar does not inherit it, and would otherwise
+      silently fall back to whatever version the superpom/Spring Boot BOM manages instead.
+    -->
+    <dependencyManagement>
+        <dependencies>
+            <!-- Aligns all io.awspring.cloud:* artifacts (incl. transitive spring-cloud-aws-autoconfigure)
+                 to a single, Spring Boot 4 compatible version. Without this BOM, bumping only the
+                 starter version leaves the transitive autoconfigure unmanaged and prone to version skew. -->
+            <dependency>
+                <groupId>io.awspring.cloud</groupId>
+                <artifactId>spring-cloud-aws-dependencies</artifactId>
+                <version>${spring-cloud-aws.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>com.hazelcast</groupId>
+                <artifactId>hazelcast</artifactId>
+                <version>${hazelcast.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.hazelcast</groupId>
+                <artifactId>hazelcast-spring</artifactId>
+                <version>${hazelcast.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.hazelcast</groupId>
+                <artifactId>hazelcast-hibernate53</artifactId>
+                <version>${hazelcast-hibernate53.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.graphql-java</groupId>
+                <artifactId>graphql-java</artifactId>
+                <version>${graphql-java.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.graphql-java</groupId>
+                <artifactId>graphql-java-extended-scalars</artifactId>
+                <version>${graphql-java-extended-scalars.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <build>
         <pluginManagement>
             <plugins>
