@@ -64,8 +64,8 @@
         <java.version>25</java.version>
         <hazelcast.version>5.2.5</hazelcast.version>
         <hazelcast-hibernate53.version>5.2.0</hazelcast-hibernate53.version>
-        <graphql-java.version>20.9</graphql-java.version>
-        <graphql-java-extended-scalars.version>20.2</graphql-java-extended-scalars.version>
+        <graphql-java.version>26.1</graphql-java.version>
+        <graphql-java-extended-scalars.version>24.0</graphql-java-extended-scalars.version>
         <spring-cloud-aws.version>4.0.2</spring-cloud-aws.version>
     </properties>
 
