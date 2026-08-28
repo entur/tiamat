@@ -2,7 +2,7 @@ services:
   app:
     image: 'entur/tiamat:latest'
     build:
-      context: ..
+      context: ../tiamat-app
     container_name: tiamat
     networks:
       - tiamat-net
