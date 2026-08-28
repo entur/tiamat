@@ -1,6 +1,0 @@
-pubsub_project = "ent-tiamat-tst"
-storage_project = "ent-tiamat-tst"
-kube_namespace = "tiamat"
-bucket_instance_suffix = "tst"
-location = "europe-west1"
-bucket_instance_prefix="ror-tiamat-gcp2"
