@@ -364,8 +364,28 @@ public class StreamingPublicationDelivery {
             ParkingsInFrame_RelStructure parkingsInFrame_relStructure = new ParkingsInFrame_RelStructure();
             List<Parking> parkings = new NetexMappingIteratorList<>(() -> new NetexMappingIterator<>(netexMapper, parkingRepository.scrollParkings(stopPlacePrimaryIds),
                     Parking.class, mappedParkingCount, evicter));
+            //todo may be use netex mapper??
+            // Wrap Parking objects in JAXBElement for JAXB marshalling (required by @XmlElementRef)
+            // Use custom ArrayList that wraps elements in JAXBElement during iteration
+            List<JAXBElement<? extends Site_VersionStructure>> wrappedParkings = new ArrayList<>() {
+                @Override
+                public Iterator<JAXBElement<? extends Site_VersionStructure>> iterator() {
+                    Iterator<Parking> innerIterator = parkings.iterator();
+                    return new Iterator<>() {
+                        @Override
+                        public boolean hasNext() {
+                            return innerIterator.hasNext();
+                        }
 
-            setField(ParkingsInFrame_RelStructure.class, "parking", parkingsInFrame_relStructure, parkings);
+                        @Override
+                        public JAXBElement<? extends Site_VersionStructure> next() {
+                            return netexObjectFactory.createParking(innerIterator.next());
+                        }
+                    };
+                }
+            };
+
+            setField(ParkingsInFrame_RelStructure.class, "parking_Dummy", parkingsInFrame_relStructure, wrappedParkings);
             netexSiteFrame.setParkings(parkingsInFrame_relStructure);
         } else {
             logger.info("No parkings to export based on stop places");
@@ -384,26 +404,15 @@ public class StreamingPublicationDelivery {
             ParentStopFetchingIterator parentStopFetchingIterator = new ParentStopFetchingIterator(stopPlaceIterator, stopPlaceRepository);
             NetexMappingIterator<org.rutebanken.tiamat.model.StopPlace, StopPlace> netexMappingIterator = new NetexMappingIterator<>(netexMapper, parentStopFetchingIterator, StopPlace.class, mappedStopPlaceCount, evicter);
 
-            // Wrap StopPlace objects in JAXBElement for JAXB marshalling (required by @XmlElementRef)
-            // Use custom ArrayList that wraps elements in JAXBElement during iteration
-            List<JAXBElement<? extends Site_VersionStructure>> stopPlaces = new ArrayList<>() {
+            // Use custom ArrayList backed by a lazily-scrolling iterator, so the marshaller streams
+            // stop places without materializing the full list in memory.
+            List<StopPlace> stopPlaces = new ArrayList<>() {
                 @Override
-                public Iterator<JAXBElement<? extends Site_VersionStructure>> iterator() {
-                    Iterator<StopPlace> innerIterator = new NetexReferenceRemovingIterator(netexMappingIterator, exportParams);
-                    return new Iterator<>() {
-                        @Override
-                        public boolean hasNext() {
-                            return innerIterator.hasNext();
-                        }
-
-                        @Override
-                        public JAXBElement<? extends Site_VersionStructure> next() {
-                            return netexObjectFactory.createStopPlace(innerIterator.next());
-                        }
-                    };
+                public Iterator<StopPlace> iterator() {
+                    return new NetexReferenceRemovingIterator(netexMappingIterator, exportParams);
                 }
             };
-            setField(StopPlacesInFrame_RelStructure.class, "stopPlace_", stopPlacesInFrame_relStructure, stopPlaces);
+            setField(StopPlacesInFrame_RelStructure.class, "stopPlace", stopPlacesInFrame_relStructure, stopPlaces);
             netexSiteFrame.setStopPlaces(stopPlacesInFrame_relStructure);
         } else {
             logger.info("No stop places to export");

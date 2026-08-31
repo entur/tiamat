@@ -19,13 +19,13 @@ import org.junit.Test;
 import org.rutebanken.netex.model.FareFrame;
 import org.rutebanken.netex.model.FareZone;
 import org.rutebanken.netex.model.FareZonesInFrame_RelStructure;
-import org.rutebanken.netex.model.MultilingualString;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.netex.model.ValidBetween;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.importer.FareZoneFrameSource;
 import org.rutebanken.tiamat.importer.ImportParams;
 import org.rutebanken.tiamat.importer.ImportType;
+import org.rutebanken.tiamat.netex.mapping.NetexMultilingualStringHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDateTime;
@@ -47,7 +47,7 @@ public class FareZoneFareFrameImportTest extends TiamatIntegrationTest {
         LocalDateTime validFrom = LocalDateTime.now().minusDays(3);
 
         FareZone fareZone = new FareZone()
-                .withName(new MultilingualString().withValue("Zone A"))
+                .withName(NetexMultilingualStringHelper.toNetexModel("Zone A"))
                 .withVersion("1")
                 .withValidBetween(new ValidBetween().withFromDate(validFrom))
                 .withId("RUT:FareZone:A01");
@@ -73,7 +73,7 @@ public class FareZoneFareFrameImportTest extends TiamatIntegrationTest {
         assertThat(responseFareFrame.getFareZones().getFareZone()).hasSize(1);
 
         FareZone importedZone = responseFareFrame.getFareZones().getFareZone().get(0);
-        assertThat(importedZone.getName().getValue()).isEqualTo("Zone A");
+        assertThat(NetexMultilingualStringHelper.getValue(importedZone.getName())).isEqualTo("Zone A");
         assertThat(importedZone.getId()).startsWith("RUT:FareZone:");
     }
 
@@ -83,19 +83,19 @@ public class FareZoneFareFrameImportTest extends TiamatIntegrationTest {
         LocalDateTime validFrom = LocalDateTime.now().minusDays(3);
 
         FareZone fareZone1 = new FareZone()
-                .withName(new MultilingualString().withValue("Zone A"))
+                .withName(NetexMultilingualStringHelper.toNetexModel("Zone A"))
                 .withVersion("1")
                 .withValidBetween(new ValidBetween().withFromDate(validFrom))
                 .withId("RUT:FareZone:A01");
 
         FareZone fareZone2 = new FareZone()
-                .withName(new MultilingualString().withValue("Zone B"))
+                .withName(NetexMultilingualStringHelper.toNetexModel("Zone B"))
                 .withVersion("1")
                 .withValidBetween(new ValidBetween().withFromDate(validFrom))
                 .withId("RUT:FareZone:B02");
 
         FareZone fareZone3 = new FareZone()
-                .withName(new MultilingualString().withValue("Zone C"))
+                .withName(NetexMultilingualStringHelper.toNetexModel("Zone C"))
                 .withVersion("1")
                 .withValidBetween(new ValidBetween().withFromDate(validFrom))
                 .withId("RUT:FareZone:C03");
@@ -123,7 +123,7 @@ public class FareZoneFareFrameImportTest extends TiamatIntegrationTest {
         assertThat(responseFareFrame.getFareZones().getFareZone()).hasSize(3);
 
         List<String> zoneNames = responseFareFrame.getFareZones().getFareZone().stream()
-                .map(zone -> zone.getName().getValue())
+                .map(zone -> NetexMultilingualStringHelper.getValue(zone.getName()))
                 .toList();
         assertThat(zoneNames).containsExactlyInAnyOrder("Zone A", "Zone B", "Zone C");
     }
@@ -134,7 +134,7 @@ public class FareZoneFareFrameImportTest extends TiamatIntegrationTest {
         LocalDateTime validFrom = LocalDateTime.now().minusDays(3);
 
         FareZone fareZone = new FareZone()
-                .withName(new MultilingualString().withValue("Zone Version Test"))
+                .withName(NetexMultilingualStringHelper.toNetexModel("Zone Version Test"))
                 .withVersion("1")
                 .withValidBetween(new ValidBetween().withFromDate(validFrom))
                 .withId("RUT:FareZone:Ver01");
@@ -198,7 +198,7 @@ public class FareZoneFareFrameImportTest extends TiamatIntegrationTest {
     public void fareFrameResponseHasCorrectStructure() throws Exception {
         // GIVEN: FareFrame with fare zone
         FareZone fareZone = new FareZone()
-                .withName(new MultilingualString().withValue("Structure Test Zone"))
+                .withName(NetexMultilingualStringHelper.toNetexModel("Structure Test Zone"))
                 .withVersion("1")
                 .withId("RUT:FareZone:Struct01");
 

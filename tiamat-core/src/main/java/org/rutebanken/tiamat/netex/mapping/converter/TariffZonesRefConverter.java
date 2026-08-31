@@ -46,20 +46,20 @@ public class TariffZonesRefConverter extends BidirectionalConverter<Set<TariffZo
                 .collect(toList());
 
 
-        return new TariffZoneRefs_RelStructure().withTariffZoneRef_(wrappedTariffZoneRefList);
+        return new TariffZoneRefs_RelStructure().withTariffZoneRef_Dummy(wrappedTariffZoneRefList);
 
     }
 
     @Override
     public Set<TariffZoneRef> convertFrom(TariffZoneRefs_RelStructure tariffZoneRefs_relStructure, Type<Set<TariffZoneRef>> type, MappingContext mappingContext) {
         if(tariffZoneRefs_relStructure == null
-                || tariffZoneRefs_relStructure.getTariffZoneRef_() == null
-                || tariffZoneRefs_relStructure.getTariffZoneRef_().isEmpty()) {
+                || tariffZoneRefs_relStructure.getTariffZoneRef_Dummy() == null
+                || tariffZoneRefs_relStructure.getTariffZoneRef_Dummy().isEmpty()) {
             return null;
         }
 
         return tariffZoneRefs_relStructure
-                .getTariffZoneRef_()
+                .getTariffZoneRef_Dummy()
                 .stream()
                 .map(JAXBElement::getValue)
                 .map(tariffZoneRef -> mapperFacade.map(tariffZoneRef, TariffZoneRef.class))

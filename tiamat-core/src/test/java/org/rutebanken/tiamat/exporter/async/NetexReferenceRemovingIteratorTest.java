@@ -39,7 +39,7 @@ public class NetexReferenceRemovingIteratorTest {
         StopPlace stopPlace = new StopPlace()
                 .withTariffZones(
                         new TariffZoneRefs_RelStructure()
-                                .withTariffZoneRef_(
+                                .withTariffZoneRef_Dummy(
                                         new ObjectFactory().createTariffZoneRef(
                                             new TariffZoneRef()
                                                 .withRef("RUT:TariffZone:1")
@@ -70,11 +70,11 @@ public class NetexReferenceRemovingIteratorTest {
 
         StopPlace actual = netexReferenceRemovingIterator.next();
 
-        assertThat(actual.getTariffZones().getTariffZoneRef_().stream()
+        assertThat(actual.getTariffZones().getTariffZoneRef_Dummy().stream()
                 .map(JAXBElement::getValue)
                 .toList()
                 .getFirst().getVersion()).as("TariffZoneref version").isNull();
-        assertThat(actual.getTariffZones().getTariffZoneRef_().stream()
+        assertThat(actual.getTariffZones().getTariffZoneRef_Dummy().stream()
                 .map(JAXBElement::getValue)
                 .toList()
                 .getLast().getVersion()).as("TariffZoneref version").isNull();
@@ -88,7 +88,7 @@ public class NetexReferenceRemovingIteratorTest {
         StopPlace stopPlace = new StopPlace()
                 .withTariffZones(
                         new TariffZoneRefs_RelStructure()
-                                .withTariffZoneRef_(new ObjectFactory().createTariffZoneRef(
+                                .withTariffZoneRef_Dummy(new ObjectFactory().createTariffZoneRef(
                                         new TariffZoneRef()
                                                 .withRef("ref")
                                                 .withVersion("version"))))
@@ -110,7 +110,7 @@ public class NetexReferenceRemovingIteratorTest {
 
         StopPlace actual = netexReferenceRemovingIterator.next();
 
-        assertThat(actual.getTariffZones().getTariffZoneRef_().stream()
+        assertThat(actual.getTariffZones().getTariffZoneRef_Dummy().stream()
                 .map(JAXBElement::getValue)
                 .toList()
                 .getFirst().getVersion()).as("TariffZoneref version").isEqualTo("version");

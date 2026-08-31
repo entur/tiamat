@@ -20,7 +20,6 @@ import org.junit.Test;
 import org.rutebanken.netex.model.KeyListStructure;
 import org.rutebanken.netex.model.KeyValueStructure;
 import org.rutebanken.netex.model.LocationStructure;
-import org.rutebanken.netex.model.MultilingualString;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.Quay;
@@ -31,6 +30,7 @@ import org.rutebanken.netex.model.StopTypeEnumeration;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.importer.ImportParams;
 import org.rutebanken.tiamat.importer.ImportType;
+import org.rutebanken.tiamat.netex.mapping.NetexMultilingualStringHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.xml.sax.SAXException;
 
@@ -53,7 +53,7 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
                 .withId("RUT:StopPlace:187187666")
                 .withStopPlaceType(StopTypeEnumeration.BUS_STATION)
                 .withVersion("1")
-                .withName(new MultilingualString().withValue("I don't care"))
+                .withName(NetexMultilingualStringHelper.toNetexModel("I don't care"))
                 .withCentroid(new SimplePoint_VersionStructure()
                         .withLocation(new LocationStructure()
                                 .withLatitude(new BigDecimal("10"))
@@ -62,7 +62,7 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
                         .withQuayRefOrQuay(new ObjectFactory().createQuay(new Quay()
                                 .withId("XYZ:01:02")
                                 .withVersion("1")
-                                .withName(new MultilingualString().withValue("B"))
+                                .withName(NetexMultilingualStringHelper.toNetexModel("B"))
                                 .withCentroid(new SimplePoint_VersionStructure()
                                         .withLocation(new LocationStructure()
                                                 .withLatitude(new BigDecimal("10"))
@@ -100,7 +100,7 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
                 .withId("NTR:StopPlace:222")
                 .withStopPlaceType(StopTypeEnumeration.RAIL_STATION)
                 .withVersion("1")
-                .withName(new MultilingualString().withValue("Vennesla"))
+                .withName(NetexMultilingualStringHelper.toNetexModel("Vennesla"))
                 .withCentroid(new SimplePoint_VersionStructure()
                         .withLocation(new LocationStructure()
                                 .withLatitude(new BigDecimal("10"))
@@ -109,7 +109,7 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
                         .withQuayRefOrQuay(new ObjectFactory().createQuay(new Quay()
                                 .withId("XYZ:01:02")
                                 .withVersion("1")
-                                .withName(new MultilingualString().withValue("B"))
+                                .withName(NetexMultilingualStringHelper.toNetexModel("B"))
                                 .withCentroid(new SimplePoint_VersionStructure()
                                         .withLocation(new LocationStructure()
                                                 .withLatitude(new BigDecimal("10"))
@@ -125,7 +125,7 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
                 .withId("NTR:StopPlace:222")
                 .withStopPlaceType(StopTypeEnumeration.BUS_STATION)
                 .withVersion("1")
-                .withName(new MultilingualString().withValue("Vennesla"))
+                .withName(NetexMultilingualStringHelper.toNetexModel("Vennesla"))
                 .withCentroid(new SimplePoint_VersionStructure()
                         .withLocation(new LocationStructure()
                                 .withLatitude(new BigDecimal("10"))
@@ -134,7 +134,7 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
                         .withQuayRefOrQuay(new ObjectFactory().createQuay(new Quay()
                                 .withId("XYZ:01:02")
                                 .withVersion("1")
-                                .withName(new MultilingualString().withValue("B"))
+                                .withName(NetexMultilingualStringHelper.toNetexModel("B"))
                                 .withCentroid(new SimplePoint_VersionStructure()
                                         .withLocation(new LocationStructure()
                                                 .withLatitude(new BigDecimal("10"))
@@ -171,7 +171,7 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
                 .withId("NTR:StopPlace:10")
                 .withStopPlaceType(StopTypeEnumeration.BUS_STATION)
                 .withVersion("1")
-                .withName(new MultilingualString().withValue("Vennesla"))
+                .withName(NetexMultilingualStringHelper.toNetexModel("Vennesla"))
                 .withCentroid(new SimplePoint_VersionStructure()
                         .withLocation(new LocationStructure()
                                 .withLatitude(new BigDecimal("10"))
@@ -190,7 +190,7 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
                 .withId("NTR:StopPlace:10")
                 .withStopPlaceType(StopTypeEnumeration.BUS_STATION)
                 .withVersion("1")
-                .withName(new MultilingualString().withValue("Vennesla"))
+                .withName(NetexMultilingualStringHelper.toNetexModel("Vennesla"))
                 .withCentroid(new SimplePoint_VersionStructure()
                         .withLocation(new LocationStructure()
                                 .withLatitude(new BigDecimal("10"))
@@ -207,7 +207,7 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
                 .withId("NTR:StopPlace:10")
                 .withStopPlaceType(StopTypeEnumeration.BUS_STATION)
                 .withVersion("1")
-                .withName(new MultilingualString().withValue("Vennesla"))
+                .withName(NetexMultilingualStringHelper.toNetexModel("Vennesla"))
                 .withCentroid(new SimplePoint_VersionStructure()
                         .withLocation(new LocationStructure()
                                 .withLatitude(new BigDecimal("10"))
@@ -245,7 +245,7 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
                 .withId("RUT:StopPlace:187187666")
                 .withStopPlaceType(StopTypeEnumeration.BUS_STATION)
                 .withVersion("1")
-                .withName(new MultilingualString().withValue("Too far away"))
+                .withName(NetexMultilingualStringHelper.toNetexModel("Too far away"))
                 .withCentroid(new SimplePoint_VersionStructure()
                         .withLocation(new LocationStructure()
                                 .withLatitude(new BigDecimal("74"))
@@ -254,7 +254,7 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
                         .withQuayRefOrQuay(new ObjectFactory().createQuay(new Quay()
                                 .withId("XYZ:01:02")
                                 .withVersion("1")
-                                .withName(new MultilingualString().withValue("B"))
+                                .withName(NetexMultilingualStringHelper.toNetexModel("B"))
                                 .withCentroid(new SimplePoint_VersionStructure()
                                         .withLocation(new LocationStructure()
                                                 .withLatitude(new BigDecimal("74"))
@@ -264,7 +264,7 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
                 .withId("CBS:StopPlace:321")
                 .withStopPlaceType(StopTypeEnumeration.BUS_STATION)
                 .withVersion("1")
-                .withName(new MultilingualString().withValue("Some stop place"))
+                .withName(NetexMultilingualStringHelper.toNetexModel("Some stop place"))
                 .withCentroid(new SimplePoint_VersionStructure()
                         .withLocation(new LocationStructure()
                                 .withLatitude(new BigDecimal("74.2"))
@@ -287,7 +287,7 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
                 .withId("RUT:StopPlace:187187666") // Same as the ID of the stop place which is too far away
                 .withStopPlaceType(StopTypeEnumeration.BUS_STATION)
                 .withVersion("1")
-                .withName(new MultilingualString().withValue("Some stop place"))
+                .withName(NetexMultilingualStringHelper.toNetexModel("Some stop place"))
                 .withCentroid(new SimplePoint_VersionStructure()
                         .withLocation(new LocationStructure()
                                 .withLatitude(new BigDecimal("74.2002"))
@@ -296,7 +296,7 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
                         .withQuayRefOrQuay(new ObjectFactory().createQuay(new Quay()
                                 .withId("XYZ:01:02")
                                 .withVersion("1")
-                                .withName(new MultilingualString().withValue("B"))
+                                .withName(NetexMultilingualStringHelper.toNetexModel("B"))
                                 .withCentroid(new SimplePoint_VersionStructure()
                                         .withLocation(new LocationStructure()
                                                 .withLatitude(new BigDecimal("74.2002"))
@@ -313,8 +313,8 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
         publicationDeliveryTestHelper.hasOriginalId(nearbyStopPlace.getId(), actualStopPlace);
         publicationDeliveryTestHelper.hasOriginalId(stopPlaceToBeMerged.getId(), actualStopPlace);
 
-        assertThat(actualStopPlace.getName().getValue()).isNotEqualTo(tooFarAwayStopPlace.getName().getValue());
-        assertThat(actualStopPlace.getName().getValue()).isEqualTo(nearbyStopPlace.getName().getValue());
+        assertThat(NetexMultilingualStringHelper.getValue(actualStopPlace.getName())).isNotEqualTo(NetexMultilingualStringHelper.getValue(tooFarAwayStopPlace.getName()));
+        assertThat(NetexMultilingualStringHelper.getValue(actualStopPlace.getName())).isEqualTo(NetexMultilingualStringHelper.getValue(nearbyStopPlace.getName()));
 
     }
 
@@ -333,7 +333,7 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
                         .withQuayRefOrQuay(new ObjectFactory().createQuay(new Quay()
                                 .withId("XYZ:01:02")
                                 .withVersion("1")
-                                .withName(new MultilingualString().withValue("B"))
+                                .withName(NetexMultilingualStringHelper.toNetexModel("B"))
                                 .withCentroid(new SimplePoint_VersionStructure()
                                         .withLocation(new LocationStructure()
                                                 .withLatitude(new BigDecimal("14"))
@@ -362,7 +362,7 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
     public void doNotmatchStopOnSimilarOriginalId() throws Exception {
 
         StopPlace stopPlaceNotToBeMatched = new StopPlace()
-                .withName(new MultilingualString().withValue("Hest"))
+                .withName(NetexMultilingualStringHelper.toNetexModel("Hest"))
                 .withId("RUT:StopPlace:212345678910")
                 .withStopPlaceType(StopTypeEnumeration.BUS_STATION)
                 .withVersion("1")
@@ -374,7 +374,7 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
                         .withQuayRefOrQuay(new ObjectFactory().createQuay(new Quay()
                                 .withId("XYZ:01:06")
                                 .withVersion("1")
-                                .withName(new MultilingualString().withValue("B"))
+                                .withName(NetexMultilingualStringHelper.toNetexModel("B"))
                                 .withCentroid(new SimplePoint_VersionStructure()
                                         .withLocation(new LocationStructure()
                                                 .withLatitude(new BigDecimal("15"))
@@ -392,7 +392,7 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
                 .withQuayRefOrQuay(new ObjectFactory().createQuay(new Quay()
                         .withId("XYZ:01:07")
                         .withVersion("1")
-                        .withName(new MultilingualString().withValue("B"))
+                        .withName(NetexMultilingualStringHelper.toNetexModel("B"))
                         .withCentroid(new SimplePoint_VersionStructure()
                                 .withLocation(new LocationStructure()
                                         .withLatitude(new BigDecimal("15"))
@@ -423,7 +423,7 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
                         .withQuayRefOrQuay(new ObjectFactory().createQuay(new Quay()
                                 .withId("XYZ:01:02")
                                 .withVersion("1")
-                                .withName(new MultilingualString().withValue("B"))
+                                .withName(NetexMultilingualStringHelper.toNetexModel("B"))
                                 .withCentroid(new SimplePoint_VersionStructure()
                                         .withLocation(new LocationStructure()
                                                 .withLatitude(new BigDecimal("11"))
@@ -463,7 +463,7 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
                         .withQuayRefOrQuay(new ObjectFactory().createQuay(new Quay()
                                 .withId("XYZ:01:02")
                                 .withVersion("1")
-                                .withName(new MultilingualString().withValue("B"))
+                                .withName(NetexMultilingualStringHelper.toNetexModel("B"))
                                 .withCentroid(new SimplePoint_VersionStructure()
                                         .withLocation(new LocationStructure()
                                                 .withLatitude(new BigDecimal("11"))
@@ -507,7 +507,7 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
                 )
                 .withStopPlaceType(StopTypeEnumeration.BUS_STATION)
                 .withVersion("1")
-                .withName(new MultilingualString().withValue("somewhere"))
+                .withName(NetexMultilingualStringHelper.toNetexModel("somewhere"))
                 .withCentroid(new SimplePoint_VersionStructure()
                         .withLocation(new LocationStructure()
                                 .withLatitude(new BigDecimal("9"))
@@ -516,7 +516,7 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
                         .withQuayRefOrQuay(new ObjectFactory().createQuay(new Quay()
                                 .withId("XYZ:01:02")
                                 .withVersion("1")
-                                .withName(new MultilingualString().withValue("B"))
+                                .withName(NetexMultilingualStringHelper.toNetexModel("B"))
                                 .withCentroid(new SimplePoint_VersionStructure()
                                         .withLocation(new LocationStructure()
                                                 .withLatitude(new BigDecimal("9"))
@@ -534,7 +534,7 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
                 )
                 .withStopPlaceType(StopTypeEnumeration.BUS_STATION)
                 .withVersion("1")
-                .withName(new MultilingualString().withValue("somewhere"))
+                .withName(NetexMultilingualStringHelper.toNetexModel("somewhere"))
                 .withCentroid(new SimplePoint_VersionStructure()
                         .withLocation(new LocationStructure()
                                 .withLatitude(new BigDecimal("9"))
@@ -543,7 +543,7 @@ public class StopPlaceMatchingTest extends TiamatIntegrationTest {
                         .withQuayRefOrQuay(new ObjectFactory().createQuay(new Quay()
                                 .withId("XYZ:01:03")
                                 .withVersion("1")
-                                .withName(new MultilingualString().withValue("B"))
+                                .withName(NetexMultilingualStringHelper.toNetexModel("B"))
                                 .withCentroid(new SimplePoint_VersionStructure()
                                         .withLocation(new LocationStructure()
                                                 .withLatitude(new BigDecimal("9"))

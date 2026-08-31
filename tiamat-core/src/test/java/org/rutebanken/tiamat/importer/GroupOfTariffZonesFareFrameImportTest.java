@@ -20,7 +20,6 @@ import org.rutebanken.netex.model.FareFrame;
 import org.rutebanken.netex.model.FareZone;
 import org.rutebanken.netex.model.FareZonesInFrame_RelStructure;
 import org.rutebanken.netex.model.GroupsOfTariffZonesInFrame_RelStructure;
-import org.rutebanken.netex.model.MultilingualString;
 import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.netex.model.SiteFrame;
@@ -34,6 +33,7 @@ import org.rutebanken.tiamat.config.FareZoneConfig;
 import org.rutebanken.tiamat.config.GroupOfTariffZonesConfig;
 import org.rutebanken.tiamat.config.TariffZoneConfig;
 import org.rutebanken.tiamat.model.GroupOfTariffZones;
+import org.rutebanken.tiamat.netex.mapping.NetexMultilingualStringHelper;
 import org.rutebanken.tiamat.rest.netex.publicationdelivery.PublicationDeliveryTestHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -247,7 +247,7 @@ public class GroupOfTariffZonesFareFrameImportTest extends TiamatIntegrationTest
                     .withTariffZone(objectFactory.createTariffZone(new TariffZone()
                             .withId("OST:TariffZone:1")
                             .withVersion("1")
-                            .withName(new MultilingualString().withValue("Deprecated zone")))));
+                            .withName(NetexMultilingualStringHelper.toNetexModel("Deprecated zone")))));
             siteFrame.withGroupsOfTariffZones(new GroupsOfTariffZonesInFrame_RelStructure()
                     .withGroupOfTariffZones(groupOfTariffZones("OST:GroupOfTariffZones:1", "OST:FareZone:1")));
 
@@ -282,7 +282,7 @@ public class GroupOfTariffZonesFareFrameImportTest extends TiamatIntegrationTest
             fareFrame.getFareZones().getFareZone().add(new FareZone()
                     .withId(id)
                     .withVersion("1")
-                    .withName(new MultilingualString().withValue(id))
+                    .withName(NetexMultilingualStringHelper.toNetexModel(id))
                     .withValidBetween(new ValidBetween().withFromDate(validFrom)));
         }
         return fareFrame;
@@ -291,12 +291,12 @@ public class GroupOfTariffZonesFareFrameImportTest extends TiamatIntegrationTest
     private org.rutebanken.netex.model.GroupOfTariffZones groupOfTariffZones(String groupId, String... memberRefs) {
         TariffZoneRefs_RelStructure members = new TariffZoneRefs_RelStructure();
         for (String ref : memberRefs) {
-            members.getTariffZoneRef_().add(objectFactory.createTariffZoneRef(new TariffZoneRef().withRef(ref)));
+            members.getTariffZoneRef_Dummy().add(objectFactory.createTariffZoneRef(new TariffZoneRef().withRef(ref)));
         }
         return new org.rutebanken.netex.model.GroupOfTariffZones()
                 .withId(groupId)
                 .withVersion("1")
-                .withName(new MultilingualString().withValue(groupId))
+                .withName(NetexMultilingualStringHelper.toNetexModel(groupId))
                 .withMembers(members);
     }
 }

@@ -20,6 +20,7 @@ import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.netex.model.Quay;
 import org.rutebanken.netex.model.StopPlace;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
+import org.rutebanken.tiamat.netex.mapping.NetexMultilingualStringHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
@@ -101,20 +102,21 @@ public class OsloBussterminalImportTest extends TiamatIntegrationTest {
 
         StopPlace actualStopPlace = publicationDeliveryTestHelper.findFirstStopPlace(publicationDeliveryResponse);
 
-        assertThat(actualStopPlace.getName().getValue()).isEqualTo("Oslo Bussterminal");
+        assertThat(NetexMultilingualStringHelper.getValue(actualStopPlace.getName())).isEqualTo("Oslo Bussterminal");
 
         List<Quay> actualQuays = publicationDeliveryTestHelper.extractQuays(actualStopPlace);
         assertThat(actualQuays).as("quays should not be null").isNotNull();
 
         assertThat(actualQuays.stream()
                 .filter(quay -> quay.getPublicCode() != null)
-                .filter(quay -> quay.getPublicCode().equals("17"))
+                .filter(quay -> quay.getPublicCode().getValue() != null)
+                .filter(quay -> quay.getPublicCode().getValue().equals("17"))
                 .findAny()).describedAs("There should be a quay with matching public code").isPresent();
 
         assertThat(actualQuays.stream()
                 .filter(quay -> quay.getDescription() != null)
-                .filter(quay -> quay.getDescription().getValue() != null)
-                .filter(quay -> quay.getDescription().getValue().equals("avstigning"))
+                .filter(quay -> NetexMultilingualStringHelper.getValue(quay.getDescription()) != null)
+                .filter(quay -> NetexMultilingualStringHelper.getValue(quay.getDescription()).equals("avstigning"))
                 .findAny()).describedAs("Quay should contain description").isPresent();
     }
 }

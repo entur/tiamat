@@ -27,7 +27,6 @@ import org.locationtech.jts.geom.Point;
 import org.mockito.Mockito;
 import org.rutebanken.netex.model.GroupOfStopPlaces;
 import org.rutebanken.netex.model.LocationStructure;
-import org.rutebanken.netex.model.MultilingualString;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.netex.model.SimplePoint_VersionStructure;
 import org.rutebanken.netex.model.SiteFrame;
@@ -39,6 +38,7 @@ import org.rutebanken.tiamat.dtoassembling.dto.ChangedStopPlaceSearchDto;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.exporter.params.StopPlaceSearch;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
+import org.rutebanken.tiamat.netex.mapping.NetexMultilingualStringHelper;
 import org.rutebanken.tiamat.model.PurposeOfGrouping;
 import org.rutebanken.tiamat.model.StopPlaceReference;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -175,7 +175,7 @@ public class ExportResourceTest extends TiamatIntegrationTest {
 
         assertThat(netexGroupOfStopPlaces).isNotNull();
 
-        assertThat(netexGroupOfStopPlaces.getName().getValue())
+        assertThat(NetexMultilingualStringHelper.getValue(netexGroupOfStopPlaces.getName()))
                 .as("name.value")
                 .isEqualTo(groupOfStopPlaces.getName().getValue());
 
@@ -208,7 +208,7 @@ public class ExportResourceTest extends TiamatIntegrationTest {
         StopPlace stopPlace1 = new StopPlace()
                                        .withId("XYZ:Stopplace:1")
                                        .withVersion("1")
-                                       .withName(new MultilingualString().withValue("Changed stop1"))
+                                       .withName(NetexMultilingualStringHelper.toNetexModel("Changed stop1"))
                                        .withValidBetween(new ValidBetween().withFromDate(validFrom))
                                        .withCentroid(new SimplePoint_VersionStructure()
                                                              .withLocation(new LocationStructure()
@@ -218,7 +218,7 @@ public class ExportResourceTest extends TiamatIntegrationTest {
         StopPlace stopPlace2 = new StopPlace()
                                        .withId("XYZ:Stopplace:2")
                                        .withVersion("1")
-                                       .withName(new MultilingualString().withValue("Changed stop2"))
+                                       .withName(NetexMultilingualStringHelper.toNetexModel("Changed stop2"))
                                        .withValidBetween(new ValidBetween().withFromDate(validFrom.plusDays(1)))
                                        .withCentroid(new SimplePoint_VersionStructure()
                                                              .withLocation(new LocationStructure()
@@ -236,7 +236,7 @@ public class ExportResourceTest extends TiamatIntegrationTest {
         Response response = exportResource.exportStopPlacesWithEffectiveChangedInPeriod(search, newExportParamsBuilder().build(), uriInfoMock);
         List<StopPlace> changedStopPlaces = publicationDeliveryTestHelper.extractStopPlaces(response);
         Assert.assertEquals(1, changedStopPlaces.size());
-        Assert.assertEquals(stopPlace1.getName().getValue(), changedStopPlaces.getFirst().getName().getValue());
+        Assert.assertEquals(NetexMultilingualStringHelper.getValue(stopPlace1.getName()), NetexMultilingualStringHelper.getValue(changedStopPlaces.getFirst().getName()));
 
         Link link = response.getLink("next");
         Assert.assertNotNull(link);
@@ -264,7 +264,7 @@ public class ExportResourceTest extends TiamatIntegrationTest {
         StopPlace stopPlace = new StopPlace()
                 .withId("XYZ:Stopplace:1")
                 .withVersion("1")
-                .withName(new MultilingualString().withValue("Østre gravlund"))
+                .withName(NetexMultilingualStringHelper.toNetexModel("Østre gravlund"))
                 .withCentroid(new SimplePoint_VersionStructure()
                         .withLocation(new LocationStructure()
                                 .withLatitude(new BigDecimal("59.914353"))

@@ -46,17 +46,17 @@ public class ParkingAreaListConverter extends BidirectionalConverter<List<Parkin
 
         parkingAreas.forEach(parkingArea -> {
             org.rutebanken.netex.model.ParkingArea netexParkingArea = mapperFacade.map(parkingArea, org.rutebanken.netex.model.ParkingArea.class);
-            parkingAreasRelStructure.withParkingAreaRefOrParkingArea_(List.of(new ObjectFactory().createParkingArea_(netexParkingArea)));
+            parkingAreasRelStructure.withParkingAreaRefOrParkingArea_Dummy(List.of(new ObjectFactory().createParkingArea(netexParkingArea)));
         });
         return parkingAreasRelStructure;
     }
 
     @Override
     public List<ParkingArea> convertFrom(ParkingAreas_RelStructure parkingAreasRelStructure, Type<List<ParkingArea>> destinationType, MappingContext mappingContext) {
-        logger.debug("Mapping {} quays to internal model", parkingAreasRelStructure != null ? parkingAreasRelStructure.getParkingAreaRefOrParkingArea_().size() : 0);
+        logger.debug("Mapping {} quays to internal model", parkingAreasRelStructure != null ? parkingAreasRelStructure.getParkingAreaRefOrParkingArea_Dummy().size() : 0);
         List<ParkingArea> parkingAreas = new ArrayList<>();
-        if(parkingAreasRelStructure != null && parkingAreasRelStructure.getParkingAreaRefOrParkingArea_() != null) {
-            parkingAreasRelStructure.getParkingAreaRefOrParkingArea_().stream()
+        if(parkingAreasRelStructure != null && parkingAreasRelStructure.getParkingAreaRefOrParkingArea_Dummy() != null) {
+            parkingAreasRelStructure.getParkingAreaRefOrParkingArea_Dummy().stream()
                     .map(JAXBElement::getValue)
                     .filter(object -> object instanceof org.rutebanken.netex.model.ParkingArea)
                     .map(object -> ((org.rutebanken.netex.model.ParkingArea) object))

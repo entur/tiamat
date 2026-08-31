@@ -21,10 +21,10 @@ import org.junit.Test;
 import org.rutebanken.netex.model.LocationStructure;
 import org.rutebanken.netex.model.PathDirectionEnumeration;
 import org.rutebanken.netex.model.PathLink;
-import org.rutebanken.netex.model.PathLinkEndStructure;
 import org.rutebanken.netex.model.PlaceRefStructure;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.netex.model.SimplePoint_VersionStructure;
+import org.rutebanken.netex.model.SitePathLinkEndStructure;
 import org.rutebanken.netex.model.StopPlace;
 import org.rutebanken.netex.model.TransferDurationStructure;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
@@ -82,12 +82,12 @@ public class PathLinkImportTest extends TiamatIntegrationTest {
                         .withDefaultDuration(duration))
                 .withLineString(lineStringType)
                 .withFrom(
-                        new PathLinkEndStructure()
+                        new SitePathLinkEndStructure()
                                 .withPlaceRef(
                                         new PlaceRefStructure()
                                                 .withRef(fromStopPlace.getId())))
                 .withTo(
-                        new PathLinkEndStructure()
+                        new SitePathLinkEndStructure()
                                 .withPlaceRef(
                                         new PlaceRefStructure()
                                                 .withRef(toStopPlace.getId())

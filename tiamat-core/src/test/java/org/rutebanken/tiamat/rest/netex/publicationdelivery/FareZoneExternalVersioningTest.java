@@ -21,7 +21,6 @@ import org.rutebanken.netex.model.FareZone;
 import org.rutebanken.netex.model.FareZonesInFrame_RelStructure;
 import org.rutebanken.netex.model.GroupOfTariffZones;
 import org.rutebanken.netex.model.GroupsOfTariffZonesInFrame_RelStructure;
-import org.rutebanken.netex.model.MultilingualString;
 import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.netex.model.SiteFrame;
@@ -29,6 +28,7 @@ import org.rutebanken.netex.model.TariffZoneRef;
 import org.rutebanken.netex.model.TariffZoneRefs_RelStructure;
 import org.rutebanken.netex.model.ValidBetween;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
+import org.rutebanken.tiamat.netex.mapping.NetexMultilingualStringHelper;
 import org.rutebanken.tiamat.config.FareZoneConfig;
 import org.rutebanken.tiamat.importer.FareZoneFrameSource;
 import org.rutebanken.tiamat.importer.ImportParams;
@@ -73,12 +73,12 @@ public class FareZoneExternalVersioningTest extends TiamatIntegrationTest {
         try {
             // GIVEN: FareFrame with two new FareZones
             FareZone fareZone1 = new FareZone()
-                    .withName(new MultilingualString().withValue("Zone Alpha"))
+                    .withName(NetexMultilingualStringHelper.toNetexModel("Zone Alpha"))
                     .withVersion("5")
                     .withId("NSR:FareZone:101");
 
             FareZone fareZone2 = new FareZone()
-                    .withName(new MultilingualString().withValue("Zone Beta"))
+                    .withName(NetexMultilingualStringHelper.toNetexModel("Zone Beta"))
                     .withVersion("3")
                     .withId("NSR:FareZone:102");
 
@@ -105,12 +105,12 @@ public class FareZoneExternalVersioningTest extends TiamatIntegrationTest {
 
             // Verify versions are preserved from import (not auto-incremented)
             FareZone imported1 = responseFareFrame.getFareZones().getFareZone().stream()
-                    .filter(fz -> fz.getName().getValue().equals("Zone Alpha"))
+                    .filter(fz -> NetexMultilingualStringHelper.getValue(fz.getName()).equals("Zone Alpha"))
                     .findFirst().get();
             assertThat(imported1.getVersion()).isEqualTo("5");
 
             FareZone imported2 = responseFareFrame.getFareZones().getFareZone().stream()
-                    .filter(fz -> fz.getName().getValue().equals("Zone Beta"))
+                    .filter(fz -> NetexMultilingualStringHelper.getValue(fz.getName()).equals("Zone Beta"))
                     .findFirst().get();
             assertThat(imported2.getVersion()).isEqualTo("3");
 
@@ -135,7 +135,7 @@ public class FareZoneExternalVersioningTest extends TiamatIntegrationTest {
         try {
             // GIVEN: Import initial FareZone with version 1
             FareZone initialZone = new FareZone()
-                    .withName(new MultilingualString().withValue("Zone Gamma V1"))
+                    .withName(NetexMultilingualStringHelper.toNetexModel("Zone Gamma V1"))
                     .withVersion("1")
                     .withId("NSR:FareZone:201");
 
@@ -158,7 +158,7 @@ public class FareZoneExternalVersioningTest extends TiamatIntegrationTest {
 
             // WHEN: Import updated FareZone with version 7 (same netexId)
             FareZone updatedZone = new FareZone()
-                    .withName(new MultilingualString().withValue("Zone Gamma V7 Updated"))
+                    .withName(NetexMultilingualStringHelper.toNetexModel("Zone Gamma V7 Updated"))
                     .withVersion("7")
                     .withId("NSR:FareZone:201");
 
@@ -175,7 +175,7 @@ public class FareZoneExternalVersioningTest extends TiamatIntegrationTest {
             assertThat(responseFareFrame.getFareZones().getFareZone()).hasSize(1);
 
             FareZone importedZone = responseFareFrame.getFareZones().getFareZone().get(0);
-            assertThat(importedZone.getName().getValue()).isEqualTo("Zone Gamma V7 Updated");
+            assertThat(NetexMultilingualStringHelper.getValue(importedZone.getName())).isEqualTo("Zone Gamma V7 Updated");
             assertThat(importedZone.getVersion()).isEqualTo("7");
 
             // Verify database: Same ID (updated in place), new version, new name
@@ -210,7 +210,7 @@ public class FareZoneExternalVersioningTest extends TiamatIntegrationTest {
 
             for (int i = 1; i <= 5; i++) {
                 FareZone zone = new FareZone()
-                        .withName(new MultilingualString().withValue("Zone " + i))
+                        .withName(NetexMultilingualStringHelper.toNetexModel("Zone " + i))
                         .withVersion("1")
                         .withId("NSR:FareZone:" + (300 + i));
                 initialFrame.getFareZones().getFareZone().add(zone);
@@ -232,7 +232,7 @@ public class FareZoneExternalVersioningTest extends TiamatIntegrationTest {
 
             for (int i = 1; i <= 3; i++) {
                 FareZone zone = new FareZone()
-                        .withName(new MultilingualString().withValue("Zone " + i + " Updated"))
+                        .withName(NetexMultilingualStringHelper.toNetexModel("Zone " + i + " Updated"))
                         .withVersion("2")
                         .withId("NSR:FareZone:" + (300 + i));
                 updateFrame.getFareZones().getFareZone().add(zone);
@@ -273,7 +273,7 @@ public class FareZoneExternalVersioningTest extends TiamatIntegrationTest {
 
         // GIVEN: Import same FareZone twice
         FareZone zone = new FareZone()
-                .withName(new MultilingualString().withValue("Zone Delta"))
+                .withName(NetexMultilingualStringHelper.toNetexModel("Zone Delta"))
                 .withVersion("10")
                 .withId("NSR:FareZone:401");
 
@@ -321,7 +321,7 @@ public class FareZoneExternalVersioningTest extends TiamatIntegrationTest {
 
             for (int i = 1; i <= 3; i++) {
                 FareZone zone = new FareZone()
-                        .withName(new MultilingualString().withValue("Zone " + i))
+                        .withName(NetexMultilingualStringHelper.toNetexModel("Zone " + i))
                         .withVersion("1")
                         .withId("NSR:FareZone:" + (500 + i));
                 initialFrame.getFareZones().getFareZone().add(zone);
@@ -378,7 +378,7 @@ public class FareZoneExternalVersioningTest extends TiamatIntegrationTest {
 
             for (int i = 1; i <= 3; i++) {
                 FareZone zone = new FareZone()
-                        .withName(new MultilingualString().withValue("Zone " + i))
+                        .withName(NetexMultilingualStringHelper.toNetexModel("Zone " + i))
                         .withVersion("1")
                         .withId("NSR:FareZone:" + (600 + i));
                 initialFrame.getFareZones().getFareZone().add(zone);
@@ -397,7 +397,7 @@ public class FareZoneExternalVersioningTest extends TiamatIntegrationTest {
 
             for (int i = 1; i <= 3; i++) {
                 FareZone zone = new FareZone()
-                        .withName(new MultilingualString().withValue("Zone " + i + " V2"))
+                        .withName(NetexMultilingualStringHelper.toNetexModel("Zone " + i + " V2"))
                         .withVersion("2")
                         .withId("NSR:FareZone:" + (600 + i));
                 updateFrame.getFareZones().getFareZone().add(zone);
@@ -435,7 +435,7 @@ public class FareZoneExternalVersioningTest extends TiamatIntegrationTest {
             LocalDateTime fromDate = LocalDateTime.now().minusDays(1);
 
             FareZone fareZone = new FareZone()
-                    .withName(new MultilingualString().withValue("Open Ended Zone"))
+                    .withName(NetexMultilingualStringHelper.toNetexModel("Open Ended Zone"))
                     .withVersion("1")
                     .withId("NSR:FareZone:701")
                     .withValidBetween(new ValidBetween()
@@ -487,7 +487,7 @@ public class FareZoneExternalVersioningTest extends TiamatIntegrationTest {
             LocalDateTime toDate = LocalDateTime.now().plusDays(10);
 
             FareZone fareZone = new FareZone()
-                    .withName(new MultilingualString().withValue("Time Limited Zone"))
+                    .withName(NetexMultilingualStringHelper.toNetexModel("Time Limited Zone"))
                     .withVersion("1")
                     .withId("NSR:FareZone:702")
                     .withValidBetween(new ValidBetween()
@@ -541,7 +541,7 @@ public class FareZoneExternalVersioningTest extends TiamatIntegrationTest {
             LocalDateTime toDate = LocalDateTime.now().minusDays(10);
 
             FareZone fareZone = new FareZone()
-                    .withName(new MultilingualString().withValue("Invalid Date Zone"))
+                    .withName(NetexMultilingualStringHelper.toNetexModel("Invalid Date Zone"))
                     .withVersion("1")
                     .withId("NSR:FareZone:703")
                     .withValidBetween(new ValidBetween()
@@ -591,12 +591,12 @@ public class FareZoneExternalVersioningTest extends TiamatIntegrationTest {
         try {
             // GIVEN: Create neighbour FareZones first
             FareZone neighbour1 = new FareZone()
-                    .withName(new MultilingualString().withValue("Neighbour Zone 1"))
+                    .withName(NetexMultilingualStringHelper.toNetexModel("Neighbour Zone 1"))
                     .withVersion("1")
                     .withId("NSR:FareZone:801");
 
             FareZone neighbour2 = new FareZone()
-                    .withName(new MultilingualString().withValue("Neighbour Zone 2"))
+                    .withName(NetexMultilingualStringHelper.toNetexModel("Neighbour Zone 2"))
                     .withVersion("1")
                     .withId("NSR:FareZone:802");
 
@@ -614,7 +614,7 @@ public class FareZoneExternalVersioningTest extends TiamatIntegrationTest {
 
             // WHEN: Create FareZone with neighbour references
             FareZone mainZone = new FareZone()
-                    .withName(new MultilingualString().withValue("Main Zone with Neighbours"))
+                    .withName(NetexMultilingualStringHelper.toNetexModel("Main Zone with Neighbours"))
                     .withVersion("1")
                     .withId("NSR:FareZone:800");
 
@@ -709,7 +709,7 @@ public class FareZoneExternalVersioningTest extends TiamatIntegrationTest {
             fareFrame.getFareZones().getFareZone().add(new FareZone()
                     .withId(id)
                     .withVersion("1")
-                    .withName(new MultilingualString().withValue(id))
+                    .withName(NetexMultilingualStringHelper.toNetexModel(id))
                     .withValidBetween(new ValidBetween().withFromDate(validFrom)));
         }
         return fareFrame;
@@ -718,12 +718,12 @@ public class FareZoneExternalVersioningTest extends TiamatIntegrationTest {
     private GroupOfTariffZones groupOfTariffZones(String groupId, String... memberRefs) {
         TariffZoneRefs_RelStructure members = new TariffZoneRefs_RelStructure();
         for (String ref : memberRefs) {
-            members.getTariffZoneRef_().add(objectFactory.createTariffZoneRef(new TariffZoneRef().withRef(ref)));
+            members.getTariffZoneRef_Dummy().add(objectFactory.createTariffZoneRef(new TariffZoneRef().withRef(ref)));
         }
         return new GroupOfTariffZones()
                 .withId(groupId)
                 .withVersion("1")
-                .withName(new MultilingualString().withValue(groupId))
+                .withName(NetexMultilingualStringHelper.toNetexModel(groupId))
                 .withMembers(members);
     }
 

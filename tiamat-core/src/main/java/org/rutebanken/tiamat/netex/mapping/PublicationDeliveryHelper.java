@@ -54,7 +54,7 @@ public class PublicationDeliveryHelper {
     }
 
     public boolean hasStops(SiteFrame siteFrame) {
-        return siteFrame.getStopPlaces() != null && siteFrame.getStopPlaces().getStopPlace_() != null;
+        return siteFrame.getStopPlaces() != null && siteFrame.getStopPlaces().getStopPlace() != null;
     }
 
     public boolean hasTariffZones(SiteFrame netexSiteFrame) {
@@ -62,15 +62,15 @@ public class PublicationDeliveryHelper {
     }
 
     public boolean hasPathLinks(SiteFrame netexSiteFrame) {
-        return netexSiteFrame.getPathLinks() != null && netexSiteFrame.getPathLinks().getPathLink() != null;
+        return netexSiteFrame.getPathLinks() != null && netexSiteFrame.getPathLinks().getSitePathLinkOrOffSitePathLinkOrPathLink() != null;
     }
 
     public boolean hasParkings(SiteFrame siteFrame) {
-        return siteFrame.getParkings() != null && siteFrame.getParkings().getParking() != null;
+        return siteFrame.getParkings() != null && siteFrame.getParkings().getParking_Dummy() != null;
     }
 
     public int numberOfStops(SiteFrame netexSiteFrame) {
-        return hasStops(netexSiteFrame) ? netexSiteFrame.getStopPlaces().getStopPlace_().size() : 0;
+        return hasStops(netexSiteFrame) ? netexSiteFrame.getStopPlaces().getStopPlace().size() : 0;
     }
 
     public SiteFrame findSiteFrame(PublicationDeliveryStructure incomingPublicationDelivery) {

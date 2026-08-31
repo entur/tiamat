@@ -324,9 +324,7 @@ public class StreamingPublicationDeliveryIntegrationTest extends TiamatIntegrati
         PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryUnmarshaller.unmarshal(new ByteArrayInputStream(xml.getBytes()));
 
         org.rutebanken.netex.model.SiteFrame siteFrame = publicationDeliveryHelper.findSiteFrame(publicationDeliveryStructure);
-        List<org.rutebanken.netex.model.StopPlace> stops = siteFrame.getStopPlaces().getStopPlace_().stream()
-                .map(sp -> (org.rutebanken.netex.model.StopPlace) sp.getValue())
-                .toList();
+        List<org.rutebanken.netex.model.StopPlace> stops = siteFrame.getStopPlaces().getStopPlace();
 
         assertThat(stops)
                 .hasSize(2)
@@ -342,7 +340,7 @@ public class StreamingPublicationDeliveryIntegrationTest extends TiamatIntegrati
                 .as("actual stop place 1 tariff zones")
                 .isNotNull();
 
-        org.rutebanken.netex.model.TariffZoneRef actualTariffZoneRefStopPlace1 = actualStopPlace1.getTariffZones().getTariffZoneRef_().stream()
+        org.rutebanken.netex.model.TariffZoneRef actualTariffZoneRefStopPlace1 = actualStopPlace1.getTariffZones().getTariffZoneRef_Dummy().stream()
                 .map(tf -> (org.rutebanken.netex.model.TariffZoneRef) tf.getValue())
                 .toList()
                 .getFirst();
@@ -355,7 +353,7 @@ public class StreamingPublicationDeliveryIntegrationTest extends TiamatIntegrati
         // Check stop place 2
 
         org.rutebanken.netex.model.StopPlace actualStopPlace2 = stops.stream().filter(sp -> sp.getId().equals(stopPlace2NetexId)).findFirst().get();
-        org.rutebanken.netex.model.TariffZoneRef actualTariffZoneRefStopPlace2 = actualStopPlace2.getTariffZones().getTariffZoneRef_().stream()
+        org.rutebanken.netex.model.TariffZoneRef actualTariffZoneRefStopPlace2 = actualStopPlace2.getTariffZones().getTariffZoneRef_Dummy().stream()
                 .map(tf -> (org.rutebanken.netex.model.TariffZoneRef) tf.getValue())
                 .toList()
                 .getFirst();
@@ -503,9 +501,7 @@ public class StreamingPublicationDeliveryIntegrationTest extends TiamatIntegrati
         org.rutebanken.netex.model.SiteFrame siteFrame = publicationDeliveryHelper.findSiteFrame(publicationDeliveryStructure);
 
         // The parent stop must have been appended to the export.
-        List<org.rutebanken.netex.model.StopPlace> stops = siteFrame.getStopPlaces().getStopPlace_().stream()
-                .map(sp -> (org.rutebanken.netex.model.StopPlace) sp.getValue())
-                .toList();
+        List<org.rutebanken.netex.model.StopPlace> stops = siteFrame.getStopPlaces().getStopPlace();
         assertThat(stops)
                 .as("both the searched child and its appended parent must be exported")
                 .extracting(org.rutebanken.netex.model.StopPlace::getId)

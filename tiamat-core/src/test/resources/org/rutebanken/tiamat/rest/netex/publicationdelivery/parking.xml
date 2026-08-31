@@ -69,7 +69,7 @@
                     <AccessibilityAssessment modification="new" version="0" id="FSR:AccessibilityAssessment:2">
                         <MobilityImpairedAccess>unknown</MobilityImpairedAccess>
                         <limitations>
-                            <AccessibilityLimitation modification="new" version="0" id="FSR:AccessibilityLimitation:6">
+                            <AccessibilityLimitation modification="new" version="0" id="FSR:AccessibilityLimitation:7">
                                 <WheelchairAccess>unknown</WheelchairAccess>
                                 <StepFreeAccess>true</StepFreeAccess>
                                 <EscalatorFreeAccess>unknown</EscalatorFreeAccess>

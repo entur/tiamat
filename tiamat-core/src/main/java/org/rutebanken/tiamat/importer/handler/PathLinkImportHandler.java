@@ -45,8 +45,9 @@
 
 package org.rutebanken.tiamat.importer.handler;
 
-import org.rutebanken.netex.model.PathLinksInFrame_RelStructure;
+import org.rutebanken.netex.model.PathLink;
 import org.rutebanken.netex.model.SiteFrame;
+import org.rutebanken.netex.model.SitePathLinksInFrame_RelStructure;
 import org.rutebanken.tiamat.importer.ImportParams;
 import org.rutebanken.tiamat.importer.PathLinksImporter;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
@@ -73,12 +74,18 @@ public class PathLinkImportHandler {
     }
 
     public void handlePathLinks(SiteFrame netexSiteFrame, ImportParams importParams, AtomicInteger pathLinkCounter, SiteFrame responseSiteframe) {
-        if (netexSiteFrame.getPathLinks() != null && netexSiteFrame.getPathLinks().getPathLink() != null) {
-            List<org.rutebanken.tiamat.model.PathLink> tiamatPathLinks = netexMapper.mapPathLinksToTiamatModel(netexSiteFrame.getPathLinks().getPathLink());
+        if (netexSiteFrame.getPathLinks() != null && netexSiteFrame.getPathLinks().getSitePathLinkOrOffSitePathLinkOrPathLink() != null) {
+            List<PathLink> netexPathLinks = netexSiteFrame.getPathLinks().getSitePathLinkOrOffSitePathLinkOrPathLink()
+                    .stream()
+                    .filter(PathLink.class::isInstance)
+                    .map(PathLink.class::cast)
+                    .toList();
+            List<org.rutebanken.tiamat.model.PathLink> tiamatPathLinks = netexMapper.mapPathLinksToTiamatModel(netexPathLinks);
             tiamatPathLinks.forEach(tiamatPathLink -> logger.debug("Received path link: {}", tiamatPathLink));
 
             List<org.rutebanken.netex.model.PathLink> pathLinks = pathLinksImporter.importPathLinks(tiamatPathLinks, pathLinkCounter);
-            responseSiteframe.withPathLinks(new PathLinksInFrame_RelStructure().withPathLink(pathLinks));
+            responseSiteframe.withPathLinks(new SitePathLinksInFrame_RelStructure()
+                    .withSitePathLinkOrOffSitePathLinkOrPathLink(new java.util.ArrayList<org.rutebanken.netex.model.GenericPathLink_VersionStructure>(pathLinks)));
         }
     }
 

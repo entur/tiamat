@@ -33,7 +33,6 @@ import org.rutebanken.netex.model.GroupOfTariffZones;
 import org.rutebanken.netex.model.InstalledEquipment_VersionStructure;
 import org.rutebanken.netex.model.Parking;
 import org.rutebanken.netex.model.PathLink;
-import org.rutebanken.netex.model.PathLinkEndStructure;
 import org.rutebanken.netex.model.PlaceEquipments_RelStructure;
 import org.rutebanken.netex.model.PostalAddress;
 import org.rutebanken.netex.model.PurposeOfGrouping;
@@ -44,6 +43,7 @@ import org.rutebanken.netex.model.ServiceFrame;
 import org.rutebanken.netex.model.ShelterEquipment;
 import org.rutebanken.netex.model.SiteFacilitySet;
 import org.rutebanken.netex.model.SiteFrame;
+import org.rutebanken.netex.model.SitePathLinkEndStructure;
 import org.rutebanken.netex.model.StopPlace;
 import org.rutebanken.netex.model.TariffZone;
 import org.rutebanken.netex.model.LocalService_VersionStructure;
@@ -161,7 +161,7 @@ public class NetexMapper {
                 .byDefault()
                 .register();
 
-        mapperFactory.classMap(PathLinkEndStructure.class, org.rutebanken.tiamat.model.PathLinkEnd.class)
+        mapperFactory.classMap(SitePathLinkEndStructure.class, org.rutebanken.tiamat.model.PathLinkEnd.class)
                 .byDefault()
                 .register();
 
@@ -201,7 +201,13 @@ public class NetexMapper {
                 .customize(new FacilityMapper())
                 .register();
 
-        mapperFactoryWithNetexIdClassBuilder(PlaceEquipments_RelStructure.class, org.rutebanken.tiamat.model.PlaceEquipment.class)
+        // Not using mapperFactoryWithNetexIdClassBuilder here: PlaceEquipment's netexId has no
+        // valid slot on the netex side. PlaceEquipments_RelStructure.id is a RelationshipId,
+        // restricted to a fixed enumeration of NeTEx property names - not a free-form entity id.
+        // Explicitly excluded (rather than just skipping the netexId mapping) so Orika's
+        // convention-based default mapping doesn't instead wire up tiamat's JPA primary key.
+        mapperFactory.classMap(PlaceEquipments_RelStructure.class, org.rutebanken.tiamat.model.PlaceEquipment.class)
+                .exclude("id")
                 .customize(new PlaceEquipmentMapper())
                 .byDefault()
                 .register();

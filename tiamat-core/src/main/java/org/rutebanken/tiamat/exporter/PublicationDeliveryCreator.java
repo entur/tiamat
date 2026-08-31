@@ -2,12 +2,12 @@ package org.rutebanken.tiamat.exporter;
 
 import jakarta.xml.bind.JAXBElement;
 import org.rutebanken.netex.model.DataManagedObjectStructure;
-import org.rutebanken.netex.model.MultilingualString;
 import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.netex.model.PurposeOfGrouping;
 import org.rutebanken.netex.model.ResourceFrame;
 import org.rutebanken.tiamat.netex.id.ValidPrefixList;
+import org.rutebanken.tiamat.netex.mapping.NetexMultilingualStringHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -153,7 +153,7 @@ public class PublicationDeliveryCreator {
 
     private ResourceFrame createResourceFrame() {
         List<JAXBElement<? extends DataManagedObjectStructure>> purposeOfGroupingList = new ArrayList<>();
-        final PurposeOfGrouping purposeOfGrouping = new ObjectFactory().createPurposeOfGrouping().withId("NSR:PurposeOfGrouping:3").withName(new MultilingualString().withValue("generalization")).withVersion("1");
+        final PurposeOfGrouping purposeOfGrouping = new ObjectFactory().createPurposeOfGrouping().withId("NSR:PurposeOfGrouping:3").withName(NetexMultilingualStringHelper.toNetexModel("generalization")).withVersion("1");
         final JAXBElement<PurposeOfGrouping> purposeOfGroupingJAXBElement= new ObjectFactory().createPurposeOfGrouping(purposeOfGrouping);
         purposeOfGroupingList.add(purposeOfGroupingJAXBElement);
 

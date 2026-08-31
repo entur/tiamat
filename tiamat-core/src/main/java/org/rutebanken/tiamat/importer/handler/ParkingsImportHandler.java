@@ -16,6 +16,7 @@
 package org.rutebanken.tiamat.importer.handler;
 
 import com.hazelcast.core.HazelcastInstance;
+import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.ParkingsInFrame_RelStructure;
 import org.rutebanken.netex.model.SiteFrame;
 import org.rutebanken.tiamat.importer.ImportParams;
@@ -69,7 +70,13 @@ public class ParkingsImportHandler {
 
         if (publicationDeliveryHelper.hasParkings(netexSiteFrame)) {
 
-            List<Parking> tiamatParking = netexMapper.mapParkingsToTiamatModel(netexSiteFrame.getParkings().getParking());
+            List<org.rutebanken.netex.model.Parking> netexParkings = netexSiteFrame.getParkings().getParking_Dummy()
+                    .stream()
+                    .map(jakarta.xml.bind.JAXBElement::getValue)
+                    .filter(org.rutebanken.netex.model.Parking.class::isInstance)
+                    .map(org.rutebanken.netex.model.Parking.class::cast)
+                    .toList();
+            List<Parking> tiamatParking = netexMapper.mapParkingsToTiamatModel(netexParkings);
 
             int numberOfParkingsBeforeFiltering = tiamatParking.size();
             logger.info("About to filter {} parkings based on topographic references: {}", tiamatParking.size(), importParams.targetTopographicPlaces);
@@ -102,9 +109,13 @@ public class ParkingsImportHandler {
             }
 
             if (!importedParkings.isEmpty()) {
-                responseSiteframe.withParkings(
-                        new ParkingsInFrame_RelStructure()
-                                .withParking(importedParkings));
+                ObjectFactory objectFactory = new ObjectFactory();
+                List<jakarta.xml.bind.JAXBElement<org.rutebanken.netex.model.Parking>> wrappedParkings = importedParkings.stream()
+                        .map(objectFactory::createParking)
+                        .toList();
+                ParkingsInFrame_RelStructure parkingsInFrameRelStructure = new ParkingsInFrame_RelStructure();
+                parkingsInFrameRelStructure.getParking_Dummy().addAll(wrappedParkings);
+                responseSiteframe.withParkings(parkingsInFrameRelStructure);
             }
 
             logger.info("Mapped {} parkings!!", tiamatParking.size());

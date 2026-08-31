@@ -13,8 +13,8 @@ public class GroupOfTariffZonesMapper extends CustomMapper<GroupOfTariffZones, o
     @Override
     public void mapAtoB(GroupOfTariffZones netexGroupOfTariffZones, org.rutebanken.tiamat.model.GroupOfTariffZones tiamatGroupOfTariffZones, MappingContext context) {
         super.mapAtoB(netexGroupOfTariffZones, tiamatGroupOfTariffZones, context);
-        if (netexGroupOfTariffZones.getMembers() != null && !netexGroupOfTariffZones.getMembers().getTariffZoneRef_().isEmpty()) {
-            final List<TariffZoneRef> tiamatTariffZoneRefList = netexGroupOfTariffZones.getMembers().getTariffZoneRef_().stream()
+        if (netexGroupOfTariffZones.getMembers() != null && !netexGroupOfTariffZones.getMembers().getTariffZoneRef_Dummy().isEmpty()) {
+            final List<TariffZoneRef> tiamatTariffZoneRefList = netexGroupOfTariffZones.getMembers().getTariffZoneRef_Dummy().stream()
                     .map(JAXBElement::getValue)
                     .map(tzr -> new TariffZoneRef(tzr.getRef())).toList();
 

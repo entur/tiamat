@@ -97,14 +97,11 @@ public class ExportStopPlacesWithEffectiveChangeInPeriod {
 
         if (convertedSiteFrame.getStopPlaces() != null) {
             if (relevantTariffZones) {
-                final Collection<org.rutebanken.netex.model.StopPlace> stopPlace = convertedSiteFrame.getStopPlaces().getStopPlace_().stream()
-                        .map(sp -> (org.rutebanken.netex.model.StopPlace) sp.getValue())
-                        .toList();
+                final Collection<org.rutebanken.netex.model.StopPlace> stopPlace = convertedSiteFrame.getStopPlaces().getStopPlace();
                 tariffZonesFromStopsExporter.resolveTariffZones(stopPlace, convertedSiteFrame);
             } else if (ExportParams.ExportMode.NONE.equals(exportParams.getTariffZoneExportMode())) {
-                logger.info("TariffZone export mode is NONE. Removing references from {} converted stop places", convertedSiteFrame.getStopPlaces().getStopPlace_().size());
-                convertedSiteFrame.getStopPlaces().getStopPlace_().stream()
-                        .map(sp -> (org.rutebanken.netex.model.StopPlace) sp.getValue())
+                logger.info("TariffZone export mode is NONE. Removing references from {} converted stop places", convertedSiteFrame.getStopPlaces().getStopPlace().size());
+                convertedSiteFrame.getStopPlaces().getStopPlace()
                         .forEach(convertedStop -> convertedStop.setTariffZones(null));
             }
         }
@@ -117,8 +114,7 @@ public class ExportStopPlacesWithEffectiveChangeInPeriod {
     }
     private void removeVersionFromTopographicPlaceReferences(org.rutebanken.netex.model.SiteFrame convertedSiteFrame) {
         if (convertedSiteFrame.getStopPlaces() != null) {
-            convertedSiteFrame.getStopPlaces().getStopPlace_().stream()
-                    .map(sp -> (org.rutebanken.netex.model.StopPlace) sp.getValue())
+            convertedSiteFrame.getStopPlaces().getStopPlace().stream()
                     .filter(sp -> sp.getTopographicPlaceRef() != null)
                     .forEach(sp -> sp.getTopographicPlaceRef().setVersion(null));
         }

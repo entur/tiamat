@@ -72,8 +72,8 @@ public class NetexReferenceRemovingIterator implements Iterator<StopPlace> {
     }
 
     private void removeTariffZoneRefsVersion(StopPlace stopPlace, String type) {
-        if(stopPlace.getTariffZones() != null && stopPlace.getTariffZones().getTariffZoneRef_() != null) {
-            stopPlace.getTariffZones().getTariffZoneRef_().stream()
+        if(stopPlace.getTariffZones() != null && stopPlace.getTariffZones().getTariffZoneRef_Dummy() != null) {
+            stopPlace.getTariffZones().getTariffZoneRef_Dummy().stream()
             .map(JAXBElement::getValue)
                     .forEach(tariffZoneRef -> {
                 if(tariffZoneRef.getRef().contains(type)) {

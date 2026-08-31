@@ -31,9 +31,9 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
     public void mapAtoB(Parking parking, org.rutebanken.tiamat.model.Parking parking2, MappingContext context) {
         super.mapAtoB(parking, parking2, context);
         if (parking.getParkingAreas() != null &&
-                parking.getParkingAreas().getParkingAreaRefOrParkingArea_() != null &&
-                !parking.getParkingAreas().getParkingAreaRefOrParkingArea_().isEmpty()) {
-            List<org.rutebanken.tiamat.model.ParkingArea> parkingAreas = mapperFacade.mapAsList(parking.getParkingAreas().getParkingAreaRefOrParkingArea_(), org.rutebanken.tiamat.model.ParkingArea.class, context);
+                parking.getParkingAreas().getParkingAreaRefOrParkingArea_Dummy() != null &&
+                !parking.getParkingAreas().getParkingAreaRefOrParkingArea_Dummy().isEmpty()) {
+            List<org.rutebanken.tiamat.model.ParkingArea> parkingAreas = mapperFacade.mapAsList(parking.getParkingAreas().getParkingAreaRefOrParkingArea_Dummy(), org.rutebanken.tiamat.model.ParkingArea.class, context);
             if (!parkingAreas.isEmpty()) {
                 parking2.setParkingAreas(parkingAreas);
             }
@@ -53,7 +53,7 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
 
             if (!parkingAreas.isEmpty()) {
                 ParkingAreas_RelStructure parkingAreas_relStructure = new ParkingAreas_RelStructure();
-                parkingAreas_relStructure.getParkingAreaRefOrParkingArea_().addAll(wrappedParkingAreas);
+                parkingAreas_relStructure.getParkingAreaRefOrParkingArea_Dummy().addAll(wrappedParkingAreas);
 
                 netexParking.setParkingAreas(parkingAreas_relStructure);
             }

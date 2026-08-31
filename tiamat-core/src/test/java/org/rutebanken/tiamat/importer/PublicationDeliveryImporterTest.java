@@ -21,7 +21,6 @@ import org.rutebanken.netex.model.Frames_RelStructure;
 import org.rutebanken.netex.model.KeyListStructure;
 import org.rutebanken.netex.model.KeyValueStructure;
 import org.rutebanken.netex.model.LocationStructure;
-import org.rutebanken.netex.model.MultilingualString;
 import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.netex.model.Quay;
@@ -31,6 +30,7 @@ import org.rutebanken.netex.model.SiteFrame;
 import org.rutebanken.netex.model.SiteRefStructure;
 import org.rutebanken.netex.model.StopPlace;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
+import org.rutebanken.tiamat.netex.mapping.NetexMultilingualStringHelper;
 import org.rutebanken.tiamat.netex.mapping.PublicationDeliveryHelper;
 import org.rutebanken.tiamat.rest.netex.publicationdelivery.PublicationDeliveryTestHelper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,7 +64,7 @@ public class PublicationDeliveryImporterTest extends TiamatIntegrationTest {
                         .withKeyValue(new KeyValueStructure()
                                 .withKey(ORIGINAL_ID_KEY)
                                 .withValue("RANDOM:ACB:01")))
-                .withName(new MultilingualString().withValue("StopPlaceName").withLang("nb"))
+                .withName(NetexMultilingualStringHelper.toNetexModel("StopPlaceName", "nb"))
                 .withCentroid(new SimplePoint_VersionStructure()
                         .withLocation(new LocationStructure()
                                 .withLatitude(new BigDecimal("9"))
@@ -91,7 +91,7 @@ public class PublicationDeliveryImporterTest extends TiamatIntegrationTest {
                         .withKeyValue(new KeyValueStructure()
                                 .withKey(ORIGINAL_ID_KEY)
                                 .withValue("RANDOM:ACB:01")))
-                .withName(new MultilingualString().withValue("ParentStop").withLang("nb"))
+                .withName(NetexMultilingualStringHelper.toNetexModel("ParentStop", "nb"))
                 .withCentroid(new SimplePoint_VersionStructure()
                         .withLocation(new LocationStructure()
                                 .withLatitude(new BigDecimal("9"))
@@ -104,7 +104,7 @@ public class PublicationDeliveryImporterTest extends TiamatIntegrationTest {
                         .withKeyValue(new KeyValueStructure()
                                 .withKey(ORIGINAL_ID_KEY)
                                 .withValue("RANDOM:ABC:02")))
-                .withName(new MultilingualString().withValue("ParentStopB").withLang("nb"))
+                .withName(NetexMultilingualStringHelper.toNetexModel("ParentStopB", "nb"))
                 .withCentroid(new SimplePoint_VersionStructure()
                         .withLocation(new LocationStructure()
                                 .withLatitude(new BigDecimal("9"))
@@ -113,7 +113,7 @@ public class PublicationDeliveryImporterTest extends TiamatIntegrationTest {
         StopPlace childStopA = new StopPlace()
                 .withId("NSR:StopPlace:04")
                 .withVersion("1")
-                .withName(new MultilingualString().withValue("ChildStop A").withLang("nb"))
+                .withName(NetexMultilingualStringHelper.toNetexModel("ChildStop A", "nb"))
                 .withCentroid(new SimplePoint_VersionStructure()
                         .withLocation(new LocationStructure()
                                 .withLatitude(new BigDecimal("9"))
@@ -124,7 +124,7 @@ public class PublicationDeliveryImporterTest extends TiamatIntegrationTest {
                                 new Quay()
                                 .withId("XYZ:01:03")
                                 .withVersion("1")
-                                .withName(new MultilingualString().withValue("A"))
+                                .withName(NetexMultilingualStringHelper.toNetexModel("A"))
                                 .withCentroid(new SimplePoint_VersionStructure()
                                         .withLocation(new LocationStructure()
                                                 .withLatitude(new BigDecimal("9.1"))
@@ -133,7 +133,7 @@ public class PublicationDeliveryImporterTest extends TiamatIntegrationTest {
         StopPlace childStopB = new StopPlace()
                 .withId("NSR:StopPlace:05")
                 .withVersion("1")
-                .withName(new MultilingualString().withValue("ChildStop B").withLang("nb"))
+                .withName(NetexMultilingualStringHelper.toNetexModel("ChildStop B", "nb"))
                 .withCentroid(new SimplePoint_VersionStructure()
                         .withLocation(new LocationStructure()
                                 .withLatitude(new BigDecimal("9"))
@@ -144,7 +144,7 @@ public class PublicationDeliveryImporterTest extends TiamatIntegrationTest {
                                 new Quay()
                                 .withId("XYZ:01:02")
                                 .withVersion("1")
-                                .withName(new MultilingualString().withValue("B"))
+                                .withName(NetexMultilingualStringHelper.toNetexModel("B"))
                                 .withCentroid(new SimplePoint_VersionStructure()
                                         .withLocation(new LocationStructure()
                                                 .withLatitude(new BigDecimal("9.2"))
@@ -153,7 +153,7 @@ public class PublicationDeliveryImporterTest extends TiamatIntegrationTest {
         StopPlace childStopC = new StopPlace()
                 .withId("NSR:StopPlace:03")
                 .withVersion("1")
-                .withName(new MultilingualString().withValue("ChildStop C").withLang("nb"))
+                .withName(NetexMultilingualStringHelper.toNetexModel("ChildStop C", "nb"))
                 .withCentroid(new SimplePoint_VersionStructure()
                         .withLocation(new LocationStructure()
                                 .withLatitude(new BigDecimal("9"))
@@ -164,7 +164,7 @@ public class PublicationDeliveryImporterTest extends TiamatIntegrationTest {
                                 new Quay()
                                 .withId("XYZ:02:01")
                                 .withVersion("1")
-                                .withName(new MultilingualString().withValue("C"))
+                                .withName(NetexMultilingualStringHelper.toNetexModel("C"))
                                 .withCentroid(new SimplePoint_VersionStructure()
                                         .withLocation(new LocationStructure()
                                                 .withLatitude(new BigDecimal("9.1"))

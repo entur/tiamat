@@ -15,28 +15,21 @@
 
 package org.rutebanken.tiamat.netex.mapping.converter;
 
-import jakarta.xml.bind.JAXBElement;
 import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;
-import org.rutebanken.netex.model.ObjectFactory;
-import org.rutebanken.netex.model.Site_VersionStructure;
 import org.rutebanken.netex.model.StopPlace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-
 /**
  * Converter for StopPlacesInFrame_RelStructure between Tiamat and Netex models.
- * Handles the JAXBElement wrapping required by Netex model's stopPlace_ field.
  */
 @Component
 public class StopPlacesInFrameRelStructureConverter extends BidirectionalConverter<org.rutebanken.tiamat.model.StopPlacesInFrame_RelStructure, org.rutebanken.netex.model.StopPlacesInFrame_RelStructure> {
 
     private static final Logger logger = LoggerFactory.getLogger(StopPlacesInFrameRelStructureConverter.class);
-    private static final ObjectFactory objectFactory = new ObjectFactory();
 
     @Override
     public org.rutebanken.netex.model.StopPlacesInFrame_RelStructure convertTo(
@@ -54,8 +47,7 @@ public class StopPlacesInFrameRelStructureConverter extends BidirectionalConvert
 
         for (org.rutebanken.tiamat.model.StopPlace tiamatStopPlace : tiamatStopPlaces.getStopPlace()) {
             StopPlace netexStopPlace = mapperFacade.map(tiamatStopPlace, StopPlace.class);
-            JAXBElement<StopPlace> jaxbElement = objectFactory.createStopPlace(netexStopPlace);
-            netexStopPlaces.getStopPlace_().add(jaxbElement);
+            netexStopPlaces.getStopPlace().add(netexStopPlace);
         }
 
         return netexStopPlaces;
@@ -68,20 +60,16 @@ public class StopPlacesInFrameRelStructureConverter extends BidirectionalConvert
             MappingContext mappingContext) {
 
         logger.debug("Mapping {} stop places to internal model",
-                netexStopPlaces != null && netexStopPlaces.getStopPlace_() != null
-                        ? netexStopPlaces.getStopPlace_().size() : 0);
+                netexStopPlaces != null && netexStopPlaces.getStopPlace() != null
+                        ? netexStopPlaces.getStopPlace().size() : 0);
 
         org.rutebanken.tiamat.model.StopPlacesInFrame_RelStructure tiamatStopPlaces = new org.rutebanken.tiamat.model.StopPlacesInFrame_RelStructure();
 
-        if (netexStopPlaces != null && netexStopPlaces.getStopPlace_() != null) {
-            List<JAXBElement<? extends Site_VersionStructure>> stopPlaceElements = netexStopPlaces.getStopPlace_();
-            for (JAXBElement<? extends Site_VersionStructure> element : stopPlaceElements) {
-                Site_VersionStructure value = element.getValue();
-                if (value instanceof StopPlace netexStopPlace) {
-                    org.rutebanken.tiamat.model.StopPlace tiamatStopPlace =
-                            mapperFacade.map(netexStopPlace, org.rutebanken.tiamat.model.StopPlace.class);
-                    tiamatStopPlaces.getStopPlace().add(tiamatStopPlace);
-                }
+        if (netexStopPlaces != null && netexStopPlaces.getStopPlace() != null) {
+            for (StopPlace netexStopPlace : netexStopPlaces.getStopPlace()) {
+                org.rutebanken.tiamat.model.StopPlace tiamatStopPlace =
+                        mapperFacade.map(netexStopPlace, org.rutebanken.tiamat.model.StopPlace.class);
+                tiamatStopPlaces.getStopPlace().add(tiamatStopPlace);
             }
         }
 
