@@ -1,6 +1,6 @@
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
-import org.rutebanken.netex.model.PublicationDeliveryStructure;
+import org.entur.netex2.model.PublicationDeliveryStructure;
 import org.rutebanken.tiamat.exporter.PublicationDeliveryCreator;
 import org.rutebanken.tiamat.exporter.PublicationDeliveryStructurePage;
 import org.rutebanken.tiamat.exporter.TariffZonesFromStopsExporter;
@@ -93,18 +93,15 @@ public class ExportStopPlacesWithEffectiveChangeInPeriod {
         tiamatSiteFrameExporter.addRelevantPathLinks(stopPlaceIds, siteFrame);
 
         logger.info("Mapping site frame to netex model");
-        org.rutebanken.netex.model.SiteFrame convertedSiteFrame = netexMapper.mapToNetexModel(siteFrame);
+        org.entur.netex2.model.SiteFrame convertedSiteFrame = netexMapper.mapToNetexModel(siteFrame);
 
         if (convertedSiteFrame.getStopPlaces() != null) {
             if (relevantTariffZones) {
-                final Collection<org.rutebanken.netex.model.StopPlace> stopPlace = convertedSiteFrame.getStopPlaces().getStopPlace_().stream()
-                        .map(sp -> (org.rutebanken.netex.model.StopPlace) sp.getValue())
-                        .toList();
+                final Collection<org.entur.netex2.model.StopPlace> stopPlace = convertedSiteFrame.getStopPlaces().getStopPlace();
                 tariffZonesFromStopsExporter.resolveTariffZones(stopPlace, convertedSiteFrame);
             } else if (ExportParams.ExportMode.NONE.equals(exportParams.getTariffZoneExportMode())) {
-                logger.info("TariffZone export mode is NONE. Removing references from {} converted stop places", convertedSiteFrame.getStopPlaces().getStopPlace_().size());
-                convertedSiteFrame.getStopPlaces().getStopPlace_().stream()
-                        .map(sp -> (org.rutebanken.netex.model.StopPlace) sp.getValue())
+                logger.info("TariffZone export mode is NONE. Removing references from {} converted stop places", convertedSiteFrame.getStopPlaces().getStopPlace().size());
+                convertedSiteFrame.getStopPlaces().getStopPlace()
                         .forEach(convertedStop -> convertedStop.setTariffZones(null));
             }
         }
@@ -115,10 +112,9 @@ public class ExportStopPlacesWithEffectiveChangeInPeriod {
 
         return publicationDeliveryCreator.createPublicationDelivery(convertedSiteFrame);
     }
-    private void removeVersionFromTopographicPlaceReferences(org.rutebanken.netex.model.SiteFrame convertedSiteFrame) {
+    private void removeVersionFromTopographicPlaceReferences(org.entur.netex2.model.SiteFrame convertedSiteFrame) {
         if (convertedSiteFrame.getStopPlaces() != null) {
-            convertedSiteFrame.getStopPlaces().getStopPlace_().stream()
-                    .map(sp -> (org.rutebanken.netex.model.StopPlace) sp.getValue())
+            convertedSiteFrame.getStopPlaces().getStopPlace().stream()
                     .filter(sp -> sp.getTopographicPlaceRef() != null)
                     .forEach(sp -> sp.getTopographicPlaceRef().setVersion(null));
         }

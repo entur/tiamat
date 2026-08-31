@@ -15,14 +15,11 @@
 
 package org.rutebanken.tiamat.importer.handler;
 
-import jakarta.xml.bind.JAXBElement;
 import org.apache.commons.lang3.NotImplementedException;
-import org.rutebanken.netex.model.ObjectFactory;
-import org.rutebanken.netex.model.SiteFrame;
-import org.rutebanken.netex.model.Site_VersionStructure;
-import org.rutebanken.netex.model.StopPlacesInFrame_RelStructure;
-import org.rutebanken.netex.model.TopographicPlace;
-import org.rutebanken.netex.model.TopographicPlacesInFrame_RelStructure;
+import org.entur.netex2.model.SiteFrame;
+import org.entur.netex2.model.StopPlacesInFrame_RelStructure;
+import org.entur.netex2.model.TopographicPlace;
+import org.entur.netex2.model.TopographicPlacesInFrame_RelStructure;
 import org.rutebanken.tiamat.exporter.TariffZonesFromStopsExporter;
 import org.rutebanken.tiamat.exporter.TopographicPlacesExporter;
 import org.rutebanken.tiamat.importer.ImportParams;
@@ -108,9 +105,7 @@ public class StopPlaceImportHandler {
 
     public void handleStops(SiteFrame netexSiteFrame, ImportParams importParams, AtomicInteger stopPlacesCreatedMatchedOrUpdated, SiteFrame responseSiteframe) {
         if (publicationDeliveryHelper.hasStops(netexSiteFrame)) {
-            final List<org.rutebanken.netex.model.StopPlace> netexStopPlace = netexSiteFrame.getStopPlaces().getStopPlace_().stream()
-                                                                                  .map(sp -> (org.rutebanken.netex.model.StopPlace) sp.getValue())
-                                                                                  .toList();
+            final List<org.entur.netex2.model.StopPlace> netexStopPlace = netexSiteFrame.getStopPlaces().getStopPlace();
 
             List<StopPlace> tiamatStops = netexMapper.mapStopsToTiamatModel(netexStopPlace);
 
@@ -148,7 +143,7 @@ public class StopPlaceImportHandler {
                 tiamatStops.forEach(stopPlace -> stopPlace.setStopPlaceType(importParams.forceStopType));
             }
 
-            Collection<org.rutebanken.netex.model.StopPlace> importedOrMatchedNetexStopPlaces;
+            Collection<org.entur.netex2.model.StopPlace> importedOrMatchedNetexStopPlaces;
             logger.info("The import type is: {}", importParams.importType);
 
             if (importParams.importType != null && importParams.importType.equals(ImportType.ID_MATCH)) {
@@ -160,7 +155,7 @@ public class StopPlaceImportHandler {
             }
 
             // Filter uniques by StopPlace.id#version
-            Map<String, org.rutebanken.netex.model.StopPlace> uniqueById = new HashMap<>();
+            Map<String, org.entur.netex2.model.StopPlace> uniqueById = new HashMap<>();
             importedOrMatchedNetexStopPlaces.stream().forEach(e -> uniqueById.put(e.getId() + "#" + e.getVersion(), e));
             importedOrMatchedNetexStopPlaces = uniqueById.values();
 
@@ -188,21 +183,16 @@ public class StopPlaceImportHandler {
 
             if (!importedOrMatchedNetexStopPlaces.isEmpty()) {
                 logger.info("Add {} stops to response site frame", importedOrMatchedNetexStopPlaces.size());
-                List<JAXBElement<? extends Site_VersionStructure>> wrappedStopPlaces = importedOrMatchedNetexStopPlaces.stream()
-                                .map(sp -> new ObjectFactory().createStopPlace(sp))
-                        .collect(Collectors.toList());
-
-
                 responseSiteframe.withStopPlaces(
                         new StopPlacesInFrame_RelStructure()
-                                .withStopPlace_( wrappedStopPlaces));
+                                .withStopPlace(importedOrMatchedNetexStopPlaces));
             } else {
                 logger.info("No stops in response");
             }
         }
     }
 
-    private Collection<org.rutebanken.netex.model.StopPlace> importStopPlaces(List<StopPlace> tiamatStops, ImportParams importParams, AtomicInteger stopPlacesCreatedMatchedOrUpdated) {
+    private Collection<org.entur.netex2.model.StopPlace> importStopPlaces(List<StopPlace> tiamatStops, ImportParams importParams, AtomicInteger stopPlacesCreatedMatchedOrUpdated) {
         if (importParams.importType == null || importParams.importType.equals(ImportType.MERGE)) {
             return transactionalMergingStopPlacesImporter.importStopPlaces(tiamatStops, stopPlacesCreatedMatchedOrUpdated);
         } else if (importParams.importType.equals(ImportType.INITIAL)) {
@@ -214,7 +204,7 @@ public class StopPlaceImportHandler {
         }
     }
 
-    public void clearTopographicPlaceRefs(Collection<org.rutebanken.netex.model.StopPlace> stopPlaces) {
+    public void clearTopographicPlaceRefs(Collection<org.entur.netex2.model.StopPlace> stopPlaces) {
         stopPlaces.stream().forEach(stopPlace -> stopPlace.setTopographicPlaceRef(null));
     }
 

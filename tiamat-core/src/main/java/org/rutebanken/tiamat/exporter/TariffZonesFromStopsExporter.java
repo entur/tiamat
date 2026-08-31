@@ -16,13 +16,13 @@
 package org.rutebanken.tiamat.exporter;
 
 import jakarta.xml.bind.JAXBElement;
-import org.rutebanken.netex.model.FareZone;
-import org.rutebanken.netex.model.ObjectFactory;
-import org.rutebanken.netex.model.SiteFrame;
-import org.rutebanken.netex.model.StopPlace;
-import org.rutebanken.netex.model.TariffZone;
-import org.rutebanken.netex.model.TariffZonesInFrame_RelStructure;
-import org.rutebanken.netex.model.Zone_VersionStructure;
+import org.entur.netex2.model.FareZone;
+import org.entur.netex2.model.ObjectFactory;
+import org.entur.netex2.model.SiteFrame;
+import org.entur.netex2.model.StopPlace;
+import org.entur.netex2.model.TariffZone;
+import org.entur.netex2.model.TariffZonesInFrame_RelStructure;
+import org.entur.netex2.model.Zone_VersionStructure;
 import org.rutebanken.tiamat.model.TariffZoneRef;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.repository.reference.ReferenceResolver;
@@ -67,7 +67,7 @@ public class TariffZonesFromStopsExporter {
 
         importedNetexStopPlaces.stream()
                 .filter(stopPlace -> stopPlace.getTariffZones() != null)
-                .flatMap(stopPlace -> stopPlace.getTariffZones().getTariffZoneRef_().stream())
+                .flatMap(stopPlace -> stopPlace.getTariffZones().getTariffZoneRef().stream())
                 .map(JAXBElement::getValue)
                 .filter(tariffZoneRef -> !tariffZoneMap.containsKey(key(tariffZoneRef.getRef(), tariffZoneRef.getVersion())))
                 .map(tariffZoneRef -> netexMapper.getFacade().map(tariffZoneRef, TariffZoneRef.class))

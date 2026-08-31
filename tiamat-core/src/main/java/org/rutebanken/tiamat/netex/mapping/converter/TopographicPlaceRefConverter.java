@@ -19,7 +19,7 @@ import com.google.common.primitives.Longs;
 import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;
-import org.rutebanken.netex.model.TopographicPlaceRefStructure;
+import org.entur.netex2.model.TopographicPlaceRefStructure;
 import org.rutebanken.tiamat.model.TopographicPlace;
 import org.rutebanken.tiamat.netex.mapping.NetexMappingException;
 import org.rutebanken.tiamat.repository.TopographicPlaceRepository;

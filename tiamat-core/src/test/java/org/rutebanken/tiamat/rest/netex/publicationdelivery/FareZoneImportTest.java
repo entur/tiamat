@@ -17,27 +17,27 @@ package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
 import jakarta.xml.bind.JAXBElement;
 import org.junit.Test;
-import org.rutebanken.netex.model.FareFrame;
-import org.rutebanken.netex.model.FareZone;
-import org.rutebanken.netex.model.LocationStructure;
-import org.rutebanken.netex.model.MultilingualString;
-import org.rutebanken.netex.model.ObjectFactory;
-import org.rutebanken.netex.model.PublicationDeliveryStructure;
-import org.rutebanken.netex.model.Quay;
-import org.rutebanken.netex.model.Quays_RelStructure;
-import org.rutebanken.netex.model.SimplePoint_VersionStructure;
-import org.rutebanken.netex.model.SiteFrame;
-import org.rutebanken.netex.model.StopPlace;
-import org.rutebanken.netex.model.StopPlacesInFrame_RelStructure;
-import org.rutebanken.netex.model.StopTypeEnumeration;
-import org.rutebanken.netex.model.TariffZoneRef;
-import org.rutebanken.netex.model.TariffZoneRefs_RelStructure;
-import org.rutebanken.netex.model.TariffZonesInFrame_RelStructure;
-import org.rutebanken.netex.model.ValidBetween;
-import org.rutebanken.netex.model.Zone_VersionStructure;
+import org.entur.netex2.model.FareFrame;
+import org.entur.netex2.model.FareZone;
+import org.entur.netex2.model.LocationStructure;
+import org.entur.netex2.model.ObjectFactory;
+import org.entur.netex2.model.PublicationDeliveryStructure;
+import org.entur.netex2.model.Quay;
+import org.entur.netex2.model.Quays_RelStructure;
+import org.entur.netex2.model.SimplePoint_VersionStructure;
+import org.entur.netex2.model.SiteFrame;
+import org.entur.netex2.model.StopPlace;
+import org.entur.netex2.model.StopPlacesInFrame_RelStructure;
+import org.entur.netex2.model.StopTypeEnumeration;
+import org.entur.netex2.model.TariffZoneRef;
+import org.entur.netex2.model.TariffZoneRefs_RelStructure;
+import org.entur.netex2.model.TariffZonesInFrame_RelStructure;
+import org.entur.netex2.model.ValidBetween;
+import org.entur.netex2.model.Zone_VersionStructure;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.importer.ImportParams;
 import org.rutebanken.tiamat.importer.ImportType;
+import org.rutebanken.tiamat.netex.mapping.NetexMultilingualStringHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
@@ -61,7 +61,7 @@ public class FareZoneImportTest extends TiamatIntegrationTest {
         List<JAXBElement<? extends Zone_VersionStructure>> tariffZones = new ArrayList<>();
 
         FareZone fareZone = new FareZone()
-                .withName(new MultilingualString().withValue("V02"))
+                .withName(NetexMultilingualStringHelper.toNetexModel("V02"))
                 .withVersion("1")
                 .withValidBetween(new ValidBetween().withFromDate(validFrom))
                 .withId("RUT:FareZone:01");
@@ -81,7 +81,7 @@ public class FareZoneImportTest extends TiamatIntegrationTest {
                 .getTariffZones().getTariffZone();
 
         assertThat(actualZones).isNotEmpty();
-        assertThat(actualZones.getFirst().getValue().getName().getValue()).isEqualTo(fareZone.getName().getValue());
+        assertThat(NetexMultilingualStringHelper.getValue(actualZones.getFirst().getValue().getName())).isEqualTo(NetexMultilingualStringHelper.getValue(fareZone.getName()));
     }
 
     @Test
@@ -90,7 +90,7 @@ public class FareZoneImportTest extends TiamatIntegrationTest {
         List<JAXBElement<? extends Zone_VersionStructure>> tariffZones = new ArrayList<>();
 
         FareZone fareZone = new FareZone()
-                .withName(new MultilingualString().withValue("V02"))
+                .withName(NetexMultilingualStringHelper.toNetexModel("V02"))
                 .withVersion("1")
                 .withValidBetween(new ValidBetween().withFromDate(validFrom))
                 .withId("RUT:FareZone:05");
@@ -101,7 +101,7 @@ public class FareZoneImportTest extends TiamatIntegrationTest {
         stopPlace.withId("XYZ:StopPlace:32111");
         stopPlace.setVersion("1");
         stopPlace.setTariffZones(new TariffZoneRefs_RelStructure()
-                .withTariffZoneRef_(netexObjectFactory.createTariffZoneRef(new TariffZoneRef()
+                .withTariffZoneRef(netexObjectFactory.createTariffZoneRef(new TariffZoneRef()
                         .withVersion(fareZone.getVersion())
                         .withRef(fareZone.getId()))));
         stopPlace.setQuays(
@@ -109,7 +109,7 @@ public class FareZoneImportTest extends TiamatIntegrationTest {
                         .withQuayRefOrQuay(netexObjectFactory.createQuay(new Quay()
                                 .withId("XYZ:01:02")
                                 .withVersion("1")
-                                .withName(new MultilingualString().withValue("B"))
+                                .withName(NetexMultilingualStringHelper.toNetexModel("B"))
                                 .withCentroid(new SimplePoint_VersionStructure()
                                         .withLocation(new LocationStructure()
                                                 .withLatitude(new BigDecimal("9.6"))
@@ -118,7 +118,7 @@ public class FareZoneImportTest extends TiamatIntegrationTest {
         SiteFrame siteFrame = publicationDeliveryTestHelper.siteFrame()
                 .withTariffZones(new TariffZonesInFrame_RelStructure()
                         .withTariffZone(tariffZones))
-                .withStopPlaces(new StopPlacesInFrame_RelStructure().withStopPlace_(netexObjectFactory.createStopPlace(stopPlace)));
+                .withStopPlaces(new StopPlacesInFrame_RelStructure().withStopPlace(stopPlace));
 
         PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryTestHelper.publicationDelivery(siteFrame);
 
@@ -135,7 +135,7 @@ public class FareZoneImportTest extends TiamatIntegrationTest {
 
         assertThat(actualZones).isNotEmpty();
 
-        assertThat(actualZones.getFirst().getValue().getName().getValue()).isEqualTo(fareZone.getName().getValue());
+        assertThat(NetexMultilingualStringHelper.getValue(actualZones.getFirst().getValue().getName())).isEqualTo(NetexMultilingualStringHelper.getValue(fareZone.getName()));
         // Versions for tariff zones are incremented.
         assertThat(actualZones.getFirst().getValue().getVersion()).isEqualTo("2");
 
@@ -150,7 +150,7 @@ public class FareZoneImportTest extends TiamatIntegrationTest {
         LocalDateTime validFrom = LocalDateTime.now().minusDays(3).withNano(305_742_539);
 
         FareZone fareZone = new FareZone()
-                .withName(new MultilingualString().withValue("Nanos"))
+                .withName(NetexMultilingualStringHelper.toNetexModel("Nanos"))
                 .withVersion("1")
                 .withValidBetween(new ValidBetween().withFromDate(validFrom))
                 .withId("RUT:FareZone:Nanos01");
@@ -183,13 +183,13 @@ public class FareZoneImportTest extends TiamatIntegrationTest {
         List<JAXBElement<? extends Zone_VersionStructure>> tariffZones1 = new ArrayList<>();
 
         FareZone fareZone1 = new FareZone()
-                .withName(new MultilingualString().withValue("V02"))
+                .withName(NetexMultilingualStringHelper.toNetexModel("V02"))
                 .withVersion("1")
                 .withId("RUT:FareZone:01");
         tariffZones1.add(netexObjectFactory.createFareZone(fareZone1));
         StopPlace stopPlace = new StopPlace()
                 .withId("RUT:StopPlace:321")
-                .withName(new MultilingualString().withValue("name"))
+                .withName(NetexMultilingualStringHelper.toNetexModel("name"))
                 .withCentroid(point)
                 .withVersion("1")
                 .withStopPlaceType(StopTypeEnumeration.ONSTREET_BUS)
@@ -197,20 +197,20 @@ public class FareZoneImportTest extends TiamatIntegrationTest {
                         .withQuayRefOrQuay(netexObjectFactory.createQuay(new Quay()
                                 .withId("XYZ:01:02")
                                 .withVersion("1")
-                                .withName(new MultilingualString().withValue("B"))
+                                .withName(NetexMultilingualStringHelper.toNetexModel("B"))
                                 .withCentroid(new SimplePoint_VersionStructure()
                                         .withLocation(new LocationStructure()
                                                 .withLatitude(new BigDecimal("9.6"))
                                                 .withLongitude(new BigDecimal("76")))))))
                 .withTariffZones(new TariffZoneRefs_RelStructure()
-                        .withTariffZoneRef_(netexObjectFactory.createTariffZoneRef(new TariffZoneRef()
+                        .withTariffZoneRef(netexObjectFactory.createTariffZoneRef(new TariffZoneRef()
                                 .withVersion(fareZone1.getVersion())
                                 .withRef(fareZone1.getId()))));
 
         SiteFrame siteFrame = publicationDeliveryTestHelper.siteFrame()
                 .withTariffZones(new TariffZonesInFrame_RelStructure()
                         .withTariffZone(tariffZones1))
-                .withStopPlaces(new StopPlacesInFrame_RelStructure().withStopPlace_(netexObjectFactory.createStopPlace(stopPlace)));
+                .withStopPlaces(new StopPlacesInFrame_RelStructure().withStopPlace(stopPlace));
 
         PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryTestHelper.publicationDelivery(siteFrame);
 
@@ -222,14 +222,14 @@ public class FareZoneImportTest extends TiamatIntegrationTest {
 
         List<JAXBElement<? extends Zone_VersionStructure>> tariffZones2 = new ArrayList<>();
         FareZone fareZone2 = new FareZone()
-                .withName(new MultilingualString().withValue("X09"))
+                .withName(NetexMultilingualStringHelper.toNetexModel("X09"))
                 .withVersion("1")
                 .withId("BRA:FareZone:02");
         tariffZones2.add(netexObjectFactory.createFareZone(fareZone2));
         stopPlace
                 .withId("BRA:Stopplace:3")
                 .withTariffZones(new TariffZoneRefs_RelStructure()
-                        .withTariffZoneRef_(netexObjectFactory.createTariffZoneRef(new TariffZoneRef()
+                        .withTariffZoneRef(netexObjectFactory.createTariffZoneRef(new TariffZoneRef()
                                 .withVersion(fareZone2.getVersion())
                                 .withRef(fareZone2.getId()))));
 
@@ -237,7 +237,7 @@ public class FareZoneImportTest extends TiamatIntegrationTest {
         SiteFrame siteFrame2 = publicationDeliveryTestHelper.siteFrame()
                 .withTariffZones(new TariffZonesInFrame_RelStructure()
                         .withTariffZone(tariffZones2))
-                .withStopPlaces(new StopPlacesInFrame_RelStructure().withStopPlace_(netexObjectFactory.createStopPlace(stopPlace)));
+                .withStopPlaces(new StopPlacesInFrame_RelStructure().withStopPlace(stopPlace));
 
         PublicationDeliveryStructure publicationDeliveryStructure2 = publicationDeliveryTestHelper.publicationDelivery(siteFrame2);
 
@@ -265,13 +265,13 @@ public class FareZoneImportTest extends TiamatIntegrationTest {
 
         List<JAXBElement<? extends Zone_VersionStructure>> tariffZones1 = new ArrayList<>();
         FareZone fareZone1 = new FareZone()
-                .withName(new MultilingualString().withValue("V03"))
+                .withName(NetexMultilingualStringHelper.toNetexModel("V03"))
                 .withVersion("1")
                 .withId("ATB:FareZone:01");
         tariffZones1.add(netexObjectFactory.createFareZone(fareZone1));
         StopPlace stopPlace = new StopPlace()
                 .withId("ATB:StopPlace:322")
-                .withName(new MultilingualString().withValue("name"))
+                .withName(NetexMultilingualStringHelper.toNetexModel("name"))
                 .withCentroid(point)
                 .withVersion("1")
                 .withStopPlaceType(StopTypeEnumeration.ONSTREET_BUS)
@@ -279,20 +279,20 @@ public class FareZoneImportTest extends TiamatIntegrationTest {
                         .withQuayRefOrQuay(netexObjectFactory.createQuay(new Quay()
                                 .withId("XYZ:01:02")
                                 .withVersion("1")
-                                .withName(new MultilingualString().withValue("B"))
+                                .withName(NetexMultilingualStringHelper.toNetexModel("B"))
                                 .withCentroid(new SimplePoint_VersionStructure()
                                         .withLocation(new LocationStructure()
                                                 .withLatitude(new BigDecimal("77"))
                                                 .withLongitude(new BigDecimal("9.7")))))))
                 .withTariffZones(new TariffZoneRefs_RelStructure()
-                        .withTariffZoneRef_(netexObjectFactory.createTariffZoneRef(new TariffZoneRef()
+                        .withTariffZoneRef(netexObjectFactory.createTariffZoneRef(new TariffZoneRef()
                                 .withVersion(fareZone1.getVersion())
                                 .withRef(fareZone1.getId()))));
 
         SiteFrame siteFrame = publicationDeliveryTestHelper.siteFrame()
                 .withTariffZones(new TariffZonesInFrame_RelStructure()
                         .withTariffZone(tariffZones1))
-                .withStopPlaces(new StopPlacesInFrame_RelStructure().withStopPlace_(netexObjectFactory.createStopPlace(stopPlace)));
+                .withStopPlaces(new StopPlacesInFrame_RelStructure().withStopPlace(stopPlace));
 
         PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryTestHelper.publicationDelivery(siteFrame);
 
@@ -305,7 +305,7 @@ public class FareZoneImportTest extends TiamatIntegrationTest {
         List<JAXBElement<? extends Zone_VersionStructure>> tariffZones2 = new ArrayList<>();
 
         FareZone fareZone2 = new FareZone()
-                .withName(new MultilingualString().withValue("X08"))
+                .withName(NetexMultilingualStringHelper.toNetexModel("X08"))
                 .withVersion("1")
                 .withId("NTR:FareZone:03");
         tariffZones2.add(netexObjectFactory.createFareZone(fareZone2));
@@ -317,13 +317,13 @@ public class FareZoneImportTest extends TiamatIntegrationTest {
                         .withQuayRefOrQuay(netexObjectFactory.createQuay(new Quay()
                                 .withId("XYZ:01:02")
                                 .withVersion("1")
-                                .withName(new MultilingualString().withValue("B"))
+                                .withName(NetexMultilingualStringHelper.toNetexModel("B"))
                                 .withCentroid(new SimplePoint_VersionStructure()
                                         .withLocation(new LocationStructure()
                                                 .withLatitude(new BigDecimal("77"))
                                                 .withLongitude(new BigDecimal("9.7")))))))
                 .withTariffZones(new TariffZoneRefs_RelStructure()
-                        .withTariffZoneRef_(netexObjectFactory.createTariffZoneRef(new TariffZoneRef()
+                        .withTariffZoneRef(netexObjectFactory.createTariffZoneRef(new TariffZoneRef()
                                 .withVersion(fareZone2.getVersion())
                                 .withRef(fareZone2.getId()))));
 
@@ -331,7 +331,7 @@ public class FareZoneImportTest extends TiamatIntegrationTest {
         SiteFrame siteFrame2 = publicationDeliveryTestHelper.siteFrame()
                 .withTariffZones(new TariffZonesInFrame_RelStructure()
                         .withTariffZone(tariffZones2))
-                .withStopPlaces(new StopPlacesInFrame_RelStructure().withStopPlace_(netexObjectFactory.createStopPlace(stopPlace2)));
+                .withStopPlaces(new StopPlacesInFrame_RelStructure().withStopPlace(stopPlace2));
 
         PublicationDeliveryStructure publicationDeliveryStructure2 = publicationDeliveryTestHelper.publicationDelivery(siteFrame2);
 
@@ -348,7 +348,7 @@ public class FareZoneImportTest extends TiamatIntegrationTest {
 
         List<StopPlace> actualIdMatchedStopPlaces = publicationDeliveryTestHelper.extractStopPlaces(matchReponse);
         assertThat(actualIdMatchedStopPlaces).hasSize(1);
-        assertThat(actualIdMatchedStopPlaces.getFirst().getTariffZones().getTariffZoneRef_()).as("number of tariff zone refs").hasSize(2);
+        assertThat(actualIdMatchedStopPlaces.getFirst().getTariffZones().getTariffZoneRef()).as("number of tariff zone refs").hasSize(2);
 
         importParams.importType = ImportType.ID_MATCH;
 
@@ -361,7 +361,7 @@ public class FareZoneImportTest extends TiamatIntegrationTest {
 
         actualIdMatchedStopPlaces = publicationDeliveryTestHelper.extractStopPlaces(matchReponse);
         assertThat(actualIdMatchedStopPlaces).hasSize(1);
-        assertThat(actualIdMatchedStopPlaces.getFirst().getTariffZones().getTariffZoneRef_()).as("number of tariff zone refs").hasSize(2);
+        assertThat(actualIdMatchedStopPlaces.getFirst().getTariffZones().getTariffZoneRef()).as("number of tariff zone refs").hasSize(2);
 
     }
 
@@ -372,7 +372,7 @@ public class FareZoneImportTest extends TiamatIntegrationTest {
         List<JAXBElement<? extends Zone_VersionStructure>> tariffZones = new ArrayList<>();
 
         FareZone fareZone = new FareZone()
-                .withName(new MultilingualString().withValue("Backward Compat Zone"))
+                .withName(NetexMultilingualStringHelper.toNetexModel("Backward Compat Zone"))
                 .withVersion("1")
                 .withValidBetween(new ValidBetween().withFromDate(validFrom))
                 .withId("RUT:FareZone:BC01");
@@ -395,7 +395,7 @@ public class FareZoneImportTest extends TiamatIntegrationTest {
                 .getTariffZones().getTariffZone();
 
         assertThat(actualZones).isNotEmpty();
-        assertThat(actualZones.getFirst().getValue().getName().getValue()).isEqualTo(fareZone.getName().getValue());
+        assertThat(NetexMultilingualStringHelper.getValue(actualZones.getFirst().getValue().getName())).isEqualTo(NetexMultilingualStringHelper.getValue(fareZone.getName()));
 
         // Verify no FareFrame in response (backward compatible behavior)
         FareFrame responseFareFrame = publicationDeliveryTestHelper.findFareFrame(response);
@@ -409,7 +409,7 @@ public class FareZoneImportTest extends TiamatIntegrationTest {
         List<JAXBElement<? extends Zone_VersionStructure>> tariffZones = new ArrayList<>();
 
         FareZone fareZone = new FareZone()
-                .withName(new MultilingualString().withValue("Legacy Import Zone"))
+                .withName(NetexMultilingualStringHelper.toNetexModel("Legacy Import Zone"))
                 .withVersion("1")
                 .withValidBetween(new ValidBetween().withFromDate(validFrom))
                 .withId("RUT:FareZone:Legacy01");
@@ -432,7 +432,7 @@ public class FareZoneImportTest extends TiamatIntegrationTest {
                 .getTariffZones().getTariffZone();
 
         assertThat(actualZones).isNotEmpty();
-        assertThat(actualZones.getFirst().getValue().getName().getValue()).isEqualTo(fareZone.getName().getValue());
+        assertThat(NetexMultilingualStringHelper.getValue(actualZones.getFirst().getValue().getName())).isEqualTo(NetexMultilingualStringHelper.getValue(fareZone.getName()));
     }
 
     @Test
@@ -442,7 +442,7 @@ public class FareZoneImportTest extends TiamatIntegrationTest {
         List<JAXBElement<? extends Zone_VersionStructure>> tariffZones = new ArrayList<>();
 
         FareZone fareZone = new FareZone()
-                .withName(new MultilingualString().withValue("Explicit Site Zone"))
+                .withName(NetexMultilingualStringHelper.toNetexModel("Explicit Site Zone"))
                 .withVersion("1")
                 .withValidBetween(new ValidBetween().withFromDate(validFrom))
                 .withId("RUT:FareZone:Exp01");
@@ -465,6 +465,6 @@ public class FareZoneImportTest extends TiamatIntegrationTest {
                 .getTariffZones().getTariffZone();
 
         assertThat(actualZones).isNotEmpty();
-        assertThat(actualZones.getFirst().getValue().getName().getValue()).isEqualTo(fareZone.getName().getValue());
+        assertThat(NetexMultilingualStringHelper.getValue(actualZones.getFirst().getValue().getName())).isEqualTo(NetexMultilingualStringHelper.getValue(fareZone.getName()));
     }
 }

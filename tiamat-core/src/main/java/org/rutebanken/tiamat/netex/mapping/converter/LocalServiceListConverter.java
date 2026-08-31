@@ -4,10 +4,10 @@ import jakarta.xml.bind.JAXBElement;
 import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;
-import org.rutebanken.netex.model.AssistanceService;
-import org.rutebanken.netex.model.LocalService_VersionStructure;
-import org.rutebanken.netex.model.LocalServices_RelStructure;
-import org.rutebanken.netex.model.ObjectFactory;
+import org.entur.netex2.model.AssistanceService;
+import org.entur.netex2.model.LocalService_VersionStructure;
+import org.entur.netex2.model.LocalServices_RelStructure;
+import org.entur.netex2.model.ObjectFactory;
 import org.rutebanken.tiamat.model.LocalService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +32,7 @@ public class LocalServiceListConverter extends BidirectionalConverter<List<Local
         logger.debug("Mapping {} local services to netex", localServices.size());
 
         localServices.forEach(localService -> {
-            org.rutebanken.netex.model.AssistanceService netexLocalService = mapperFacade.map(localService, AssistanceService.class);
+            org.entur.netex2.model.AssistanceService netexLocalService = mapperFacade.map(localService, AssistanceService.class);
             JAXBElement<AssistanceService> localServiceVersionStructureJAXBElement = objectFactory.createAssistanceService(netexLocalService);
             localServices_relStructure.getLocalServiceRefOrLocalService().add(localServiceVersionStructureJAXBElement);
         });

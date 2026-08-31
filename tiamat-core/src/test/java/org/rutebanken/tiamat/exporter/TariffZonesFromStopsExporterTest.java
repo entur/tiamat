@@ -16,12 +16,12 @@
 package org.rutebanken.tiamat.exporter;
 
 import org.junit.Test;
-import org.rutebanken.netex.model.ObjectFactory;
-import org.rutebanken.netex.model.SiteFrame;
-import org.rutebanken.netex.model.StopPlace;
-import org.rutebanken.netex.model.TariffZoneRef;
-import org.rutebanken.netex.model.TariffZoneRefs_RelStructure;
-import org.rutebanken.netex.model.TariffZonesInFrame_RelStructure;
+import org.entur.netex2.model.ObjectFactory;
+import org.entur.netex2.model.SiteFrame;
+import org.entur.netex2.model.StopPlace;
+import org.entur.netex2.model.TariffZoneRef;
+import org.entur.netex2.model.TariffZoneRefs_RelStructure;
+import org.entur.netex2.model.TariffZonesInFrame_RelStructure;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.TariffZone;
 import org.rutebanken.tiamat.repository.TariffZoneRepository;
@@ -51,12 +51,12 @@ public class TariffZonesFromStopsExporterTest extends TiamatIntegrationTest {
         // Two stops with reference to the same tariffzone
         StopPlace netexStopPlace = new StopPlace();
         netexStopPlace.setId("NSR:StopPlace:1");
-        netexStopPlace.withTariffZones(new TariffZoneRefs_RelStructure().withTariffZoneRef_(new ObjectFactory().createTariffZoneRef(
+        netexStopPlace.withTariffZones(new TariffZoneRefs_RelStructure().withTariffZoneRef(new ObjectFactory().createTariffZoneRef(
                 new TariffZoneRef().withRef(tariffZone.getNetexId()).withVersion("1"))));
 
         StopPlace netexStopPlace2 = new StopPlace();
         netexStopPlace2.setId("NSR:StopPlace:2");
-        netexStopPlace2.withTariffZones(new TariffZoneRefs_RelStructure().withTariffZoneRef_(new ObjectFactory().createTariffZoneRef(
+        netexStopPlace2.withTariffZones(new TariffZoneRefs_RelStructure().withTariffZoneRef(new ObjectFactory().createTariffZoneRef(
                 new TariffZoneRef().withRef(tariffZone.getNetexId()).withVersion("1"))));
 
         SiteFrame siteFrame = new SiteFrame();
@@ -76,7 +76,7 @@ public class TariffZonesFromStopsExporterTest extends TiamatIntegrationTest {
 
         StopPlace netexStopPlace = new StopPlace();
         netexStopPlace.setId("NSR:StopPlace:1");
-        netexStopPlace.withTariffZones(new TariffZoneRefs_RelStructure().withTariffZoneRef_(new ObjectFactory().createTariffZoneRef(
+        netexStopPlace.withTariffZones(new TariffZoneRefs_RelStructure().withTariffZoneRef(new ObjectFactory().createTariffZoneRef(
                 new TariffZoneRef().withRef("NSR:TariffZone:1"))));
 
         SiteFrame siteFrame = new SiteFrame();
@@ -94,13 +94,13 @@ public class TariffZonesFromStopsExporterTest extends TiamatIntegrationTest {
         tariffZone.setVersion(1L);
         tariffZoneRepository.save(tariffZone);
 
-        org.rutebanken.netex.model.TariffZone alreadyAddedTariffZone = new org.rutebanken.netex.model.TariffZone()
+        org.entur.netex2.model.TariffZone alreadyAddedTariffZone = new org.entur.netex2.model.TariffZone()
                 .withId("VKT:TariffZone:123")
                 .withVersion("2");
 
         StopPlace netexStopPlace = new StopPlace();
         netexStopPlace.setId("NSR:StopPlace:1");
-        netexStopPlace.withTariffZones(new TariffZoneRefs_RelStructure().withTariffZoneRef_(new ObjectFactory().createTariffZoneRef(
+        netexStopPlace.withTariffZones(new TariffZoneRefs_RelStructure().withTariffZoneRef(new ObjectFactory().createTariffZoneRef(
                 new TariffZoneRef().withRef(tariffZone.getNetexId()).withVersion("1"))));
 
         SiteFrame siteFrame = new SiteFrame();

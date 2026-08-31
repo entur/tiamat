@@ -16,7 +16,7 @@
 package org.rutebanken.tiamat.exporter.async;
 
 import jakarta.xml.bind.JAXBElement;
-import org.rutebanken.netex.model.StopPlace;
+import org.entur.netex2.model.StopPlace;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 import java.util.Iterator;
 import java.util.function.Consumer;
@@ -72,8 +72,8 @@ public class NetexReferenceRemovingIterator implements Iterator<StopPlace> {
     }
 
     private void removeTariffZoneRefsVersion(StopPlace stopPlace, String type) {
-        if(stopPlace.getTariffZones() != null && stopPlace.getTariffZones().getTariffZoneRef_() != null) {
-            stopPlace.getTariffZones().getTariffZoneRef_().stream()
+        if(stopPlace.getTariffZones() != null && stopPlace.getTariffZones().getTariffZoneRef() != null) {
+            stopPlace.getTariffZones().getTariffZoneRef().stream()
             .map(JAXBElement::getValue)
                     .forEach(tariffZoneRef -> {
                 if(tariffZoneRef.getRef().contains(type)) {

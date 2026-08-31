@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class NetexMappingIterator<T extends EntityStructure, N extends org.rutebanken.netex.model.EntityStructure> implements Iterator<N> {
+public class NetexMappingIterator<T extends EntityStructure, N extends org.entur.netex2.model.EntityStructure> implements Iterator<N> {
 
     private static final Logger logger = LoggerFactory.getLogger(NetexMappingIterator.class);
 

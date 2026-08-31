@@ -6,11 +6,11 @@ import ma.glasnost.orika.metadata.Type;
 import ma.glasnost.orika.metadata.TypeBuilder;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
-import org.rutebanken.netex.model.AssistanceAvailabilityEnumeration;
-import org.rutebanken.netex.model.AssistanceFacilityEnumeration;
-import org.rutebanken.netex.model.LocalService_VersionStructure;
-import org.rutebanken.netex.model.LocalServices_RelStructure;
-import org.rutebanken.netex.model.ObjectFactory;
+import org.entur.netex2.model.AssistanceAvailabilityEnumeration;
+import org.entur.netex2.model.AssistanceFacilityEnumeration;
+import org.entur.netex2.model.LocalService_VersionStructure;
+import org.entur.netex2.model.LocalServices_RelStructure;
+import org.entur.netex2.model.ObjectFactory;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.AssistanceService;
 import org.rutebanken.tiamat.model.LocalService;
@@ -32,8 +32,8 @@ public class LocalServicesListConverterTest extends TiamatIntegrationTest  {
     @Autowired
     private LocalServiceListConverter localServiceListConverter;
 
-    protected org.rutebanken.netex.model.AssistanceService createNetexAssistanceService() {
-        org.rutebanken.netex.model.AssistanceService assistanceService = new org.rutebanken.netex.model.AssistanceService();
+    protected org.entur.netex2.model.AssistanceService createNetexAssistanceService() {
+        org.entur.netex2.model.AssistanceService assistanceService = new org.entur.netex2.model.AssistanceService();
         assistanceService.setAssistanceAvailability(AssistanceAvailabilityEnumeration.AVAILABLE_IF_BOOKED);
         assistanceService.withAssistanceFacilityList(AssistanceFacilityEnumeration.BOARDING_ASSISTANCE, AssistanceFacilityEnumeration.PERSONAL_ASSISTANCE);
         return assistanceService;
@@ -48,7 +48,7 @@ public class LocalServicesListConverterTest extends TiamatIntegrationTest  {
         return assistanceService;
     }
 
-    protected LocalServices_RelStructure getLocalServices_RelStructure(org.rutebanken.netex.model.AssistanceService assistanceService) {
+    protected LocalServices_RelStructure getLocalServices_RelStructure(org.entur.netex2.model.AssistanceService assistanceService) {
         LocalServices_RelStructure localServices_relStructure = new LocalServices_RelStructure();
         JAXBElement<LocalService_VersionStructure> localServiceVersionStructureJAXBElement = netexObjectFactory.createLocalService(assistanceService);
         return localServices_relStructure.withLocalServiceRefOrLocalService(localServiceVersionStructureJAXBElement);
@@ -56,7 +56,7 @@ public class LocalServicesListConverterTest extends TiamatIntegrationTest  {
 
     @Test
     public void convertFromRelStructure() {
-        org.rutebanken.netex.model.AssistanceService netexAssistanceService = createNetexAssistanceService();
+        org.entur.netex2.model.AssistanceService netexAssistanceService = createNetexAssistanceService();
         LocalServices_RelStructure localServices_relStructure = getLocalServices_RelStructure(netexAssistanceService);
 
         List<LocalService> localServices = localServiceListConverter.convertFrom(localServices_relStructure, localServicesType, mappingContext);
@@ -76,7 +76,7 @@ public class LocalServicesListConverterTest extends TiamatIntegrationTest  {
         LocalServices_RelStructure localServices_relStructure = localServiceListConverter.convertTo(localServices, localServices_RelStructureType, mappingContext);
         assertThat(localServices_relStructure).isNotNull();
         Assertions.assertThat(localServices_relStructure.getLocalServiceRefOrLocalService().size()).isEqualTo(1);
-        org.rutebanken.netex.model.AssistanceService netexAssistanceService = (org.rutebanken.netex.model.AssistanceService) localServices_relStructure.getLocalServiceRefOrLocalService().get(0).getValue();
+        org.entur.netex2.model.AssistanceService netexAssistanceService = (org.entur.netex2.model.AssistanceService) localServices_relStructure.getLocalServiceRefOrLocalService().get(0).getValue();
         assertThat(netexAssistanceService.getAssistanceAvailability().value()).isEqualTo(tiamatAssistanceService.getAssistanceAvailability().value());
         assertThat(netexAssistanceService.getAssistanceFacilityList().size()).isEqualTo(tiamatAssistanceService.getAssistanceFacilityList().size());
         assertThat(netexAssistanceService.getId()).isEqualTo(tiamatAssistanceService.getNetexId());

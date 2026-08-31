@@ -15,7 +15,7 @@
 
 package org.rutebanken.tiamat.importer;
 
-import org.rutebanken.netex.model.GroupOfTariffZones;
+import org.entur.netex2.model.GroupOfTariffZones;
 
 import java.util.List;
 import java.util.Set;

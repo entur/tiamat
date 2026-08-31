@@ -2,7 +2,7 @@ package org.rutebanken.tiamat.ext.fintraffic.api;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.rutebanken.netex.validation.NeTExValidator;
+import org.entur.netex2.validation.NeTExValidator;
 import org.rutebanken.tiamat.ext.fintraffic.api.model.ReadApiEntityOutRecord;
 import org.rutebanken.tiamat.ext.fintraffic.api.model.ReadApiSearchKey;
 import org.rutebanken.tiamat.ext.fintraffic.api.repository.NetexRepository;

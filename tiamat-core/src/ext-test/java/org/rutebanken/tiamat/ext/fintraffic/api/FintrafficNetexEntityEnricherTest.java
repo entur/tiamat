@@ -3,12 +3,12 @@ package org.rutebanken.tiamat.ext.fintraffic.api;
 import jakarta.xml.bind.JAXBElement;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.rutebanken.netex.model.KeyValueStructure;
-import org.rutebanken.netex.model.Parking;
-import org.rutebanken.netex.model.Quay;
-import org.rutebanken.netex.model.Quays_RelStructure;
-import org.rutebanken.netex.model.StopPlace;
-import org.rutebanken.netex.model.TopographicPlace;
+import org.entur.netex2.model.KeyValueStructure;
+import org.entur.netex2.model.Parking;
+import org.entur.netex2.model.Quay;
+import org.entur.netex2.model.Quays_RelStructure;
+import org.entur.netex2.model.StopPlace;
+import org.entur.netex2.model.TopographicPlace;
 
 import javax.xml.namespace.QName;
 import java.util.List;
@@ -39,7 +39,7 @@ class FintrafficNetexEntityEnricherTest {
     void enrichStopPlace_withExistingKeyList_appendsNumericId() {
         StopPlace stopPlace = new StopPlace();
         stopPlace.setId("ABC:StopPlace:1");
-        stopPlace.withKeyList(new org.rutebanken.netex.model.KeyListStructure()
+        stopPlace.withKeyList(new org.entur.netex2.model.KeyListStructure()
                 .withKeyValue(new KeyValueStructure().withKey("existingKey").withValue("existingValue")));
 
         enricher.enrich(stopPlace);
