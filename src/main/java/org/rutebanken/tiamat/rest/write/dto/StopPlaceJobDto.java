@@ -1,5 +1,6 @@
 package org.rutebanken.tiamat.rest.write.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.rutebanken.tiamat.model.job.AsyncStopPlaceJob;
 import org.rutebanken.tiamat.model.job.AsyncStopPlaceJobStatus;
 import org.rutebanken.tiamat.model.job.StopPlaceIdMapping;
@@ -7,9 +8,16 @@ import org.rutebanken.tiamat.model.job.StopPlaceIdMapping;
 import java.util.List;
 
 public record StopPlaceJobDto(
+    @Schema(description = "ID of the job. Poll the job endpoint with this ID.", example = "88991")
     Long jobId,
+
+    @Schema(description = "PROCESSING while the job runs. FINISHED, FAILED or TIMED_OUT when it ends.")
     AsyncStopPlaceJobStatus status,
+
+    @Schema(description = "For a create job that is FINISHED, the NeTEx ID that you submitted and the ID that the system generated.")
     List<StopPlaceIdMapping> createdIds,
+
+    @Schema(description = "Why the job is FAILED or TIMED_OUT. Null for the other statuses.")
     String errorMessage
 ) {
     public static StopPlaceJobDto from(AsyncStopPlaceJob asyncStopPlaceJob) {

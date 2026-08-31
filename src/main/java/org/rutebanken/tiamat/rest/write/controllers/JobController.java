@@ -17,8 +17,16 @@ interface JobController {
         description = """
         Returns the current status of a stop place write job.
 
-        A job is only visible to the principal that submitted it. Jobs submitted by someone else
-        are reported as not found rather than as forbidden, so that job ids cannot be probed.
+        The status is one of four values. PROCESSING means that the job is not complete, and you
+        must poll again. FINISHED means that the write is committed. FAILED means that the write
+        did not occur, and `errorMessage` gives the reason. TIMED_OUT means that the job did not
+        complete in time, and that nothing was written, so you can submit the request again.
+
+        A create job that is FINISHED gives `createdIds`. Each entry maps the NeTEx ID that you
+        submitted to the ID that the system generated.
+
+        A job is only visible to the principal that submitted it. The API reports a job from
+        another principal as not found, and not as forbidden, so that you cannot probe job ids.
         """,
         parameters = {
             @Parameter(

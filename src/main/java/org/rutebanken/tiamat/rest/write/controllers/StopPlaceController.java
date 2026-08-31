@@ -25,15 +25,13 @@ import org.rutebanken.tiamat.rest.write.dto.StopPlaceJobDto;
 
     The API does not read a write request before it accepts the request. The API answers a
     syntactically correct request with 202 and a job id. The API then reads and validates the
-    payload asynchronously. A synchronous API rejects malformed XML or an unsupported element
-    with 400. This API reports these problems as a FAILED job with a reason. To find the
-    outcome of a write request, poll the job endpoint.
+    payload asynchronously. Malformed XML and an unsupported element become a FAILED job with
+    a reason. To find the outcome of a write request, poll the job endpoint.
 
-    The API applies only one check synchronously: can this caller use the write API at all.
-    That check answers 403. The per-entity authorization limits a caller to some stop place
-    types and administrative zones. The API applies it during processing, and reports a
-    failure as a FAILED job. Thus the API answers an unauthorized write request with 202, and
-    the job fails later.
+    Only one check is synchronous: can this caller use the write API. If that check fails, the
+    API answers 403. The per-entity authorization limits a caller to some stop place types and
+    administrative zones. The API applies it during processing, so an unauthorized write
+    request also becomes a FAILED job.
     """
 )
 interface StopPlaceController {
@@ -46,7 +44,7 @@ interface StopPlaceController {
         The system replaces the NeTEx ID that you submit with a generated ID.
         The API returns a job for the asynchronous create operation.
         If the operation is successful, the job result includes the generated NeTEx ID.
-        The API reports malformed XML and unsupported elements on the job, and not as a 400.
+        The API reports malformed XML and unsupported elements on the job.
         """,
         requestBody = @RequestBody(
             required = true,
@@ -114,7 +112,7 @@ interface StopPlaceController {
         know which version you edited. Your document replaces every change that another client
         made after you read it. Refer to #453.
 
-        The API reports malformed XML and unsupported elements on the job, and not as a 400.
+        The API reports malformed XML and unsupported elements on the job.
         """,
         requestBody = @RequestBody(
             required = true,
