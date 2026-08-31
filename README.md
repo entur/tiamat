@@ -52,6 +52,9 @@ Tiamat also includes a diff tool. This is used to compare and show the differenc
 mvn clean install
 ```
 
+This builds both modules: `tiamat-core` (the reusable library, `tiamat-core/target/tiamat-core-*.jar`)
+and `tiamat-app` (the executable Spring Boot application, `tiamat-app/target/tiamat.jar`).
+
 You need the directory `/deployments/data` with rights for the user who
 performs the build.
 
@@ -220,11 +223,18 @@ See also [Disable AWS S3 Autoconfiguration](#disable-aws-s3-autoconfiguration), 
 
 #### Run It!
 
-**IntelliJ**: Right-click on `TiamatApplication.java` and choose Run (or Cmd+Shift+F10). Open Run -> Edit 
-configurations, choose the correct configuration (Spring Boot -> App), and add a comma separated list of desired 
-profiles (e.g. `local,local-blobstore,activemq`) to Active profiles. Save the configuration.
+**IntelliJ**: Right-click on `TiamatApplication.java` (in the `tiamat-app` module) and choose Run (or 
+Cmd+Shift+F10). Open Run -> Edit configurations, choose the correct configuration (Spring Boot -> App), and add a 
+comma separated list of desired profiles (e.g. `local,local-blobstore,activemq`) to Active profiles. Save the 
+configuration.
 
-**Command line**: `mvn spring-boot:run`
+> **Note!** Run configurations created before the multi-module split reference the old `tiamat` module and fail
+> with `ClassNotFoundException: org.rutebanken.tiamat.TiamatApplication`. Point them at `tiamat-app` instead.
+
+**Command line**: `mvn -pl tiamat-app -am spring-boot:run`
+
+Tiamat is built from the `tiamat-app` module; the reactor builds `tiamat-core` first. Running
+`mvn spring-boot:run` from the repository root does nothing — the root is an aggregator POM.
 
 ## Run tiamat with Docker compose
 To run Tiamat with Docker compose, you need to have a docker-compose.yml file. In docker-compose folder you will find a compose.yml file.:
@@ -276,7 +286,7 @@ spring.cloud.gcp.pubsub.enabled=false
 Start Tiamat with **spring.config.additional-location** so the file layers on top of the
 defaults shipped in the jar:
 
-`java -Dspring.config.additional-location=file:/path/to/tiamat.properties --add-opens java.base/java.lang=ALL-UNNAMED -jar tiamat-0.0.2-SNAPSHOT.jar`
+`java -Dspring.config.additional-location=file:/path/to/tiamat.properties --add-opens java.base/java.lang=ALL-UNNAMED -jar tiamat-app/target/tiamat.jar`
 
 > **Note!** Using `-Dspring.config.location=` (without `additional-`) still works, but it
 > *replaces* the jar's config files entirely, so your file must then contain the complete

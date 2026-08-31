@@ -248,7 +248,8 @@ mvn test
 
 ### Build Docker Image
 ```bash
-docker build -t tiamat .
+mvn -pl tiamat-app -am package
+docker build -f tiamat-app/Dockerfile -t tiamat tiamat-app
 ```
 Or use Jib for containerization without Docker daemon:
 ```bash
