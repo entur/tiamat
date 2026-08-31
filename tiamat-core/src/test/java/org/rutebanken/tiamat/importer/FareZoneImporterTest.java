@@ -64,8 +64,8 @@ public class FareZoneImporterTest {
         NetexMapper netexMapper = mock(NetexMapper.class);
         MapperFacade facade = mock(MapperFacade.class);
         when(netexMapper.getFacade()).thenReturn(facade);
-        when(facade.map(any(), eq(org.rutebanken.netex.model.FareZone.class)))
-                .thenReturn(new org.rutebanken.netex.model.FareZone());
+        when(facade.map(any(), eq(org.entur.netex2.model.FareZone.class)))
+                .thenReturn(new org.entur.netex2.model.FareZone());
         FareZoneConfig replicaConfig = new FareZoneConfig();
         ReflectionTestUtils.setField(replicaConfig, "externalVersioning", true);
         return new FareZoneImporter(netexMapper, saver, replicaConfig);

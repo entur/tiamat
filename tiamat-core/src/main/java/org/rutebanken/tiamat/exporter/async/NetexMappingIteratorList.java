@@ -20,7 +20,7 @@ import java.util.Iterator;
 import java.util.concurrent.Callable;
 
 
-public class NetexMappingIteratorList<N extends org.rutebanken.netex.model.EntityStructure> extends ArrayList<N> {
+public class NetexMappingIteratorList<N extends org.entur.netex2.model.EntityStructure> extends ArrayList<N> {
 
     private final Callable<Iterator<N>> iteratorRetriever;
 

@@ -23,14 +23,15 @@ import net.opengis.gml._3.ObjectFactory;
 import net.opengis.gml._3.PolygonType;
 import net.opengis.gml._3.SurfacePropertyType;
 import org.junit.Test;
-import org.rutebanken.netex.model.CountryRef;
-import org.rutebanken.netex.model.MultilingualString;
-import org.rutebanken.netex.model.PublicationDeliveryStructure;
-import org.rutebanken.netex.model.TopographicPlace;
-import org.rutebanken.netex.model.TopographicPlaceDescriptor_VersionedChildStructure;
-import org.rutebanken.netex.model.TopographicPlaceRefStructure;
-import org.rutebanken.netex.model.TopographicPlaceTypeEnumeration;
+import org.entur.netex2.model.CountryRef;
+import org.entur.netex2.model.MultilingualString;
+import org.entur.netex2.model.PublicationDeliveryStructure;
+import org.entur.netex2.model.TopographicPlace;
+import org.entur.netex2.model.TopographicPlaceDescriptor_VersionedChildStructure;
+import org.entur.netex2.model.TopographicPlaceRefStructure;
+import org.entur.netex2.model.TopographicPlaceTypeEnumeration;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
+import org.rutebanken.tiamat.netex.mapping.NetexMultilingualStringHelper;
 import org.rutebanken.tiamat.netex.mapping.converter.PolygonConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -74,7 +75,7 @@ public class TopographicPlaceRestImportIntegrationTest extends TiamatIntegration
                 .withExterior(new AbstractRingPropertyType()
                     .withAbstractRing(openGisObjectFactory.createLinearRing(linearRing)));
 
-        MultilingualString nameDescriptor = new MultilingualString().withValue("Vestfold").withLang("nb");
+        MultilingualString nameDescriptor = NetexMultilingualStringHelper.toNetexModel("Vestfold", "nb");
 
         TopographicPlace topographicPlace = new TopographicPlace()
                 .withId("KVE:TopographicPlace:07")
@@ -143,7 +144,7 @@ public class TopographicPlaceRestImportIntegrationTest extends TiamatIntegration
                                 new LinearRingType()
                                         .withPosList(new DirectPositionListType().withValue(interiorValues)))));
 
-        MultilingualString nameDescriptor = new MultilingualString().withValue("Vestfold med hull").withLang("nb");
+        MultilingualString nameDescriptor = NetexMultilingualStringHelper.toNetexModel("Vestfold med hull", "nb");
 
         TopographicPlace topographicPlace = new TopographicPlace()
                 .withId("KVE:TopographicPlace:07")
@@ -235,7 +236,7 @@ public class TopographicPlaceRestImportIntegrationTest extends TiamatIntegration
                         new SurfacePropertyType().withAbstractSurface(openGisObjectFactory.createPolygon(polygonType2))
                 );
 
-        MultilingualString nameDescriptor = new MultilingualString().withValue("Vestfold").withLang("nb");
+        MultilingualString nameDescriptor = NetexMultilingualStringHelper.toNetexModel("Vestfold", "nb");
 
         TopographicPlace topographicPlace = new TopographicPlace()
                 .withId("KVE:TopographicPlace:07")
@@ -265,7 +266,7 @@ public class TopographicPlaceRestImportIntegrationTest extends TiamatIntegration
 
     @Test
     public void publicationDeliveryWithParentTopographicPlace() throws Exception {
-        MultilingualString countyName = new MultilingualString().withValue("Vestfold").withLang("nb");
+        MultilingualString countyName = NetexMultilingualStringHelper.toNetexModel("Vestfold", "nb");
 
         TopographicPlace county = new TopographicPlace()
                 .withId("KVE:TopographicPlace:07")
@@ -275,7 +276,7 @@ public class TopographicPlaceRestImportIntegrationTest extends TiamatIntegration
                 .withTopographicPlaceType(TopographicPlaceTypeEnumeration.COUNTY)
                 .withCountryRef(new CountryRef().withValue("NO"));
 
-        MultilingualString municipalityName = new MultilingualString().withValue("Larvik").withLang("nb");
+        MultilingualString municipalityName = NetexMultilingualStringHelper.toNetexModel("Larvik", "nb");
 
         TopographicPlace municipality = new TopographicPlace()
                 .withId("KVE:TopographicPlace:08")
@@ -295,7 +296,7 @@ public class TopographicPlaceRestImportIntegrationTest extends TiamatIntegration
 
     @Test
     public void publicationDeliveryWithParentTopographicPlaceValidReferences() throws Exception {
-        MultilingualString countyName = new MultilingualString().withValue("Vestfold").withLang("nb");
+        MultilingualString countyName = NetexMultilingualStringHelper.toNetexModel("Vestfold", "nb");
 
         TopographicPlace county = new TopographicPlace()
                 .withId("KVE:TopographicPlace:07")
@@ -305,7 +306,7 @@ public class TopographicPlaceRestImportIntegrationTest extends TiamatIntegration
                 .withTopographicPlaceType(TopographicPlaceTypeEnumeration.COUNTY)
                 .withCountryRef(new CountryRef().withValue("NO"));
 
-        MultilingualString municipalityName = new MultilingualString().withValue("Larvik").withLang("nb");
+        MultilingualString municipalityName = NetexMultilingualStringHelper.toNetexModel("Larvik", "nb");
         TopographicPlace municipality = new TopographicPlace()
                 .withId("KVE:TopographicPlace:08")
                 .withName(municipalityName)
@@ -336,7 +337,7 @@ public class TopographicPlaceRestImportIntegrationTest extends TiamatIntegration
 
     @Test
     public void reimportTopographicPlaceAndExpectVersionIncremented() throws Exception {
-        MultilingualString countyName = new MultilingualString().withValue("Vestfold").withLang("nb");
+        MultilingualString countyName = NetexMultilingualStringHelper.toNetexModel("Vestfold", "nb");
 
         TopographicPlace county = new TopographicPlace()
                 .withId("KVE:TopographicPlace:07")
@@ -364,7 +365,7 @@ public class TopographicPlaceRestImportIntegrationTest extends TiamatIntegration
     @Test(expected = Exception.class)
     public void publicationDeliveryWithInvalidParentTopographicPlaceRef() throws Exception {
 
-        MultilingualString municipalityName = new MultilingualString().withValue("Larvik").withLang("nb");
+        MultilingualString municipalityName = NetexMultilingualStringHelper.toNetexModel("Larvik", "nb");
 
         TopographicPlace municipality = new TopographicPlace()
                 .withId("KVE:TopographicPlace:08")

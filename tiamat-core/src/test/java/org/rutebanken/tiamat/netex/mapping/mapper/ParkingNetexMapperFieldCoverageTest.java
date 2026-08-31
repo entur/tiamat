@@ -44,7 +44,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class ParkingNetexMapperFieldCoverageTest {
 
     /**
-     * Fields mapped between {@code org.rutebanken.netex.model.Parking} and
+     * Fields mapped between {@code org.entur.netex2.model.Parking} and
      * {@code org.rutebanken.tiamat.model.Parking}, each covered by an explicit
      * {@code mapNetexParking<Field>*}/{@code mapInternalParking<Field>*} test pair in
      * {@link org.rutebanken.tiamat.netex.mapping.NetexMapperTest}. Some are mapped by an

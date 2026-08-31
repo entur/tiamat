@@ -19,8 +19,8 @@ import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Unmarshaller;
 import org.junit.Test;
-import org.rutebanken.netex.model.PublicationDeliveryStructure;
-import org.rutebanken.netex.validation.NeTExValidator;
+import org.entur.netex2.model.PublicationDeliveryStructure;
+import org.entur.netex2.validation.NeTExValidator;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.exporter.params.StopPlaceSearch;
@@ -132,7 +132,7 @@ public class StreamingPublicationDeliveryIntegrationTest extends TiamatIntegrati
         streamingPublicationDelivery.stream(exportParams, byteArrayOutputStream, true);
 
         PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryTestHelper.fromString(byteArrayOutputStream.toString());
-        List<org.rutebanken.netex.model.StopPlace> stopPlaces = publicationDeliveryTestHelper.extractStopPlaces(publicationDeliveryStructure);
+        List<org.entur.netex2.model.StopPlace> stopPlaces = publicationDeliveryTestHelper.extractStopPlaces(publicationDeliveryStructure);
         assertThat(stopPlaces).hasSize(numberOfStopPlaces);
     }
 
@@ -323,27 +323,25 @@ public class StreamingPublicationDeliveryIntegrationTest extends TiamatIntegrati
 
         PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryUnmarshaller.unmarshal(new ByteArrayInputStream(xml.getBytes()));
 
-        org.rutebanken.netex.model.SiteFrame siteFrame = publicationDeliveryHelper.findSiteFrame(publicationDeliveryStructure);
-        List<org.rutebanken.netex.model.StopPlace> stops = siteFrame.getStopPlaces().getStopPlace_().stream()
-                .map(sp -> (org.rutebanken.netex.model.StopPlace) sp.getValue())
-                .toList();
+        org.entur.netex2.model.SiteFrame siteFrame = publicationDeliveryHelper.findSiteFrame(publicationDeliveryStructure);
+        List<org.entur.netex2.model.StopPlace> stops = siteFrame.getStopPlaces().getStopPlace();
 
         assertThat(stops)
                 .hasSize(2)
                 .as("stops expected")
-                .extracting(org.rutebanken.netex.model.StopPlace::getId)
+                .extracting(org.entur.netex2.model.StopPlace::getId)
                 .containsOnly(stopPlace1.getNetexId(), stopPlace2.getNetexId());
 
 
         // Make sure both stops have references to tariff zones and with correct version
-        org.rutebanken.netex.model.StopPlace actualStopPlace1 = stops.stream().filter(sp -> sp.getId().equals(stopPlace1NetexId)).findFirst().get();
+        org.entur.netex2.model.StopPlace actualStopPlace1 = stops.stream().filter(sp -> sp.getId().equals(stopPlace1NetexId)).findFirst().get();
 
         assertThat(actualStopPlace1.getTariffZones())
                 .as("actual stop place 1 tariff zones")
                 .isNotNull();
 
-        org.rutebanken.netex.model.TariffZoneRef actualTariffZoneRefStopPlace1 = actualStopPlace1.getTariffZones().getTariffZoneRef_().stream()
-                .map(tf -> (org.rutebanken.netex.model.TariffZoneRef) tf.getValue())
+        org.entur.netex2.model.TariffZoneRef actualTariffZoneRefStopPlace1 = actualStopPlace1.getTariffZones().getTariffZoneRef().stream()
+                .map(tf -> (org.entur.netex2.model.TariffZoneRef) tf.getValue())
                 .toList()
                 .getFirst();
 
@@ -354,9 +352,9 @@ public class StreamingPublicationDeliveryIntegrationTest extends TiamatIntegrati
 
         // Check stop place 2
 
-        org.rutebanken.netex.model.StopPlace actualStopPlace2 = stops.stream().filter(sp -> sp.getId().equals(stopPlace2NetexId)).findFirst().get();
-        org.rutebanken.netex.model.TariffZoneRef actualTariffZoneRefStopPlace2 = actualStopPlace2.getTariffZones().getTariffZoneRef_().stream()
-                .map(tf -> (org.rutebanken.netex.model.TariffZoneRef) tf.getValue())
+        org.entur.netex2.model.StopPlace actualStopPlace2 = stops.stream().filter(sp -> sp.getId().equals(stopPlace2NetexId)).findFirst().get();
+        org.entur.netex2.model.TariffZoneRef actualTariffZoneRefStopPlace2 = actualStopPlace2.getTariffZones().getTariffZoneRef().stream()
+                .map(tf -> (org.entur.netex2.model.TariffZoneRef) tf.getValue())
                 .toList()
                 .getFirst();
 
@@ -375,7 +373,7 @@ public class StreamingPublicationDeliveryIntegrationTest extends TiamatIntegrati
                 .as("site fra topopgraphic places")
                 .isNotNull()
                 .hasSize(1)
-                .extracting(org.rutebanken.netex.model.TopographicPlace::getId)
+                .extracting(org.entur.netex2.model.TopographicPlace::getId)
                 .containsOnly(topographicPlace.getNetexId());
 
         // Check tariff zones
@@ -426,7 +424,7 @@ public class StreamingPublicationDeliveryIntegrationTest extends TiamatIntegrati
 
         PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryUnmarshaller.unmarshal(new ByteArrayInputStream(byteArrayOutputStream.toByteArray()));
 
-        List<org.rutebanken.netex.model.StopPlace> stopPlaces = publicationDeliveryTestHelper.extractStopPlaces(publicationDeliveryStructure);
+        List<org.entur.netex2.model.StopPlace> stopPlaces = publicationDeliveryTestHelper.extractStopPlaces(publicationDeliveryStructure);
         assertThat(stopPlaces).hasSize(2);
     }
 
@@ -500,22 +498,20 @@ public class StreamingPublicationDeliveryIntegrationTest extends TiamatIntegrati
         netexXmlReferenceValidator.validateNetexReferences(new ByteArrayInputStream(xml.getBytes()), "publicationDelivery");
 
         PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryUnmarshaller.unmarshal(new ByteArrayInputStream(xml.getBytes()));
-        org.rutebanken.netex.model.SiteFrame siteFrame = publicationDeliveryHelper.findSiteFrame(publicationDeliveryStructure);
+        org.entur.netex2.model.SiteFrame siteFrame = publicationDeliveryHelper.findSiteFrame(publicationDeliveryStructure);
 
         // The parent stop must have been appended to the export.
-        List<org.rutebanken.netex.model.StopPlace> stops = siteFrame.getStopPlaces().getStopPlace_().stream()
-                .map(sp -> (org.rutebanken.netex.model.StopPlace) sp.getValue())
-                .toList();
+        List<org.entur.netex2.model.StopPlace> stops = siteFrame.getStopPlaces().getStopPlace();
         assertThat(stops)
                 .as("both the searched child and its appended parent must be exported")
-                .extracting(org.rutebanken.netex.model.StopPlace::getId)
+                .extracting(org.entur.netex2.model.StopPlace::getId)
                 .contains(child.getNetexId(), parent.getNetexId());
 
         // Both municipalities must be present: the one referenced by the child and the one referenced only by the parent.
         assertThat(siteFrame.getTopographicPlaces()).isNotNull();
         assertThat(siteFrame.getTopographicPlaces().getTopographicPlace())
                 .as("the topographic place referenced only by the parent must also be exported")
-                .extracting(org.rutebanken.netex.model.TopographicPlace::getId)
+                .extracting(org.entur.netex2.model.TopographicPlace::getId)
                 .contains(parentMunicipality.getNetexId(), childMunicipality.getNetexId());
     }
 
@@ -645,7 +641,7 @@ public class StreamingPublicationDeliveryIntegrationTest extends TiamatIntegrati
         PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryUnmarshaller.unmarshal(
                 new ByteArrayInputStream(xml.getBytes()));
 
-        org.rutebanken.netex.model.SiteFrame siteFrame = publicationDeliveryHelper.findSiteFrame(publicationDeliveryStructure);
+        org.entur.netex2.model.SiteFrame siteFrame = publicationDeliveryHelper.findSiteFrame(publicationDeliveryStructure);
 
         assertThat(siteFrame.getTopographicPlaces())
                 .as("TopographicPlaces should not be null")
@@ -655,7 +651,7 @@ public class StreamingPublicationDeliveryIntegrationTest extends TiamatIntegrati
                 .as("Should have one topographic place")
                 .hasSize(1);
 
-        org.rutebanken.netex.model.TopographicPlace exportedPlace = siteFrame.getTopographicPlaces().getTopographicPlace().getFirst();
+        org.entur.netex2.model.TopographicPlace exportedPlace = siteFrame.getTopographicPlaces().getTopographicPlace().getFirst();
 
         assertThat(exportedPlace.getId())
                 .as("Exported topographic place ID")
@@ -743,9 +739,9 @@ public class StreamingPublicationDeliveryIntegrationTest extends TiamatIntegrati
         PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryUnmarshaller.unmarshal(
                 new ByteArrayInputStream(xml.getBytes()));
 
-        org.rutebanken.netex.model.SiteFrame siteFrame = publicationDeliveryHelper.findSiteFrame(publicationDeliveryStructure);
+        org.entur.netex2.model.SiteFrame siteFrame = publicationDeliveryHelper.findSiteFrame(publicationDeliveryStructure);
 
-        org.rutebanken.netex.model.TopographicPlace exportedPlace = siteFrame.getTopographicPlaces().getTopographicPlace().getFirst();
+        org.entur.netex2.model.TopographicPlace exportedPlace = siteFrame.getTopographicPlaces().getTopographicPlace().getFirst();
 
         // Verify polygon is present
         assertThat(exportedPlace.getPolygon())
@@ -837,8 +833,8 @@ public class StreamingPublicationDeliveryIntegrationTest extends TiamatIntegrati
         validate(xmlFalse);
 
         PublicationDeliveryStructure pdFalse = publicationDeliveryUnmarshaller.unmarshal(new ByteArrayInputStream(xmlFalse.getBytes()));
-        org.rutebanken.netex.model.SiteFrame siteFrameFalse = publicationDeliveryHelper.findSiteFrame(pdFalse);
-        org.rutebanken.netex.model.TopographicPlace exportedPlaceFalse = siteFrameFalse.getTopographicPlaces()
+        org.entur.netex2.model.SiteFrame siteFrameFalse = publicationDeliveryHelper.findSiteFrame(pdFalse);
+        org.entur.netex2.model.TopographicPlace exportedPlaceFalse = siteFrameFalse.getTopographicPlaces()
                 .getTopographicPlace().stream()
                 .filter(tp -> tp.getId().equals(topographicPlaceNetexId))
                 .findFirst()
@@ -868,8 +864,8 @@ public class StreamingPublicationDeliveryIntegrationTest extends TiamatIntegrati
         validate(xmlTrue);
 
         PublicationDeliveryStructure pdTrue = publicationDeliveryUnmarshaller.unmarshal(new ByteArrayInputStream(xmlTrue.getBytes()));
-        org.rutebanken.netex.model.SiteFrame siteFrameTrue = publicationDeliveryHelper.findSiteFrame(pdTrue);
-        org.rutebanken.netex.model.TopographicPlace exportedPlaceTrue = siteFrameTrue.getTopographicPlaces()
+        org.entur.netex2.model.SiteFrame siteFrameTrue = publicationDeliveryHelper.findSiteFrame(pdTrue);
+        org.entur.netex2.model.TopographicPlace exportedPlaceTrue = siteFrameTrue.getTopographicPlaces()
                 .getTopographicPlace().stream()
                 .filter(tp -> tp.getId().equals(topographicPlaceNetexId))
                 .findFirst()
@@ -968,14 +964,14 @@ public class StreamingPublicationDeliveryIntegrationTest extends TiamatIntegrati
         PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryUnmarshaller.unmarshal(
                 new ByteArrayInputStream(xml.getBytes()));
 
-        org.rutebanken.netex.model.SiteFrame siteFrame = publicationDeliveryHelper.findSiteFrame(publicationDeliveryStructure);
+        org.entur.netex2.model.SiteFrame siteFrame = publicationDeliveryHelper.findSiteFrame(publicationDeliveryStructure);
 
         assertThat(siteFrame.getTopographicPlaces().getTopographicPlace())
                 .as("Should have two topographic places")
                 .hasSize(2);
 
         // Find the polygon place
-        org.rutebanken.netex.model.TopographicPlace exportedPolygonPlace = siteFrame.getTopographicPlaces()
+        org.entur.netex2.model.TopographicPlace exportedPolygonPlace = siteFrame.getTopographicPlaces()
                 .getTopographicPlace().stream()
                 .filter(tp -> tp.getId().equals(polygonPlaceNetexId))
                 .findFirst()
@@ -989,7 +985,7 @@ public class StreamingPublicationDeliveryIntegrationTest extends TiamatIntegrati
                 .isNull();
 
         // Find the multiSurface place - with exportMultiSurface=false, multiSurface should be cleared
-        org.rutebanken.netex.model.TopographicPlace exportedMultiSurfacePlace = siteFrame.getTopographicPlaces()
+        org.entur.netex2.model.TopographicPlace exportedMultiSurfacePlace = siteFrame.getTopographicPlaces()
                 .getTopographicPlace().stream()
                 .filter(tp -> tp.getId().equals(multiSurfacePlaceNetexId))
                 .findFirst()
@@ -1092,7 +1088,7 @@ public class StreamingPublicationDeliveryIntegrationTest extends TiamatIntegrati
         PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryUnmarshaller.unmarshal(
                 new ByteArrayInputStream(xml.getBytes()));
 
-        org.rutebanken.netex.model.SiteFrame siteFrame = publicationDeliveryHelper.findSiteFrame(publicationDeliveryStructure);
+        org.entur.netex2.model.SiteFrame siteFrame = publicationDeliveryHelper.findSiteFrame(publicationDeliveryStructure);
 
         assertThat(siteFrame.getTopographicPlaces().getTopographicPlace())
                 .as("Should have two topographic places")
@@ -1100,7 +1096,7 @@ public class StreamingPublicationDeliveryIntegrationTest extends TiamatIntegrati
 
         // Find the polygon-only place - should still have polygon when exportMultiSurface=true
         // because it doesn't have multiSurface data
-        org.rutebanken.netex.model.TopographicPlace exportedPolygonPlace = siteFrame.getTopographicPlaces()
+        org.entur.netex2.model.TopographicPlace exportedPolygonPlace = siteFrame.getTopographicPlaces()
                 .getTopographicPlace().stream()
                 .filter(tp -> tp.getId().equals(polygonPlaceNetexId))
                 .findFirst()
@@ -1114,7 +1110,7 @@ public class StreamingPublicationDeliveryIntegrationTest extends TiamatIntegrati
                 .isNull();
 
         // Find the multiSurface place - should have multiSurface, no polygon
-        org.rutebanken.netex.model.TopographicPlace exportedMultiSurfacePlace = siteFrame.getTopographicPlaces()
+        org.entur.netex2.model.TopographicPlace exportedMultiSurfacePlace = siteFrame.getTopographicPlaces()
                 .getTopographicPlace().stream()
                 .filter(tp -> tp.getId().equals(multiSurfacePlaceNetexId))
                 .findFirst()

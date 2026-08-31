@@ -18,7 +18,7 @@ package org.rutebanken.tiamat.netex.mapping.converter;
 import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;
-import org.rutebanken.netex.model.AccessibilityLimitations_RelStructure;
+import org.entur.netex2.model.AccessibilityLimitations_RelStructure;
 import org.rutebanken.tiamat.model.AccessibilityLimitation;
 import org.springframework.stereotype.Component;
 
@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-public class AccessibilityLimitationsListConverter extends BidirectionalConverter<List<AccessibilityLimitation>, org.rutebanken.netex.model.AccessibilityLimitations_RelStructure> {
+public class AccessibilityLimitationsListConverter extends BidirectionalConverter<List<AccessibilityLimitation>, org.entur.netex2.model.AccessibilityLimitations_RelStructure> {
 
     @Override
     public AccessibilityLimitations_RelStructure convertTo(List<AccessibilityLimitation> accessibilityLimitations,
@@ -39,7 +39,7 @@ public class AccessibilityLimitationsListConverter extends BidirectionalConverte
         AccessibilityLimitations_RelStructure limitationsRelStructure = new AccessibilityLimitations_RelStructure();
         accessibilityLimitations.forEach(limitation -> {
             limitationsRelStructure.setAccessibilityLimitation(
-                    mapperFacade.map(limitation, org.rutebanken.netex.model.AccessibilityLimitation.class)
+                    mapperFacade.map(limitation, org.entur.netex2.model.AccessibilityLimitation.class)
             );
         });
 
@@ -53,7 +53,7 @@ public class AccessibilityLimitationsListConverter extends BidirectionalConverte
         List<AccessibilityLimitation> accessibilityLimitations = new ArrayList<>();
 
         if(accessibilityLimitations_relStructure.getAccessibilityLimitation() != null) {
-            org.rutebanken.netex.model.AccessibilityLimitation accessibilityLimitation = accessibilityLimitations_relStructure.getAccessibilityLimitation();
+            org.entur.netex2.model.AccessibilityLimitation accessibilityLimitation = accessibilityLimitations_relStructure.getAccessibilityLimitation();
             AccessibilityLimitation tiamatLimitation = mapperFacade.map(accessibilityLimitation, AccessibilityLimitation.class);
             accessibilityLimitations.add(tiamatLimitation);
         }

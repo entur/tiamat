@@ -18,24 +18,25 @@ package org.rutebanken.tiamat.netex.mapping.mapper;
 import jakarta.xml.bind.JAXBElement;
 import ma.glasnost.orika.CustomMapper;
 import ma.glasnost.orika.MappingContext;
-import org.rutebanken.netex.model.AvailabilityCondition;
-import org.rutebanken.netex.model.DayTypeRefStructure;
-import org.rutebanken.netex.model.DayTypes_RelStructure;
-import org.rutebanken.netex.model.InfoLinkStructure;
-import org.rutebanken.netex.model.ObjectFactory;
-import org.rutebanken.netex.model.OperatorRefStructure;
-import org.rutebanken.netex.model.OrganisationRefStructure;
-import org.rutebanken.netex.model.Parking;
-import org.rutebanken.netex.model.ParkingArea;
-import org.rutebanken.netex.model.ParkingAreas_RelStructure;
-import org.rutebanken.netex.model.ParkingEntranceForVehicles;
-import org.rutebanken.netex.model.ParkingEntrancesForVehicles_RelStructure;
-import org.rutebanken.netex.model.Timeband_VersionedChildStructure;
-import org.rutebanken.netex.model.Timebands_RelStructure;
-import org.rutebanken.netex.model.ValidityConditions_RelStructure;
+import org.entur.netex2.model.AvailabilityCondition;
+import org.entur.netex2.model.DayTypeRefStructure;
+import org.entur.netex2.model.DayTypes_RelStructure;
+import org.entur.netex2.model.InfoLinkStructure;
+import org.entur.netex2.model.ObjectFactory;
+import org.entur.netex2.model.OperatorRefStructure;
+import org.entur.netex2.model.OrganisationRefStructure;
+import org.entur.netex2.model.Parking;
+import org.entur.netex2.model.ParkingArea;
+import org.entur.netex2.model.ParkingAreas_RelStructure;
+import org.entur.netex2.model.ParkingEntranceForVehicles;
+import org.entur.netex2.model.ParkingEntrancesForVehicles_RelStructure;
+import org.entur.netex2.model.Timeband_VersionedChildStructure;
+import org.entur.netex2.model.Timebands_RelStructure;
+import org.entur.netex2.model.ValidityConditions_RelStructure;
 import org.rutebanken.tiamat.model.InfoLink;
 import org.rutebanken.tiamat.model.PaymentMethodEnumeration;
 import org.rutebanken.tiamat.model.TypeOfInfolinkEnumeration;
+import org.rutebanken.tiamat.netex.mapping.NetexMultilingualStringHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,9 +55,9 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
     public void mapAtoB(Parking parking, org.rutebanken.tiamat.model.Parking parking2, MappingContext context) {
         super.mapAtoB(parking, parking2, context);
         if (parking.getParkingAreas() != null &&
-                parking.getParkingAreas().getParkingAreaRefOrParkingArea_() != null &&
-                !parking.getParkingAreas().getParkingAreaRefOrParkingArea_().isEmpty()) {
-            List<org.rutebanken.tiamat.model.ParkingArea> parkingAreas = mapperFacade.mapAsList(parking.getParkingAreas().getParkingAreaRefOrParkingArea_(), org.rutebanken.tiamat.model.ParkingArea.class, context);
+                parking.getParkingAreas().getParkingAreaRefOrParkingArea() != null &&
+                !parking.getParkingAreas().getParkingAreaRefOrParkingArea().isEmpty()) {
+            List<org.rutebanken.tiamat.model.ParkingArea> parkingAreas = mapperFacade.mapAsList(parking.getParkingAreas().getParkingAreaRefOrParkingArea(), org.rutebanken.tiamat.model.ParkingArea.class, context);
             if (!parkingAreas.isEmpty()) {
                 parking2.setParkingAreas(parkingAreas);
             }
@@ -82,7 +83,7 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
 
             if (!parkingAreas.isEmpty()) {
                 ParkingAreas_RelStructure parkingAreas_relStructure = new ParkingAreas_RelStructure();
-                parkingAreas_relStructure.getParkingAreaRefOrParkingArea_().addAll(wrappedParkingAreas);
+                parkingAreas_relStructure.getParkingAreaRefOrParkingArea().addAll(wrappedParkingAreas);
 
                 netexParking.setParkingAreas(parkingAreas_relStructure);
             }
@@ -103,13 +104,13 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
      * by name but accounting for the value-set mismatch.
      */
     private void mapPaymentMethodsFromNetex(Parking source, org.rutebanken.tiamat.model.Parking target) {
-        List<org.rutebanken.netex.model.PaymentMethodEnumeration> netexMethods = source.getPaymentMethods();
+        List<org.entur.netex2.model.PaymentMethodEnumeration> netexMethods = source.getPaymentMethods();
         if (netexMethods == null || netexMethods.isEmpty()) {
             return;
         }
         List<PaymentMethodEnumeration> targetMethods = target.getPaymentMethods();
         targetMethods.clear();
-        for (org.rutebanken.netex.model.PaymentMethodEnumeration netexMethod : netexMethods) {
+        for (org.entur.netex2.model.PaymentMethodEnumeration netexMethod : netexMethods) {
             try {
                 targetMethods.add(PaymentMethodEnumeration.fromValue(netexMethod.value()));
             } catch (IllegalArgumentException ignored) {
@@ -125,11 +126,11 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
         if (methods.isEmpty()) {
             return;
         }
-        List<org.rutebanken.netex.model.PaymentMethodEnumeration> targetMethods = target.getPaymentMethods();
+        List<org.entur.netex2.model.PaymentMethodEnumeration> targetMethods = target.getPaymentMethods();
         targetMethods.clear();
         for (PaymentMethodEnumeration method : methods) {
             try {
-                targetMethods.add(org.rutebanken.netex.model.PaymentMethodEnumeration.fromValue(method.value()));
+                targetMethods.add(org.entur.netex2.model.PaymentMethodEnumeration.fromValue(method.value()));
             } catch (IllegalArgumentException ignored) {
                 LOGGER.warn("Parking {}: internal payment method '{}' has no equivalent in the NeTEx " +
                                 "PaymentMethodEnumeration and was dropped on export.",
@@ -195,7 +196,7 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
                                           List<org.rutebanken.tiamat.model.ParkingEntranceForVehicles> entrances) {
         for (int i = 0; i < netexEntrances.size() && i < entrances.size(); i++) {
             ParkingEntranceForVehicles netexEntrance = netexEntrances.get(i);
-            List<org.rutebanken.netex.model.AccessModeEnumeration> netexAccessModes = netexEntrance.getAccessModes();
+            List<org.entur.netex2.model.AccessModeEnumeration> netexAccessModes = netexEntrance.getAccessModes();
             if (netexAccessModes == null || netexAccessModes.isEmpty()) {
                 continue;
             }
@@ -224,10 +225,10 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
             if (accessModes.isEmpty()) {
                 continue;
             }
-            List<org.rutebanken.netex.model.AccessModeEnumeration> netexAccessModes = accessModes.stream()
+            List<org.entur.netex2.model.AccessModeEnumeration> netexAccessModes = accessModes.stream()
                     .map(mode -> {
                         try {
-                            return org.rutebanken.netex.model.AccessModeEnumeration.fromValue(mode.value());
+                            return org.entur.netex2.model.AccessModeEnumeration.fromValue(mode.value());
                         } catch (IllegalArgumentException ignored) {
                             LOGGER.warn("Vehicle entrance {}: internal access mode '{}' has no equivalent in the NeTEx " +
                                             "AccessModeEnumeration and was dropped on export.",
@@ -261,7 +262,7 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
                 continue;
             }
             TypeOfInfolinkEnumeration type = null;
-            List<org.rutebanken.netex.model.TypeOfInfolinkEnumeration> types = netexLink.getTypeOfInfoLink();
+            List<org.entur.netex2.model.TypeOfInfoLinkEnumeration> types = netexLink.getTypeOfInfoLink();
             if (types != null && !types.isEmpty()) {
                 try {
                     type = TypeOfInfolinkEnumeration.fromValue(types.get(0).value());
@@ -281,15 +282,15 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
         if (infoLinks.isEmpty()) {
             return;
         }
-        org.rutebanken.netex.model.GroupOfEntities_VersionStructure.InfoLinks relStruct =
-                new org.rutebanken.netex.model.GroupOfEntities_VersionStructure.InfoLinks();
+        org.entur.netex2.model.GroupOfEntities_VersionStructure.InfoLinks relStruct =
+                new org.entur.netex2.model.GroupOfEntities_VersionStructure.InfoLinks();
         for (InfoLink infoLink : infoLinks) {
             InfoLinkStructure netexLink = new InfoLinkStructure();
             netexLink.setValue(infoLink.getUri());
             if (infoLink.getTypeOfInfoLink() != null) {
                 try {
                     netexLink.getTypeOfInfoLink().add(
-                            org.rutebanken.netex.model.TypeOfInfolinkEnumeration.fromValue(infoLink.getTypeOfInfoLink().value()));
+                            org.entur.netex2.model.TypeOfInfoLinkEnumeration.fromValue(infoLink.getTypeOfInfoLink().value()));
                 } catch (IllegalArgumentException ignored) {
                     // stored value no longer valid — skip type
                 }
@@ -319,7 +320,7 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
         }
 
         LinkedHashSet<org.rutebanken.tiamat.model.AvailabilityCondition> conditions = new LinkedHashSet<>();
-        for (Object entry : validityConditions.getValidityConditionRefOrValidBetweenOrValidityCondition_()) {
+        for (Object entry : validityConditions.getValidityConditionRefOrValidBetweenOrValidityCondition()) {
             if (!(entry instanceof JAXBElement<?> jaxbElement)) {
                 continue;
             }
@@ -370,7 +371,7 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
             return List.of();
         }
         List<String> refs = new ArrayList<>();
-        for (JAXBElement<?> dayTypeEntry : dayTypes.getDayTypeRefOrDayType_()) {
+        for (JAXBElement<?> dayTypeEntry : dayTypes.getDayTypeRefOrDayType()) {
             if (dayTypeEntry.getValue() instanceof DayTypeRefStructure ref && ref.getRef() != null) {
                 refs.add(ref.getRef());
             }
@@ -422,7 +423,7 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
             validityConditions = new ValidityConditions_RelStructure();
             target.setValidityConditions(validityConditions);
         }
-        List<Object> validityConditionEntries = validityConditions.getValidityConditionRefOrValidBetweenOrValidityCondition_();
+        List<Object> validityConditionEntries = validityConditions.getValidityConditionRefOrValidBetweenOrValidityCondition();
         validityConditionEntries.removeIf(entry -> entry instanceof JAXBElement<?> jaxbElement
                 && jaxbElement.getValue() instanceof AvailabilityCondition);
 
@@ -435,7 +436,7 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
 
             DayTypeRefStructure dayTypeRef = new DayTypeRefStructure().withRef(condition.getDayTypeRef());
             DayTypes_RelStructure dayTypes = new DayTypes_RelStructure();
-            dayTypes.getDayTypeRefOrDayType_().add(OBJECT_FACTORY.createDayTypeRef(dayTypeRef));
+            dayTypes.getDayTypeRefOrDayType().add(OBJECT_FACTORY.createDayTypeRef(dayTypeRef));
             availabilityCondition.withDayTypes(dayTypes);
 
             if (condition.getStartTime() != null) {
@@ -478,11 +479,11 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
         }
 
         List<org.rutebanken.tiamat.model.AlternativeName> alternativeNames = new ArrayList<>();
-        for (org.rutebanken.netex.model.AlternativeName netexAltName : source.getAlternativeNames().getAlternativeName()) {
+        for (org.entur.netex2.model.AlternativeName netexAltName : source.getAlternativeNames().getAlternativeName()) {
             if (netexAltName != null
                     && netexAltName.getName() != null
-                    && netexAltName.getName().getValue() != null
-                    && !netexAltName.getName().getValue().isEmpty()) {
+                    && NetexMultilingualStringHelper.getValue(netexAltName.getName()) != null
+                    && !NetexMultilingualStringHelper.getValue(netexAltName.getName()).isEmpty()) {
                 org.rutebanken.tiamat.model.AlternativeName tiamatAltName = new org.rutebanken.tiamat.model.AlternativeName();
                 mapperFacade.map(netexAltName, tiamatAltName);
                 alternativeNames.add(tiamatAltName);
@@ -499,13 +500,13 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
             return;
         }
 
-        List<org.rutebanken.netex.model.AlternativeName> netexAlternativeNames = new ArrayList<>();
+        List<org.entur.netex2.model.AlternativeName> netexAlternativeNames = new ArrayList<>();
         for (org.rutebanken.tiamat.model.AlternativeName alternativeName : source.getAlternativeNames()) {
             if (alternativeName != null
                     && alternativeName.getName() != null
                     && alternativeName.getName().getValue() != null
                     && !alternativeName.getName().getValue().isEmpty()) {
-                org.rutebanken.netex.model.AlternativeName netexAltName = new org.rutebanken.netex.model.AlternativeName();
+                org.entur.netex2.model.AlternativeName netexAltName = new org.entur.netex2.model.AlternativeName();
                 mapperFacade.map(alternativeName, netexAltName);
                 netexAltName.setId(alternativeName.getNetexId());
                 netexAlternativeNames.add(netexAltName);
@@ -513,8 +514,8 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
         }
 
         if (!netexAlternativeNames.isEmpty()) {
-            org.rutebanken.netex.model.AlternativeNames_RelStructure alternativeNamesRelStructure =
-                    new org.rutebanken.netex.model.AlternativeNames_RelStructure();
+            org.entur.netex2.model.AlternativeNames_RelStructure alternativeNamesRelStructure =
+                    new org.entur.netex2.model.AlternativeNames_RelStructure();
             alternativeNamesRelStructure.getAlternativeName().addAll(netexAlternativeNames);
             target.setAlternativeNames(alternativeNamesRelStructure);
         }

@@ -16,14 +16,14 @@
 package org.rutebanken.tiamat.netex.mapping;
 
 import jakarta.xml.bind.JAXBElement;
-import org.rutebanken.netex.model.Common_VersionFrameStructure;
-import org.rutebanken.netex.model.CompositeFrame;
-import org.rutebanken.netex.model.Composite_VersionFrameStructure;
-import org.rutebanken.netex.model.DataManagedObjectStructure;
-import org.rutebanken.netex.model.FareFrame;
-import org.rutebanken.netex.model.PublicationDeliveryStructure;
-import org.rutebanken.netex.model.SiteFrame;
-import org.rutebanken.netex.model.TopographicPlace;
+import org.entur.netex2.model.Common_VersionFrameStructure;
+import org.entur.netex2.model.CompositeFrame;
+import org.entur.netex2.model.Composite_VersionFrameStructure;
+import org.entur.netex2.model.DataManagedObjectStructure;
+import org.entur.netex2.model.FareFrame;
+import org.entur.netex2.model.PublicationDeliveryStructure;
+import org.entur.netex2.model.SiteFrame;
+import org.entur.netex2.model.TopographicPlace;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -54,7 +54,7 @@ public class PublicationDeliveryHelper {
     }
 
     public boolean hasStops(SiteFrame siteFrame) {
-        return siteFrame.getStopPlaces() != null && siteFrame.getStopPlaces().getStopPlace_() != null;
+        return siteFrame.getStopPlaces() != null && siteFrame.getStopPlaces().getStopPlace() != null;
     }
 
     public boolean hasTariffZones(SiteFrame netexSiteFrame) {
@@ -62,7 +62,7 @@ public class PublicationDeliveryHelper {
     }
 
     public boolean hasPathLinks(SiteFrame netexSiteFrame) {
-        return netexSiteFrame.getPathLinks() != null && netexSiteFrame.getPathLinks().getPathLink() != null;
+        return netexSiteFrame.getPathLinks() != null && netexSiteFrame.getPathLinks().getSitePathLinkOrOffSitePathLinkOrPathLink() != null;
     }
 
     public boolean hasParkings(SiteFrame siteFrame) {
@@ -70,7 +70,7 @@ public class PublicationDeliveryHelper {
     }
 
     public int numberOfStops(SiteFrame netexSiteFrame) {
-        return hasStops(netexSiteFrame) ? netexSiteFrame.getStopPlaces().getStopPlace_().size() : 0;
+        return hasStops(netexSiteFrame) ? netexSiteFrame.getStopPlaces().getStopPlace().size() : 0;
     }
 
     public SiteFrame findSiteFrame(PublicationDeliveryStructure incomingPublicationDelivery) {

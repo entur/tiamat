@@ -54,7 +54,7 @@ public class TopographicPlaceImporter {
         this.topographicPlaceVersionedSaverService = topographicPlaceVersionedSaverService;
     }
 
-    public List<org.rutebanken.netex.model.TopographicPlace> importTopographicPlaces(List<TopographicPlace> topographicPlaces, AtomicInteger topographicPlacesCounter) {
+    public List<org.entur.netex2.model.TopographicPlace> importTopographicPlaces(List<TopographicPlace> topographicPlaces, AtomicInteger topographicPlacesCounter) {
 
         logger.info("Importing {} incoming topogprahic places", topographicPlaces.size());
 

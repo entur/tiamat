@@ -67,7 +67,7 @@ public class PathLinksImporter {
         this.authorizationService = authorizationService;
     }
 
-    public List<org.rutebanken.netex.model.PathLink> importPathLinks(List<PathLink> pathLinks, AtomicInteger pathLinkCounter) {
+    public List<org.entur.netex2.model.PathLink> importPathLinks(List<PathLink> pathLinks, AtomicInteger pathLinkCounter) {
 
         return pathLinks.stream()
                 .peek(pathLink -> logger.debug("Importing path link {}", pathLink))

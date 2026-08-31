@@ -17,8 +17,8 @@ package org.rutebanken.tiamat.exporter;
 
 import jakarta.xml.bind.JAXBException;
 import org.junit.Test;
-import org.rutebanken.netex.model.PublicationDeliveryStructure;
-import org.rutebanken.netex.model.StopPlace;
+import org.entur.netex2.model.PublicationDeliveryStructure;
+import org.entur.netex2.model.StopPlace;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.model.SiteRefStructure;

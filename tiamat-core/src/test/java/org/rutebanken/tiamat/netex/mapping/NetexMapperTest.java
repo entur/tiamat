@@ -19,13 +19,12 @@ import jakarta.xml.bind.JAXBElement;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
-import org.rutebanken.netex.model.AccessibilityLimitations_RelStructure;
-import org.rutebanken.netex.model.KeyListStructure;
-import org.rutebanken.netex.model.KeyValueStructure;
-import org.rutebanken.netex.model.MultilingualString;
-import org.rutebanken.netex.model.ObjectFactory;
-import org.rutebanken.netex.model.SiteRefs_RelStructure;
-import org.rutebanken.netex.model.TopographicPlacesInFrame_RelStructure;
+import org.entur.netex2.model.AccessibilityLimitations_RelStructure;
+import org.entur.netex2.model.KeyListStructure;
+import org.entur.netex2.model.KeyValueStructure;
+import org.entur.netex2.model.ObjectFactory;
+import org.entur.netex2.model.SiteRefs_RelStructure;
+import org.entur.netex2.model.TopographicPlacesInFrame_RelStructure;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.AccessibilityAssessment;
 import org.rutebanken.tiamat.model.AccessibilityLimitation;
@@ -74,7 +73,7 @@ public class NetexMapperTest extends TiamatIntegrationTest {
     public void mapKeyValuesToInternalList() throws Exception {
 
 
-        org.rutebanken.netex.model.StopPlace stopPlace = new org.rutebanken.netex.model.StopPlace()
+        org.entur.netex2.model.StopPlace stopPlace = new org.entur.netex2.model.StopPlace()
                 .withKeyList(
                         new KeyListStructure()
                                 .withKeyValue(
@@ -106,33 +105,31 @@ public class NetexMapperTest extends TiamatIntegrationTest {
 
         sourceSiteFrame.setStopPlaces(stopPlacesInFrame_relStructure);
 
-        org.rutebanken.netex.model.SiteFrame netexSiteFrame = netexMapper.mapToNetexModel(sourceSiteFrame);
+        org.entur.netex2.model.SiteFrame netexSiteFrame = netexMapper.mapToNetexModel(sourceSiteFrame);
 
         assertThat(netexSiteFrame).isNotNull();
-        assertThat(netexSiteFrame.getStopPlaces().getStopPlace_().getFirst().getValue().getName().getValue()).isEqualTo(stopPlace.getName().getValue());
+        assertThat(NetexMultilingualStringHelper.getValue(netexSiteFrame.getStopPlaces().getStopPlace().getFirst().getName())).isEqualTo(stopPlace.getName().getValue());
     }
 
     @Test
     public void mapSiteFrameToInternalModel() throws Exception {
-        org.rutebanken.netex.model.SiteFrame netexSiteFrame = new org.rutebanken.netex.model.SiteFrame();
+        org.entur.netex2.model.SiteFrame netexSiteFrame = new org.entur.netex2.model.SiteFrame();
 
-        org.rutebanken.netex.model.StopPlacesInFrame_RelStructure stopPlacesInFrame_relStructure = new org.rutebanken.netex.model.StopPlacesInFrame_RelStructure();
+        org.entur.netex2.model.StopPlacesInFrame_RelStructure stopPlacesInFrame_relStructure = new org.entur.netex2.model.StopPlacesInFrame_RelStructure();
 
-        org.rutebanken.netex.model.StopPlace stopPlace = new org.rutebanken.netex.model.StopPlace();
-        stopPlace.setName(new org.rutebanken.netex.model.MultilingualString()
-                .withValue("stop place")
-                .withLang("no"));
+        org.entur.netex2.model.StopPlace stopPlace = new org.entur.netex2.model.StopPlace();
+        stopPlace.setName(NetexMultilingualStringHelper.toNetexModel("stop place", "no"));
 
         String stopPlaceId = "1337";
         stopPlace.setId("AVI:StopPlace:" + stopPlaceId);
 
-        stopPlacesInFrame_relStructure.getStopPlace_().add(new ObjectFactory().createStopPlace(stopPlace));
+        stopPlacesInFrame_relStructure.getStopPlace().add(stopPlace);
         netexSiteFrame.setStopPlaces(stopPlacesInFrame_relStructure);
 
         org.rutebanken.tiamat.model.SiteFrame actualSiteFrame = netexMapper.mapToTiamatModel(netexSiteFrame);
 
         assertThat(actualSiteFrame).isNotNull();
-        assertThat(actualSiteFrame.getStopPlaces().getStopPlace().getFirst().getName().getValue()).isEqualTo(stopPlace.getName().getValue());
+        assertThat(actualSiteFrame.getStopPlaces().getStopPlace().getFirst().getName().getValue()).isEqualTo(NetexMultilingualStringHelper.getValue(stopPlace.getName()));
     }
 
     @Test
@@ -160,11 +157,11 @@ public class NetexMapperTest extends TiamatIntegrationTest {
 
 
 
-        org.rutebanken.netex.model.GroupOfStopPlaces netexGroupOfStopPlaces = netexMapper.getFacade().map(groupOfStopPlaces, org.rutebanken.netex.model.GroupOfStopPlaces.class);
+        org.entur.netex2.model.GroupOfStopPlaces netexGroupOfStopPlaces = netexMapper.getFacade().map(groupOfStopPlaces, org.entur.netex2.model.GroupOfStopPlaces.class);
 
         assertThat(netexGroupOfStopPlaces).isNotNull();
 
-        assertThat(netexGroupOfStopPlaces.getName().getValue())
+        assertThat(NetexMultilingualStringHelper.getValue(netexGroupOfStopPlaces.getName()))
                 .as("name.value")
                 .isEqualTo(groupOfStopPlaces.getName().getValue());
 
@@ -202,11 +199,11 @@ public class NetexMapperTest extends TiamatIntegrationTest {
         topographicPlace.setNetexId("netexidfortopoplace");
         stopPlace.setTopographicPlace(topographicPlace);
 
-        org.rutebanken.netex.model.StopPlace netexStopPlace = netexMapper.mapToNetexModel(stopPlace);
+        org.entur.netex2.model.StopPlace netexStopPlace = netexMapper.mapToNetexModel(stopPlace);
 
         assertThat(netexStopPlace).isNotNull();
         assertThat(netexStopPlace.getName()).isNotNull();
-        assertThat(netexStopPlace.getName().getValue()).isEqualTo(stopPlace.getName().getValue());
+        assertThat(NetexMultilingualStringHelper.getValue(netexStopPlace.getName())).isEqualTo(stopPlace.getName().getValue());
         assertThat(netexStopPlace.getTopographicPlaceRef()).isNotNull();
         assertThat(netexStopPlace.getTopographicPlaceRef().getRef()).isEqualTo(topographicPlace.getNetexId());
         assertThat(netexStopPlace.getTopographicPlaceRef().getVersion()).isEqualTo(String.valueOf(topographicPlace.getVersion()));
@@ -214,7 +211,7 @@ public class NetexMapperTest extends TiamatIntegrationTest {
 
     @Test
     public void mapStopPlaceToInternalWithId() throws Exception {
-        org.rutebanken.netex.model.StopPlace netexStopPlace = new org.rutebanken.netex.model.StopPlace();
+        org.entur.netex2.model.StopPlace netexStopPlace = new org.entur.netex2.model.StopPlace();
         netexStopPlace.setId("NSR:StopPlace:1339");
 
         org.rutebanken.tiamat.model.StopPlace tiamatStopPlace = netexMapper.mapToTiamatModel(netexStopPlace);
@@ -233,7 +230,7 @@ public class NetexMapperTest extends TiamatIntegrationTest {
 
         stopPlace.getKeyValues().put(ORIGINAL_ID_KEY, new Value(originalId));
 
-        org.rutebanken.netex.model.StopPlace netexStopPlace = netexMapper.mapToNetexModel(stopPlace);
+        org.entur.netex2.model.StopPlace netexStopPlace = netexMapper.mapToNetexModel(stopPlace);
         assertThat(netexStopPlace.getKeyList()).isNotNull();
         assertThat(netexStopPlace.getKeyList().getKeyValue()).isNotNull();
         assertThat(netexStopPlace.getKeyList().getKeyValue()).isNotEmpty();
@@ -248,7 +245,7 @@ public class NetexMapperTest extends TiamatIntegrationTest {
     @Test
     public void mapStopPlaceWithKeyValuesToTiamat() throws Exception {
         String originalId = "OPP:StopArea:123";
-        org.rutebanken.netex.model.StopPlace netexStopPlace = new org.rutebanken.netex.model.StopPlace()
+        org.entur.netex2.model.StopPlace netexStopPlace = new org.entur.netex2.model.StopPlace()
                 .withKeyList(
                         new KeyListStructure().withKeyValue(
                                 new KeyValueStructure()
@@ -263,17 +260,15 @@ public class NetexMapperTest extends TiamatIntegrationTest {
 
     @Test
     public void mapStopPlaceToInternalWithName() throws Exception {
-        org.rutebanken.netex.model.StopPlace netexStopPlace = new org.rutebanken.netex.model.StopPlace();
-        org.rutebanken.netex.model.MultilingualString name = new org.rutebanken.netex.model.MultilingualString();
-        name.setValue("stop place ");
-        name.setLang("no");
+        org.entur.netex2.model.StopPlace netexStopPlace = new org.entur.netex2.model.StopPlace();
+        org.entur.netex2.model.MultilingualString name = NetexMultilingualStringHelper.toNetexModel("stop place ", "no");
         name.setTextIdType("");
         netexStopPlace.setName(name);
 
         org.rutebanken.tiamat.model.StopPlace tiamatStopPlace = netexMapper.mapToTiamatModel(netexStopPlace);
 
         assertThat(tiamatStopPlace).isNotNull();
-        assertThat(tiamatStopPlace.getName().getValue()).isEqualTo(netexStopPlace.getName().getValue());
+        assertThat(tiamatStopPlace.getName().getValue()).isEqualTo(NetexMultilingualStringHelper.getValue(netexStopPlace.getName()));
 
     }
 
@@ -282,20 +277,20 @@ public class NetexMapperTest extends TiamatIntegrationTest {
         StopPlace tiamatStopPlace = new StopPlace();
         tiamatStopPlace.setNetexId("NSR:StopPlace:123456");
 
-        org.rutebanken.netex.model.StopPlace netexStopPlace = netexMapper.mapToNetexModel(tiamatStopPlace);
+        org.entur.netex2.model.StopPlace netexStopPlace = netexMapper.mapToNetexModel(tiamatStopPlace);
 
         assertThat(netexStopPlace.getId()).isEqualTo("NSR:StopPlace:123456");
     }
 
     @Test
     public void mapNetexQuayIdToInternal() {
-        org.rutebanken.netex.model.Quay netexQuay = new org.rutebanken.netex.model.Quay();
+        org.entur.netex2.model.Quay netexQuay = new org.entur.netex2.model.Quay();
 
         String netexId = "NSR:Quay:12345";
         netexQuay.setId(netexId);
         netexQuay.setCompassBearing(312f);
-        netexQuay.setPublicCode("B");
-        netexQuay.setLighting(org.rutebanken.netex.model.LightingEnumeration.UNLIT);
+        netexQuay.setPublicCode(new org.entur.netex2.model.PublicCodeStructure().withValue("B"));
+        netexQuay.setLighting(org.entur.netex2.model.LightingEnumeration.UNLIT);
 
         org.rutebanken.tiamat.model.Quay tiamatQuay = netexMapper.mapToTiamatModel(netexQuay);
 
@@ -312,17 +307,17 @@ public class NetexMapperTest extends TiamatIntegrationTest {
         String netexId = "NSR:Quay:" + 1234567;
         tiamatQuay.setNetexId(netexId);
 
-        org.rutebanken.netex.model.Quay netexQuay = netexMapper.mapToNetexModel(tiamatQuay);
+        org.entur.netex2.model.Quay netexQuay = netexMapper.mapToNetexModel(tiamatQuay);
         assertThat(netexQuay.getId()).isNotNull();
         assertThat(netexQuay.getId()).isEqualTo(netexId);
     }
 
     @Test
     public void mapNetexParkingPaymentMethodsToInternal() {
-        org.rutebanken.netex.model.Parking netexParking = new org.rutebanken.netex.model.Parking();
+        org.entur.netex2.model.Parking netexParking = new org.entur.netex2.model.Parking();
         netexParking.setId("NSR:Parking:1");
-        netexParking.getPaymentMethods().add(org.rutebanken.netex.model.PaymentMethodEnumeration.CASH);
-        netexParking.getPaymentMethods().add(org.rutebanken.netex.model.PaymentMethodEnumeration.CREDIT_CARD);
+        netexParking.getPaymentMethods().add(org.entur.netex2.model.PaymentMethodEnumeration.CASH);
+        netexParking.getPaymentMethods().add(org.entur.netex2.model.PaymentMethodEnumeration.CREDIT_CARD);
 
         org.rutebanken.tiamat.model.Parking tiamatParking = netexMapper.mapToTiamatModel(netexParking);
 
@@ -337,17 +332,17 @@ public class NetexMapperTest extends TiamatIntegrationTest {
         tiamatParking.setNetexId("NSR:Parking:1");
         tiamatParking.getPaymentMethods().add(org.rutebanken.tiamat.model.PaymentMethodEnumeration.MOBILE_PHONE);
 
-        org.rutebanken.netex.model.Parking netexParking = netexMapper.mapToNetexModel(tiamatParking);
+        org.entur.netex2.model.Parking netexParking = netexMapper.mapToNetexModel(tiamatParking);
 
-        assertThat(netexParking.getPaymentMethods()).containsExactly(org.rutebanken.netex.model.PaymentMethodEnumeration.MOBILE_PHONE);
+        assertThat(netexParking.getPaymentMethods()).containsExactly(org.entur.netex2.model.PaymentMethodEnumeration.MOBILE_PHONE);
     }
 
     @Test
     public void mapNetexParkingPaymentMethodsRoundTripCoversEveryNetexValue() {
-        for (org.rutebanken.netex.model.PaymentMethodEnumeration netexMethod :
-                org.rutebanken.netex.model.PaymentMethodEnumeration.values()) {
+        for (org.entur.netex2.model.PaymentMethodEnumeration netexMethod :
+                org.entur.netex2.model.PaymentMethodEnumeration.values()) {
 
-            org.rutebanken.netex.model.Parking netexParking = new org.rutebanken.netex.model.Parking();
+            org.entur.netex2.model.Parking netexParking = new org.entur.netex2.model.Parking();
             netexParking.setId("NSR:Parking:1");
             netexParking.getPaymentMethods().add(netexMethod);
 
@@ -357,7 +352,7 @@ public class NetexMapperTest extends TiamatIntegrationTest {
                     .extracting(org.rutebanken.tiamat.model.PaymentMethodEnumeration::value)
                     .containsExactly(netexMethod.value());
 
-            org.rutebanken.netex.model.Parking reexported = netexMapper.mapToNetexModel(tiamatParking);
+            org.entur.netex2.model.Parking reexported = netexMapper.mapToNetexModel(tiamatParking);
             assertThat(reexported.getPaymentMethods())
                     .as("export of internal payment method for NeTEx value '%s'", netexMethod.value())
                     .containsExactly(netexMethod);
@@ -366,9 +361,9 @@ public class NetexMapperTest extends TiamatIntegrationTest {
 
     @Test
     public void mapNetexParkingLightingToInternal() {
-        org.rutebanken.netex.model.Parking netexParking = new org.rutebanken.netex.model.Parking();
+        org.entur.netex2.model.Parking netexParking = new org.entur.netex2.model.Parking();
         netexParking.setId("NSR:Parking:1");
-        netexParking.setLighting(org.rutebanken.netex.model.LightingEnumeration.WELL_LIT);
+        netexParking.setLighting(org.entur.netex2.model.LightingEnumeration.WELL_LIT);
 
         org.rutebanken.tiamat.model.Parking tiamatParking = netexMapper.mapToTiamatModel(netexParking);
 
@@ -381,16 +376,16 @@ public class NetexMapperTest extends TiamatIntegrationTest {
         tiamatParking.setNetexId("NSR:Parking:1");
         tiamatParking.setLighting(LightingEnumeration.UNLIT);
 
-        org.rutebanken.netex.model.Parking netexParking = netexMapper.mapToNetexModel(tiamatParking);
+        org.entur.netex2.model.Parking netexParking = netexMapper.mapToNetexModel(tiamatParking);
 
-        assertThat(netexParking.getLighting()).isEqualTo(org.rutebanken.netex.model.LightingEnumeration.UNLIT);
+        assertThat(netexParking.getLighting()).isEqualTo(org.entur.netex2.model.LightingEnumeration.UNLIT);
     }
 
     @Test
     public void mapNetexParkingOperatorRefToInternal() {
-        org.rutebanken.netex.model.Parking netexParking = new org.rutebanken.netex.model.Parking();
+        org.entur.netex2.model.Parking netexParking = new org.entur.netex2.model.Parking();
         netexParking.setId("NSR:Parking:1");
-        org.rutebanken.netex.model.OperatorRefStructure operatorRef = new org.rutebanken.netex.model.OperatorRefStructure()
+        org.entur.netex2.model.OperatorRefStructure operatorRef = new org.entur.netex2.model.OperatorRefStructure()
                 .withRef("FSR:Operator:1234567-8")
                 .withVersion("1");
         netexParking.setOrganisationRef(new ObjectFactory().createOperatorRef(operatorRef));
@@ -408,10 +403,10 @@ public class NetexMapperTest extends TiamatIntegrationTest {
         tiamatParking.setNetexId("NSR:Parking:1");
         tiamatParking.setOrganisationRef(new org.rutebanken.tiamat.model.OrganisationRefStructure("FSR:Operator:1234567-8", "1"));
 
-        org.rutebanken.netex.model.Parking netexParking = netexMapper.mapToNetexModel(tiamatParking);
+        org.entur.netex2.model.Parking netexParking = netexMapper.mapToNetexModel(tiamatParking);
 
         assertThat(netexParking.getOrganisationRef()).isNotNull();
-        assertThat(netexParking.getOrganisationRef().getValue()).isInstanceOf(org.rutebanken.netex.model.OperatorRefStructure.class);
+        assertThat(netexParking.getOrganisationRef().getValue()).isInstanceOf(org.entur.netex2.model.OperatorRefStructure.class);
         assertThat(netexParking.getOrganisationRef().getValue().getRef()).isEqualTo("FSR:Operator:1234567-8");
         assertThat(netexParking.getOrganisationRef().getValue().getVersion()).isEqualTo("1");
     }
@@ -421,22 +416,22 @@ public class NetexMapperTest extends TiamatIntegrationTest {
         org.rutebanken.tiamat.model.Parking tiamatParking = new org.rutebanken.tiamat.model.Parking();
         tiamatParking.setNetexId("NSR:Parking:1");
 
-        org.rutebanken.netex.model.Parking netexParking = netexMapper.mapToNetexModel(tiamatParking);
+        org.entur.netex2.model.Parking netexParking = netexMapper.mapToNetexModel(tiamatParking);
 
         assertThat(netexParking.getOrganisationRef()).isNull();
     }
 
     @Test
     public void mapParkingOrganisationRefRoundTrips() {
-        org.rutebanken.netex.model.Parking netexParking = new org.rutebanken.netex.model.Parking();
+        org.entur.netex2.model.Parking netexParking = new org.entur.netex2.model.Parking();
         netexParking.setId("NSR:Parking:1");
-        org.rutebanken.netex.model.OperatorRefStructure operatorRef = new org.rutebanken.netex.model.OperatorRefStructure()
+        org.entur.netex2.model.OperatorRefStructure operatorRef = new org.entur.netex2.model.OperatorRefStructure()
                 .withRef("FSR:Operator:1234567-8")
                 .withVersion("1");
         netexParking.setOrganisationRef(new ObjectFactory().createOperatorRef(operatorRef));
 
         org.rutebanken.tiamat.model.Parking tiamatParking = netexMapper.mapToTiamatModel(netexParking);
-        org.rutebanken.netex.model.Parking reexported = netexMapper.mapToNetexModel(tiamatParking);
+        org.entur.netex2.model.Parking reexported = netexMapper.mapToNetexModel(tiamatParking);
 
         assertThat(reexported.getOrganisationRef().getValue().getRef())
                 .isEqualTo(netexParking.getOrganisationRef().getValue().getRef());
@@ -446,9 +441,9 @@ public class NetexMapperTest extends TiamatIntegrationTest {
 
     @Test
     public void mapNetexParkingOrganisationRefAcceptsAnySubstitution() {
-        org.rutebanken.netex.model.Parking netexParking = new org.rutebanken.netex.model.Parking();
+        org.entur.netex2.model.Parking netexParking = new org.entur.netex2.model.Parking();
         netexParking.setId("NSR:Parking:1");
-        org.rutebanken.netex.model.AuthorityRef authorityRef = new org.rutebanken.netex.model.AuthorityRef()
+        org.entur.netex2.model.AuthorityRef authorityRef = new org.entur.netex2.model.AuthorityRef()
                 .withRef("FSR:Authority:1234567-8")
                 .withVersion("2");
         netexParking.setOrganisationRef(new ObjectFactory().createAuthorityRef(authorityRef));
@@ -462,20 +457,20 @@ public class NetexMapperTest extends TiamatIntegrationTest {
 
     @Test
     public void mapNetexParkingVehicleEntrancesToInternal() {
-        org.rutebanken.netex.model.ParkingEntranceForVehicles netexEntrance = new org.rutebanken.netex.model.ParkingEntranceForVehicles();
+        org.entur.netex2.model.ParkingEntranceForVehicles netexEntrance = new org.entur.netex2.model.ParkingEntranceForVehicles();
         netexEntrance.setId("NSR:ParkingEntranceForVehicles:1");
         netexEntrance.setVersion("1");
-        netexEntrance.setLabel(new org.rutebanken.netex.model.MultilingualString().withValue("Main gate"));
-        netexEntrance.setEntranceType(org.rutebanken.netex.model.EntranceEnumeration.GATE);
+        netexEntrance.setLabel(NetexMultilingualStringHelper.toNetexModel("Main gate"));
+        netexEntrance.setEntranceType(org.entur.netex2.model.EntranceEnumeration.GATE);
         netexEntrance.setWidth(new java.math.BigDecimal("2.50"));
         netexEntrance.setHeight(new java.math.BigDecimal("2.10"));
-        netexEntrance.getAccessModes().add(org.rutebanken.netex.model.AccessModeEnumeration.FOOT);
-        netexEntrance.getAccessModes().add(org.rutebanken.netex.model.AccessModeEnumeration.BICYCLE);
+        netexEntrance.getAccessModes().add(org.entur.netex2.model.AccessModeEnumeration.FOOT);
+        netexEntrance.getAccessModes().add(org.entur.netex2.model.AccessModeEnumeration.BICYCLE);
 
-        org.rutebanken.netex.model.ParkingEntrancesForVehicles_RelStructure rel = new org.rutebanken.netex.model.ParkingEntrancesForVehicles_RelStructure();
+        org.entur.netex2.model.ParkingEntrancesForVehicles_RelStructure rel = new org.entur.netex2.model.ParkingEntrancesForVehicles_RelStructure();
         rel.getParkingEntranceForVehiclesRefOrParkingEntranceForVehicles().add(netexEntrance);
 
-        org.rutebanken.netex.model.Parking netexParking = new org.rutebanken.netex.model.Parking();
+        org.entur.netex2.model.Parking netexParking = new org.entur.netex2.model.Parking();
         netexParking.setId("NSR:Parking:1");
         netexParking.setVersion("1");
         netexParking.setVehicleEntrances(rel);
@@ -508,20 +503,20 @@ public class NetexMapperTest extends TiamatIntegrationTest {
         mapperLogger.addAppender(appender);
 
         try {
-            org.rutebanken.netex.model.ParkingEntranceForVehicles inlineEntrance = new org.rutebanken.netex.model.ParkingEntranceForVehicles();
+            org.entur.netex2.model.ParkingEntranceForVehicles inlineEntrance = new org.entur.netex2.model.ParkingEntranceForVehicles();
             inlineEntrance.setId("NSR:ParkingEntranceForVehicles:1");
             inlineEntrance.setVersion("1");
-            inlineEntrance.setEntranceType(org.rutebanken.netex.model.EntranceEnumeration.GATE);
+            inlineEntrance.setEntranceType(org.entur.netex2.model.EntranceEnumeration.GATE);
 
-            org.rutebanken.netex.model.ParkingEntranceForVehiclesRefStructure entranceRef =
-                    new org.rutebanken.netex.model.ParkingEntranceForVehiclesRefStructure();
+            org.entur.netex2.model.ParkingEntranceForVehiclesRefStructure entranceRef =
+                    new org.entur.netex2.model.ParkingEntranceForVehiclesRefStructure();
             entranceRef.setRef("NSR:ParkingEntranceForVehicles:2");
 
-            org.rutebanken.netex.model.ParkingEntrancesForVehicles_RelStructure rel = new org.rutebanken.netex.model.ParkingEntrancesForVehicles_RelStructure();
+            org.entur.netex2.model.ParkingEntrancesForVehicles_RelStructure rel = new org.entur.netex2.model.ParkingEntrancesForVehicles_RelStructure();
             rel.getParkingEntranceForVehiclesRefOrParkingEntranceForVehicles().add(inlineEntrance);
             rel.getParkingEntranceForVehiclesRefOrParkingEntranceForVehicles().add(entranceRef);
 
-            org.rutebanken.netex.model.Parking netexParking = new org.rutebanken.netex.model.Parking();
+            org.entur.netex2.model.Parking netexParking = new org.entur.netex2.model.Parking();
             netexParking.setId("NSR:Parking:1");
             netexParking.setVersion("1");
             netexParking.setVehicleEntrances(rel);
@@ -559,33 +554,33 @@ public class NetexMapperTest extends TiamatIntegrationTest {
         tiamatParking.setNetexId("NSR:Parking:1");
         tiamatParking.getVehicleEntrances().add(tiamatEntrance);
 
-        org.rutebanken.netex.model.Parking netexParking = netexMapper.mapToNetexModel(tiamatParking);
+        org.entur.netex2.model.Parking netexParking = netexMapper.mapToNetexModel(tiamatParking);
 
         assertThat(netexParking.getVehicleEntrances()).isNotNull();
         List<Object> netexEntrances = netexParking.getVehicleEntrances().getParkingEntranceForVehiclesRefOrParkingEntranceForVehicles();
         assertThat(netexEntrances).hasSize(1);
-        org.rutebanken.netex.model.ParkingEntranceForVehicles netexEntrance = (org.rutebanken.netex.model.ParkingEntranceForVehicles) netexEntrances.get(0);
+        org.entur.netex2.model.ParkingEntranceForVehicles netexEntrance = (org.entur.netex2.model.ParkingEntranceForVehicles) netexEntrances.get(0);
         assertThat(netexEntrance.getId()).isEqualTo("NSR:ParkingEntranceForVehicles:1");
-        assertThat(netexEntrance.getLabel().getValue()).isEqualTo("Main gate");
-        assertThat(netexEntrance.getEntranceType()).isEqualTo(org.rutebanken.netex.model.EntranceEnumeration.GATE);
+        assertThat(NetexMultilingualStringHelper.getValue(netexEntrance.getLabel())).isEqualTo("Main gate");
+        assertThat(netexEntrance.getEntranceType()).isEqualTo(org.entur.netex2.model.EntranceEnumeration.GATE);
         assertThat(netexEntrance.getWidth()).isEqualByComparingTo("2.50");
         assertThat(netexEntrance.getHeight()).isEqualByComparingTo("2.10");
         assertThat(netexEntrance.getAccessModes()).containsExactly(
-                org.rutebanken.netex.model.AccessModeEnumeration.FOOT,
-                org.rutebanken.netex.model.AccessModeEnumeration.BICYCLE);
+                org.entur.netex2.model.AccessModeEnumeration.FOOT,
+                org.entur.netex2.model.AccessModeEnumeration.BICYCLE);
     }
 
     @Test
     public void mapNetexParkingInfoLinksToInternal() {
-        org.rutebanken.netex.model.InfoLinkStructure netexLink = new org.rutebanken.netex.model.InfoLinkStructure();
+        org.entur.netex2.model.InfoLinkStructure netexLink = new org.entur.netex2.model.InfoLinkStructure();
         netexLink.setValue("https://example.org/parking-info");
-        netexLink.getTypeOfInfoLink().add(org.rutebanken.netex.model.TypeOfInfolinkEnumeration.INFO);
+        netexLink.getTypeOfInfoLink().add(org.entur.netex2.model.TypeOfInfoLinkEnumeration.INFO);
 
-        org.rutebanken.netex.model.GroupOfEntities_VersionStructure.InfoLinks infoLinks =
-                new org.rutebanken.netex.model.GroupOfEntities_VersionStructure.InfoLinks();
+        org.entur.netex2.model.GroupOfEntities_VersionStructure.InfoLinks infoLinks =
+                new org.entur.netex2.model.GroupOfEntities_VersionStructure.InfoLinks();
         infoLinks.getInfoLink().add(netexLink);
 
-        org.rutebanken.netex.model.Parking netexParking = new org.rutebanken.netex.model.Parking();
+        org.entur.netex2.model.Parking netexParking = new org.entur.netex2.model.Parking();
         netexParking.setId("NSR:Parking:1");
         netexParking.setVersion("1");
         netexParking.setInfoLinks(infoLinks);
@@ -607,45 +602,45 @@ public class NetexMapperTest extends TiamatIntegrationTest {
         tiamatParking.setNetexId("NSR:Parking:1");
         tiamatParking.setInfoLinks(List.of(tiamatLink));
 
-        org.rutebanken.netex.model.Parking netexParking = netexMapper.mapToNetexModel(tiamatParking);
+        org.entur.netex2.model.Parking netexParking = netexMapper.mapToNetexModel(tiamatParking);
 
         assertThat(netexParking.getInfoLinks()).isNotNull();
-        List<org.rutebanken.netex.model.InfoLinkStructure> netexLinks = netexParking.getInfoLinks().getInfoLink();
+        List<org.entur.netex2.model.InfoLinkStructure> netexLinks = netexParking.getInfoLinks().getInfoLink();
         assertThat(netexLinks).hasSize(1);
-        org.rutebanken.netex.model.InfoLinkStructure netexLink = netexLinks.get(0);
+        org.entur.netex2.model.InfoLinkStructure netexLink = netexLinks.get(0);
         assertThat(netexLink.getValue()).isEqualTo("https://example.org/parking-info");
-        assertThat(netexLink.getTypeOfInfoLink()).containsExactly(org.rutebanken.netex.model.TypeOfInfolinkEnumeration.INFO);
+        assertThat(netexLink.getTypeOfInfoLink()).containsExactly(org.entur.netex2.model.TypeOfInfoLinkEnumeration.INFO);
     }
 
     @Test
     public void mapNetexParkingAvailabilityConditionsToInternal() {
-        org.rutebanken.netex.model.AvailabilityCondition netexCondition = new org.rutebanken.netex.model.AvailabilityCondition()
+        org.entur.netex2.model.AvailabilityCondition netexCondition = new org.entur.netex2.model.AvailabilityCondition()
                 .withId("NSR:Parking:1:AvailabilityCondition:1")
                 .withVersion("1")
                 .withIsAvailable(true);
 
-        org.rutebanken.netex.model.DayTypeRefStructure dayTypeRef =
-                new org.rutebanken.netex.model.DayTypeRefStructure().withRef("NSR:DayType:1");
-        org.rutebanken.netex.model.DayTypes_RelStructure dayTypes = new org.rutebanken.netex.model.DayTypes_RelStructure();
-        dayTypes.getDayTypeRefOrDayType_().add(new ObjectFactory().createDayTypeRef(dayTypeRef));
+        org.entur.netex2.model.DayTypeRefStructure dayTypeRef =
+                new org.entur.netex2.model.DayTypeRefStructure().withRef("NSR:DayType:1");
+        org.entur.netex2.model.DayTypes_RelStructure dayTypes = new org.entur.netex2.model.DayTypes_RelStructure();
+        dayTypes.getDayTypeRefOrDayType().add(new ObjectFactory().createDayTypeRef(dayTypeRef));
         netexCondition.withDayTypes(dayTypes);
 
-        org.rutebanken.netex.model.Timeband_VersionedChildStructure timeband =
-                new org.rutebanken.netex.model.Timeband_VersionedChildStructure()
+        org.entur.netex2.model.Timeband_VersionedChildStructure timeband =
+                new org.entur.netex2.model.Timeband_VersionedChildStructure()
                         .withId("NSR:Parking:1:Timeband:1")
                         .withVersion("1")
                         .withStartTime(java.time.LocalTime.of(6, 0))
                         .withEndTime(java.time.LocalTime.of(22, 0));
-        org.rutebanken.netex.model.Timebands_RelStructure timebands = new org.rutebanken.netex.model.Timebands_RelStructure();
+        org.entur.netex2.model.Timebands_RelStructure timebands = new org.entur.netex2.model.Timebands_RelStructure();
         timebands.getTimebandRefOrTimeband().add(timeband);
         netexCondition.withTimebands(timebands);
 
-        org.rutebanken.netex.model.ValidityConditions_RelStructure validityConditions =
-                new org.rutebanken.netex.model.ValidityConditions_RelStructure();
-        validityConditions.getValidityConditionRefOrValidBetweenOrValidityCondition_()
+        org.entur.netex2.model.ValidityConditions_RelStructure validityConditions =
+                new org.entur.netex2.model.ValidityConditions_RelStructure();
+        validityConditions.getValidityConditionRefOrValidBetweenOrValidityCondition()
                 .add(new ObjectFactory().createAvailabilityCondition(netexCondition));
 
-        org.rutebanken.netex.model.Parking netexParking = new org.rutebanken.netex.model.Parking();
+        org.entur.netex2.model.Parking netexParking = new org.entur.netex2.model.Parking();
         netexParking.setId("NSR:Parking:1");
         netexParking.setVersion("1");
         netexParking.setValidityConditions(validityConditions);
@@ -662,24 +657,24 @@ public class NetexMapperTest extends TiamatIntegrationTest {
 
     @Test
     public void mapNetexParkingAvailabilityConditionsWithSameDayTypeRefAndDifferentContentKeepsBoth() {
-        org.rutebanken.netex.model.ValidityConditions_RelStructure validityConditions =
-                new org.rutebanken.netex.model.ValidityConditions_RelStructure();
+        org.entur.netex2.model.ValidityConditions_RelStructure validityConditions =
+                new org.entur.netex2.model.ValidityConditions_RelStructure();
         ObjectFactory objectFactory = new ObjectFactory();
         for (boolean available : new boolean[] {true, false}) {
-            org.rutebanken.netex.model.AvailabilityCondition netexCondition = new org.rutebanken.netex.model.AvailabilityCondition()
+            org.entur.netex2.model.AvailabilityCondition netexCondition = new org.entur.netex2.model.AvailabilityCondition()
                     .withId("NSR:Parking:1:AvailabilityCondition:" + available)
                     .withVersion("1")
                     .withIsAvailable(available);
-            org.rutebanken.netex.model.DayTypeRefStructure dayTypeRef =
-                    new org.rutebanken.netex.model.DayTypeRefStructure().withRef("NSR:DayType:1");
-            org.rutebanken.netex.model.DayTypes_RelStructure dayTypes = new org.rutebanken.netex.model.DayTypes_RelStructure();
-            dayTypes.getDayTypeRefOrDayType_().add(objectFactory.createDayTypeRef(dayTypeRef));
+            org.entur.netex2.model.DayTypeRefStructure dayTypeRef =
+                    new org.entur.netex2.model.DayTypeRefStructure().withRef("NSR:DayType:1");
+            org.entur.netex2.model.DayTypes_RelStructure dayTypes = new org.entur.netex2.model.DayTypes_RelStructure();
+            dayTypes.getDayTypeRefOrDayType().add(objectFactory.createDayTypeRef(dayTypeRef));
             netexCondition.withDayTypes(dayTypes);
-            validityConditions.getValidityConditionRefOrValidBetweenOrValidityCondition_()
+            validityConditions.getValidityConditionRefOrValidBetweenOrValidityCondition()
                     .add(objectFactory.createAvailabilityCondition(netexCondition));
         }
 
-        org.rutebanken.netex.model.Parking netexParking = new org.rutebanken.netex.model.Parking();
+        org.entur.netex2.model.Parking netexParking = new org.entur.netex2.model.Parking();
         netexParking.setId("NSR:Parking:1");
         netexParking.setVersion("1");
         netexParking.setValidityConditions(validityConditions);
@@ -695,11 +690,11 @@ public class NetexMapperTest extends TiamatIntegrationTest {
 
     @Test
     public void mapNetexParkingIdenticalAvailabilityConditionsCollapseToOne() {
-        org.rutebanken.netex.model.ValidityConditions_RelStructure validityConditions =
-                new org.rutebanken.netex.model.ValidityConditions_RelStructure();
+        org.entur.netex2.model.ValidityConditions_RelStructure validityConditions =
+                new org.entur.netex2.model.ValidityConditions_RelStructure();
         ObjectFactory objectFactory = new ObjectFactory();
         for (int i = 0; i < 2; i++) {
-            validityConditions.getValidityConditionRefOrValidBetweenOrValidityCondition_()
+            validityConditions.getValidityConditionRefOrValidBetweenOrValidityCondition()
                     .add(objectFactory.createAvailabilityCondition(netexAvailabilityCondition(
                             "NSR:Parking:1:AvailabilityCondition:" + i, true,
                             List.of("NSR:DayType:1"),
@@ -707,7 +702,7 @@ public class NetexMapperTest extends TiamatIntegrationTest {
                                     java.time.LocalTime.of(6, 0), java.time.LocalTime.of(22, 0), null)))));
         }
 
-        org.rutebanken.netex.model.Parking netexParking = new org.rutebanken.netex.model.Parking();
+        org.entur.netex2.model.Parking netexParking = new org.entur.netex2.model.Parking();
         netexParking.setId("NSR:Parking:1");
         netexParking.setVersion("1");
         netexParking.setValidityConditions(validityConditions);
@@ -719,7 +714,7 @@ public class NetexMapperTest extends TiamatIntegrationTest {
 
     @Test
     public void mapNetexParkingAvailabilityConditionWithSeveralDayTypeRefsFansOut() {
-        org.rutebanken.netex.model.Parking netexParking = netexParkingWithConditions(netexAvailabilityCondition(
+        org.entur.netex2.model.Parking netexParking = netexParkingWithConditions(netexAvailabilityCondition(
                 "NSR:Parking:1:AvailabilityCondition:1", true,
                 List.of("NSR:DayType:1", "NSR:DayType:2", "NSR:DayType:3"),
                 List.of(netexTimeband("NSR:Parking:1:Timeband:1",
@@ -738,7 +733,7 @@ public class NetexMapperTest extends TiamatIntegrationTest {
 
     @Test
     public void mapNetexParkingAvailabilityConditionWithSplitTimebandsFansOut() {
-        org.rutebanken.netex.model.Parking netexParking = netexParkingWithConditions(netexAvailabilityCondition(
+        org.entur.netex2.model.Parking netexParking = netexParkingWithConditions(netexAvailabilityCondition(
                 "NSR:Parking:1:AvailabilityCondition:1", true,
                 List.of("NSR:DayType:1"),
                 List.of(netexTimeband("NSR:Parking:1:Timeband:1",
@@ -758,7 +753,7 @@ public class NetexMapperTest extends TiamatIntegrationTest {
 
     @Test
     public void mapNetexParkingAvailabilityConditionWithSeveralDayTypesAndTimebandsFansOutEveryCombination() {
-        org.rutebanken.netex.model.Parking netexParking = netexParkingWithConditions(netexAvailabilityCondition(
+        org.entur.netex2.model.Parking netexParking = netexParkingWithConditions(netexAvailabilityCondition(
                 "NSR:Parking:1:AvailabilityCondition:1", true,
                 List.of("NSR:DayType:1", "NSR:DayType:2"),
                 List.of(netexTimeband("NSR:Parking:1:Timeband:1",
@@ -779,7 +774,7 @@ public class NetexMapperTest extends TiamatIntegrationTest {
 
     @Test
     public void mapParkingAvailabilityConditionDayOffsetRoundTripsEndOfDay() {
-        org.rutebanken.netex.model.Parking netexParking = netexParkingWithConditions(netexAvailabilityCondition(
+        org.entur.netex2.model.Parking netexParking = netexParkingWithConditions(netexAvailabilityCondition(
                 "NSR:Parking:1:AvailabilityCondition:1", true,
                 List.of("NSR:DayType:1"),
                 List.of(netexTimeband("NSR:Parking:1:Timeband:1",
@@ -793,7 +788,7 @@ public class NetexMapperTest extends TiamatIntegrationTest {
                 .as("end-of-day must stay distinguishable from start-of-day midnight")
                 .isEqualTo(1);
 
-        org.rutebanken.netex.model.Timeband_VersionedChildStructure exported =
+        org.entur.netex2.model.Timeband_VersionedChildStructure exported =
                 singleExportedTimeband(netexMapper.mapToNetexModel(tiamatParking));
         assertThat(exported.getEndTime()).isEqualTo(java.time.LocalTime.MIDNIGHT);
         assertThat(exported.getDayOffset()).isEqualTo(java.math.BigInteger.ONE);
@@ -806,7 +801,7 @@ public class NetexMapperTest extends TiamatIntegrationTest {
         tiamatParking.setAvailabilityConditions(List.of(new org.rutebanken.tiamat.model.AvailabilityCondition(
                 "NSR:DayType:1", true, java.time.LocalTime.of(6, 0), java.time.LocalTime.MIDNIGHT, 0)));
 
-        org.rutebanken.netex.model.Timeband_VersionedChildStructure exported =
+        org.entur.netex2.model.Timeband_VersionedChildStructure exported =
                 singleExportedTimeband(netexMapper.mapToNetexModel(tiamatParking));
         assertThat(exported.getEndTime()).isEqualTo(java.time.LocalTime.MIDNIGHT);
         assertThat(exported.getDayOffset())
@@ -816,7 +811,7 @@ public class NetexMapperTest extends TiamatIntegrationTest {
 
     @Test
     public void mapNetexParkingAvailabilityConditionWithEndTimeButNoStartTimeIsRejected() {
-        org.rutebanken.netex.model.Parking netexParking = netexParkingWithConditions(netexAvailabilityCondition(
+        org.entur.netex2.model.Parking netexParking = netexParkingWithConditions(netexAvailabilityCondition(
                 "NSR:Parking:1:AvailabilityCondition:1", true,
                 List.of("NSR:DayType:1"),
                 List.of(netexTimeband("NSR:Parking:1:Timeband:1", null, java.time.LocalTime.of(22, 0), null))));
@@ -834,18 +829,18 @@ public class NetexMapperTest extends TiamatIntegrationTest {
         tiamatParking.setAvailabilityConditions(List.of(new org.rutebanken.tiamat.model.AvailabilityCondition(
                 "NSR:DayType:1", true, null, java.time.LocalTime.of(22, 0))));
 
-        org.rutebanken.netex.model.Parking netexParking = netexMapper.mapToNetexModel(tiamatParking);
-        List<org.rutebanken.netex.model.AvailabilityCondition> conditions = exportedAvailabilityConditions(netexParking);
+        org.entur.netex2.model.Parking netexParking = netexMapper.mapToNetexModel(tiamatParking);
+        List<org.entur.netex2.model.AvailabilityCondition> conditions = exportedAvailabilityConditions(netexParking);
         assertThat(conditions).hasSize(1);
         assertThat(conditions.get(0).getTimebands())
                 .as("NeTEx requires Timeband/StartTime, so no timeband may be emitted without one")
                 .isNull();
     }
 
-    private org.rutebanken.netex.model.Timeband_VersionedChildStructure netexTimeband(
+    private org.entur.netex2.model.Timeband_VersionedChildStructure netexTimeband(
             String id, java.time.LocalTime startTime, java.time.LocalTime endTime, Integer dayOffset) {
-        org.rutebanken.netex.model.Timeband_VersionedChildStructure timeband =
-                new org.rutebanken.netex.model.Timeband_VersionedChildStructure()
+        org.entur.netex2.model.Timeband_VersionedChildStructure timeband =
+                new org.entur.netex2.model.Timeband_VersionedChildStructure()
                         .withId(id)
                         .withVersion("1")
                         .withStartTime(startTime)
@@ -856,64 +851,64 @@ public class NetexMapperTest extends TiamatIntegrationTest {
         return timeband;
     }
 
-    private org.rutebanken.netex.model.AvailabilityCondition netexAvailabilityCondition(
+    private org.entur.netex2.model.AvailabilityCondition netexAvailabilityCondition(
             String id, Boolean isAvailable, List<String> dayTypeRefs,
-            List<org.rutebanken.netex.model.Timeband_VersionedChildStructure> timebands) {
+            List<org.entur.netex2.model.Timeband_VersionedChildStructure> timebands) {
         ObjectFactory objectFactory = new ObjectFactory();
-        org.rutebanken.netex.model.AvailabilityCondition condition =
-                new org.rutebanken.netex.model.AvailabilityCondition()
+        org.entur.netex2.model.AvailabilityCondition condition =
+                new org.entur.netex2.model.AvailabilityCondition()
                         .withId(id)
                         .withVersion("1")
                         .withIsAvailable(isAvailable);
 
-        org.rutebanken.netex.model.DayTypes_RelStructure dayTypes = new org.rutebanken.netex.model.DayTypes_RelStructure();
+        org.entur.netex2.model.DayTypes_RelStructure dayTypes = new org.entur.netex2.model.DayTypes_RelStructure();
         for (String dayTypeRef : dayTypeRefs) {
-            dayTypes.getDayTypeRefOrDayType_().add(objectFactory.createDayTypeRef(
-                    new org.rutebanken.netex.model.DayTypeRefStructure().withRef(dayTypeRef)));
+            dayTypes.getDayTypeRefOrDayType().add(objectFactory.createDayTypeRef(
+                    new org.entur.netex2.model.DayTypeRefStructure().withRef(dayTypeRef)));
         }
         condition.withDayTypes(dayTypes);
 
         if (!timebands.isEmpty()) {
-            org.rutebanken.netex.model.Timebands_RelStructure timebandsRel = new org.rutebanken.netex.model.Timebands_RelStructure();
+            org.entur.netex2.model.Timebands_RelStructure timebandsRel = new org.entur.netex2.model.Timebands_RelStructure();
             timebandsRel.getTimebandRefOrTimeband().addAll(timebands);
             condition.withTimebands(timebandsRel);
         }
         return condition;
     }
 
-    private org.rutebanken.netex.model.Parking netexParkingWithConditions(
-            org.rutebanken.netex.model.AvailabilityCondition... conditions) {
+    private org.entur.netex2.model.Parking netexParkingWithConditions(
+            org.entur.netex2.model.AvailabilityCondition... conditions) {
         ObjectFactory objectFactory = new ObjectFactory();
-        org.rutebanken.netex.model.ValidityConditions_RelStructure validityConditions =
-                new org.rutebanken.netex.model.ValidityConditions_RelStructure();
-        for (org.rutebanken.netex.model.AvailabilityCondition condition : conditions) {
-            validityConditions.getValidityConditionRefOrValidBetweenOrValidityCondition_()
+        org.entur.netex2.model.ValidityConditions_RelStructure validityConditions =
+                new org.entur.netex2.model.ValidityConditions_RelStructure();
+        for (org.entur.netex2.model.AvailabilityCondition condition : conditions) {
+            validityConditions.getValidityConditionRefOrValidBetweenOrValidityCondition()
                     .add(objectFactory.createAvailabilityCondition(condition));
         }
-        org.rutebanken.netex.model.Parking netexParking = new org.rutebanken.netex.model.Parking();
+        org.entur.netex2.model.Parking netexParking = new org.entur.netex2.model.Parking();
         netexParking.setId("NSR:Parking:1");
         netexParking.setVersion("1");
         netexParking.setValidityConditions(validityConditions);
         return netexParking;
     }
 
-    private List<org.rutebanken.netex.model.AvailabilityCondition> exportedAvailabilityConditions(
-            org.rutebanken.netex.model.Parking netexParking) {
-        return netexParking.getValidityConditions().getValidityConditionRefOrValidBetweenOrValidityCondition_().stream()
+    private List<org.entur.netex2.model.AvailabilityCondition> exportedAvailabilityConditions(
+            org.entur.netex2.model.Parking netexParking) {
+        return netexParking.getValidityConditions().getValidityConditionRefOrValidBetweenOrValidityCondition().stream()
                 .filter(entry -> entry instanceof JAXBElement<?>)
                 .map(entry -> ((JAXBElement<?>) entry).getValue())
-                .filter(value -> value instanceof org.rutebanken.netex.model.AvailabilityCondition)
-                .map(value -> (org.rutebanken.netex.model.AvailabilityCondition) value)
+                .filter(value -> value instanceof org.entur.netex2.model.AvailabilityCondition)
+                .map(value -> (org.entur.netex2.model.AvailabilityCondition) value)
                 .toList();
     }
 
-    private org.rutebanken.netex.model.Timeband_VersionedChildStructure singleExportedTimeband(
-            org.rutebanken.netex.model.Parking netexParking) {
-        List<org.rutebanken.netex.model.AvailabilityCondition> conditions = exportedAvailabilityConditions(netexParking);
+    private org.entur.netex2.model.Timeband_VersionedChildStructure singleExportedTimeband(
+            org.entur.netex2.model.Parking netexParking) {
+        List<org.entur.netex2.model.AvailabilityCondition> conditions = exportedAvailabilityConditions(netexParking);
         assertThat(conditions).hasSize(1);
         List<Object> timebands = conditions.get(0).getTimebands().getTimebandRefOrTimeband();
         assertThat(timebands).hasSize(1);
-        return (org.rutebanken.netex.model.Timeband_VersionedChildStructure) timebands.get(0);
+        return (org.entur.netex2.model.Timeband_VersionedChildStructure) timebands.get(0);
     }
 
     @Test
@@ -925,30 +920,30 @@ public class NetexMapperTest extends TiamatIntegrationTest {
         tiamatParking.setNetexId("NSR:Parking:1");
         tiamatParking.setAvailabilityConditions(List.of(condition));
 
-        org.rutebanken.netex.model.Parking netexParking = netexMapper.mapToNetexModel(tiamatParking);
+        org.entur.netex2.model.Parking netexParking = netexMapper.mapToNetexModel(tiamatParking);
 
         assertThat(netexParking.getValidityConditions()).isNotNull();
-        List<Object> entries = netexParking.getValidityConditions().getValidityConditionRefOrValidBetweenOrValidityCondition_();
-        List<org.rutebanken.netex.model.AvailabilityCondition> availabilityConditions = entries.stream()
+        List<Object> entries = netexParking.getValidityConditions().getValidityConditionRefOrValidBetweenOrValidityCondition();
+        List<org.entur.netex2.model.AvailabilityCondition> availabilityConditions = entries.stream()
                 .filter(entry -> entry instanceof JAXBElement<?>)
                 .map(entry -> ((JAXBElement<?>) entry).getValue())
-                .filter(value -> value instanceof org.rutebanken.netex.model.AvailabilityCondition)
-                .map(value -> (org.rutebanken.netex.model.AvailabilityCondition) value)
+                .filter(value -> value instanceof org.entur.netex2.model.AvailabilityCondition)
+                .map(value -> (org.entur.netex2.model.AvailabilityCondition) value)
                 .toList();
         assertThat(availabilityConditions).hasSize(1);
 
-        org.rutebanken.netex.model.AvailabilityCondition netexCondition = availabilityConditions.get(0);
+        org.entur.netex2.model.AvailabilityCondition netexCondition = availabilityConditions.get(0);
         assertThat(netexCondition.isIsAvailable()).isTrue();
-        assertThat(netexCondition.getDayTypes().getDayTypeRefOrDayType_()).hasSize(1);
-        org.rutebanken.netex.model.DayTypeRefStructure dayTypeRef =
-                (org.rutebanken.netex.model.DayTypeRefStructure) netexCondition.getDayTypes().getDayTypeRefOrDayType_().get(0).getValue();
+        assertThat(netexCondition.getDayTypes().getDayTypeRefOrDayType()).hasSize(1);
+        org.entur.netex2.model.DayTypeRefStructure dayTypeRef =
+                (org.entur.netex2.model.DayTypeRefStructure) netexCondition.getDayTypes().getDayTypeRefOrDayType().get(0).getValue();
         assertThat(dayTypeRef.getRef()).isEqualTo("NSR:DayType:1");
 
         assertThat(netexCondition.getTimebands().getTimebandRefOrTimeband()).hasSize(1);
         Object timebandEntry = netexCondition.getTimebands().getTimebandRefOrTimeband().get(0);
-        assertThat(timebandEntry).isInstanceOf(org.rutebanken.netex.model.Timeband_VersionedChildStructure.class);
-        org.rutebanken.netex.model.Timeband_VersionedChildStructure timeband =
-                (org.rutebanken.netex.model.Timeband_VersionedChildStructure) timebandEntry;
+        assertThat(timebandEntry).isInstanceOf(org.entur.netex2.model.Timeband_VersionedChildStructure.class);
+        org.entur.netex2.model.Timeband_VersionedChildStructure timeband =
+                (org.entur.netex2.model.Timeband_VersionedChildStructure) timebandEntry;
         assertThat(timeband.getStartTime()).isEqualTo(java.time.LocalTime.of(6, 0));
         assertThat(timeband.getEndTime()).isEqualTo(java.time.LocalTime.of(22, 0));
     }
@@ -962,8 +957,8 @@ public class NetexMapperTest extends TiamatIntegrationTest {
         tiamatParking.setNetexId("NSR:Parking:1");
         tiamatParking.setAvailabilityConditions(List.of(condition));
 
-        org.rutebanken.netex.model.Parking firstMap = netexMapper.mapToNetexModel(tiamatParking);
-        org.rutebanken.netex.model.Parking secondMap = netexMapper.mapToNetexModel(tiamatParking);
+        org.entur.netex2.model.Parking firstMap = netexMapper.mapToNetexModel(tiamatParking);
+        org.entur.netex2.model.Parking secondMap = netexMapper.mapToNetexModel(tiamatParking);
 
         long firstCount = countAvailabilityConditions(firstMap);
         long secondCount = countAvailabilityConditions(secondMap);
@@ -971,11 +966,11 @@ public class NetexMapperTest extends TiamatIntegrationTest {
         assertThat(secondCount).isEqualTo(1);
     }
 
-    private long countAvailabilityConditions(org.rutebanken.netex.model.Parking netexParking) {
-        return netexParking.getValidityConditions().getValidityConditionRefOrValidBetweenOrValidityCondition_().stream()
+    private long countAvailabilityConditions(org.entur.netex2.model.Parking netexParking) {
+        return netexParking.getValidityConditions().getValidityConditionRefOrValidBetweenOrValidityCondition().stream()
                 .filter(entry -> entry instanceof JAXBElement<?>)
                 .map(entry -> ((JAXBElement<?>) entry).getValue())
-                .filter(value -> value instanceof org.rutebanken.netex.model.AvailabilityCondition)
+                .filter(value -> value instanceof org.entur.netex2.model.AvailabilityCondition)
                 .count();
     }
 
@@ -992,19 +987,19 @@ public class NetexMapperTest extends TiamatIntegrationTest {
 
         stopPlace.getQuays().add(tiamatQuay);
 
-        org.rutebanken.netex.model.StopPlace actualStop = netexMapper.mapToNetexModel(stopPlace);
+        org.entur.netex2.model.StopPlace actualStop = netexMapper.mapToNetexModel(stopPlace);
 
-        org.rutebanken.netex.model.Quay actualQuay = actualStop.getQuays().getQuayRefOrQuay().stream()
+        org.entur.netex2.model.Quay actualQuay = actualStop.getQuays().getQuayRefOrQuay().stream()
                 .map(JAXBElement::getValue)
-                .filter(object -> object instanceof org.rutebanken.netex.model.Quay)
-                .map(object -> ((org.rutebanken.netex.model.Quay) object))
+                .filter(object -> object instanceof org.entur.netex2.model.Quay)
+                .map(object -> ((org.entur.netex2.model.Quay) object))
                 .findFirst()
                 .get();
 
         assertThat(actualQuay.getId()).isEqualTo(netexId);
         assertThat(actualQuay.getCompassBearing()).isEqualTo(123f);
-        assertThat(actualQuay.getLighting()).isEqualTo(org.rutebanken.netex.model.LightingEnumeration.WELL_LIT);
-        assertThat(actualQuay.getPublicCode()).isEqualTo("A");
+        assertThat(actualQuay.getLighting()).isEqualTo(org.entur.netex2.model.LightingEnumeration.WELL_LIT);
+        assertThat(actualQuay.getPublicCode().getValue()).isEqualTo("A");
     }
 
     @Test
@@ -1022,15 +1017,15 @@ public class NetexMapperTest extends TiamatIntegrationTest {
                 .getTopographicPlace()
                 .add(topographicPlace);
 
-        org.rutebanken.netex.model.SiteFrame netexSiteFrame = netexMapper.mapToNetexModel(tiamatSiteFrame);
+        org.entur.netex2.model.SiteFrame netexSiteFrame = netexMapper.mapToNetexModel(tiamatSiteFrame);
 
 
         assertThat(netexSiteFrame).isNotNull();
         assertThat(netexSiteFrame.getTopographicPlaces().getTopographicPlace()).isNotEmpty();
 
-        org.rutebanken.netex.model.TopographicPlace netexTopographicPlace = netexSiteFrame.getTopographicPlaces().getTopographicPlace().getFirst();
+        org.entur.netex2.model.TopographicPlace netexTopographicPlace = netexSiteFrame.getTopographicPlaces().getTopographicPlace().getFirst();
         assertThat(netexTopographicPlace.getCountryRef()).as("Reference to country shall not be null").isNotNull();
-        assertThat(netexTopographicPlace.getCountryRef().getRef()).isEqualTo(org.rutebanken.netex.model.IanaCountryTldEnumeration.ZM);
+        assertThat(netexTopographicPlace.getCountryRef().getRef()).isEqualTo(org.entur.netex2.model.IanaCountryTldEnumeration.ZM);
 
 
     }
@@ -1060,13 +1055,13 @@ public class NetexMapperTest extends TiamatIntegrationTest {
                 .getTopographicPlace()
                 .add(county);
 
-        org.rutebanken.netex.model.SiteFrame netexSiteFrame = netexMapper.mapToNetexModel(tiamatSiteFrame);
+        org.entur.netex2.model.SiteFrame netexSiteFrame = netexMapper.mapToNetexModel(tiamatSiteFrame);
 
 
         assertThat(netexSiteFrame).isNotNull();
         assertThat(netexSiteFrame.getTopographicPlaces().getTopographicPlace()).isNotEmpty();
 
-        org.rutebanken.netex.model.TopographicPlace netexMunicipality = netexSiteFrame.getTopographicPlaces().getTopographicPlace().getFirst();
+        org.entur.netex2.model.TopographicPlace netexMunicipality = netexSiteFrame.getTopographicPlaces().getTopographicPlace().getFirst();
         assertThat(netexMunicipality).isNotNull();
         assertThat(netexMunicipality.getParentTopographicPlaceRef()).describedAs("The municipality should have a reference to the parent topographic place").isNotNull();
         assertThat(netexMunicipality.getParentTopographicPlaceRef().getRef()).isEqualTo(county.getNetexId());
@@ -1074,22 +1069,22 @@ public class NetexMapperTest extends TiamatIntegrationTest {
 
     @Test
     public void mapCountyRefsFromMunicipalitiesFromNetexToTiamat() {
-        org.rutebanken.netex.model.SiteFrame netexSiteFrame = new org.rutebanken.netex.model.SiteFrame();
+        org.entur.netex2.model.SiteFrame netexSiteFrame = new org.entur.netex2.model.SiteFrame();
         netexSiteFrame.withTopographicPlaces(new TopographicPlacesInFrame_RelStructure());
 
-        org.rutebanken.netex.model.CountryRef countryRef = new org.rutebanken.netex.model.CountryRef();
-        countryRef.setRef(org.rutebanken.netex.model.IanaCountryTldEnumeration.ZM);
+        org.entur.netex2.model.CountryRef countryRef = new org.entur.netex2.model.CountryRef();
+        countryRef.setRef(org.entur.netex2.model.IanaCountryTldEnumeration.ZM);
 
-        org.rutebanken.netex.model.TopographicPlace county = new org.rutebanken.netex.model.TopographicPlace();
+        org.entur.netex2.model.TopographicPlace county = new org.entur.netex2.model.TopographicPlace();
         county.setId("NSR:TopographicPlace:1");
-        county.setName(new MultilingualString().withValue("Akershus"));
+        county.setName(NetexMultilingualStringHelper.toNetexModel("Akershus"));
         county.withCountryRef(countryRef);
 
-        org.rutebanken.netex.model.TopographicPlace municipality = new org.rutebanken.netex.model.TopographicPlace();
+        org.entur.netex2.model.TopographicPlace municipality = new org.entur.netex2.model.TopographicPlace();
         municipality.setId("NSR:TopographicPlace:2");
-        municipality.setName(new MultilingualString().withValue("Asker"));
+        municipality.setName(NetexMultilingualStringHelper.toNetexModel("Asker"));
         municipality.withParentTopographicPlaceRef(
-                new org.rutebanken.netex.model.TopographicPlaceRefStructure().withRef(county.getId())
+                new org.entur.netex2.model.TopographicPlaceRefStructure().withRef(county.getId())
         );
 
         netexSiteFrame
@@ -1103,11 +1098,11 @@ public class NetexMapperTest extends TiamatIntegrationTest {
                 .add(county);
 
         // To be able to look up NSR references, we need to persist municipality and county
-        TopographicPlace tiamatCounty = new TopographicPlace(new EmbeddableMultilingualString(county.getName().getValue()));
+        TopographicPlace tiamatCounty = new TopographicPlace(new EmbeddableMultilingualString(NetexMultilingualStringHelper.getValue(county.getName())));
         tiamatCounty.setNetexId(county.getId());
         topographicPlaceRepository.save(tiamatCounty);
 
-        TopographicPlace tiamatMunicipality = new TopographicPlace(new EmbeddableMultilingualString(municipality.getName().getValue()));
+        TopographicPlace tiamatMunicipality = new TopographicPlace(new EmbeddableMultilingualString(NetexMultilingualStringHelper.getValue(municipality.getName())));
         tiamatMunicipality.setNetexId(municipality.getId());
         tiamatMunicipality.setParentTopographicPlaceRef(new TopographicPlaceRefStructure(tiamatCounty));
         topographicPlaceRepository.save(tiamatMunicipality);
@@ -1128,7 +1123,7 @@ public class NetexMapperTest extends TiamatIntegrationTest {
 
     @Test
     public void mapStopPlaceWithAccessibilityAssessmentToTiamat() {
-        org.rutebanken.netex.model.StopPlace netexStopPlace = new org.rutebanken.netex.model.StopPlace();
+        org.entur.netex2.model.StopPlace netexStopPlace = new org.entur.netex2.model.StopPlace();
         netexStopPlace.setAccessibilityAssessment(createNetexAccessibilityAssessment());
 
         assertThat(netexStopPlace.getAccessibilityAssessment()).isNotNull();
@@ -1141,10 +1136,10 @@ public class NetexMapperTest extends TiamatIntegrationTest {
         assertThat(tiamatStopPlace.getAccessibilityAssessment().getLimitations()).isNotNull();
     }
 
-    protected org.rutebanken.netex.model.AccessibilityAssessment createNetexAccessibilityAssessment() {
-        org.rutebanken.netex.model.AccessibilityAssessment accessibilityAssessment = new org.rutebanken.netex.model.AccessibilityAssessment();
+    protected org.entur.netex2.model.AccessibilityAssessment createNetexAccessibilityAssessment() {
+        org.entur.netex2.model.AccessibilityAssessment accessibilityAssessment = new org.entur.netex2.model.AccessibilityAssessment();
 
-        final org.rutebanken.netex.model.AccessibilityLimitation accessibilityLimitation = getAccessibilityLimitation();
+        final org.entur.netex2.model.AccessibilityLimitation accessibilityLimitation = getAccessibilityLimitation();
         AccessibilityLimitations_RelStructure limitationsRelStructure = new AccessibilityLimitations_RelStructure();
 
 
@@ -1154,14 +1149,14 @@ public class NetexMapperTest extends TiamatIntegrationTest {
     }
 
     @NotNull
-    private static org.rutebanken.netex.model.AccessibilityLimitation getAccessibilityLimitation() {
-        org.rutebanken.netex.model.AccessibilityLimitation accessibilityLimitation = new org.rutebanken.netex.model.AccessibilityLimitation();
-        accessibilityLimitation.setWheelchairAccess(org.rutebanken.netex.model.LimitationStatusEnumeration.TRUE);
-        accessibilityLimitation.setLiftFreeAccess(org.rutebanken.netex.model.LimitationStatusEnumeration.TRUE);
-        accessibilityLimitation.setEscalatorFreeAccess(org.rutebanken.netex.model.LimitationStatusEnumeration.TRUE);
-        accessibilityLimitation.setAudibleSignalsAvailable(org.rutebanken.netex.model.LimitationStatusEnumeration.TRUE);
-        accessibilityLimitation.setVisualSignsAvailable(org.rutebanken.netex.model.LimitationStatusEnumeration.TRUE);
-        accessibilityLimitation.setStepFreeAccess(org.rutebanken.netex.model.LimitationStatusEnumeration.TRUE);
+    private static org.entur.netex2.model.AccessibilityLimitation getAccessibilityLimitation() {
+        org.entur.netex2.model.AccessibilityLimitation accessibilityLimitation = new org.entur.netex2.model.AccessibilityLimitation();
+        accessibilityLimitation.setWheelchairAccess(org.entur.netex2.model.LimitationStatusEnumeration.TRUE);
+        accessibilityLimitation.setLiftFreeAccess(org.entur.netex2.model.LimitationStatusEnumeration.TRUE);
+        accessibilityLimitation.setEscalatorFreeAccess(org.entur.netex2.model.LimitationStatusEnumeration.TRUE);
+        accessibilityLimitation.setAudibleSignalsAvailable(org.entur.netex2.model.LimitationStatusEnumeration.TRUE);
+        accessibilityLimitation.setVisualSignsAvailable(org.entur.netex2.model.LimitationStatusEnumeration.TRUE);
+        accessibilityLimitation.setStepFreeAccess(org.entur.netex2.model.LimitationStatusEnumeration.TRUE);
         return accessibilityLimitation;
     }
 
@@ -1173,7 +1168,7 @@ public class NetexMapperTest extends TiamatIntegrationTest {
         assertThat(tiamatStopPlace.getAccessibilityAssessment()).isNotNull();
         assertThat(tiamatStopPlace.getAccessibilityAssessment().getLimitations()).isNotNull();
 
-        org.rutebanken.netex.model.StopPlace netexStopPlace = netexMapper.mapToNetexModel(tiamatStopPlace);
+        org.entur.netex2.model.StopPlace netexStopPlace = netexMapper.mapToNetexModel(tiamatStopPlace);
 
         assertThat(netexStopPlace).isNotNull();
         assertThat(netexStopPlace.getAccessibilityAssessment()).isNotNull();
@@ -1189,13 +1184,13 @@ public class NetexMapperTest extends TiamatIntegrationTest {
         accessibilityAssessment.setMobilityImpairedAccess(null);
 
         quay.setAccessibilityAssessment(accessibilityAssessment);
-        org.rutebanken.netex.model.Quay netexQuay = netexMapper.mapToNetexModel(quay);
+        org.entur.netex2.model.Quay netexQuay = netexMapper.mapToNetexModel(quay);
 
         assertThat(netexQuay.getAccessibilityAssessment()).isNotNull();
         assertThat(netexQuay.getAccessibilityAssessment().getMobilityImpairedAccess())
                 .as("mobilityImpairedAccess")
                 .isNotNull()
-                .isEqualByComparingTo(org.rutebanken.netex.model.LimitationStatusEnumeration.UNKNOWN);
+                .isEqualByComparingTo(org.entur.netex2.model.LimitationStatusEnumeration.UNKNOWN);
 
     }
 
@@ -1225,9 +1220,9 @@ public class NetexMapperTest extends TiamatIntegrationTest {
         stopPlace.setNetexId("NSR:StopPlace:321123");
         stopPlace.setAccessibilityAssessment(accessibilityAssessment);
 
-        org.rutebanken.netex.model.StopPlace netexStopPlace = netexMapper.mapToNetexModel(stopPlace);
+        org.entur.netex2.model.StopPlace netexStopPlace = netexMapper.mapToNetexModel(stopPlace);
 
-        org.rutebanken.netex.model.AccessibilityAssessment netexAccessibilityAssesment = netexStopPlace.getAccessibilityAssessment();
+        org.entur.netex2.model.AccessibilityAssessment netexAccessibilityAssesment = netexStopPlace.getAccessibilityAssessment();
 
         assertThat(netexAccessibilityAssesment.getId()).isNotEmpty();
         assertThat(netexAccessibilityAssesment.getId()).isEqualToIgnoringCase("NSR:AccessibilityAssesment:123124");
@@ -1241,7 +1236,7 @@ public class NetexMapperTest extends TiamatIntegrationTest {
         pathLink.setNetexId("NSR:PathLink:1");
         pathLink.setVersion(2L);
 
-        org.rutebanken.netex.model.PathLink netexPathLink = netexMapper.mapToNetexModel(pathLink);
+        org.entur.netex2.model.PathLink netexPathLink = netexMapper.mapToNetexModel(pathLink);
         assertThat(netexPathLink.getId()).isEqualTo(pathLink.getNetexId());
         assertThat(netexPathLink.getVersion()).as("version").isEqualTo(String.valueOf(pathLink.getVersion()));
         assertThat(netexPathLink.getTo()).isNotNull();
@@ -1260,7 +1255,7 @@ public class NetexMapperTest extends TiamatIntegrationTest {
         StopPlace stopPlace = new StopPlace();
         stopPlace.getAdjacentSites().add(new SiteRefStructure("NSR:StopPlace:1"));
 
-        org.rutebanken.netex.model.StopPlace netexStopPlace = netexMapper.mapToNetexModel(stopPlace);
+        org.entur.netex2.model.StopPlace netexStopPlace = netexMapper.mapToNetexModel(stopPlace);
 
         SiteRefs_RelStructure siteRefs_relStructure = netexStopPlace.getAdjacentSites();
 
@@ -1269,7 +1264,7 @@ public class NetexMapperTest extends TiamatIntegrationTest {
 
         assertThat(siteRefs_relStructure.getSiteRef()).isNotEmpty();
 
-        org.rutebanken.netex.model.SiteRefStructure firstSiteRef = siteRefs_relStructure.
+        org.entur.netex2.model.SiteRefStructure firstSiteRef = siteRefs_relStructure.
                 getSiteRef().
                 getFirst()
                 .getValue();
@@ -1304,11 +1299,11 @@ public class NetexMapperTest extends TiamatIntegrationTest {
             tiamatFareZone.getFareZoneMembers().add(new StopPlaceReference("NSR:StopPlace:123"));
 
             // Export: StopPlace ref -> ScheduledStopPoint ref with "S" prefix added.
-            org.rutebanken.netex.model.FareZone netexFareZone = netexMapper.mapToNetexModel(tiamatFareZone);
+            org.entur.netex2.model.FareZone netexFareZone = netexMapper.mapToNetexModel(tiamatFareZone);
 
             assertThat(netexFareZone.getScopingMethod())
                     .as("scoping method preserved on export")
-                    .isEqualTo(org.rutebanken.netex.model.ScopingMethodEnumeration.EXPLICIT_STOPS);
+                    .isEqualTo(org.entur.netex2.model.ScopingMethodEnumeration.EXPLICIT_STOPS);
             assertThat(netexFareZone.getMembers()).as("members").isNotNull();
             assertThat(netexFareZone.getMembers().getPointRef())
                     .as("exported member point refs")

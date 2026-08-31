@@ -19,11 +19,11 @@ import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.metadata.Type;
 import ma.glasnost.orika.metadata.TypeBuilder;
 import org.junit.Test;
-import org.rutebanken.netex.model.ParkingCapacities_RelStructure;
-import org.rutebanken.netex.model.ParkingProperties_RelStructure;
-import org.rutebanken.netex.model.ParkingStayEnumeration;
-import org.rutebanken.netex.model.ParkingUserEnumeration;
-import org.rutebanken.netex.model.ParkingVehicleEnumeration;
+import org.entur.netex2.model.ParkingCapacities_RelStructure;
+import org.entur.netex2.model.ParkingProperties_RelStructure;
+import org.entur.netex2.model.ParkingStayEnumeration;
+import org.entur.netex2.model.ParkingUserEnumeration;
+import org.entur.netex2.model.ParkingVehicleEnumeration;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.ParkingCapacity;
 import org.rutebanken.tiamat.model.ParkingProperties;
@@ -58,7 +58,7 @@ public class ParkingPropertiesListConverterTest extends TiamatIntegrationTest {
         capacity.setParkingVehicleType(org.rutebanken.tiamat.model.ParkingVehicleEnumeration.MOTORCYCLE);
         capacity.setParkingStayType(org.rutebanken.tiamat.model.ParkingStayEnumeration.LONG_TERM);
 
-        org.rutebanken.netex.model.ParkingCapacity netexCapacity = convertToSingleCapacity(capacity);
+        org.entur.netex2.model.ParkingCapacity netexCapacity = convertToSingleCapacity(capacity);
 
         assertThat(netexCapacity.getParkingVehicleType()).isEqualTo(ParkingVehicleEnumeration.MOTORCYCLE);
         assertThat(netexCapacity.getParkingStayType()).isEqualTo(ParkingStayEnumeration.LONG_TERM);
@@ -66,7 +66,7 @@ public class ParkingPropertiesListConverterTest extends TiamatIntegrationTest {
 
     @Test
     public void convertToWritesNoAttributeWhenTheStoredValueIsNull() {
-        org.rutebanken.netex.model.ParkingCapacity netexCapacity = convertToSingleCapacity(tiamatCapacity());
+        org.entur.netex2.model.ParkingCapacity netexCapacity = convertToSingleCapacity(tiamatCapacity());
 
         assertThat(netexCapacity.getParkingVehicleType()).isNull();
         assertThat(netexCapacity.getParkingStayType()).isNull();
@@ -75,7 +75,7 @@ public class ParkingPropertiesListConverterTest extends TiamatIntegrationTest {
 
     @Test
     public void convertFromKeepsVehicleTypeAndStayType() {
-        org.rutebanken.netex.model.ParkingCapacity netexCapacity = netexCapacity()
+        org.entur.netex2.model.ParkingCapacity netexCapacity = netexCapacity()
                 .withParkingVehicleType(ParkingVehicleEnumeration.PEDAL_CYCLE)
                 .withParkingStayType(ParkingStayEnumeration.SHORT_STAY);
 
@@ -103,7 +103,7 @@ public class ParkingPropertiesListConverterTest extends TiamatIntegrationTest {
      */
     @Test
     public void convertFromDropsAVehicleTypeThatTiamatDoesNotDefine() {
-        org.rutebanken.netex.model.ParkingCapacity netexCapacity = netexCapacity()
+        org.entur.netex2.model.ParkingCapacity netexCapacity = netexCapacity()
                 .withParkingVehicleType(ParkingVehicleEnumeration.SNOWMOBILE);
 
         ParkingCapacity capacity = convertFromSingleCapacity(netexCapacity);
@@ -213,8 +213,8 @@ public class ParkingPropertiesListConverterTest extends TiamatIntegrationTest {
     private List<ParkingVehicleEnumeration> vehicleTypesOf(ParkingProperties_RelStructure relStructure, int groupIndex) {
         return relStructure.getParkingProperties().get(groupIndex).getSpaces()
                 .getParkingCapacityRefOrParkingCapacity().stream()
-                .map(org.rutebanken.netex.model.ParkingCapacity.class::cast)
-                .map(org.rutebanken.netex.model.ParkingCapacity::getParkingVehicleType)
+                .map(org.entur.netex2.model.ParkingCapacity.class::cast)
+                .map(org.entur.netex2.model.ParkingCapacity::getParkingVehicleType)
                 .toList();
     }
 
@@ -227,15 +227,15 @@ public class ParkingPropertiesListConverterTest extends TiamatIntegrationTest {
         return capacity;
     }
 
-    private org.rutebanken.netex.model.ParkingCapacity netexCapacity() {
-        return new org.rutebanken.netex.model.ParkingCapacity()
+    private org.entur.netex2.model.ParkingCapacity netexCapacity() {
+        return new org.entur.netex2.model.ParkingCapacity()
                 .withId("NSR:ParkingCapacity:1")
                 .withVersion("1")
                 .withParkingUserType(ParkingUserEnumeration.ALL_USERS)
                 .withNumberOfSpaces(BigInteger.valueOf(42));
     }
 
-    private org.rutebanken.netex.model.ParkingCapacity convertToSingleCapacity(ParkingCapacity capacity) {
+    private org.entur.netex2.model.ParkingCapacity convertToSingleCapacity(ParkingCapacity capacity) {
         ParkingProperties parkingProperties = new ParkingProperties();
         parkingProperties.setNetexId("NSR:ParkingProperties:1");
         parkingProperties.setVersion(1L);
@@ -249,11 +249,11 @@ public class ParkingPropertiesListConverterTest extends TiamatIntegrationTest {
         List<Object> spaces = relStructure.getParkingProperties().get(0).getSpaces()
                 .getParkingCapacityRefOrParkingCapacity();
         assertThat(spaces).hasSize(1);
-        return (org.rutebanken.netex.model.ParkingCapacity) spaces.get(0);
+        return (org.entur.netex2.model.ParkingCapacity) spaces.get(0);
     }
 
-    private ParkingCapacity convertFromSingleCapacity(org.rutebanken.netex.model.ParkingCapacity netexCapacity) {
-        org.rutebanken.netex.model.ParkingProperties netexParkingProperties = new org.rutebanken.netex.model.ParkingProperties()
+    private ParkingCapacity convertFromSingleCapacity(org.entur.netex2.model.ParkingCapacity netexCapacity) {
+        org.entur.netex2.model.ParkingProperties netexParkingProperties = new org.entur.netex2.model.ParkingProperties()
                 .withId("NSR:ParkingProperties:1")
                 .withVersion("1")
                 .withSpaces(new ParkingCapacities_RelStructure()
