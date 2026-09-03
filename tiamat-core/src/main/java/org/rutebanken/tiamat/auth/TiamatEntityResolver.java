@@ -20,11 +20,15 @@ import org.rutebanken.tiamat.model.Parking;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class TiamatEntityResolver implements EntityResolver {
+
+    private static final Logger logger = LoggerFactory.getLogger(TiamatEntityResolver.class);
 
     @Autowired
     private StopPlaceRepository stopPlaceRepository;
@@ -47,10 +51,14 @@ public class TiamatEntityResolver implements EntityResolver {
                 if (parking.getParentSiteRef() != null && parking.getParentSiteRef().getRef() != null) {
                     StopPlace stopPlace = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(parking.getParentSiteRef().getRef());
 
-                    if (stopPlace == null) {
-                        throw new IllegalArgumentException("Cannot resolve stop place from parking: " + entity);
+                    if (stopPlace != null) {
+                        return stopPlace;
                     }
-                    return stopPlace;
+                    // The referenced parent stop place no longer exists. Fall back to
+                    // checking permission on the parking itself instead of throwing -
+                    // same as the case below where the parking has no parent site ref.
+                    logger.warn("Cannot resolve stop place from parking: {}. Parent site ref {} no longer exists, falling back to parking permission check.",
+                            entity, parking.getParentSiteRef().getRef());
                 }
             }
             default -> {
