@@ -706,9 +706,9 @@ public class StopPlaceControllerIntegrationTest extends TiamatIntegrationTest {
     }
 
     /**
-     * version="any" is legal NeTEx, and is refused deliberately rather than as a side effect of
-     * parsing. "any" is precisely the assertion a precondition cannot accept: it says the caller
-     * does not care which version it edited.
+     * version="any" is legal NeTEx, and the writer refuses it deliberately, not as a side effect
+     * of the parse. "any" is the one assertion that a precondition cannot accept, because it says
+     * the caller does not care which version it edited.
      */
     @Test
     public void updateWithANonNumericVersionFails() throws InterruptedException {

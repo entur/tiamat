@@ -93,14 +93,15 @@ public class StopPlaceWriter {
         establishNetexMappingContext();
         long expectedVersion = requireSubmittedVersion(newStopPlace);
         return mutateLock.executeInLock(() -> {
-            // Resolved inside the lock rather than from the request, so the version compared
-            // against is a fresh read rather than one the caller supplied.
+            // The validator reads the current version inside the lock, so the comparison uses a
+            // fresh read and not a version that the caller supplied.
             //
-            // This narrows the window but does not close it. The lock sits inside the
-            // transaction, so the previous writer releases it before committing, and a writer
-            // parked on the lock can still read the superseded version. The unique constraint on
-            // (netex_id, version) catches that, so nothing is lost, but the caller is told a
-            // constraint was violated rather than that the stop place moved on. See #458.
+            // This check narrows the window, but it does not close it. The lock sits inside the
+            // transaction, so the previous writer releases the lock before it commits. A writer
+            // that waits on the lock can still read the superseded version. The unique constraint
+            // on (netex_id, version) then refuses the second row, so the database keeps the first
+            // write. But the caller gets a constraint message instead of the stale-version
+            // reason. See #458.
             var existingStopPlace = stopPlaceMutationValidator.validateStopPlaceUpdate(
                     newStopPlace.getId(),
                     false,
