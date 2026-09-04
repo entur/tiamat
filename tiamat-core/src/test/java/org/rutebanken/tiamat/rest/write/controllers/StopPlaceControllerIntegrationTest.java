@@ -654,9 +654,10 @@ public class StopPlaceControllerIntegrationTest extends TiamatIntegrationTest {
     }
 
     /**
-     * The case from issue #453. Two clients read version 1. The first write moves the stop place to
-     * version 2. The second was built from what the first has already replaced, so applying it
-     * would discard that work without telling anybody.
+     * This test covers the case from issue #453. Two clients read version 1. The first write moves
+     * the stop place to version 2. The second client built its edit from the version that the
+     * first write replaced. Without the precondition, that edit discards the first write without
+     * a warning.
      */
     @Test
     public void updateFromAVersionThatHasMovedOnFails() throws InterruptedException {
