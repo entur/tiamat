@@ -36,6 +36,11 @@
             <artifactId>tiamat-core</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.rutebanken</groupId>
+            <artifactId>tiamat-gcp</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
     <build>

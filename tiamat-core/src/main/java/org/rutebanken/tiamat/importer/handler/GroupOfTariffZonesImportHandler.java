@@ -45,7 +45,7 @@
 
 package org.rutebanken.tiamat.importer.handler;
 
-import com.google.api.client.util.Preconditions;
+import com.google.common.base.Preconditions;
 import org.rutebanken.netex.model.GroupOfTariffZones;
 import org.rutebanken.netex.model.GroupsOfTariffZonesInFrame_RelStructure;
 import org.rutebanken.netex.model.SiteFrame;

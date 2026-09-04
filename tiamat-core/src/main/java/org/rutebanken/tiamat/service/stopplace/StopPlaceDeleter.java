@@ -15,7 +15,7 @@
 
 package org.rutebanken.tiamat.service.stopplace;
 
-import com.google.api.client.util.Preconditions;
+import com.google.common.base.Preconditions;
 import org.rutebanken.tiamat.auth.AuthorizationService;
 import org.rutebanken.tiamat.auth.UsernameFetcher;
 import org.rutebanken.tiamat.changelog.EntityChangedListener;

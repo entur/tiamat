@@ -45,7 +45,7 @@
 
 package org.rutebanken.tiamat.rest.graphql.fetchers;
 
-import com.google.api.client.util.Preconditions;
+import com.google.common.base.Preconditions;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import org.rutebanken.tiamat.service.groupofstopplaces.GroupOfStopPlacesDeleter;

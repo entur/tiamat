@@ -42,7 +42,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * There is a legacy naming problem with the <code>gcs-blobstore</code> profile and its configuration injection, but as
  * this <code>rutebanken-helpers adaptation</code> is not needed for GCS support within Tiamat but for the other
  * implementations it provides, in practice these do not clash. If the GCS implementation is ever to be taken into use,
- * {@link org.rutebanken.tiamat.service.GcsBlobStoreService} first needs to be adapted directly, and additional feature
+ * <code>GcsBlobStoreService</code> in the tiamat-gcp module first needs to be adapted directly, and additional feature
  * gap fixing will probably need to be done in <code>rutebanken-helpers</code> as well.
  */
 @Lazy
