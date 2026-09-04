@@ -16,18 +16,18 @@ import static org.rutebanken.tiamat.writer.async.PubSubWriteJobPublisher.ATTRIBU
 import static org.rutebanken.tiamat.writer.async.PubSubWriteJobPublisher.ATTRIBUTE_OPERATION;
 
 /**
- * Receives write jobs from Pub/Sub and hands them to the handler, which is the same handler the
- * in-memory transport uses. Nothing about processing a job lives here.
+ * This class receives write jobs from Pub/Sub and gives them to the handler. This is the same
+ * handler that the in-process transport uses, and nothing about how to process a job lives here.
  * <p>
- * Acknowledgement is the only judgement this class makes. The handler records the outcome of a
- * job itself, including failures, so a message is acknowledged whenever the handler returns:
- * the job has reached a terminal state and redelivering it would achieve nothing. A message is
- * only sent back for redelivery when the handler throws, which means the outcome was never
- * recorded and the job is still waiting for someone to finish it.
+ * This class makes one decision only: whether to acknowledge the message. The handler records the
+ * outcome of a job itself, and this includes a failure. Thus this class acknowledges a message
+ * when the handler returns, because the job is then in a terminal state and a second delivery
+ * achieves nothing. It sends a message back only when the handler throws, which means that
+ * nothing recorded the outcome and the job is still unfinished.
  * <p>
- * Redelivery is safe rather than merely tolerable: the handler claims the job before doing any
- * work, so a second delivery of a job that has already been processed is discarded rather than
- * applied twice. That property is what lets this class stay this small.
+ * A second delivery is safe, and not merely tolerable. The handler claims a job before it does
+ * the work, so it discards a second delivery of a job that already ran. That property is what
+ * keeps this class small.
  */
 @Component
 @ConditionalOnProperty(name = "tiamat.write-api.transport", havingValue = "pubsub")
@@ -68,9 +68,9 @@ public class PubSubWriteJobSubscriber {
         try {
             writeJob = toWriteJob(message.getPubsubMessage());
         } catch (RuntimeException e) {
-            // Nothing here can be retried into working: the message does not describe a job. Sending
-            // it back would loop until the dead letter policy takes it, so acknowledge and let the
-            // job time out, which is the outcome the client already handles.
+            // A second delivery cannot help, because the message does not describe a job. To send
+            // it back makes a loop that runs until the dead letter policy takes it. Acknowledge
+            // instead, and let the job time out, which is an outcome the client already handles.
             logger.error("Discarding a message on {} that is not a write job", subscription, e);
             message.ack();
             return;
@@ -80,9 +80,9 @@ public class PubSubWriteJobSubscriber {
             handler.handle(writeJob);
             message.ack();
         } catch (RuntimeException e) {
-            // The handler records its own failures, so reaching here means the outcome was never
-            // written and the job is still unfinished. Redelivery is safe because claiming is what
-            // decides whether the work actually runs.
+            // The handler records its own failures. Thus a throw means that nothing wrote the
+            // outcome, and that the job is unfinished. A second delivery is safe, because the
+            // claim decides whether the work runs.
             logger.error("Write job {} was not completed, returning it for redelivery", writeJob.jobId(), e);
             message.nack();
         }
