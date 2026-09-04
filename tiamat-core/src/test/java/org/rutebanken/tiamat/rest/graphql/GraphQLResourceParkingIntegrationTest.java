@@ -455,5 +455,53 @@ public class GraphQLResourceParkingIntegrationTest extends AbstractGraphQLResour
 
     }
 
+    @Test
+    public void testMutateParkingWithCycleStorageShouldPersistAndReturn() throws Exception {
+
+        StopPlace stopPlace = stopPlaceRepository.save(new StopPlace());
+
+        String graphQlQuery = "{\n" +
+                "\"query\": \"mutation { " +
+                "  parking: " + GraphQLNames.MUTATE_PARKING + " (Parking : {" +
+                "    geometry: { type:Point coordinates:[10.5, 59.0] } " +
+                "    parentSiteRef:\\\"" + stopPlace.getNetexId() + "\\\" " +
+                "    placeEquipments: { " +
+                "      cycleStorageEquipment: [{ " +
+                "        numberOfSpaces: 10 " +
+                "        cycleStorageType: bars " +
+                "      }] " +
+                "    } " +
+                "  }) {" +
+                "    id " +
+                "    placeEquipments { " +
+                "      cycleStorageEquipment { numberOfSpaces cycleStorageType } " +
+                "    } " +
+                "  }" +
+                "}\",\"variables\": \"\"}";
+
+        String parkingId = executeGraphQL(graphQlQuery)
+                .body("data.parking[0].id", notNullValue())
+                .body("data.parking[0].placeEquipments.cycleStorageEquipment[0].cycleStorageType", equalTo("bars"))
+                .body("data.parking[0].placeEquipments.cycleStorageEquipment[0].numberOfSpaces", equalTo(10))
+                .extract()
+                .path("data.parking[0].id");
+
+        String findParkingQuery = "{" +
+                "\"query\":\"{" +
+                "  parking: " + GraphQLNames.FIND_PARKING + " (id:\\\"" + parkingId + "\\\") { " +
+                "    id " +
+                "    placeEquipments { " +
+                "      cycleStorageEquipment { numberOfSpaces cycleStorageType } " +
+                "    } " +
+                "  } " +
+                "}\"," +
+                "\"variables\":\"\"}";
+
+        executeGraphQL(findParkingQuery)
+                .body("data.parking[0].id", equalTo(parkingId))
+                .body("data.parking[0].placeEquipments.cycleStorageEquipment[0].cycleStorageType", equalTo("bars"))
+                .body("data.parking[0].placeEquipments.cycleStorageEquipment[0].numberOfSpaces", equalTo(10));
+    }
+
 
 }

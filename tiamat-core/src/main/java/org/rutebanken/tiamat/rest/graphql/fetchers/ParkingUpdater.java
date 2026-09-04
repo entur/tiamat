@@ -35,10 +35,12 @@ import org.rutebanken.tiamat.model.ParkingStayEnumeration;
 import org.rutebanken.tiamat.model.ParkingTypeEnumeration;
 import org.rutebanken.tiamat.model.ParkingUserEnumeration;
 import org.rutebanken.tiamat.model.ParkingVehicleEnumeration;
+import org.rutebanken.tiamat.model.PlaceEquipment;
 import org.rutebanken.tiamat.model.SiteRefStructure;
 import org.rutebanken.tiamat.repository.ParkingRepository;
 import org.rutebanken.tiamat.rest.graphql.mappers.AccessibilityLimitationMapper;
 import org.rutebanken.tiamat.rest.graphql.mappers.GeometryMapper;
+import org.rutebanken.tiamat.rest.graphql.mappers.PlaceEquipmentMapper;
 import org.rutebanken.tiamat.rest.graphql.mappers.ValidBetweenMapper;
 import org.rutebanken.tiamat.versioning.VersionCreator;
 import org.rutebanken.tiamat.versioning.save.ParkingVersionedSaverService;
@@ -55,6 +57,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ACCESSIBILITY_ASSESSMENT;
@@ -79,6 +82,7 @@ import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PARKING_TYPE;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PARKING_USER_TYPE;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PARKING_VEHICLE_TYPE;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PARKING_VEHICLE_TYPES;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PLACE_EQUIPMENTS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PRINCIPAL_CAPACITY;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.REAL_TIME_OCCUPANCY_AVAILABLE;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.RECHARGING_AVAILABLE;
@@ -114,6 +118,9 @@ class ParkingUpdater implements DataFetcher {
 
     @Autowired
     private AccessibilityLimitationMapper accessibilityLimitationMapper;
+
+    @Autowired
+    private PlaceEquipmentMapper placeEquipmentMapper;
 
     @Override
     public Object get(DataFetchingEnvironment environment) {
@@ -285,6 +292,12 @@ class ParkingUpdater implements DataFetcher {
             List<ParkingArea> parkingAreasList = resolveParkingAreasList((List) input.get(PARKING_AREAS));
             isUpdated = true;
             updatedParking.setParkingAreas(parkingAreasList);
+        }
+
+        Optional<PlaceEquipment> placeEquipment = placeEquipmentMapper.map(input);
+        if (placeEquipment.isPresent()) {
+            isUpdated = isUpdated || !Objects.equals(placeEquipment.get(), updatedParking.getPlaceEquipments());
+            updatedParking.setPlaceEquipments(placeEquipment.get());
         }
 
         if (input.get(ACCESSIBILITY_ASSESSMENT) != null) {
