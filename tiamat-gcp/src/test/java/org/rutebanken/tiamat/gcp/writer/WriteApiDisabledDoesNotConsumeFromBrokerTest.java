@@ -1,10 +1,9 @@
-package org.rutebanken.tiamat.writer;
+package org.rutebanken.tiamat.gcp.writer;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.rutebanken.tiamat.TiamatTestApplication;
-import org.rutebanken.tiamat.writer.async.PubSubWriteJobPublisher;
-import org.rutebanken.tiamat.writer.async.PubSubWriteJobSubscriber;
+import org.rutebanken.tiamat.writer.AsyncStopPlaceWriter;
 import org.rutebanken.tiamat.writer.async.WriteJobTimeoutSweeper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,12 +16,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * These two properties together are how an operator takes the write API out of service and
- * leaves the transport configured. {@link org.rutebanken.tiamat.writer.async.PubSubWriteJobSubscriber}
- * says why that has to stop the subscriber.
+ * leaves the transport configured. {@link PubSubWriteJobSubscriber} says why that has to stop
+ * the subscriber.
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = TiamatTestApplication.class)
-@ActiveProfiles({"test", "gcs-blobstore"})
+@ActiveProfiles({"test", "local-blobstore"})
 @TestPropertySource(properties = {
         "tiamat.write-api.enabled=false",
         "tiamat.write-api.transport=pubsub"
