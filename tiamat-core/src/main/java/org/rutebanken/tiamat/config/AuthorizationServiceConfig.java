@@ -18,7 +18,9 @@ package org.rutebanken.tiamat.config;
 import org.rutebanken.helper.organisation.DataScopedAuthorizationService;
 import org.rutebanken.helper.organisation.ReflectionAuthorizationService;
 import org.rutebanken.helper.organisation.RoleAssignmentExtractor;
+import org.rutebanken.tiamat.auth.AuthorizationClaims;
 import org.rutebanken.tiamat.auth.AuthorizationService;
+import org.rutebanken.tiamat.auth.DefaultAuthorizationClaims;
 import org.rutebanken.tiamat.auth.DefaultAuthorizationService;
 import org.rutebanken.tiamat.auth.TiamatEntityResolver;
 import org.rutebanken.tiamat.auth.check.TiamatOriganisationChecker;
@@ -38,6 +40,16 @@ import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.SUBMODE;
 
 @Configuration
 public class AuthorizationServiceConfig {
+
+    /**
+     * Declared alongside the authorization service, because which claims carry authority follows
+     * from what that service reads, and is substituted the same way.
+     */
+    @ConditionalOnMissingBean
+    @Bean
+    public AuthorizationClaims authorizationClaims() {
+        return new DefaultAuthorizationClaims();
+    }
 
     @ConditionalOnMissingBean
     @Bean

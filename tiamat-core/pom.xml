@@ -105,6 +105,16 @@
             <groupId>org.glassfish.jaxb</groupId>
             <artifactId>jaxb-xjc</artifactId>
         </dependency>
+        <!--
+            Provides the JAXB MessageBodyWriter used to serialise ErrorResponseEntity, which is
+            @XmlRootElement annotated, for resources that declare @Produces(application/xml).
+            Without it those endpoints answer 500 instead of the mapped status. It is no longer
+            used to bind request bodies; the write API reads the payload itself.
+        -->
+        <dependency>
+            <groupId>org.glassfish.jersey.media</groupId>
+            <artifactId>jersey-media-jaxb</artifactId>
+        </dependency>
         <dependency>
             <groupId>jakarta.jms</groupId>
             <artifactId>jakarta.jms-api</artifactId>
@@ -364,6 +374,11 @@
             <version>${geotools.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-resttestclient</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
