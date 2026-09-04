@@ -25,18 +25,12 @@ package org.rutebanken.tiamat.rest.validation;
  */
 public class StaleVersionException extends RuntimeException {
 
-    private final long expectedVersion;
     private final long currentVersion;
 
     public StaleVersionException(String netexId, long expectedVersion, long currentVersion) {
         super("Stop place " + netexId + " has moved to version " + currentVersion
                 + " since version " + expectedVersion + " was read.");
-        this.expectedVersion = expectedVersion;
         this.currentVersion = currentVersion;
-    }
-
-    public long getExpectedVersion() {
-        return expectedVersion;
     }
 
     public long getCurrentVersion() {

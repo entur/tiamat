@@ -331,7 +331,7 @@ public class StopPlaceControllerIntegrationTest extends TiamatIntegrationTest {
                 </stopPlaces>
                 """,
                 saved.getNetexId(), saved.getVersion()
-            );
+        );
 
         ResponseEntity<StopPlaceJobDto> response = putXml(xml, StopPlaceJobDto.class);
 
@@ -701,6 +701,35 @@ public class StopPlaceControllerIntegrationTest extends TiamatIntegrationTest {
 
         assertThat(job.status()).isEqualTo(AsyncStopPlaceJobStatus.FAILED);
         assertThat(job.errorMessage()).contains("must carry the version attribute");
+        String unchangedName = written(saved.getNetexId(), sp -> sp.getName().getValue());
+        assertThat(unchangedName).isEqualTo("Original Name");
+    }
+
+    /**
+     * version="any" is legal NeTEx, and is refused deliberately rather than as a side effect of
+     * parsing. "any" is precisely the assertion a precondition cannot accept: it says the caller
+     * does not care which version it edited.
+     */
+    @Test
+    public void updateWithANonNumericVersionFails() throws InterruptedException {
+        StopPlace saved = savedStopPlace("Original Name");
+
+        String xml = """
+            <stopPlaces xmlns="http://www.netex.org.uk/netex">
+                <StopPlace id="%s" version="any">
+                    <Name>Any Version</Name>
+                    <StopPlaceType>busStation</StopPlaceType>
+                </StopPlace>
+            </stopPlaces>
+            """.formatted(saved.getNetexId());
+
+        StopPlaceJobDto job = awaitJobCompletion(putXml(xml, StopPlaceJobDto.class).getBody().jobId());
+
+        assertThat(job.status()).isEqualTo(AsyncStopPlaceJobStatus.FAILED);
+        assertThat(job.errorMessage())
+                .as("the message reaches the caller verbatim, so it is part of the contract")
+                .contains("version attribute must be a number")
+                .contains("'any'");
         String unchangedName = written(saved.getNetexId(), sp -> sp.getName().getValue());
         assertThat(unchangedName).isEqualTo("Original Name");
     }
