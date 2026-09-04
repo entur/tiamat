@@ -20,7 +20,7 @@ import org.rutebanken.tiamat.rest.write.dto.StopPlaceJobDto;
     Write mono-modal StopPlace entities asynchronously.
 
     The system sets the ValidBetween attribute, and ignores the one in the NeTEx XML that you
-    submit. On an update, the Version attribute states which version you edited, and the API
+    submit. On an update, set the Version attribute to the version you read, and the API
     refuses the write if that version is no longer current. On a create, the API ignores the
     Version attribute. Timestamps in the NeTEx XML that the API returns always use the timezone
     of the system, without timezone information.
@@ -110,9 +110,13 @@ interface StopPlaceController {
         that are not in your document. If a quay has an unknown NeTEx ID, the job fails. If a
         quay has no ID, the API adds a new quay.
 
-        The Version attribute must state the version that you edited. If another client changed
-        the stop place after you read it, the job fails and the reason gives the current
-        version. Read the stop place again, apply your change to it, and submit it again.
+        Set the Version attribute to the version you read, not to the version you want to
+        make. The system decides the next version. If the stop place is at version 4, send
+        version="4", and the system writes version 5.
+
+        This is how the API knows that nobody changed the stop place while you were editing
+        it. If somebody did, the job fails, and the reason gives the version that is now
+        current. Read the stop place again, apply your change to it, and submit it again.
 
         The API reports malformed XML and unsupported elements on the job.
         """,
@@ -122,10 +126,10 @@ interface StopPlaceController {
                 mediaType = "application/xml",
                 examples = {
                     @ExampleObject(
-                        name = "Update StopPlace Example",
+                        name = "Update the stop place that is currently at version 1",
                         value = """
                                                 <stopPlaces xmlns="http://www.netex.org.uk/netex">
-                                                  <StopPlace id="MES:StopPlace:1" version="2">
+                                                  <StopPlace id="MES:StopPlace:1" version="1">
                                                     <Name lang="akk">Bīt Mīt Uruk</Name>
                                                     <PrivateCode>1</PrivateCode>
                                                     <Centroid>
