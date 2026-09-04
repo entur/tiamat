@@ -15,16 +15,16 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 /**
- * Hands a write job to Pub/Sub, which then delivers it to whichever pod is subscribed.
+ * This class hands a write job to Pub/Sub. Pub/Sub then delivers the job to a subscribed pod.
  * <p>
- * The payload travels as the message body and everything else as attributes, so the raw request
- * bytes are carried through untouched and nothing has to parse them to route the message. That
- * matches the rest of the design: the payload is not looked at until the job is being processed.
+ * The payload travels as the message body, and everything else travels as attributes. Thus this
+ * class carries the request bytes through without a change, and nothing reads them to route the
+ * message. This agrees with the rest of the design: nothing reads the payload until the job runs.
  * <p>
- * Publishing blocks until the broker has acknowledged the message. It would be faster not to
- * wait, but the client is told its job was accepted the moment this returns, and a job accepted
- * without anything to deliver it would sit untouched until the timeout sweeper found it. Waiting
- * turns that silent case into a failed publish the caller can be told about.
+ * This class waits for the broker to acknowledge the message. Not to wait is faster. But the
+ * client learns that the API accepted its job as soon as this method returns. A job that no
+ * transport took stays untouched until the sweeper times it out. The wait makes that silent case
+ * into a failure that the caller can see.
  */
 @Component
 @ConditionalOnProperty(name = "tiamat.write-api.transport", havingValue = "pubsub")
@@ -66,8 +66,8 @@ public class PubSubWriteJobPublisher implements WriteJobPublisher {
             Thread.currentThread().interrupt();
             throw new WriteJobRejectedException("Interrupted while publishing the write job.", e);
         } catch (ExecutionException | TimeoutException e) {
-            // Reported the same way the in-memory transport reports a full queue: the caller knows
-            // only that the job could not be handed over, not which transport failed to take it.
+            // Reported the way the in-process transport reports a full queue. The caller learns
+            // only that no transport took the job, and not which transport failed to take it.
             throw new WriteJobRejectedException("Could not hand the write job to the broker.", e);
         }
     }
