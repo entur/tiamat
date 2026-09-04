@@ -88,6 +88,12 @@ public class ParkingVersionedSaverService {
             newVersion.setVersion(existing.getVersion());
 
             parkingRepository.delete(existing);
+            // Force the delete (including its cascaded ParkingProperties/ParkingCapacity children)
+            // to execute against the database now, before newVersion is saved below. Without this,
+            // Hibernate's action queue executes entity insertions before entity deletions within the
+            // same flush, so re-attached children carrying over the same (netex_id, version) as the
+            // about-to-be-deleted ones would violate parking_properties_netex_id_version_constraint.
+            parkingRepository.flush();
         } else {
             newVersion.setCreated(Instant.now());
         }
