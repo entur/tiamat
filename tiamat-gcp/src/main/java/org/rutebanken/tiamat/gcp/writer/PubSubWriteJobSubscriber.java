@@ -1,4 +1,4 @@
-package org.rutebanken.tiamat.writer.async;
+package org.rutebanken.tiamat.gcp.writer;
 
 import com.google.cloud.pubsub.v1.Subscriber;
 import com.google.cloud.spring.pubsub.core.PubSubTemplate;
@@ -6,14 +6,17 @@ import com.google.cloud.spring.pubsub.support.BasicAcknowledgeablePubsubMessage;
 import com.google.pubsub.v1.PubsubMessage;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
+import org.rutebanken.tiamat.writer.async.DefaultWriteJobHandler;
+import org.rutebanken.tiamat.writer.async.WriteJobHandler;
+import org.rutebanken.tiamat.writer.async.WriteJobMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
-import static org.rutebanken.tiamat.writer.async.PubSubWriteJobPublisher.ATTRIBUTE_JOB_ID;
-import static org.rutebanken.tiamat.writer.async.PubSubWriteJobPublisher.ATTRIBUTE_OPERATION;
+import static org.rutebanken.tiamat.gcp.writer.PubSubWriteJobPublisher.ATTRIBUTE_JOB_ID;
+import static org.rutebanken.tiamat.gcp.writer.PubSubWriteJobPublisher.ATTRIBUTE_OPERATION;
 
 /**
  * Receives write jobs from Pub/Sub and gives them to {@link WriteJobHandler}.
