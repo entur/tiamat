@@ -15,17 +15,16 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 /**
- * This class hands a write job to Pub/Sub. Pub/Sub then delivers the job to a subscribed pod.
+ * Publishes a write job to Pub/Sub.
  * <p>
- * The payload travels as the message body, and everything else travels as attributes. Thus this
- * class carries the request bytes through without a change, and nothing reads them to route the
- * message. This keeps a property that {@link org.rutebanken.tiamat.writer.AsyncStopPlaceWriter}
- * establishes: no thread reads the payload until the job runs.
+ * The payload travels as the message body, and the job id and the operation as attributes, so
+ * nothing reads the payload to route the message. That keeps the property
+ * {@link org.rutebanken.tiamat.writer.AsyncStopPlaceWriter} establishes: no thread reads a payload
+ * until the job runs.
  * <p>
- * This class waits for the broker to acknowledge the message. Not to wait is faster. But the
- * client learns that the API accepted its job as soon as this method returns. A job that no
- * transport took stays untouched until {@link WriteJobTimeoutSweeper} times it out. The wait
- * makes that silent case into a failure that the caller can see.
+ * Waits for the broker to acknowledge the message. Not to wait is faster. But the client treats a
+ * return from this method as acceptance, and a job that no transport took stays untouched until
+ * {@link WriteJobTimeoutSweeper} times it out.
  */
 @Component
 @ConditionalOnProperty(name = "tiamat.write-api.transport", havingValue = "pubsub")
@@ -67,8 +66,8 @@ public class PubSubWriteJobPublisher implements WriteJobPublisher {
             Thread.currentThread().interrupt();
             throw new WriteJobRejectedException("Interrupted while publishing the write job.", e);
         } catch (ExecutionException | TimeoutException e) {
-            // Reported the way the in-process transport reports a full queue. The caller learns
-            // only that no transport took the job, and not which transport failed to take it.
+            // Reported as the in-process transport reports a full queue, so the caller does not
+            // learn which transport failed to take the job.
             throw new WriteJobRejectedException("Could not hand the write job to the broker.", e);
         }
     }

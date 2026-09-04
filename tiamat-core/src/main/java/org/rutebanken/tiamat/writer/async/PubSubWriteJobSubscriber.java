@@ -16,19 +16,15 @@ import static org.rutebanken.tiamat.writer.async.PubSubWriteJobPublisher.ATTRIBU
 import static org.rutebanken.tiamat.writer.async.PubSubWriteJobPublisher.ATTRIBUTE_OPERATION;
 
 /**
- * This class receives write jobs from Pub/Sub and gives them to {@link WriteJobHandler}. This is
- * the same handler that {@link InMemoryWriteJobPublisher} uses, and nothing about how to process a
- * job lives here.
+ * Receives write jobs from Pub/Sub and gives them to {@link WriteJobHandler}.
  * <p>
- * This class makes one decision only: whether to acknowledge the message. The handler records the
- * outcome of a job itself, and this includes a failure. Thus this class acknowledges a message
- * when the handler returns, because the job is then in a terminal state and a second delivery
+ * The handler records the outcome of a job itself, and this includes a failure. So this class
+ * acknowledges a message when the handler returns: the job is terminal, and a second delivery
  * achieves nothing. It sends a message back only when the handler throws, which means that
- * nothing recorded the outcome and the job is still unfinished.
+ * nothing recorded the outcome.
  * <p>
- * A second delivery is safe, and not merely tolerable. {@link DefaultWriteJobHandler} claims a job
- * before it does the work, so it discards a second delivery of a job that already ran. That
- * property is what keeps this class small.
+ * A second delivery is safe: {@link DefaultWriteJobHandler} claims a job before it does the work,
+ * so it discards a delivery of a job that already ran.
  */
 @Component
 @ConditionalOnProperty(name = "tiamat.write-api.transport", havingValue = "pubsub")
@@ -69,9 +65,8 @@ public class PubSubWriteJobSubscriber {
         try {
             writeJob = toWriteJob(message.getPubsubMessage());
         } catch (RuntimeException e) {
-            // A second delivery cannot help, because the message does not describe a job. To send
-            // it back makes a loop that runs until the dead letter policy takes it. Acknowledge
-            // instead, and let the job time out, which is an outcome the client already handles.
+            // The message does not describe a job, so a second delivery makes a loop that runs
+            // until the dead letter policy takes it. Acknowledge, and let the job time out.
             logger.error("Discarding a message on {} that is not a write job", subscription, e);
             message.ack();
             return;
@@ -81,9 +76,7 @@ public class PubSubWriteJobSubscriber {
             handler.handle(writeJob);
             message.ack();
         } catch (RuntimeException e) {
-            // The handler records its own failures. Thus a throw means that nothing wrote the
-            // outcome, and that the job is unfinished. A second delivery is safe, because the
-            // claim decides whether the work runs.
+            // The handler records its own failures, so a throw means nothing wrote the outcome.
             logger.error("Write job {} was not completed, returning it for redelivery", writeJob.jobId(), e);
             message.nack();
         }
