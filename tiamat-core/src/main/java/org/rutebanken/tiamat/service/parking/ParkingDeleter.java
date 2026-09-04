@@ -34,11 +34,8 @@ package org.rutebanken.tiamat.service.parking;
 import org.rutebanken.tiamat.auth.AuthorizationService;
 import org.rutebanken.tiamat.auth.UsernameFetcher;
 import org.rutebanken.tiamat.changelog.EntityChangedListener;
-import org.rutebanken.tiamat.model.DataManagedObjectStructure;
 import org.rutebanken.tiamat.model.Parking;
-import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.ParkingRepository;
-import org.rutebanken.tiamat.repository.reference.ReferenceResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,7 +44,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -65,18 +61,15 @@ public class ParkingDeleter {
 
     private ParkingRepository parkingRepository;
 
-    private ReferenceResolver referenceResolver;
-
     @Autowired
     public ParkingDeleter(ParkingRepository parkingRepository,
                           EntityChangedListener entityChangedListener,
                           AuthorizationService authorizationService,
-                          UsernameFetcher usernameFetcher, ReferenceResolver referenceResolver) {
+                          UsernameFetcher usernameFetcher) {
         this.parkingRepository = parkingRepository;
         this.entityChangedListener = entityChangedListener;
         this.authorizationService = authorizationService;
         this.usernameFetcher = usernameFetcher;
-        this.referenceResolver = referenceResolver;
     }
 
     @Transactional
@@ -91,18 +84,12 @@ public class ParkingDeleter {
             throw new IllegalArgumentException("Cannot find parking to delete from ID: " + parkingId);
         }
 
-        for(Parking parking : parkings) {
-            if(parking.getParentSiteRef() != null) {
-                DataManagedObjectStructure resolved = referenceResolver.resolve(parking.getParentSiteRef());
-                if(resolved instanceof StopPlace) {
-                    authorizationService.verifyCanEditEntities( Arrays.asList(resolved));
-                } else {
-                    throw new IllegalArgumentException("Parking does not have a parent site ref that points to a stop place. " + parking);
-                }
-            } else {
-                throw new IllegalArgumentException("Parking does not have a parent site ref. Cannot check permission. " + parking);
-            }
-        }
+        // Permission is checked directly on the Parking entities, same as
+        // ParkingUpdater does for edits. The auth framework's TiamatEntityResolver
+        // resolves each Parking to its parent StopPlace internally (and falls back
+        // to checking the parking itself if the parent no longer exists), so no
+        // separate resolution is needed here.
+        authorizationService.verifyCanEditEntities(parkings);
 
         parkingRepository.deleteAll(parkings);
         notifyDeleted(parkings);
@@ -111,6 +98,7 @@ public class ParkingDeleter {
 
         return true;
     }
+
     //This is to make sure entity is persisted before sending message
     @Transactional
     public void notifyDeleted(List<Parking> parkings) {
