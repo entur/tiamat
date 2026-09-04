@@ -163,10 +163,10 @@ public class WriteJobBrokerPathPrincipalIntegrationTest extends TiamatIntegratio
 
     private String changedByOfStopPlaceCreatedBy(Long jobId) {
         AsyncStopPlaceJob job = jobRepository.findById(jobId).orElseThrow();
-        assertThat(job.getCreatedIds())
+        assertThat(job.getWrittenStopPlaces())
                 .as("the job must have created a stop place for there to be anything to attribute")
                 .hasSize(1);
-        String netexId = job.getCreatedIds().getFirst().createdId();
+        String netexId = job.getWrittenStopPlaces().getFirst().netexId();
         return stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(netexId).getChangedBy();
     }
 }
