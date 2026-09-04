@@ -9,7 +9,7 @@ import org.rutebanken.netex.model.KeyListStructure;
 import org.rutebanken.netex.model.KeyValueStructure;
 import org.rutebanken.netex.model.SiteRefStructure;
 import org.rutebanken.netex.model.StopPlace;
-import org.rutebanken.tiamat.model.job.StopPlaceIdMapping;
+import org.rutebanken.tiamat.model.job.WrittenStopPlace;
 import org.rutebanken.tiamat.writer.JobService;
 import org.rutebanken.tiamat.writer.xml.StopPlacesPayloadUnmarshaller;
 import org.rutebanken.tiamat.writer.StopPlaceWriter;
@@ -49,7 +49,7 @@ class WriteJobProcessorTest {
     }
 
     @Test
-    void processCreateStopPlace_Success_CallsSucceedWithIdMapping() {
+    void processCreateStopPlace_Success_ReportsTheSubmittedIdAndTheVersionItProduced() {
         var dto = singleStopPlaceDto("CLIENT:StopPlace:1");
         var tiamatStop = monoModalTiamatStop("NSR:StopPlace:100");
         var netexStop = dto.getStopPlaces().getFirst();
@@ -62,7 +62,7 @@ class WriteJobProcessorTest {
         verify(domainService).createStopPlace(netexStop);
         verify(jobService).succeed(
                 eq(JOB_ID),
-                eq(List.of(new StopPlaceIdMapping("CLIENT:StopPlace:1", "NSR:StopPlace:100")))
+                eq(List.of(WrittenStopPlace.created("CLIENT:StopPlace:1", "NSR:StopPlace:100", 1L)))
         );
     }
 
@@ -130,15 +130,22 @@ class WriteJobProcessorTest {
     }
 
     @Test
-    void processUpdateStopPlace_Success_CallsSucceedWithNullCreatedIds() {
+    void processUpdateStopPlace_Success_ReportsTheVersionItProduced() {
         var dto = singleStopPlaceDto("NSR:StopPlace:200");
         var netexStop = dto.getStopPlaces().getFirst();
+
+        when(domainService.updateStopPlace(netexStop))
+                .thenReturn(monoModalTiamatStop("NSR:StopPlace:200", 5L));
 
         when(payloadUnmarshaller.unmarshal(PAYLOAD)).thenReturn(dto);
         processor.process(WriteJobMessage.update(JOB_ID, PAYLOAD));
 
         verify(domainService).updateStopPlace(netexStop);
-        verify(jobService).succeed(JOB_ID, null);
+        // No submitted id: the caller named the stop place it edited, so there is nothing to map.
+        verify(jobService).succeed(
+                JOB_ID,
+                List.of(WrittenStopPlace.changed("NSR:StopPlace:200", 5L))
+        );
     }
 
     @Test
@@ -147,7 +154,7 @@ class WriteJobProcessorTest {
         var netexStop = dto.getStopPlaces().getFirst();
         var exception = new IllegalArgumentException("No changes detected");
 
-        doThrow(exception).when(domainService).updateStopPlace(netexStop);
+        when(domainService.updateStopPlace(netexStop)).thenThrow(exception);
 
         when(payloadUnmarshaller.unmarshal(PAYLOAD)).thenReturn(dto);
         assertThatThrownBy(() -> processor.process(WriteJobMessage.update(JOB_ID, PAYLOAD)))
@@ -169,18 +176,23 @@ class WriteJobProcessorTest {
     }
 
     @Test
-    void processDeleteStopPlace_Success_CallsSucceedWithNullCreatedIds() {
+    void processDeleteStopPlace_Success_ReportsTheTerminatedVersion() {
+        when(domainService.deleteStopPlace("NSR:StopPlace:300"))
+                .thenReturn(monoModalTiamatStop("NSR:StopPlace:300", 3L));
+
         processor.process(WriteJobMessage.delete(JOB_ID, "NSR:StopPlace:300"));
 
         verify(domainService).deleteStopPlace("NSR:StopPlace:300");
-        verify(jobService).succeed(JOB_ID, null);
+        verify(jobService).succeed(
+                JOB_ID,
+                List.of(WrittenStopPlace.changed("NSR:StopPlace:300", 3L))
+        );
     }
 
     @Test
     void processDeleteStopPlace_DomainServiceThrows_Throws() {
         var exception = new RuntimeException("Not found");
-        doThrow(exception)
-                .when(domainService).deleteStopPlace("NSR:StopPlace:300");
+        when(domainService.deleteStopPlace("NSR:StopPlace:300")).thenThrow(exception);
 
         assertThatThrownBy(() -> processor.process(WriteJobMessage.delete(JOB_ID, "NSR:StopPlace:300")))
                 .isSameAs(exception);
@@ -196,8 +208,13 @@ class WriteJobProcessorTest {
     }
 
     private org.rutebanken.tiamat.model.StopPlace monoModalTiamatStop(String netexId) {
+        return monoModalTiamatStop(netexId, 1L);
+    }
+
+    private org.rutebanken.tiamat.model.StopPlace monoModalTiamatStop(String netexId, long version) {
         var stop = new org.rutebanken.tiamat.model.StopPlace();
         stop.setNetexId(netexId);
+        stop.setVersion(version);
         return stop;
     }
 }
