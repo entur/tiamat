@@ -19,12 +19,13 @@ import java.util.concurrent.TimeoutException;
  * <p>
  * The payload travels as the message body, and everything else travels as attributes. Thus this
  * class carries the request bytes through without a change, and nothing reads them to route the
- * message. This agrees with the rest of the design: nothing reads the payload until the job runs.
+ * message. This keeps a property that {@link org.rutebanken.tiamat.writer.AsyncStopPlaceWriter}
+ * establishes: no thread reads the payload until the job runs.
  * <p>
  * This class waits for the broker to acknowledge the message. Not to wait is faster. But the
  * client learns that the API accepted its job as soon as this method returns. A job that no
- * transport took stays untouched until the sweeper times it out. The wait makes that silent case
- * into a failure that the caller can see.
+ * transport took stays untouched until {@link WriteJobTimeoutSweeper} times it out. The wait
+ * makes that silent case into a failure that the caller can see.
  */
 @Component
 @ConditionalOnProperty(name = "tiamat.write-api.transport", havingValue = "pubsub")

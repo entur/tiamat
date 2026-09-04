@@ -16,8 +16,9 @@ import static org.rutebanken.tiamat.writer.async.PubSubWriteJobPublisher.ATTRIBU
 import static org.rutebanken.tiamat.writer.async.PubSubWriteJobPublisher.ATTRIBUTE_OPERATION;
 
 /**
- * This class receives write jobs from Pub/Sub and gives them to the handler. This is the same
- * handler that the in-process transport uses, and nothing about how to process a job lives here.
+ * This class receives write jobs from Pub/Sub and gives them to {@link WriteJobHandler}. This is
+ * the same handler that {@link InMemoryWriteJobPublisher} uses, and nothing about how to process a
+ * job lives here.
  * <p>
  * This class makes one decision only: whether to acknowledge the message. The handler records the
  * outcome of a job itself, and this includes a failure. Thus this class acknowledges a message
@@ -25,9 +26,9 @@ import static org.rutebanken.tiamat.writer.async.PubSubWriteJobPublisher.ATTRIBU
  * achieves nothing. It sends a message back only when the handler throws, which means that
  * nothing recorded the outcome and the job is still unfinished.
  * <p>
- * A second delivery is safe, and not merely tolerable. The handler claims a job before it does
- * the work, so it discards a second delivery of a job that already ran. That property is what
- * keeps this class small.
+ * A second delivery is safe, and not merely tolerable. {@link DefaultWriteJobHandler} claims a job
+ * before it does the work, so it discards a second delivery of a job that already ran. That
+ * property is what keeps this class small.
  */
 @Component
 @ConditionalOnProperty(name = "tiamat.write-api.transport", havingValue = "pubsub")
