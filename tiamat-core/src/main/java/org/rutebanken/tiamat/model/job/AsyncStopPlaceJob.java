@@ -3,6 +3,8 @@ package org.rutebanken.tiamat.model.job;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -25,13 +27,20 @@ public class AsyncStopPlaceJob {
     @Schema(description = "Job status")
     private AsyncStopPlaceJobStatus status;
 
-    @Schema(description = "List of submitted to created StopPlace ID mappings")
+    @Schema(description = "The stop places that the job wrote, with the version that each write produced")
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
-    private List<StopPlaceIdMapping> createdIds;
+    private List<WrittenStopPlace> writtenStopPlaces;
 
     @Schema(description = "Reason for failure if the job has failed")
     private String reason;
+
+    @Schema(description = "The kind of failure, if the job has failed")
+    @Enumerated(EnumType.STRING)
+    private JobFailureReason reasonCode;
+
+    @Schema(description = "The version the stop place is at now, if the job failed because the version moved on")
+    private Long currentVersion;
 
     @Schema(description = "Username of the principal that submitted the job")
     private String createdBy;
@@ -63,12 +72,12 @@ public class AsyncStopPlaceJob {
         this.status = status;
     }
 
-    public List<StopPlaceIdMapping> getCreatedIds() {
-        return createdIds;
+    public List<WrittenStopPlace> getWrittenStopPlaces() {
+        return writtenStopPlaces;
     }
 
-    public void setCreatedIds(List<StopPlaceIdMapping> createdIds) {
-        this.createdIds = createdIds;
+    public void setWrittenStopPlaces(List<WrittenStopPlace> writtenStopPlaces) {
+        this.writtenStopPlaces = writtenStopPlaces;
     }
 
     public String getReason() {
@@ -77,6 +86,22 @@ public class AsyncStopPlaceJob {
 
     public void setReason(String errorMessage) {
         this.reason = errorMessage;
+    }
+
+    public JobFailureReason getReasonCode() {
+        return reasonCode;
+    }
+
+    public void setReasonCode(JobFailureReason reasonCode) {
+        this.reasonCode = reasonCode;
+    }
+
+    public Long getCurrentVersion() {
+        return currentVersion;
+    }
+
+    public void setCurrentVersion(Long currentVersion) {
+        this.currentVersion = currentVersion;
     }
 
     public String getCreatedBy() {

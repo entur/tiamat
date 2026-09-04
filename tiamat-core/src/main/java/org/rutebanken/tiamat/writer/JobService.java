@@ -2,7 +2,8 @@ package org.rutebanken.tiamat.writer;
 
 import org.rutebanken.tiamat.model.job.AsyncStopPlaceJob;
 import org.rutebanken.tiamat.model.job.AsyncStopPlaceJobStatus;
-import org.rutebanken.tiamat.model.job.StopPlaceIdMapping;
+import org.rutebanken.tiamat.model.job.JobFailureReason;
+import org.rutebanken.tiamat.model.job.WrittenStopPlace;
 import org.rutebanken.tiamat.repository.AsyncStopPlaceJobRepository;
 import org.rutebanken.tiamat.rest.validation.StaleVersionException;
 import org.rutebanken.tiamat.writer.async.WriteJobNotOwnedException;
@@ -44,7 +45,7 @@ public class JobService {
     public AsyncStopPlaceJob createJob() {
         var job = new AsyncStopPlaceJob();
         job.setStatus(AsyncStopPlaceJobStatus.PROCESSING);
-        job.setCreatedIds(Collections.emptyList());
+        job.setWrittenStopPlaces(Collections.emptyList());
         job.setCreatedBy(principal.currentSubject());
         job.setPrincipalClaims(principal.capture());
         job.setCreatedAt(Instant.now());
@@ -129,6 +130,7 @@ public class JobService {
         }
         var job = repo.findById(jobId).orElseThrow();
         job.setReason(reason);
+        job.setReasonCode(JobFailureReason.TIMED_OUT);
         repo.save(job);
     }
 
@@ -151,15 +153,15 @@ public class JobService {
      * nothing, and throwing here rolls the write back. That is what lets a client treat TIMED_OUT
      * as "nothing was written, resubmitting is safe" rather than having to go and look.
      */
-    public void succeed(Long id, List<StopPlaceIdMapping> createdStopPlaceIds) {
+    public void succeed(Long id, List<WrittenStopPlace> writtenStopPlaces) {
         if (repo.transition(id, List.of(AsyncStopPlaceJobStatus.IN_PROGRESS),
                 AsyncStopPlaceJobStatus.FINISHED) != 1) {
             throw new WriteJobNotOwnedException(id);
         }
         // The conditional update holds the row lock for the rest of the transaction, so nothing
-        // else can change the job before the created ids are written.
+        // else can change the job before the outcome is written.
         var job = repo.findById(id).orElseThrow();
-        job.setCreatedIds(createdStopPlaceIds);
+        job.setWrittenStopPlaces(writtenStopPlaces);
         repo.save(job);
     }
 
@@ -185,23 +187,39 @@ public class JobService {
             logger.warn("Job {} already reached {}, not recording failure", id, job.getStatus());
             return job;
         }
-        job.setReason(formatException(exception));
+        Failure failure = classify(exception);
+        job.setReason(failure.message());
+        job.setReasonCode(failure.reasonCode());
+        job.setCurrentVersion(failure.currentVersion());
         return repo.save(job);
     }
 
     /**
-     * The reason is returned to the caller, so only messages meant for them are surfaced.
-     * IllegalArgumentException carries the validation feedback for the submitted payload and is
-     * the only explanation a caller gets for a failed write, since the payload is no longer
-     * validated on the request thread. Everything else is reported generically, because the
-     * message may describe internals.
+     * What the caller learns about a failed job. The current version is set only when the job
+     * failed because the version moved on.
      */
-    private String formatException(Exception e) {
-        // Matched on the exception itself rather than anywhere in its causes, deliberately. This is
-        // the one reason forwarded verbatim, so it must stay limited to the messages this codebase
-        // writes for the caller. Unwrapping here would surface text from anywhere in the stack.
+    record Failure(JobFailureReason reasonCode, String message, Long currentVersion) {
+
+        static Failure of(JobFailureReason reasonCode, String message) {
+            return new Failure(reasonCode, message, null);
+        }
+    }
+
+    /**
+     * The message goes back to the caller, so this method surfaces only the messages that this
+     * codebase writes for a caller. IllegalArgumentException carries the validation feedback for
+     * the submitted payload, and it is the only explanation a caller gets for a rejected payload,
+     * because nothing validates the payload on the request thread. Every other message is
+     * generic, because it can describe internals.
+     */
+    private Failure classify(Exception e) {
+        // Matched on the exception itself and not anywhere in its causes, deliberately. This is the
+        // one message that goes back word for word, so it must stay limited to the messages that
+        // this codebase writes for the caller. An unwrap here surfaces text from anywhere in the
+        // stack.
         if (e instanceof IllegalArgumentException) {
-            return e.getMessage() != null ? e.getMessage() : GENERIC_REASON;
+            return Failure.of(JobFailureReason.INVALID_PAYLOAD,
+                    e.getMessage() != null ? e.getMessage() : GENERIC_REASON);
         }
         return constantReasonFor(e);
     }
@@ -212,28 +230,35 @@ public class JobService {
      * that dispatches jobs itself may add a layer of its own. A miss here is silent, costing the
      * caller a usable reason rather than raising anything.
      */
-    private String constantReasonFor(Throwable throwable) {
+    private Failure constantReasonFor(Throwable throwable) {
         Throwable cause = throwable;
         // The loop stops at a fixed depth and does not go to the end of the chain. A cause chain
         // can be cyclic, and no wrapping that this method sees through is anywhere near this deep.
         for (int depth = 0; cause != null && depth < MAX_CAUSE_DEPTH; depth++, cause = cause.getCause()) {
             if (cause instanceof StaleVersionException stale) {
                 // A stale version is the one failure that the caller can resubmit, so the message
-                // says so. It also carries the current version, because the caller needs that
-                // number to read the stop place again.
-                return "The stop place moved to version " + stale.getCurrentVersion()
-                        + " while this job was pending. Read it again and reapply the change.";
+                // says so. The current version also travels on its own field, because the caller
+                // needs that number to read the stop place again, and it must not have to take
+                // the number out of the sentence.
+                return new Failure(
+                        JobFailureReason.STALE_VERSION,
+                        "The stop place moved to version " + stale.getCurrentVersion()
+                                + " while this job was pending. Read it again and reapply the change.",
+                        stale.getCurrentVersion());
             }
             if (cause instanceof AccessDeniedException) {
-                return "You do not have permission to perform this operation.";
+                return Failure.of(JobFailureReason.ACCESS_DENIED,
+                        "You do not have permission to perform this operation.");
             }
             if (cause instanceof RejectedExecutionException) {
-                return "The job queue is full. Please try again later.";
+                return Failure.of(JobFailureReason.QUEUE_FULL,
+                        "The job queue is full. Please try again later.");
             }
             if (cause instanceof DataIntegrityViolationException) {
-                return "A database constraint was violated. This may be due to invalid input data or a conflict with existing data.";
+                return Failure.of(JobFailureReason.CONSTRAINT_VIOLATION,
+                        "A database constraint was violated. This may be due to invalid input data or a conflict with existing data.");
             }
         }
-        return GENERIC_REASON;
+        return Failure.of(JobFailureReason.UNEXPECTED_ERROR, GENERIC_REASON);
     }
 }

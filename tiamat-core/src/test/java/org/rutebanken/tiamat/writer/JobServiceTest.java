@@ -6,7 +6,7 @@ import org.mockito.ArgumentCaptor;
 import org.rutebanken.tiamat.writer.async.WriteJobPrincipal;
 import org.rutebanken.tiamat.model.job.AsyncStopPlaceJob;
 import org.rutebanken.tiamat.model.job.AsyncStopPlaceJobStatus;
-import org.rutebanken.tiamat.model.job.StopPlaceIdMapping;
+import org.rutebanken.tiamat.model.job.WrittenStopPlace;
 import org.rutebanken.tiamat.repository.AsyncStopPlaceJobRepository;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.rutebanken.tiamat.writer.async.WriteJobNotOwnedException;
@@ -110,17 +110,17 @@ public class JobServiceTest {
     }
 
     @Test
-    public void succeedRecordsCreatedIdsWhenTheClaimIsStillHeld() {
+    public void succeedRecordsTheWrittenStopPlacesWhenTheClaimIsStillHeld() {
         AsyncStopPlaceJob job = new AsyncStopPlaceJob();
         when(repository.transition(eq(1L), anyCollection(), eq(AsyncStopPlaceJobStatus.FINISHED)))
                 .thenReturn(1);
         when(repository.findById(1L)).thenReturn(Optional.of(job));
 
-        jobService.succeed(1L, singletonList(new StopPlaceIdMapping("submittedId", "createdId")));
+        jobService.succeed(1L, singletonList(WrittenStopPlace.created("submittedId", "createdId", 1L)));
 
         ArgumentCaptor<AsyncStopPlaceJob> captor = ArgumentCaptor.forClass(AsyncStopPlaceJob.class);
         verify(repository).save(captor.capture());
-        assertEquals("createdId", captor.getValue().getCreatedIds().getFirst().createdId());
+        assertEquals("createdId", captor.getValue().getWrittenStopPlaces().getFirst().netexId());
         // The status moves via the conditional update, not by mutating the entity, so that
         // completion cannot happen unless the job is still claimed.
         verify(repository).transition(eq(1L), anyCollection(), eq(AsyncStopPlaceJobStatus.FINISHED));
@@ -183,7 +183,7 @@ public class JobServiceTest {
         assertThat(saved.getStatus()).isEqualTo(
             AsyncStopPlaceJobStatus.PROCESSING
         );
-        assertThat(saved.getCreatedIds()).isEmpty();
+        assertThat(saved.getWrittenStopPlaces()).isEmpty();
     }
 
     @Test
