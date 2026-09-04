@@ -123,12 +123,14 @@ public class StopPlaceWriter {
     }
 
     /**
-     * The version attribute states which version the caller edited, and an update cannot be
-     * checked for staleness without it. Required rather than optional: the alternative leaves
-     * every caller that omits it able to overwrite concurrent edits silently, which is the
-     * problem this exists to close.
+     * The version attribute states which version the caller edited. Without it the writer cannot
+     * find a stale update.
      * <p>
-     * Create ignores the attribute, because there is nothing yet to be stale against.
+     * The attribute is required, not optional. An optional precondition lets every caller that
+     * omits it overwrite a concurrent edit without a warning. That is the problem that this
+     * requirement closes.
+     * <p>
+     * A create ignores the attribute, because a new stop place has no earlier version.
      */
     private static long requireSubmittedVersion(org.rutebanken.netex.model.StopPlace submitted) {
         String version = submitted.getVersion();
