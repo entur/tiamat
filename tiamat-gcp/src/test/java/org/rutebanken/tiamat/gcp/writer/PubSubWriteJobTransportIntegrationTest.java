@@ -1,4 +1,4 @@
-package org.rutebanken.tiamat.writer.async;
+package org.rutebanken.tiamat.gcp.writer;
 
 import com.google.api.gax.core.NoCredentialsProvider;
 import com.google.api.gax.grpc.GrpcTransportChannel;
@@ -20,6 +20,8 @@ import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.job.AsyncStopPlaceJobStatus;
 import org.rutebanken.tiamat.repository.AsyncStopPlaceJobRepository;
 import org.rutebanken.tiamat.writer.JobService;
+import org.rutebanken.tiamat.writer.async.WriteJobMessage;
+import org.rutebanken.tiamat.writer.async.WriteJobPublisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;

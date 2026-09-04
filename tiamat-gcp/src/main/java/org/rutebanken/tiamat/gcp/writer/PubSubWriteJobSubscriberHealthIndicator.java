@@ -1,4 +1,4 @@
-package org.rutebanken.tiamat.writer.async;
+package org.rutebanken.tiamat.gcp.writer;
 
 import com.google.api.core.ApiService;
 import org.springframework.boot.health.contributor.Health;
