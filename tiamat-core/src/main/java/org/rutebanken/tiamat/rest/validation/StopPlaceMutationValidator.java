@@ -69,18 +69,22 @@ public class StopPlaceMutationValidator {
     }
 
     /**
-     * As above, and refuses the update unless the caller edited the version that is still current.
+     * This method does the same as the two-argument method, and also refuses the update when the
+     * caller edited a version that is no longer current.
      * <p>
-     * Without this an edit built from a stale read silently overwrites whatever happened in
-     * between. The mutate lock does not help: it serialises the writes, but the caller read the
-     * stop place in an earlier request, long before taking the lock.
+     * Without this check, an edit from a stale read overwrites a concurrent edit without a
+     * warning. The mutate lock does not prevent this problem. The lock serializes the writes, but
+     * the caller read the stop place in an earlier request, before anything took the lock.
      * <p>
-     * Belongs here rather than in the saver service, which has callers throughout the importers
-     * where an expected version is not a concept, and which is a persistence concern rather than a
-     * request one. Callers must resolve the expected version inside the lock, or they reintroduce
-     * the race they are trying to close.
+     * This check belongs here and not in the saver service. That service has callers throughout
+     * the importers, where an expected version is not a concept. It is also a persistence concern
+     * and not a request one.
+     * <p>
+     * A caller must resolve the expected version inside the lock. A caller that resolves it
+     * earlier opens the race again.
      *
-     * @throws StaleVersionException if the stop place has moved on since the caller read it.
+     * @throws StaleVersionException if the stop place moved to a later version after the caller
+     *         read it.
      */
     public StopPlace validateStopPlaceUpdate(String netexId, boolean isParentMutation, long expectedVersion) {
         StopPlace existingStopPlace = validateStopPlaceUpdate(netexId, isParentMutation);

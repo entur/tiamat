@@ -16,12 +16,12 @@
 package org.rutebanken.tiamat.rest.validation;
 
 /**
- * Thrown when an edit was based on a version that is no longer current.
+ * The writer throws this exception when an edit uses a version that is no longer current.
  * <p>
- * Distinct from the other validation failures because it says something different to the caller.
- * A rejected payload stays rejected however many times it is sent. This one means the payload was
- * fine and somebody else got there first, so reading the stop place again and reapplying the edit
- * is the correct response rather than a retry of the same bytes.
+ * This exception differs from the other validation failures, because it tells the caller
+ * something different. A rejected payload stays rejected, and the same bytes always give the
+ * same result. A stale version means that the payload was correct, and that another client wrote
+ * first. The caller must read the stop place again and reapply the edit.
  */
 public class StaleVersionException extends RuntimeException {
 
