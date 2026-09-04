@@ -99,7 +99,7 @@ class StopPlaceWriterTest {
         org.rutebanken.netex.model.StopPlace updatedNetexStopPlace = createNetexStopPlace(stopPlaceId, "New Name", 1L);
         StopPlace savedStopPlace = createTiamatStopPlace(stopPlaceId, "New Name", 2L);
 
-        when(validator.validateStopPlaceUpdate(stopPlaceId, false)).thenReturn(existingStopPlace);
+        when(validator.validateStopPlaceUpdate(stopPlaceId, false, 1L)).thenReturn(existingStopPlace);
         when(versionCreator.createCopy(existingStopPlace, StopPlace.class)).thenReturn(updatedTiamatStopPlace);
         when(stopPlaceVersionedSaverService.saveNewVersion(eq(existingStopPlace), eq(updatedTiamatStopPlace), anySet()))
             .thenReturn(savedStopPlace);
@@ -107,7 +107,7 @@ class StopPlaceWriterTest {
         StopPlace result = domainService.updateStopPlace(updatedNetexStopPlace);
 
         assertThat(result).isSameAs(savedStopPlace);
-        verify(validator).validateStopPlaceUpdate(stopPlaceId, false);
+        verify(validator).validateStopPlaceUpdate(stopPlaceId, false, 1L);
         verify(validator).validateStopPlaceMutation(updatedTiamatStopPlace);
         verify(stopPlaceVersionedSaverService).saveNewVersion(eq(existingStopPlace), eq(updatedTiamatStopPlace), anySet());
     }
@@ -149,7 +149,7 @@ class StopPlaceWriterTest {
         String stopPlaceId = "NSR:StopPlace:100";
         org.rutebanken.netex.model.StopPlace updatedStopPlace = createNetexStopPlace(stopPlaceId, "Invalid Stop", 1L);
 
-        when(validator.validateStopPlaceUpdate(stopPlaceId, false)).thenThrow(
+        when(validator.validateStopPlaceUpdate(stopPlaceId, false, 1L)).thenThrow(
             new IllegalArgumentException("Stop place not found")
         );
 
@@ -157,7 +157,7 @@ class StopPlaceWriterTest {
             domainService.updateStopPlace(updatedStopPlace)
         );
 
-        verify(validator).validateStopPlaceUpdate(stopPlaceId, false);
+        verify(validator).validateStopPlaceUpdate(stopPlaceId, false, 1L);
         verify(validator, never()).validateStopPlaceName(any());
         verify(stopPlaceVersionedSaverService, never()).saveNewVersion(any(), any());
     }
@@ -169,7 +169,7 @@ class StopPlaceWriterTest {
         StopPlace updatedTiamatStopPlace = createTiamatStopPlace(stopPlaceId, "", 1L);
         org.rutebanken.netex.model.StopPlace updatedNetexStopPlace = createNetexStopPlace(stopPlaceId, "", 1L);
 
-        when(validator.validateStopPlaceUpdate(stopPlaceId, false)).thenReturn(existingStopPlace);
+        when(validator.validateStopPlaceUpdate(stopPlaceId, false, 1L)).thenReturn(existingStopPlace);
         when(versionCreator.createCopy(existingStopPlace, StopPlace.class)).thenReturn(updatedTiamatStopPlace);
         doThrow(new IllegalArgumentException("Stop place name is required"))
             .when(validator)
@@ -179,7 +179,7 @@ class StopPlaceWriterTest {
             domainService.updateStopPlace(updatedNetexStopPlace)
         );
 
-        verify(validator).validateStopPlaceUpdate(stopPlaceId, false);
+        verify(validator).validateStopPlaceUpdate(stopPlaceId, false, 1L);
         verify(validator).validateStopPlaceMutation(updatedTiamatStopPlace);
         verify(stopPlaceVersionedSaverService, never()).saveNewVersion(any(), any());
     }
@@ -227,7 +227,7 @@ class StopPlaceWriterTest {
         StopPlace savedStopPlace = createTiamatStopPlace(stopPlaceId, "New Name", 2L);
 
         AtomicReference<NetexMappingContext> contextDuringMapping = new AtomicReference<>();
-        when(validator.validateStopPlaceUpdate(stopPlaceId, false)).thenReturn(existingStopPlace);
+        when(validator.validateStopPlaceUpdate(stopPlaceId, false, 1L)).thenReturn(existingStopPlace);
         when(netexMapper.mapToTiamatModel(updatedNetexStopPlace)).thenAnswer(invocation -> {
             contextDuringMapping.set(NetexMappingContextThreadLocal.get());
             return updatedTiamatStopPlace;

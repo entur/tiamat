@@ -91,10 +91,14 @@ public class StopPlaceWriter {
     @Transactional
     public StopPlace updateStopPlace(org.rutebanken.netex.model.StopPlace newStopPlace) {
         establishNetexMappingContext();
+        long expectedVersion = requireSubmittedVersion(newStopPlace);
         return mutateLock.executeInLock(() -> {
+            // Resolved inside the lock, so that the version compared against is the one this write
+            // is about to supersede rather than one read before the lock was taken.
             var existingStopPlace = stopPlaceMutationValidator.validateStopPlaceUpdate(
                     newStopPlace.getId(),
-                    false
+                    false,
+                    expectedVersion
             );
             var tiamatStop = netexMapper.mapToTiamatModel(newStopPlace);
 
@@ -109,6 +113,28 @@ public class StopPlaceWriter {
                     Set.of() // currently only mono-modal stops are supported
             );
         });
+    }
+
+    /**
+     * The version attribute states which version the caller edited, and an update cannot be
+     * checked for staleness without it. Required rather than optional: the alternative leaves
+     * every caller that omits it able to overwrite concurrent edits silently, which is the
+     * problem this exists to close.
+     * <p>
+     * Create ignores the attribute, because there is nothing yet to be stale against.
+     */
+    private static long requireSubmittedVersion(org.rutebanken.netex.model.StopPlace submitted) {
+        String version = submitted.getVersion();
+        if (version == null || version.isBlank()) {
+            throw new IllegalArgumentException(
+                    "An update must carry the version attribute of the stop place it edits.");
+        }
+        try {
+            return Long.parseLong(version.trim());
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException(
+                    "The version attribute must be a number, but was '" + version + "'.");
+        }
     }
 
     @Transactional
