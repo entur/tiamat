@@ -1,7 +1,7 @@
 package org.rutebanken.tiamat.writer.async;
 
 import org.rutebanken.netex.model.StopPlace;
-import org.rutebanken.tiamat.model.job.StopPlaceIdMapping;
+import org.rutebanken.tiamat.model.job.WrittenStopPlace;
 import org.rutebanken.tiamat.writer.JobService;
 import org.rutebanken.tiamat.writer.StopPlaceWriter;
 import org.rutebanken.tiamat.writer.xml.StopPlacesPayloadUnmarshaller;
@@ -60,7 +60,10 @@ public class WriteJobProcessor {
         var savedStopPlace = domainService.createStopPlace(newStopPlace);
         jobService.succeed(
                 message.jobId(),
-                List.of(new StopPlaceIdMapping(newStopPlace.getId(), savedStopPlace.getNetexId()))
+                List.of(WrittenStopPlace.created(
+                        newStopPlace.getId(),
+                        savedStopPlace.getNetexId(),
+                        savedStopPlace.getVersion()))
         );
     }
 
@@ -69,13 +72,22 @@ public class WriteJobProcessor {
         var stopPlaces = dto.getStopPlaces();
         requireMonomodal(classify(stopPlaces), "updates");
 
-        domainService.updateStopPlace(stopPlaces.getFirst());
-        jobService.succeed(message.jobId(), null);
+        var updatedStopPlace = domainService.updateStopPlace(stopPlaces.getFirst());
+        jobService.succeed(message.jobId(), List.of(written(updatedStopPlace)));
     }
 
     private void delete(WriteJobMessage message) {
-        domainService.deleteStopPlace(message.payloadAsString());
-        jobService.succeed(message.jobId(), null);
+        var terminatedStopPlace = domainService.deleteStopPlace(message.payloadAsString());
+        jobService.succeed(message.jobId(), List.of(written(terminatedStopPlace)));
+    }
+
+    /**
+     * An update and a delete both name the stop place that the caller already knew, so neither
+     * carries a submitted id. Both still report a version: an update must state the version it
+     * edited, and without this the caller cannot make a second edit without a read in between.
+     */
+    private static WrittenStopPlace written(org.rutebanken.tiamat.model.StopPlace stopPlace) {
+        return WrittenStopPlace.changed(stopPlace.getNetexId(), stopPlace.getVersion());
     }
 
     private static void requireMonomodal(StopPlaceStructure structure, String operation) {

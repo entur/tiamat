@@ -146,10 +146,14 @@ public class StopPlaceWriter {
         }
     }
 
+    /**
+     * @return the terminated stop place, so that the job can report the version that the
+     *         termination produced.
+     */
     @Transactional
-    public void deleteStopPlace(String stopPlaceId) {
+    public StopPlace deleteStopPlace(String stopPlaceId) {
         // already uses mutateLock
-        stopPlaceTerminator.terminateStopPlace(
+        return stopPlaceTerminator.terminateStopPlace(
                 stopPlaceId,
                 Instant.now(),
                 "Deleted via write API",
