@@ -91,10 +91,21 @@ public class StopPlaceWriter {
     @Transactional
     public StopPlace updateStopPlace(org.rutebanken.netex.model.StopPlace newStopPlace) {
         establishNetexMappingContext();
+        long expectedVersion = requireSubmittedVersion(newStopPlace);
         return mutateLock.executeInLock(() -> {
+            // The validator reads the current version inside the lock, so the comparison uses a
+            // fresh read and not a version that the caller supplied.
+            //
+            // This check narrows the window, but it does not close it. The lock sits inside the
+            // transaction, so the previous writer releases the lock before it commits. A writer
+            // that waits on the lock can still read the superseded version. The unique constraint
+            // on (netex_id, version) then refuses the second row, so the database keeps the first
+            // write. But the caller gets a constraint message instead of the stale-version
+            // reason. See #458.
             var existingStopPlace = stopPlaceMutationValidator.validateStopPlaceUpdate(
                     newStopPlace.getId(),
-                    false
+                    false,
+                    expectedVersion
             );
             var tiamatStop = netexMapper.mapToTiamatModel(newStopPlace);
 
@@ -109,6 +120,30 @@ public class StopPlaceWriter {
                     Set.of() // currently only mono-modal stops are supported
             );
         });
+    }
+
+    /**
+     * The version attribute states which version the caller edited. Without it the writer cannot
+     * find a stale update.
+     * <p>
+     * The attribute is required, not optional. An optional precondition lets every caller that
+     * omits it overwrite a concurrent edit without a warning. That is the problem that this
+     * requirement closes.
+     * <p>
+     * A create ignores the attribute, because a new stop place has no earlier version.
+     */
+    private static long requireSubmittedVersion(org.rutebanken.netex.model.StopPlace submitted) {
+        String version = submitted.getVersion();
+        if (version == null || version.isBlank()) {
+            throw new IllegalArgumentException(
+                    "An update must carry the version attribute of the stop place it edits.");
+        }
+        try {
+            return Long.parseLong(version.trim());
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException(
+                    "The version attribute must be a number, but was '" + version + "'.");
+        }
     }
 
     @Transactional

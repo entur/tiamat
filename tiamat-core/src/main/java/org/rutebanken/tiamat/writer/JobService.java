@@ -4,6 +4,7 @@ import org.rutebanken.tiamat.model.job.AsyncStopPlaceJob;
 import org.rutebanken.tiamat.model.job.AsyncStopPlaceJobStatus;
 import org.rutebanken.tiamat.model.job.StopPlaceIdMapping;
 import org.rutebanken.tiamat.repository.AsyncStopPlaceJobRepository;
+import org.rutebanken.tiamat.rest.validation.StaleVersionException;
 import org.rutebanken.tiamat.writer.async.WriteJobNotOwnedException;
 import org.rutebanken.tiamat.writer.async.WriteJobPrincipal;
 import org.slf4j.Logger;
@@ -213,9 +214,16 @@ public class JobService {
      */
     private String constantReasonFor(Throwable throwable) {
         Throwable cause = throwable;
-        // Bounded rather than walked to the end: a cause chain can be cyclic, and no wrapping this
-        // has to see through is anywhere near this deep.
+        // The loop stops at a fixed depth and does not go to the end of the chain. A cause chain
+        // can be cyclic, and no wrapping that this method sees through is anywhere near this deep.
         for (int depth = 0; cause != null && depth < MAX_CAUSE_DEPTH; depth++, cause = cause.getCause()) {
+            if (cause instanceof StaleVersionException stale) {
+                // A stale version is the one failure that the caller can resubmit, so the message
+                // says so. It also carries the current version, because the caller needs that
+                // number to read the stop place again.
+                return "The stop place moved to version " + stale.getCurrentVersion()
+                        + " while this job was pending. Read it again and reapply the change.";
+            }
             if (cause instanceof AccessDeniedException) {
                 return "You do not have permission to perform this operation.";
             }

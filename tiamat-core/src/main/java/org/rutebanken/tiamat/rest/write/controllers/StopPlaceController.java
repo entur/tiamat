@@ -19,9 +19,11 @@ import org.rutebanken.tiamat.rest.write.dto.StopPlaceJobDto;
     description = """
     Write mono-modal StopPlace entities asynchronously.
 
-    The API ignores the Version and ValidBetween attributes in the NeTEx XML that you submit.
-    The system sets these values. Timestamps in the NeTEx XML that the API returns always use
-    the timezone of the system, without timezone information.
+    The system sets the ValidBetween attribute, and ignores the one in the NeTEx XML that you
+    submit. On an update, set the Version attribute to the version you read, and the API
+    refuses the write if that version is no longer current. On a create, the API ignores the
+    Version attribute. Timestamps in the NeTEx XML that the API returns always use the timezone
+    of the system, without timezone information.
 
     The API does not read a write request before it accepts the request. The API answers a
     syntactically correct request with 202 and a job id. The API then reads and validates the
@@ -108,9 +110,13 @@ interface StopPlaceController {
         that are not in your document. If a quay has an unknown NeTEx ID, the job fails. If a
         quay has no ID, the API adds a new quay.
 
-        CAUTION: Send an update only from a document that you read recently. The API does not
-        know which version you edited. Your document replaces every change that another client
-        made after you read it. Refer to #453.
+        Set the Version attribute to the version you read, not to the version you want to
+        make. The system decides the next version. If the stop place is at version 4, send
+        version="4", and the system writes version 5.
+
+        This is how the API knows that nobody changed the stop place while you were editing
+        it. If somebody did, the job fails, and the reason gives the version that is now
+        current. Read the stop place again, apply your change to it, and submit it again.
 
         The API reports malformed XML and unsupported elements on the job.
         """,
@@ -120,10 +126,10 @@ interface StopPlaceController {
                 mediaType = "application/xml",
                 examples = {
                     @ExampleObject(
-                        name = "Update StopPlace Example",
+                        name = "Update the stop place that is currently at version 1",
                         value = """
                                                 <stopPlaces xmlns="http://www.netex.org.uk/netex">
-                                                  <StopPlace id="MES:StopPlace:1" version="2">
+                                                  <StopPlace id="MES:StopPlace:1" version="1">
                                                     <Name lang="akk">Bīt Mīt Uruk</Name>
                                                     <PrivateCode>1</PrivateCode>
                                                     <Centroid>

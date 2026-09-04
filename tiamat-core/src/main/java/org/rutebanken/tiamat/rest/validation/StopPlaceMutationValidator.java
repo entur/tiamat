@@ -68,6 +68,32 @@ public class StopPlaceMutationValidator {
         return existingStopPlace;
     }
 
+    /**
+     * This method does the same as the two-argument method, and also refuses the update when the
+     * caller edited a version that is no longer current.
+     * <p>
+     * Without this check, an edit from a stale read overwrites a concurrent edit without a
+     * warning. The mutate lock does not prevent this problem. The lock serializes the writes, but
+     * the caller read the stop place in an earlier request, before anything took the lock.
+     * <p>
+     * This check belongs here and not in the saver service. That service has callers throughout
+     * the importers, where an expected version is not a concept. It is also a persistence concern
+     * and not a request one.
+     * <p>
+     * A caller must resolve the expected version inside the lock. A caller that resolves it
+     * earlier opens the race again.
+     *
+     * @throws StaleVersionException if the stop place moved to a later version after the caller
+     *         read it.
+     */
+    public StopPlace validateStopPlaceUpdate(String netexId, boolean isParentMutation, long expectedVersion) {
+        StopPlace existingStopPlace = validateStopPlaceUpdate(netexId, isParentMutation);
+        if (existingStopPlace.getVersion() != expectedVersion) {
+            throw new StaleVersionException(netexId, expectedVersion, existingStopPlace.getVersion());
+        }
+        return existingStopPlace;
+    }
+
     public void validateStopPlaceName(StopPlace stopPlace) throws IllegalArgumentException {
         Preconditions.checkArgument(
                 stopPlace.getName() != null && !Strings.isNullOrEmpty(stopPlace.getName().getValue()),
