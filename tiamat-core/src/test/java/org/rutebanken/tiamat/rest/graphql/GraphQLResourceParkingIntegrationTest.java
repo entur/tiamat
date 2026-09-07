@@ -610,4 +610,64 @@ public class GraphQLResourceParkingIntegrationTest extends AbstractGraphQLResour
                 .body("data.parking[0].lighting", equalTo("unlit"));
     }
 
+    @Test
+    public void testMutateParkingWithVehicleEntrancesShouldPersistAndReplaceOnUpdate() throws Exception {
+
+        StopPlace stopPlace = stopPlaceRepository.save(new StopPlace());
+
+        String graphQlQuery = "{\n" +
+                "\"query\": \"mutation { " +
+                "  parking: " + GraphQLNames.MUTATE_PARKING + " (Parking : {" +
+                "    geometry: { type:Point coordinates:[10.5, 59.0] } " +
+                "    parentSiteRef:\\\"" + stopPlace.getNetexId() + "\\\" " +
+                "    vehicleEntrances: [" +
+                "      { label: \\\"North gate\\\" entranceType: gate isEntry: true isExit: false } " +
+                "      { label: \\\"South gate\\\" entranceType: gate isEntry: false isExit: true } " +
+                "    ]" +
+                "  }) {" +
+                "    id " +
+                "    vehicleEntrances { label entranceType isEntry isExit } " +
+                "  }" +
+                "}\",\"variables\": \"\"}";
+
+        String parkingId = executeGraphQL(graphQlQuery)
+                .body("data.parking[0].id", notNullValue())
+                .body("data.parking[0].vehicleEntrances.size()", equalTo(2))
+                .extract()
+                .path("data.parking[0].id");
+
+        String findParkingQuery = "{" +
+                "\"query\":\"{" +
+                "  parking: " + GraphQLNames.FIND_PARKING + " (id:\\\"" + parkingId + "\\\") { " +
+                "    id " +
+                "    vehicleEntrances { label entranceType isEntry isExit } " +
+                "  } " +
+                "}\"," +
+                "\"variables\":\"\"}";
+
+        executeGraphQL(findParkingQuery)
+                .body("data.parking[0].id", equalTo(parkingId))
+                .body("data.parking[0].vehicleEntrances.size()", equalTo(2));
+
+        String updateQuery = "{" +
+                "\"query\":\"mutation { " +
+                "  parking:" + GraphQLNames.MUTATE_PARKING + " (Parking: {" +
+                "        id:\\\"" + parkingId + "\\\" " +
+                "        vehicleEntrances: [" +
+                "          { label: \\\"Main gate\\\" entranceType: ticketBarrier isEntry: true isExit: true } " +
+                "        ] " +
+                "       }) { " +
+                "      id " +
+                "      vehicleEntrances { label entranceType isEntry isExit } " +
+                "    } " +
+                "}\"," +
+                "\"variables\":\"\"}";
+
+        executeGraphQL(updateQuery)
+                .body("data.parking[0].id", equalTo(parkingId))
+                .body("data.parking[0].vehicleEntrances.size()", equalTo(1))
+                .body("data.parking[0].vehicleEntrances[0].label", equalTo("Main gate"))
+                .body("data.parking[0].vehicleEntrances[0].entranceType", equalTo("ticketBarrier"));
+    }
+
 }

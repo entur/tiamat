@@ -53,8 +53,9 @@ public class Parking
     protected List<String> cardsAccepted;
     @Transient
     protected PaymentByMobileStructure paymentByMobile;
-    @Transient
-    protected ParkingEntrancesForVehicles_RelStructure vehicleEntrances;
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    protected List<ParkingEntranceForVehicles> vehicleEntrances = new ArrayList<>();
 
     @Transient
     protected SitePathLinks_RelStructure pathLinks;
@@ -313,11 +314,14 @@ public class Parking
         this.parkingAreas = value;
     }
 
-    public ParkingEntrancesForVehicles_RelStructure getVehicleEntrances() {
+    public List<ParkingEntranceForVehicles> getVehicleEntrances() {
+        if (vehicleEntrances == null) {
+            vehicleEntrances = new ArrayList<>();
+        }
         return vehicleEntrances;
     }
 
-    public void setVehicleEntrances(ParkingEntrancesForVehicles_RelStructure value) {
+    public void setVehicleEntrances(List<ParkingEntranceForVehicles> value) {
         this.vehicleEntrances = value;
     }
 
