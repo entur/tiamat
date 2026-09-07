@@ -340,6 +340,28 @@ public class NetexMapperTest extends TiamatIntegrationTest {
     }
 
     @Test
+    public void mapNetexParkingLightingToInternal() {
+        org.rutebanken.netex.model.Parking netexParking = new org.rutebanken.netex.model.Parking();
+        netexParking.setId("NSR:Parking:1");
+        netexParking.setLighting(org.rutebanken.netex.model.LightingEnumeration.WELL_LIT);
+
+        org.rutebanken.tiamat.model.Parking tiamatParking = netexMapper.mapToTiamatModel(netexParking);
+
+        assertThat(tiamatParking.getLighting()).isEqualTo(LightingEnumeration.WELL_LIT);
+    }
+
+    @Test
+    public void mapInternalParkingLightingToNetex() {
+        org.rutebanken.tiamat.model.Parking tiamatParking = new org.rutebanken.tiamat.model.Parking();
+        tiamatParking.setNetexId("NSR:Parking:1");
+        tiamatParking.setLighting(LightingEnumeration.UNLIT);
+
+        org.rutebanken.netex.model.Parking netexParking = netexMapper.mapToNetexModel(tiamatParking);
+
+        assertThat(netexParking.getLighting()).isEqualTo(org.rutebanken.netex.model.LightingEnumeration.UNLIT);
+    }
+
+    @Test
     public void mapStopPlaceWithQuayToNetex() {
         org.rutebanken.tiamat.model.StopPlace stopPlace = new StopPlace();
 
