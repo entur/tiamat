@@ -15,18 +15,40 @@
 
 package org.rutebanken.tiamat.model;
 
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.AttributeOverrides;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.MappedSuperclass;
+
 import java.math.BigDecimal;
 
 
+@MappedSuperclass
 public class SiteEntrance extends SiteComponent_VersionStructure {
 
     protected String publicCode;
-    protected MultilingualStringEntity label;
+
+    // Was MultilingualStringEntity, an @Entity which cannot be @Embedded. Retyped to the
+    // @Embeddable EmbeddableMultilingualString, matching ParkingComponent_VersionStructure
+    // and StopPlaceSpace_VersionStructure, which already type `label` this way.
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "value", column = @Column(name = "label_value")),
+            @AttributeOverride(name = "lang", column = @Column(name = "label_lang", length = 5))
+    })
+    protected EmbeddableMultilingualString label;
+
+    @Enumerated(EnumType.STRING)
     protected EntranceEnumeration entranceType;
     protected Boolean isExternal;
     protected Boolean isEntry;
     protected Boolean isExit;
+    @Column(precision = 10, scale = 2)
     protected BigDecimal width;
+    @Column(precision = 10, scale = 2)
     protected BigDecimal height;
     protected Boolean droppedKerbOutside;
     protected Boolean dropOffPointClose;
@@ -39,11 +61,11 @@ public class SiteEntrance extends SiteComponent_VersionStructure {
         this.publicCode = value;
     }
 
-    public MultilingualStringEntity getLabel() {
+    public EmbeddableMultilingualString getLabel() {
         return label;
     }
 
-    public void setLabel(MultilingualStringEntity value) {
+    public void setLabel(EmbeddableMultilingualString value) {
         this.label = value;
     }
 

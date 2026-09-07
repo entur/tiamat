@@ -22,6 +22,8 @@ import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.Parking;
 import org.rutebanken.netex.model.ParkingArea;
 import org.rutebanken.netex.model.ParkingAreas_RelStructure;
+import org.rutebanken.netex.model.ParkingEntranceForVehicles;
+import org.rutebanken.netex.model.ParkingEntrancesForVehicles_RelStructure;
 import org.rutebanken.tiamat.model.PaymentMethodEnumeration;
 
 import java.util.List;
@@ -40,6 +42,7 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
             }
         }
         mapPaymentMethodsFromNetex(parking, parking2);
+        mapVehicleEntrancesFromNetex(parking, parking2, context);
     }
 
     @Override
@@ -61,6 +64,7 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
             }
         }
         mapPaymentMethodsToNetex(tiamatParking, netexParking);
+        mapVehicleEntrancesToNetex(tiamatParking, netexParking, context);
     }
 
     /**
@@ -99,6 +103,43 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
             } catch (IllegalArgumentException ignored) {
                 // skip unknown values
             }
+        }
+    }
+
+    /**
+     * {@code vehicleEntrances} is excluded from the default Orika class map (see
+     * {@code NetexMapper}) because NeTEx models it as a {@code RelStructure} (a wrapper
+     * holding refs-or-entries) while Tiamat persists a plain {@code List}. Orika cannot
+     * bridge that structural mismatch on its own.
+     */
+    private void mapVehicleEntrancesFromNetex(Parking source, org.rutebanken.tiamat.model.Parking target, MappingContext context) {
+        if (source.getVehicleEntrances() == null
+                || source.getVehicleEntrances().getParkingEntranceForVehiclesRefOrParkingEntranceForVehicles().isEmpty()) {
+            return;
+        }
+        List<ParkingEntranceForVehicles> netexEntrances = source.getVehicleEntrances()
+                .getParkingEntranceForVehiclesRefOrParkingEntranceForVehicles().stream()
+                .filter(ParkingEntranceForVehicles.class::isInstance)
+                .map(ParkingEntranceForVehicles.class::cast)
+                .toList();
+
+        List<org.rutebanken.tiamat.model.ParkingEntranceForVehicles> entrances =
+                mapperFacade.mapAsList(netexEntrances, org.rutebanken.tiamat.model.ParkingEntranceForVehicles.class, context);
+        if (!entrances.isEmpty()) {
+            target.setVehicleEntrances(entrances);
+        }
+    }
+
+    private void mapVehicleEntrancesToNetex(org.rutebanken.tiamat.model.Parking source, Parking target, MappingContext context) {
+        if (source.getVehicleEntrances() == null || source.getVehicleEntrances().isEmpty()) {
+            return;
+        }
+        List<ParkingEntranceForVehicles> entrances = mapperFacade.mapAsList(
+                source.getVehicleEntrances(), ParkingEntranceForVehicles.class, context);
+        if (!entrances.isEmpty()) {
+            ParkingEntrancesForVehicles_RelStructure rel = new ParkingEntrancesForVehicles_RelStructure();
+            rel.getParkingEntranceForVehiclesRefOrParkingEntranceForVehicles().addAll(entrances);
+            target.setVehicleEntrances(rel);
         }
     }
 }

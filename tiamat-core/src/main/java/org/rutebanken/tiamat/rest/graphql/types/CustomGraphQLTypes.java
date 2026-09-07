@@ -139,6 +139,7 @@ public class CustomGraphQLTypes {
     public static GraphQLEnumType passengerInformationEquipmentListEnum = createCustomEnumType("PassengerInformationEquipmentEnumerationType", PassengerInformationEquipmentEnumeration.class);
     public static GraphQLEnumType sanitaryFacilityEnumType = createCustomEnumType("SanitaryFacilityEnumeration", SanitaryFacilityEnumeration.class);
     public static GraphQLEnumType lightingEnumType = createCustomEnumType("LightingEnumeration", org.rutebanken.tiamat.model.LightingEnumeration.class);
+    public static GraphQLEnumType entranceTypeEnum = createCustomEnumType("EntranceType", org.rutebanken.tiamat.model.EntranceEnumeration.class);
 
     public static GraphQLEnumType createCustomEnumType(String name, Class c) {
 
@@ -955,6 +956,38 @@ public class CustomGraphQLTypes {
                     .type(parkingPropertiesInputObjectType))
             .build();
 
+    public static GraphQLObjectType parkingVehicleEntranceObjectType = newObject()
+            .name(OUTPUT_TYPE_PARKING_VEHICLE_ENTRANCE)
+            .field(newFieldDefinition()
+                    .name(LABEL)
+                    .type(GraphQLString))
+            .field(newFieldDefinition()
+                    .name(ENTRANCE_TYPE)
+                    .type(entranceTypeEnum))
+            .field(newFieldDefinition()
+                    .name(IS_ENTRY)
+                    .type(GraphQLBoolean))
+            .field(newFieldDefinition()
+                    .name(IS_EXIT)
+                    .type(GraphQLBoolean))
+            .build();
+
+    public static GraphQLInputObjectType parkingVehicleEntranceInputObjectType = GraphQLInputObjectType.newInputObject()
+            .name(INPUT_TYPE_PARKING_VEHICLE_ENTRANCE)
+            .field(newInputObjectField()
+                    .name(LABEL)
+                    .type(GraphQLString))
+            .field(newInputObjectField()
+                    .name(ENTRANCE_TYPE)
+                    .type(entranceTypeEnum))
+            .field(newInputObjectField()
+                    .name(IS_ENTRY)
+                    .type(GraphQLBoolean))
+            .field(newInputObjectField()
+                    .name(IS_EXIT)
+                    .type(GraphQLBoolean))
+            .build();
+
     public static GraphQLObjectType postalAddressObjectType = GraphQLObjectType.newObject()
             .name(OUTPUT_TYPE_POSTAL_ADDRESS)
             .field(newFieldDefinition()
@@ -1062,6 +1095,9 @@ public class CustomGraphQLTypes {
                         .name(PARKING_AREAS)
                         .type(new GraphQLList(parkingAreaObjectType)))
                 .field(newFieldDefinition()
+                        .name(VEHICLE_ENTRANCES)
+                        .type(new GraphQLList(parkingVehicleEntranceObjectType)))
+                .field(newFieldDefinition()
                         .name(PLACE_EQUIPMENTS)
                         .type(equipmentType))
                 .field(geometryFieldDefinition)
@@ -1136,6 +1172,9 @@ public class CustomGraphQLTypes {
                 .field(newInputObjectField()
                         .name(PARKING_AREAS)
                         .type(new GraphQLList(parkingAreaInputObjectType)))
+                .field(newInputObjectField()
+                        .name(VEHICLE_ENTRANCES)
+                        .type(new GraphQLList(parkingVehicleEntranceInputObjectType)))
                 .field(newInputObjectField()
                         .name(PLACE_EQUIPMENTS)
                         .type(equipmentInputType))

@@ -228,6 +228,9 @@ public class GraphQLNames {
     public static final String OUTPUT_TYPE_PARKING_AREA = "ParkingArea";
     public static final String INPUT_TYPE_PARKING_AREA = OUTPUT_TYPE_PARKING_AREA + INPUT_TYPE_POSTFIX;
 
+    public static final String OUTPUT_TYPE_PARKING_VEHICLE_ENTRANCE = "ParkingVehicleEntrance";
+    public static final String INPUT_TYPE_PARKING_VEHICLE_ENTRANCE = OUTPUT_TYPE_PARKING_VEHICLE_ENTRANCE + INPUT_TYPE_POSTFIX;
+
 
     public static final String GEOMETRY_TYPE_ENUM = "GeoJSONType";
 
@@ -465,6 +468,10 @@ public class GraphQLNames {
     public static final String PARKING_PAYMENT_PROCESS = "parkingPaymentProcess";
     public static final String PAYMENT_METHODS = "paymentMethods";
     public static final String LABEL = "label";
+    public static final String VEHICLE_ENTRANCES = "vehicleEntrances";
+    public static final String ENTRANCE_TYPE = "entranceType";
+    public static final String IS_ENTRY = "isEntry";
+    public static final String IS_EXIT = "isExit";
     public static final String PARENT_SITE_REF = "parentSiteRef";
 
     public static final String VALID_TRANSPORT_MODES = "validTransportModes";
