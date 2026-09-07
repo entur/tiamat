@@ -273,7 +273,7 @@ public class StopPlaceControllerIntegrationTest extends TiamatIntegrationTest {
         String xml = String.format(
             """
             <stopPlaces xmlns="http://www.netex.org.uk/netex">
-                <StopPlace id="%s">
+                <StopPlace id="%s" version="%d">
                     <Name>Updated Name</Name>
                     <StopPlaceType>busStation</StopPlaceType>
                     <quays>
@@ -284,7 +284,7 @@ public class StopPlaceControllerIntegrationTest extends TiamatIntegrationTest {
                 </StopPlace>
             </stopPlaces>
             """,
-            saved.getNetexId()
+            saved.getNetexId(), saved.getVersion()
         );
 
         ResponseEntity<StopPlaceJobDto> response = putXml(xml, StopPlaceJobDto.class);
@@ -318,7 +318,7 @@ public class StopPlaceControllerIntegrationTest extends TiamatIntegrationTest {
         String xml = String.format(
                 """
                 <stopPlaces xmlns="http://www.netex.org.uk/netex">
-                    <StopPlace id="%s">
+                    <StopPlace id="%s" version="%d">
                         <Name>Updated Name</Name>
                         <StopPlaceType>busStation</StopPlaceType>
                         <quays>
@@ -330,7 +330,7 @@ public class StopPlaceControllerIntegrationTest extends TiamatIntegrationTest {
                     </StopPlace>
                 </stopPlaces>
                 """,
-                saved.getNetexId()
+                saved.getNetexId(), saved.getVersion()
         );
 
         ResponseEntity<StopPlaceJobDto> response = putXml(xml, StopPlaceJobDto.class);
@@ -551,7 +551,7 @@ public class StopPlaceControllerIntegrationTest extends TiamatIntegrationTest {
         String xml = String.format(
             """
             <stopPlaces xmlns="http://www.netex.org.uk/netex">
-                <StopPlace id="%s" version="0">
+                <StopPlace id="%s" version="%d">
                     <Name>Updated Name</Name>
                     <StopPlaceType>busStation</StopPlaceType>
                     <ValidBetween>
@@ -566,7 +566,7 @@ public class StopPlaceControllerIntegrationTest extends TiamatIntegrationTest {
                 </StopPlace>
             </stopPlaces>
             """,
-            saved.getNetexId()
+            saved.getNetexId(), saved.getVersion()
         );
 
         ResponseEntity<StopPlaceJobDto> response = putXml(xml, StopPlaceJobDto.class);
@@ -606,7 +606,7 @@ public class StopPlaceControllerIntegrationTest extends TiamatIntegrationTest {
         String xml = String.format(
             """
             <stopPlaces xmlns="http://www.netex.org.uk/netex">
-                <StopPlace id="%s" version="666">
+                <StopPlace id="%s" version="%d">
                     <Name>Updated Name</Name>
                     <StopPlaceType>busStation</StopPlaceType>
                     <AccessibilityAssessment modification="new" version="667" id="NSR:AccessibilityAssessment:1">
@@ -630,7 +630,7 @@ public class StopPlaceControllerIntegrationTest extends TiamatIntegrationTest {
                 </StopPlace>
             </stopPlaces>
             """,
-            saved.getNetexId()
+            saved.getNetexId(), saved.getVersion()
         );
 
         ResponseEntity<StopPlaceJobDto> response = putXml(xml, StopPlaceJobDto.class);
@@ -651,6 +651,120 @@ public class StopPlaceControllerIntegrationTest extends TiamatIntegrationTest {
         assertThat(updatedAssessmentVersion).as("the server decides the version, not the client").isEqualTo(2L);
         assertThat(updatedAssessmentId).isEqualTo("NSR:AccessibilityAssessment:1");
         assertThat(updatedLimitationVersion).isEqualTo(1L);
+    }
+
+    /**
+     * This test covers the case from issue #453. Two clients read version 1. The first write moves
+     * the stop place to version 2. The second client built its edit from the version that the
+     * first write replaced. Without the precondition, that edit discards the first write without
+     * a warning.
+     */
+    @Test
+    public void updateFromAVersionThatHasMovedOnFails() throws InterruptedException {
+        StopPlace saved = savedStopPlace("Original Name");
+
+        StopPlaceJobDto firstJob = awaitJobCompletion(
+                putXml(updateXml(saved.getNetexId(), 1, "First Edit"), StopPlaceJobDto.class).getBody().jobId());
+        assertThat(firstJob.status()).isEqualTo(AsyncStopPlaceJobStatus.FINISHED);
+
+        ResponseEntity<StopPlaceJobDto> second =
+                putXml(updateXml(saved.getNetexId(), 1, "Second Edit"), StopPlaceJobDto.class);
+
+        assertThat(second.getStatusCode())
+                .as("staleness is found during processing, so the request is still accepted")
+                .isEqualTo(HttpStatus.ACCEPTED);
+
+        StopPlaceJobDto secondJob = awaitJobCompletion(second.getBody().jobId());
+
+        assertThat(secondJob.status()).isEqualTo(AsyncStopPlaceJobStatus.FAILED);
+        assertThat(secondJob.errorMessage())
+                .as("the reason has to say the edit can be reapplied, and give the version to read")
+                .contains("moved to version 2")
+                .contains("Read it again");
+        String survivingName = written(saved.getNetexId(), sp -> sp.getName().getValue());
+        assertThat(survivingName).as("the first edit survives").isEqualTo("First Edit");
+    }
+
+    @Test
+    public void updateWithoutAVersionFails() throws InterruptedException {
+        StopPlace saved = savedStopPlace("Original Name");
+
+        String xml = """
+            <stopPlaces xmlns="http://www.netex.org.uk/netex">
+                <StopPlace id="%s">
+                    <Name>No Version</Name>
+                    <StopPlaceType>busStation</StopPlaceType>
+                </StopPlace>
+            </stopPlaces>
+            """.formatted(saved.getNetexId());
+
+        StopPlaceJobDto job = awaitJobCompletion(putXml(xml, StopPlaceJobDto.class).getBody().jobId());
+
+        assertThat(job.status()).isEqualTo(AsyncStopPlaceJobStatus.FAILED);
+        assertThat(job.errorMessage()).contains("must carry the version attribute");
+        String unchangedName = written(saved.getNetexId(), sp -> sp.getName().getValue());
+        assertThat(unchangedName).isEqualTo("Original Name");
+    }
+
+    /**
+     * version="any" is legal NeTEx, and the writer refuses it deliberately, not as a side effect
+     * of the parse. "any" is the one assertion that a precondition cannot accept, because it says
+     * the caller does not care which version it edited.
+     */
+    @Test
+    public void updateWithANonNumericVersionFails() throws InterruptedException {
+        StopPlace saved = savedStopPlace("Original Name");
+
+        String xml = """
+            <stopPlaces xmlns="http://www.netex.org.uk/netex">
+                <StopPlace id="%s" version="any">
+                    <Name>Any Version</Name>
+                    <StopPlaceType>busStation</StopPlaceType>
+                </StopPlace>
+            </stopPlaces>
+            """.formatted(saved.getNetexId());
+
+        StopPlaceJobDto job = awaitJobCompletion(putXml(xml, StopPlaceJobDto.class).getBody().jobId());
+
+        assertThat(job.status()).isEqualTo(AsyncStopPlaceJobStatus.FAILED);
+        assertThat(job.errorMessage())
+                .as("the message reaches the caller verbatim, so it is part of the contract")
+                .contains("version attribute must be a number")
+                .contains("'any'");
+        String unchangedName = written(saved.getNetexId(), sp -> sp.getName().getValue());
+        assertThat(unchangedName).isEqualTo("Original Name");
+    }
+
+    @Test
+    public void updateFromTheCurrentVersionSucceeds() throws InterruptedException {
+        StopPlace saved = savedStopPlace("Original Name");
+
+        StopPlaceJobDto job = awaitJobCompletion(
+                putXml(updateXml(saved.getNetexId(), 1, "Edited"), StopPlaceJobDto.class).getBody().jobId());
+
+        assertThat(job.status()).isEqualTo(AsyncStopPlaceJobStatus.FINISHED);
+        String editedName = written(saved.getNetexId(), sp -> sp.getName().getValue());
+        Long newVersion = written(saved.getNetexId(), StopPlace::getVersion);
+        assertThat(editedName).isEqualTo("Edited");
+        assertThat(newVersion).as("the server still decides the next version").isEqualTo(2L);
+    }
+
+    private StopPlace savedStopPlace(String name) {
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString(name));
+        stopPlace.setVersion(1L);
+        stopPlace.setStopPlaceType(StopTypeEnumeration.BUS_STATION);
+        return stopPlaceRepository.save(stopPlace);
+    }
+
+    private static String updateXml(String netexId, long version, String name) {
+        return """
+            <stopPlaces xmlns="http://www.netex.org.uk/netex">
+                <StopPlace id="%s" version="%d">
+                    <Name>%s</Name>
+                    <StopPlaceType>busStation</StopPlaceType>
+                </StopPlace>
+            </stopPlaces>
+            """.formatted(netexId, version, name);
     }
 
     @Autowired

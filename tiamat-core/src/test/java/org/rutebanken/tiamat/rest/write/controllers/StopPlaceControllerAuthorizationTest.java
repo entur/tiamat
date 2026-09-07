@@ -73,12 +73,12 @@ public class StopPlaceControllerAuthorizationTest extends TiamatIntegrationTest 
 
         String xml = String.format("""
                 <stopPlaces xmlns="http://www.netex.org.uk/netex">
-                    <StopPlace id="%s">
+                    <StopPlace id="%s" version="%d">
                         <Name>Updated Stop</Name>
                         <StopPlaceType>busStation</StopPlaceType>
                     </StopPlace>
                 </stopPlaces>
-                """, existing.getNetexId());
+                """, existing.getNetexId(), existing.getVersion());
 
         ResponseEntity<StopPlaceJobDto> response = putXml(xml, StopPlaceJobDto.class);
 
@@ -141,12 +141,12 @@ public class StopPlaceControllerAuthorizationTest extends TiamatIntegrationTest 
 
         String xml = String.format("""
                 <stopPlaces xmlns="http://www.netex.org.uk/netex">
-                    <StopPlace id="%s">
+                    <StopPlace id="%s" version="%d">
                         <Name>Updated Bus Stop</Name>
                         <StopPlaceType>busStation</StopPlaceType>
                     </StopPlace>
                 </stopPlaces>
-                """, existing.getNetexId());
+                """, existing.getNetexId(), existing.getVersion());
 
         ResponseEntity<StopPlaceJobDto> response = putXml(xml, StopPlaceJobDto.class);
 
