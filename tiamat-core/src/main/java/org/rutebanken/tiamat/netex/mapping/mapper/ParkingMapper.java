@@ -22,6 +22,7 @@ import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.Parking;
 import org.rutebanken.netex.model.ParkingArea;
 import org.rutebanken.netex.model.ParkingAreas_RelStructure;
+import org.rutebanken.tiamat.model.PaymentMethodEnumeration;
 
 import java.util.List;
 
@@ -38,6 +39,7 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
                 parking2.setParkingAreas(parkingAreas);
             }
         }
+        mapPaymentMethodsFromNetex(parking, parking2);
     }
 
     @Override
@@ -56,6 +58,46 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
                 parkingAreas_relStructure.getParkingAreaRefOrParkingArea_().addAll(wrappedParkingAreas);
 
                 netexParking.setParkingAreas(parkingAreas_relStructure);
+            }
+        }
+        mapPaymentMethodsToNetex(tiamatParking, netexParking);
+    }
+
+    /**
+     * {@code paymentMethods} is excluded from the default Orika class map (see
+     * {@code NetexMapper}) because the NeTEx and Tiamat enums are distinct types with
+     * different value sets (NeTEx's is a superset). Bridge them explicitly via the
+     * shared {@code value()} string, mirroring how {@code parkingType} etc. are handled
+     * by name but accounting for the value-set mismatch.
+     */
+    private void mapPaymentMethodsFromNetex(Parking source, org.rutebanken.tiamat.model.Parking target) {
+        List<org.rutebanken.netex.model.PaymentMethodEnumeration> netexMethods = source.getPaymentMethods();
+        if (netexMethods == null || netexMethods.isEmpty()) {
+            return;
+        }
+        List<PaymentMethodEnumeration> targetMethods = target.getPaymentMethods();
+        targetMethods.clear();
+        for (org.rutebanken.netex.model.PaymentMethodEnumeration netexMethod : netexMethods) {
+            try {
+                targetMethods.add(PaymentMethodEnumeration.fromValue(netexMethod.value()));
+            } catch (IllegalArgumentException ignored) {
+                // skip unknown values
+            }
+        }
+    }
+
+    private void mapPaymentMethodsToNetex(org.rutebanken.tiamat.model.Parking source, Parking target) {
+        List<PaymentMethodEnumeration> methods = source.getPaymentMethods();
+        if (methods.isEmpty()) {
+            return;
+        }
+        List<org.rutebanken.netex.model.PaymentMethodEnumeration> targetMethods = target.getPaymentMethods();
+        targetMethods.clear();
+        for (PaymentMethodEnumeration method : methods) {
+            try {
+                targetMethods.add(org.rutebanken.netex.model.PaymentMethodEnumeration.fromValue(method.value()));
+            } catch (IllegalArgumentException ignored) {
+                // skip unknown values
             }
         }
     }

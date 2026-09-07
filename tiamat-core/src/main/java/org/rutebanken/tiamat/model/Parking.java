@@ -37,8 +37,11 @@ public class Parking
     protected String publicCode;
     @Transient
     protected MultilingualStringEntity label;
-    @Transient
+
+    @ElementCollection(targetClass = PaymentMethodEnumeration.class, fetch = FetchType.EAGER)
+    @Enumerated(EnumType.STRING)
     protected List<PaymentMethodEnumeration> paymentMethods;
+
     @Transient
     protected String defaultCurrency;
     @Transient

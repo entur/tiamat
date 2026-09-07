@@ -35,6 +35,7 @@ import org.rutebanken.tiamat.model.ParkingStayEnumeration;
 import org.rutebanken.tiamat.model.ParkingTypeEnumeration;
 import org.rutebanken.tiamat.model.ParkingUserEnumeration;
 import org.rutebanken.tiamat.model.ParkingVehicleEnumeration;
+import org.rutebanken.tiamat.model.PaymentMethodEnumeration;
 import org.rutebanken.tiamat.model.PlaceEquipment;
 import org.rutebanken.tiamat.model.SiteRefStructure;
 import org.rutebanken.tiamat.repository.ParkingRepository;
@@ -82,6 +83,7 @@ import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PARKING_TYPE;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PARKING_USER_TYPE;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PARKING_VEHICLE_TYPE;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PARKING_VEHICLE_TYPES;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PAYMENT_METHODS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PLACE_EQUIPMENTS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PRINCIPAL_CAPACITY;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.REAL_TIME_OCCUPANCY_AVAILABLE;
@@ -256,6 +258,16 @@ class ParkingUpdater implements DataFetcher {
 
             updatedParking.getParkingPaymentProcess().clear();
             updatedParking.getParkingPaymentProcess().addAll(parkingPaymentProcessTypes);
+        }
+
+        if (input.get(PAYMENT_METHODS) != null) {
+
+            List<PaymentMethodEnumeration> paymentMethods = (List<PaymentMethodEnumeration>) input.get(PAYMENT_METHODS);
+            isUpdated = isUpdated || !(updatedParking.getPaymentMethods().containsAll(paymentMethods) &&
+                    paymentMethods.containsAll(updatedParking.getPaymentMethods()));
+
+            updatedParking.getPaymentMethods().clear();
+            updatedParking.getPaymentMethods().addAll(paymentMethods);
         }
 
         if (input.get(PARKING_RESERVATION) != null) {

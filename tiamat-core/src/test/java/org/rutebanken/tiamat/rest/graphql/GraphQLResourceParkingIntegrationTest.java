@@ -503,5 +503,59 @@ public class GraphQLResourceParkingIntegrationTest extends AbstractGraphQLResour
                 .body("data.parking[0].placeEquipments.cycleStorageEquipment[0].numberOfSpaces", equalTo(10));
     }
 
+    @Test
+    public void testMutateParkingWithPaymentMethodsShouldPersistAndReturn() throws Exception {
+
+        StopPlace stopPlace = stopPlaceRepository.save(new StopPlace());
+
+        String graphQlQuery = "{\n" +
+                "\"query\": \"mutation { " +
+                "  parking: " + GraphQLNames.MUTATE_PARKING + " (Parking : {" +
+                "    geometry: { type:Point coordinates:[10.5, 59.0] } " +
+                "    parentSiteRef:\\\"" + stopPlace.getNetexId() + "\\\" " +
+                "    paymentMethods: [cash, creditCard, mobilePhone] " +
+                "  }) {" +
+                "    id " +
+                "    paymentMethods " +
+                "  }" +
+                "}\",\"variables\": \"\"}";
+
+        String parkingId = executeGraphQL(graphQlQuery)
+                .body("data.parking[0].id", notNullValue())
+                .body("data.parking[0].paymentMethods", hasSize(3))
+                .extract()
+                .path("data.parking[0].id");
+
+        String findParkingQuery = "{" +
+                "\"query\":\"{" +
+                "  parking: " + GraphQLNames.FIND_PARKING + " (id:\\\"" + parkingId + "\\\") { " +
+                "    id " +
+                "    paymentMethods " +
+                "  } " +
+                "}\"," +
+                "\"variables\":\"\"}";
+
+        executeGraphQL(findParkingQuery)
+                .body("data.parking[0].id", equalTo(parkingId))
+                .body("data.parking[0].paymentMethods", hasSize(3));
+
+        String updateQuery = "{" +
+                "\"query\":\"mutation { " +
+                "  parking:" + GraphQLNames.MUTATE_PARKING + " (Parking: {" +
+                "        id:\\\"" + parkingId + "\\\" " +
+                "        paymentMethods: [contactlessPaymentCard] " +
+                "       }) { " +
+                "      id " +
+                "      paymentMethods " +
+                "    } " +
+                "}\"," +
+                "\"variables\":\"\"}";
+
+        executeGraphQL(updateQuery)
+                .body("data.parking[0].id", equalTo(parkingId))
+                .body("data.parking[0].paymentMethods", hasSize(1))
+                .body("data.parking[0].paymentMethods[0]", equalTo("contactlessPaymentCard"));
+    }
+
 
 }
