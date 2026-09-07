@@ -17,8 +17,8 @@ import java.util.List;
  * no {@code result}. A PROCESSING job gives neither, because it has no outcome yet.
  * <p>
  * The two objects exist so that the position of a field says when the field applies. The earlier
- * shape put every field at the top level, which left the reader to learn from the documentation
- * which status filled in which field.
+ * shape put every field at the top level. A reader of that shape had to learn from the
+ * documentation which status filled in which field.
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record StopPlaceJobDto(

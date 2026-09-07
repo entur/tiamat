@@ -6,8 +6,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * Why a write job did not finish.
  * <p>
  * The distinction that matters is whether the same payload can succeed later.
- * {@link #STALE_VERSION} and {@link #QUEUE_FULL} say that it can. The others say that it cannot,
- * and that the caller must change something first.
+ * {@link #TIMED_OUT} and {@link #QUEUE_FULL} say that it can, and that the same bytes are enough.
+ * {@link #STALE_VERSION} says that it can, after the caller reads the stop place again and
+ * reapplies the edit to the version it finds. {@link #INVALID_PAYLOAD}, {@link #ACCESS_DENIED} and
+ * {@link #CONSTRAINT_VIOLATION} say that it cannot, and that the caller must change something
+ * first. {@link #UNEXPECTED_ERROR} says nothing either way.
  */
 @Schema(description = "Why the job did not finish.")
 public enum JobFailureReason {

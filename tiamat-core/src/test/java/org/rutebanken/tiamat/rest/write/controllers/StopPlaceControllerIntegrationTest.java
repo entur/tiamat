@@ -760,9 +760,9 @@ public class StopPlaceControllerIntegrationTest extends TiamatIntegrationTest {
 
     /**
      * The case that issue #459 exists to close. A client creates a stop place and then edits it,
-     * with nothing but what the write API gave back. Before this, a create reported the new id
-     * and not its version, and an update must state a version, so the client had to read the stop
-     * place through another API in between.
+     * with nothing but what the write API gave back. A create used to report the new id and not
+     * its version. An update must state a version, so the client had to read the stop place
+     * through another API in between.
      */
     @Test
     public void aClientCanCreateThenUpdateWithNoReadInBetween() throws InterruptedException {
