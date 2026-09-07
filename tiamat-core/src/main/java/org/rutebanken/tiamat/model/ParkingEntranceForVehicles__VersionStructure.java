@@ -15,6 +15,9 @@
 
 package org.rutebanken.tiamat.model;
 
+import jakarta.persistence.MappedSuperclass;
+
+@MappedSuperclass
 public class ParkingEntranceForVehicles__VersionStructure
         extends SiteEntrance {
 

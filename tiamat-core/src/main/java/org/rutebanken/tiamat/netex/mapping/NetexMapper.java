@@ -152,11 +152,17 @@ public class NetexMapper {
                 .register();
 
 
+        mapperFactoryWithNetexIdClassBuilder(org.rutebanken.netex.model.ParkingEntranceForVehicles.class,
+                        org.rutebanken.tiamat.model.ParkingEntranceForVehicles.class)
+                .byDefault()
+                .register();
+
         mapperFactoryWithNetexIdClassBuilder(Parking.class, org.rutebanken.tiamat.model.Parking.class)
                 .exclude("paymentMethods")
                 .exclude("cardsAccepted")
                 .exclude("currenciesAccepted")
                 .exclude("accessModes")
+                .exclude("vehicleEntrances")
                 .customize(new ParkingMapper())
                 .byDefault()
                 .register();

@@ -36,6 +36,7 @@ import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.FareZone;
 import org.rutebanken.tiamat.model.GroupOfStopPlaces;
 import org.rutebanken.tiamat.model.IanaCountryTldEnumeration;
+import org.rutebanken.tiamat.model.EntranceEnumeration;
 import org.rutebanken.tiamat.model.LightingEnumeration;
 import org.rutebanken.tiamat.model.LimitationStatusEnumeration;
 import org.rutebanken.tiamat.model.NameTypeEnumeration;
@@ -359,6 +360,61 @@ public class NetexMapperTest extends TiamatIntegrationTest {
         org.rutebanken.netex.model.Parking netexParking = netexMapper.mapToNetexModel(tiamatParking);
 
         assertThat(netexParking.getLighting()).isEqualTo(org.rutebanken.netex.model.LightingEnumeration.UNLIT);
+    }
+
+    @Test
+    public void mapNetexParkingVehicleEntrancesToInternal() {
+        org.rutebanken.netex.model.ParkingEntranceForVehicles netexEntrance = new org.rutebanken.netex.model.ParkingEntranceForVehicles();
+        netexEntrance.setId("NSR:ParkingEntranceForVehicles:1");
+        netexEntrance.setVersion("1");
+        netexEntrance.setLabel(new org.rutebanken.netex.model.MultilingualString().withValue("Main gate"));
+        netexEntrance.setEntranceType(org.rutebanken.netex.model.EntranceEnumeration.GATE);
+        netexEntrance.setWidth(new java.math.BigDecimal("2.50"));
+        netexEntrance.setHeight(new java.math.BigDecimal("2.10"));
+
+        org.rutebanken.netex.model.ParkingEntrancesForVehicles_RelStructure rel = new org.rutebanken.netex.model.ParkingEntrancesForVehicles_RelStructure();
+        rel.getParkingEntranceForVehiclesRefOrParkingEntranceForVehicles().add(netexEntrance);
+
+        org.rutebanken.netex.model.Parking netexParking = new org.rutebanken.netex.model.Parking();
+        netexParking.setId("NSR:Parking:1");
+        netexParking.setVersion("1");
+        netexParking.setVehicleEntrances(rel);
+
+        org.rutebanken.tiamat.model.Parking tiamatParking = netexMapper.mapToTiamatModel(netexParking);
+
+        assertThat(tiamatParking.getVehicleEntrances()).hasSize(1);
+        org.rutebanken.tiamat.model.ParkingEntranceForVehicles tiamatEntrance = tiamatParking.getVehicleEntrances().get(0);
+        assertThat(tiamatEntrance.getNetexId()).isEqualTo("NSR:ParkingEntranceForVehicles:1");
+        assertThat(tiamatEntrance.getLabel().getValue()).isEqualTo("Main gate");
+        assertThat(tiamatEntrance.getEntranceType()).isEqualTo(EntranceEnumeration.GATE);
+        assertThat(tiamatEntrance.getWidth()).isEqualByComparingTo("2.50");
+        assertThat(tiamatEntrance.getHeight()).isEqualByComparingTo("2.10");
+    }
+
+    @Test
+    public void mapInternalParkingVehicleEntrancesToNetex() {
+        org.rutebanken.tiamat.model.ParkingEntranceForVehicles tiamatEntrance = new org.rutebanken.tiamat.model.ParkingEntranceForVehicles();
+        tiamatEntrance.setNetexId("NSR:ParkingEntranceForVehicles:1");
+        tiamatEntrance.setLabel(new org.rutebanken.tiamat.model.EmbeddableMultilingualString("Main gate"));
+        tiamatEntrance.setEntranceType(EntranceEnumeration.GATE);
+        tiamatEntrance.setWidth(new java.math.BigDecimal("2.50"));
+        tiamatEntrance.setHeight(new java.math.BigDecimal("2.10"));
+
+        org.rutebanken.tiamat.model.Parking tiamatParking = new org.rutebanken.tiamat.model.Parking();
+        tiamatParking.setNetexId("NSR:Parking:1");
+        tiamatParking.getVehicleEntrances().add(tiamatEntrance);
+
+        org.rutebanken.netex.model.Parking netexParking = netexMapper.mapToNetexModel(tiamatParking);
+
+        assertThat(netexParking.getVehicleEntrances()).isNotNull();
+        List<Object> netexEntrances = netexParking.getVehicleEntrances().getParkingEntranceForVehiclesRefOrParkingEntranceForVehicles();
+        assertThat(netexEntrances).hasSize(1);
+        org.rutebanken.netex.model.ParkingEntranceForVehicles netexEntrance = (org.rutebanken.netex.model.ParkingEntranceForVehicles) netexEntrances.get(0);
+        assertThat(netexEntrance.getId()).isEqualTo("NSR:ParkingEntranceForVehicles:1");
+        assertThat(netexEntrance.getLabel().getValue()).isEqualTo("Main gate");
+        assertThat(netexEntrance.getEntranceType()).isEqualTo(org.rutebanken.netex.model.EntranceEnumeration.GATE);
+        assertThat(netexEntrance.getWidth()).isEqualByComparingTo("2.50");
+        assertThat(netexEntrance.getHeight()).isEqualByComparingTo("2.10");
     }
 
     @Test
