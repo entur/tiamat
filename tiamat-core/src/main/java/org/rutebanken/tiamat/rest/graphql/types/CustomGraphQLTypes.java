@@ -140,6 +140,7 @@ public class CustomGraphQLTypes {
     public static GraphQLEnumType sanitaryFacilityEnumType = createCustomEnumType("SanitaryFacilityEnumeration", SanitaryFacilityEnumeration.class);
     public static GraphQLEnumType lightingEnumType = createCustomEnumType("LightingEnumeration", org.rutebanken.tiamat.model.LightingEnumeration.class);
     public static GraphQLEnumType entranceTypeEnum = createCustomEnumType("EntranceType", org.rutebanken.tiamat.model.EntranceEnumeration.class);
+    public static GraphQLEnumType accessModeEnum = createCustomEnumType("AccessModeEnum", org.rutebanken.tiamat.model.AccessModeEnumeration.class);
 
     public static GraphQLEnumType createCustomEnumType(String name, Class c) {
 
@@ -970,6 +971,9 @@ public class CustomGraphQLTypes {
             .field(newFieldDefinition()
                     .name(IS_EXIT)
                     .type(GraphQLBoolean))
+            .field(newFieldDefinition()
+                    .name(ACCESS_MODES)
+                    .type(new GraphQLList(accessModeEnum)))
             .build();
 
     public static GraphQLInputObjectType parkingVehicleEntranceInputObjectType = GraphQLInputObjectType.newInputObject()
@@ -986,6 +990,9 @@ public class CustomGraphQLTypes {
             .field(newInputObjectField()
                     .name(IS_EXIT)
                     .type(GraphQLBoolean))
+            .field(newInputObjectField()
+                    .name(ACCESS_MODES)
+                    .type(new GraphQLList(accessModeEnum)))
             .build();
 
     public static GraphQLObjectType postalAddressObjectType = GraphQLObjectType.newObject()

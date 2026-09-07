@@ -840,6 +840,10 @@ public class StopPlaceRegisterGraphQLSchema {
             EmbeddableMultilingualString label = entrance.getLabel();
             return label != null ? label.getValue() : null;
         });
+        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_PARKING_VEHICLE_ENTRANCE,ACCESS_MODES,env -> {
+            ParkingEntranceForVehicles entrance = env.getSource();
+            return entrance.getAccessModesList();
+        });
 
         mapNetexId(codeRegistryBuilder, OUTPUT_TYPE_SHELTER_EQUIPMENT, OUTPUT_TYPE_SANITARY_EQUIPMENT, OUTPUT_TYPE_CYCLE_STORAGE_EQUIPMENT, OUTPUT_TYPE_GENERAL_SIGN_EQUIPMENT, OUTPUT_TYPE_TICKETING_EQUIPMENT, OUTPUT_TYPE_WAITING_ROOM_EQUIPMENT);
         registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_BOARDING_POSITION,ID,getNetexIdFetcher());

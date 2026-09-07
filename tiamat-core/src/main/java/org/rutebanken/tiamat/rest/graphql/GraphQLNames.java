@@ -472,6 +472,7 @@ public class GraphQLNames {
     public static final String ENTRANCE_TYPE = "entranceType";
     public static final String IS_ENTRY = "isEntry";
     public static final String IS_EXIT = "isExit";
+    public static final String ACCESS_MODES = "accessModes";
     public static final String PARENT_SITE_REF = "parentSiteRef";
 
     public static final String VALID_TRANSPORT_MODES = "validTransportModes";

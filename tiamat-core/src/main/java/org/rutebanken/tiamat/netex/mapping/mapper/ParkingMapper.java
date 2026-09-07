@@ -126,6 +126,7 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
         List<org.rutebanken.tiamat.model.ParkingEntranceForVehicles> entrances =
                 mapperFacade.mapAsList(netexEntrances, org.rutebanken.tiamat.model.ParkingEntranceForVehicles.class, context);
         if (!entrances.isEmpty()) {
+            mapAccessModesFromNetex(netexEntrances, entrances);
             target.setVehicleEntrances(entrances);
         }
     }
@@ -137,9 +138,61 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
         List<ParkingEntranceForVehicles> entrances = mapperFacade.mapAsList(
                 source.getVehicleEntrances(), ParkingEntranceForVehicles.class, context);
         if (!entrances.isEmpty()) {
+            mapAccessModesToNetex(source.getVehicleEntrances(), entrances);
             ParkingEntrancesForVehicles_RelStructure rel = new ParkingEntrancesForVehicles_RelStructure();
             rel.getParkingEntranceForVehiclesRefOrParkingEntranceForVehicles().addAll(entrances);
             target.setVehicleEntrances(rel);
+        }
+    }
+
+    /**
+     * {@code accessModes} is excluded from Orika's default entrance mapping because the
+     * NeTEx side is a {@code List<AccessModeEnumeration>} (repeatable XML element) while
+     * the Tiamat side is stored as a single space-separated token string (see
+     * {@code ParkingEntranceForVehicles.getAccessModesList()}). Bridge both edges
+     * explicitly, in matching list order, mirroring {@link #mapPaymentMethodsFromNetex}.
+     */
+    private void mapAccessModesFromNetex(List<ParkingEntranceForVehicles> netexEntrances,
+                                          List<org.rutebanken.tiamat.model.ParkingEntranceForVehicles> entrances) {
+        for (int i = 0; i < netexEntrances.size() && i < entrances.size(); i++) {
+            List<org.rutebanken.netex.model.AccessModeEnumeration> netexAccessModes = netexEntrances.get(i).getAccessModes();
+            if (netexAccessModes == null || netexAccessModes.isEmpty()) {
+                continue;
+            }
+            List<org.rutebanken.tiamat.model.AccessModeEnumeration> accessModes = netexAccessModes.stream()
+                    .map(mode -> {
+                        try {
+                            return org.rutebanken.tiamat.model.AccessModeEnumeration.fromValue(mode.value());
+                        } catch (IllegalArgumentException ignored) {
+                            return null;
+                        }
+                    })
+                    .filter(java.util.Objects::nonNull)
+                    .toList();
+            entrances.get(i).setAccessModesList(accessModes);
+        }
+    }
+
+    private void mapAccessModesToNetex(List<org.rutebanken.tiamat.model.ParkingEntranceForVehicles> source,
+                                        List<ParkingEntranceForVehicles> entrances) {
+        for (int i = 0; i < source.size() && i < entrances.size(); i++) {
+            List<org.rutebanken.tiamat.model.AccessModeEnumeration> accessModes = source.get(i).getAccessModesList();
+            if (accessModes.isEmpty()) {
+                continue;
+            }
+            List<org.rutebanken.netex.model.AccessModeEnumeration> netexAccessModes = accessModes.stream()
+                    .map(mode -> {
+                        try {
+                            return org.rutebanken.netex.model.AccessModeEnumeration.fromValue(mode.value());
+                        } catch (IllegalArgumentException ignored) {
+                            return null;
+                        }
+                    })
+                    .filter(java.util.Objects::nonNull)
+                    .toList();
+            if (!netexAccessModes.isEmpty()) {
+                entrances.get(i).withAccessModes(netexAccessModes);
+            }
         }
     }
 }

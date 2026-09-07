@@ -24,6 +24,8 @@ import org.rutebanken.tiamat.model.SiteRefStructure;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
 
+import java.util.List;
+
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
@@ -621,18 +623,20 @@ public class GraphQLResourceParkingIntegrationTest extends AbstractGraphQLResour
                 "    geometry: { type:Point coordinates:[10.5, 59.0] } " +
                 "    parentSiteRef:\\\"" + stopPlace.getNetexId() + "\\\" " +
                 "    vehicleEntrances: [" +
-                "      { label: \\\"North gate\\\" entranceType: gate isEntry: true isExit: false } " +
+                "      { label: \\\"North gate\\\" entranceType: gate isEntry: true isExit: false accessModes: [foot, bicycle] } " +
                 "      { label: \\\"South gate\\\" entranceType: gate isEntry: false isExit: true } " +
                 "    ]" +
                 "  }) {" +
                 "    id " +
-                "    vehicleEntrances { label entranceType isEntry isExit } " +
+                "    vehicleEntrances { label entranceType isEntry isExit accessModes } " +
                 "  }" +
                 "}\",\"variables\": \"\"}";
 
         String parkingId = executeGraphQL(graphQlQuery)
                 .body("data.parking[0].id", notNullValue())
                 .body("data.parking[0].vehicleEntrances.size()", equalTo(2))
+                .body("data.parking[0].vehicleEntrances[0].accessModes", equalTo(List.of("foot", "bicycle")))
+                .body("data.parking[0].vehicleEntrances[1].accessModes", equalTo(List.of()))
                 .extract()
                 .path("data.parking[0].id");
 
@@ -640,25 +644,26 @@ public class GraphQLResourceParkingIntegrationTest extends AbstractGraphQLResour
                 "\"query\":\"{" +
                 "  parking: " + GraphQLNames.FIND_PARKING + " (id:\\\"" + parkingId + "\\\") { " +
                 "    id " +
-                "    vehicleEntrances { label entranceType isEntry isExit } " +
+                "    vehicleEntrances { label entranceType isEntry isExit accessModes } " +
                 "  } " +
                 "}\"," +
                 "\"variables\":\"\"}";
 
         executeGraphQL(findParkingQuery)
                 .body("data.parking[0].id", equalTo(parkingId))
-                .body("data.parking[0].vehicleEntrances.size()", equalTo(2));
+                .body("data.parking[0].vehicleEntrances.size()", equalTo(2))
+                .body("data.parking[0].vehicleEntrances[0].accessModes", equalTo(List.of("foot", "bicycle")));
 
         String updateQuery = "{" +
                 "\"query\":\"mutation { " +
                 "  parking:" + GraphQLNames.MUTATE_PARKING + " (Parking: {" +
                 "        id:\\\"" + parkingId + "\\\" " +
                 "        vehicleEntrances: [" +
-                "          { label: \\\"Main gate\\\" entranceType: ticketBarrier isEntry: true isExit: true } " +
+                "          { label: \\\"Main gate\\\" entranceType: ticketBarrier isEntry: true isExit: true accessModes: [car] } " +
                 "        ] " +
                 "       }) { " +
                 "      id " +
-                "      vehicleEntrances { label entranceType isEntry isExit } " +
+                "      vehicleEntrances { label entranceType isEntry isExit accessModes } " +
                 "    } " +
                 "}\"," +
                 "\"variables\":\"\"}";
@@ -667,7 +672,8 @@ public class GraphQLResourceParkingIntegrationTest extends AbstractGraphQLResour
                 .body("data.parking[0].id", equalTo(parkingId))
                 .body("data.parking[0].vehicleEntrances.size()", equalTo(1))
                 .body("data.parking[0].vehicleEntrances[0].label", equalTo("Main gate"))
-                .body("data.parking[0].vehicleEntrances[0].entranceType", equalTo("ticketBarrier"));
+                .body("data.parking[0].vehicleEntrances[0].entranceType", equalTo("ticketBarrier"))
+                .body("data.parking[0].vehicleEntrances[0].accessModes", equalTo(List.of("car")));
     }
 
 }

@@ -371,6 +371,8 @@ public class NetexMapperTest extends TiamatIntegrationTest {
         netexEntrance.setEntranceType(org.rutebanken.netex.model.EntranceEnumeration.GATE);
         netexEntrance.setWidth(new java.math.BigDecimal("2.50"));
         netexEntrance.setHeight(new java.math.BigDecimal("2.10"));
+        netexEntrance.getAccessModes().add(org.rutebanken.netex.model.AccessModeEnumeration.FOOT);
+        netexEntrance.getAccessModes().add(org.rutebanken.netex.model.AccessModeEnumeration.BICYCLE);
 
         org.rutebanken.netex.model.ParkingEntrancesForVehicles_RelStructure rel = new org.rutebanken.netex.model.ParkingEntrancesForVehicles_RelStructure();
         rel.getParkingEntranceForVehiclesRefOrParkingEntranceForVehicles().add(netexEntrance);
@@ -389,6 +391,9 @@ public class NetexMapperTest extends TiamatIntegrationTest {
         assertThat(tiamatEntrance.getEntranceType()).isEqualTo(EntranceEnumeration.GATE);
         assertThat(tiamatEntrance.getWidth()).isEqualByComparingTo("2.50");
         assertThat(tiamatEntrance.getHeight()).isEqualByComparingTo("2.10");
+        assertThat(tiamatEntrance.getAccessModesList()).containsExactly(
+                org.rutebanken.tiamat.model.AccessModeEnumeration.FOOT,
+                org.rutebanken.tiamat.model.AccessModeEnumeration.BICYCLE);
     }
 
     @Test
@@ -399,6 +404,9 @@ public class NetexMapperTest extends TiamatIntegrationTest {
         tiamatEntrance.setEntranceType(EntranceEnumeration.GATE);
         tiamatEntrance.setWidth(new java.math.BigDecimal("2.50"));
         tiamatEntrance.setHeight(new java.math.BigDecimal("2.10"));
+        tiamatEntrance.setAccessModesList(List.of(
+                org.rutebanken.tiamat.model.AccessModeEnumeration.FOOT,
+                org.rutebanken.tiamat.model.AccessModeEnumeration.BICYCLE));
 
         org.rutebanken.tiamat.model.Parking tiamatParking = new org.rutebanken.tiamat.model.Parking();
         tiamatParking.setNetexId("NSR:Parking:1");
@@ -415,6 +423,9 @@ public class NetexMapperTest extends TiamatIntegrationTest {
         assertThat(netexEntrance.getEntranceType()).isEqualTo(org.rutebanken.netex.model.EntranceEnumeration.GATE);
         assertThat(netexEntrance.getWidth()).isEqualByComparingTo("2.50");
         assertThat(netexEntrance.getHeight()).isEqualByComparingTo("2.10");
+        assertThat(netexEntrance.getAccessModes()).containsExactly(
+                org.rutebanken.netex.model.AccessModeEnumeration.FOOT,
+                org.rutebanken.netex.model.AccessModeEnumeration.BICYCLE);
     }
 
     @Test
