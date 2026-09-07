@@ -43,6 +43,7 @@ import org.rutebanken.tiamat.model.ModificationEnumeration;
 import org.rutebanken.tiamat.model.NameTypeEnumeration;
 import org.rutebanken.tiamat.model.ParkingLayoutEnumeration;
 import org.rutebanken.tiamat.model.ParkingPaymentProcessEnumeration;
+import org.rutebanken.tiamat.model.PaymentMethodEnumeration;
 import org.rutebanken.tiamat.model.ParkingReservationEnumeration;
 import org.rutebanken.tiamat.model.ParkingStayEnumeration;
 import org.rutebanken.tiamat.model.ParkingTypeEnumeration;
@@ -107,6 +108,7 @@ public class CustomGraphQLTypes {
     public static GraphQLEnumType parkingStayEnum = createCustomEnumType(PARKING_STAY_TYPE_ENUM, ParkingStayEnumeration.class);
     public static GraphQLEnumType parkingReservationEnum = createCustomEnumType(PARKING_RESERVATION_ENUM, ParkingReservationEnumeration.class);
     public static GraphQLEnumType parkingPaymentProcessEnum = createCustomEnumType(PARKING_PAYMENT_PROCESS_ENUM, ParkingPaymentProcessEnumeration.class);
+    public static GraphQLEnumType paymentMethodEnum = createCustomEnumType(PAYMENT_METHOD_ENUM, PaymentMethodEnumeration.class);
     public static GraphQLEnumType parkingTypeEnum = createCustomEnumType(PARKING_TYPE_ENUM, ParkingTypeEnumeration.class);
     public static GraphQLEnumType topographicPlaceTypeEnum = createCustomEnumType(TOPOGRAPHIC_PLACE_TYPE_ENUM, TopographicPlaceTypeEnumeration.class);
     public static GraphQLEnumType stopPlaceTypeEnum = createCustomEnumType(STOP_PLACE_TYPE_ENUM, StopTypeEnumeration.class);
@@ -1048,6 +1050,9 @@ public class CustomGraphQLTypes {
                         .name(PARKING_PAYMENT_PROCESS)
                         .type(new GraphQLList(parkingPaymentProcessEnum)))
                 .field(newFieldDefinition()
+                        .name(PAYMENT_METHODS)
+                        .type(new GraphQLList(paymentMethodEnum)))
+                .field(newFieldDefinition()
                         .name(PARKING_PROPERTIES)
                         .type(new GraphQLList(parkingPropertiesObjectType)))
                 .field(newFieldDefinition()
@@ -1116,6 +1121,9 @@ public class CustomGraphQLTypes {
                 .field(newInputObjectField()
                         .name(PARKING_PAYMENT_PROCESS)
                         .type(new GraphQLList(parkingPaymentProcessEnum)))
+                .field(newInputObjectField()
+                        .name(PAYMENT_METHODS)
+                        .type(new GraphQLList(paymentMethodEnum)))
                 .field(newInputObjectField()
                         .name(PARKING_PROPERTIES)
                         .type(new GraphQLList(parkingPropertiesInputObjectType)))
