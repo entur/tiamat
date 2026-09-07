@@ -165,6 +165,14 @@ public class NetexMapper {
         mapperFactoryWithNetexIdClassBuilder(org.rutebanken.netex.model.ParkingEntranceForVehicles.class,
                         org.rutebanken.tiamat.model.ParkingEntranceForVehicles.class)
                 .exclude("accessModes")
+                // ParkingEntranceForVehicles's NeTEx ancestor (GroupOfPoints_VersionStructure)
+                // extends GroupOfEntities_VersionStructure, inheriting an "infoLinks" field the
+                // Tiamat model has no matching property for. Same as the "otherTransportModes"/
+                // "infoLinks" exclusions on StopPlace/Quay/TariffZone/etc. above: without this
+                // exclude, Orika's byDefault() still initialises the NeTEx target's infoLinks
+                // wrapper to a non-null-but-empty object, which then fails XSD validation on
+                // export ("content of element 'infoLinks' is not complete").
+                .exclude("infoLinks")
                 .byDefault()
                 .register();
 
