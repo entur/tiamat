@@ -315,6 +315,31 @@ public class NetexMapperTest extends TiamatIntegrationTest {
     }
 
     @Test
+    public void mapNetexParkingPaymentMethodsToInternal() {
+        org.rutebanken.netex.model.Parking netexParking = new org.rutebanken.netex.model.Parking();
+        netexParking.setId("NSR:Parking:1");
+        netexParking.getPaymentMethods().add(org.rutebanken.netex.model.PaymentMethodEnumeration.CASH);
+        netexParking.getPaymentMethods().add(org.rutebanken.netex.model.PaymentMethodEnumeration.CREDIT_CARD);
+
+        org.rutebanken.tiamat.model.Parking tiamatParking = netexMapper.mapToTiamatModel(netexParking);
+
+        assertThat(tiamatParking.getPaymentMethods()).containsExactlyInAnyOrder(
+                org.rutebanken.tiamat.model.PaymentMethodEnumeration.CASH,
+                org.rutebanken.tiamat.model.PaymentMethodEnumeration.CREDIT_CARD);
+    }
+
+    @Test
+    public void mapInternalParkingPaymentMethodsToNetex() {
+        org.rutebanken.tiamat.model.Parking tiamatParking = new org.rutebanken.tiamat.model.Parking();
+        tiamatParking.setNetexId("NSR:Parking:1");
+        tiamatParking.getPaymentMethods().add(org.rutebanken.tiamat.model.PaymentMethodEnumeration.MOBILE_PHONE);
+
+        org.rutebanken.netex.model.Parking netexParking = netexMapper.mapToNetexModel(tiamatParking);
+
+        assertThat(netexParking.getPaymentMethods()).containsExactly(org.rutebanken.netex.model.PaymentMethodEnumeration.MOBILE_PHONE);
+    }
+
+    @Test
     public void mapStopPlaceWithQuayToNetex() {
         org.rutebanken.tiamat.model.StopPlace stopPlace = new StopPlace();
 
