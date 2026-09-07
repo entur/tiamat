@@ -48,6 +48,9 @@ public class Parking
     @ElementCollection(fetch = FetchType.EAGER)
     protected List<InfoLink> infoLinks;
 
+    @ElementCollection(fetch = FetchType.EAGER)
+    protected List<AvailabilityCondition> availabilityConditions;
+
     @Transient
     protected String defaultCurrency;
     @Transient
@@ -259,6 +262,18 @@ public class Parking
     public void setInfoLinks(List<InfoLink> value) {
         this.infoLinks = value;
     }
+
+    public List<AvailabilityCondition> getAvailabilityConditions() {
+        if (availabilityConditions == null) {
+            availabilityConditions = new ArrayList<>();
+        }
+        return this.availabilityConditions;
+    }
+
+    public void setAvailabilityConditions(List<AvailabilityCondition> value) {
+        this.availabilityConditions = value;
+    }
+
 
     public String getDefaultCurrency() {
         return defaultCurrency;

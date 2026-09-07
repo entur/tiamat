@@ -23,6 +23,7 @@ import org.rutebanken.tiamat.auth.AuthorizationService;
 import org.rutebanken.tiamat.model.AccessModeEnumeration;
 import org.rutebanken.tiamat.model.AccessibilityAssessment;
 import org.rutebanken.tiamat.model.AccessibilityLimitation;
+import org.rutebanken.tiamat.model.AvailabilityCondition;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.EntranceEnumeration;
 import org.rutebanken.tiamat.model.InfoLink;
@@ -57,10 +58,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -69,12 +73,20 @@ import java.util.stream.Collectors;
 
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ACCESSIBILITY_ASSESSMENT;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ACCESS_MODES;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.AVAILABILITY_CONDITIONS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.BOOKING_URL;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.DAY_OFFSET;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.DAY_TYPE_REF;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.END_TIME;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ENTRANCE_TYPE;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ENTRANCE_WIDTH;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ENTRANCE_HEIGHT;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PUBLIC_CODE;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.FREE_PARKING_OUT_OF_HOURS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.GEOMETRY;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ID;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.INFO_LINKS;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.IS_AVAILABLE;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.IS_ENTRY;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.IS_EXIT;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.LABEL;
@@ -102,6 +114,7 @@ import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.REAL_TIME_OCCUPANC
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.RECHARGING_AVAILABLE;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.SECURE;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.SPACES;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.START_TIME;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.TOTAL_CAPACITY;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.TYPE_OF_INFO_LINK;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.URI;
@@ -339,6 +352,12 @@ class ParkingUpdater implements DataFetcher {
             updatedParking.setInfoLinks(infoLinksList);
         }
 
+        if (input.get(AVAILABILITY_CONDITIONS) != null) {
+            List<AvailabilityCondition> availabilityConditionsList = resolveAvailabilityConditionsList((List) input.get(AVAILABILITY_CONDITIONS));
+            isUpdated = true;
+            updatedParking.setAvailabilityConditions(availabilityConditionsList);
+        }
+
         Optional<PlaceEquipment> placeEquipment = placeEquipmentMapper.map(input);
         if (placeEquipment.isPresent()) {
             // Present in the input means the client intends to write it, as in SiteElementMapper.
@@ -428,10 +447,27 @@ class ParkingUpdater implements DataFetcher {
         entrance.setEntranceType((EntranceEnumeration) input.get(ENTRANCE_TYPE));
         entrance.setIsEntry((Boolean) input.get(IS_ENTRY));
         entrance.setIsExit((Boolean) input.get(IS_EXIT));
+        entrance.setWidth(toBigDecimal(input.get(ENTRANCE_WIDTH)));
+        entrance.setHeight(toBigDecimal(input.get(ENTRANCE_HEIGHT)));
+        entrance.setPublicCode((String) input.get(PUBLIC_CODE));
         if (input.get(ACCESS_MODES) != null) {
             entrance.setAccessModesList((List<AccessModeEnumeration>) input.get(ACCESS_MODES));
         }
         return entrance;
+    }
+
+    /**
+     * The GraphQLFloat scalar coerces input values to {@link Double}, so a plain {@code (BigDecimal)}
+     * cast on the resolved map value fails; convert defensively from any {@link Number}.
+     */
+    private static BigDecimal toBigDecimal(Object value) {
+        if (value instanceof BigDecimal bd) {
+            return bd;
+        }
+        if (value instanceof Number number) {
+            return BigDecimal.valueOf(number.doubleValue());
+        }
+        return null;
     }
 
     private List<InfoLink> resolveInfoLinksList(List list) {
@@ -447,6 +483,89 @@ class ParkingUpdater implements DataFetcher {
         infoLink.setUri((String) input.get(URI));
         infoLink.setTypeOfInfoLink((TypeOfInfolinkEnumeration) input.get(TYPE_OF_INFO_LINK));
         return infoLink;
+    }
+
+    /**
+     * Deduplicates on the whole condition rather than on {@code dayTypeRef}: a single day type
+     * legitimately carries several opening periods (e.g. 06:00–10:00 and 15:00–20:00), so only
+     * a fully identical repetition is redundant and can be collapsed.
+     */
+    private List<AvailabilityCondition> resolveAvailabilityConditionsList(List list) {
+        LinkedHashSet<AvailabilityCondition> conditions = new LinkedHashSet<>();
+        for (Object conditionInput : list) {
+            conditions.add(resolveSingleAvailabilityCondition((Map) conditionInput));
+        }
+        return new ArrayList<>(conditions);
+    }
+
+    private AvailabilityCondition resolveSingleAvailabilityCondition(Map input) {
+        String dayTypeRef = (String) input.get(DAY_TYPE_REF);
+        Object isAvailableObj = input.get(IS_AVAILABLE);
+        boolean isAvailable = !(isAvailableObj instanceof Boolean) || (Boolean) isAvailableObj;
+        LocalTime startTime = parseLocalTime((String) input.get(START_TIME));
+
+        String endTimeValue = (String) input.get(END_TIME);
+        LocalTime endTime = parseLocalTime(endTimeValue);
+        int dayOffset = resolveDayOffset(input);
+        if (isEndOfDay(endTimeValue)) {
+            // 24:00 is shorthand for midnight at the end of the period's day.
+            dayOffset = Math.max(dayOffset, 1);
+        }
+
+        if (endTime == null) {
+            dayOffset = 0;
+        } else if (startTime == null) {
+            // NeTEx requires Timeband/StartTime and permits a start-only timeband, but never an
+            // end-only one. Rejecting here stops Tiamat persisting data it can never export validly.
+            throw new IllegalArgumentException(
+                    "availabilityConditions entry for dayTypeRef '" + dayTypeRef
+                            + "' has an endTime but no startTime; startTime is required whenever endTime is given");
+        }
+
+        return new AvailabilityCondition(dayTypeRef, isAvailable, startTime, endTime, dayOffset);
+    }
+
+    private int resolveDayOffset(Map input) {
+        Object dayOffsetObj = input.get(DAY_OFFSET);
+        if (!(dayOffsetObj instanceof Number dayOffsetNumber)) {
+            return 0;
+        }
+        int dayOffset = dayOffsetNumber.intValue();
+        if (dayOffset < 0) {
+            throw new IllegalArgumentException("Invalid dayOffset: " + dayOffset + ". Must not be negative.");
+        }
+        return dayOffset;
+    }
+
+    private boolean isEndOfDay(String timeValue) {
+        return "24:00".equals(timeValue) || "24:00:00".equals(timeValue);
+    }
+
+    /**
+     * Accepts {@code HH:mm} or {@code HH:mm:ss}. Maps {@code 24:00}/{@code 24:00:00} to
+     * midnight; callers pair that with a {@code dayOffset} of 1 so the end-of-day meaning is
+     * not lost. Throws {@code IllegalArgumentException} on any invalid value so the GraphQL
+     * layer returns a proper GraphQL error rather than a 500.
+     */
+    private LocalTime parseLocalTime(String timeValue) {
+        if (timeValue == null || timeValue.isEmpty()) {
+            return null;
+        }
+        try {
+            String[] parts = timeValue.split(":");
+            if (parts.length == 0 || parts[0].isEmpty()) {
+                throw new IllegalArgumentException("Invalid time value: '" + timeValue + "'. Expected HH:mm or HH:mm:ss.");
+            }
+            int hour = Integer.parseInt(parts[0]);
+            int minute = parts.length > 1 ? Integer.parseInt(parts[1]) : 0;
+            int second = parts.length > 2 ? Integer.parseInt(parts[2]) : 0;
+            if (hour == 24 && minute == 0 && second == 0) {
+                return LocalTime.MIDNIGHT;
+            }
+            return LocalTime.of(hour, minute, second);
+        } catch (NumberFormatException | java.time.DateTimeException e) {
+            throw new IllegalArgumentException("Invalid time value: '" + timeValue + "'. Expected HH:mm or HH:mm:ss.", e);
+        }
     }
 
     private AccessibilityAssessment resolveAccessibilityAssessment(AccessibilityLimitation limitationFromInput) {

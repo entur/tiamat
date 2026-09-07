@@ -739,4 +739,146 @@ public class GraphQLResourceParkingIntegrationTest extends AbstractGraphQLResour
                 .body("data.parking[0].infoLinks[0].uri", equalTo("https://example.fintraffic.fi/replacement"));
     }
 
+    @Test
+    public void testMutateParkingWithAvailabilityConditionsShouldPersistAndReplaceOnUpdate() throws Exception {
+
+        StopPlace stopPlace = stopPlaceRepository.save(new StopPlace());
+
+        String graphQlQuery = "{\n" +
+                "\"query\": \"mutation { " +
+                "  parking: " + GraphQLNames.MUTATE_PARKING + " (Parking : {" +
+                "    geometry: { type:Point coordinates:[10.5, 59.0] } " +
+                "    parentSiteRef:\\\"" + stopPlace.getNetexId() + "\\\" " +
+                "    availabilityConditions: [" +
+                "      { dayTypeRef: \\\"NSR:DayType:1\\\" isAvailable: true startTime: \\\"06:00:00\\\" endTime: \\\"22:00:00\\\" } " +
+                "      { dayTypeRef: \\\"NSR:DayType:2\\\" isAvailable: false } " +
+                "    ]" +
+                "  }) {" +
+                "    id " +
+                "    availabilityConditions { dayTypeRef isAvailable startTime endTime } " +
+                "  }" +
+                "}\",\"variables\": \"\"}";
+
+        String parkingId = executeGraphQL(graphQlQuery)
+                .body("data.parking[0].id", notNullValue())
+                .body("data.parking[0].availabilityConditions.size()", equalTo(2))
+                .body("data.parking[0].availabilityConditions[0].dayTypeRef", equalTo("NSR:DayType:1"))
+                .body("data.parking[0].availabilityConditions[0].isAvailable", equalTo(true))
+                .body("data.parking[0].availabilityConditions[0].startTime", equalTo("06:00"))
+                .body("data.parking[0].availabilityConditions[0].endTime", equalTo("22:00"))
+                .body("data.parking[0].availabilityConditions[1].dayTypeRef", equalTo("NSR:DayType:2"))
+                .body("data.parking[0].availabilityConditions[1].isAvailable", equalTo(false))
+                .extract()
+                .path("data.parking[0].id");
+
+        String findParkingQuery = "{" +
+                "\"query\":\"{" +
+                "  parking: " + GraphQLNames.FIND_PARKING + " (id:\\\"" + parkingId + "\\\") { " +
+                "    id " +
+                "    availabilityConditions { dayTypeRef isAvailable startTime endTime } " +
+                "  } " +
+                "}\"," +
+                "\"variables\":\"\"}";
+
+        executeGraphQL(findParkingQuery)
+                .body("data.parking[0].id", equalTo(parkingId))
+                .body("data.parking[0].availabilityConditions.size()", equalTo(2))
+                .body("data.parking[0].availabilityConditions[0].dayTypeRef", equalTo("NSR:DayType:1"));
+
+        String updateQuery = "{" +
+                "\"query\":\"mutation { " +
+                "  parking:" + GraphQLNames.MUTATE_PARKING + " (Parking: {" +
+                "        id:\\\"" + parkingId + "\\\" " +
+                "        availabilityConditions: [" +
+                "          { dayTypeRef: \\\"NSR:DayType:3\\\" isAvailable: true startTime: \\\"06:00:00\\\" endTime: \\\"24:00:00\\\" } " +
+                "        ] " +
+                "       }) { " +
+                "      id " +
+                "      availabilityConditions { dayTypeRef isAvailable startTime endTime dayOffset } " +
+                "    } " +
+                "}\"," +
+                "\"variables\":\"\"}";
+
+        executeGraphQL(updateQuery)
+                .body("data.parking[0].id", equalTo(parkingId))
+                .body("data.parking[0].availabilityConditions.size()", equalTo(1))
+                .body("data.parking[0].availabilityConditions[0].dayTypeRef", equalTo("NSR:DayType:3"))
+                .body("data.parking[0].availabilityConditions[0].startTime", equalTo("06:00"))
+                .body("data.parking[0].availabilityConditions[0].endTime", equalTo("00:00"))
+                .body("data.parking[0].availabilityConditions[0].dayOffset", equalTo(1));
+    }
+
+    @Test
+    public void testMutateParkingWithSplitOpeningHoursForSameDayTypeShouldPersistBoth() throws Exception {
+
+        StopPlace stopPlace = stopPlaceRepository.save(new StopPlace());
+
+        String graphQlQuery = "{\n" +
+                "\"query\": \"mutation { " +
+                "  parking: " + GraphQLNames.MUTATE_PARKING + " (Parking : {" +
+                "    geometry: { type:Point coordinates:[10.5, 59.0] } " +
+                "    parentSiteRef:\\\"" + stopPlace.getNetexId() + "\\\" " +
+                "    availabilityConditions: [" +
+                "      { dayTypeRef: \\\"NSR:DayType:1\\\" isAvailable: true startTime: \\\"06:00:00\\\" endTime: \\\"10:00:00\\\" } " +
+                "      { dayTypeRef: \\\"NSR:DayType:1\\\" isAvailable: true startTime: \\\"15:00:00\\\" endTime: \\\"20:00:00\\\" } " +
+                "    ]" +
+                "  }) {" +
+                "    id " +
+                "    availabilityConditions { dayTypeRef startTime endTime } " +
+                "  }" +
+                "}\",\"variables\": \"\"}";
+
+        executeGraphQL(graphQlQuery)
+                .body("data.parking[0].availabilityConditions.size()", equalTo(2))
+                .body("data.parking[0].availabilityConditions[0].startTime", equalTo("06:00"))
+                .body("data.parking[0].availabilityConditions[0].endTime", equalTo("10:00"))
+                .body("data.parking[0].availabilityConditions[1].startTime", equalTo("15:00"))
+                .body("data.parking[0].availabilityConditions[1].endTime", equalTo("20:00"));
+    }
+
+    @Test
+    public void testMutateParkingWithEndTimeButNoStartTimeReturnsGraphQLError() throws Exception {
+
+        StopPlace stopPlace = stopPlaceRepository.save(new StopPlace());
+
+        String graphQlQuery = "{\n" +
+                "\"query\": \"mutation { " +
+                "  parking: " + GraphQLNames.MUTATE_PARKING + " (Parking : {" +
+                "    geometry: { type:Point coordinates:[10.5, 59.0] } " +
+                "    parentSiteRef:\\\"" + stopPlace.getNetexId() + "\\\" " +
+                "    availabilityConditions: [" +
+                "      { dayTypeRef: \\\"NSR:DayType:1\\\" isAvailable: true endTime: \\\"22:00:00\\\" } " +
+                "    ]" +
+                "  }) {" +
+                "    id " +
+                "  }" +
+                "}\",\"variables\": \"\"}";
+
+        executeGraphQL(graphQlQuery, 400)
+                .body("errors", notNullValue());
+    }
+
+    @Test
+    public void testMutateParkingWithInvalidAvailabilityConditionTimeReturnsGraphQLError() throws Exception {
+
+        StopPlace stopPlace = stopPlaceRepository.save(new StopPlace());
+
+        String graphQlQuery = "{\n" +
+                "\"query\": \"mutation { " +
+                "  parking: " + GraphQLNames.MUTATE_PARKING + " (Parking : {" +
+                "    geometry: { type:Point coordinates:[10.5, 59.0] } " +
+                "    parentSiteRef:\\\"" + stopPlace.getNetexId() + "\\\" " +
+                "    availabilityConditions: [" +
+                "      { dayTypeRef: \\\"NSR:DayType:1\\\" startTime: \\\"not-a-time\\\" } " +
+                "    ]" +
+                "  }) {" +
+                "    id " +
+                "  }" +
+                "}\",\"variables\": \"\"}";
+
+        executeGraphQL(graphQlQuery, 400)
+                .body("errors", notNullValue());
+    }
+
 }
+

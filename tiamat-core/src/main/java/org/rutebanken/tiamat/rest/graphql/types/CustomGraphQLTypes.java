@@ -70,6 +70,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static graphql.Scalars.GraphQLBoolean;
+import static graphql.Scalars.GraphQLFloat;
 import static graphql.Scalars.GraphQLInt;
 import static graphql.Scalars.GraphQLString;
 import static graphql.scalars.ExtendedScalars.GraphQLBigInteger;
@@ -972,6 +973,15 @@ public class CustomGraphQLTypes {
                     .name(IS_EXIT)
                     .type(GraphQLBoolean))
             .field(newFieldDefinition()
+                    .name(ENTRANCE_WIDTH)
+                    .type(GraphQLFloat))
+            .field(newFieldDefinition()
+                    .name(ENTRANCE_HEIGHT)
+                    .type(GraphQLFloat))
+            .field(newFieldDefinition()
+                    .name(PUBLIC_CODE)
+                    .type(GraphQLString))
+            .field(newFieldDefinition()
                     .name(ACCESS_MODES)
                     .type(new GraphQLList(accessModeEnum)))
             .build();
@@ -990,6 +1000,15 @@ public class CustomGraphQLTypes {
             .field(newInputObjectField()
                     .name(IS_EXIT)
                     .type(GraphQLBoolean))
+            .field(newInputObjectField()
+                    .name(ENTRANCE_WIDTH)
+                    .type(GraphQLFloat))
+            .field(newInputObjectField()
+                    .name(ENTRANCE_HEIGHT)
+                    .type(GraphQLFloat))
+            .field(newInputObjectField()
+                    .name(PUBLIC_CODE)
+                    .type(GraphQLString))
             .field(newInputObjectField()
                     .name(ACCESS_MODES)
                     .type(new GraphQLList(accessModeEnum)))
@@ -1015,6 +1034,51 @@ public class CustomGraphQLTypes {
             .field(newInputObjectField()
                     .name(TYPE_OF_INFO_LINK)
                     .type(infoLinkTypeEnum))
+            .build();
+
+    public static GraphQLObjectType availabilityConditionObjectType = newObject()
+            .name(OUTPUT_TYPE_AVAILABILITY_CONDITION)
+            .field(newFieldDefinition()
+                    .name(DAY_TYPE_REF)
+                    .type(GraphQLNonNull.nonNull(GraphQLString)))
+            .field(newFieldDefinition()
+                    .name(IS_AVAILABLE)
+                    .type(GraphQLBoolean))
+            .field(newFieldDefinition()
+                    .name(START_TIME)
+                    .type(GraphQLString))
+            .field(newFieldDefinition()
+                    .name(END_TIME)
+                    .type(GraphQLString))
+            .field(newFieldDefinition()
+                    .name(DAY_OFFSET)
+                    .description("Number of days after startTime that endTime falls on. " +
+                            "Use 1 for a period ending at the end of the day, which distinguishes " +
+                            "an endTime of 00:00 from one at the very start of the same day.")
+                    .type(GraphQLInt))
+            .build();
+
+    public static GraphQLInputObjectType availabilityConditionInputObjectType = GraphQLInputObjectType.newInputObject()
+            .name(INPUT_TYPE_AVAILABILITY_CONDITION)
+            .field(newInputObjectField()
+                    .name(DAY_TYPE_REF)
+                    .type(GraphQLNonNull.nonNull(GraphQLString)))
+            .field(newInputObjectField()
+                    .name(IS_AVAILABLE)
+                    .type(GraphQLBoolean))
+            .field(newInputObjectField()
+                    .name(START_TIME)
+                    .type(GraphQLString))
+            .field(newInputObjectField()
+                    .name(END_TIME)
+                    .type(GraphQLString))
+            .field(newInputObjectField()
+                    .name(DAY_OFFSET)
+                    .description("Number of days after startTime that endTime falls on. " +
+                            "Use 1 for a period ending at the end of the day, which distinguishes " +
+                            "an endTime of 00:00 from one at the very start of the same day. " +
+                            "An endTime of 24:00 is accepted as shorthand for 00:00 with dayOffset 1.")
+                    .type(GraphQLInt))
             .build();
 
     public static GraphQLObjectType postalAddressObjectType = GraphQLObjectType.newObject()
@@ -1130,6 +1194,9 @@ public class CustomGraphQLTypes {
                         .name(INFO_LINKS)
                         .type(new GraphQLList(infoLinkObjectType)))
                 .field(newFieldDefinition()
+                        .name(AVAILABILITY_CONDITIONS)
+                        .type(new GraphQLList(availabilityConditionObjectType)))
+                .field(newFieldDefinition()
                         .name(PLACE_EQUIPMENTS)
                         .type(equipmentType))
                 .field(geometryFieldDefinition)
@@ -1210,6 +1277,9 @@ public class CustomGraphQLTypes {
                 .field(newInputObjectField()
                         .name(INFO_LINKS)
                         .type(new GraphQLList(infoLinkInputObjectType)))
+                .field(newInputObjectField()
+                        .name(AVAILABILITY_CONDITIONS)
+                        .type(new GraphQLList(availabilityConditionInputObjectType)))
                 .field(newInputObjectField()
                         .name(PLACE_EQUIPMENTS)
                         .type(equipmentInputType))
