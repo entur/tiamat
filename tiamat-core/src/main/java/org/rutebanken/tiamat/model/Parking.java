@@ -42,6 +42,9 @@ public class Parking
     @Enumerated(EnumType.STRING)
     protected List<PaymentMethodEnumeration> paymentMethods;
 
+    @Enumerated(EnumType.STRING)
+    protected LightingEnumeration lighting;
+
     @Transient
     protected String defaultCurrency;
     @Transient
@@ -230,6 +233,16 @@ public class Parking
         return this.paymentMethods;
     }
 
+    @Override
+    public LightingEnumeration getLighting() {
+        return lighting;
+    }
+
+    @Override
+    public void setLighting(LightingEnumeration lighting) {
+        this.lighting = lighting;
+    }
+
     public String getDefaultCurrency() {
         return defaultCurrency;
     }
@@ -322,6 +335,7 @@ public class Parking
                 .add("label", label)
                 .add("parkingPaymentProcess", parkingPaymentProcess)
                 .add("paymentMethods", paymentMethods)
+                .add("lighting", lighting)
                 .add("defaultCurrency", defaultCurrency)
                 .add("currenciesAccepted", currenciesAccepted)
                 .add("cardsAccepted", cardsAccepted)
