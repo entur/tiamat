@@ -45,6 +45,9 @@ public class Parking
     @Enumerated(EnumType.STRING)
     protected LightingEnumeration lighting;
 
+    @ElementCollection(fetch = FetchType.EAGER)
+    protected List<InfoLink> infoLinks;
+
     @Transient
     protected String defaultCurrency;
     @Transient
@@ -242,6 +245,19 @@ public class Parking
     @Override
     public void setLighting(LightingEnumeration lighting) {
         this.lighting = lighting;
+    }
+
+    @Override
+    public List<InfoLink> getInfoLinks() {
+        if (infoLinks == null) {
+            infoLinks = new ArrayList<>();
+        }
+        return this.infoLinks;
+    }
+
+    @Override
+    public void setInfoLinks(List<InfoLink> value) {
+        this.infoLinks = value;
     }
 
     public String getDefaultCurrency() {
