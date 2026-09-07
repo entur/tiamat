@@ -25,6 +25,7 @@ import org.rutebanken.tiamat.model.AccessibilityAssessment;
 import org.rutebanken.tiamat.model.AccessibilityLimitation;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.EntranceEnumeration;
+import org.rutebanken.tiamat.model.InfoLink;
 import org.rutebanken.tiamat.model.LightingEnumeration;
 import org.rutebanken.tiamat.model.LimitationStatusEnumeration;
 import org.rutebanken.tiamat.model.Parking;
@@ -42,6 +43,7 @@ import org.rutebanken.tiamat.model.ParkingVehicleEnumeration;
 import org.rutebanken.tiamat.model.PaymentMethodEnumeration;
 import org.rutebanken.tiamat.model.PlaceEquipment;
 import org.rutebanken.tiamat.model.SiteRefStructure;
+import org.rutebanken.tiamat.model.TypeOfInfolinkEnumeration;
 import org.rutebanken.tiamat.repository.ParkingRepository;
 import org.rutebanken.tiamat.rest.graphql.mappers.AccessibilityLimitationMapper;
 import org.rutebanken.tiamat.rest.graphql.mappers.GeometryMapper;
@@ -72,6 +74,7 @@ import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ENTRANCE_TYPE;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.FREE_PARKING_OUT_OF_HOURS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.GEOMETRY;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ID;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.INFO_LINKS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.IS_ENTRY;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.IS_EXIT;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.LABEL;
@@ -100,6 +103,8 @@ import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.RECHARGING_AVAILAB
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.SECURE;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.SPACES;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.TOTAL_CAPACITY;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.TYPE_OF_INFO_LINK;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.URI;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.VALID_BETWEEN;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.VEHICLE_ENTRANCES;
 import static org.rutebanken.tiamat.rest.graphql.mappers.EmbeddableMultilingualStringMapper.getEmbeddableString;
@@ -328,6 +333,12 @@ class ParkingUpdater implements DataFetcher {
             updatedParking.setVehicleEntrances(vehicleEntrancesList);
         }
 
+        if (input.get(INFO_LINKS) != null) {
+            List<InfoLink> infoLinksList = resolveInfoLinksList((List) input.get(INFO_LINKS));
+            isUpdated = true;
+            updatedParking.setInfoLinks(infoLinksList);
+        }
+
         Optional<PlaceEquipment> placeEquipment = placeEquipmentMapper.map(input);
         if (placeEquipment.isPresent()) {
             // Present in the input means the client intends to write it, as in SiteElementMapper.
@@ -421,6 +432,21 @@ class ParkingUpdater implements DataFetcher {
             entrance.setAccessModesList((List<AccessModeEnumeration>) input.get(ACCESS_MODES));
         }
         return entrance;
+    }
+
+    private List<InfoLink> resolveInfoLinksList(List list) {
+        List<InfoLink> result = new ArrayList<>();
+        for (Object infoLink : list) {
+            result.add(resolveSingleInfoLink((Map) infoLink));
+        }
+        return result;
+    }
+
+    private InfoLink resolveSingleInfoLink(Map input) {
+        InfoLink infoLink = new InfoLink();
+        infoLink.setUri((String) input.get(URI));
+        infoLink.setTypeOfInfoLink((TypeOfInfolinkEnumeration) input.get(TYPE_OF_INFO_LINK));
+        return infoLink;
     }
 
     private AccessibilityAssessment resolveAccessibilityAssessment(AccessibilityLimitation limitationFromInput) {
