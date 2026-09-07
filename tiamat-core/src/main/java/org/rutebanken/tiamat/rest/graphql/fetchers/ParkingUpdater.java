@@ -20,6 +20,7 @@ import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import org.locationtech.jts.geom.Point;
 import org.rutebanken.tiamat.auth.AuthorizationService;
+import org.rutebanken.tiamat.model.AccessModeEnumeration;
 import org.rutebanken.tiamat.model.AccessibilityAssessment;
 import org.rutebanken.tiamat.model.AccessibilityLimitation;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
@@ -65,6 +66,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ACCESSIBILITY_ASSESSMENT;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ACCESS_MODES;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.BOOKING_URL;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ENTRANCE_TYPE;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.FREE_PARKING_OUT_OF_HOURS;
@@ -415,6 +417,9 @@ class ParkingUpdater implements DataFetcher {
         entrance.setEntranceType((EntranceEnumeration) input.get(ENTRANCE_TYPE));
         entrance.setIsEntry((Boolean) input.get(IS_ENTRY));
         entrance.setIsExit((Boolean) input.get(IS_EXIT));
+        if (input.get(ACCESS_MODES) != null) {
+            entrance.setAccessModesList((List<AccessModeEnumeration>) input.get(ACCESS_MODES));
+        }
         return entrance;
     }
 

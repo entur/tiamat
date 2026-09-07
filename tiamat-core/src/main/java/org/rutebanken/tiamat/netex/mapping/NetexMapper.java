@@ -154,6 +154,7 @@ public class NetexMapper {
 
         mapperFactoryWithNetexIdClassBuilder(org.rutebanken.netex.model.ParkingEntranceForVehicles.class,
                         org.rutebanken.tiamat.model.ParkingEntranceForVehicles.class)
+                .exclude("accessModes")
                 .byDefault()
                 .register();
 
