@@ -429,6 +429,48 @@ public class NetexMapperTest extends TiamatIntegrationTest {
     }
 
     @Test
+    public void mapNetexParkingInfoLinksToInternal() {
+        org.rutebanken.netex.model.InfoLinkStructure netexLink = new org.rutebanken.netex.model.InfoLinkStructure();
+        netexLink.setValue("https://example.org/parking-info");
+        netexLink.getTypeOfInfoLink().add(org.rutebanken.netex.model.TypeOfInfolinkEnumeration.INFO);
+
+        org.rutebanken.netex.model.GroupOfEntities_VersionStructure.InfoLinks infoLinks =
+                new org.rutebanken.netex.model.GroupOfEntities_VersionStructure.InfoLinks();
+        infoLinks.getInfoLink().add(netexLink);
+
+        org.rutebanken.netex.model.Parking netexParking = new org.rutebanken.netex.model.Parking();
+        netexParking.setId("NSR:Parking:1");
+        netexParking.setVersion("1");
+        netexParking.setInfoLinks(infoLinks);
+
+        org.rutebanken.tiamat.model.Parking tiamatParking = netexMapper.mapToTiamatModel(netexParking);
+
+        assertThat(tiamatParking.getInfoLinks()).hasSize(1);
+        org.rutebanken.tiamat.model.InfoLink tiamatLink = tiamatParking.getInfoLinks().get(0);
+        assertThat(tiamatLink.getUri()).isEqualTo("https://example.org/parking-info");
+        assertThat(tiamatLink.getTypeOfInfoLink()).isEqualTo(org.rutebanken.tiamat.model.TypeOfInfolinkEnumeration.INFO);
+    }
+
+    @Test
+    public void mapInternalParkingInfoLinksToNetex() {
+        org.rutebanken.tiamat.model.InfoLink tiamatLink = new org.rutebanken.tiamat.model.InfoLink(
+                "https://example.org/parking-info", org.rutebanken.tiamat.model.TypeOfInfolinkEnumeration.INFO);
+
+        org.rutebanken.tiamat.model.Parking tiamatParking = new org.rutebanken.tiamat.model.Parking();
+        tiamatParking.setNetexId("NSR:Parking:1");
+        tiamatParking.setInfoLinks(List.of(tiamatLink));
+
+        org.rutebanken.netex.model.Parking netexParking = netexMapper.mapToNetexModel(tiamatParking);
+
+        assertThat(netexParking.getInfoLinks()).isNotNull();
+        List<org.rutebanken.netex.model.InfoLinkStructure> netexLinks = netexParking.getInfoLinks().getInfoLink();
+        assertThat(netexLinks).hasSize(1);
+        org.rutebanken.netex.model.InfoLinkStructure netexLink = netexLinks.get(0);
+        assertThat(netexLink.getValue()).isEqualTo("https://example.org/parking-info");
+        assertThat(netexLink.getTypeOfInfoLink()).containsExactly(org.rutebanken.netex.model.TypeOfInfolinkEnumeration.INFO);
+    }
+
+    @Test
     public void mapStopPlaceWithQuayToNetex() {
         org.rutebanken.tiamat.model.StopPlace stopPlace = new StopPlace();
 

@@ -995,6 +995,28 @@ public class CustomGraphQLTypes {
                     .type(new GraphQLList(accessModeEnum)))
             .build();
 
+    public static GraphQLEnumType infoLinkTypeEnum = createCustomEnumType("InfoLinkType", org.rutebanken.tiamat.model.TypeOfInfolinkEnumeration.class);
+
+    public static GraphQLObjectType infoLinkObjectType = newObject()
+            .name(OUTPUT_TYPE_INFO_LINK)
+            .field(newFieldDefinition()
+                    .name(URI)
+                    .type(GraphQLNonNull.nonNull(GraphQLString)))
+            .field(newFieldDefinition()
+                    .name(TYPE_OF_INFO_LINK)
+                    .type(infoLinkTypeEnum))
+            .build();
+
+    public static GraphQLInputObjectType infoLinkInputObjectType = GraphQLInputObjectType.newInputObject()
+            .name(INPUT_TYPE_INFO_LINK)
+            .field(newInputObjectField()
+                    .name(URI)
+                    .type(GraphQLNonNull.nonNull(GraphQLString)))
+            .field(newInputObjectField()
+                    .name(TYPE_OF_INFO_LINK)
+                    .type(infoLinkTypeEnum))
+            .build();
+
     public static GraphQLObjectType postalAddressObjectType = GraphQLObjectType.newObject()
             .name(OUTPUT_TYPE_POSTAL_ADDRESS)
             .field(newFieldDefinition()
@@ -1105,6 +1127,9 @@ public class CustomGraphQLTypes {
                         .name(VEHICLE_ENTRANCES)
                         .type(new GraphQLList(parkingVehicleEntranceObjectType)))
                 .field(newFieldDefinition()
+                        .name(INFO_LINKS)
+                        .type(new GraphQLList(infoLinkObjectType)))
+                .field(newFieldDefinition()
                         .name(PLACE_EQUIPMENTS)
                         .type(equipmentType))
                 .field(geometryFieldDefinition)
@@ -1182,6 +1207,9 @@ public class CustomGraphQLTypes {
                 .field(newInputObjectField()
                         .name(VEHICLE_ENTRANCES)
                         .type(new GraphQLList(parkingVehicleEntranceInputObjectType)))
+                .field(newInputObjectField()
+                        .name(INFO_LINKS)
+                        .type(new GraphQLList(infoLinkInputObjectType)))
                 .field(newInputObjectField()
                         .name(PLACE_EQUIPMENTS)
                         .type(equipmentInputType))

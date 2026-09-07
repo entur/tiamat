@@ -676,4 +676,67 @@ public class GraphQLResourceParkingIntegrationTest extends AbstractGraphQLResour
                 .body("data.parking[0].vehicleEntrances[0].accessModes", equalTo(List.of("car")));
     }
 
+    @Test
+    public void testMutateParkingWithInfoLinksShouldPersistAndReplaceOnUpdate() throws Exception {
+
+        StopPlace stopPlace = stopPlaceRepository.save(new StopPlace());
+
+        String graphQlQuery = "{\n" +
+                "\"query\": \"mutation { " +
+                "  parking: " + GraphQLNames.MUTATE_PARKING + " (Parking : {" +
+                "    geometry: { type:Point coordinates:[10.5, 59.0] } " +
+                "    parentSiteRef:\\\"" + stopPlace.getNetexId() + "\\\" " +
+                "    infoLinks: [" +
+                "      { uri: \\\"https://example.fintraffic.fi/one\\\" typeOfInfoLink: info } " +
+                "      { uri: \\\"https://example.fintraffic.fi/two\\\" typeOfInfoLink: info } " +
+                "    ]" +
+                "  }) {" +
+                "    id " +
+                "    infoLinks { uri typeOfInfoLink } " +
+                "  }" +
+                "}\",\"variables\": \"\"}";
+
+        String parkingId = executeGraphQL(graphQlQuery)
+                .body("data.parking[0].id", notNullValue())
+                .body("data.parking[0].infoLinks.size()", equalTo(2))
+                .body("data.parking[0].infoLinks[0].uri", equalTo("https://example.fintraffic.fi/one"))
+                .body("data.parking[0].infoLinks[0].typeOfInfoLink", equalTo("info"))
+                .body("data.parking[0].infoLinks[1].uri", equalTo("https://example.fintraffic.fi/two"))
+                .extract()
+                .path("data.parking[0].id");
+
+        String findParkingQuery = "{" +
+                "\"query\":\"{" +
+                "  parking: " + GraphQLNames.FIND_PARKING + " (id:\\\"" + parkingId + "\\\") { " +
+                "    id " +
+                "    infoLinks { uri typeOfInfoLink } " +
+                "  } " +
+                "}\"," +
+                "\"variables\":\"\"}";
+
+        executeGraphQL(findParkingQuery)
+                .body("data.parking[0].id", equalTo(parkingId))
+                .body("data.parking[0].infoLinks.size()", equalTo(2))
+                .body("data.parking[0].infoLinks[0].uri", equalTo("https://example.fintraffic.fi/one"));
+
+        String updateQuery = "{" +
+                "\"query\":\"mutation { " +
+                "  parking:" + GraphQLNames.MUTATE_PARKING + " (Parking: {" +
+                "        id:\\\"" + parkingId + "\\\" " +
+                "        infoLinks: [" +
+                "          { uri: \\\"https://example.fintraffic.fi/replacement\\\" typeOfInfoLink: info } " +
+                "        ] " +
+                "       }) { " +
+                "      id " +
+                "      infoLinks { uri typeOfInfoLink } " +
+                "    } " +
+                "}\"," +
+                "\"variables\":\"\"}";
+
+        executeGraphQL(updateQuery)
+                .body("data.parking[0].id", equalTo(parkingId))
+                .body("data.parking[0].infoLinks.size()", equalTo(1))
+                .body("data.parking[0].infoLinks[0].uri", equalTo("https://example.fintraffic.fi/replacement"));
+    }
+
 }

@@ -96,6 +96,7 @@ public class NetexMapper {
 
         mapperFactoryWithNetexIdClassBuilder(TopographicPlace.class, org.rutebanken.tiamat.model.TopographicPlace.class)
                 .fieldBToA("name", "descriptor.name")
+                .exclude("infoLinks")
                 .byDefault()
                 .register();
 
@@ -103,6 +104,7 @@ public class NetexMapper {
                 .fieldBToA("purposeOfGrouping", "purposeOfGroupingRef")
                 .fieldAToB("purposeOfGroupingRef.ref", "purposeOfGrouping.name")
                 .customize(new GroupOfStopPlacesMapper())
+                .exclude("infoLinks")
                 .byDefault()
                 .register();
 
@@ -112,6 +114,7 @@ public class NetexMapper {
 
         mapperFactoryWithNetexIdClassBuilder(GroupOfTariffZones.class, org.rutebanken.tiamat.model.GroupOfTariffZones.class)
                 .customize(new GroupOfTariffZonesMapper())
+                .exclude("infoLinks")
                 .byDefault()
                 .register();
 
@@ -126,6 +129,10 @@ public class NetexMapper {
                 // and JAXB then marshals <OtherTransportModes></OtherTransportModes> on every
                 // stop place we publish.
                 .exclude("otherTransportModes")
+                // infoLinks is only persisted on Parking (see GroupOfEntities_VersionStructure);
+                // it stays @Transient here, so exclude it from Orika's byDefault name matching
+                // to avoid a MappingException (see ParkingMapper's identical exclude).
+                .exclude("infoLinks")
                 .customize(new StopPlaceMapper(publicationDeliveryHelper))
                 .byDefault()
                 .register();
@@ -135,11 +142,13 @@ public class NetexMapper {
                 .exclude("roadAddress")
                 // Same as on StopPlace: @Transient, and mapping it emits an empty element.
                 .exclude("otherTransportModes")
+                .exclude("infoLinks")
                 .customize(new QuayMapper())
                 .byDefault()
                 .register();
 
         mapperFactoryWithNetexIdClassBuilder(TariffZone.class, org.rutebanken.tiamat.model.TariffZone.class)
+                .exclude("infoLinks")
                 .byDefault()
                 .register();
 
@@ -147,6 +156,7 @@ public class NetexMapper {
                 .exclude("transportOrganisationRef")
                 .exclude("neighbours")
                 .exclude("members")
+                .exclude("infoLinks")
                 .customize(new FareZoneMapper())
                 .byDefault()
                 .register();
@@ -164,6 +174,7 @@ public class NetexMapper {
                 .exclude("currenciesAccepted")
                 .exclude("accessModes")
                 .exclude("vehicleEntrances")
+                .exclude("infoLinks")
                 .customize(new ParkingMapper())
                 .byDefault()
                 .register();

@@ -18,14 +18,18 @@ package org.rutebanken.tiamat.netex.mapping.mapper;
 import jakarta.xml.bind.JAXBElement;
 import ma.glasnost.orika.CustomMapper;
 import ma.glasnost.orika.MappingContext;
+import org.rutebanken.netex.model.InfoLinkStructure;
 import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.Parking;
 import org.rutebanken.netex.model.ParkingArea;
 import org.rutebanken.netex.model.ParkingAreas_RelStructure;
 import org.rutebanken.netex.model.ParkingEntranceForVehicles;
 import org.rutebanken.netex.model.ParkingEntrancesForVehicles_RelStructure;
+import org.rutebanken.tiamat.model.InfoLink;
 import org.rutebanken.tiamat.model.PaymentMethodEnumeration;
+import org.rutebanken.tiamat.model.TypeOfInfolinkEnumeration;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.model.Parking> {
@@ -43,6 +47,7 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
         }
         mapPaymentMethodsFromNetex(parking, parking2);
         mapVehicleEntrancesFromNetex(parking, parking2, context);
+        mapInfoLinksFromNetex(parking, parking2);
     }
 
     @Override
@@ -65,6 +70,7 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
         }
         mapPaymentMethodsToNetex(tiamatParking, netexParking);
         mapVehicleEntrancesToNetex(tiamatParking, netexParking, context);
+        mapInfoLinksToNetex(tiamatParking, netexParking);
     }
 
     /**
@@ -194,5 +200,61 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
                 entrances.get(i).withAccessModes(netexAccessModes);
             }
         }
+    }
+
+    /**
+     * {@code infoLinks} is excluded from Orika's default classmap (see {@code NetexMapper})
+     * because it is declared {@code @Transient} on the shared ancestor
+     * {@code GroupOfEntities_VersionStructure} and only shadowed as persisted on
+     * {@code Parking} — bridge it explicitly, mirroring {@link #mapPaymentMethodsFromNetex}.
+     * Only the first {@code typeOfInfoLink} value is kept (NeTEx's list-typed attribute is
+     * never populated with more than one value by any producer we integrate).
+     */
+    private void mapInfoLinksFromNetex(Parking source, org.rutebanken.tiamat.model.Parking target) {
+        if (source.getInfoLinks() == null || source.getInfoLinks().getInfoLink().isEmpty()) {
+            return;
+        }
+        List<InfoLink> infoLinks = new ArrayList<>();
+        for (InfoLinkStructure netexLink : source.getInfoLinks().getInfoLink()) {
+            if (netexLink.getValue() == null || netexLink.getValue().isBlank()) {
+                continue;
+            }
+            TypeOfInfolinkEnumeration type = null;
+            List<org.rutebanken.netex.model.TypeOfInfolinkEnumeration> types = netexLink.getTypeOfInfoLink();
+            if (types != null && !types.isEmpty()) {
+                try {
+                    type = TypeOfInfolinkEnumeration.fromValue(types.get(0).value());
+                } catch (IllegalArgumentException ignored) {
+                    // unknown value — leave type unset
+                }
+            }
+            infoLinks.add(new InfoLink(netexLink.getValue(), type));
+        }
+        if (!infoLinks.isEmpty()) {
+            target.setInfoLinks(infoLinks);
+        }
+    }
+
+    private void mapInfoLinksToNetex(org.rutebanken.tiamat.model.Parking source, Parking target) {
+        List<InfoLink> infoLinks = source.getInfoLinks();
+        if (infoLinks.isEmpty()) {
+            return;
+        }
+        org.rutebanken.netex.model.GroupOfEntities_VersionStructure.InfoLinks relStruct =
+                new org.rutebanken.netex.model.GroupOfEntities_VersionStructure.InfoLinks();
+        for (InfoLink infoLink : infoLinks) {
+            InfoLinkStructure netexLink = new InfoLinkStructure();
+            netexLink.setValue(infoLink.getUri());
+            if (infoLink.getTypeOfInfoLink() != null) {
+                try {
+                    netexLink.getTypeOfInfoLink().add(
+                            org.rutebanken.netex.model.TypeOfInfolinkEnumeration.fromValue(infoLink.getTypeOfInfoLink().value()));
+                } catch (IllegalArgumentException ignored) {
+                    // stored value no longer valid — skip type
+                }
+            }
+            relStruct.getInfoLink().add(netexLink);
+        }
+        target.setInfoLinks(relStruct);
     }
 }
