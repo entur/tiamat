@@ -61,6 +61,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
 
 public class NetexMapperTest extends TiamatIntegrationTest {
@@ -468,6 +470,368 @@ public class NetexMapperTest extends TiamatIntegrationTest {
         org.rutebanken.netex.model.InfoLinkStructure netexLink = netexLinks.get(0);
         assertThat(netexLink.getValue()).isEqualTo("https://example.org/parking-info");
         assertThat(netexLink.getTypeOfInfoLink()).containsExactly(org.rutebanken.netex.model.TypeOfInfolinkEnumeration.INFO);
+    }
+
+    @Test
+    public void mapNetexParkingAvailabilityConditionsToInternal() {
+        org.rutebanken.netex.model.AvailabilityCondition netexCondition = new org.rutebanken.netex.model.AvailabilityCondition()
+                .withId("NSR:Parking:1:AvailabilityCondition:1")
+                .withVersion("1")
+                .withIsAvailable(true);
+
+        org.rutebanken.netex.model.DayTypeRefStructure dayTypeRef =
+                new org.rutebanken.netex.model.DayTypeRefStructure().withRef("NSR:DayType:1");
+        org.rutebanken.netex.model.DayTypes_RelStructure dayTypes = new org.rutebanken.netex.model.DayTypes_RelStructure();
+        dayTypes.getDayTypeRefOrDayType_().add(new ObjectFactory().createDayTypeRef(dayTypeRef));
+        netexCondition.withDayTypes(dayTypes);
+
+        org.rutebanken.netex.model.Timeband_VersionedChildStructure timeband =
+                new org.rutebanken.netex.model.Timeband_VersionedChildStructure()
+                        .withId("NSR:Parking:1:Timeband:1")
+                        .withVersion("1")
+                        .withStartTime(java.time.LocalTime.of(6, 0))
+                        .withEndTime(java.time.LocalTime.of(22, 0));
+        org.rutebanken.netex.model.Timebands_RelStructure timebands = new org.rutebanken.netex.model.Timebands_RelStructure();
+        timebands.getTimebandRefOrTimeband().add(timeband);
+        netexCondition.withTimebands(timebands);
+
+        org.rutebanken.netex.model.ValidityConditions_RelStructure validityConditions =
+                new org.rutebanken.netex.model.ValidityConditions_RelStructure();
+        validityConditions.getValidityConditionRefOrValidBetweenOrValidityCondition_()
+                .add(new ObjectFactory().createAvailabilityCondition(netexCondition));
+
+        org.rutebanken.netex.model.Parking netexParking = new org.rutebanken.netex.model.Parking();
+        netexParking.setId("NSR:Parking:1");
+        netexParking.setVersion("1");
+        netexParking.setValidityConditions(validityConditions);
+
+        org.rutebanken.tiamat.model.Parking tiamatParking = netexMapper.mapToTiamatModel(netexParking);
+
+        assertThat(tiamatParking.getAvailabilityConditions()).hasSize(1);
+        org.rutebanken.tiamat.model.AvailabilityCondition condition = tiamatParking.getAvailabilityConditions().get(0);
+        assertThat(condition.getDayTypeRef()).isEqualTo("NSR:DayType:1");
+        assertThat(condition.isAvailable()).isTrue();
+        assertThat(condition.getStartTime()).isEqualTo(java.time.LocalTime.of(6, 0));
+        assertThat(condition.getEndTime()).isEqualTo(java.time.LocalTime.of(22, 0));
+    }
+
+    @Test
+    public void mapNetexParkingAvailabilityConditionsWithSameDayTypeRefAndDifferentContentKeepsBoth() {
+        org.rutebanken.netex.model.ValidityConditions_RelStructure validityConditions =
+                new org.rutebanken.netex.model.ValidityConditions_RelStructure();
+        ObjectFactory objectFactory = new ObjectFactory();
+        for (boolean available : new boolean[] {true, false}) {
+            org.rutebanken.netex.model.AvailabilityCondition netexCondition = new org.rutebanken.netex.model.AvailabilityCondition()
+                    .withId("NSR:Parking:1:AvailabilityCondition:" + available)
+                    .withVersion("1")
+                    .withIsAvailable(available);
+            org.rutebanken.netex.model.DayTypeRefStructure dayTypeRef =
+                    new org.rutebanken.netex.model.DayTypeRefStructure().withRef("NSR:DayType:1");
+            org.rutebanken.netex.model.DayTypes_RelStructure dayTypes = new org.rutebanken.netex.model.DayTypes_RelStructure();
+            dayTypes.getDayTypeRefOrDayType_().add(objectFactory.createDayTypeRef(dayTypeRef));
+            netexCondition.withDayTypes(dayTypes);
+            validityConditions.getValidityConditionRefOrValidBetweenOrValidityCondition_()
+                    .add(objectFactory.createAvailabilityCondition(netexCondition));
+        }
+
+        org.rutebanken.netex.model.Parking netexParking = new org.rutebanken.netex.model.Parking();
+        netexParking.setId("NSR:Parking:1");
+        netexParking.setVersion("1");
+        netexParking.setValidityConditions(validityConditions);
+
+        org.rutebanken.tiamat.model.Parking tiamatParking = netexMapper.mapToTiamatModel(netexParking);
+
+        assertThat(tiamatParking.getAvailabilityConditions())
+                .as("conditions differing in content must not be collapsed by dayTypeRef")
+                .hasSize(2)
+                .extracting(org.rutebanken.tiamat.model.AvailabilityCondition::isAvailable)
+                .containsExactly(true, false);
+    }
+
+    @Test
+    public void mapNetexParkingIdenticalAvailabilityConditionsCollapseToOne() {
+        org.rutebanken.netex.model.ValidityConditions_RelStructure validityConditions =
+                new org.rutebanken.netex.model.ValidityConditions_RelStructure();
+        ObjectFactory objectFactory = new ObjectFactory();
+        for (int i = 0; i < 2; i++) {
+            validityConditions.getValidityConditionRefOrValidBetweenOrValidityCondition_()
+                    .add(objectFactory.createAvailabilityCondition(netexAvailabilityCondition(
+                            "NSR:Parking:1:AvailabilityCondition:" + i, true,
+                            List.of("NSR:DayType:1"),
+                            List.of(netexTimeband("NSR:Parking:1:Timeband:" + i,
+                                    java.time.LocalTime.of(6, 0), java.time.LocalTime.of(22, 0), null)))));
+        }
+
+        org.rutebanken.netex.model.Parking netexParking = new org.rutebanken.netex.model.Parking();
+        netexParking.setId("NSR:Parking:1");
+        netexParking.setVersion("1");
+        netexParking.setValidityConditions(validityConditions);
+
+        assertThat(netexMapper.mapToTiamatModel(netexParking).getAvailabilityConditions())
+                .as("re-importing the same opening hours must be idempotent")
+                .hasSize(1);
+    }
+
+    @Test
+    public void mapNetexParkingAvailabilityConditionWithSeveralDayTypeRefsFansOut() {
+        org.rutebanken.netex.model.Parking netexParking = netexParkingWithConditions(netexAvailabilityCondition(
+                "NSR:Parking:1:AvailabilityCondition:1", true,
+                List.of("NSR:DayType:1", "NSR:DayType:2", "NSR:DayType:3"),
+                List.of(netexTimeband("NSR:Parking:1:Timeband:1",
+                        java.time.LocalTime.of(6, 0), java.time.LocalTime.of(22, 0), null))));
+
+        assertThat(netexMapper.mapToTiamatModel(netexParking).getAvailabilityConditions())
+                .as("every DayTypeRef must survive, not only the first")
+                .hasSize(3)
+                .allSatisfy(condition -> {
+                    assertThat(condition.getStartTime()).isEqualTo(java.time.LocalTime.of(6, 0));
+                    assertThat(condition.getEndTime()).isEqualTo(java.time.LocalTime.of(22, 0));
+                })
+                .extracting(org.rutebanken.tiamat.model.AvailabilityCondition::getDayTypeRef)
+                .containsExactly("NSR:DayType:1", "NSR:DayType:2", "NSR:DayType:3");
+    }
+
+    @Test
+    public void mapNetexParkingAvailabilityConditionWithSplitTimebandsFansOut() {
+        org.rutebanken.netex.model.Parking netexParking = netexParkingWithConditions(netexAvailabilityCondition(
+                "NSR:Parking:1:AvailabilityCondition:1", true,
+                List.of("NSR:DayType:1"),
+                List.of(netexTimeband("NSR:Parking:1:Timeband:1",
+                                java.time.LocalTime.of(6, 0), java.time.LocalTime.of(10, 0), null),
+                        netexTimeband("NSR:Parking:1:Timeband:2",
+                                java.time.LocalTime.of(15, 0), java.time.LocalTime.of(20, 0), null))));
+
+        assertThat(netexMapper.mapToTiamatModel(netexParking).getAvailabilityConditions())
+                .as("split opening hours for one day must both survive")
+                .hasSize(2)
+                .extracting(org.rutebanken.tiamat.model.AvailabilityCondition::getStartTime,
+                        org.rutebanken.tiamat.model.AvailabilityCondition::getEndTime)
+                .containsExactly(
+                        tuple(java.time.LocalTime.of(6, 0), java.time.LocalTime.of(10, 0)),
+                        tuple(java.time.LocalTime.of(15, 0), java.time.LocalTime.of(20, 0)));
+    }
+
+    @Test
+    public void mapNetexParkingAvailabilityConditionWithSeveralDayTypesAndTimebandsFansOutEveryCombination() {
+        org.rutebanken.netex.model.Parking netexParking = netexParkingWithConditions(netexAvailabilityCondition(
+                "NSR:Parking:1:AvailabilityCondition:1", true,
+                List.of("NSR:DayType:1", "NSR:DayType:2"),
+                List.of(netexTimeband("NSR:Parking:1:Timeband:1",
+                                java.time.LocalTime.of(6, 0), java.time.LocalTime.of(10, 0), null),
+                        netexTimeband("NSR:Parking:1:Timeband:2",
+                                java.time.LocalTime.of(15, 0), java.time.LocalTime.of(20, 0), null))));
+
+        assertThat(netexMapper.mapToTiamatModel(netexParking).getAvailabilityConditions())
+                .hasSize(4)
+                .extracting(org.rutebanken.tiamat.model.AvailabilityCondition::getDayTypeRef,
+                        org.rutebanken.tiamat.model.AvailabilityCondition::getStartTime)
+                .containsExactly(
+                        tuple("NSR:DayType:1", java.time.LocalTime.of(6, 0)),
+                        tuple("NSR:DayType:1", java.time.LocalTime.of(15, 0)),
+                        tuple("NSR:DayType:2", java.time.LocalTime.of(6, 0)),
+                        tuple("NSR:DayType:2", java.time.LocalTime.of(15, 0)));
+    }
+
+    @Test
+    public void mapParkingAvailabilityConditionDayOffsetRoundTripsEndOfDay() {
+        org.rutebanken.netex.model.Parking netexParking = netexParkingWithConditions(netexAvailabilityCondition(
+                "NSR:Parking:1:AvailabilityCondition:1", true,
+                List.of("NSR:DayType:1"),
+                List.of(netexTimeband("NSR:Parking:1:Timeband:1",
+                        java.time.LocalTime.of(6, 0), java.time.LocalTime.MIDNIGHT, 1))));
+
+        org.rutebanken.tiamat.model.Parking tiamatParking = netexMapper.mapToTiamatModel(netexParking);
+        assertThat(tiamatParking.getAvailabilityConditions()).hasSize(1);
+        org.rutebanken.tiamat.model.AvailabilityCondition condition = tiamatParking.getAvailabilityConditions().get(0);
+        assertThat(condition.getEndTime()).isEqualTo(java.time.LocalTime.MIDNIGHT);
+        assertThat(condition.getDayOffset())
+                .as("end-of-day must stay distinguishable from start-of-day midnight")
+                .isEqualTo(1);
+
+        org.rutebanken.netex.model.Timeband_VersionedChildStructure exported =
+                singleExportedTimeband(netexMapper.mapToNetexModel(tiamatParking));
+        assertThat(exported.getEndTime()).isEqualTo(java.time.LocalTime.MIDNIGHT);
+        assertThat(exported.getDayOffset()).isEqualTo(java.math.BigInteger.ONE);
+    }
+
+    @Test
+    public void mapParkingAvailabilityConditionWithoutDayOffsetKeepsStartOfDayMidnightDistinct() {
+        org.rutebanken.tiamat.model.Parking tiamatParking = new org.rutebanken.tiamat.model.Parking();
+        tiamatParking.setNetexId("NSR:Parking:1");
+        tiamatParking.setAvailabilityConditions(List.of(new org.rutebanken.tiamat.model.AvailabilityCondition(
+                "NSR:DayType:1", true, java.time.LocalTime.of(6, 0), java.time.LocalTime.MIDNIGHT, 0)));
+
+        org.rutebanken.netex.model.Timeband_VersionedChildStructure exported =
+                singleExportedTimeband(netexMapper.mapToNetexModel(tiamatParking));
+        assertThat(exported.getEndTime()).isEqualTo(java.time.LocalTime.MIDNIGHT);
+        assertThat(exported.getDayOffset())
+                .as("a zero dayOffset must not be emitted, keeping it distinct from end-of-day")
+                .isNull();
+    }
+
+    @Test
+    public void mapNetexParkingAvailabilityConditionWithEndTimeButNoStartTimeIsRejected() {
+        org.rutebanken.netex.model.Parking netexParking = netexParkingWithConditions(netexAvailabilityCondition(
+                "NSR:Parking:1:AvailabilityCondition:1", true,
+                List.of("NSR:DayType:1"),
+                List.of(netexTimeband("NSR:Parking:1:Timeband:1", null, java.time.LocalTime.of(22, 0), null))));
+
+        assertThatThrownBy(() -> netexMapper.mapToTiamatModel(netexParking))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("EndTime")
+                .hasMessageContaining("no StartTime");
+    }
+
+    @Test
+    public void mapInternalParkingAvailabilityConditionWithoutStartTimeOmitsTimebandOnExport() {
+        org.rutebanken.tiamat.model.Parking tiamatParking = new org.rutebanken.tiamat.model.Parking();
+        tiamatParking.setNetexId("NSR:Parking:1");
+        tiamatParking.setAvailabilityConditions(List.of(new org.rutebanken.tiamat.model.AvailabilityCondition(
+                "NSR:DayType:1", true, null, java.time.LocalTime.of(22, 0))));
+
+        org.rutebanken.netex.model.Parking netexParking = netexMapper.mapToNetexModel(tiamatParking);
+        List<org.rutebanken.netex.model.AvailabilityCondition> conditions = exportedAvailabilityConditions(netexParking);
+        assertThat(conditions).hasSize(1);
+        assertThat(conditions.get(0).getTimebands())
+                .as("NeTEx requires Timeband/StartTime, so no timeband may be emitted without one")
+                .isNull();
+    }
+
+    private org.rutebanken.netex.model.Timeband_VersionedChildStructure netexTimeband(
+            String id, java.time.LocalTime startTime, java.time.LocalTime endTime, Integer dayOffset) {
+        org.rutebanken.netex.model.Timeband_VersionedChildStructure timeband =
+                new org.rutebanken.netex.model.Timeband_VersionedChildStructure()
+                        .withId(id)
+                        .withVersion("1")
+                        .withStartTime(startTime)
+                        .withEndTime(endTime);
+        if (dayOffset != null) {
+            timeband.setDayOffset(java.math.BigInteger.valueOf(dayOffset));
+        }
+        return timeband;
+    }
+
+    private org.rutebanken.netex.model.AvailabilityCondition netexAvailabilityCondition(
+            String id, Boolean isAvailable, List<String> dayTypeRefs,
+            List<org.rutebanken.netex.model.Timeband_VersionedChildStructure> timebands) {
+        ObjectFactory objectFactory = new ObjectFactory();
+        org.rutebanken.netex.model.AvailabilityCondition condition =
+                new org.rutebanken.netex.model.AvailabilityCondition()
+                        .withId(id)
+                        .withVersion("1")
+                        .withIsAvailable(isAvailable);
+
+        org.rutebanken.netex.model.DayTypes_RelStructure dayTypes = new org.rutebanken.netex.model.DayTypes_RelStructure();
+        for (String dayTypeRef : dayTypeRefs) {
+            dayTypes.getDayTypeRefOrDayType_().add(objectFactory.createDayTypeRef(
+                    new org.rutebanken.netex.model.DayTypeRefStructure().withRef(dayTypeRef)));
+        }
+        condition.withDayTypes(dayTypes);
+
+        if (!timebands.isEmpty()) {
+            org.rutebanken.netex.model.Timebands_RelStructure timebandsRel = new org.rutebanken.netex.model.Timebands_RelStructure();
+            timebandsRel.getTimebandRefOrTimeband().addAll(timebands);
+            condition.withTimebands(timebandsRel);
+        }
+        return condition;
+    }
+
+    private org.rutebanken.netex.model.Parking netexParkingWithConditions(
+            org.rutebanken.netex.model.AvailabilityCondition... conditions) {
+        ObjectFactory objectFactory = new ObjectFactory();
+        org.rutebanken.netex.model.ValidityConditions_RelStructure validityConditions =
+                new org.rutebanken.netex.model.ValidityConditions_RelStructure();
+        for (org.rutebanken.netex.model.AvailabilityCondition condition : conditions) {
+            validityConditions.getValidityConditionRefOrValidBetweenOrValidityCondition_()
+                    .add(objectFactory.createAvailabilityCondition(condition));
+        }
+        org.rutebanken.netex.model.Parking netexParking = new org.rutebanken.netex.model.Parking();
+        netexParking.setId("NSR:Parking:1");
+        netexParking.setVersion("1");
+        netexParking.setValidityConditions(validityConditions);
+        return netexParking;
+    }
+
+    private List<org.rutebanken.netex.model.AvailabilityCondition> exportedAvailabilityConditions(
+            org.rutebanken.netex.model.Parking netexParking) {
+        return netexParking.getValidityConditions().getValidityConditionRefOrValidBetweenOrValidityCondition_().stream()
+                .filter(entry -> entry instanceof JAXBElement<?>)
+                .map(entry -> ((JAXBElement<?>) entry).getValue())
+                .filter(value -> value instanceof org.rutebanken.netex.model.AvailabilityCondition)
+                .map(value -> (org.rutebanken.netex.model.AvailabilityCondition) value)
+                .toList();
+    }
+
+    private org.rutebanken.netex.model.Timeband_VersionedChildStructure singleExportedTimeband(
+            org.rutebanken.netex.model.Parking netexParking) {
+        List<org.rutebanken.netex.model.AvailabilityCondition> conditions = exportedAvailabilityConditions(netexParking);
+        assertThat(conditions).hasSize(1);
+        List<Object> timebands = conditions.get(0).getTimebands().getTimebandRefOrTimeband();
+        assertThat(timebands).hasSize(1);
+        return (org.rutebanken.netex.model.Timeband_VersionedChildStructure) timebands.get(0);
+    }
+
+    @Test
+    public void mapInternalParkingAvailabilityConditionsToNetex() {
+        org.rutebanken.tiamat.model.AvailabilityCondition condition = new org.rutebanken.tiamat.model.AvailabilityCondition(
+                "NSR:DayType:1", true, java.time.LocalTime.of(6, 0), java.time.LocalTime.of(22, 0));
+
+        org.rutebanken.tiamat.model.Parking tiamatParking = new org.rutebanken.tiamat.model.Parking();
+        tiamatParking.setNetexId("NSR:Parking:1");
+        tiamatParking.setAvailabilityConditions(List.of(condition));
+
+        org.rutebanken.netex.model.Parking netexParking = netexMapper.mapToNetexModel(tiamatParking);
+
+        assertThat(netexParking.getValidityConditions()).isNotNull();
+        List<Object> entries = netexParking.getValidityConditions().getValidityConditionRefOrValidBetweenOrValidityCondition_();
+        List<org.rutebanken.netex.model.AvailabilityCondition> availabilityConditions = entries.stream()
+                .filter(entry -> entry instanceof JAXBElement<?>)
+                .map(entry -> ((JAXBElement<?>) entry).getValue())
+                .filter(value -> value instanceof org.rutebanken.netex.model.AvailabilityCondition)
+                .map(value -> (org.rutebanken.netex.model.AvailabilityCondition) value)
+                .toList();
+        assertThat(availabilityConditions).hasSize(1);
+
+        org.rutebanken.netex.model.AvailabilityCondition netexCondition = availabilityConditions.get(0);
+        assertThat(netexCondition.isIsAvailable()).isTrue();
+        assertThat(netexCondition.getDayTypes().getDayTypeRefOrDayType_()).hasSize(1);
+        org.rutebanken.netex.model.DayTypeRefStructure dayTypeRef =
+                (org.rutebanken.netex.model.DayTypeRefStructure) netexCondition.getDayTypes().getDayTypeRefOrDayType_().get(0).getValue();
+        assertThat(dayTypeRef.getRef()).isEqualTo("NSR:DayType:1");
+
+        assertThat(netexCondition.getTimebands().getTimebandRefOrTimeband()).hasSize(1);
+        Object timebandEntry = netexCondition.getTimebands().getTimebandRefOrTimeband().get(0);
+        assertThat(timebandEntry).isInstanceOf(org.rutebanken.netex.model.Timeband_VersionedChildStructure.class);
+        org.rutebanken.netex.model.Timeband_VersionedChildStructure timeband =
+                (org.rutebanken.netex.model.Timeband_VersionedChildStructure) timebandEntry;
+        assertThat(timeband.getStartTime()).isEqualTo(java.time.LocalTime.of(6, 0));
+        assertThat(timeband.getEndTime()).isEqualTo(java.time.LocalTime.of(22, 0));
+    }
+
+    @Test
+    public void mapInternalParkingAvailabilityConditionsToNetexIsIdempotentUnderRepeatInvocation() {
+        org.rutebanken.tiamat.model.AvailabilityCondition condition = new org.rutebanken.tiamat.model.AvailabilityCondition(
+                "NSR:DayType:1", true, java.time.LocalTime.of(6, 0), java.time.LocalTime.of(22, 0));
+
+        org.rutebanken.tiamat.model.Parking tiamatParking = new org.rutebanken.tiamat.model.Parking();
+        tiamatParking.setNetexId("NSR:Parking:1");
+        tiamatParking.setAvailabilityConditions(List.of(condition));
+
+        org.rutebanken.netex.model.Parking firstMap = netexMapper.mapToNetexModel(tiamatParking);
+        org.rutebanken.netex.model.Parking secondMap = netexMapper.mapToNetexModel(tiamatParking);
+
+        long firstCount = countAvailabilityConditions(firstMap);
+        long secondCount = countAvailabilityConditions(secondMap);
+        assertThat(firstCount).isEqualTo(1);
+        assertThat(secondCount).isEqualTo(1);
+    }
+
+    private long countAvailabilityConditions(org.rutebanken.netex.model.Parking netexParking) {
+        return netexParking.getValidityConditions().getValidityConditionRefOrValidBetweenOrValidityCondition_().stream()
+                .filter(entry -> entry instanceof JAXBElement<?>)
+                .map(entry -> ((JAXBElement<?>) entry).getValue())
+                .filter(value -> value instanceof org.rutebanken.netex.model.AvailabilityCondition)
+                .count();
     }
 
     @Test
