@@ -557,5 +557,57 @@ public class GraphQLResourceParkingIntegrationTest extends AbstractGraphQLResour
                 .body("data.parking[0].paymentMethods[0]", equalTo("contactlessPaymentCard"));
     }
 
+    @Test
+    public void testMutateParkingWithLightingShouldPersistAndReturn() throws Exception {
+
+        StopPlace stopPlace = stopPlaceRepository.save(new StopPlace());
+
+        String graphQlQuery = "{\n" +
+                "\"query\": \"mutation { " +
+                "  parking: " + GraphQLNames.MUTATE_PARKING + " (Parking : {" +
+                "    geometry: { type:Point coordinates:[10.5, 59.0] } " +
+                "    parentSiteRef:\\\"" + stopPlace.getNetexId() + "\\\" " +
+                "    lighting: wellLit " +
+                "  }) {" +
+                "    id " +
+                "    lighting " +
+                "  }" +
+                "}\",\"variables\": \"\"}";
+
+        String parkingId = executeGraphQL(graphQlQuery)
+                .body("data.parking[0].id", notNullValue())
+                .body("data.parking[0].lighting", equalTo("wellLit"))
+                .extract()
+                .path("data.parking[0].id");
+
+        String findParkingQuery = "{" +
+                "\"query\":\"{" +
+                "  parking: " + GraphQLNames.FIND_PARKING + " (id:\\\"" + parkingId + "\\\") { " +
+                "    id " +
+                "    lighting " +
+                "  } " +
+                "}\"," +
+                "\"variables\":\"\"}";
+
+        executeGraphQL(findParkingQuery)
+                .body("data.parking[0].id", equalTo(parkingId))
+                .body("data.parking[0].lighting", equalTo("wellLit"));
+
+        String updateQuery = "{" +
+                "\"query\":\"mutation { " +
+                "  parking:" + GraphQLNames.MUTATE_PARKING + " (Parking: {" +
+                "        id:\\\"" + parkingId + "\\\" " +
+                "        lighting: unlit " +
+                "       }) { " +
+                "      id " +
+                "      lighting " +
+                "    } " +
+                "}\"," +
+                "\"variables\":\"\"}";
+
+        executeGraphQL(updateQuery)
+                .body("data.parking[0].id", equalTo(parkingId))
+                .body("data.parking[0].lighting", equalTo("unlit"));
+    }
 
 }
