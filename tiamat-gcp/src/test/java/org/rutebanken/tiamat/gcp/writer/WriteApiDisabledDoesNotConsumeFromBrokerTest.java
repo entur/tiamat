@@ -1,11 +1,9 @@
-package org.rutebanken.tiamat.writer;
+package org.rutebanken.tiamat.gcp.writer;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.rutebanken.tiamat.TiamatTestApplication;
-import org.rutebanken.tiamat.writer.async.OnPubSubWriteTransport;
-import org.rutebanken.tiamat.writer.async.PubSubWriteJobPublisher;
-import org.rutebanken.tiamat.writer.async.PubSubWriteJobSubscriber;
+import org.rutebanken.tiamat.writer.AsyncStopPlaceWriter;
 import org.rutebanken.tiamat.writer.async.WriteJobTimeoutSweeper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -23,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = TiamatTestApplication.class)
-@ActiveProfiles({"test", "gcs-blobstore"})
+@ActiveProfiles({"test", "local-blobstore"})
 @TestPropertySource(properties = {
         "tiamat.write-api.enabled=false",
         "tiamat.write-api.transport=pubsub"

@@ -15,8 +15,8 @@
 
 package org.rutebanken.tiamat.rest.validation;
 
-import com.google.api.client.util.Preconditions;
-import com.google.api.client.util.Strings;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import org.rutebanken.tiamat.model.ModificationEnumeration;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;

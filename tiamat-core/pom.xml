@@ -31,32 +31,23 @@
     <description>Stop place register / holdeplassregister</description>
 
     <properties>
-        <spring-cloud-gcp.version>5.13.11</spring-cloud-gcp.version>
         <geotools.version>30.2</geotools.version>
         <orika-core.version>1.5.4</orika-core.version>
         <swagger-jersey2.version>2.2.53</swagger-jersey2.version>
         <netex-java-model.version>2.0.16</netex-java-model.version>
-        <entur.helpers.version>7.2.0</entur.helpers.version>
         <jts-core.version>1.20.0</jts-core.version>
         <groovy-all.version>4.0.33</groovy-all.version>
         <rest-assured.version>5.5.7</rest-assured.version>
         <aws-secretsmanager.version>2.1.3</aws-secretsmanager.version>
-        <argLine/>
 
         <xercesImpl.version>2.12.2</xercesImpl.version>
         <maven.compiler.args>--add-opens java.base/java.lang=ALL-UNNAMED</maven.compiler.args>
-        <testcontainers.version>1.21.4</testcontainers.version>
         <build-helper-maven-plugin.version>3.6.1</build-helper-maven-plugin.version>
         <metrics-graphite.version>4.2.39</metrics-graphite.version>
     </properties>
 
     <dependencies>
 
-        <dependency>
-            <groupId>com.google.cloud</groupId>
-            <artifactId>spring-cloud-gcp-starter-pubsub</artifactId>
-            <version>${spring-cloud-gcp.version}</version>
-        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
@@ -199,17 +190,6 @@
             <version>${netex-java-model.version}</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.entur.ror.helpers</groupId>
-            <artifactId>storage-gcp-gcs</artifactId>
-            <version>${entur.helpers.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>javax.servlet</groupId>
-                    <artifactId>servlet-api</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -329,13 +309,6 @@
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>jdbc</artifactId>
-            <version>${testcontainers.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <!-- Runs the Pub/Sub emulator, so the write job transport is tested against a broker. -->
-        <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>gcloud</artifactId>
             <version>${testcontainers.version}</version>
             <scope>test</scope>
         </dependency>
@@ -480,6 +453,22 @@
 
     <build>
         <plugins>
+            <!--
+              Publishes the test classes as their own artifact. tiamat-gcp tests extend
+              TiamatIntegrationTest, which lives here, and test-scoped classes are not on a
+              downstream module's classpath without this.
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>test-jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -521,14 +510,6 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <argLine>@{argLine} -Xms500m -Xmx1000m -Xss256k --add-opens java.base/java.lang=ALL-UNNAMED -Dhazelcast.ignoreXxeProtectionFailures=true</argLine>
-                    <runOrder>alphabetical</runOrder>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.sonarsource.scanner.maven</groupId>

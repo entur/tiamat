@@ -51,6 +51,7 @@
 
     <modules>
         <module>tiamat-core</module>
+        <module>tiamat-gcp</module>
         <module>tiamat-app</module>
     </modules>
 
@@ -67,6 +68,16 @@
         <graphql-java.version>20.9</graphql-java.version>
         <graphql-java-extended-scalars.version>20.2</graphql-java-extended-scalars.version>
         <spring-cloud-aws.version>4.0.2</spring-cloud-aws.version>
+        <!--
+          Used by tiamat-gcp, and by tiamat-core for its own test containers, so both modules
+          need them. Same reasoning as the versions above: a property set in one leaf module
+          does not reach a sibling.
+        -->
+        <spring-cloud-gcp.version>5.13.11</spring-cloud-gcp.version>
+        <entur.helpers.version>7.2.0</entur.helpers.version>
+        <testcontainers.version>1.21.4</testcontainers.version>
+        <!-- Empty default, so @{argLine} still resolves in a module that does not run jacoco. -->
+        <argLine/>
     </properties>
 
     <!--
@@ -132,6 +143,20 @@
                     <artifactId>jib-maven-plugin</artifactId>
                     <configuration>
                         <skip>true</skip>
+                    </configuration>
+                </plugin>
+                <!--
+                  Managed here rather than in tiamat-core, because every module that boots a
+                  Tiamat Spring context needs it. Hazelcast reads its XML config through a parser
+                  that rejects the accessExternalSchema property, and without the flag the cache
+                  provider fails to start and takes the context with it.
+                -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <configuration>
+                        <argLine>@{argLine} -Xms500m -Xmx1000m -Xss256k --add-opens java.base/java.lang=ALL-UNNAMED -Dhazelcast.ignoreXxeProtectionFailures=true</argLine>
+                        <runOrder>alphabetical</runOrder>
                     </configuration>
                 </plugin>
             </plugins>

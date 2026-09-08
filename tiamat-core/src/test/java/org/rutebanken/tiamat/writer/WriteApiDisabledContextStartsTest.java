@@ -27,7 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = TiamatTestApplication.class)
-@ActiveProfiles({"test", "gcs-blobstore"})
+@ActiveProfiles({"test", "local-blobstore"})
 @TestPropertySource(properties = {
         "tiamat.write-api.enabled=false",
         "tiamat.write-api.transport="

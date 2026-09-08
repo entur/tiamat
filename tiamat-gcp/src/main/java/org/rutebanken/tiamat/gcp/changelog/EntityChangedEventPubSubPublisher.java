@@ -13,9 +13,11 @@
  * limitations under the Licence.
  */
 
-package org.rutebanken.tiamat.changelog;
+package org.rutebanken.tiamat.gcp.changelog;
 
 import com.google.cloud.spring.pubsub.core.PubSubTemplate;
+import org.rutebanken.tiamat.changelog.EntityChangedEventPublisher;
+import org.rutebanken.tiamat.changelog.EntityChangedListener;
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
