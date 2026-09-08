@@ -9,7 +9,7 @@ import jakarta.annotation.PreDestroy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
 
 import static org.rutebanken.tiamat.writer.async.PubSubWriteJobPublisher.ATTRIBUTE_JOB_ID;
@@ -27,7 +27,7 @@ import static org.rutebanken.tiamat.writer.async.PubSubWriteJobPublisher.ATTRIBU
  * so it discards a delivery of a job that already ran.
  */
 @Component
-@ConditionalOnProperty(name = "tiamat.write-api.transport", havingValue = "pubsub")
+@Conditional(OnPubSubWriteTransport.class)
 public class PubSubWriteJobSubscriber {
 
     private static final Logger logger = LoggerFactory.getLogger(PubSubWriteJobSubscriber.class);
