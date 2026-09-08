@@ -107,7 +107,9 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
             try {
                 targetMethods.add(PaymentMethodEnumeration.fromValue(netexMethod.value()));
             } catch (IllegalArgumentException ignored) {
-                // skip unknown values
+                LOGGER.warn("Parking {}: NeTEx payment method '{}' has no equivalent in the internal " +
+                                "PaymentMethodEnumeration and was dropped on import.",
+                        source.getId(), netexMethod.value());
             }
         }
     }
@@ -123,7 +125,9 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
             try {
                 targetMethods.add(org.rutebanken.netex.model.PaymentMethodEnumeration.fromValue(method.value()));
             } catch (IllegalArgumentException ignored) {
-                // skip unknown values
+                LOGGER.warn("Parking {}: internal payment method '{}' has no equivalent in the NeTEx " +
+                                "PaymentMethodEnumeration and was dropped on export.",
+                        source.getNetexId(), method.value());
             }
         }
     }
