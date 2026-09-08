@@ -6,7 +6,7 @@ import com.google.pubsub.v1.PubsubMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -27,7 +27,7 @@ import java.util.concurrent.TimeoutException;
  * {@link WriteJobTimeoutSweeper} times it out.
  */
 @Component
-@ConditionalOnProperty(name = "tiamat.write-api.transport", havingValue = "pubsub")
+@Conditional(OnPubSubWriteTransport.class)
 public class PubSubWriteJobPublisher implements WriteJobPublisher {
 
     private static final Logger logger = LoggerFactory.getLogger(PubSubWriteJobPublisher.class);
@@ -62,12 +62,19 @@ public class PubSubWriteJobPublisher implements WriteJobPublisher {
             String messageId = pubSubTemplate.publish(topic, pubsubMessage)
                     .get(publishTimeoutSeconds, TimeUnit.SECONDS);
             logger.debug("Published write job {} to {} as message {}", message.jobId(), topic, messageId);
+        } catch (TimeoutException e) {
+            // The message can still reach the broker, so this returns and the job stays
+            // PROCESSING. A rejection here says nothing was written. If the message does arrive,
+            // that is false, and the caller resubmits and gets a second stop place.
+            logger.warn("Publishing write job {} to {} took longer than {}s. The job stays "
+                            + "PROCESSING until it completes or times out.",
+                    message.jobId(), topic, publishTimeoutSeconds, e);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new WriteJobRejectedException("Interrupted while publishing the write job.", e);
-        } catch (ExecutionException | TimeoutException e) {
-            // Reported as the in-process transport reports a full queue, so the caller does not
-            // learn which transport failed to take the job.
+        } catch (ExecutionException e) {
+            // The broker answered and refused, so nothing has the message. Reported as a full
+            // queue, so the caller does not learn which transport failed to take the job.
             throw new WriteJobRejectedException("Could not hand the write job to the broker.", e);
         }
     }
