@@ -63,6 +63,7 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
         mapVehicleEntrancesFromNetex(parking, parking2, context);
         mapInfoLinksFromNetex(parking, parking2);
         mapAvailabilityConditionsFromNetex(parking, parking2);
+        mapAlternativeNamesFromNetex(parking, parking2);
     }
 
     @Override
@@ -87,6 +88,7 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
         mapVehicleEntrancesToNetex(tiamatParking, netexParking, context);
         mapInfoLinksToNetex(tiamatParking, netexParking);
         mapAvailabilityConditionsToNetex(tiamatParking, netexParking);
+        mapAlternativeNamesToNetex(tiamatParking, netexParking);
     }
 
     /**
@@ -439,6 +441,63 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
 
             validityConditionEntries.add(OBJECT_FACTORY.createAvailabilityCondition(availabilityCondition));
             index++;
+        }
+    }
+
+    /**
+     * `alternativeNames` is inherited on both the NeTEx (`SiteElement_VersionStructure`) and
+     * Tiamat (`SiteElement`) sides, but — same as `StopPlaceMapper`/`QuayMapper` — Orika's
+     * `byDefault()` field matching does not auto-invoke `AlternativeNamesConverter` for it, so a
+     * Parking-specific mapper method is needed. Only non-empty names are carried over, mirroring
+     * `StopPlaceMapper.mapAtoB`.
+     */
+    private void mapAlternativeNamesFromNetex(Parking source, org.rutebanken.tiamat.model.Parking target) {
+        if (source.getAlternativeNames() == null
+                || source.getAlternativeNames().getAlternativeName() == null
+                || source.getAlternativeNames().getAlternativeName().isEmpty()) {
+            return;
+        }
+
+        List<org.rutebanken.tiamat.model.AlternativeName> alternativeNames = new ArrayList<>();
+        for (org.rutebanken.netex.model.AlternativeName netexAltName : source.getAlternativeNames().getAlternativeName()) {
+            if (netexAltName != null
+                    && netexAltName.getName() != null
+                    && netexAltName.getName().getValue() != null
+                    && !netexAltName.getName().getValue().isEmpty()) {
+                org.rutebanken.tiamat.model.AlternativeName tiamatAltName = new org.rutebanken.tiamat.model.AlternativeName();
+                mapperFacade.map(netexAltName, tiamatAltName);
+                alternativeNames.add(tiamatAltName);
+            }
+        }
+
+        if (!alternativeNames.isEmpty()) {
+            target.getAlternativeNames().addAll(alternativeNames);
+        }
+    }
+
+    private void mapAlternativeNamesToNetex(org.rutebanken.tiamat.model.Parking source, Parking target) {
+        if (source.getAlternativeNames() == null || source.getAlternativeNames().isEmpty()) {
+            return;
+        }
+
+        List<org.rutebanken.netex.model.AlternativeName> netexAlternativeNames = new ArrayList<>();
+        for (org.rutebanken.tiamat.model.AlternativeName alternativeName : source.getAlternativeNames()) {
+            if (alternativeName != null
+                    && alternativeName.getName() != null
+                    && alternativeName.getName().getValue() != null
+                    && !alternativeName.getName().getValue().isEmpty()) {
+                org.rutebanken.netex.model.AlternativeName netexAltName = new org.rutebanken.netex.model.AlternativeName();
+                mapperFacade.map(alternativeName, netexAltName);
+                netexAltName.setId(alternativeName.getNetexId());
+                netexAlternativeNames.add(netexAltName);
+            }
+        }
+
+        if (!netexAlternativeNames.isEmpty()) {
+            org.rutebanken.netex.model.AlternativeNames_RelStructure alternativeNamesRelStructure =
+                    new org.rutebanken.netex.model.AlternativeNames_RelStructure();
+            alternativeNamesRelStructure.getAlternativeName().addAll(netexAlternativeNames);
+            target.setAlternativeNames(alternativeNamesRelStructure);
         }
     }
 }

@@ -23,6 +23,7 @@ import org.rutebanken.tiamat.auth.AuthorizationService;
 import org.rutebanken.tiamat.model.AccessModeEnumeration;
 import org.rutebanken.tiamat.model.AccessibilityAssessment;
 import org.rutebanken.tiamat.model.AccessibilityLimitation;
+import org.rutebanken.tiamat.model.AlternativeName;
 import org.rutebanken.tiamat.model.AvailabilityCondition;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.EntranceEnumeration;
@@ -47,9 +48,11 @@ import org.rutebanken.tiamat.model.SiteRefStructure;
 import org.rutebanken.tiamat.model.TypeOfInfolinkEnumeration;
 import org.rutebanken.tiamat.repository.ParkingRepository;
 import org.rutebanken.tiamat.rest.graphql.mappers.AccessibilityLimitationMapper;
+import org.rutebanken.tiamat.rest.graphql.mappers.AlternativeNameMapper;
 import org.rutebanken.tiamat.rest.graphql.mappers.GeometryMapper;
 import org.rutebanken.tiamat.rest.graphql.mappers.PlaceEquipmentMapper;
 import org.rutebanken.tiamat.rest.graphql.mappers.ValidBetweenMapper;
+import org.rutebanken.tiamat.service.AlternativeNameUpdater;
 import org.rutebanken.tiamat.versioning.VersionCreator;
 import org.rutebanken.tiamat.versioning.save.ParkingVersionedSaverService;
 import org.slf4j.Logger;
@@ -73,6 +76,7 @@ import java.util.stream.Collectors;
 
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ACCESSIBILITY_ASSESSMENT;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ACCESS_MODES;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ALTERNATIVE_NAMES;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.AVAILABILITY_CONDITIONS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.BOOKING_URL;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.DAY_OFFSET;
@@ -151,6 +155,12 @@ class ParkingUpdater implements DataFetcher {
 
     @Autowired
     private PlaceEquipmentMapper placeEquipmentMapper;
+
+    @Autowired
+    private AlternativeNameMapper alternativeNameMapper;
+
+    @Autowired
+    private AlternativeNameUpdater alternativeNameUpdater;
 
     @Override
     public Object get(DataFetchingEnvironment environment) {
@@ -363,6 +373,16 @@ class ParkingUpdater implements DataFetcher {
             // Present in the input means the client intends to write it, as in SiteElementMapper.
             isUpdated = true;
             updatedParking.setPlaceEquipments(placeEquipment.get());
+        }
+
+        if (input.get(ALTERNATIVE_NAMES) != null) {
+            List<AlternativeName> alternativeNames = alternativeNameMapper.mapAlternativeNames((List) input.get(ALTERNATIVE_NAMES));
+            // updateAlternativeNames always replaces the stored list (matching incoming entries
+            // against existing ones by name+nameType to keep their identity) — same convention
+            // as availabilityConditions/vehicleEntrances above, and the same helper
+            // SiteElementMapper uses for StopPlace/Quay.
+            alternativeNameUpdater.updateAlternativeNames(updatedParking, alternativeNames);
+            isUpdated = true;
         }
 
         if (input.get(ACCESSIBILITY_ASSESSMENT) != null) {
