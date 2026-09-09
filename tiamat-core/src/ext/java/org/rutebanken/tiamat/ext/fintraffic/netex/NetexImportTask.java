@@ -1,9 +1,12 @@
 package org.rutebanken.tiamat.ext.fintraffic.netex;
 
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
+import org.rutebanken.tiamat.importer.FareZoneFrameSource;
 import org.rutebanken.tiamat.importer.ImportParams;
 import org.rutebanken.tiamat.importer.ImportType;
+import org.rutebanken.tiamat.importer.PublicationDeliveryFareFrameImporter;
 import org.rutebanken.tiamat.importer.PublicationDeliveryImporter;
+import org.rutebanken.tiamat.importer.PublicationDeliveryTariffZoneImporter;
 import org.rutebanken.tiamat.rest.netex.publicationdelivery.PublicationDeliveryUnmarshaller;
 import org.rutebanken.tiamat.service.BlobStoreService;
 import org.slf4j.Logger;
@@ -25,12 +28,24 @@ import java.util.function.IntConsumer;
 /**
  * Imports a single NeTEx file into Tiamat and shuts down the application when done.
  * <p>
- * All three environment variables are required:
+ * Three environment variables are required:
  * <ul>
  *   <li>{@code NETEX_S3_KEY} — S3 object key to import, or a local file path
  *       ({@code /abs/path}, {@code ./rel/path}, {@code file://...}) for local testing</li>
  *   <li>{@code NETEX_IMPORT_TYPE} — import mode, e.g. {@code INITIAL} or {@code MERGE}</li>
  *   <li>{@code NETEX_DISABLE_PRE_POST_PROCESSING} — {@code true} or {@code false}</li>
+ * </ul>
+ * Two further variables are optional and select which importer the delivery is routed to,
+ * mirroring the {@code importOnlyTariffZones} and {@code fareZoneFrameSource} query
+ * parameters of the NeTEx import REST endpoint:
+ * <ul>
+ *   <li>{@code NETEX_IMPORT_ONLY_TARIFF_ZONES} — {@code true} imports only tariff zones,
+ *       fare zones and groups of tariff zones from the SiteFrame, ignoring stop places,
+ *       topographic places, parkings and path links. Defaults to {@code false}.</li>
+ *   <li>{@code NETEX_FARE_ZONE_FRAME_SOURCE} — {@code SITE_FRAME} (default) or
+ *       {@code FARE_FRAME}. {@code FARE_FRAME} imports fare zones from an accompanying
+ *       FareFrame only. Ignored when {@code NETEX_IMPORT_ONLY_TARIFF_ZONES} is
+ *       {@code true}.</li>
  * </ul>
  * On completion, writes {@code done} or {@code failed} to {@value #STATUS_S3_KEY} in S3
  * (skipped for local file paths), then calls {@code System.exit}.
@@ -45,6 +60,8 @@ public class NetexImportTask implements ApplicationRunner {
     static final String ENV_S3_KEY = "NETEX_S3_KEY";
     static final String ENV_IMPORT_TYPE = "NETEX_IMPORT_TYPE";
     static final String ENV_DISABLE_PRE_POST_PROCESSING = "NETEX_DISABLE_PRE_POST_PROCESSING";
+    static final String ENV_IMPORT_ONLY_TARIFF_ZONES = "NETEX_IMPORT_ONLY_TARIFF_ZONES";
+    static final String ENV_FARE_ZONE_FRAME_SOURCE = "NETEX_FARE_ZONE_FRAME_SOURCE";
     static final String STATUS_S3_KEY = "netex/processing/status";
     static final String STATUS_DONE = "done";
     static final String STATUS_FAILED = "failed";
@@ -52,14 +69,18 @@ public class NetexImportTask implements ApplicationRunner {
     private final BlobStoreService blobStoreService;
     private final PublicationDeliveryUnmarshaller unmarshaller;
     private final PublicationDeliveryImporter importer;
+    private final PublicationDeliveryTariffZoneImporter tariffZoneImporter;
+    private final PublicationDeliveryFareFrameImporter fareFrameImporter;
     private final IntConsumer exitHandler;
 
     /** Production constructor — uses {@code System::exit}. */
     public NetexImportTask(
             BlobStoreService blobStoreService,
             PublicationDeliveryUnmarshaller unmarshaller,
-            PublicationDeliveryImporter importer) {
-        this(blobStoreService, unmarshaller, importer, System::exit);
+            PublicationDeliveryImporter importer,
+            PublicationDeliveryTariffZoneImporter tariffZoneImporter,
+            PublicationDeliveryFareFrameImporter fareFrameImporter) {
+        this(blobStoreService, unmarshaller, importer, tariffZoneImporter, fareFrameImporter, System::exit);
     }
 
     /** Full constructor — {@code exitHandler} is injectable for testing. */
@@ -67,10 +88,14 @@ public class NetexImportTask implements ApplicationRunner {
             BlobStoreService blobStoreService,
             PublicationDeliveryUnmarshaller unmarshaller,
             PublicationDeliveryImporter importer,
+            PublicationDeliveryTariffZoneImporter tariffZoneImporter,
+            PublicationDeliveryFareFrameImporter fareFrameImporter,
             IntConsumer exitHandler) {
         this.blobStoreService = blobStoreService;
         this.unmarshaller = unmarshaller;
         this.importer = importer;
+        this.tariffZoneImporter = tariffZoneImporter;
+        this.fareFrameImporter = fareFrameImporter;
         this.exitHandler = exitHandler;
     }
 
@@ -84,8 +109,10 @@ public class NetexImportTask implements ApplicationRunner {
             return;
         }
 
-        logger.info("Starting NeTEx import: key={}, importType={}, disablePrePostProcessing={}, source={}",
+        logger.info("Starting NeTEx import: key={}, importType={}, disablePrePostProcessing={}, "
+                        + "importOnlyTariffZones={}, fareZoneFrameSource={}, source={}",
                 config.s3Key(), config.importType(), config.disablePrePostProcessing(),
+                config.importOnlyTariffZones(), config.fareZoneFrameSource(),
                 config.localFile() ? "local file" : "S3");
 
         int exitCode = 1;
@@ -93,7 +120,7 @@ public class NetexImportTask implements ApplicationRunner {
         try {
             InputStream inputStream = openSource(config.s3Key(), config.localFile());
             PublicationDeliveryStructure delivery = unmarshal(inputStream);
-            runImport(delivery, config.importType(), config.disablePrePostProcessing());
+            runImport(delivery, config);
             logSuccess(config.s3Key(), config.importType(), Duration.between(start, Instant.now()));
             writeStatus(STATUS_DONE, config.localFile());
             exitCode = 0;
@@ -110,7 +137,15 @@ public class NetexImportTask implements ApplicationRunner {
         String s3Key = requireEnv(ENV_S3_KEY);
         ImportType importType = requireImportType(requireEnv(ENV_IMPORT_TYPE));
         boolean disablePrePostProcessing = "true".equalsIgnoreCase(requireEnv(ENV_DISABLE_PRE_POST_PROCESSING));
-        return new ImportConfig(s3Key, importType, disablePrePostProcessing, isLocalPath(s3Key));
+        boolean importOnlyTariffZones = "true".equalsIgnoreCase(optionalEnv(ENV_IMPORT_ONLY_TARIFF_ZONES));
+        FareZoneFrameSource fareZoneFrameSource = resolveFareZoneFrameSource(optionalEnv(ENV_FARE_ZONE_FRAME_SOURCE));
+        return new ImportConfig(s3Key, importType, disablePrePostProcessing, importOnlyTariffZones,
+                fareZoneFrameSource, isLocalPath(s3Key));
+    }
+
+    private String optionalEnv(String name) {
+        String value = getenv(name);
+        return value == null || value.isBlank() ? null : value;
     }
 
     private String requireEnv(String name) {
@@ -131,7 +166,22 @@ public class NetexImportTask implements ApplicationRunner {
         return type;
     }
 
-    private record ImportConfig(String s3Key, ImportType importType, boolean disablePrePostProcessing, boolean localFile) {}
+    private static FareZoneFrameSource resolveFareZoneFrameSource(String value) {
+        if (value == null) {
+            return FareZoneFrameSource.SITE_FRAME;
+        }
+        try {
+            return FareZoneFrameSource.valueOf(value.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            logger.error("Unknown fare zone frame source '{}'. Valid values: {}. Aborting.",
+                    value, Arrays.toString(FareZoneFrameSource.values()));
+            throw new IllegalStateException("Invalid fare zone frame source: " + value);
+        }
+    }
+
+    private record ImportConfig(String s3Key, ImportType importType, boolean disablePrePostProcessing,
+                                boolean importOnlyTariffZones, FareZoneFrameSource fareZoneFrameSource,
+                                boolean localFile) {}
 
     private InputStream openSource(String s3Key, boolean localFile) throws Exception {
         if (localFile) {
@@ -156,14 +206,28 @@ public class NetexImportTask implements ApplicationRunner {
         return unmarshaller.unmarshal(inputStream);
     }
 
-    private void runImport(PublicationDeliveryStructure delivery, ImportType importType,
-                           boolean disablePrePostProcessing) throws Exception {
+    private void runImport(PublicationDeliveryStructure delivery, ImportConfig config) throws Exception {
         ImportParams params = new ImportParams();
-        params.importType = importType;
-        params.disablePreAndPostProcessing = disablePrePostProcessing;
-        logger.info("Running import (importType={}, disablePrePostProcessing={})...",
-                importType, disablePrePostProcessing);
-        importer.importPublicationDelivery(delivery, params);
+        params.importType = config.importType();
+        params.disablePreAndPostProcessing = config.disablePrePostProcessing();
+        params.importOnlyTariffZones = config.importOnlyTariffZones();
+        params.fareZoneFrameSource = config.fareZoneFrameSource();
+
+        // Routing mirrors ImportResource#importPublicationDelivery so that the task and the
+        // REST endpoint behave identically for the same set of import parameters.
+        if (config.importOnlyTariffZones()) {
+            logger.info("Running import of tariff zones only from SiteFrame (importType={}, disablePrePostProcessing={})...",
+                    config.importType(), config.disablePrePostProcessing());
+            tariffZoneImporter.importPublicationDelivery(delivery, params);
+        } else if (config.fareZoneFrameSource() == FareZoneFrameSource.FARE_FRAME) {
+            logger.info("Running import of fare zones from FareFrame only (importType={}, disablePrePostProcessing={})...",
+                    config.importType(), config.disablePrePostProcessing());
+            fareFrameImporter.importPublicationDelivery(delivery, params);
+        } else {
+            logger.info("Running full import from SiteFrame (importType={}, disablePrePostProcessing={})...",
+                    config.importType(), config.disablePrePostProcessing());
+            importer.importPublicationDelivery(delivery, params);
+        }
     }
 
     private static void logSuccess(String s3Key, ImportType importType, Duration elapsed) {
