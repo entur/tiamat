@@ -42,16 +42,11 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 /**
  * Regression tests for {@code importType=INITIAL} handling of {@link Parking}.
  * <p>
- * These properties are what the Liipi park-and-ride migration (DPO-4802) relies on to
- * preserve deterministic, prefix-namespaced ids (e.g. {@code FSR:Parking:<facilityId>}) across
- * repeated imports. The prefix used here must always track {@code netex.validPrefix} (which
- * defaults to {@code NSR} and is not overridden in the test profile) rather than a specific
- * deployment's value - see DPO-4956 and {@code generated-docs/plan_DPO-4956-initial-import-tests.md}
- * in the fintraffic workspace.
- * <p>
- * All fixtures here use fields already present in core Tiamat (upstream {@code entur/master}) -
- * none depend on the Fintraffic {@code src/ext} extensions, since this class targets
- * {@code entur/tiamat} directly.
+ * These properties are what a bulk park-and-ride data migration relies on to preserve
+ * deterministic, prefix-namespaced ids (e.g. {@code NSR:Parking:<sourceId>}) across repeated
+ * imports. The prefix used here always tracks {@code netex.validPrefix} (which defaults to
+ * {@code NSR} and is not overridden in the test profile) rather than any specific deployment's
+ * value.
  */
 public class ParkingInitialImportTest extends TiamatIntegrationTest {
 
@@ -116,12 +111,12 @@ public class ParkingInitialImportTest extends TiamatIntegrationTest {
                 .toList();
     }
 
-    /** T1 - covers R1: a valid-prefix, numeric-postfix id survives INITIAL import verbatim. */
+    /** A valid-prefix, numeric-postfix id survives INITIAL import verbatim. */
     @Test
     public void initialImportPreservesIdWithValidPrefixAndNumericPostfix() throws JAXBException, IOException, SAXException {
         persistParentStopPlace();
 
-        PublicationDeliveryStructure response = importInitial(netexParking("NSR:Parking:99", "Liipi 1"));
+        PublicationDeliveryStructure response = importInitial(netexParking("NSR:Parking:99", "Parking 1"));
 
         List<Parking> parkings = extractParkings(response);
         assertThat(parkings).hasSize(1);
@@ -132,11 +127,11 @@ public class ParkingInitialImportTest extends TiamatIntegrationTest {
     }
 
     /**
-     * T2 - covers R2: claiming a numeric id under the valid prefix advances Tiamat's gapless
-     * sequence for Parking, exactly as it would for a Tiamat-minted id. This matters because
-     * production's Parking table currently has very few rows, so an id claimed by the Liipi
-     * import sits in the same low numeric range Tiamat's own auto-generator would otherwise
-     * hand out - see the id-collision race window in plan_liipi-data-import.md.
+     * Claiming a numeric id under the valid prefix advances Tiamat's gapless sequence for
+     * Parking, exactly as it would for a Tiamat-minted id. This matters when the Parking table
+     * holds few rows: an id claimed by an import then sits in the same low numeric range
+     * Tiamat's own auto-generator would otherwise hand out, so failing to advance the sequence
+     * would open a collision window.
      */
     @Test
     public void initialImportOfNumericIdAdvancesGaplessSequence() throws JAXBException, IOException, SAXException {
@@ -156,26 +151,26 @@ public class ParkingInitialImportTest extends TiamatIntegrationTest {
                 .isEqualTo("NSR:Parking:2");
     }
 
-    /** T3 - covers R3: an explicit imported-id key value survives the import untouched. */
+    /** An explicit imported-id key value survives the import untouched. */
     @Test
     public void initialImportPreservesImportedIdKeyValue() throws JAXBException, IOException, SAXException {
         persistParentStopPlace();
 
         PublicationDeliveryStructure response = importInitial(
-                withImportedId(netexParking("NSR:Parking:5", "Liipi facility"), "LIIPI:Facility:5"));
+                withImportedId(netexParking("NSR:Parking:5", "Parking facility"), "XYZ:Facility:5"));
 
         List<Parking> parkings = extractParkings(response);
         assertThat(parkings).hasSize(1);
-        assertThat(importedIdValue(parkings.get(0))).contains("LIIPI:Facility:5");
+        assertThat(importedIdValue(parkings.get(0))).contains("XYZ:Facility:5");
     }
 
-    /** T4 - covers R4 and R5: re-importing the same document is idempotent (one row, version bumped). */
+    /** Re-importing the same document is idempotent (one row, version bumped). */
     @Test
     public void initialImportIsIdempotentOnReRun() throws JAXBException, IOException, SAXException {
         persistParentStopPlace();
 
-        importInitial(netexParking("NSR:Parking:7", "Liipi facility"));
-        importInitial(netexParking("NSR:Parking:7", "Liipi facility"));
+        importInitial(netexParking("NSR:Parking:7", "Parking facility"));
+        importInitial(netexParking("NSR:Parking:7", "Parking facility"));
 
         List<org.rutebanken.tiamat.model.Parking> all = parkingRepository.findAll().stream()
                 .filter(p -> "NSR:Parking:7".equals(p.getNetexId()))
@@ -187,12 +182,12 @@ public class ParkingInitialImportTest extends TiamatIntegrationTest {
         assertThat(all.get(0).getVersion()).isEqualTo(3);
     }
 
-    /** T5 - covers R6: a field present in the first import but absent from the second is dropped (full-replace). */
+    /** A field present in the first import but absent from the second is dropped (full-replace). */
     @Test
     public void initialReImportRemovesFieldAbsentFromSecondDocument() throws JAXBException, IOException, SAXException {
         persistParentStopPlace();
 
-        Parking withCapacity = netexParking("NSR:Parking:9", "Liipi facility")
+        Parking withCapacity = netexParking("NSR:Parking:9", "Parking facility")
                 .withTotalCapacity(BigInteger.TEN)
                 .withPaymentMethods(PaymentMethodEnumeration.CASH);
         importInitial(withCapacity);
@@ -200,21 +195,21 @@ public class ParkingInitialImportTest extends TiamatIntegrationTest {
         org.rutebanken.tiamat.model.Parking afterFirstImport = parkingRepository.findFirstByNetexIdOrderByVersionDesc("NSR:Parking:9");
         assertThat(afterFirstImport.getTotalCapacity()).isEqualTo(BigInteger.TEN);
 
-        Parking withoutCapacity = netexParking("NSR:Parking:9", "Liipi facility");
+        Parking withoutCapacity = netexParking("NSR:Parking:9", "Parking facility");
         importInitial(withoutCapacity);
 
         org.rutebanken.tiamat.model.Parking afterSecondImport = parkingRepository.findFirstByNetexIdOrderByVersionDesc("NSR:Parking:9");
         assertThat(afterSecondImport.getTotalCapacity()).as("field absent from the re-imported document must be dropped").isNull();
     }
 
-    /** T6 - covers R7: a batch of several parkings sharing a parent stop place all import successfully. */
+    /** A batch of several parkings sharing a parent stop place all import successfully. */
     @Test
     public void initialImportOfMultipleParkingsImportsAll() throws JAXBException, IOException, SAXException {
         persistParentStopPlace();
 
         Parking[] parkings = new Parking[10];
         for (int i = 0; i < parkings.length; i++) {
-            parkings[i] = netexParking("NSR:Parking:" + (100 + i), "Liipi facility " + i);
+            parkings[i] = netexParking("NSR:Parking:" + (100 + i), "Parking facility " + i);
         }
 
         PublicationDeliveryStructure response = importInitial(parkings);
@@ -230,10 +225,10 @@ public class ParkingInitialImportTest extends TiamatIntegrationTest {
     }
 
     /**
-     * T7 - covers R8: contrast case. A foreign-prefixed id is not claimable, so it is demoted to
-     * an imported-id key value and a new gapless id is minted instead - this is the branch that
-     * makes T1's assertion meaningful (proves the valid-prefix short-circuit, rather than every
-     * id surviving import regardless of prefix).
+     * Contrast case. A foreign-prefixed id is not claimable, so it is demoted to an imported-id
+     * key value and a new gapless id is minted instead - this is the branch that makes
+     * {@link #initialImportPreservesIdWithValidPrefixAndNumericPostfix} meaningful (it proves the
+     * valid-prefix short-circuit, rather than every id surviving import regardless of prefix).
      */
     @Test
     public void initialImportOfForeignPrefixReplacesIdAndRecordsOriginal() throws JAXBException, IOException, SAXException {
@@ -248,19 +243,17 @@ public class ParkingInitialImportTest extends TiamatIntegrationTest {
     }
 
     /**
-     * T8 - covers R9: a known-limitation regression guard. A valid-prefix id with a non-numeric
-     * postfix (the migration's original, now-abandoned id scheme, e.g. FSR:Parking:liipi-1) is
-     * not silently accepted or silently demoted - it fails the import outright, because
-     * NetexIdProvider.claimId() unconditionally parses the postfix as a Long once the prefix has
-     * matched. This documents the exact defect found while writing T1 against the old scheme, so
-     * the same mistake is not reintroduced unnoticed. See
-     * digitraffic-tis-parking-netex-migration PR #14 and plan_liipi-data-import.md.
+     * Known-limitation regression guard. A valid-prefix id with a non-numeric postfix
+     * (e.g. {@code NSR:Parking:abc-1}) is neither silently accepted nor silently demoted - it
+     * fails the import outright, because {@code NetexIdProvider.claimId()} unconditionally parses
+     * the postfix as a {@code Long} once the prefix has matched. Producers that namespace ids
+     * with a non-numeric postfix must therefore use a foreign prefix instead.
      */
     @Test
     public void initialImportOfValidPrefixWithNonNumericPostfixThrows() {
         persistParentStopPlace();
 
-        assertThatThrownBy(() -> importInitial(netexParking("NSR:Parking:liipi-1", "Liipi facility")))
+        assertThatThrownBy(() -> importInitial(netexParking("NSR:Parking:abc-1", "Parking facility")))
                 .hasRootCauseInstanceOf(NumberFormatException.class);
     }
 }
