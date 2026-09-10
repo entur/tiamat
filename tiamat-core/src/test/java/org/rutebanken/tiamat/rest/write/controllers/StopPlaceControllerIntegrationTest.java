@@ -174,6 +174,37 @@ public class StopPlaceControllerIntegrationTest extends TiamatIntegrationTest {
         assertThat(finalJob.failure().message()).contains("notAValidTag");
     }
 
+    /**
+     * A create and an update already refuse a multimodal stop place. A delete did not, so the one
+     * multimodal operation this API performed was the destructive one: the parent was terminated
+     * and every child kept a reference to it. Issue #364 defines what a delete does with the
+     * children, and until then the whole set is refused.
+     */
+    @Test
+    public void deleteRefusesAParentStopPlace() throws InterruptedException {
+        StopPlace parent = new StopPlace(new EmbeddableMultilingualString("Parent"));
+        parent.setParentStopPlace(true);
+        parent.setValidBetween(new ValidBetween(Instant.now()));
+        StopPlace saved = stopPlaceRepository.save(parent);
+
+        ResponseEntity<StopPlaceJobDto> response = restTemplate.exchange(
+                WRITE_ENDPOINT + "/" + saved.getNetexId(),
+                HttpMethod.DELETE,
+                null,
+                StopPlaceJobDto.class);
+
+        StopPlaceJobDto job = awaitJobCompletion(response.getBody().jobId());
+
+        assertThat(job.status()).isEqualTo(JobStatus.FAILED);
+        assertThat(job.failure().reasonCode()).isEqualTo(JobFailureReason.INVALID_PAYLOAD);
+        assertThat(job.failure().message()).contains("Multimodal stop place deletion");
+
+        Long stillCurrent = written(saved.getNetexId(), StopPlace::getVersion);
+        assertThat(stillCurrent)
+                .as("the parent keeps the version it had, so nothing terminated it")
+                .isEqualTo(saved.getVersion());
+    }
+
     @Test
     public void deleteStopPlaceReturnsAcceptedWithProcessingJob() throws InterruptedException {
         StopPlace stopPlace = new StopPlace(
