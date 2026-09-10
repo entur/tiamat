@@ -9,8 +9,8 @@ import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.rutebanken.tiamat.model.ValidBetween;
-import org.rutebanken.tiamat.model.job.AsyncStopPlaceJobStatus;
 import org.rutebanken.tiamat.rest.write.dto.StopPlaceJobDto;
+import org.rutebanken.tiamat.rest.write.dto.JobStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.resttestclient.TestRestTemplate;
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
@@ -61,7 +61,7 @@ public class StopPlaceControllerAuthorizationTest extends TiamatIntegrationTest 
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
         StopPlaceJobDto finalJob = awaitJobCompletion(response.getBody().jobId());
-        assertThat(finalJob.status()).isEqualTo(AsyncStopPlaceJobStatus.FAILED);
+        assertThat(finalJob.status()).isEqualTo(JobStatus.FAILED);
         assertThat(finalJob.failure().message()).isEqualTo(ACCESS_DENIED_MESSAGE);
     }
 
@@ -84,7 +84,7 @@ public class StopPlaceControllerAuthorizationTest extends TiamatIntegrationTest 
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
         StopPlaceJobDto finalJob = awaitJobCompletion(response.getBody().jobId());
-        assertThat(finalJob.status()).isEqualTo(AsyncStopPlaceJobStatus.FAILED);
+        assertThat(finalJob.status()).isEqualTo(JobStatus.FAILED);
         assertThat(finalJob.failure().message()).isEqualTo(ACCESS_DENIED_MESSAGE);
     }
 
@@ -103,7 +103,7 @@ public class StopPlaceControllerAuthorizationTest extends TiamatIntegrationTest 
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
         StopPlaceJobDto finalJob = awaitJobCompletion(response.getBody().jobId());
-        assertThat(finalJob.status()).isEqualTo(AsyncStopPlaceJobStatus.FAILED);
+        assertThat(finalJob.status()).isEqualTo(JobStatus.FAILED);
         assertThat(finalJob.failure().message()).isEqualTo(ACCESS_DENIED_MESSAGE);
     }
 
@@ -127,7 +127,7 @@ public class StopPlaceControllerAuthorizationTest extends TiamatIntegrationTest 
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
         StopPlaceJobDto finalJob = awaitJobCompletion(response.getBody().jobId());
-        assertThat(finalJob.status()).isEqualTo(AsyncStopPlaceJobStatus.FAILED);
+        assertThat(finalJob.status()).isEqualTo(JobStatus.FAILED);
         assertThat(finalJob.failure().message()).isEqualTo(ACCESS_DENIED_MESSAGE);
     }
 
@@ -152,7 +152,7 @@ public class StopPlaceControllerAuthorizationTest extends TiamatIntegrationTest 
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
         StopPlaceJobDto finalJob = awaitJobCompletion(response.getBody().jobId());
-        assertThat(finalJob.status()).isEqualTo(AsyncStopPlaceJobStatus.FAILED);
+        assertThat(finalJob.status()).isEqualTo(JobStatus.FAILED);
         assertThat(finalJob.failure().message()).isEqualTo(ACCESS_DENIED_MESSAGE);
     }
 
@@ -173,7 +173,7 @@ public class StopPlaceControllerAuthorizationTest extends TiamatIntegrationTest 
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
         StopPlaceJobDto finalJob = awaitJobCompletion(response.getBody().jobId());
-        assertThat(finalJob.status()).isEqualTo(AsyncStopPlaceJobStatus.FAILED);
+        assertThat(finalJob.status()).isEqualTo(JobStatus.FAILED);
         assertThat(finalJob.failure().message()).isEqualTo(ACCESS_DENIED_MESSAGE);
     }
 
@@ -190,7 +190,7 @@ public class StopPlaceControllerAuthorizationTest extends TiamatIntegrationTest 
             ResponseEntity<StopPlaceJobDto> jobResponse =
                     restTemplate.getForEntity(jobUrl, StopPlaceJobDto.class);
             StopPlaceJobDto job = jobResponse.getBody();
-            if (job != null && job.status() != AsyncStopPlaceJobStatus.PROCESSING) {
+            if (job != null && job.status() != JobStatus.PROCESSING) {
                 return job;
             }
             Thread.sleep(200);
