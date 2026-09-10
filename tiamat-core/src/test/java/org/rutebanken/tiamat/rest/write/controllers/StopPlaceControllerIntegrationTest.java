@@ -14,10 +14,10 @@ import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.rutebanken.tiamat.model.ValidBetween;
-import org.rutebanken.tiamat.model.job.AsyncStopPlaceJobStatus;
 import org.rutebanken.tiamat.model.job.JobFailureReason;
 import org.rutebanken.tiamat.model.job.WrittenStopPlace;
 import org.rutebanken.tiamat.rest.write.dto.StopPlaceJobDto;
+import org.rutebanken.tiamat.rest.write.dto.JobStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -88,13 +88,13 @@ public class StopPlaceControllerIntegrationTest extends TiamatIntegrationTest {
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().jobId()).isNotNull();
         assertThat(response.getBody().status()).isEqualTo(
-            AsyncStopPlaceJobStatus.PROCESSING
+            JobStatus.PROCESSING
         );
 
         Long jobId = response.getBody().jobId();
         StopPlaceJobDto finalJob = awaitJobCompletion(jobId);
 
-        assertThat(finalJob.status()).isEqualTo(AsyncStopPlaceJobStatus.FINISHED);
+        assertThat(finalJob.status()).isEqualTo(JobStatus.FINISHED);
     }
 
     @Test
@@ -125,7 +125,7 @@ public class StopPlaceControllerIntegrationTest extends TiamatIntegrationTest {
         Long jobId = response.getBody().jobId();
         StopPlaceJobDto finalJob = awaitJobCompletion(jobId);
 
-        assertThat(finalJob.status()).isEqualTo(AsyncStopPlaceJobStatus.FAILED);
+        assertThat(finalJob.status()).isEqualTo(JobStatus.FAILED);
         assertThat(finalJob.failure().message()).contains(
             "Invalid stop place structure."
         );
@@ -149,7 +149,7 @@ public class StopPlaceControllerIntegrationTest extends TiamatIntegrationTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
         StopPlaceJobDto finalJob = awaitJobCompletion(response.getBody().jobId());
 
-        assertThat(finalJob.status()).isEqualTo(AsyncStopPlaceJobStatus.FAILED);
+        assertThat(finalJob.status()).isEqualTo(JobStatus.FAILED);
         assertThat(finalJob.failure().message()).contains("Malformed XML");
     }
 
@@ -170,7 +170,7 @@ public class StopPlaceControllerIntegrationTest extends TiamatIntegrationTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
         StopPlaceJobDto finalJob = awaitJobCompletion(response.getBody().jobId());
 
-        assertThat(finalJob.status()).isEqualTo(AsyncStopPlaceJobStatus.FAILED);
+        assertThat(finalJob.status()).isEqualTo(JobStatus.FAILED);
         assertThat(finalJob.failure().message()).contains("notAValidTag");
     }
 
@@ -196,13 +196,13 @@ public class StopPlaceControllerIntegrationTest extends TiamatIntegrationTest {
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().jobId()).isNotNull();
         assertThat(response.getBody().status()).isEqualTo(
-            AsyncStopPlaceJobStatus.PROCESSING
+            JobStatus.PROCESSING
         );
 
         Long jobId = response.getBody().jobId();
         StopPlaceJobDto finalJob = awaitJobCompletion(jobId);
 
-        assertThat(finalJob.status()).isEqualTo(AsyncStopPlaceJobStatus.FINISHED);
+        assertThat(finalJob.status()).isEqualTo(JobStatus.FINISHED);
     }
 
     /**
@@ -231,7 +231,7 @@ public class StopPlaceControllerIntegrationTest extends TiamatIntegrationTest {
 
         StopPlaceJobDto finalJob = awaitJobCompletion(response.getBody().jobId());
 
-        assertThat(finalJob.status()).isEqualTo(AsyncStopPlaceJobStatus.FAILED);
+        assertThat(finalJob.status()).isEqualTo(JobStatus.FAILED);
         assertThat(finalJob.failure().message())
                 .as("a constraint violation must not degrade to the generic reason")
                 .isEqualTo("A database constraint was violated. This may be due to invalid input data or a conflict with existing data.");
@@ -256,7 +256,7 @@ public class StopPlaceControllerIntegrationTest extends TiamatIntegrationTest {
 
         StopPlaceJobDto finalJob = awaitJobCompletion(response.getBody().jobId());
 
-        assertThat(finalJob.status()).isEqualTo(AsyncStopPlaceJobStatus.FAILED);
+        assertThat(finalJob.status()).isEqualTo(JobStatus.FAILED);
         assertThat(finalJob.failure().message()).contains("Cannot find stop place to terminate");
     }
 
@@ -295,13 +295,13 @@ public class StopPlaceControllerIntegrationTest extends TiamatIntegrationTest {
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().jobId()).isNotNull();
         assertThat(response.getBody().status()).isEqualTo(
-            AsyncStopPlaceJobStatus.PROCESSING
+            JobStatus.PROCESSING
         );
 
         Long jobId = response.getBody().jobId();
         StopPlaceJobDto finalJob = awaitJobCompletion(jobId);
 
-        assertThat(finalJob.status()).isEqualTo(AsyncStopPlaceJobStatus.FINISHED);
+        assertThat(finalJob.status()).isEqualTo(JobStatus.FINISHED);
     }
 
 
@@ -340,7 +340,7 @@ public class StopPlaceControllerIntegrationTest extends TiamatIntegrationTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
         StopPlaceJobDto finalJob = awaitJobCompletion(response.getBody().jobId());
 
-        assertThat(finalJob.status()).isEqualTo(AsyncStopPlaceJobStatus.FAILED);
+        assertThat(finalJob.status()).isEqualTo(JobStatus.FAILED);
         assertThat(finalJob.failure().message()).contains("NotAValidTag");
     }
 
@@ -580,7 +580,7 @@ public class StopPlaceControllerIntegrationTest extends TiamatIntegrationTest {
         Long jobId = response.getBody().jobId();
         StopPlaceJobDto finalJob = awaitJobCompletion(jobId);
 
-        assertThat(finalJob.status()).isEqualTo(AsyncStopPlaceJobStatus.FINISHED);
+        assertThat(finalJob.status()).isEqualTo(JobStatus.FINISHED);
 
         Instant updatedToDate = written(saved.getNetexId(), sp -> sp.getValidBetween() == null ? null : sp.getValidBetween().getToDate());
         assertThat(updatedToDate).as("a client supplied validity must not be kept on update").isNull();
@@ -644,7 +644,7 @@ public class StopPlaceControllerIntegrationTest extends TiamatIntegrationTest {
         Long jobId = response.getBody().jobId();
         StopPlaceJobDto finalJob = awaitJobCompletion(jobId);
 
-        assertThat(finalJob.status()).isEqualTo(AsyncStopPlaceJobStatus.FINISHED);
+        assertThat(finalJob.status()).isEqualTo(JobStatus.FINISHED);
 
         Long updatedAssessmentVersion = written(saved.getNetexId(), sp -> sp.getAccessibilityAssessment().getVersion());
         String updatedAssessmentId = written(saved.getNetexId(), sp -> sp.getAccessibilityAssessment().getNetexId());
@@ -667,7 +667,7 @@ public class StopPlaceControllerIntegrationTest extends TiamatIntegrationTest {
 
         StopPlaceJobDto firstJob = awaitJobCompletion(
                 putXml(updateXml(saved.getNetexId(), 1, "First Edit"), StopPlaceJobDto.class).getBody().jobId());
-        assertThat(firstJob.status()).isEqualTo(AsyncStopPlaceJobStatus.FINISHED);
+        assertThat(firstJob.status()).isEqualTo(JobStatus.FINISHED);
 
         ResponseEntity<StopPlaceJobDto> second =
                 putXml(updateXml(saved.getNetexId(), 1, "Second Edit"), StopPlaceJobDto.class);
@@ -678,7 +678,7 @@ public class StopPlaceControllerIntegrationTest extends TiamatIntegrationTest {
 
         StopPlaceJobDto secondJob = awaitJobCompletion(second.getBody().jobId());
 
-        assertThat(secondJob.status()).isEqualTo(AsyncStopPlaceJobStatus.FAILED);
+        assertThat(secondJob.status()).isEqualTo(JobStatus.FAILED);
         assertThat(secondJob.failure().reasonCode()).isEqualTo(JobFailureReason.STALE_VERSION);
         assertThat(secondJob.failure().currentVersion())
                 .as("the version to read again, without taking the number out of the message")
@@ -705,7 +705,7 @@ public class StopPlaceControllerIntegrationTest extends TiamatIntegrationTest {
 
         StopPlaceJobDto job = awaitJobCompletion(putXml(xml, StopPlaceJobDto.class).getBody().jobId());
 
-        assertThat(job.status()).isEqualTo(AsyncStopPlaceJobStatus.FAILED);
+        assertThat(job.status()).isEqualTo(JobStatus.FAILED);
         assertThat(job.failure().reasonCode()).isEqualTo(JobFailureReason.INVALID_PAYLOAD);
         assertThat(job.failure().currentVersion())
                 .as("only a stale version has a current version to report")
@@ -735,7 +735,7 @@ public class StopPlaceControllerIntegrationTest extends TiamatIntegrationTest {
 
         StopPlaceJobDto job = awaitJobCompletion(putXml(xml, StopPlaceJobDto.class).getBody().jobId());
 
-        assertThat(job.status()).isEqualTo(AsyncStopPlaceJobStatus.FAILED);
+        assertThat(job.status()).isEqualTo(JobStatus.FAILED);
         assertThat(job.failure().message())
                 .as("the message reaches the caller verbatim, so it is part of the contract")
                 .contains("version attribute must be a number")
@@ -751,7 +751,7 @@ public class StopPlaceControllerIntegrationTest extends TiamatIntegrationTest {
         StopPlaceJobDto job = awaitJobCompletion(
                 putXml(updateXml(saved.getNetexId(), 1, "Edited"), StopPlaceJobDto.class).getBody().jobId());
 
-        assertThat(job.status()).isEqualTo(AsyncStopPlaceJobStatus.FINISHED);
+        assertThat(job.status()).isEqualTo(JobStatus.FINISHED);
         String editedName = written(saved.getNetexId(), sp -> sp.getName().getValue());
         Long newVersion = written(saved.getNetexId(), StopPlace::getVersion);
         assertThat(editedName).isEqualTo("Edited");
@@ -778,7 +778,7 @@ public class StopPlaceControllerIntegrationTest extends TiamatIntegrationTest {
         StopPlaceJobDto created = awaitJobCompletion(
                 postXml(createXml, StopPlaceJobDto.class).getBody().jobId());
 
-        assertThat(created.status()).isEqualTo(AsyncStopPlaceJobStatus.FINISHED);
+        assertThat(created.status()).isEqualTo(JobStatus.FINISHED);
         WrittenStopPlace fromCreate = created.result().stopPlaces().getFirst();
         assertThat(fromCreate.netexId()).isNotNull();
         assertThat(fromCreate.version()).as("a create reports the version it produced").isEqualTo(1L);
@@ -789,7 +789,7 @@ public class StopPlaceControllerIntegrationTest extends TiamatIntegrationTest {
 
         assertThat(updated.status())
                 .as("the version from the create satisfies the precondition on the update")
-                .isEqualTo(AsyncStopPlaceJobStatus.FINISHED);
+                .isEqualTo(JobStatus.FINISHED);
         assertThat(updated.result().stopPlaces().getFirst().version())
                 .as("and the update reports its own version, so a third write needs no read either")
                 .isEqualTo(2L);
@@ -802,7 +802,7 @@ public class StopPlaceControllerIntegrationTest extends TiamatIntegrationTest {
         StopPlaceJobDto job = awaitJobCompletion(
                 putXml(updateXml(saved.getNetexId(), 1, "Edited"), StopPlaceJobDto.class).getBody().jobId());
 
-        assertThat(job.status()).isEqualTo(AsyncStopPlaceJobStatus.FINISHED);
+        assertThat(job.status()).isEqualTo(JobStatus.FINISHED);
         assertThat(job.failure()).isNull();
     }
 
@@ -820,7 +820,7 @@ public class StopPlaceControllerIntegrationTest extends TiamatIntegrationTest {
 
         StopPlaceJobDto job = awaitJobCompletion(response.getBody().jobId());
 
-        assertThat(job.status()).isEqualTo(AsyncStopPlaceJobStatus.FINISHED);
+        assertThat(job.status()).isEqualTo(JobStatus.FINISHED);
         WrittenStopPlace terminated = job.result().stopPlaces().getFirst();
         assertThat(terminated.netexId()).isEqualTo(saved.getNetexId());
         assertThat(terminated.submittedId())
@@ -870,7 +870,7 @@ public class StopPlaceControllerIntegrationTest extends TiamatIntegrationTest {
             StopPlaceJobDto job = jobResponse.getBody();
             if (
                 job != null &&
-                job.status() != AsyncStopPlaceJobStatus.PROCESSING
+                job.status() != JobStatus.PROCESSING
             ) {
                 return job;
             }

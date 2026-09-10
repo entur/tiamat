@@ -26,8 +26,7 @@ public record StopPlaceJobDto(
     @Schema(description = "ID of the job. Poll the job endpoint with this ID.", example = "88991")
     Long jobId,
 
-    @Schema(description = "PROCESSING while the job runs. FINISHED, FAILED or TIMED_OUT when it ends.")
-    AsyncStopPlaceJobStatus status,
+    JobStatus status,
 
     @Schema(description = "What the write produced. Present when the status is FINISHED.")
     WriteResult result,
@@ -60,7 +59,7 @@ public record StopPlaceJobDto(
     ) {}
 
     public static StopPlaceJobDto from(AsyncStopPlaceJob asyncStopPlaceJob) {
-        AsyncStopPlaceJobStatus status = reportedStatus(asyncStopPlaceJob.getStatus());
+        JobStatus status = reportedStatus(asyncStopPlaceJob.getStatus());
         return new StopPlaceJobDto(
             asyncStopPlaceJob.getId(),
             status,
@@ -69,16 +68,16 @@ public record StopPlaceJobDto(
         );
     }
 
-    private static WriteResult resultOf(AsyncStopPlaceJob job, AsyncStopPlaceJobStatus status) {
-        if (status != AsyncStopPlaceJobStatus.FINISHED) {
+    private static WriteResult resultOf(AsyncStopPlaceJob job, JobStatus status) {
+        if (status != JobStatus.FINISHED) {
             return null;
         }
         List<WrittenStopPlace> written = job.getWrittenStopPlaces();
         return new WriteResult(written == null ? List.of() : written);
     }
 
-    private static WriteFailure failureOf(AsyncStopPlaceJob job, AsyncStopPlaceJobStatus status) {
-        if (status != AsyncStopPlaceJobStatus.FAILED && status != AsyncStopPlaceJobStatus.TIMED_OUT) {
+    private static WriteFailure failureOf(AsyncStopPlaceJob job, JobStatus status) {
+        if (status != JobStatus.FAILED && status != JobStatus.TIMED_OUT) {
             return null;
         }
         return new WriteFailure(job.getReasonCode(), job.getReason(), job.getCurrentVersion());
@@ -86,12 +85,15 @@ public record StopPlaceJobDto(
 
     /**
      * IN_PROGRESS exists so a job can be claimed exactly once. That is an internal distinction, so
-     * clients continue to see a claimed job as PROCESSING rather than having the wire contract
-     * change for an implementation detail.
+     * a client sees a claimed job as PROCESSING. The switch is exhaustive, so a value added to the
+     * stored enum fails to compile here rather than reaching a client unannounced.
      */
-    private static AsyncStopPlaceJobStatus reportedStatus(AsyncStopPlaceJobStatus status) {
-        return status == AsyncStopPlaceJobStatus.IN_PROGRESS
-                ? AsyncStopPlaceJobStatus.PROCESSING
-                : status;
+    private static JobStatus reportedStatus(AsyncStopPlaceJobStatus status) {
+        return switch (status) {
+            case PROCESSING, IN_PROGRESS -> JobStatus.PROCESSING;
+            case FINISHED -> JobStatus.FINISHED;
+            case FAILED -> JobStatus.FAILED;
+            case TIMED_OUT -> JobStatus.TIMED_OUT;
+        };
     }
 }

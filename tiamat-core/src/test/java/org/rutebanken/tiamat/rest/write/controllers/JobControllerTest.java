@@ -8,6 +8,7 @@ import org.rutebanken.tiamat.model.job.JobFailureReason;
 import org.rutebanken.tiamat.model.job.WrittenStopPlace;
 import org.rutebanken.tiamat.writer.JobService;
 import org.rutebanken.tiamat.rest.write.dto.StopPlaceJobDto;
+import org.rutebanken.tiamat.rest.write.dto.JobStatus;
 
 import java.util.Optional;
 
@@ -37,7 +38,7 @@ public class JobControllerTest {
         StopPlaceJobDto result = jobController.getJobStatus(1L);
 
         assertThat(result.jobId()).isEqualTo(1L);
-        assertThat(result.status()).isEqualTo(AsyncStopPlaceJobStatus.FINISHED);
+        assertThat(result.status()).isEqualTo(JobStatus.FINISHED);
         assertThat(result.result().stopPlaces()).containsExactly(
             WrittenStopPlace.created("submitted-id", "NSR:StopPlace:1", 1L)
         );
@@ -56,7 +57,7 @@ public class JobControllerTest {
 
         StopPlaceJobDto result = jobController.getJobStatus(1L);
 
-        assertThat(result.status()).isEqualTo(AsyncStopPlaceJobStatus.FAILED);
+        assertThat(result.status()).isEqualTo(JobStatus.FAILED);
         assertThat(result.failure().message()).isEqualTo("Error");
         assertThat(result.failure().reasonCode()).isEqualTo(JobFailureReason.STALE_VERSION);
         assertThat(result.failure().currentVersion()).isEqualTo(4L);
@@ -78,7 +79,7 @@ public class JobControllerTest {
 
         StopPlaceJobDto result = jobController.getJobStatus(1L);
 
-        assertThat(result.status()).isEqualTo(AsyncStopPlaceJobStatus.PROCESSING);
+        assertThat(result.status()).isEqualTo(JobStatus.PROCESSING);
         assertThat(result.result()).isNull();
         assertThat(result.failure()).isNull();
     }
