@@ -1,12 +1,11 @@
--- Persists Parking.infoLinks (DPO-4810). Per decision 0c, infoLinks is declared @Transient
--- on GroupOfEntities_VersionStructure (matching NeTEx's own placement on the abstract
+-- Persists Parking.infoLinks. infoLinks is declared @Transient on
+-- GroupOfEntities_VersionStructure (matching NeTEx's own placement on the abstract
 -- GroupOfEntities_VersionStructure), and shadowed as a persisted @ElementCollection on
 -- Parking only, so exactly one collection table is created rather than one per subclass.
 --
--- typeOfInfoLink stores a single core enum value (uppercase, @Enumerated(STRING) per decision
--- 0g) even though NeTEx's InfoLinkStructure.typeOfInfoLink is an XML list attribute — only the
--- first declared value is persisted, matching every current producer (exactly one type is ever
--- supplied) and the shipped ext V4.
+-- typeOfInfoLink stores a single enum value (uppercase, @Enumerated(STRING)) even though
+-- NeTEx's InfoLinkStructure.typeOfInfoLink is an XML list attribute — only the first declared
+-- value is persisted, matching every current producer (exactly one type is ever supplied).
 
 CREATE TABLE parking_info_links (
     parking_id        bigint NOT NULL,

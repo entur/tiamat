@@ -109,9 +109,9 @@ public class ParkingGraphQLFieldCoverageTest {
 
     /**
      * Fields deliberately not exposed via GraphQL: either {@code @Transient} on the Tiamat
-     * model, out of scope for Fintraffic's Parking extension, or structural/internal fields
-     * with no meaningful GraphQL representation. A name belongs here only with a reason
-     * recorded in the comment above its group.
+     * model, out of scope for the park-and-ride use case this change covers, or
+     * structural/internal fields with no meaningful GraphQL representation. A name belongs
+     * here only with a reason recorded in the comment above its group.
      */
     private static final Set<String> KNOWINGLY_NOT_IN_GRAPHQL_SCHEMA = Set.of(
             // Capacity/layout and operational-flag fields with a real NeTEx representation

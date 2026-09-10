@@ -109,8 +109,8 @@ public class ParkingNetexMapperFieldCoverageTest {
 
     /**
      * Fields deliberately not mapped to/from NeTEx: either {@code @Transient} on the Tiamat
-     * model (so a mapped value would not survive a save/reload anyway), out of the scope
-     * Fintraffic's Parking extension actually needs, or genuinely without a NeTEx counterpart.
+     * model (so a mapped value would not survive a save/reload anyway), out of scope for the
+     * park-and-ride use case this change covers, or genuinely without a NeTEx counterpart.
      * A name belongs here only with a reason recorded in the comment above its group.
      */
     private static final Set<String> KNOWINGLY_NOT_MAPPED_TO_NETEX = Set.of(
