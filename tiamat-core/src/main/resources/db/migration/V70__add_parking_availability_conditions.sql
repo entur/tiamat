@@ -1,4 +1,4 @@
--- Persists Parking.availabilityConditions (DPO-4796): the parking's opening hours, modelled
+-- Persists Parking.availabilityConditions: the parking's opening hours, modelled
 -- after NeTEx's AvailabilityCondition. dayTypeRef is a ref-only value (matching the
 -- TariffZoneRef precedent), not an owned DayType entity.
 --
