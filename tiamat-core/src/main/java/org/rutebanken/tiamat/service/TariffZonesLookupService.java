@@ -79,53 +79,32 @@ public class TariffZonesLookupService {
                 stopPlace.setTariffZones(new HashSet<>());
             }
 
-            Set<String> refsBefore = mapToIdStrings(stopPlace.getTariffZones());
+            Set<TariffZoneRef> refs = stopPlace.getTariffZones();
+            Set<String> refsBefore = mapToIdStrings(refs);
 
             if(removeExistingReferences) {
-                stopPlace.getTariffZones().clear();
+                refs.clear();
             }
 
-            Set<TariffZoneRef> tariffZoneMatches = findTariffZones(stopPlace.getCentroid())
-                    .stream()
-                    .filter(tariffZone -> stopPlace.getTariffZones().isEmpty() || stopPlace.getTariffZones()
-                            .stream()
-                            .noneMatch(tariffZoneRef -> tariffZone.getNetexId().equals(tariffZoneRef.getRef()) && tariffZoneRef.getVersion().equals(String.valueOf(tariffZone.getVersion()))))
-                    .map(TariffZoneRef::new)
-                    .collect(toSet());
+            findTariffZones(stopPlace.getCentroid()).forEach(tariffZone -> refs.add(new TariffZoneRef(tariffZone)));
+            findImplicitFareZones(stopPlace.getCentroid()).forEach(fareZone -> refs.add(new TariffZoneRef(fareZone)));
+            fareZoneRepository.findValidExplicitStopsFareZones(stopPlace.getNetexId())
+                    .forEach(fareZone -> refs.add(new TariffZoneRef(fareZone)));
 
-            Set<TariffZoneRef> allMatches = new HashSet<>(tariffZoneMatches);
-
-            Set<TariffZoneRef> fareZoneMatches = findFareZones(stopPlace.getCentroid())
-                    .stream()
-                    .filter(fareZone -> stopPlace.getTariffZones().isEmpty() || isNoneMatch(stopPlace, fareZone))
-                    .map(TariffZoneRef::new)
-                    .collect(toSet());
-
-
-            allMatches.addAll(fareZoneMatches);
-
-            stopPlace.getTariffZones().addAll(allMatches);
-
-            Set<String> refsAfter = mapToIdStrings(stopPlace.getTariffZones());
+            Set<String> refsAfter = mapToIdStrings(refs);
 
             return !Sets.symmetricDifference(refsBefore, refsAfter).isEmpty();
         }
         return false;
     }
 
-    private boolean isNoneMatch(StopPlace stopPlace, FareZone fareZone) {
-        if (fareZone.getScopingMethod().equals(ScopingMethodEnumeration.IMPLICIT_SPATIAL_PROJECTION)) {
-            return stopPlace.getTariffZones()
-                    .stream()
-                    .noneMatch(tariffZoneRef -> fareZone.getNetexId().equals(tariffZoneRef.getRef()) && tariffZoneRef.getVersion().equals(String.valueOf(fareZone.getVersion())));
-        }
-        if (fareZone.getScopingMethod().equals(ScopingMethodEnumeration.EXPLICIT_STOPS) && !fareZone.getFareZoneMembers().isEmpty()) {
-            return fareZone.getFareZoneMembers().stream()
-                    .anyMatch(member -> member.getRef().equals(stopPlace.getNetexId()));
-        }
-        return true;
-
+    private List<FareZone> findImplicitFareZones(Point centroid) {
+        return findFareZones(centroid)
+                .stream()
+                .filter(fareZone -> ScopingMethodEnumeration.IMPLICIT_SPATIAL_PROJECTION.equals(fareZone.getScopingMethod()))
+                .collect(toList());
     }
+
     private Set<String> mapToIdStrings(Set<TariffZoneRef> tariffZoneRefs) {
         return tariffZoneRefs.stream().map(tzr -> tzr.getRef()).collect(toSet());
     }
