@@ -37,8 +37,20 @@ public class Parking
     protected String publicCode;
     @Transient
     protected MultilingualStringEntity label;
-    @Transient
+
+    @ElementCollection(targetClass = PaymentMethodEnumeration.class, fetch = FetchType.EAGER)
+    @Enumerated(EnumType.STRING)
     protected List<PaymentMethodEnumeration> paymentMethods;
+
+    @Enumerated(EnumType.STRING)
+    protected LightingEnumeration lighting;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    protected List<InfoLink> infoLinks;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    protected List<AvailabilityCondition> availabilityConditions;
+
     @Transient
     protected String defaultCurrency;
     @Transient
@@ -47,8 +59,9 @@ public class Parking
     protected List<String> cardsAccepted;
     @Transient
     protected PaymentByMobileStructure paymentByMobile;
-    @Transient
-    protected ParkingEntrancesForVehicles_RelStructure vehicleEntrances;
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    protected List<ParkingEntranceForVehicles> vehicleEntrances = new ArrayList<>();
 
     @Transient
     protected SitePathLinks_RelStructure pathLinks;
@@ -227,6 +240,41 @@ public class Parking
         return this.paymentMethods;
     }
 
+    @Override
+    public LightingEnumeration getLighting() {
+        return lighting;
+    }
+
+    @Override
+    public void setLighting(LightingEnumeration lighting) {
+        this.lighting = lighting;
+    }
+
+    @Override
+    public List<InfoLink> getInfoLinks() {
+        if (infoLinks == null) {
+            infoLinks = new ArrayList<>();
+        }
+        return this.infoLinks;
+    }
+
+    @Override
+    public void setInfoLinks(List<InfoLink> value) {
+        this.infoLinks = value;
+    }
+
+    public List<AvailabilityCondition> getAvailabilityConditions() {
+        if (availabilityConditions == null) {
+            availabilityConditions = new ArrayList<>();
+        }
+        return this.availabilityConditions;
+    }
+
+    public void setAvailabilityConditions(List<AvailabilityCondition> value) {
+        this.availabilityConditions = value;
+    }
+
+
     public String getDefaultCurrency() {
         return defaultCurrency;
     }
@@ -297,11 +345,14 @@ public class Parking
         this.parkingAreas = value;
     }
 
-    public ParkingEntrancesForVehicles_RelStructure getVehicleEntrances() {
+    public List<ParkingEntranceForVehicles> getVehicleEntrances() {
+        if (vehicleEntrances == null) {
+            vehicleEntrances = new ArrayList<>();
+        }
         return vehicleEntrances;
     }
 
-    public void setVehicleEntrances(ParkingEntrancesForVehicles_RelStructure value) {
+    public void setVehicleEntrances(List<ParkingEntranceForVehicles> value) {
         this.vehicleEntrances = value;
     }
 
@@ -319,6 +370,7 @@ public class Parking
                 .add("label", label)
                 .add("parkingPaymentProcess", parkingPaymentProcess)
                 .add("paymentMethods", paymentMethods)
+                .add("lighting", lighting)
                 .add("defaultCurrency", defaultCurrency)
                 .add("currenciesAccepted", currenciesAccepted)
                 .add("cardsAccepted", cardsAccepted)
