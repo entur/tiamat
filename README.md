@@ -10,6 +10,23 @@ Tiamat is created with technologies like Spring Boot, Hibernate, Postgis, Jersey
 * Assigns unique IDs to stop places (if desired).
 * Validates incoming data against the XML schema.
 
+#### Parking fields not carried over by a merging import
+
+A `MERGE` import (the default `importType` when none is specified) that matches an *already stored*
+`Parking` starts from a copy of the stored entity and applies only a fixed set of fields from the
+incoming one: `keyValues`, `parkingType`, `centroid` and `parkingVehicleTypes`. The following fields
+are not part of that set, so on a matching `MERGE` re-import their stored values are preserved
+untouched rather than updated from the incoming data (and, importantly, they are not cleared either):
+`name`, `parkingLayout`, `totalCapacity`, `rechargingAvailable`, `secure`, `parkingPaymentProcess`,
+`parkingProperties`, `placeEquipments`, `paymentMethods`, `lighting`, `vehicleEntrances` (and their
+access modes), `infoLinks`, `availabilityConditions` and `alternativeNames`.
+
+This only affects the "already exists" branch of a merging import. A `Parking` that does not match an
+existing one is saved whole on first import, with every field intact — nothing is lost there.
+
+To update any of the fields above on an already-imported `Parking`, use `importType=INITIAL`, the
+GraphQL update mutation, or delete and re-import the parking.
+
 ### NeTEx exports
 Supports exporting stop places and other entities to the http://netex-cen.eu/ format.
 There are many options for exports:

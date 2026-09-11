@@ -43,6 +43,7 @@ import org.rutebanken.tiamat.model.ModificationEnumeration;
 import org.rutebanken.tiamat.model.NameTypeEnumeration;
 import org.rutebanken.tiamat.model.ParkingLayoutEnumeration;
 import org.rutebanken.tiamat.model.ParkingPaymentProcessEnumeration;
+import org.rutebanken.tiamat.model.PaymentMethodEnumeration;
 import org.rutebanken.tiamat.model.ParkingReservationEnumeration;
 import org.rutebanken.tiamat.model.ParkingStayEnumeration;
 import org.rutebanken.tiamat.model.ParkingTypeEnumeration;
@@ -69,6 +70,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static graphql.Scalars.GraphQLBoolean;
+import static graphql.Scalars.GraphQLFloat;
 import static graphql.Scalars.GraphQLInt;
 import static graphql.Scalars.GraphQLString;
 import static graphql.scalars.ExtendedScalars.GraphQLBigInteger;
@@ -107,6 +109,7 @@ public class CustomGraphQLTypes {
     public static GraphQLEnumType parkingStayEnum = createCustomEnumType(PARKING_STAY_TYPE_ENUM, ParkingStayEnumeration.class);
     public static GraphQLEnumType parkingReservationEnum = createCustomEnumType(PARKING_RESERVATION_ENUM, ParkingReservationEnumeration.class);
     public static GraphQLEnumType parkingPaymentProcessEnum = createCustomEnumType(PARKING_PAYMENT_PROCESS_ENUM, ParkingPaymentProcessEnumeration.class);
+    public static GraphQLEnumType paymentMethodEnum = createCustomEnumType(PAYMENT_METHOD_ENUM, PaymentMethodEnumeration.class);
     public static GraphQLEnumType parkingTypeEnum = createCustomEnumType(PARKING_TYPE_ENUM, ParkingTypeEnumeration.class);
     public static GraphQLEnumType topographicPlaceTypeEnum = createCustomEnumType(TOPOGRAPHIC_PLACE_TYPE_ENUM, TopographicPlaceTypeEnumeration.class);
     public static GraphQLEnumType stopPlaceTypeEnum = createCustomEnumType(STOP_PLACE_TYPE_ENUM, StopTypeEnumeration.class);
@@ -137,6 +140,8 @@ public class CustomGraphQLTypes {
     public static GraphQLEnumType passengerInformationEquipmentListEnum = createCustomEnumType("PassengerInformationEquipmentEnumerationType", PassengerInformationEquipmentEnumeration.class);
     public static GraphQLEnumType sanitaryFacilityEnumType = createCustomEnumType("SanitaryFacilityEnumeration", SanitaryFacilityEnumeration.class);
     public static GraphQLEnumType lightingEnumType = createCustomEnumType("LightingEnumeration", org.rutebanken.tiamat.model.LightingEnumeration.class);
+    public static GraphQLEnumType entranceTypeEnum = createCustomEnumType("EntranceType", org.rutebanken.tiamat.model.EntranceEnumeration.class);
+    public static GraphQLEnumType accessModeEnum = createCustomEnumType("AccessModeEnum", org.rutebanken.tiamat.model.AccessModeEnumeration.class);
 
     public static GraphQLEnumType createCustomEnumType(String name, Class c) {
 
@@ -953,6 +958,129 @@ public class CustomGraphQLTypes {
                     .type(parkingPropertiesInputObjectType))
             .build();
 
+    public static GraphQLObjectType parkingVehicleEntranceObjectType = newObject()
+            .name(OUTPUT_TYPE_PARKING_VEHICLE_ENTRANCE)
+            .field(newFieldDefinition()
+                    .name(LABEL)
+                    .type(GraphQLString))
+            .field(newFieldDefinition()
+                    .name(ENTRANCE_TYPE)
+                    .type(entranceTypeEnum))
+            .field(newFieldDefinition()
+                    .name(IS_ENTRY)
+                    .type(GraphQLBoolean))
+            .field(newFieldDefinition()
+                    .name(IS_EXIT)
+                    .type(GraphQLBoolean))
+            .field(newFieldDefinition()
+                    .name(ENTRANCE_WIDTH)
+                    .type(GraphQLFloat))
+            .field(newFieldDefinition()
+                    .name(ENTRANCE_HEIGHT)
+                    .type(GraphQLFloat))
+            .field(newFieldDefinition()
+                    .name(PUBLIC_CODE)
+                    .type(GraphQLString))
+            .field(newFieldDefinition()
+                    .name(ACCESS_MODES)
+                    .type(new GraphQLList(accessModeEnum)))
+            .build();
+
+    public static GraphQLInputObjectType parkingVehicleEntranceInputObjectType = GraphQLInputObjectType.newInputObject()
+            .name(INPUT_TYPE_PARKING_VEHICLE_ENTRANCE)
+            .field(newInputObjectField()
+                    .name(LABEL)
+                    .type(GraphQLString))
+            .field(newInputObjectField()
+                    .name(ENTRANCE_TYPE)
+                    .type(entranceTypeEnum))
+            .field(newInputObjectField()
+                    .name(IS_ENTRY)
+                    .type(GraphQLBoolean))
+            .field(newInputObjectField()
+                    .name(IS_EXIT)
+                    .type(GraphQLBoolean))
+            .field(newInputObjectField()
+                    .name(ENTRANCE_WIDTH)
+                    .type(GraphQLFloat))
+            .field(newInputObjectField()
+                    .name(ENTRANCE_HEIGHT)
+                    .type(GraphQLFloat))
+            .field(newInputObjectField()
+                    .name(PUBLIC_CODE)
+                    .type(GraphQLString))
+            .field(newInputObjectField()
+                    .name(ACCESS_MODES)
+                    .type(new GraphQLList(accessModeEnum)))
+            .build();
+
+    public static GraphQLEnumType infoLinkTypeEnum = createCustomEnumType("InfoLinkType", org.rutebanken.tiamat.model.TypeOfInfolinkEnumeration.class);
+
+    public static GraphQLObjectType infoLinkObjectType = newObject()
+            .name(OUTPUT_TYPE_INFO_LINK)
+            .field(newFieldDefinition()
+                    .name(URI)
+                    .type(GraphQLNonNull.nonNull(GraphQLString)))
+            .field(newFieldDefinition()
+                    .name(TYPE_OF_INFO_LINK)
+                    .type(infoLinkTypeEnum))
+            .build();
+
+    public static GraphQLInputObjectType infoLinkInputObjectType = GraphQLInputObjectType.newInputObject()
+            .name(INPUT_TYPE_INFO_LINK)
+            .field(newInputObjectField()
+                    .name(URI)
+                    .type(GraphQLNonNull.nonNull(GraphQLString)))
+            .field(newInputObjectField()
+                    .name(TYPE_OF_INFO_LINK)
+                    .type(infoLinkTypeEnum))
+            .build();
+
+    public static GraphQLObjectType availabilityConditionObjectType = newObject()
+            .name(OUTPUT_TYPE_AVAILABILITY_CONDITION)
+            .field(newFieldDefinition()
+                    .name(DAY_TYPE_REF)
+                    .type(GraphQLNonNull.nonNull(GraphQLString)))
+            .field(newFieldDefinition()
+                    .name(IS_AVAILABLE)
+                    .type(GraphQLBoolean))
+            .field(newFieldDefinition()
+                    .name(START_TIME)
+                    .type(GraphQLString))
+            .field(newFieldDefinition()
+                    .name(END_TIME)
+                    .type(GraphQLString))
+            .field(newFieldDefinition()
+                    .name(DAY_OFFSET)
+                    .description("Number of days after startTime that endTime falls on. " +
+                            "Use 1 for a period ending at the end of the day, which distinguishes " +
+                            "an endTime of 00:00 from one at the very start of the same day.")
+                    .type(GraphQLInt))
+            .build();
+
+    public static GraphQLInputObjectType availabilityConditionInputObjectType = GraphQLInputObjectType.newInputObject()
+            .name(INPUT_TYPE_AVAILABILITY_CONDITION)
+            .field(newInputObjectField()
+                    .name(DAY_TYPE_REF)
+                    .type(GraphQLNonNull.nonNull(GraphQLString)))
+            .field(newInputObjectField()
+                    .name(IS_AVAILABLE)
+                    .type(GraphQLBoolean))
+            .field(newInputObjectField()
+                    .name(START_TIME)
+                    .type(GraphQLString))
+            .field(newInputObjectField()
+                    .name(END_TIME)
+                    .type(GraphQLString))
+            .field(newInputObjectField()
+                    .name(DAY_OFFSET)
+                    .description("Number of days after startTime that endTime falls on. " +
+                            "Use 1 for a period ending at the end of the day, which distinguishes " +
+                            "an endTime of 00:00 from one at the very start of the same day. " +
+                            "An endTime of 24:00 is accepted as shorthand for 00:00 with dayOffset 1.")
+                    .type(GraphQLInt))
+            .build();
+
     public static GraphQLObjectType postalAddressObjectType = GraphQLObjectType.newObject()
             .name(OUTPUT_TYPE_POSTAL_ADDRESS)
             .field(newFieldDefinition()
@@ -1048,11 +1176,32 @@ public class CustomGraphQLTypes {
                         .name(PARKING_PAYMENT_PROCESS)
                         .type(new GraphQLList(parkingPaymentProcessEnum)))
                 .field(newFieldDefinition()
+                        .name(PAYMENT_METHODS)
+                        .type(new GraphQLList(paymentMethodEnum)))
+                .field(newFieldDefinition()
+                        .name(LIGHTING)
+                        .type(lightingEnumType))
+                .field(newFieldDefinition()
                         .name(PARKING_PROPERTIES)
                         .type(new GraphQLList(parkingPropertiesObjectType)))
                 .field(newFieldDefinition()
                         .name(PARKING_AREAS)
                         .type(new GraphQLList(parkingAreaObjectType)))
+                .field(newFieldDefinition()
+                        .name(VEHICLE_ENTRANCES)
+                        .type(new GraphQLList(parkingVehicleEntranceObjectType)))
+                .field(newFieldDefinition()
+                        .name(INFO_LINKS)
+                        .type(new GraphQLList(infoLinkObjectType)))
+                .field(newFieldDefinition()
+                        .name(AVAILABILITY_CONDITIONS)
+                        .type(new GraphQLList(availabilityConditionObjectType)))
+                .field(newFieldDefinition()
+                        .name(PLACE_EQUIPMENTS)
+                        .type(equipmentType))
+                .field(newFieldDefinition()
+                        .name(ALTERNATIVE_NAMES)
+                        .type(new GraphQLList(alternativeNameObjectType)))
                 .field(geometryFieldDefinition)
                 .field(newFieldDefinition()
                         .name(ACCESSIBILITY_ASSESSMENT)
@@ -1114,11 +1263,32 @@ public class CustomGraphQLTypes {
                         .name(PARKING_PAYMENT_PROCESS)
                         .type(new GraphQLList(parkingPaymentProcessEnum)))
                 .field(newInputObjectField()
+                        .name(PAYMENT_METHODS)
+                        .type(new GraphQLList(paymentMethodEnum)))
+                .field(newInputObjectField()
+                        .name(LIGHTING)
+                        .type(lightingEnumType))
+                .field(newInputObjectField()
                         .name(PARKING_PROPERTIES)
                         .type(new GraphQLList(parkingPropertiesInputObjectType)))
                 .field(newInputObjectField()
                         .name(PARKING_AREAS)
                         .type(new GraphQLList(parkingAreaInputObjectType)))
+                .field(newInputObjectField()
+                        .name(VEHICLE_ENTRANCES)
+                        .type(new GraphQLList(parkingVehicleEntranceInputObjectType)))
+                .field(newInputObjectField()
+                        .name(INFO_LINKS)
+                        .type(new GraphQLList(infoLinkInputObjectType)))
+                .field(newInputObjectField()
+                        .name(AVAILABILITY_CONDITIONS)
+                        .type(new GraphQLList(availabilityConditionInputObjectType)))
+                .field(newInputObjectField()
+                        .name(PLACE_EQUIPMENTS)
+                        .type(equipmentInputType))
+                .field(newInputObjectField()
+                        .name(ALTERNATIVE_NAMES)
+                        .type(new GraphQLList(alternativeNameInputObjectType)))
                 .field(newInputObjectField()
                         .name(GEOMETRY)
                         .type(geoJsonInputType))
