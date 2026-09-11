@@ -60,4 +60,48 @@ public class ParkingDeleterTest extends TiamatIntegrationTest {
         assertThat(parkings).isEmpty();
     }
 
+    /**
+     * A parking's parentSiteRef can point at a stop place that has since
+     * been deleted (e.g. the parent was deleted without deleting its child
+     * parking first). Deletion must fall back to checking permission on the
+     * parking itself rather than refusing to delete it outright.
+     */
+    @Test
+    @Transactional
+    public void deleteParkingWithUnresolvableParent() throws Exception {
+
+        Parking v1 = new Parking();
+        v1.setVersion(1L);
+        v1.setParentSiteRef(new SiteRefStructure("NSR:StopPlace:999999999"));
+
+        parkingRepository.save(v1);
+
+        boolean result = parkingDeleter.deleteParking(v1.getNetexId());
+        assertThat(result).isTrue();
+
+        List<Parking> parkings = parkingRepository.findByNetexId(v1.getNetexId());
+        assertThat(parkings).isEmpty();
+    }
+
+    /**
+     * A parking with no parentSiteRef at all (never had a parent) must also
+     * fall back to checking permission on the parking itself, rather than
+     * refusing to delete it.
+     */
+    @Test
+    @Transactional
+    public void deleteParkingWithNoParentSiteRef() throws Exception {
+
+        Parking v1 = new Parking();
+        v1.setVersion(1L);
+
+        parkingRepository.save(v1);
+
+        boolean result = parkingDeleter.deleteParking(v1.getNetexId());
+        assertThat(result).isTrue();
+
+        List<Parking> parkings = parkingRepository.findByNetexId(v1.getNetexId());
+        assertThat(parkings).isEmpty();
+    }
+
 }
