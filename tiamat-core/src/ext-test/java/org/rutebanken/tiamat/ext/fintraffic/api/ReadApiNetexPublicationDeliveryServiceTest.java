@@ -75,21 +75,26 @@ class ReadApiNetexPublicationDeliveryServiceTest {
     }
 
     @Test
-    void streamPublicationDelivery_fareZoneAppearsBeforeStopPlaces() throws Exception {
-        String fareZoneXml = "<FareZone id=\"TKL:FareZone:A\" version=\"1\"/>";
+    void streamPublicationDelivery_fareZoneAppearsAfterStopPlacesAndParkings() throws Exception {
         String stopPlaceXml = "<StopPlace id=\"FSR:StopPlace:1\" version=\"1\"/>";
-        ReadApiEntityOutRecord fareZoneRecord = new ReadApiEntityOutRecord("FareZone", fareZoneXml);
+        String parkingXml = "<Parking id=\"FSR:Parking:1\" version=\"1\"/>";
+        String fareZoneXml = "<FareZone id=\"TKL:FareZone:A\" version=\"1\"/>";
         ReadApiEntityOutRecord stopPlaceRecord = new ReadApiEntityOutRecord("StopPlace", stopPlaceXml);
+        ReadApiEntityOutRecord parkingRecord = new ReadApiEntityOutRecord("Parking", parkingXml);
+        ReadApiEntityOutRecord fareZoneRecord = new ReadApiEntityOutRecord("FareZone", fareZoneXml);
 
         when(netexRepository.streamStopPlaces(any(ReadApiSearchKey.class)))
-                .thenReturn(Stream.of(fareZoneRecord, stopPlaceRecord));
+                .thenReturn(Stream.of(stopPlaceRecord, parkingRecord, fareZoneRecord));
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         service.streamPublicationDelivery(mock(ReadApiSearchKey.class), out);
         String xml = out.toString();
 
-        assertThat(xml.indexOf("<tariffZones>")).isLessThan(xml.indexOf("<stopPlaces>"));
+        // NeTEx SiteFrameGroup requires TariffZoneInFrameGroup after SiteInFrameGroup
+        assertThat(xml.indexOf("<stopPlaces>")).isLessThan(xml.indexOf("<parkings>"));
+        assertThat(xml.indexOf("<parkings>")).isLessThan(xml.indexOf("<tariffZones>"));
         assertThat(xml).contains("TKL:FareZone:A");
         assertThat(xml).contains("FSR:StopPlace:1");
+        assertThat(xml).contains("FSR:Parking:1");
     }
 }

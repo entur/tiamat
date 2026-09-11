@@ -72,9 +72,9 @@ public class ReadApiNetexPublicationDeliveryService {
                             </DefaultLocale>
                         </FrameDefaults>
                         <topographicPlaces/>
-                        <tariffZones/>
                         <stopPlaces/>
                         <parkings/>
+                        <tariffZones/>
                     </SiteFrame>
                 </dataObjects>
             </PublicationDelivery>""";

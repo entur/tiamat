@@ -76,9 +76,9 @@ public class FintrafficNetexRepository extends AbstractNetexRepository {
                 WHEN 'ScheduledStopPoint' THEN 1
                 WHEN 'PassengerStopAssignment' THEN 2
                 WHEN 'TopographicPlace' THEN 3
-                WHEN 'FareZone' THEN 4
-                WHEN 'StopPlace' THEN 5
-                WHEN 'Parking' THEN 6
+                WHEN 'StopPlace' THEN 4
+                WHEN 'Parking' THEN 5
+                WHEN 'FareZone' THEN 6
                 ELSE 7
             END,
             id
