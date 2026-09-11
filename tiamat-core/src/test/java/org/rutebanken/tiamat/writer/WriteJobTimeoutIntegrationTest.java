@@ -4,6 +4,7 @@ import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.job.AsyncStopPlaceJob;
 import org.rutebanken.tiamat.model.job.AsyncStopPlaceJobStatus;
+import org.rutebanken.tiamat.model.job.JobFailureReason;
 import org.rutebanken.tiamat.repository.AsyncStopPlaceJobRepository;
 import org.rutebanken.tiamat.writer.async.WriteJobMessage;
 import org.rutebanken.tiamat.writer.async.WriteJobNotOwnedException;
@@ -99,6 +100,41 @@ public class WriteJobTimeoutIntegrationTest extends TiamatIntegrationTest {
 
         assertThat(jobService.timeOutStaleJobs(TIMEOUT)).isEqualTo(1);
         assertThat(statusOf(jobId)).isEqualTo(AsyncStopPlaceJobStatus.TIMED_OUT);
+    }
+
+    /**
+     * The sweep is how a job reaches TIMED_OUT in almost every case, so it has to record why. The
+     * status alone leaves the caller with a terminal job and an empty failure object.
+     */
+    @Test
+    public void theSweepRecordsWhyTheJobEnded() {
+        Long jobId = persist(AsyncStopPlaceJobStatus.IN_PROGRESS, Instant.now().minus(Duration.ofHours(2)),
+                Instant.now().minus(Duration.ofHours(1)));
+
+        assertThat(jobService.timeOutStaleJobs(TIMEOUT)).isEqualTo(1);
+
+        AsyncStopPlaceJob swept = jobRepository.findById(jobId).orElseThrow();
+        assertThat(swept.getReasonCode()).isEqualTo(JobFailureReason.TIMED_OUT);
+        assertThat(swept.getReason())
+                .as("and says that the same request can be sent again")
+                .contains("Nothing was written");
+    }
+
+    /**
+     * The other way to TIMED_OUT, taken when the credentials of a job expire before it runs.
+     * This path always recorded a reason. It must record the same code as the sweep, so that a
+     * caller cannot tell the two paths apart.
+     */
+    @Test
+    public void anExplicitTimeoutRecordsTheSameCodeAsTheSweep() {
+        Long jobId = persist(AsyncStopPlaceJobStatus.PROCESSING, Instant.now(), null);
+
+        jobService.timeOut(jobId, "The credentials of this job expired before it ran.");
+
+        AsyncStopPlaceJob timedOut = jobRepository.findById(jobId).orElseThrow();
+        assertThat(timedOut.getStatus()).isEqualTo(AsyncStopPlaceJobStatus.TIMED_OUT);
+        assertThat(timedOut.getReasonCode()).isEqualTo(JobFailureReason.TIMED_OUT);
+        assertThat(timedOut.getReason()).isEqualTo("The credentials of this job expired before it ran.");
     }
 
     @Test

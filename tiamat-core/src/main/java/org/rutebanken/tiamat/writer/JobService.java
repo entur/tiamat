@@ -2,7 +2,8 @@ package org.rutebanken.tiamat.writer;
 
 import org.rutebanken.tiamat.model.job.AsyncStopPlaceJob;
 import org.rutebanken.tiamat.model.job.AsyncStopPlaceJobStatus;
-import org.rutebanken.tiamat.model.job.StopPlaceIdMapping;
+import org.rutebanken.tiamat.model.job.JobFailureReason;
+import org.rutebanken.tiamat.model.job.WrittenStopPlace;
 import org.rutebanken.tiamat.repository.AsyncStopPlaceJobRepository;
 import org.rutebanken.tiamat.rest.validation.StaleVersionException;
 import org.rutebanken.tiamat.writer.async.WriteJobNotOwnedException;
@@ -33,6 +34,10 @@ public class JobService {
 
     private static final String GENERIC_REASON = "An unexpected error occurred.";
 
+    private static final String SWEPT_REASON =
+            "The job did not finish within the time allowed. Nothing was written, so you can "
+                    + "submit the same request again.";
+
     private final AsyncStopPlaceJobRepository repo;
     private final WriteJobPrincipal principal;
 
@@ -44,7 +49,7 @@ public class JobService {
     public AsyncStopPlaceJob createJob() {
         var job = new AsyncStopPlaceJob();
         job.setStatus(AsyncStopPlaceJobStatus.PROCESSING);
-        job.setCreatedIds(Collections.emptyList());
+        job.setWrittenStopPlaces(Collections.emptyList());
         job.setCreatedBy(principal.currentSubject());
         job.setPrincipalClaims(principal.capture());
         job.setCreatedAt(Instant.now());
@@ -93,6 +98,8 @@ public class JobService {
         int timedOut = repo.timeOutStale(
                 List.of(AsyncStopPlaceJobStatus.PROCESSING, AsyncStopPlaceJobStatus.IN_PROGRESS),
                 AsyncStopPlaceJobStatus.TIMED_OUT,
+                SWEPT_REASON,
+                JobFailureReason.TIMED_OUT,
                 Instant.now().minus(timeout)
         );
         if (timedOut > 0) {
@@ -118,18 +125,16 @@ public class JobService {
      */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void timeOut(Long jobId, String reason) {
-        int moved = repo.transition(
+        int moved = repo.transitionWithReason(
                 jobId,
                 List.of(AsyncStopPlaceJobStatus.PROCESSING, AsyncStopPlaceJobStatus.IN_PROGRESS),
-                AsyncStopPlaceJobStatus.TIMED_OUT
+                AsyncStopPlaceJobStatus.TIMED_OUT,
+                reason,
+                JobFailureReason.TIMED_OUT
         );
         if (moved != 1) {
             logger.warn("Job {} already reached a terminal state, not recording a timeout", jobId);
-            return;
         }
-        var job = repo.findById(jobId).orElseThrow();
-        job.setReason(reason);
-        repo.save(job);
     }
 
     /**
@@ -151,15 +156,15 @@ public class JobService {
      * nothing, and throwing here rolls the write back. That is what lets a client treat TIMED_OUT
      * as "nothing was written, resubmitting is safe" rather than having to go and look.
      */
-    public void succeed(Long id, List<StopPlaceIdMapping> createdStopPlaceIds) {
+    public void succeed(Long id, List<WrittenStopPlace> writtenStopPlaces) {
         if (repo.transition(id, List.of(AsyncStopPlaceJobStatus.IN_PROGRESS),
                 AsyncStopPlaceJobStatus.FINISHED) != 1) {
             throw new WriteJobNotOwnedException(id);
         }
         // The conditional update holds the row lock for the rest of the transaction, so nothing
-        // else can change the job before the created ids are written.
+        // else can change the job before this method writes the outcome.
         var job = repo.findById(id).orElseThrow();
-        job.setCreatedIds(createdStopPlaceIds);
+        job.setWrittenStopPlaces(writtenStopPlaces);
         repo.save(job);
     }
 
@@ -175,33 +180,56 @@ public class JobService {
      */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public AsyncStopPlaceJob fail(Long id, Exception exception) {
-        int moved = repo.transition(
+        // This method classifies the failure before the transition, so that a job that lost the
+        // race still gets its reason into the log. The job itself cannot record it. A sweeper got
+        // there first, and TIMED_OUT already tells the caller the truth: nothing was written.
+        Failure failure = classify(exception);
+        int moved = repo.transitionWithReason(
                 id,
                 List.of(AsyncStopPlaceJobStatus.PROCESSING, AsyncStopPlaceJobStatus.IN_PROGRESS),
-                AsyncStopPlaceJobStatus.FAILED
+                AsyncStopPlaceJobStatus.FAILED,
+                failure.message(),
+                failure.reasonCode()
         );
         var job = repo.findById(id).orElseThrow();
         if (moved != 1) {
-            logger.warn("Job {} already reached {}, not recording failure", id, job.getStatus());
+            logger.warn("Job {} already reached {}, not recording failure: {} [{}]",
+                    id, job.getStatus(), failure.message(), failure.reasonCode());
             return job;
         }
-        job.setReason(formatException(exception));
-        return repo.save(job);
+        if (failure.currentVersion() != null) {
+            job.setCurrentVersion(failure.currentVersion());
+            return repo.save(job);
+        }
+        return job;
     }
 
     /**
-     * The reason is returned to the caller, so only messages meant for them are surfaced.
-     * IllegalArgumentException carries the validation feedback for the submitted payload and is
-     * the only explanation a caller gets for a failed write, since the payload is no longer
-     * validated on the request thread. Everything else is reported generically, because the
-     * message may describe internals.
+     * What the caller learns about a failed job. The current version has a value only when the
+     * job failed because the version moved on.
      */
-    private String formatException(Exception e) {
-        // Matched on the exception itself rather than anywhere in its causes, deliberately. This is
-        // the one reason forwarded verbatim, so it must stay limited to the messages this codebase
-        // writes for the caller. Unwrapping here would surface text from anywhere in the stack.
+    record Failure(JobFailureReason reasonCode, String message, Long currentVersion) {
+
+        static Failure of(JobFailureReason reasonCode, String message) {
+            return new Failure(reasonCode, message, null);
+        }
+    }
+
+    /**
+     * The message goes back to the caller, so this method surfaces only the messages that this
+     * codebase writes for a caller. IllegalArgumentException carries the validation feedback for
+     * the submitted payload. Nothing validates the payload on the request thread, so that
+     * feedback is the only explanation a caller gets for a rejected payload. Every other message
+     * is generic, because it can describe internals.
+     */
+    private Failure classify(Exception e) {
+        // This method matches the exception itself, and not anywhere in its causes. That is
+        // deliberate. This message is the one that goes back word for word, so it must stay
+        // limited to what this codebase writes for the caller. An unwrap here surfaces text from
+        // anywhere in the stack.
         if (e instanceof IllegalArgumentException) {
-            return e.getMessage() != null ? e.getMessage() : GENERIC_REASON;
+            return Failure.of(JobFailureReason.INVALID_PAYLOAD,
+                    e.getMessage() != null ? e.getMessage() : GENERIC_REASON);
         }
         return constantReasonFor(e);
     }
@@ -212,28 +240,35 @@ public class JobService {
      * that dispatches jobs itself may add a layer of its own. A miss here is silent, costing the
      * caller a usable reason rather than raising anything.
      */
-    private String constantReasonFor(Throwable throwable) {
+    private Failure constantReasonFor(Throwable throwable) {
         Throwable cause = throwable;
         // The loop stops at a fixed depth and does not go to the end of the chain. A cause chain
         // can be cyclic, and no wrapping that this method sees through is anywhere near this deep.
         for (int depth = 0; cause != null && depth < MAX_CAUSE_DEPTH; depth++, cause = cause.getCause()) {
             if (cause instanceof StaleVersionException stale) {
                 // A stale version is the one failure that the caller can resubmit, so the message
-                // says so. It also carries the current version, because the caller needs that
-                // number to read the stop place again.
-                return "The stop place moved to version " + stale.getCurrentVersion()
-                        + " while this job was pending. Read it again and reapply the change.";
+                // says so. The current version also travels on its own field. The caller needs
+                // that number to read the stop place again, and must not get it from the
+                // sentence.
+                return new Failure(
+                        JobFailureReason.STALE_VERSION,
+                        "The stop place moved to version " + stale.getCurrentVersion()
+                                + " while this job was pending. Read it again and reapply the change.",
+                        stale.getCurrentVersion());
             }
             if (cause instanceof AccessDeniedException) {
-                return "You do not have permission to perform this operation.";
+                return Failure.of(JobFailureReason.ACCESS_DENIED,
+                        "You do not have permission to perform this operation.");
             }
             if (cause instanceof RejectedExecutionException) {
-                return "The job queue is full. Please try again later.";
+                return Failure.of(JobFailureReason.QUEUE_FULL,
+                        "The job queue is full. Please try again later.");
             }
             if (cause instanceof DataIntegrityViolationException) {
-                return "A database constraint was violated. This may be due to invalid input data or a conflict with existing data.";
+                return Failure.of(JobFailureReason.CONSTRAINT_VIOLATION,
+                        "A database constraint was violated. This may be due to invalid input data or a conflict with existing data.");
             }
         }
-        return GENERIC_REASON;
+        return Failure.of(JobFailureReason.UNEXPECTED_ERROR, GENERIC_REASON);
     }
 }

@@ -6,7 +6,8 @@ import org.mockito.ArgumentCaptor;
 import org.rutebanken.tiamat.writer.async.WriteJobPrincipal;
 import org.rutebanken.tiamat.model.job.AsyncStopPlaceJob;
 import org.rutebanken.tiamat.model.job.AsyncStopPlaceJobStatus;
-import org.rutebanken.tiamat.model.job.StopPlaceIdMapping;
+import org.rutebanken.tiamat.model.job.JobFailureReason;
+import org.rutebanken.tiamat.model.job.WrittenStopPlace;
 import org.rutebanken.tiamat.repository.AsyncStopPlaceJobRepository;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.rutebanken.tiamat.writer.async.WriteJobNotOwnedException;
@@ -44,6 +45,9 @@ public class JobServiceTest {
     @Before
     public void jobIsOwnedByDefault() {
         when(repository.transition(anyLong(), anyCollection(), any(AsyncStopPlaceJobStatus.class)))
+                .thenReturn(1);
+        when(repository.transitionWithReason(anyLong(), anyCollection(),
+                any(AsyncStopPlaceJobStatus.class), any(), any()))
                 .thenReturn(1);
     }
 
@@ -110,17 +114,17 @@ public class JobServiceTest {
     }
 
     @Test
-    public void succeedRecordsCreatedIdsWhenTheClaimIsStillHeld() {
+    public void succeedRecordsTheWrittenStopPlacesWhenTheClaimIsStillHeld() {
         AsyncStopPlaceJob job = new AsyncStopPlaceJob();
         when(repository.transition(eq(1L), anyCollection(), eq(AsyncStopPlaceJobStatus.FINISHED)))
                 .thenReturn(1);
         when(repository.findById(1L)).thenReturn(Optional.of(job));
 
-        jobService.succeed(1L, singletonList(new StopPlaceIdMapping("submittedId", "createdId")));
+        jobService.succeed(1L, singletonList(WrittenStopPlace.created("submittedId", "createdId", 1L)));
 
         ArgumentCaptor<AsyncStopPlaceJob> captor = ArgumentCaptor.forClass(AsyncStopPlaceJob.class);
         verify(repository).save(captor.capture());
-        assertEquals("createdId", captor.getValue().getCreatedIds().getFirst().createdId());
+        assertEquals("createdId", captor.getValue().getWrittenStopPlaces().getFirst().netexId());
         // The status moves via the conditional update, not by mutating the entity, so that
         // completion cannot happen unless the job is still claimed.
         verify(repository).transition(eq(1L), anyCollection(), eq(AsyncStopPlaceJobStatus.FINISHED));
@@ -183,7 +187,7 @@ public class JobServiceTest {
         assertThat(saved.getStatus()).isEqualTo(
             AsyncStopPlaceJobStatus.PROCESSING
         );
-        assertThat(saved.getCreatedIds()).isEmpty();
+        assertThat(saved.getWrittenStopPlaces()).isEmpty();
     }
 
     @Test
@@ -195,13 +199,9 @@ public class JobServiceTest {
 
         jobService.fail(1L, new IllegalArgumentException("Error"));
 
-        ArgumentCaptor<AsyncStopPlaceJob> captor = ArgumentCaptor.forClass(
-            AsyncStopPlaceJob.class
-        );
-        verify(repository).save(captor.capture());
-
-        verify(repository).transition(eq(1L), anyCollection(), eq(AsyncStopPlaceJobStatus.FAILED));
-        assertThat(captor.getValue().getReason()).isEqualTo("Error");
+        verify(repository).transitionWithReason(eq(1L), anyCollection(),
+                eq(AsyncStopPlaceJobStatus.FAILED), eq("Error"),
+                eq(JobFailureReason.INVALID_PAYLOAD));
     }
 
     /**
@@ -215,9 +215,7 @@ public class JobServiceTest {
 
         jobService.fail(1L, new IllegalArgumentException());
 
-        ArgumentCaptor<AsyncStopPlaceJob> captor = ArgumentCaptor.forClass(AsyncStopPlaceJob.class);
-        verify(repository).save(captor.capture());
-        assertThat(captor.getValue().getReason()).isEqualTo("An unexpected error occurred.");
+        assertThat(recordedReason()).isEqualTo("An unexpected error occurred.");
     }
 
     @Test
@@ -230,15 +228,8 @@ public class JobServiceTest {
 
         jobService.fail(1L, exception);
 
-        ArgumentCaptor<AsyncStopPlaceJob> captor = ArgumentCaptor.forClass(
-            AsyncStopPlaceJob.class
-        );
-        verify(repository).save(captor.capture());
-
-        AsyncStopPlaceJob saved = captor.getValue();
-        assertThat(saved.getReason()).isEqualTo(
-            "The job queue is full. Please try again later."
-        );
+        assertThat(recordedReason()).isEqualTo("The job queue is full. Please try again later.");
+        assertThat(recordedReasonCode()).isEqualTo(JobFailureReason.QUEUE_FULL);
     }
 
     /**
@@ -254,10 +245,9 @@ public class JobServiceTest {
         jobService.fail(1L, new RuntimeException("dispatch failed",
                 new DataIntegrityViolationException("could not execute statement")));
 
-        ArgumentCaptor<AsyncStopPlaceJob> captor = ArgumentCaptor.forClass(AsyncStopPlaceJob.class);
-        verify(repository).save(captor.capture());
-        assertThat(captor.getValue().getReason())
+        assertThat(recordedReason())
                 .isEqualTo("A database constraint was violated. This may be due to invalid input data or a conflict with existing data.");
+        assertThat(recordedReasonCode()).isEqualTo(JobFailureReason.CONSTRAINT_VIOLATION);
     }
 
     /**
@@ -272,9 +262,7 @@ public class JobServiceTest {
         jobService.fail(1L, new RuntimeException("wrapper",
                 new IllegalArgumentException("internal detail from some library")));
 
-        ArgumentCaptor<AsyncStopPlaceJob> captor = ArgumentCaptor.forClass(AsyncStopPlaceJob.class);
-        verify(repository).save(captor.capture());
-        assertThat(captor.getValue().getReason()).isEqualTo("An unexpected error occurred.");
+        assertThat(recordedReason()).isEqualTo("An unexpected error occurred.");
     }
 
     @Test
@@ -287,14 +275,25 @@ public class JobServiceTest {
 
         jobService.fail(1L, exception);
 
-        ArgumentCaptor<AsyncStopPlaceJob> captor = ArgumentCaptor.forClass(
-            AsyncStopPlaceJob.class
-        );
-        verify(repository).save(captor.capture());
+        assertThat(recordedReason()).isEqualTo("An unexpected error occurred.");
+        assertThat(recordedReasonCode()).isEqualTo(JobFailureReason.UNEXPECTED_ERROR);
+    }
 
-        AsyncStopPlaceJob saved = captor.getValue();
-        assertThat(saved.getReason()).isEqualTo(
-            "An unexpected error occurred."
-        );
+    /**
+     * The reason travels with the transition rather than in a later save, so these read it from
+     * the arguments of that one statement.
+     */
+    private String recordedReason() {
+        ArgumentCaptor<String> reason = ArgumentCaptor.forClass(String.class);
+        verify(repository).transitionWithReason(anyLong(), anyCollection(),
+                any(AsyncStopPlaceJobStatus.class), reason.capture(), any());
+        return reason.getValue();
+    }
+
+    private JobFailureReason recordedReasonCode() {
+        ArgumentCaptor<JobFailureReason> code = ArgumentCaptor.forClass(JobFailureReason.class);
+        verify(repository).transitionWithReason(anyLong(), anyCollection(),
+                any(AsyncStopPlaceJobStatus.class), any(), code.capture());
+        return code.getValue();
     }
 }

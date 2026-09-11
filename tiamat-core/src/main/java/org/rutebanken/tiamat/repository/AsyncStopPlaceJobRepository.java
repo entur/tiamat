@@ -2,6 +2,7 @@ package org.rutebanken.tiamat.repository;
 
 import org.rutebanken.tiamat.model.job.AsyncStopPlaceJob;
 import org.rutebanken.tiamat.model.job.AsyncStopPlaceJobStatus;
+import org.rutebanken.tiamat.model.job.JobFailureReason;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -47,19 +48,47 @@ public interface AsyncStopPlaceJobRepository
                    @Param("to") AsyncStopPlaceJobStatus to);
 
     /**
-     * Moves jobs that have been in a non terminal state for too long.
+     * Moves a job to a terminal state and records why, in one statement. Moves it only if it is
+     * currently in one of the expected states.
      * <p>
-     * Age is measured from the claim if there is one and from creation otherwise, so a job that
-     * was never claimed, because its publish failed, still ages out, while a job that sat in a
-     * queue for a long time before being picked up is measured from when work actually started.
-     * <p>
-     * A job with neither timestamp is left alone rather than assumed stale; its age is unknown.
+     * The reason travels with the transition, and not in a later write. A caller that moves the
+     * status first, and saves the reason after, leaves a window open. In that window the job
+     * reads as terminal and gives no reason for it.
+     *
+     * @return 1 if the job moved, 0 if it was not in any of the expected states.
      */
     @Modifying(clearAutomatically = true, flushAutomatically = true)
-    @Query("update AsyncStopPlaceJob j set j.status = :timedOut"
+    @Query("update AsyncStopPlaceJob j"
+            + " set j.status = :to, j.reason = :reason, j.reasonCode = :reasonCode"
+            + " where j.id = :id and j.status in :from")
+    int transitionWithReason(@Param("id") Long id,
+                             @Param("from") Collection<AsyncStopPlaceJobStatus> from,
+                             @Param("to") AsyncStopPlaceJobStatus to,
+                             @Param("reason") String reason,
+                             @Param("reasonCode") JobFailureReason reasonCode);
+
+    /**
+     * Moves jobs that stayed in a non terminal state for too long, and records why.
+     * <p>
+     * Age comes from the claim if there is one, and from creation if there is not. So a job that
+     * no worker ever claimed, because its publish failed, still ages out. And a job that waited a
+     * long time in a queue ages from the moment work started on it.
+     * <p>
+     * A job with neither timestamp keeps its state. Its age is unknown, and an unknown age is not
+     * a reason to call it stale.
+     * <p>
+     * Sets the same two columns as {@link #transitionWithReason}, deliberately. This sweep is how
+     * a job reaches TIMED_OUT in almost every case. A sweep that set only the status gives the
+     * caller a terminal job and no reason for it.
+     */
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("update AsyncStopPlaceJob j"
+            + " set j.status = :timedOut, j.reason = :reason, j.reasonCode = :reasonCode"
             + " where j.status in :nonTerminal"
             + " and coalesce(j.claimedAt, j.createdAt) < :threshold")
     int timeOutStale(@Param("nonTerminal") Collection<AsyncStopPlaceJobStatus> nonTerminal,
                      @Param("timedOut") AsyncStopPlaceJobStatus timedOut,
+                     @Param("reason") String reason,
+                     @Param("reasonCode") JobFailureReason reasonCode,
                      @Param("threshold") Instant threshold);
 }
