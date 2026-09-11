@@ -43,5 +43,3 @@ src/main/resources/stops/agency.txt
 
 local_config/
 node_modules
-tiamat-core/src/main/resources/application-local-ext.properties
-tiamat-core/src/main/resources/logback-spring.xml
