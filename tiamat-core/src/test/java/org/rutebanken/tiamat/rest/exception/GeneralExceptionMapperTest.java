@@ -49,6 +49,25 @@ public class GeneralExceptionMapperTest {
         Assert.assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), rsp.getStatus());
     }
 
+    /**
+     * IllegalArgumentException is the codebase's established convention for a client input
+     * validation error thrown deep in a mapper/importer (e.g. ParkingMapper's timeband
+     * validation) — GraphQLResource#getStatusCodeFromThrowable already treats it as BAD_REQUEST
+     * for the GraphQL path; this mirrors that for the REST/NeTEx import path, which previously
+     * fell through to the INTERNAL_SERVER_ERROR default.
+     */
+    @Test
+    public void rawIllegalArgumentExceptionYieldsBadRequest() {
+        Response rsp = new GeneralExceptionMapper().toResponse(new IllegalArgumentException("bad input"));
+        Assert.assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), rsp.getStatus());
+    }
+
+    @Test
+    public void nestedIllegalArgumentExceptionYieldsBadRequest() {
+        Response rsp = new GeneralExceptionMapper().toResponse(new TransactionSystemException("", new IllegalArgumentException("bad input")));
+        Assert.assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), rsp.getStatus());
+    }
+
     @Test
     public void nestedUnknownExceptionYieldsInternalServerError() {
         Response rsp = new GeneralExceptionMapper().toResponse(new TransactionSystemException("", new RuntimeException()));
