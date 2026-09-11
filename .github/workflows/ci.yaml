@@ -99,7 +99,7 @@ jobs:
       # Temporary: keep Harness fed from the Entur registry until GitHub CD cutover.
       # Copies the exact Docker Hub manifest (same digest), no second build.
       - name: Authenticate to GCP registry
-        uses: entur/gha-meta/.github/actions/docker-auth@v1.8.4
+        uses: entur/gha-meta/.github/actions/docker-auth@v1.9.0
         with:
           cloud_provider: gcp
           gcp_workload_identity_provider: ${{ vars.CI_WORKLOAD_IDENTITY_PROVIDER }}
