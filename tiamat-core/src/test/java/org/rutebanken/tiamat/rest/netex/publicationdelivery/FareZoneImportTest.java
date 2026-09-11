@@ -39,6 +39,7 @@ import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.importer.ImportParams;
 import org.rutebanken.tiamat.importer.ImportType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.TestPropertySource;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -47,6 +48,11 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+// These tests assert importer plumbing, not ref assignment, and their zone fixtures have no geometry to
+// re-derive from. They need a non-production value: the suite default matches production
+// (resetReferences=true), under which populateTariffZone discards import-supplied refs. Whether that
+// discard is intended is an open question, tracked separately.
+@TestPropertySource(properties = "tariffzoneLookupService.resetReferences=false")
 public class FareZoneImportTest extends TiamatIntegrationTest {
 
     private static final ObjectFactory netexObjectFactory = new ObjectFactory();

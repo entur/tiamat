@@ -105,7 +105,7 @@ public class TariffZonesLookupServiceIntegrationTest extends TiamatIntegrationTe
     }
 
     @Test
-    public void shouldNotDuplicateExistingTariffZoneRefs() {
+    public void shouldReportNoChangeWhenTariffZoneRefIsRederived() {
         TariffZone tariffZone = createTariffZoneWithPolygon("NSR:TariffZone:1", "Zone A",
                 new Coordinate(10.0, 59.0),
                 new Coordinate(10.0, 60.0),
@@ -303,16 +303,7 @@ public class TariffZonesLookupServiceIntegrationTest extends TiamatIntegrationTe
     }
 
     @Test
-    public void shouldNotPopulateFareZoneWithExplicitStopsWhenStopNotMemberAndHasExistingRefs() {
-        // Create a tariff zone so the stop place gets an existing ref
-        TariffZone tariffZone = createTariffZoneWithPolygon("NSR:TariffZone:1", "Tariff Zone A",
-                new Coordinate(10.0, 59.0),
-                new Coordinate(10.0, 60.0),
-                new Coordinate(11.0, 60.0),
-                new Coordinate(11.0, 59.0),
-                new Coordinate(10.0, 59.0));
-        tariffZone = tariffZoneRepository.save(tariffZone);
-
+    public void shouldRemoveExplicitStopsFareZoneRefWhenStopIsNotMember() {
         FareZone fareZone = createFareZoneWithPolygon("NSR:FareZone:1", "Fare Zone Explicit",
                 ScopingMethodEnumeration.EXPLICIT_STOPS,
                 new Coordinate(10.0, 59.0),
@@ -321,28 +312,132 @@ public class TariffZonesLookupServiceIntegrationTest extends TiamatIntegrationTe
                 new Coordinate(11.0, 59.0),
                 new Coordinate(10.0, 59.0));
         fareZone.getFareZoneMembers().add(new StopPlaceReference("NSR:StopPlace:999"));
-        fareZoneRepository.save(fareZone);
+        fareZone = fareZoneRepository.save(fareZone);
 
-        tariffZonesLookupService.resetTariffZone();
         tariffZonesLookupService.resetFareZone();
 
-        // Create stop place with existing tariff zone ref - this is required for
-        // EXPLICIT_STOPS logic to be evaluated (when tariffZones is empty, the filter short-circuits)
         StopPlace stopPlace = new StopPlace();
         stopPlace.setNetexId("NSR:StopPlace:1");
-        stopPlace.setName(new EmbeddableMultilingualString("Test Stop"));
+        stopPlace.setName(new EmbeddableMultilingualString("Stop inside the outline but not a member"));
         stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(10.5, 59.5)));
         Set<TariffZoneRef> existingRefs = new HashSet<>();
-        existingRefs.add(new TariffZoneRef(tariffZone));
+        existingRefs.add(new TariffZoneRef(fareZone));
         stopPlace.setTariffZones(existingRefs);
 
         boolean changed = tariffZonesLookupService.populateTariffZone(stopPlace);
 
-        // No change because the tariff zone was already there, and the fare zone with
-        // EXPLICIT_STOPS doesn't include this stop in its members
+        assertThat(changed).isTrue();
+        assertThat(stopPlace.getTariffZones()).isEmpty();
+    }
+
+    @Test
+    public void shouldReportNoChangeWhenExplicitStopsFareZoneRefIsRederived() {
+        FareZone fareZone = createFareZoneWithPolygon("NSR:FareZone:1", "Fare Zone Explicit",
+                ScopingMethodEnumeration.EXPLICIT_STOPS,
+                new Coordinate(10.0, 59.0),
+                new Coordinate(10.0, 60.0),
+                new Coordinate(11.0, 60.0),
+                new Coordinate(11.0, 59.0),
+                new Coordinate(10.0, 59.0));
+        fareZone.getFareZoneMembers().add(new StopPlaceReference("NSR:StopPlace:1"));
+        fareZone = fareZoneRepository.save(fareZone);
+
+        tariffZonesLookupService.resetFareZone();
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setNetexId("NSR:StopPlace:1");
+        stopPlace.setName(new EmbeddableMultilingualString("Member stop"));
+        stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(10.5, 59.5)));
+        Set<TariffZoneRef> existingRefs = new HashSet<>();
+        existingRefs.add(new TariffZoneRef(fareZone));
+        stopPlace.setTariffZones(existingRefs);
+
+        boolean changed = tariffZonesLookupService.populateTariffZone(stopPlace);
+
         assertThat(changed).isFalse();
         assertThat(stopPlace.getTariffZones()).hasSize(1);
-        assertThat(stopPlace.getTariffZones().iterator().next().getRef()).isEqualTo("NSR:TariffZone:1");
+        TariffZoneRef ref = stopPlace.getTariffZones().iterator().next();
+        assertThat(ref.getRef()).isEqualTo("NSR:FareZone:1");
+        assertThat(ref.getVersion()).isEqualTo("1");
+    }
+
+    @Test
+    public void shouldPopulateExplicitStopsFareZoneWhenStopIsMemberButOutsidePolygon() {
+        FareZone fareZone = createFareZoneWithPolygon("NSR:FareZone:1", "Fare Zone Explicit",
+                ScopingMethodEnumeration.EXPLICIT_STOPS,
+                new Coordinate(10.0, 59.0),
+                new Coordinate(10.0, 60.0),
+                new Coordinate(11.0, 60.0),
+                new Coordinate(11.0, 59.0),
+                new Coordinate(10.0, 59.0));
+        fareZone.getFareZoneMembers().add(new StopPlaceReference("NSR:StopPlace:1"));
+        fareZoneRepository.save(fareZone);
+
+        tariffZonesLookupService.resetFareZone();
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setNetexId("NSR:StopPlace:1");
+        stopPlace.setName(new EmbeddableMultilingualString("Member far outside the zone outline"));
+        stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(5.0, 55.0)));
+
+        boolean changed = tariffZonesLookupService.populateTariffZone(stopPlace);
+
+        assertThat(changed).isTrue();
+        assertThat(stopPlace.getTariffZones()).hasSize(1);
+        assertThat(stopPlace.getTariffZones().iterator().next().getRef()).isEqualTo("NSR:FareZone:1");
+    }
+
+    @Test
+    public void shouldNotPopulateExplicitStopsFareZoneWithoutMembers() {
+        // A member list is the definition of an EXPLICIT_STOPS zone, so an empty one matches nothing.
+        // FareZoneRepositoryImpl.updateStopPlaceTariffZoneRef inner joins FARE_ZONE_MEMBERS and so
+        // behaves the same way.
+        FareZone fareZone = createFareZoneWithPolygon("NSR:FareZone:1", "Fare Zone Explicit Without Members",
+                ScopingMethodEnumeration.EXPLICIT_STOPS,
+                new Coordinate(10.0, 59.0),
+                new Coordinate(10.0, 60.0),
+                new Coordinate(11.0, 60.0),
+                new Coordinate(11.0, 59.0),
+                new Coordinate(10.0, 59.0));
+        fareZoneRepository.save(fareZone);
+
+        tariffZonesLookupService.resetFareZone();
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setNetexId("NSR:StopPlace:1");
+        stopPlace.setName(new EmbeddableMultilingualString("Stop inside the outline"));
+        stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(10.5, 59.5)));
+
+        boolean changed = tariffZonesLookupService.populateTariffZone(stopPlace);
+
+        assertThat(changed).isFalse();
+        assertThat(stopPlace.getTariffZones()).isEmpty();
+    }
+
+    @Test
+    public void shouldNotPopulateFareZoneWithoutScopingMethod() {
+        // Neither branch of FareZoneRepositoryImpl.updateStopPlaceTariffZoneRef matches a zone with no
+        // scoping method, so the save path must not assign it either.
+        FareZone fareZone = createFareZoneWithPolygon("NSR:FareZone:1", "Fare Zone Without Scoping Method",
+                null,
+                new Coordinate(10.0, 59.0),
+                new Coordinate(10.0, 60.0),
+                new Coordinate(11.0, 60.0),
+                new Coordinate(11.0, 59.0),
+                new Coordinate(10.0, 59.0));
+        fareZoneRepository.save(fareZone);
+
+        tariffZonesLookupService.resetFareZone();
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setNetexId("NSR:StopPlace:1");
+        stopPlace.setName(new EmbeddableMultilingualString("Stop inside the outline"));
+        stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(10.5, 59.5)));
+
+        boolean changed = tariffZonesLookupService.populateTariffZone(stopPlace);
+
+        assertThat(changed).isFalse();
+        assertThat(stopPlace.getTariffZones()).isEmpty();
     }
 
     @Test
@@ -663,6 +758,70 @@ public class TariffZonesLookupServiceIntegrationTest extends TiamatIntegrationTe
                 geometryFactory.createPoint(new Coordinate(12.5, 59.5)));
         assertThat(resultB).hasSize(1);
         assertThat(resultB.getFirst().getNetexId()).isEqualTo("NSR:TariffZone:1");
+    }
+
+    @Test
+    public void shouldPopulateExplicitStopsFareZoneWithoutGeometry() {
+        FareZone fareZone = new FareZone();
+        fareZone.setNetexId("NSR:FareZone:1");
+        fareZone.setName(new EmbeddableMultilingualString("Fare Zone Without Geometry"));
+        fareZone.setVersion(1L);
+        fareZone.setScopingMethod(ScopingMethodEnumeration.EXPLICIT_STOPS);
+        fareZone.getFareZoneMembers().add(new StopPlaceReference("NSR:StopPlace:1"));
+        fareZoneRepository.save(fareZone);
+
+        tariffZonesLookupService.resetFareZone();
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setNetexId("NSR:StopPlace:1");
+        stopPlace.setName(new EmbeddableMultilingualString("Member of a zone with no outline"));
+        stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(10.5, 59.5)));
+
+        boolean changed = tariffZonesLookupService.populateTariffZone(stopPlace);
+
+        assertThat(changed).isTrue();
+        assertThat(stopPlace.getTariffZones()).hasSize(1);
+        assertThat(stopPlace.getTariffZones().iterator().next().getRef()).isEqualTo("NSR:FareZone:1");
+    }
+
+    @Test
+    public void shouldUseLatestFareZoneVersionMemberList() {
+        Coordinate[] coordinates = new Coordinate[]{
+                new Coordinate(10.0, 59.0),
+                new Coordinate(10.0, 60.0),
+                new Coordinate(11.0, 60.0),
+                new Coordinate(11.0, 59.0),
+                new Coordinate(10.0, 59.0)
+        };
+
+        FareZone v1 = new FareZone();
+        v1.setNetexId("NSR:FareZone:1");
+        v1.setName(new EmbeddableMultilingualString("Fare Zone v1"));
+        v1.setVersion(1L);
+        v1.setScopingMethod(ScopingMethodEnumeration.EXPLICIT_STOPS);
+        v1.setPolygon(geometryFactory.createPolygon(coordinates));
+        v1.getFareZoneMembers().add(new StopPlaceReference("NSR:StopPlace:1"));
+        fareZoneRepository.save(v1);
+
+        FareZone v2 = new FareZone();
+        v2.setNetexId("NSR:FareZone:1");
+        v2.setName(new EmbeddableMultilingualString("Fare Zone v2"));
+        v2.setVersion(2L);
+        v2.setScopingMethod(ScopingMethodEnumeration.EXPLICIT_STOPS);
+        v2.setPolygon(geometryFactory.createPolygon(coordinates));
+        fareZoneRepository.save(v2);
+
+        tariffZonesLookupService.resetFareZone();
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setNetexId("NSR:StopPlace:1");
+        stopPlace.setName(new EmbeddableMultilingualString("Dropped from the member list in v2"));
+        stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(10.5, 59.5)));
+
+        boolean changed = tariffZonesLookupService.populateTariffZone(stopPlace);
+
+        assertThat(changed).isFalse();
+        assertThat(stopPlace.getTariffZones()).isEmpty();
     }
 
     // ========== Helper Methods ==========

@@ -15,6 +15,8 @@ import org.rutebanken.netex.model.ScheduledStopPointRefStructure;
 import org.rutebanken.netex.model.ScopingMethodEnumeration;
 import org.rutebanken.tiamat.model.StopPlaceReference;
 import org.rutebanken.tiamat.model.TariffZoneRef;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
 import java.util.List;
@@ -23,6 +25,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class FareZoneMapper extends CustomMapper<FareZone, org.rutebanken.tiamat.model.FareZone> {
+
+    private static final Logger logger = LoggerFactory.getLogger(FareZoneMapper.class);
 
     final ObjectFactory objectFactory = new ObjectFactory();
 
@@ -41,16 +45,25 @@ public class FareZoneMapper extends CustomMapper<FareZone, org.rutebanken.tiamat
             tiamatFareZone.setNeighbours(tiamatNeighbours);
         }
 
-        if (netexFareZone.getScopingMethod() != null && netexFareZone.getScopingMethod().equals(ScopingMethodEnumeration.EXPLICIT_STOPS)
-                && netexFareZone.getMembers() != null && !netexFareZone.getMembers().getPointRef().isEmpty()) {
+        if (netexFareZone.getScopingMethod() != null && netexFareZone.getScopingMethod().equals(ScopingMethodEnumeration.EXPLICIT_STOPS)) {
+            List<JAXBElement<? extends PointRefStructure>> pointRefs =
+                    netexFareZone.getMembers() == null ? List.of() : netexFareZone.getMembers().getPointRef();
 
-            var fareZoneMembers = netexFareZone.getMembers().getPointRef().stream()
+            Set<StopPlaceReference> fareZoneMembers = pointRefs.stream()
                     .map(jaxbElement -> convertScheduledStopPointRefToStopPlaceRef(jaxbElement.getValue().getRef()))
                     .filter(Objects::nonNull)
                     .map(StopPlaceReference::new)
                     .collect(Collectors.toSet());
 
             tiamatFareZone.setFareZoneMembers(fareZoneMembers);
+
+            if (fareZoneMembers.isEmpty()) {
+                // An explicitly scoped zone with no usable members matches no stops. Refs that no
+                // conversion handles land here too. Surface it so the upstream data can be raised
+                // with the feed owner.
+                logger.warn("FareZone {} is scoped EXPLICIT_STOPS but has no usable members; it will match no stops. "
+                        + "Raise with the feed owner if this is unexpected.", netexFareZone.getId());
+            }
         }
     }
 
