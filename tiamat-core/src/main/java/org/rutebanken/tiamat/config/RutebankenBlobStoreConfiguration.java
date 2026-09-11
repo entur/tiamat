@@ -89,8 +89,8 @@ public class RutebankenBlobStoreConfiguration {
     @Profile("local | test")
     @Bean
     public AwsCredentialsProvider localCredentials(
-            @Value("blobstore.s3.access-key-id") String accessKeyId,
-            @Value("blobstore.s3.secret-key") String secretKey
+            @Value("${blobstore.s3.access-key-id:dev-access-key-id}") String accessKeyId,
+            @Value("${blobstore.s3.secret-key:dev-secret-key}") String secretKey
     ) {
         return StaticCredentialsProvider.create(
                 AwsBasicCredentials.create(accessKeyId, secretKey)
