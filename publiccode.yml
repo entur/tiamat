@@ -1,0 +1,66 @@
+# publiccode.yml metadata, see https://yml.publiccode.tools/
+publiccodeYmlVersion: "0.7.0"
+
+name: Tiamat
+url: https://github.com/entur/tiamat
+
+platforms:
+  - web
+  - linux
+
+categories:
+  - geographic-information-systems
+  - data-collection
+
+developmentStatus: stable
+softwareType: standalone/backend
+
+organisation:
+  name: Entur AS
+  uri: https://entur.no
+
+usedBy:
+  - Norway (nationwide), Entur AS
+  - Finland, Fintraffic
+
+intendedAudience:
+  scope:
+    - transportation
+  countries:
+    - "NO"
+
+description:
+  en:
+    localisedName: Tiamat
+    shortDescription: Backend and API for the Norwegian National Stop Place Register (NSR).
+    longDescription: >
+      Tiamat is the backend of the Norwegian National Stop Place Register (Nasjonalt stoppestedsregister, NSR).
+      It stores stop places, quays, topographic places, tariff zones, path links and parking, and exposes them
+      through a rich GraphQL API that supports both queries and mutations. Tiamat imports and exports NeTEx,
+      validates data against the NeTEx XML schema, keeps a full version history of every entity, and maintains a
+      mapping between old and newly assigned identifiers. Its web front-end is Abzu.
+      Tiamat is built with Spring Boot, Hibernate and PostGIS, and can run as multiple instances using a
+      Hazelcast in-memory data grid.
+    documentation: https://github.com/entur/tiamat/blob/master/README.md
+    features:
+      - GraphQL API for stop places with queries and mutations
+      - NeTEx import with merging strategies and schema validation
+      - Synchronous and asynchronous NeTEx export
+      - Full version history of stop places and other entities
+      - Mapping between old and newly assigned identifiers
+      - Automatic topographic place and tariff zone lookup from polygons
+
+legal:
+  license: EUPL-1.2
+  mainCopyrightOwner: Entur AS
+
+maintenance:
+  type: internal
+  contacts:
+    - name: Entur ROR (Open Data and Journey Planning)
+      email: kollektivdata@entur.org
+
+localisation:
+  localisationReady: false
+  availableLanguages:
+    - en
