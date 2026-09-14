@@ -5,6 +5,7 @@ import com.google.cloud.pubsub.v1.Subscriber;
 import com.google.cloud.spring.pubsub.core.PubSubTemplate;
 import com.google.cloud.spring.pubsub.support.BasicAcknowledgeablePubsubMessage;
 import com.google.pubsub.v1.PubsubMessage;
+import org.rutebanken.tiamat.writer.JobService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,11 +25,17 @@ import static org.rutebanken.tiamat.writer.async.PubSubWriteJobPublisher.ATTRIBU
  * <p>
  * The handler records the outcome of a job itself, and this includes a failure. So this class
  * acknowledges a message when the handler returns: the job is terminal, and a second delivery
- * achieves nothing. It sends a message back only when the handler throws, which means that
- * nothing recorded the outcome.
+ * achieves nothing. It sends a message back when the handler throws, which means that nothing
+ * recorded the outcome.
  * <p>
- * A second delivery is safe: {@link DefaultWriteJobHandler} claims a job before it does the work,
- * so it discards a delivery of a job that already ran.
+ * That second delivery retries the work only when the throw came before the claim. A claim moves
+ * the job to IN_PROGRESS, and {@link JobService#claim} matches PROCESSING, so the redelivery of a
+ * claimed job is discarded and acknowledged. The job then ends at TIMED_OUT through
+ * {@link WriteJobTimeoutSweeper}, which is true: the write rolled back. The message goes back
+ * because nothing recorded the outcome, and not because the work is sure to run again.
+ * <p>
+ * The discard is what makes a second delivery safe. {@link DefaultWriteJobHandler} claims a job
+ * before it does the work, so a delivery of a job that already ran writes nothing.
  * <p>
  * A {@link SmartLifecycle} rather than {@code @PostConstruct} and {@code @PreDestroy}. The two
  * ends of a consumer both need the rest of the context, and the annotations give neither.
@@ -120,7 +127,14 @@ public class PubSubWriteJobSubscriber implements SmartLifecycle {
         }
     }
 
-    private void onMessage(BasicAcknowledgeablePubsubMessage message) {
+    /**
+     * Settles every message, whatever leaves this method. An Error is caught for that reason
+     * alone, and then goes on its way. A message that is neither acknowledged nor sent back keeps
+     * its lease for the whole ack extension period. The claimed job behind it is invisible for all
+     * of that time. A payload that exhausts the stack reaches here, because
+     * {@link DefaultWriteJobHandler} catches Exception.
+     */
+    void onMessage(BasicAcknowledgeablePubsubMessage message) {
         WriteJobMessage writeJob;
         try {
             writeJob = toWriteJob(message.getPubsubMessage());
@@ -130,6 +144,9 @@ public class PubSubWriteJobSubscriber implements SmartLifecycle {
             logger.error("Discarding a message on {} that is not a write job", subscription, e);
             message.ack();
             return;
+        } catch (Error e) {
+            message.ack();
+            throw e;
         }
 
         try {
@@ -139,6 +156,11 @@ public class PubSubWriteJobSubscriber implements SmartLifecycle {
             // The handler records its own failures, so a throw means nothing wrote the outcome.
             logger.error("Write job {} was not completed, returning it for redelivery", writeJob.jobId(), e);
             message.nack();
+        } catch (Error e) {
+            logger.error("Write job {} ended in an error. Returning the message and going on.",
+                    writeJob.jobId(), e);
+            message.nack();
+            throw e;
         }
     }
 
