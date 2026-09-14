@@ -36,6 +36,7 @@ import java.time.Instant;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public class ParkingVersionedSaverServiceTest extends TiamatIntegrationTest {
 
@@ -246,6 +247,24 @@ public class ParkingVersionedSaverServiceTest extends TiamatIntegrationTest {
         assertThat(secondAreaProperties.getSpaces().getFirst().getVersion())
                 .as("area capacity version follows the parking version")
                 .isEqualTo(2L);
+    }
+
+    /**
+     * Regression cover for resolveParentStopPlace, which is the only thing preventing a parking
+     * from being saved with a parent site ref that does not resolve.
+     */
+    @Test
+    public void saveParkingWithUnresolvableParentSiteRefIsRejected() {
+
+        Parking parking = new Parking();
+        parking.setCentroid(geometryFactory.createPoint(new Coordinate(9.84, 59.26)));
+        parking.setParentSiteRef(new SiteRefStructure("NSR:StopPlace:doesnotexist"));
+
+        assertThatThrownBy(() -> parkingVersionedSaverService.saveNewVersion(parking))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("NSR:StopPlace:doesnotexist");
+
+        assertThat(parkingRepository.findAll()).isEmpty();
     }
 
 }
