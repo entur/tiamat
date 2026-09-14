@@ -73,6 +73,9 @@ public class PubSubWriteJobTransportIntegrationTest extends TiamatIntegrationTes
     @Autowired
     private AsyncStopPlaceJobRepository jobRepository;
 
+    @Autowired
+    private PubSubWriteJobSubscriber subscriber;
+
     @BeforeClass
     public static void startBrokerAndCreateTopic() throws Exception {
         EMULATOR.start();
@@ -120,6 +123,14 @@ public class PubSubWriteJobTransportIntegrationTest extends TiamatIntegrationTes
     }
 
     @Test
+    public void theSubscriberRunsOnceTheContextIsReady() {
+        assertThat(subscriber.isRunning())
+                .as("a lifecycle that never started consumes nothing, and every job times out")
+                .isTrue();
+        assertThat(subscriber.subscriberState()).contains(com.google.api.core.ApiService.State.RUNNING);
+    }
+
+    @Test
     public void aJobPublishedToTheBrokerIsProcessedAndCompleted() {
         Long jobId = acceptedJob();
 
@@ -130,8 +141,8 @@ public class PubSubWriteJobTransportIntegrationTest extends TiamatIntegrationTes
                         .as("the job should have been delivered, processed and completed")
                         .isEqualTo(AsyncStopPlaceJobStatus.FINISHED));
 
-        assertThat(jobRepository.findById(jobId).orElseThrow().getCreatedIds())
-                .as("processing a create should have minted a stop place id")
+        assertThat(jobRepository.findById(jobId).orElseThrow().getWrittenStopPlaces())
+                .as("processing a create mints a stop place id and reports it")
                 .hasSize(1);
     }
 
