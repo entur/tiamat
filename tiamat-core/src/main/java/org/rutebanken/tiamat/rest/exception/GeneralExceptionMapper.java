@@ -42,7 +42,7 @@ public class GeneralExceptionMapper implements ExceptionMapper<Exception> {
     public GeneralExceptionMapper() {
         mapping = new HashMap<>();
         mapping.put(Response.Status.BAD_REQUEST,
-                Sets.newHashSet(ValidationException.class, OptimisticLockException.class, EntityNotFoundException.class, DataIntegrityViolationException.class));
+                Sets.newHashSet(ValidationException.class, OptimisticLockException.class, EntityNotFoundException.class, DataIntegrityViolationException.class, IllegalArgumentException.class));
         mapping.put(Response.Status.CONFLICT, Sets.newHashSet(EntityExistsException.class));
         mapping.put(Response.Status.FORBIDDEN, Sets.newHashSet(AccessDeniedException.class));
         mapping.put(Response.Status.UNAUTHORIZED, Sets.newHashSet(NotAuthorizedException.class, NotAuthenticatedException.class));

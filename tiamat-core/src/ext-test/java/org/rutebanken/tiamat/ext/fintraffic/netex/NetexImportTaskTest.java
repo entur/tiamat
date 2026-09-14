@@ -9,7 +9,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.tiamat.importer.ImportParams;
 import org.rutebanken.tiamat.importer.ImportType;
+import org.rutebanken.tiamat.importer.FareZoneFrameSource;
+import org.rutebanken.tiamat.importer.PublicationDeliveryFareFrameImporter;
 import org.rutebanken.tiamat.importer.PublicationDeliveryImporter;
+import org.rutebanken.tiamat.importer.PublicationDeliveryTariffZoneImporter;
 import org.rutebanken.tiamat.rest.netex.publicationdelivery.PublicationDeliveryUnmarshaller;
 import org.rutebanken.tiamat.service.BlobStoreService;
 import org.springframework.boot.DefaultApplicationArguments;
@@ -36,6 +39,10 @@ class NetexImportTaskTest {
     private PublicationDeliveryUnmarshaller unmarshaller;
     @Mock
     private PublicationDeliveryImporter importer;
+    @Mock
+    private PublicationDeliveryTariffZoneImporter tariffZoneImporter;
+    @Mock
+    private PublicationDeliveryFareFrameImporter fareFrameImporter;
 
     private final DefaultApplicationArguments noArgs = new DefaultApplicationArguments();
 
@@ -44,7 +51,7 @@ class NetexImportTaskTest {
         var result = runWith(null, null);
 
         assertThat(result.exitCodes).containsExactly(1);
-        verifyNoInteractions(blobStoreService, unmarshaller, importer);
+        verifyNoInteractions(blobStoreService, unmarshaller, importer, tariffZoneImporter, fareFrameImporter);
     }
 
     @Test
@@ -52,7 +59,7 @@ class NetexImportTaskTest {
         var result = runWith("   ", null);
 
         assertThat(result.exitCodes).containsExactly(1);
-        verifyNoInteractions(blobStoreService, unmarshaller, importer);
+        verifyNoInteractions(blobStoreService, unmarshaller, importer, tariffZoneImporter, fareFrameImporter);
     }
 
     @Test
@@ -130,7 +137,7 @@ class NetexImportTaskTest {
         var result = runWith("netex/stops.xml", null);
 
         assertThat(result.exitCodes).containsExactly(1);
-        verifyNoInteractions(blobStoreService, unmarshaller, importer);
+        verifyNoInteractions(blobStoreService, unmarshaller, importer, tariffZoneImporter, fareFrameImporter);
     }
 
     @Test
@@ -138,7 +145,7 @@ class NetexImportTaskTest {
         var result = runWith("netex/stops.xml", "INITIAL", null);
 
         assertThat(result.exitCodes).containsExactly(1);
-        verifyNoInteractions(blobStoreService, unmarshaller, importer);
+        verifyNoInteractions(blobStoreService, unmarshaller, importer, tariffZoneImporter, fareFrameImporter);
     }
 
     @Test
@@ -146,7 +153,7 @@ class NetexImportTaskTest {
         var result = runWith("netex/stops.xml", "NOT_A_REAL_TYPE");
 
         assertThat(result.exitCodes).containsExactly(1);
-        verifyNoInteractions(blobStoreService, unmarshaller, importer);
+        verifyNoInteractions(blobStoreService, unmarshaller, importer, tariffZoneImporter, fareFrameImporter);
     }
 
     @Test
@@ -156,7 +163,7 @@ class NetexImportTaskTest {
         var result = runWith("netex/missing.xml", "MERGE");
 
         assertThat(result.exitCodes).containsExactly(1);
-        verifyNoInteractions(unmarshaller, importer);
+        verifyNoInteractions(unmarshaller, importer, tariffZoneImporter, fareFrameImporter);
         verifyStatusWritten(NetexImportTask.STATUS_FAILED);
     }
 
@@ -243,7 +250,7 @@ class NetexImportTaskTest {
         assertThat(result.exitCodes).containsExactly(1);
         verify(blobStoreService, never()).download(any());
         verify(blobStoreService, never()).upload(any(), any());
-        verifyNoInteractions(unmarshaller, importer);
+        verifyNoInteractions(unmarshaller, importer, tariffZoneImporter, fareFrameImporter);
     }
 
     @Test
@@ -261,6 +268,102 @@ class NetexImportTaskTest {
         verify(blobStoreService, never()).download(any());
         verify(blobStoreService, never()).upload(any(), any());
         verify(importer).importPublicationDelivery(eq(delivery), any());
+    }
+
+    @Test
+    void importOnlyTariffZones_routedToTariffZoneImporter() throws Exception {
+        String s3Key = "netex/farezones.xml";
+        InputStream fakeStream = new ByteArrayInputStream(new byte[0]);
+        PublicationDeliveryStructure delivery = new PublicationDeliveryStructure();
+
+        when(blobStoreService.download(s3Key)).thenReturn(fakeStream);
+        when(unmarshaller.unmarshal(fakeStream)).thenReturn(delivery);
+
+        var result = runWith(s3Key, "INITIAL", "false", "true", null);
+
+        ArgumentCaptor<ImportParams> paramsCaptor = ArgumentCaptor.forClass(ImportParams.class);
+        verify(tariffZoneImporter).importPublicationDelivery(eq(delivery), paramsCaptor.capture());
+        assertThat(paramsCaptor.getValue().importOnlyTariffZones).isTrue();
+        assertThat(paramsCaptor.getValue().importType).isEqualTo(ImportType.INITIAL);
+        verifyNoInteractions(importer, fareFrameImporter);
+        assertThat(result.exitCodes).containsExactly(0);
+    }
+
+    @Test
+    void fareFrameSource_routedToFareFrameImporter() throws Exception {
+        String s3Key = "netex/farezones.xml";
+        InputStream fakeStream = new ByteArrayInputStream(new byte[0]);
+        PublicationDeliveryStructure delivery = new PublicationDeliveryStructure();
+
+        when(blobStoreService.download(s3Key)).thenReturn(fakeStream);
+        when(unmarshaller.unmarshal(fakeStream)).thenReturn(delivery);
+
+        var result = runWith(s3Key, "MERGE", "false", null, "FARE_FRAME");
+
+        ArgumentCaptor<ImportParams> paramsCaptor = ArgumentCaptor.forClass(ImportParams.class);
+        verify(fareFrameImporter).importPublicationDelivery(eq(delivery), paramsCaptor.capture());
+        assertThat(paramsCaptor.getValue().fareZoneFrameSource).isEqualTo(FareZoneFrameSource.FARE_FRAME);
+        verifyNoInteractions(importer, tariffZoneImporter);
+        assertThat(result.exitCodes).containsExactly(0);
+    }
+
+    @Test
+    void siteFrameSource_routedToFullImporter() throws Exception {
+        String s3Key = "netex/stops.xml";
+        InputStream fakeStream = new ByteArrayInputStream(new byte[0]);
+        PublicationDeliveryStructure delivery = new PublicationDeliveryStructure();
+
+        when(blobStoreService.download(s3Key)).thenReturn(fakeStream);
+        when(unmarshaller.unmarshal(fakeStream)).thenReturn(delivery);
+
+        var result = runWith(s3Key, "INITIAL", "false", "false", "SITE_FRAME");
+
+        verify(importer).importPublicationDelivery(eq(delivery), any());
+        verifyNoInteractions(tariffZoneImporter, fareFrameImporter);
+        assertThat(result.exitCodes).containsExactly(0);
+    }
+
+    @Test
+    void importOnlyTariffZones_takesPrecedenceOverFareFrameSource() throws Exception {
+        String s3Key = "netex/farezones.xml";
+        InputStream fakeStream = new ByteArrayInputStream(new byte[0]);
+        PublicationDeliveryStructure delivery = new PublicationDeliveryStructure();
+
+        when(blobStoreService.download(s3Key)).thenReturn(fakeStream);
+        when(unmarshaller.unmarshal(fakeStream)).thenReturn(delivery);
+
+        var result = runWith(s3Key, "INITIAL", "false", "true", "FARE_FRAME");
+
+        verify(tariffZoneImporter).importPublicationDelivery(eq(delivery), any());
+        verifyNoInteractions(importer, fareFrameImporter);
+        assertThat(result.exitCodes).containsExactly(0);
+    }
+
+    @Test
+    void routingDefaults_toFullImporterWhenOptionalVarsUnset() throws Exception {
+        String s3Key = "netex/stops.xml";
+        InputStream fakeStream = new ByteArrayInputStream(new byte[0]);
+        PublicationDeliveryStructure delivery = new PublicationDeliveryStructure();
+
+        when(blobStoreService.download(s3Key)).thenReturn(fakeStream);
+        when(unmarshaller.unmarshal(fakeStream)).thenReturn(delivery);
+
+        var result = runWith(s3Key, "INITIAL");
+
+        ArgumentCaptor<ImportParams> paramsCaptor = ArgumentCaptor.forClass(ImportParams.class);
+        verify(importer).importPublicationDelivery(eq(delivery), paramsCaptor.capture());
+        assertThat(paramsCaptor.getValue().importOnlyTariffZones).isFalse();
+        assertThat(paramsCaptor.getValue().fareZoneFrameSource).isEqualTo(FareZoneFrameSource.SITE_FRAME);
+        verifyNoInteractions(tariffZoneImporter, fareFrameImporter);
+        assertThat(result.exitCodes).containsExactly(0);
+    }
+
+    @Test
+    void unknownFareZoneFrameSource_exitsWithCode1() {
+        var result = runWith("netex/stops.xml", "INITIAL", "false", null, "NOT_A_REAL_FRAME");
+
+        assertThat(result.exitCodes).containsExactly(1);
+        verifyNoInteractions(blobStoreService, unmarshaller, importer, tariffZoneImporter, fareFrameImporter);
     }
 
     @Test
@@ -293,14 +396,22 @@ class NetexImportTaskTest {
     }
 
     private RunResult runWith(String s3Key, String importType, String disablePrePostProcessing) {
+        return runWith(s3Key, importType, disablePrePostProcessing, null, null);
+    }
+
+    private RunResult runWith(String s3Key, String importType, String disablePrePostProcessing,
+                              String importOnlyTariffZones, String fareZoneFrameSource) {
         List<Integer> exitCodes = new ArrayList<>();
-        NetexImportTask task = new NetexImportTask(blobStoreService, unmarshaller, importer, exitCodes::add) {
+        NetexImportTask task = new NetexImportTask(blobStoreService, unmarshaller, importer,
+                tariffZoneImporter, fareFrameImporter, exitCodes::add) {
             @Override
             protected String getenv(String name) {
                 return switch (name) {
                     case ENV_S3_KEY -> s3Key;
                     case ENV_IMPORT_TYPE -> importType;
                     case ENV_DISABLE_PRE_POST_PROCESSING -> disablePrePostProcessing;
+                    case ENV_IMPORT_ONLY_TARIFF_ZONES -> importOnlyTariffZones;
+                    case ENV_FARE_ZONE_FRAME_SOURCE -> fareZoneFrameSource;
                     default -> null;
                 };
             }

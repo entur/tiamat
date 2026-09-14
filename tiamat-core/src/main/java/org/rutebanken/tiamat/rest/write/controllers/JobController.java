@@ -19,11 +19,21 @@ interface JobController {
 
         The status is one of four values. PROCESSING means that the job is not complete, and you
         must poll again. FINISHED means that the write is committed. FAILED means that the write
-        did not occur, and `errorMessage` gives the reason. TIMED_OUT means that the job did not
-        complete in time, and that nothing was written, so you can submit the request again.
+        did not occur. TIMED_OUT means that the job did not complete in time, and that nothing was
+        written, so you can submit the request again.
 
-        A create job that is FINISHED gives `createdIds`. Each entry maps the NeTEx ID that you
-        submitted to the ID that the system generated.
+        The status also says which of the two outcome objects to read. A FINISHED job gives
+        `result`. A FAILED or TIMED_OUT job gives `failure`. A PROCESSING job gives neither.
+
+        `result.stopPlaces` holds one entry for every stop place that the job wrote. Each entry
+        gives the ID of the stop place and the version that this write produced. Send that version
+        with your next update of the same stop place. A create also gives `submittedId`, which is
+        the ID that you sent, so that you can match the entry to your request.
+
+        `failure.reasonCode` says why the write did not happen, and `failure.message` describes it
+        in English. When `reasonCode` is STALE_VERSION, `failure.currentVersion` gives the version
+        that the stop place is at now. Read the stop place again, apply your change to that
+        version, and submit it again.
 
         A job is only visible to the principal that submitted it. The API reports a job from
         another principal as not found, and not as forbidden, so that you cannot probe job ids.

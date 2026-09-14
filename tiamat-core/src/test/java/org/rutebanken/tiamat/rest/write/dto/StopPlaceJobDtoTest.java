@@ -16,24 +16,24 @@ public class StopPlaceJobDtoTest {
     public void claimedJobIsReportedAsProcessing() {
         AsyncStopPlaceJob job = job(AsyncStopPlaceJobStatus.IN_PROGRESS);
 
-        assertThat(StopPlaceJobDto.from(job).status()).isEqualTo(AsyncStopPlaceJobStatus.PROCESSING);
+        assertThat(StopPlaceJobDto.from(job).status()).isEqualTo(JobStatus.PROCESSING);
     }
 
     @Test
     public void acceptedJobIsReportedAsProcessing() {
         AsyncStopPlaceJob job = job(AsyncStopPlaceJobStatus.PROCESSING);
 
-        assertThat(StopPlaceJobDto.from(job).status()).isEqualTo(AsyncStopPlaceJobStatus.PROCESSING);
+        assertThat(StopPlaceJobDto.from(job).status()).isEqualTo(JobStatus.PROCESSING);
     }
 
     @Test
     public void terminalStatusesAreReportedAsThemselves() {
         assertThat(StopPlaceJobDto.from(job(AsyncStopPlaceJobStatus.FINISHED)).status())
-                .isEqualTo(AsyncStopPlaceJobStatus.FINISHED);
+                .isEqualTo(JobStatus.FINISHED);
         assertThat(StopPlaceJobDto.from(job(AsyncStopPlaceJobStatus.FAILED)).status())
-                .isEqualTo(AsyncStopPlaceJobStatus.FAILED);
+                .isEqualTo(JobStatus.FAILED);
         assertThat(StopPlaceJobDto.from(job(AsyncStopPlaceJobStatus.TIMED_OUT)).status())
-                .isEqualTo(AsyncStopPlaceJobStatus.TIMED_OUT);
+                .isEqualTo(JobStatus.TIMED_OUT);
     }
 
     private static AsyncStopPlaceJob job(AsyncStopPlaceJobStatus status) {
