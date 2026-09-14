@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 
 public class ParkingDeleterTest extends TiamatIntegrationTest {
@@ -58,6 +59,43 @@ public class ParkingDeleterTest extends TiamatIntegrationTest {
 
         List<Parking> parkings = parkingRepository.findByNetexId(v1.getNetexId());
         assertThat(parkings).isEmpty();
+    }
+
+    /**
+     * An orphaned parking cannot be authorized under an authorization profile that resolves a
+     * parking to its parent stop place, so deletion is refused with an actionable message rather
+     * than failing deep inside the authorization stack. Clearing the dangling parentSiteRef makes
+     * the parking a standalone parking, which deletes normally - see
+     * deleteParkingWithoutParentSiteRef below.
+     */
+    @Test
+    @Transactional
+    public void deletingOrphanedParkingIsRefusedWithAnActionableMessage() throws Exception {
+
+        Parking orphan = new Parking();
+        orphan.setVersion(1L);
+        orphan.setParentSiteRef(new SiteRefStructure("NSR:StopPlace:doesnotexist"));
+
+        parkingRepository.save(orphan);
+
+        assertThatThrownBy(() -> parkingDeleter.deleteParking(orphan.getNetexId()))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("NSR:StopPlace:doesnotexist")
+                .hasMessageContaining("no longer exists")
+                .hasMessageContaining("Clear the dangling parentSiteRef");
+    }
+
+    @Test
+    @Transactional
+    public void deleteParkingWithoutParentSiteRef() throws Exception {
+
+        Parking standalone = new Parking();
+        standalone.setVersion(1L);
+
+        parkingRepository.save(standalone);
+
+        assertThat(parkingDeleter.deleteParking(standalone.getNetexId())).isTrue();
+        assertThat(parkingRepository.findByNetexId(standalone.getNetexId())).isEmpty();
     }
 
 }

@@ -22,9 +22,12 @@ import org.rutebanken.tiamat.auth.UsernameFetcher;
 import org.rutebanken.tiamat.changelog.EntityChangedListener;
 import org.rutebanken.tiamat.lock.MutateLock;
 import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.repository.ParkingRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
+import org.rutebanken.tiamat.service.parking.ParkingDeleter;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.function.Supplier;
 
@@ -33,6 +36,7 @@ import static org.mockito.Mockito.anyList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 public class StopPlaceDeleterTest extends TiamatIntegrationTest {
@@ -49,7 +53,10 @@ public class StopPlaceDeleterTest extends TiamatIntegrationTest {
         }
     };
 
-    private StopPlaceDeleter stopPlaceDeleter = new StopPlaceDeleter(stopPlaceRepository, entityChangedListener, authorizationService, usernameFetcher, mutateLock);
+    private ParkingRepository parkingRepository = mock(ParkingRepository.class);
+    private ParkingDeleter parkingDeleter = mock(ParkingDeleter.class);
+
+    private StopPlaceDeleter stopPlaceDeleter = new StopPlaceDeleter(stopPlaceRepository, entityChangedListener, authorizationService, usernameFetcher, mutateLock, parkingRepository, parkingDeleter);
 
     @Test(expected = IllegalArgumentException.class)
     public void doNotDeleteParent() {
@@ -76,6 +83,39 @@ public class StopPlaceDeleterTest extends TiamatIntegrationTest {
         assertThat(deleted).isTrue();
 
         verify(stopPlaceRepository, times(1)).deleteAll(anyList());
+    }
+
+    @Test
+    @Transactional
+    public void deletingStopPlaceCascadesToReferencingParkings() {
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setNetexId("NSR:StopPlace:42");
+
+        when(stopPlaceRepository.findAll(anyList())).thenReturn(Collections.singletonList(stopPlace));
+        when(usernameFetcher.getUserNameForAuthenticatedUser()).thenReturn("Rambo");
+        when(parkingRepository.findByStopPlaceNetexId("NSR:StopPlace:42"))
+                .thenReturn(Arrays.asList("NSR:Parking:1", "NSR:Parking:2"));
+
+        assertThat(stopPlaceDeleter.deleteStopPlace(stopPlace.getNetexId())).isTrue();
+
+        verify(parkingDeleter, times(1)).deleteParking("NSR:Parking:1");
+        verify(parkingDeleter, times(1)).deleteParking("NSR:Parking:2");
+        verify(stopPlaceRepository, times(1)).deleteAll(anyList());
+    }
+
+    @Test
+    @Transactional
+    public void deletingStopPlaceWithoutParkingsDeletesNoParkings() {
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setNetexId("NSR:StopPlace:43");
+
+        when(stopPlaceRepository.findAll(anyList())).thenReturn(Collections.singletonList(stopPlace));
+        when(usernameFetcher.getUserNameForAuthenticatedUser()).thenReturn("Rambo");
+        when(parkingRepository.findByStopPlaceNetexId("NSR:StopPlace:43")).thenReturn(Collections.emptyList());
+
+        assertThat(stopPlaceDeleter.deleteStopPlace(stopPlace.getNetexId())).isTrue();
+
+        verifyNoInteractions(parkingDeleter);
     }
 
 }
