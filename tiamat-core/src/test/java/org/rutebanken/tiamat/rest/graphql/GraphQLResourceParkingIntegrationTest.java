@@ -24,9 +24,12 @@ import org.rutebanken.tiamat.model.SiteRefStructure;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 
 public class GraphQLResourceParkingIntegrationTest extends AbstractGraphQLResourceIntegrationTest {
 
@@ -453,6 +456,47 @@ public class GraphQLResourceParkingIntegrationTest extends AbstractGraphQLResour
                 .body("data.parking", hasSize(2));
 
 
+    }
+
+    @Test
+    public void testMutateParkingWithUnknownParentSiteRefIsRejected() throws Exception {
+
+        String graphQlJsonQuery = "{" +
+                "\"query\":\"mutation { " +
+                "  parking:" + GraphQLNames.MUTATE_PARKING + " (Parking: {" +
+                "        name: { value:\\\"Orphan\\\" lang:\\\"en\\\" } " +
+                "        parentSiteRef:\\\"NSR:StopPlace:doesnotexist\\\" " +
+                "       }) { " +
+                "      id " +
+                "    } " +
+                "}\"," +
+                "\"variables\":\"\"}";
+
+        executeGraphQL(graphQlJsonQuery, 400)
+                .body("errors[0].message", containsString("NSR:StopPlace:doesnotexist"));
+
+        assertThat(parkingRepository.findAll()).isEmpty();
+    }
+
+    @Test
+    public void testMutateParkingWithExistingParentSiteRefIsAccepted() throws Exception {
+
+        String existingStopPlaceId = stopPlaceRepository.save(new StopPlace()).getNetexId();
+
+        String graphQlJsonQuery = "{" +
+                "\"query\":\"mutation { " +
+                "  parking:" + GraphQLNames.MUTATE_PARKING + " (Parking: {" +
+                "        name: { value:\\\"Has parent\\\" lang:\\\"en\\\" } " +
+                "        parentSiteRef:\\\"" + existingStopPlaceId + "\\\" " +
+                "       }) { " +
+                "      id " +
+                "    } " +
+                "}\"," +
+                "\"variables\":\"\"}";
+
+        executeGraphQL(graphQlJsonQuery)
+                .body("errors", nullValue())
+                .body("data.parking[0].id", notNullValue());
     }
 
 

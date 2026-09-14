@@ -91,24 +91,17 @@ public class ParkingDeleter {
             throw new IllegalArgumentException("Cannot find parking to delete from ID: " + parkingId);
         }
 
-        for (Parking parking : parkings) {
-            if (parking.getParentSiteRef() == null || parking.getParentSiteRef().getRef() == null) {
-                // Standalone parking - no parent to authorize against, so check the parking itself.
-                authorizationService.verifyCanEditEntities(Arrays.asList(parking));
-                continue;
+        for(Parking parking : parkings) {
+            if(parking.getParentSiteRef() != null) {
+                DataManagedObjectStructure resolved = referenceResolver.resolve(parking.getParentSiteRef());
+                if(resolved instanceof StopPlace) {
+                    authorizationService.verifyCanEditEntities( Arrays.asList(resolved));
+                } else {
+                    throw new IllegalArgumentException("Parking does not have a parent site ref that points to a stop place. " + parking);
+                }
+            } else {
+                throw new IllegalArgumentException("Parking does not have a parent site ref. Cannot check permission. " + parking);
             }
-
-            StopPlace parentStopPlace = resolveParentStopPlace(parking);
-            if (parentStopPlace == null) {
-                // Note: parentSiteRef cannot currently be cleared through the GraphQL API -
-                // ParkingUpdater ignores a null value - so this needs an administrative fix.
-                throw new IllegalArgumentException("Parking " + parking.getNetexId()
-                        + " is orphaned: parent stop place " + parking.getParentSiteRef().getRef()
-                        + " no longer exists, so permission to delete it cannot be determined. "
-                        + "Its dangling parentSiteRef has to be cleared in the database first.");
-            }
-
-            authorizationService.verifyCanEditEntities(Arrays.asList(parentStopPlace));
         }
 
         parkingRepository.deleteAll(parkings);
@@ -118,26 +111,6 @@ public class ParkingDeleter {
 
         return true;
     }
-    /**
-     * The parent site ref is a soft reference, so it can point at a stop place that no longer
-     * exists. ReferenceResolver returns null in that case, and throws for structurally invalid
-     * or unregistered IDs - both mean the same thing here: no parent to authorize against.
-     */
-    private StopPlace resolveParentStopPlace(Parking parking) {
-        if (parking.getParentSiteRef() == null || parking.getParentSiteRef().getRef() == null) {
-            return null;
-        }
-
-        try {
-            DataManagedObjectStructure resolved = referenceResolver.resolve(parking.getParentSiteRef());
-            return resolved instanceof StopPlace stopPlace ? stopPlace : null;
-        } catch (IllegalArgumentException e) {
-            logger.warn("Could not resolve parent site ref {} of parking {}: {}",
-                    parking.getParentSiteRef().getRef(), parking.getNetexId(), e.getMessage());
-            return null;
-        }
-    }
-
     //This is to make sure entity is persisted before sending message
     @Transactional
     public void notifyDeleted(List<Parking> parkings) {

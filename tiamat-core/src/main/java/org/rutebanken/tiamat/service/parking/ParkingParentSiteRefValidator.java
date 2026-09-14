@@ -22,14 +22,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * Verifies that a parking's parentSiteRef points at a stop place that actually exists.
- *
- * The reference is a soft reference - a plain NeTEx ID column with no foreign key - so nothing in
- * the schema prevents it from dangling. This check is deliberately kept out of the authorization
- * path: {@link org.rutebanken.tiamat.auth.TiamatEntityResolver} only rejects unresolvable parent
- * references under authorization profiles that use it, which made referential integrity depend on
- * which {@link org.rutebanken.tiamat.auth.AuthorizationService} implementation happened to be wired
- * in. Validating here makes the behaviour identical for every profile.
+ * Verifies that a parking's parentSiteRef points at a stop place that exists. The reference has no
+ * foreign key backing it, and checking it here rather than in the authorization path keeps the
+ * behaviour the same for every {@link org.rutebanken.tiamat.auth.AuthorizationService}.
  */
 @Service
 public class ParkingParentSiteRefValidator {
@@ -41,9 +36,7 @@ public class ParkingParentSiteRefValidator {
         this.stopPlaceRepository = stopPlaceRepository;
     }
 
-    /**
-     * @throws IllegalArgumentException if a parent site ref is set but no stop place has that ID.
-     */
+    /** @throws IllegalArgumentException if a parent site ref is set but no stop place has that ID. */
     public void validate(Parking parking) {
         if (parking == null) {
             return;
@@ -51,7 +44,7 @@ public class ParkingParentSiteRefValidator {
 
         SiteRefStructure parentSiteRef = parking.getParentSiteRef();
         if (parentSiteRef == null || parentSiteRef.getRef() == null) {
-            // A parking without a parent site ref is a valid standalone parking.
+            // A standalone parking is valid.
             return;
         }
 

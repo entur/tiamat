@@ -93,9 +93,8 @@ public class StopPlaceDeleter {
     }
 
     /**
-     * Parkings reference their parent stop place through a soft reference with no foreign key, so
-     * deleting a stop place without deleting them leaves orphans that can no longer be resolved.
-     * Deleting through ParkingDeleter keeps the changelog events a direct parking deletion emits.
+     * Parkings reference their parent stop place without a foreign key, so leaving them behind
+     * orphans them. Deleting through ParkingDeleter keeps the usual changelog events.
      */
     private void deleteReferencingParkings(String stopPlaceId) {
         List<String> parkingIds = parkingRepository.findByStopPlaceNetexId(stopPlaceId);
