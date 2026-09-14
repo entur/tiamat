@@ -40,7 +40,6 @@ import org.rutebanken.tiamat.repository.ParkingRepository;
 import org.rutebanken.tiamat.rest.graphql.mappers.AccessibilityLimitationMapper;
 import org.rutebanken.tiamat.rest.graphql.mappers.GeometryMapper;
 import org.rutebanken.tiamat.rest.graphql.mappers.ValidBetweenMapper;
-import org.rutebanken.tiamat.service.parking.ParkingParentSiteRefValidator;
 import org.rutebanken.tiamat.versioning.VersionCreator;
 import org.rutebanken.tiamat.versioning.save.ParkingVersionedSaverService;
 import org.slf4j.Logger;
@@ -116,9 +115,6 @@ class ParkingUpdater implements DataFetcher {
     @Autowired
     private AccessibilityLimitationMapper accessibilityLimitationMapper;
 
-    @Autowired
-    private ParkingParentSiteRefValidator parkingParentSiteRefValidator;
-
     @Override
     public Object get(DataFetchingEnvironment environment) {
 
@@ -149,7 +145,6 @@ class ParkingUpdater implements DataFetcher {
         boolean isUpdated = populateParking(input, updatedParking);
 
         if (isUpdated) {
-            parkingParentSiteRefValidator.validate(updatedParking);
             authorizationService.verifyCanEditEntities( Arrays.asList(existingVersion, updatedParking));
 
             logger.info("Saving new version of parking {}", updatedParking);
