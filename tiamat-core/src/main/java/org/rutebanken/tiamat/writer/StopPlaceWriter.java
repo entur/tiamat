@@ -152,6 +152,7 @@ public class StopPlaceWriter {
      */
     @Transactional
     public StopPlace deleteStopPlace(String stopPlaceId) {
+        refuseParentStopPlace(stopPlaceId);
         // already uses mutateLock
         return stopPlaceTerminator.terminateStopPlace(
                 stopPlaceId,
@@ -159,5 +160,26 @@ public class StopPlaceWriter {
                 "Deleted via write API",
                 ModificationEnumeration.DELETE
         );
+    }
+
+    /**
+     * A create and an update refuse a multimodal stop place, and a delete refused nothing.
+     * {@link StopPlaceTerminator} accepts a parent, gives it a new version that carries
+     * {@link ModificationEnumeration#DELETE}, and leaves every child with a reference to it. The
+     * terminator then refuses to terminate a child. The validator refuses to update one. And the
+     * parent takes no further update, because it is terminated.
+     * <p>
+     * So the one multimodal operation this API performed was the destructive one. It refuses the
+     * whole set until issue #364 defines what a delete does with the children.
+     * <p>
+     * A stop place that does not exist passes this check. The terminator reports it, and one
+     * reason for a missing stop place is better than two.
+     */
+    private void refuseParentStopPlace(String stopPlaceId) {
+        StopPlace existing = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(stopPlaceId);
+        if (existing != null && existing.isParentStopPlace()) {
+            throw new IllegalArgumentException(
+                    "Multimodal stop place deletion not currently supported in this endpoint.");
+        }
     }
 }
