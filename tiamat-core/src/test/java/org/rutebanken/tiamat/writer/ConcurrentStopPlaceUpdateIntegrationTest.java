@@ -11,8 +11,8 @@ import org.rutebanken.tiamat.lock.MutateLock;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
-import org.rutebanken.tiamat.model.job.AsyncStopPlaceJobStatus;
 import org.rutebanken.tiamat.rest.write.dto.StopPlaceJobDto;
+import org.rutebanken.tiamat.rest.write.dto.JobStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.resttestclient.TestRestTemplate;
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
@@ -159,7 +159,7 @@ public class ConcurrentStopPlaceUpdateIntegrationTest extends TiamatIntegrationT
 
         assertThat(finalJob.status())
                 .as("Async write job should succeed once the lock is released")
-                .isEqualTo(AsyncStopPlaceJobStatus.FINISHED);
+                .isEqualTo(JobStatus.FINISHED);
     }
 
     /**
@@ -210,7 +210,7 @@ public class ConcurrentStopPlaceUpdateIntegrationTest extends TiamatIntegrationT
 
         assertThat(finalJob.status())
                 .as("Async write job should fail when it cannot acquire the mutate-lock")
-                .isEqualTo(AsyncStopPlaceJobStatus.FAILED);
+                .isEqualTo(JobStatus.FAILED);
     }
 
     private ResponseEntity<StopPlaceJobDto> putStopPlace(String xml) {
@@ -231,7 +231,7 @@ public class ConcurrentStopPlaceUpdateIntegrationTest extends TiamatIntegrationT
             ResponseEntity<StopPlaceJobDto> jobResponse =
                     restTemplate.getForEntity(jobUrl, StopPlaceJobDto.class);
             StopPlaceJobDto job = jobResponse.getBody();
-            if (job != null && job.status() != AsyncStopPlaceJobStatus.PROCESSING) {
+            if (job != null && job.status() != JobStatus.PROCESSING) {
                 return job;
             }
             Thread.sleep(500);
