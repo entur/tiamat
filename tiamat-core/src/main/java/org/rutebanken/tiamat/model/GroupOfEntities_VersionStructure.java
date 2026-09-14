@@ -22,6 +22,9 @@ import jakarta.persistence.Embedded;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.Transient;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @MappedSuperclass
 public abstract class GroupOfEntities_VersionStructure
         extends DataManagedObjectStructure {
@@ -50,6 +53,16 @@ public abstract class GroupOfEntities_VersionStructure
     })
     @Embedded
     protected PrivateCodeStructure privateCode;
+
+    /**
+     * NeTEx declares {@code infoLinks} on this class (see {@code GroupOfEntities_VersionStructure}
+     * in {@code netex_grouping_version.xsd}), which every concrete subclass beneath it (StopPlace,
+     * Quay, Parking, TariffZone, FareZone, GroupOfStopPlaces, ...) inherits. Declared {@code @Transient}
+     * here to document the NeTEx-faithful location without generating a collection table per
+     * subclass; only {@link Parking} currently shadows it as a persisted {@code @ElementCollection}.
+     */
+    @Transient
+    protected List<InfoLink> infoLinks = new ArrayList<>();
 
 
     public GroupOfEntities_VersionStructure() {
@@ -89,6 +102,17 @@ public abstract class GroupOfEntities_VersionStructure
 
     public void setPrivateCode(PrivateCodeStructure value) {
         this.privateCode = value;
+    }
+
+    public List<InfoLink> getInfoLinks() {
+        if (infoLinks == null) {
+            infoLinks = new ArrayList<>();
+        }
+        return infoLinks;
+    }
+
+    public void setInfoLinks(List<InfoLink> value) {
+        this.infoLinks = value;
     }
 
     public String importedIdAndNameToString() {
