@@ -13,13 +13,19 @@ import com.google.pubsub.v1.PushConfig;
 import com.google.pubsub.v1.TopicName;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.job.AsyncStopPlaceJobStatus;
 import org.rutebanken.tiamat.repository.AsyncStopPlaceJobRepository;
+import org.rutebanken.tiamat.writer.JobService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.MappedJwtClaimSetConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.TestPropertySource;
@@ -29,6 +35,8 @@ import org.testcontainers.utility.DockerImageName;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
@@ -75,6 +83,19 @@ public class PubSubWriteJobTransportIntegrationTest extends TiamatIntegrationTes
 
     @Autowired
     private PubSubWriteJobSubscriber subscriber;
+
+    @Autowired
+    private JobService jobService;
+
+    private static final MappedJwtClaimSetConverter CLAIM_SET_CONVERTER =
+            MappedJwtClaimSetConverter.withDefaults(Map.of());
+
+    private static final String SUBMITTER = "alice";
+
+    @After
+    public void clearContext() {
+        SecurityContextHolder.clearContext();
+    }
 
     @BeforeClass
     public static void startBrokerAndCreateTopic() throws Exception {
@@ -147,6 +168,32 @@ public class PubSubWriteJobTransportIntegrationTest extends TiamatIntegrationTes
     }
 
     /**
+     * The one risk a cross-process transport adds. The claims are captured on the request thread,
+     * cross the broker on the job row, and are reinstated on a subscriber thread that never saw
+     * the caller. Nothing else in this suite crosses a process boundary with a principal.
+     * <p>
+     * The security context is cleared before the publish, so the subscriber thread has nothing to
+     * inherit. What attributes the write is what came back out of the database.
+     */
+    @Test
+    public void theSubmittersPrincipalCrossesTheBrokerAndAttributesTheWrite() {
+        Long jobId = acceptedJob();
+        SecurityContextHolder.clearContext();
+
+        publisher.publish(WriteJobMessage.create(jobId, CREATE_PAYLOAD));
+
+        await().atMost(Duration.ofSeconds(30)).untilAsserted(() ->
+                assertThat(statusOf(jobId)).isEqualTo(AsyncStopPlaceJobStatus.FINISHED));
+
+        String netexId = jobRepository.findById(jobId).orElseThrow()
+                .getWrittenStopPlaces().getFirst().netexId();
+
+        assertThat(stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(netexId).getChangedBy())
+                .as("a write with no principal is attributed to nobody")
+                .isEqualTo(SUBMITTER);
+    }
+
+    /**
      * Delivery is at least once, so the same message can arrive twice. Processing is not
      * idempotent: a create mints a fresh id each run, so a second delivery that was actually
      * processed would produce a duplicate stop place. Claiming is what prevents that, and this
@@ -173,11 +220,27 @@ public class PubSubWriteJobTransportIntegrationTest extends TiamatIntegrationTes
         assertThat(statusOf(jobId)).isEqualTo(AsyncStopPlaceJobStatus.FINISHED);
     }
 
+    /**
+     * Built through {@link JobService#createJob}, and not by hand. A job row assembled in the test
+     * carries no principal claims, so {@code WriteJobPrincipal.restore} takes its early return and
+     * the write runs with no security context at all. Every assertion here then holds for a
+     * transport that lost the principal.
+     */
     private Long acceptedJob() {
-        var job = new org.rutebanken.tiamat.model.job.AsyncStopPlaceJob();
-        job.setStatus(AsyncStopPlaceJobStatus.PROCESSING);
-        job.setCreatedAt(Instant.now());
-        return jobRepository.save(job).getId();
+        authenticateAsSubmitter();
+        return jobService.createJob().getId();
+    }
+
+    private void authenticateAsSubmitter() {
+        Map<String, Object> rawClaims = new HashMap<>(Map.of(
+                "sub", "auth0|" + SUBMITTER,
+                "iss", "https://internal.entur.org/",
+                "preferred_username", SUBMITTER,
+                "exp", Instant.now().plusSeconds(600).getEpochSecond()
+        ));
+        Map<String, Object> claims = CLAIM_SET_CONVERTER.convert(rawClaims);
+        Jwt jwt = new Jwt("token-value", null, (Instant) claims.get("exp"), Map.of("alg", "none"), claims);
+        SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
     }
 
     private AsyncStopPlaceJobStatus statusOf(Long jobId) {
