@@ -20,6 +20,10 @@ import org.rutebanken.tiamat.model.AccessibilityLimitation;
 import org.rutebanken.tiamat.model.AlternativeName;
 import org.rutebanken.tiamat.model.BoardingPosition;
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
+import org.rutebanken.tiamat.model.Parking;
+import org.rutebanken.tiamat.model.ParkingArea;
+import org.rutebanken.tiamat.model.ParkingEntranceForVehicles;
+import org.rutebanken.tiamat.model.ParkingProperties;
 import org.rutebanken.tiamat.model.PlaceEquipment;
 import org.rutebanken.tiamat.model.SiteElement;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -118,6 +122,50 @@ public class VersionIncrementor {
         }
 
         return stopPlace;
+    }
+
+    /**
+     * Increment versions for parking with its versioned children.
+     * Children keeping the previous version would clash with the rows being replaced,
+     * as each child table has a unique constraint on (netex_id, version).
+     * @param parking with parking properties and parking areas
+     * @return modified Parking
+     */
+    public Parking initiateOrIncrementVersions(Parking parking) {
+        initiateOrIncrementSiteElementVersion(parking);
+        initiateOrIncrementPlaceEquipment(parking.getPlaceEquipments());
+
+        if (parking.getParkingProperties() != null) {
+            parking.getParkingProperties().forEach(this::initiateOrIncrementParkingProperties);
+        }
+
+        if (parking.getParkingAreas() != null) {
+            parking.getParkingAreas().forEach(this::initiateOrIncrementParkingArea);
+        }
+
+        if (parking.getVehicleEntrances() != null) {
+            parking.getVehicleEntrances().forEach(this::initiateOrIncrementParkingEntranceForVehicles);
+        }
+
+        return parking;
+    }
+
+    private void initiateOrIncrementParkingProperties(ParkingProperties parkingProperties) {
+        initiateOrIncrement(parkingProperties);
+
+        if (parkingProperties.getSpaces() != null) {
+            parkingProperties.getSpaces().forEach(this::initiateOrIncrement);
+        }
+    }
+
+    private void initiateOrIncrementParkingArea(ParkingArea parkingArea) {
+        initiateOrIncrementSiteElementVersion(parkingArea);
+        initiateOrIncrementPlaceEquipment(parkingArea.getPlaceEquipments());
+    }
+
+    private void initiateOrIncrementParkingEntranceForVehicles(ParkingEntranceForVehicles entrance) {
+        initiateOrIncrementSiteElementVersion(entrance);
+        initiateOrIncrementPlaceEquipment(entrance.getPlaceEquipments());
     }
 
     public void initiateOrIncrementPlaceEquipment(PlaceEquipment placeEquipment) {

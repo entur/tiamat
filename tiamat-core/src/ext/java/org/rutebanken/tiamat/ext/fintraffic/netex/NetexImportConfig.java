@@ -1,6 +1,8 @@
 package org.rutebanken.tiamat.ext.fintraffic.netex;
 
+import org.rutebanken.tiamat.importer.PublicationDeliveryFareFrameImporter;
 import org.rutebanken.tiamat.importer.PublicationDeliveryImporter;
+import org.rutebanken.tiamat.importer.PublicationDeliveryTariffZoneImporter;
 import org.rutebanken.tiamat.rest.netex.publicationdelivery.PublicationDeliveryUnmarshaller;
 import org.rutebanken.tiamat.service.BlobStoreService;
 import org.springframework.context.annotation.Bean;
@@ -32,7 +34,9 @@ public class NetexImportConfig {
     public NetexImportTask netexImportTask(
             BlobStoreService blobStoreService,
             PublicationDeliveryUnmarshaller unmarshaller,
-            PublicationDeliveryImporter importer) {
-        return new NetexImportTask(blobStoreService, unmarshaller, importer);
+            PublicationDeliveryImporter importer,
+            PublicationDeliveryTariffZoneImporter tariffZoneImporter,
+            PublicationDeliveryFareFrameImporter fareFrameImporter) {
+        return new NetexImportTask(blobStoreService, unmarshaller, importer, tariffZoneImporter, fareFrameImporter);
     }
 }

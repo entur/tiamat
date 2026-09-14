@@ -14,6 +14,7 @@ import org.rutebanken.tiamat.writer.async.WriteJobMessage;
 import org.rutebanken.tiamat.writer.async.WriteJobPublisher;
 import org.rutebanken.tiamat.writer.async.WriteJobRejectedException;
 import org.rutebanken.tiamat.rest.write.dto.StopPlaceJobDto;
+import org.rutebanken.tiamat.rest.write.dto.JobStatus;
 
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -64,7 +65,7 @@ class AsyncStopPlaceWriterTest {
 
         assertNotNull(result);
         assertEquals(1L, result.jobId());
-        assertEquals(AsyncStopPlaceJobStatus.PROCESSING, result.status());
+        assertEquals(JobStatus.PROCESSING, result.status());
         assertPublished(WriteJobMessage.Operation.CREATE, 1);
     }
 
@@ -80,7 +81,7 @@ class AsyncStopPlaceWriterTest {
 
         StopPlaceJobDto result = facade.createStopPlaces(stream());
 
-        assertEquals(AsyncStopPlaceJobStatus.FAILED, result.status());
+        assertEquals(JobStatus.FAILED, result.status());
         verify(jobService).fail(eq(1L), any(Exception.class));
     }
 
@@ -112,7 +113,7 @@ class AsyncStopPlaceWriterTest {
 
         assertNotNull(result);
         assertEquals(2L, result.jobId());
-        assertEquals(AsyncStopPlaceJobStatus.PROCESSING, result.status());
+        assertEquals(JobStatus.PROCESSING, result.status());
         assertPublished(WriteJobMessage.Operation.UPDATE, 2);
     }
 
@@ -128,7 +129,7 @@ class AsyncStopPlaceWriterTest {
 
         StopPlaceJobDto result = facade.updateStopPlace(stream());
 
-        assertEquals(AsyncStopPlaceJobStatus.FAILED, result.status());
+        assertEquals(JobStatus.FAILED, result.status());
         verify(jobService).fail(eq(2L), any(Exception.class));
     }
 
@@ -161,7 +162,7 @@ class AsyncStopPlaceWriterTest {
 
         assertNotNull(result);
         assertEquals(3L, result.jobId());
-        assertEquals(AsyncStopPlaceJobStatus.PROCESSING, result.status());
+        assertEquals(JobStatus.PROCESSING, result.status());
         assertPublished(WriteJobMessage.Operation.DELETE, 3);
     }
 
@@ -178,7 +179,7 @@ class AsyncStopPlaceWriterTest {
 
         StopPlaceJobDto result = facade.deleteStopPlace(stopPlaceId);
 
-        assertEquals(AsyncStopPlaceJobStatus.FAILED, result.status());
+        assertEquals(JobStatus.FAILED, result.status());
         verify(jobService).fail(eq(3L), any(Exception.class));
     }
 
