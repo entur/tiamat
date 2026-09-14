@@ -22,6 +22,7 @@ import org.locationtech.jts.geom.Point;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.Parking;
+import org.rutebanken.tiamat.model.ParkingCapacity;
 import org.rutebanken.tiamat.model.ParkingProperties;
 import org.rutebanken.tiamat.model.ParkingUserEnumeration;
 import org.rutebanken.tiamat.model.SiteRefStructure;
@@ -29,11 +30,11 @@ import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.ParkingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.math.BigInteger;
 import java.time.Instant;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
 
 public class ParkingVersionedSaverServiceTest extends TiamatIntegrationTest {
 
@@ -89,28 +90,25 @@ public class ParkingVersionedSaverServiceTest extends TiamatIntegrationTest {
     }
 
     /**
-     * Editing a Parking that already has a {@link ParkingProperties} child a second time (without
-     * changing the child itself, e.g. GraphQL's "copy previous version, apply edits" flow
-     * re-attaching the same logical child with the same netexId/version) used to throw a Postgres
-     * duplicate key violation on {@code parking_properties_netex_id_version_constraint}.
-     * <p>
-     * Root cause: {@link ParkingVersionedSaverService#saveNewVersion(Parking)} deletes the existing
-     * Parking (cascading delete of its ParkingProperties children) and saves the new version in the
-     * same flush, without an explicit flush in between. Hibernate's action queue executes entity
-     * insertions before entity deletions within a single flush, so the INSERT for the new version's
-     * (identically netexId/version-ed) ParkingProperties child raced ahead of the DELETE for the old
-     * one, violating the unique constraint.
+     * Each versioned child of a Parking has a unique constraint on (netex_id, version).
+     * Re-attaching an existing child without incrementing its version, as GraphQL's
+     * "copy previous version, apply edits" flow does, made the new version's child row clash
+     * with the row of the version being replaced.
      */
     @Test
-    public void saveExistingParkingWithParkingPropertiesTwice_doesNotThrowDuplicateKey() {
+    public void saveExistingParkingIncrementsVersionsOfReattachedChildren() {
 
         StopPlace stopPlace = new StopPlace();
         stopPlaceRepository.save(stopPlace);
 
         Point point = geometryFactory.createPoint(new Coordinate(9.84, 59.26));
 
+        ParkingCapacity firstCapacity = new ParkingCapacity();
+        firstCapacity.setNumberOfSpaces(new BigInteger("10"));
+
         ParkingProperties firstProperties = new ParkingProperties();
         firstProperties.getParkingUserTypes().add(ParkingUserEnumeration.ALL);
+        firstProperties.setSpaces(List.of(firstCapacity));
 
         Parking firstVersion = new Parking();
         firstVersion.setCentroid(point);
@@ -118,16 +116,27 @@ public class ParkingVersionedSaverServiceTest extends TiamatIntegrationTest {
         firstVersion.setParkingProperties(List.of(firstProperties));
 
         Parking saved = parkingVersionedSaverService.saveNewVersion(firstVersion);
-        assertThat(saved.getParkingProperties()).hasSize(1);
-        ParkingProperties savedProperties = saved.getParkingProperties().get(0);
 
-        // Simulate a second, unrelated edit (e.g. only the name changes) where the caller
-        // re-attaches the SAME logical ParkingProperties child, carrying over its already
-        // persisted netexId/version, as GraphQL's copy-and-edit flow does.
+        assertThat(saved.getParkingProperties()).hasSize(1);
+        ParkingProperties savedProperties = saved.getParkingProperties().getFirst();
+        assertThat(savedProperties.getNetexId()).as("properties netexId").isNotNull();
+        assertThat(savedProperties.getVersion()).as("properties version").isEqualTo(1L);
+        assertThat(savedProperties.getSpaces()).hasSize(1);
+        ParkingCapacity savedCapacity = savedProperties.getSpaces().getFirst();
+        assertThat(savedCapacity.getVersion()).as("capacity version").isEqualTo(1L);
+
+        // Second edit re-attaching the same logical children, carrying over their already
+        // persisted netexId and version, as the GraphQL copy-and-edit flow does.
+        ParkingCapacity reattachedCapacity = new ParkingCapacity();
+        reattachedCapacity.setNetexId(savedCapacity.getNetexId());
+        reattachedCapacity.setVersion(savedCapacity.getVersion());
+        reattachedCapacity.setNumberOfSpaces(new BigInteger("20"));
+
         ParkingProperties reattachedProperties = new ParkingProperties();
         reattachedProperties.setNetexId(savedProperties.getNetexId());
         reattachedProperties.setVersion(savedProperties.getVersion());
         reattachedProperties.getParkingUserTypes().add(ParkingUserEnumeration.ALL);
+        reattachedProperties.setSpaces(List.of(reattachedCapacity));
 
         Parking secondEdit = new Parking();
         secondEdit.setNetexId(saved.getNetexId());
@@ -136,10 +145,20 @@ public class ParkingVersionedSaverServiceTest extends TiamatIntegrationTest {
         secondEdit.setParentSiteRef(new SiteRefStructure(stopPlace.getNetexId()));
         secondEdit.setParkingProperties(List.of(reattachedProperties));
 
-        assertThatCode(() -> parkingVersionedSaverService.saveNewVersion(secondEdit))
-                .as("saving a second edit that re-attaches an existing ParkingProperties child " +
-                        "must not throw a duplicate key violation on parking_properties_netex_id_version_constraint")
-                .doesNotThrowAnyException();
+        Parking secondSaved = parkingVersionedSaverService.saveNewVersion(secondEdit);
+
+        assertThat(secondSaved.getVersion()).as("parking version").isEqualTo(2L);
+
+        ParkingProperties secondProperties = secondSaved.getParkingProperties().getFirst();
+        assertThat(secondProperties.getNetexId())
+                .as("properties netexId is kept across versions")
+                .isEqualTo(savedProperties.getNetexId());
+        assertThat(secondProperties.getVersion())
+                .as("properties version follows the parking version")
+                .isEqualTo(2L);
+        assertThat(secondProperties.getSpaces().getFirst().getVersion())
+                .as("capacity version follows the parking version")
+                .isEqualTo(2L);
     }
 
 }
