@@ -14,7 +14,6 @@ import com.google.pubsub.v1.TopicName;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
@@ -63,8 +62,14 @@ public class PubSubWriteJobTransportIntegrationTest extends TiamatIntegrationTes
     static final String TOPIC = "write-jobs";
     static final String SUBSCRIPTION = "write-jobs-sub";
 
+    /**
+     * Pinned. The {@code :emulators} tag is one Google republishes, so a push there changes the
+     * emulator under a build that did not change, and a machine holding an older layer does not
+     * reproduce it.
+     */
     private static final PubSubEmulatorContainer EMULATOR = new PubSubEmulatorContainer(
-            DockerImageName.parse("gcr.io/google.com/cloudsdktool/google-cloud-cli:emulators"));
+            DockerImageName.parse("gcr.io/google.com/cloudsdktool/google-cloud-cli:581.0.0-emulators")
+                    .asCompatibleSubstituteFor("gcr.io/google.com/cloudsdktool/google-cloud-cli"));
 
     private static final byte[] CREATE_PAYLOAD = ("""
             <stopPlaces xmlns="http://www.netex.org.uk/netex">
@@ -132,15 +137,11 @@ public class PubSubWriteJobTransportIntegrationTest extends TiamatIntegrationTes
         }
     }
 
-    @AfterClass
-    public static void stopBroker() {
-        EMULATOR.stop();
-    }
-
     @DynamicPropertySource
     static void pointTheClientAtTheEmulator(DynamicPropertyRegistry registry) {
+        // One registration. Relaxed binding means emulator-host and emulatorHost are the same
+        // property, and two lines that set one value invite an edit to one of them.
         registry.add("spring.cloud.gcp.pubsub.emulator-host", EMULATOR::getEmulatorEndpoint);
-        registry.add("spring.cloud.gcp.pubsub.emulatorHost", EMULATOR::getEmulatorEndpoint);
     }
 
     @Test
