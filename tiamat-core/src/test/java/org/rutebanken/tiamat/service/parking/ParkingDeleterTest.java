@@ -64,9 +64,10 @@ public class ParkingDeleterTest extends TiamatIntegrationTest {
     /**
      * An orphaned parking cannot be authorized under an authorization profile that resolves a
      * parking to its parent stop place, so deletion is refused with an actionable message rather
-     * than failing deep inside the authorization stack. Clearing the dangling parentSiteRef makes
-     * the parking a standalone parking, which deletes normally - see
-     * deleteParkingWithoutParentSiteRef below.
+     * than failing deep inside the authorization stack. Clearing the dangling parentSiteRef turns
+     * the parking into a standalone parking, which this class deletes normally - see
+     * deleteParkingWithoutParentSiteRef below. Note that the standalone case also threw before this
+     * change, so clearing the reference is only a remedy in combination with it.
      */
     @Test
     @Transactional
