@@ -22,6 +22,7 @@ import org.rutebanken.tiamat.model.BoardingPosition;
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
 import org.rutebanken.tiamat.model.Parking;
 import org.rutebanken.tiamat.model.ParkingArea;
+import org.rutebanken.tiamat.model.ParkingEntranceForVehicles;
 import org.rutebanken.tiamat.model.ParkingProperties;
 import org.rutebanken.tiamat.model.PlaceEquipment;
 import org.rutebanken.tiamat.model.SiteElement;
@@ -142,6 +143,10 @@ public class VersionIncrementor {
             parking.getParkingAreas().forEach(this::initiateOrIncrementParkingArea);
         }
 
+        if (parking.getVehicleEntrances() != null) {
+            parking.getVehicleEntrances().forEach(this::initiateOrIncrementParkingEntranceForVehicles);
+        }
+
         return parking;
     }
 
@@ -160,6 +165,11 @@ public class VersionIncrementor {
         if (parkingArea.getParkingProperties() != null) {
             initiateOrIncrementParkingProperties(parkingArea.getParkingProperties());
         }
+    }
+
+    private void initiateOrIncrementParkingEntranceForVehicles(ParkingEntranceForVehicles entrance) {
+        initiateOrIncrementSiteElementVersion(entrance);
+        initiateOrIncrementPlaceEquipment(entrance.getPlaceEquipments());
     }
 
     public void initiateOrIncrementPlaceEquipment(PlaceEquipment placeEquipment) {

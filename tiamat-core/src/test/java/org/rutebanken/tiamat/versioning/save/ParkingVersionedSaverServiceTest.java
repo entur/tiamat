@@ -380,11 +380,12 @@ public class ParkingVersionedSaverServiceTest extends TiamatIntegrationTest {
 
     /**
      * The GraphQL copy-and-edit flow can re-attach an entrance carrying the SAME netexId/version
-     * as the already-persisted one (see #432). This must not violate
-     * parking_entrance_for_vehicles_netex_id_version_constraint.
+     * as the already-persisted one (see #432). Like every other versioned child of a Parking, the
+     * entrance must get its version incremented so the new row does not clash with the row of the
+     * version being replaced on parking_entrance_for_vehicles_netex_id_version_constraint.
      */
     @Test
-    public void reattachVehicleEntranceWithSameNetexIdAndVersion_doesNotThrowDuplicateKey() {
+    public void reattachVehicleEntranceWithSameNetexIdAndVersion_incrementsEntranceVersion() {
         StopPlace stopPlace = new StopPlace();
         stopPlaceRepository.save(stopPlace);
         Point point = geometryFactory.createPoint(new Coordinate(9.84, 59.26));
@@ -399,6 +400,7 @@ public class ParkingVersionedSaverServiceTest extends TiamatIntegrationTest {
         parkingRepository.flush();
 
         ParkingEntranceForVehicles savedEntrance = saved.getVehicleEntrances().get(0);
+        assertThat(savedEntrance.getVersion()).as("entrance version").isEqualTo(1L);
 
         ParkingEntranceForVehicles reattached = entrance("A");
         reattached.setNetexId(savedEntrance.getNetexId());
@@ -411,11 +413,17 @@ public class ParkingVersionedSaverServiceTest extends TiamatIntegrationTest {
         secondEdit.setParentSiteRef(new SiteRefStructure(stopPlace.getNetexId()));
         secondEdit.getVehicleEntrances().add(reattached);
 
-        assertThatCode(() -> parkingVersionedSaverService.saveNewVersion(secondEdit))
-                .as("re-attaching an entrance with an existing (netexId, version) must not throw "
-                        + "a duplicate key violation on "
-                        + "parking_entrance_for_vehicles_netex_id_version_constraint")
-                .doesNotThrowAnyException();
+        Parking secondSaved = parkingVersionedSaverService.saveNewVersion(secondEdit);
+
+        assertThat(secondSaved.getVersion()).as("parking version").isEqualTo(2L);
+
+        ParkingEntranceForVehicles secondEntrance = secondSaved.getVehicleEntrances().get(0);
+        assertThat(secondEntrance.getNetexId())
+                .as("entrance netexId is kept across versions")
+                .isEqualTo(savedEntrance.getNetexId());
+        assertThat(secondEntrance.getVersion())
+                .as("entrance version follows the parking version")
+                .isEqualTo(2L);
     }
 
     /**
