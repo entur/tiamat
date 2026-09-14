@@ -1,16 +1,20 @@
 package org.rutebanken.tiamat.writer.async;
 
+import com.google.api.core.ApiService;
 import com.google.cloud.pubsub.v1.Subscriber;
 import com.google.cloud.spring.pubsub.core.PubSubTemplate;
 import com.google.cloud.spring.pubsub.support.BasicAcknowledgeablePubsubMessage;
 import com.google.pubsub.v1.PubsubMessage;
-import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.SmartLifecycle;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
+
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import static org.rutebanken.tiamat.writer.async.PubSubWriteJobPublisher.ATTRIBUTE_JOB_ID;
 import static org.rutebanken.tiamat.writer.async.PubSubWriteJobPublisher.ATTRIBUTE_OPERATION;
@@ -25,38 +29,94 @@ import static org.rutebanken.tiamat.writer.async.PubSubWriteJobPublisher.ATTRIBU
  * <p>
  * A second delivery is safe: {@link DefaultWriteJobHandler} claims a job before it does the work,
  * so it discards a delivery of a job that already ran.
+ * <p>
+ * A {@link SmartLifecycle} rather than {@code @PostConstruct} and {@code @PreDestroy}. The two
+ * ends of a consumer both need the rest of the context, and the annotations give neither.
+ * {@code @PostConstruct} runs while the context still builds, so a delivery can reach a write
+ * before the beans it needs exist. {@code @PreDestroy} runs during bean destruction, so the pool
+ * a running write holds can close underneath it. A lifecycle starts after the refresh finishes
+ * and stops before anything is destroyed.
  */
 @Component
 @Conditional(OnPubSubWriteTransport.class)
-public class PubSubWriteJobSubscriber {
+public class PubSubWriteJobSubscriber implements SmartLifecycle {
 
     private static final Logger logger = LoggerFactory.getLogger(PubSubWriteJobSubscriber.class);
 
     private final PubSubTemplate pubSubTemplate;
     private final WriteJobHandler handler;
     private final String subscription;
-    private Subscriber activeSubscriber;
+    private final long shutdownTimeoutSeconds;
+    private volatile Subscriber activeSubscriber;
 
     public PubSubWriteJobSubscriber(
             PubSubTemplate pubSubTemplate,
             WriteJobHandler handler,
-            @Value("${tiamat.write-api.pubsub.subscription:tiamat-write-jobs-sub}") String subscription
+            @Value("${tiamat.write-api.pubsub.subscription:tiamat-write-jobs-sub}") String subscription,
+            @Value("${tiamat.write-api.pubsub.shutdown-timeout-seconds:30}") long shutdownTimeoutSeconds
     ) {
         this.pubSubTemplate = pubSubTemplate;
         this.handler = handler;
         this.subscription = subscription;
+        this.shutdownTimeoutSeconds = shutdownTimeoutSeconds;
     }
 
-    @PostConstruct
+    @Override
     public void start() {
-        activeSubscriber = pubSubTemplate.subscribe(subscription, this::onMessage);
+        Subscriber subscriber = pubSubTemplate.subscribe(subscription, this::onMessage);
+        subscriber.addListener(new FailureListener(), Runnable::run);
+        activeSubscriber = subscriber;
         logger.info("Listening for write jobs on subscription {}", subscription);
     }
 
-    @PreDestroy
+    /**
+     * Waits for the subscriber to terminate, rather than only asking it to stop. A pod that leaves
+     * while a write runs fails that write on a pool that closed under it. The client then holds a
+     * job that no pod owns, until a sweeper somewhere else times it out.
+     */
+    @Override
     public void stop() {
-        if (activeSubscriber != null) {
-            activeSubscriber.stopAsync();
+        Subscriber subscriber = activeSubscriber;
+        if (subscriber == null) {
+            return;
+        }
+        activeSubscriber = null;
+        subscriber.stopAsync();
+        try {
+            subscriber.awaitTerminated(shutdownTimeoutSeconds, TimeUnit.SECONDS);
+            logger.info("Stopped listening on subscription {}", subscription);
+        } catch (TimeoutException e) {
+            logger.warn("The subscriber on {} did not stop within {}s. A write that is still "
+                    + "running ends as a timed out job.", subscription, shutdownTimeoutSeconds, e);
+        }
+    }
+
+    @Override
+    public boolean isRunning() {
+        return activeSubscriber != null;
+    }
+
+    /**
+     * The state of the subscriber, for a health check to report. Read from the subscriber itself
+     * and not from what {@link FailureListener} last saw. A failure between the start and the
+     * listener is then still visible.
+     */
+    public Optional<ApiService.State> subscriberState() {
+        Subscriber subscriber = activeSubscriber;
+        return subscriber == null ? Optional.empty() : Optional.of(subscriber.state());
+    }
+
+    /**
+     * A subscriber fails on its own thread and says nothing. Without this the pod stays up and
+     * answers every request, while it consumes no job at all. Every write it accepted then reaches
+     * TIMED_OUT ten minutes later. A subscription that does not exist, and a service account
+     * without permission to consume one, both end here.
+     */
+    private class FailureListener extends ApiService.Listener {
+        @Override
+        public void failed(ApiService.State from, Throwable cause) {
+            logger.error("The subscriber on {} failed from state {}. This pod now consumes no "
+                    + "write jobs, and every job it accepts times out.", subscription, from, cause);
         }
     }
 
