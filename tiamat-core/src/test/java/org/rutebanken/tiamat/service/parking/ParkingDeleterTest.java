@@ -83,7 +83,7 @@ public class ParkingDeleterTest extends TiamatIntegrationTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("NSR:StopPlace:doesnotexist")
                 .hasMessageContaining("no longer exists")
-                .hasMessageContaining("Clear the dangling parentSiteRef");
+                .hasMessageContaining("cleared in the database");
     }
 
     @Test

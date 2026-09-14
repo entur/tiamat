@@ -100,9 +100,12 @@ public class ParkingDeleter {
 
             StopPlace parentStopPlace = resolveParentStopPlace(parking);
             if (parentStopPlace == null) {
+                // Note: parentSiteRef cannot currently be cleared through the GraphQL API -
+                // ParkingUpdater ignores a null value - so this needs an administrative fix.
                 throw new IllegalArgumentException("Parking " + parking.getNetexId()
-                        + " references parent stop place " + parking.getParentSiteRef().getRef()
-                        + " which no longer exists. Clear the dangling parentSiteRef before deleting the parking.");
+                        + " is orphaned: parent stop place " + parking.getParentSiteRef().getRef()
+                        + " no longer exists, so permission to delete it cannot be determined. "
+                        + "Its dangling parentSiteRef has to be cleared in the database first.");
             }
 
             authorizationService.verifyCanEditEntities(Arrays.asList(parentStopPlace));
