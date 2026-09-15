@@ -250,10 +250,15 @@ public class JobService {
                 // says so. The current version also travels on its own field. The caller needs
                 // that number to read the stop place again, and must not get it from the
                 // sentence.
+                //
+                // The message reports the two versions and stops there. The other write can land
+                // before this job is created or while it waits, and a stale version is found by
+                // comparing two numbers, which says nothing about which of the two happened.
                 return new Failure(
                         JobFailureReason.STALE_VERSION,
-                        "The stop place moved to version " + stale.getCurrentVersion()
-                                + " while this job was pending. Read it again and reapply the change.",
+                        "You sent version " + stale.getExpectedVersion()
+                                + ". The stop place is now at version " + stale.getCurrentVersion()
+                                + ". Read it again, apply your change to it, and submit it again.",
                         stale.getCurrentVersion());
             }
             if (cause instanceof AccessDeniedException) {
