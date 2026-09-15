@@ -25,12 +25,24 @@ package org.rutebanken.tiamat.rest.validation;
  */
 public class StaleVersionException extends RuntimeException {
 
+    private final long expectedVersion;
+
     private final long currentVersion;
 
     public StaleVersionException(String netexId, long expectedVersion, long currentVersion) {
         super("Stop place " + netexId + " has moved to version " + currentVersion
                 + " since version " + expectedVersion + " was read.");
+        this.expectedVersion = expectedVersion;
         this.currentVersion = currentVersion;
+    }
+
+    /**
+     * The version the caller submitted. A message that reports both versions can state the mismatch
+     * without claiming anything about when the other write happened, which this exception does not
+     * know: it comes from a comparison of two numbers.
+     */
+    public long getExpectedVersion() {
+        return expectedVersion;
     }
 
     public long getCurrentVersion() {

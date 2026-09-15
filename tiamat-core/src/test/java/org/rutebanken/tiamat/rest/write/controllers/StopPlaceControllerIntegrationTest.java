@@ -715,8 +715,12 @@ public class StopPlaceControllerIntegrationTest extends TiamatIntegrationTest {
                 .as("the version to read again, without taking the number out of the message")
                 .isEqualTo(2L);
         assertThat(secondJob.failure().message())
-                .contains("moved to version 2")
-                .contains("Read it again");
+                .as("the message says which version was sent and which is current, and claims nothing "
+                        + "about when the other write happened. Here it happened before this job existed.")
+                .contains("You sent version 1")
+                .contains("now at version 2")
+                .contains("Read it again")
+                .doesNotContain("pending");
         String survivingName = written(saved.getNetexId(), sp -> sp.getName().getValue());
         assertThat(survivingName).as("the first edit survives").isEqualTo("First Edit");
     }
