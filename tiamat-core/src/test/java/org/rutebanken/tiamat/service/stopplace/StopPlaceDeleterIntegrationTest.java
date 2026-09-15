@@ -21,7 +21,9 @@ import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
+import org.rutebanken.tiamat.model.Parking;
 import org.rutebanken.tiamat.model.Quay;
+import org.rutebanken.tiamat.model.SiteRefStructure;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -74,5 +76,43 @@ public class StopPlaceDeleterIntegrationTest extends TiamatIntegrationTest {
         Quay deletedQuay = quayRepository.findFirstByNetexIdOrderByVersionDesc(quayNetexId);
         // Verify that associated quay is also deleted
         Assertions.assertThat(deletedQuay).isNull();
+    }
+
+    @Transactional
+    @Test
+    public void testDeleteStopPlaceDeletesReferencingParkings() {
+
+        StopPlace stopPlace = stopPlaceVersionedSaverService.saveNewVersion(createStopPlace("Stop place with parking"));
+        StopPlace otherStopPlace = stopPlaceVersionedSaverService.saveNewVersion(createStopPlace("Unrelated stop place"));
+
+        String parkingNetexId = saveParkingFor(stopPlace).getNetexId();
+        String unrelatedParkingNetexId = saveParkingFor(otherStopPlace).getNetexId();
+
+        Assertions.assertThat(parkingRepository.findFirstByNetexIdOrderByVersionDesc(parkingNetexId)).isNotNull();
+
+        stopPlaceDeleter.deleteStopPlace(stopPlace.getNetexId());
+
+        Assertions.assertThat(parkingRepository.findFirstByNetexIdOrderByVersionDesc(parkingNetexId))
+                .as("parking referencing the deleted stop place")
+                .isNull();
+
+        Assertions.assertThat(parkingRepository.findFirstByNetexIdOrderByVersionDesc(unrelatedParkingNetexId))
+                .as("parking referencing another stop place")
+                .isNotNull();
+    }
+
+    private StopPlace createStopPlace(String name) {
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setName(new EmbeddableMultilingualString(name));
+        stopPlace.setCentroid(geometryFactory.createPoint(new Coordinate(11.1, 60.1)));
+        return stopPlace;
+    }
+
+    private Parking saveParkingFor(StopPlace stopPlace) {
+        Parking parking = new Parking();
+        parking.setName(new EmbeddableMultilingualString("Parking"));
+        parking.setCentroid(geometryFactory.createPoint(new Coordinate(11.1, 60.1)));
+        parking.setParentSiteRef(new SiteRefStructure(stopPlace.getNetexId()));
+        return parkingVersionedSaverService.saveNewVersion(parking);
     }
 }
