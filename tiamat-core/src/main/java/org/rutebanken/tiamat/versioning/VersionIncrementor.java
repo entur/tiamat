@@ -156,6 +156,10 @@ public class VersionIncrementor {
     private void initiateOrIncrementParkingArea(ParkingArea parkingArea) {
         initiateOrIncrementSiteElementVersion(parkingArea);
         initiateOrIncrementPlaceEquipment(parkingArea.getPlaceEquipments());
+
+        if (parkingArea.getParkingProperties() != null) {
+            initiateOrIncrementParkingProperties(parkingArea.getParkingProperties());
+        }
     }
 
     public void initiateOrIncrementPlaceEquipment(PlaceEquipment placeEquipment) {

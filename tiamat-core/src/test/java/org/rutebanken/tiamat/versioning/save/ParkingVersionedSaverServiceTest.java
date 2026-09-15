@@ -22,6 +22,7 @@ import org.locationtech.jts.geom.Point;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.Parking;
+import org.rutebanken.tiamat.model.ParkingArea;
 import org.rutebanken.tiamat.model.ParkingCapacity;
 import org.rutebanken.tiamat.model.ParkingProperties;
 import org.rutebanken.tiamat.model.ParkingUserEnumeration;
@@ -158,6 +159,92 @@ public class ParkingVersionedSaverServiceTest extends TiamatIntegrationTest {
                 .isEqualTo(2L);
         assertThat(secondProperties.getSpaces().getFirst().getVersion())
                 .as("capacity version follows the parking version")
+                .isEqualTo(2L);
+    }
+
+    /**
+     * A ParkingArea carries its own ParkingProperties, which in turn carries its own spaces.
+     * Both are versioned and have the same unique constraint on (netex_id, version) as the
+     * properties hanging directly off the Parking, so they clash the same way when re-attached.
+     */
+    @Test
+    public void saveExistingParkingIncrementsVersionsOfReattachedParkingAreaChildren() {
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlaceRepository.save(stopPlace);
+
+        Point point = geometryFactory.createPoint(new Coordinate(9.84, 59.26));
+
+        ParkingCapacity firstCapacity = new ParkingCapacity();
+        firstCapacity.setNumberOfSpaces(new BigInteger("10"));
+
+        ParkingProperties firstProperties = new ParkingProperties();
+        firstProperties.getParkingUserTypes().add(ParkingUserEnumeration.ALL);
+        firstProperties.setSpaces(List.of(firstCapacity));
+
+        ParkingArea firstArea = new ParkingArea();
+        firstArea.setTotalCapacity(new BigInteger("10"));
+        firstArea.setParkingProperties(firstProperties);
+
+        Parking firstVersion = new Parking();
+        firstVersion.setCentroid(point);
+        firstVersion.setParentSiteRef(new SiteRefStructure(stopPlace.getNetexId()));
+        firstVersion.setParkingAreas(List.of(firstArea));
+
+        Parking saved = parkingVersionedSaverService.saveNewVersion(firstVersion);
+
+        assertThat(saved.getParkingAreas()).hasSize(1);
+        ParkingArea savedArea = saved.getParkingAreas().getFirst();
+        ParkingProperties savedAreaProperties = savedArea.getParkingProperties();
+        assertThat(savedAreaProperties).as("area properties").isNotNull();
+        assertThat(savedAreaProperties.getVersion()).as("area properties version").isEqualTo(1L);
+        ParkingCapacity savedAreaCapacity = savedAreaProperties.getSpaces().getFirst();
+        assertThat(savedAreaCapacity.getVersion()).as("area capacity version").isEqualTo(1L);
+
+        // Second edit re-attaching the same logical children, carrying over their already
+        // persisted netexId and version, as the GraphQL copy-and-edit flow does.
+        ParkingCapacity reattachedCapacity = new ParkingCapacity();
+        reattachedCapacity.setNetexId(savedAreaCapacity.getNetexId());
+        reattachedCapacity.setVersion(savedAreaCapacity.getVersion());
+        reattachedCapacity.setNumberOfSpaces(new BigInteger("20"));
+
+        ParkingProperties reattachedProperties = new ParkingProperties();
+        reattachedProperties.setNetexId(savedAreaProperties.getNetexId());
+        reattachedProperties.setVersion(savedAreaProperties.getVersion());
+        reattachedProperties.getParkingUserTypes().add(ParkingUserEnumeration.ALL);
+        reattachedProperties.setSpaces(List.of(reattachedCapacity));
+
+        ParkingArea reattachedArea = new ParkingArea();
+        reattachedArea.setNetexId(savedArea.getNetexId());
+        reattachedArea.setVersion(savedArea.getVersion());
+        reattachedArea.setTotalCapacity(new BigInteger("20"));
+        reattachedArea.setParkingProperties(reattachedProperties);
+
+        Parking secondEdit = new Parking();
+        secondEdit.setNetexId(saved.getNetexId());
+        secondEdit.setName(new EmbeddableMultilingualString("name"));
+        secondEdit.setCentroid(point);
+        secondEdit.setParentSiteRef(new SiteRefStructure(stopPlace.getNetexId()));
+        secondEdit.setParkingAreas(List.of(reattachedArea));
+
+        Parking secondSaved = parkingVersionedSaverService.saveNewVersion(secondEdit);
+
+        assertThat(secondSaved.getVersion()).as("parking version").isEqualTo(2L);
+
+        ParkingArea secondArea = secondSaved.getParkingAreas().getFirst();
+        assertThat(secondArea.getVersion())
+                .as("area version follows the parking version")
+                .isEqualTo(2L);
+
+        ParkingProperties secondAreaProperties = secondArea.getParkingProperties();
+        assertThat(secondAreaProperties.getNetexId())
+                .as("area properties netexId is kept across versions")
+                .isEqualTo(savedAreaProperties.getNetexId());
+        assertThat(secondAreaProperties.getVersion())
+                .as("area properties version follows the parking version")
+                .isEqualTo(2L);
+        assertThat(secondAreaProperties.getSpaces().getFirst().getVersion())
+                .as("area capacity version follows the parking version")
                 .isEqualTo(2L);
     }
 
