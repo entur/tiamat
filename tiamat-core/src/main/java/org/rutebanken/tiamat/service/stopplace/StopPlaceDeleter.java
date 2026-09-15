@@ -22,7 +22,9 @@ import org.rutebanken.tiamat.changelog.EntityChangedListener;
 import org.rutebanken.tiamat.lock.MutateLock;
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
 import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.repository.ParkingRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
+import org.rutebanken.tiamat.service.parking.ParkingDeleter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,13 +53,19 @@ public class StopPlaceDeleter {
 
     private final MutateLock mutateLock;
 
+    private final ParkingRepository parkingRepository;
+
+    private final ParkingDeleter parkingDeleter;
+
     @Autowired
-    public StopPlaceDeleter(StopPlaceRepository stopPlaceRepository, EntityChangedListener entityChangedListener, AuthorizationService authorizationService, UsernameFetcher usernameFetcher, MutateLock mutateLock) {
+    public StopPlaceDeleter(StopPlaceRepository stopPlaceRepository, EntityChangedListener entityChangedListener, AuthorizationService authorizationService, UsernameFetcher usernameFetcher, MutateLock mutateLock, ParkingRepository parkingRepository, ParkingDeleter parkingDeleter) {
         this.stopPlaceRepository = stopPlaceRepository;
         this.entityChangedListener = entityChangedListener;
         this.authorizationService = authorizationService;
         this.usernameFetcher = usernameFetcher;
         this.mutateLock = mutateLock;
+        this.parkingRepository = parkingRepository;
+        this.parkingDeleter = parkingDeleter;
     }
 
     @Transactional
@@ -74,6 +82,7 @@ public class StopPlaceDeleter {
             }
 
             authorizationService.verifyCanDeleteEntities(stopPlaces);
+            deleteReferencingParkings(stopPlaceId);
             stopPlaceRepository.deleteAll(stopPlaces);
             notifyDeleted(stopPlaces);
 
@@ -81,6 +90,21 @@ public class StopPlaceDeleter {
 
             return true;
         });
+    }
+
+    /**
+     * Parkings reference their parent stop place without a foreign key, so leaving them behind
+     * orphans them. Deleting through ParkingDeleter keeps the usual changelog events.
+     */
+    private void deleteReferencingParkings(String stopPlaceId) {
+        List<String> parkingIds = parkingRepository.findByStopPlaceNetexId(stopPlaceId);
+
+        if (parkingIds.isEmpty()) {
+            return;
+        }
+
+        logger.warn("Deleting {} parking(s) referencing stop place {}: {}", parkingIds.size(), stopPlaceId, parkingIds);
+        parkingIds.forEach(parkingDeleter::deleteParking);
     }
 
     private List<StopPlace> getAllVersionsOfStopPlace(String stopPlaceId) {

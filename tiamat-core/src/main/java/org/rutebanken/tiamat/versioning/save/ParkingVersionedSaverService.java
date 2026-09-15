@@ -129,13 +129,27 @@ public class ParkingVersionedSaverService {
      * @param parking
      */
     private void resolveAndAuthorizeParkingSiteRef(Parking parking) {
+        StopPlace parentSite = resolveParentStopPlace(parking);
+        authorizationService.verifyCanEditEntities( Arrays.asList(parentSite));
+    }
+
+    /**
+     * Resolves the parking's parentSiteRef and verifies that it points at an existing stop place.
+     * The reference has no foreign key backing it, so this is what keeps a parking from being
+     * orphaned. It runs independently of authorization and on every save path.
+     *
+     * @return the stop place the parking belongs to, never null
+     * @throws IllegalArgumentException if the reference does not resolve, or resolves to something
+     *                                  other than a stop place
+     */
+    StopPlace resolveParentStopPlace(Parking parking) {
         DataManagedObjectStructure parentSite = referenceResolver.resolve(parking.getParentSiteRef());
         if (parentSite == null) {
             throw new IllegalArgumentException("Cannot save parking without resolvable parent site ref: " + parking.toString());
         }
-        if (!(parentSite instanceof StopPlace)) {
+        if (!(parentSite instanceof StopPlace stopPlace)) {
             throw new IllegalArgumentException("Parking must have a parentSiteRef pointing to stop place. Parking: " + parking.toString() + " Parent site: " + parentSite);
         }
-        authorizationService.verifyCanEditEntities( Arrays.asList(parentSite));
+        return stopPlace;
     }
 }
