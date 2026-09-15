@@ -6,6 +6,12 @@ as a description of the wire protocol and translate it into whatever you build i
 
 This is documentation that runs. It is not a test, and nothing in the build runs it.
 
+`tiamat-write-api.draft.yaml` beside it is an OpenAPI 3.0 description of the same three endpoints,
+generated from the running service and filtered down to the write API. It is a draft for review, and
+it was generated once rather than on every build, so it carries the same drift risk as the rest of
+this directory. Read the `.http` file for how the API behaves in sequence, and the spec for the
+shape of each request and answer.
+
 ## What to notice
 
 **`202` does not mean the write happened.** It means the API took the job. The write happens later,
