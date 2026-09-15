@@ -101,6 +101,30 @@ public class FareZoneRepositoryImpl implements FareZoneRepositoryCustom {
         return query.getResultList();
     }
 
+    /**
+     * The valid EXPLICIT_STOPS fare zones listing this stop place as a member. The scoping method
+     * declares how a zone's extent is determined, so the zone outline is descriptive only and is not
+     * consulted: a member outside it matches, a non-member inside it does not. Same rule as the
+     * explicit branch of updateStopPlaceTariffZoneRef below, which rebuilds these refs in bulk.
+     */
+    @Override
+    public List<FareZone> findValidExplicitStopsFareZones(String stopPlaceNetexId) {
+        if (stopPlaceNetexId == null) {
+            return Collections.emptyList();
+        }
+
+        String sql = "SELECT fz.* FROM fare_zone fz WHERE fz.scoping_method = 'EXPLICIT_STOPS' " +
+                "AND EXISTS (SELECT 1 FROM fare_zone_members fzm WHERE fzm.fare_zone_id = fz.id AND fzm.ref = :stopPlaceNetexId) " +
+                "AND fz.version = (SELECT MAX(fzv.version) FROM fare_zone fzv WHERE fzv.netex_id = fz.netex_id " +
+                "and (fzv.to_date is null or fzv.to_date > :pointInTime) and (fzv.from_date is null or fzv.from_date < :pointInTime))";
+
+        Query query = entityManager.createNativeQuery(sql, FareZone.class);
+        query.setParameter("stopPlaceNetexId", stopPlaceNetexId);
+        query.setParameter("pointInTime", Instant.now());
+
+        return query.getResultList();
+    }
+
     @Override
     public Optional<FareZone> findValidFareZone(String netexId) {
         Map<String, Object> parameters = new HashMap<>();
