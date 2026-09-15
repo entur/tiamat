@@ -94,7 +94,7 @@ public class ParkingVersionedSaverService {
 
 
         newVersion.setValidBetween(null);
-        versionIncrementor.initiateOrIncrement(newVersion);
+        versionIncrementor.initiateOrIncrementVersions(newVersion);
         newVersion.setChangedBy(usernameFetcher.getUserNameForAuthenticatedUser());
         result = parkingRepository.save(newVersion);
 
