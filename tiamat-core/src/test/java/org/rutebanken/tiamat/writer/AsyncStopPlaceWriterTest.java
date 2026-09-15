@@ -17,6 +17,7 @@ import org.rutebanken.tiamat.rest.write.dto.StopPlaceJobDto;
 import org.rutebanken.tiamat.rest.write.dto.JobStatus;
 
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -51,6 +52,17 @@ class AsyncStopPlaceWriterTest {
     }
 
 
+
+    /**
+     * A default above the broker limit lets a request through that the broker then refuses, and
+     * the caller reads that refusal as backpressure.
+     */
+    @Test
+    void theDefaultPayloadLimitFitsInAPubSubMessage() {
+        int defaultLimit = Integer.parseInt(AsyncStopPlaceWriter.DEFAULT_MAX_PAYLOAD_SIZE);
+
+        assertThat(defaultLimit).isLessThan(AsyncStopPlaceWriter.PUBSUB_MESSAGE_LIMIT);
+    }
 
     @Test
     void createStopPlaces_Success() {

@@ -50,7 +50,7 @@ public record StopPlaceJobDto(
         JobFailureReason reasonCode,
 
         @Schema(description = "A description of the failure in English. The wording can change between releases.",
-                example = "The stop place moved to version 2 while this job was pending. Read it again and reapply the change.")
+                example = "You sent version 1. The stop place is now at version 2. Read it again, apply your change to it, and submit it again.")
         String message,
 
         @Schema(description = "The version that the stop place is at now. Set when reasonCode is STALE_VERSION.",
