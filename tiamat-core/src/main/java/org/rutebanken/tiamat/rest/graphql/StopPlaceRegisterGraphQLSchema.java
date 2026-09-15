@@ -50,6 +50,7 @@ import org.rutebanken.tiamat.model.GroupOfStopPlaces;
 import org.rutebanken.tiamat.model.GroupOfTariffZones;
 import org.rutebanken.tiamat.model.Link;
 import org.rutebanken.tiamat.model.Parking;
+import org.rutebanken.tiamat.model.ParkingEntranceForVehicles;
 import org.rutebanken.tiamat.model.PostalAddress;
 import org.rutebanken.tiamat.model.PurposeOfGrouping;
 import org.rutebanken.tiamat.model.Quay;
@@ -764,6 +765,7 @@ public class StopPlaceRegisterGraphQLSchema {
         dataFetcherPlaceEquipments(codeRegistryBuilder, OUTPUT_TYPE_STOPPLACE);
         dataFetcherPlaceEquipments(codeRegistryBuilder, OUTPUT_TYPE_PARENT_STOPPLACE);
         dataFetcherPlaceEquipments(codeRegistryBuilder, OUTPUT_TYPE_QUAY);
+        dataFetcherPlaceEquipments(codeRegistryBuilder, OUTPUT_TYPE_PARKING);
 
 
         registerDataFetcher(codeRegistryBuilder, OUTPUT_TYPE_STOPPLACE, STOP_PLACE_GROUPS, stopPlaceGroupsFetcher);
@@ -832,6 +834,15 @@ public class StopPlaceRegisterGraphQLSchema {
                 return parentSiteRef.getRef();
             }
             return null;
+        });
+        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_PARKING_VEHICLE_ENTRANCE,LABEL,env -> {
+            ParkingEntranceForVehicles entrance = env.getSource();
+            EmbeddableMultilingualString label = entrance.getLabel();
+            return label != null ? label.getValue() : null;
+        });
+        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_PARKING_VEHICLE_ENTRANCE,ACCESS_MODES,env -> {
+            ParkingEntranceForVehicles entrance = env.getSource();
+            return entrance.getAccessModesList();
         });
 
         mapNetexId(codeRegistryBuilder, OUTPUT_TYPE_SHELTER_EQUIPMENT, OUTPUT_TYPE_SANITARY_EQUIPMENT, OUTPUT_TYPE_CYCLE_STORAGE_EQUIPMENT, OUTPUT_TYPE_GENERAL_SIGN_EQUIPMENT, OUTPUT_TYPE_TICKETING_EQUIPMENT, OUTPUT_TYPE_WAITING_ROOM_EQUIPMENT);
@@ -994,6 +1005,8 @@ public class StopPlaceRegisterGraphQLSchema {
                 return stopPlace.getPlaceEquipments();
             } else if (env.getSource() instanceof Quay quay) {
                 return quay.getPlaceEquipments();
+            } else if (env.getSource() instanceof Parking parking) {
+                return parking.getPlaceEquipments();
             }
             return null;
         });

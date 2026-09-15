@@ -24,6 +24,8 @@ import org.rutebanken.tiamat.model.SiteRefStructure;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
 
+import java.util.List;
+
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
@@ -455,5 +457,428 @@ public class GraphQLResourceParkingIntegrationTest extends AbstractGraphQLResour
 
     }
 
+    @Test
+    public void testMutateParkingWithCycleStorageShouldPersistAndReturn() throws Exception {
+
+        StopPlace stopPlace = stopPlaceRepository.save(new StopPlace());
+
+        String graphQlQuery = "{\n" +
+                "\"query\": \"mutation { " +
+                "  parking: " + GraphQLNames.MUTATE_PARKING + " (Parking : {" +
+                "    geometry: { type:Point coordinates:[10.5, 59.0] } " +
+                "    parentSiteRef:\\\"" + stopPlace.getNetexId() + "\\\" " +
+                "    placeEquipments: { " +
+                "      cycleStorageEquipment: [{ " +
+                "        numberOfSpaces: 10 " +
+                "        cycleStorageType: bars " +
+                "      }] " +
+                "    } " +
+                "  }) {" +
+                "    id " +
+                "    placeEquipments { " +
+                "      cycleStorageEquipment { numberOfSpaces cycleStorageType } " +
+                "    } " +
+                "  }" +
+                "}\",\"variables\": \"\"}";
+
+        String parkingId = executeGraphQL(graphQlQuery)
+                .body("data.parking[0].id", notNullValue())
+                .body("data.parking[0].placeEquipments.cycleStorageEquipment[0].cycleStorageType", equalTo("bars"))
+                .body("data.parking[0].placeEquipments.cycleStorageEquipment[0].numberOfSpaces", equalTo(10))
+                .extract()
+                .path("data.parking[0].id");
+
+        String findParkingQuery = "{" +
+                "\"query\":\"{" +
+                "  parking: " + GraphQLNames.FIND_PARKING + " (id:\\\"" + parkingId + "\\\") { " +
+                "    id " +
+                "    placeEquipments { " +
+                "      cycleStorageEquipment { numberOfSpaces cycleStorageType } " +
+                "    } " +
+                "  } " +
+                "}\"," +
+                "\"variables\":\"\"}";
+
+        executeGraphQL(findParkingQuery)
+                .body("data.parking[0].id", equalTo(parkingId))
+                .body("data.parking[0].placeEquipments.cycleStorageEquipment[0].cycleStorageType", equalTo("bars"))
+                .body("data.parking[0].placeEquipments.cycleStorageEquipment[0].numberOfSpaces", equalTo(10));
+    }
+
+    @Test
+    public void testMutateParkingWithPaymentMethodsShouldPersistAndReturn() throws Exception {
+
+        StopPlace stopPlace = stopPlaceRepository.save(new StopPlace());
+
+        String graphQlQuery = "{\n" +
+                "\"query\": \"mutation { " +
+                "  parking: " + GraphQLNames.MUTATE_PARKING + " (Parking : {" +
+                "    geometry: { type:Point coordinates:[10.5, 59.0] } " +
+                "    parentSiteRef:\\\"" + stopPlace.getNetexId() + "\\\" " +
+                "    paymentMethods: [cash, creditCard, mobilePhone] " +
+                "  }) {" +
+                "    id " +
+                "    paymentMethods " +
+                "  }" +
+                "}\",\"variables\": \"\"}";
+
+        String parkingId = executeGraphQL(graphQlQuery)
+                .body("data.parking[0].id", notNullValue())
+                .body("data.parking[0].paymentMethods", hasSize(3))
+                .extract()
+                .path("data.parking[0].id");
+
+        String findParkingQuery = "{" +
+                "\"query\":\"{" +
+                "  parking: " + GraphQLNames.FIND_PARKING + " (id:\\\"" + parkingId + "\\\") { " +
+                "    id " +
+                "    paymentMethods " +
+                "  } " +
+                "}\"," +
+                "\"variables\":\"\"}";
+
+        executeGraphQL(findParkingQuery)
+                .body("data.parking[0].id", equalTo(parkingId))
+                .body("data.parking[0].paymentMethods", hasSize(3));
+
+        String updateQuery = "{" +
+                "\"query\":\"mutation { " +
+                "  parking:" + GraphQLNames.MUTATE_PARKING + " (Parking: {" +
+                "        id:\\\"" + parkingId + "\\\" " +
+                "        paymentMethods: [contactlessPaymentCard] " +
+                "       }) { " +
+                "      id " +
+                "      paymentMethods " +
+                "    } " +
+                "}\"," +
+                "\"variables\":\"\"}";
+
+        executeGraphQL(updateQuery)
+                .body("data.parking[0].id", equalTo(parkingId))
+                .body("data.parking[0].paymentMethods", hasSize(1))
+                .body("data.parking[0].paymentMethods[0]", equalTo("contactlessPaymentCard"));
+    }
+
+    @Test
+    public void testMutateParkingWithLightingShouldPersistAndReturn() throws Exception {
+
+        StopPlace stopPlace = stopPlaceRepository.save(new StopPlace());
+
+        String graphQlQuery = "{\n" +
+                "\"query\": \"mutation { " +
+                "  parking: " + GraphQLNames.MUTATE_PARKING + " (Parking : {" +
+                "    geometry: { type:Point coordinates:[10.5, 59.0] } " +
+                "    parentSiteRef:\\\"" + stopPlace.getNetexId() + "\\\" " +
+                "    lighting: wellLit " +
+                "  }) {" +
+                "    id " +
+                "    lighting " +
+                "  }" +
+                "}\",\"variables\": \"\"}";
+
+        String parkingId = executeGraphQL(graphQlQuery)
+                .body("data.parking[0].id", notNullValue())
+                .body("data.parking[0].lighting", equalTo("wellLit"))
+                .extract()
+                .path("data.parking[0].id");
+
+        String findParkingQuery = "{" +
+                "\"query\":\"{" +
+                "  parking: " + GraphQLNames.FIND_PARKING + " (id:\\\"" + parkingId + "\\\") { " +
+                "    id " +
+                "    lighting " +
+                "  } " +
+                "}\"," +
+                "\"variables\":\"\"}";
+
+        executeGraphQL(findParkingQuery)
+                .body("data.parking[0].id", equalTo(parkingId))
+                .body("data.parking[0].lighting", equalTo("wellLit"));
+
+        String updateQuery = "{" +
+                "\"query\":\"mutation { " +
+                "  parking:" + GraphQLNames.MUTATE_PARKING + " (Parking: {" +
+                "        id:\\\"" + parkingId + "\\\" " +
+                "        lighting: unlit " +
+                "       }) { " +
+                "      id " +
+                "      lighting " +
+                "    } " +
+                "}\"," +
+                "\"variables\":\"\"}";
+
+        executeGraphQL(updateQuery)
+                .body("data.parking[0].id", equalTo(parkingId))
+                .body("data.parking[0].lighting", equalTo("unlit"));
+    }
+
+    @Test
+    public void testMutateParkingWithVehicleEntrancesShouldPersistAndReplaceOnUpdate() throws Exception {
+
+        StopPlace stopPlace = stopPlaceRepository.save(new StopPlace());
+
+        String graphQlQuery = "{\n" +
+                "\"query\": \"mutation { " +
+                "  parking: " + GraphQLNames.MUTATE_PARKING + " (Parking : {" +
+                "    geometry: { type:Point coordinates:[10.5, 59.0] } " +
+                "    parentSiteRef:\\\"" + stopPlace.getNetexId() + "\\\" " +
+                "    vehicleEntrances: [" +
+                "      { label: \\\"North gate\\\" entranceType: gate isEntry: true isExit: false accessModes: [foot, bicycle] } " +
+                "      { label: \\\"South gate\\\" entranceType: gate isEntry: false isExit: true } " +
+                "    ]" +
+                "  }) {" +
+                "    id " +
+                "    vehicleEntrances { label entranceType isEntry isExit accessModes } " +
+                "  }" +
+                "}\",\"variables\": \"\"}";
+
+        String parkingId = executeGraphQL(graphQlQuery)
+                .body("data.parking[0].id", notNullValue())
+                .body("data.parking[0].vehicleEntrances.size()", equalTo(2))
+                .body("data.parking[0].vehicleEntrances[0].accessModes", equalTo(List.of("foot", "bicycle")))
+                .body("data.parking[0].vehicleEntrances[1].accessModes", equalTo(List.of()))
+                .extract()
+                .path("data.parking[0].id");
+
+        String findParkingQuery = "{" +
+                "\"query\":\"{" +
+                "  parking: " + GraphQLNames.FIND_PARKING + " (id:\\\"" + parkingId + "\\\") { " +
+                "    id " +
+                "    vehicleEntrances { label entranceType isEntry isExit accessModes } " +
+                "  } " +
+                "}\"," +
+                "\"variables\":\"\"}";
+
+        executeGraphQL(findParkingQuery)
+                .body("data.parking[0].id", equalTo(parkingId))
+                .body("data.parking[0].vehicleEntrances.size()", equalTo(2))
+                .body("data.parking[0].vehicleEntrances[0].accessModes", equalTo(List.of("foot", "bicycle")));
+
+        String updateQuery = "{" +
+                "\"query\":\"mutation { " +
+                "  parking:" + GraphQLNames.MUTATE_PARKING + " (Parking: {" +
+                "        id:\\\"" + parkingId + "\\\" " +
+                "        vehicleEntrances: [" +
+                "          { label: \\\"Main gate\\\" entranceType: ticketBarrier isEntry: true isExit: true accessModes: [car] } " +
+                "        ] " +
+                "       }) { " +
+                "      id " +
+                "      vehicleEntrances { label entranceType isEntry isExit accessModes } " +
+                "    } " +
+                "}\"," +
+                "\"variables\":\"\"}";
+
+        executeGraphQL(updateQuery)
+                .body("data.parking[0].id", equalTo(parkingId))
+                .body("data.parking[0].vehicleEntrances.size()", equalTo(1))
+                .body("data.parking[0].vehicleEntrances[0].label", equalTo("Main gate"))
+                .body("data.parking[0].vehicleEntrances[0].entranceType", equalTo("ticketBarrier"))
+                .body("data.parking[0].vehicleEntrances[0].accessModes", equalTo(List.of("car")));
+    }
+
+    @Test
+    public void testMutateParkingWithInfoLinksShouldPersistAndReplaceOnUpdate() throws Exception {
+
+        StopPlace stopPlace = stopPlaceRepository.save(new StopPlace());
+
+        String graphQlQuery = "{\n" +
+                "\"query\": \"mutation { " +
+                "  parking: " + GraphQLNames.MUTATE_PARKING + " (Parking : {" +
+                "    geometry: { type:Point coordinates:[10.5, 59.0] } " +
+                "    parentSiteRef:\\\"" + stopPlace.getNetexId() + "\\\" " +
+                "    infoLinks: [" +
+                "      { uri: \\\"https://example.com/one\\\" typeOfInfoLink: info } " +
+                "      { uri: \\\"https://example.com/two\\\" typeOfInfoLink: info } " +
+                "    ]" +
+                "  }) {" +
+                "    id " +
+                "    infoLinks { uri typeOfInfoLink } " +
+                "  }" +
+                "}\",\"variables\": \"\"}";
+
+        String parkingId = executeGraphQL(graphQlQuery)
+                .body("data.parking[0].id", notNullValue())
+                .body("data.parking[0].infoLinks.size()", equalTo(2))
+                .body("data.parking[0].infoLinks[0].uri", equalTo("https://example.com/one"))
+                .body("data.parking[0].infoLinks[0].typeOfInfoLink", equalTo("info"))
+                .body("data.parking[0].infoLinks[1].uri", equalTo("https://example.com/two"))
+                .extract()
+                .path("data.parking[0].id");
+
+        String findParkingQuery = "{" +
+                "\"query\":\"{" +
+                "  parking: " + GraphQLNames.FIND_PARKING + " (id:\\\"" + parkingId + "\\\") { " +
+                "    id " +
+                "    infoLinks { uri typeOfInfoLink } " +
+                "  } " +
+                "}\"," +
+                "\"variables\":\"\"}";
+
+        executeGraphQL(findParkingQuery)
+                .body("data.parking[0].id", equalTo(parkingId))
+                .body("data.parking[0].infoLinks.size()", equalTo(2))
+                .body("data.parking[0].infoLinks[0].uri", equalTo("https://example.com/one"));
+
+        String updateQuery = "{" +
+                "\"query\":\"mutation { " +
+                "  parking:" + GraphQLNames.MUTATE_PARKING + " (Parking: {" +
+                "        id:\\\"" + parkingId + "\\\" " +
+                "        infoLinks: [" +
+                "          { uri: \\\"https://example.com/replacement\\\" typeOfInfoLink: info } " +
+                "        ] " +
+                "       }) { " +
+                "      id " +
+                "      infoLinks { uri typeOfInfoLink } " +
+                "    } " +
+                "}\"," +
+                "\"variables\":\"\"}";
+
+        executeGraphQL(updateQuery)
+                .body("data.parking[0].id", equalTo(parkingId))
+                .body("data.parking[0].infoLinks.size()", equalTo(1))
+                .body("data.parking[0].infoLinks[0].uri", equalTo("https://example.com/replacement"));
+    }
+
+    @Test
+    public void testMutateParkingWithAvailabilityConditionsShouldPersistAndReplaceOnUpdate() throws Exception {
+
+        StopPlace stopPlace = stopPlaceRepository.save(new StopPlace());
+
+        String graphQlQuery = "{\n" +
+                "\"query\": \"mutation { " +
+                "  parking: " + GraphQLNames.MUTATE_PARKING + " (Parking : {" +
+                "    geometry: { type:Point coordinates:[10.5, 59.0] } " +
+                "    parentSiteRef:\\\"" + stopPlace.getNetexId() + "\\\" " +
+                "    availabilityConditions: [" +
+                "      { dayTypeRef: \\\"NSR:DayType:1\\\" isAvailable: true startTime: \\\"06:00:00\\\" endTime: \\\"22:00:00\\\" } " +
+                "      { dayTypeRef: \\\"NSR:DayType:2\\\" isAvailable: false } " +
+                "    ]" +
+                "  }) {" +
+                "    id " +
+                "    availabilityConditions { dayTypeRef isAvailable startTime endTime } " +
+                "  }" +
+                "}\",\"variables\": \"\"}";
+
+        String parkingId = executeGraphQL(graphQlQuery)
+                .body("data.parking[0].id", notNullValue())
+                .body("data.parking[0].availabilityConditions.size()", equalTo(2))
+                .body("data.parking[0].availabilityConditions[0].dayTypeRef", equalTo("NSR:DayType:1"))
+                .body("data.parking[0].availabilityConditions[0].isAvailable", equalTo(true))
+                .body("data.parking[0].availabilityConditions[0].startTime", equalTo("06:00"))
+                .body("data.parking[0].availabilityConditions[0].endTime", equalTo("22:00"))
+                .body("data.parking[0].availabilityConditions[1].dayTypeRef", equalTo("NSR:DayType:2"))
+                .body("data.parking[0].availabilityConditions[1].isAvailable", equalTo(false))
+                .extract()
+                .path("data.parking[0].id");
+
+        String findParkingQuery = "{" +
+                "\"query\":\"{" +
+                "  parking: " + GraphQLNames.FIND_PARKING + " (id:\\\"" + parkingId + "\\\") { " +
+                "    id " +
+                "    availabilityConditions { dayTypeRef isAvailable startTime endTime } " +
+                "  } " +
+                "}\"," +
+                "\"variables\":\"\"}";
+
+        executeGraphQL(findParkingQuery)
+                .body("data.parking[0].id", equalTo(parkingId))
+                .body("data.parking[0].availabilityConditions.size()", equalTo(2))
+                .body("data.parking[0].availabilityConditions[0].dayTypeRef", equalTo("NSR:DayType:1"));
+
+        String updateQuery = "{" +
+                "\"query\":\"mutation { " +
+                "  parking:" + GraphQLNames.MUTATE_PARKING + " (Parking: {" +
+                "        id:\\\"" + parkingId + "\\\" " +
+                "        availabilityConditions: [" +
+                "          { dayTypeRef: \\\"NSR:DayType:3\\\" isAvailable: true startTime: \\\"06:00:00\\\" endTime: \\\"24:00:00\\\" } " +
+                "        ] " +
+                "       }) { " +
+                "      id " +
+                "      availabilityConditions { dayTypeRef isAvailable startTime endTime dayOffset } " +
+                "    } " +
+                "}\"," +
+                "\"variables\":\"\"}";
+
+        executeGraphQL(updateQuery)
+                .body("data.parking[0].id", equalTo(parkingId))
+                .body("data.parking[0].availabilityConditions.size()", equalTo(1))
+                .body("data.parking[0].availabilityConditions[0].dayTypeRef", equalTo("NSR:DayType:3"))
+                .body("data.parking[0].availabilityConditions[0].startTime", equalTo("06:00"))
+                .body("data.parking[0].availabilityConditions[0].endTime", equalTo("00:00"))
+                .body("data.parking[0].availabilityConditions[0].dayOffset", equalTo(1));
+    }
+
+    @Test
+    public void testMutateParkingWithSplitOpeningHoursForSameDayTypeShouldPersistBoth() throws Exception {
+
+        StopPlace stopPlace = stopPlaceRepository.save(new StopPlace());
+
+        String graphQlQuery = "{\n" +
+                "\"query\": \"mutation { " +
+                "  parking: " + GraphQLNames.MUTATE_PARKING + " (Parking : {" +
+                "    geometry: { type:Point coordinates:[10.5, 59.0] } " +
+                "    parentSiteRef:\\\"" + stopPlace.getNetexId() + "\\\" " +
+                "    availabilityConditions: [" +
+                "      { dayTypeRef: \\\"NSR:DayType:1\\\" isAvailable: true startTime: \\\"06:00:00\\\" endTime: \\\"10:00:00\\\" } " +
+                "      { dayTypeRef: \\\"NSR:DayType:1\\\" isAvailable: true startTime: \\\"15:00:00\\\" endTime: \\\"20:00:00\\\" } " +
+                "    ]" +
+                "  }) {" +
+                "    id " +
+                "    availabilityConditions { dayTypeRef startTime endTime } " +
+                "  }" +
+                "}\",\"variables\": \"\"}";
+
+        executeGraphQL(graphQlQuery)
+                .body("data.parking[0].availabilityConditions.size()", equalTo(2))
+                .body("data.parking[0].availabilityConditions[0].startTime", equalTo("06:00"))
+                .body("data.parking[0].availabilityConditions[0].endTime", equalTo("10:00"))
+                .body("data.parking[0].availabilityConditions[1].startTime", equalTo("15:00"))
+                .body("data.parking[0].availabilityConditions[1].endTime", equalTo("20:00"));
+    }
+
+    @Test
+    public void testMutateParkingWithEndTimeButNoStartTimeReturnsGraphQLError() throws Exception {
+
+        StopPlace stopPlace = stopPlaceRepository.save(new StopPlace());
+
+        String graphQlQuery = "{\n" +
+                "\"query\": \"mutation { " +
+                "  parking: " + GraphQLNames.MUTATE_PARKING + " (Parking : {" +
+                "    geometry: { type:Point coordinates:[10.5, 59.0] } " +
+                "    parentSiteRef:\\\"" + stopPlace.getNetexId() + "\\\" " +
+                "    availabilityConditions: [" +
+                "      { dayTypeRef: \\\"NSR:DayType:1\\\" isAvailable: true endTime: \\\"22:00:00\\\" } " +
+                "    ]" +
+                "  }) {" +
+                "    id " +
+                "  }" +
+                "}\",\"variables\": \"\"}";
+
+        executeGraphQL(graphQlQuery, 400)
+                .body("errors", notNullValue());
+    }
+
+    @Test
+    public void testMutateParkingWithInvalidAvailabilityConditionTimeReturnsGraphQLError() throws Exception {
+
+        StopPlace stopPlace = stopPlaceRepository.save(new StopPlace());
+
+        String graphQlQuery = "{\n" +
+                "\"query\": \"mutation { " +
+                "  parking: " + GraphQLNames.MUTATE_PARKING + " (Parking : {" +
+                "    geometry: { type:Point coordinates:[10.5, 59.0] } " +
+                "    parentSiteRef:\\\"" + stopPlace.getNetexId() + "\\\" " +
+                "    availabilityConditions: [" +
+                "      { dayTypeRef: \\\"NSR:DayType:1\\\" startTime: \\\"not-a-time\\\" } " +
+                "    ]" +
+                "  }) {" +
+                "    id " +
+                "  }" +
+                "}\",\"variables\": \"\"}";
+
+        executeGraphQL(graphQlQuery, 400)
+                .body("errors", notNullValue());
+    }
 
 }
+

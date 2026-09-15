@@ -228,6 +228,15 @@ public class GraphQLNames {
     public static final String OUTPUT_TYPE_PARKING_AREA = "ParkingArea";
     public static final String INPUT_TYPE_PARKING_AREA = OUTPUT_TYPE_PARKING_AREA + INPUT_TYPE_POSTFIX;
 
+    public static final String OUTPUT_TYPE_PARKING_VEHICLE_ENTRANCE = "ParkingVehicleEntrance";
+    public static final String INPUT_TYPE_PARKING_VEHICLE_ENTRANCE = OUTPUT_TYPE_PARKING_VEHICLE_ENTRANCE + INPUT_TYPE_POSTFIX;
+
+    public static final String OUTPUT_TYPE_INFO_LINK = "InfoLink";
+    public static final String INPUT_TYPE_INFO_LINK = OUTPUT_TYPE_INFO_LINK + INPUT_TYPE_POSTFIX;
+
+    public static final String OUTPUT_TYPE_AVAILABILITY_CONDITION = "AvailabilityCondition";
+    public static final String INPUT_TYPE_AVAILABILITY_CONDITION = OUTPUT_TYPE_AVAILABILITY_CONDITION + INPUT_TYPE_POSTFIX;
+
 
     public static final String GEOMETRY_TYPE_ENUM = "GeoJSONType";
 
@@ -245,6 +254,7 @@ public class GraphQLNames {
     public static final String PARKING_LAYOUT_ENUM = "ParkingLayoutType";
     public static final String PARKING_RESERVATION_ENUM = "ParkingReservationType";
     public static final String PARKING_PAYMENT_PROCESS_ENUM = "ParkingPaymentProcessType";
+    public static final String PAYMENT_METHOD_ENUM = "PaymentMethodEnum";
     public static final String PARKING_USER_ENUM = "ParkingUserType";
     public static final String PARKING_STAY_TYPE_ENUM = "ParkingStayType";
 
@@ -462,7 +472,24 @@ public class GraphQLNames {
     public static final String BOOKING_URL = "bookingUrl";
     public static final String FREE_PARKING_OUT_OF_HOURS = "freeParkingOutOfHours";
     public static final String PARKING_PAYMENT_PROCESS = "parkingPaymentProcess";
+    public static final String PAYMENT_METHODS = "paymentMethods";
     public static final String LABEL = "label";
+    public static final String VEHICLE_ENTRANCES = "vehicleEntrances";
+    public static final String ENTRANCE_TYPE = "entranceType";
+    public static final String IS_ENTRY = "isEntry";
+    public static final String IS_EXIT = "isExit";
+    public static final String ENTRANCE_WIDTH = "width";
+    public static final String ENTRANCE_HEIGHT = "height";
+    public static final String ACCESS_MODES = "accessModes";
+    public static final String INFO_LINKS = "infoLinks";
+    public static final String URI = "uri";
+    public static final String TYPE_OF_INFO_LINK = "typeOfInfoLink";
+    public static final String AVAILABILITY_CONDITIONS = "availabilityConditions";
+    public static final String DAY_TYPE_REF = "dayTypeRef";
+    public static final String IS_AVAILABLE = "isAvailable";
+    public static final String START_TIME = "startTime";
+    public static final String END_TIME = "endTime";
+    public static final String DAY_OFFSET = "dayOffset";
     public static final String PARENT_SITE_REF = "parentSiteRef";
 
     public static final String VALID_TRANSPORT_MODES = "validTransportModes";

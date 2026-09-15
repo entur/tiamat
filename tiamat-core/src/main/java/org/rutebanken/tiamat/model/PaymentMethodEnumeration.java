@@ -18,6 +18,7 @@ package org.rutebanken.tiamat.model;
 public enum PaymentMethodEnumeration {
 
     CASH("cash"),
+    CASH_EXACT_CHANGE_ONLY("cashExactChangeOnly"),
     CASH_AND_CARD("cashAndCard"),
     COIN("coin"),
     BANKNOTE("banknote"),
@@ -31,11 +32,17 @@ public enum PaymentMethodEnumeration {
     TRAVEL_CARD("travelCard"),
     CONTACTLESS_PAYMENT_CARD("contactlessPaymentCard"),
     CONTACTLESS_TRAVEL_CARD("contactlessTravelCard"),
+    DIRECT_DEBIT("directDebit"),
+    BANK_TRANSFER("bankTransfer"),
+    EPAY_DEVICE("epayDevice"),
+    EPAY_ACCOUNT("epayAccount"),
     SMS("sms"),
     MOBILE_PHONE("mobilePhone"),
+    MOBILE_APP("mobileApp"),
     VOUCHER("voucher"),
     TOKEN("token"),
     WARRANT("warrant"),
+    MILEAGE_POINTS("mileagePoints"),
     OTHER("other");
     private final String value;
 
