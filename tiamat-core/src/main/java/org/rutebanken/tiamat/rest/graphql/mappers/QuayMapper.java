@@ -15,7 +15,7 @@
 
 package org.rutebanken.tiamat.rest.graphql.mappers;
 
-import com.google.api.client.util.Preconditions;
+import com.google.common.base.Preconditions;
 import org.rutebanken.tiamat.model.BoardingPosition;
 import org.rutebanken.tiamat.model.LightingEnumeration;
 import org.rutebanken.tiamat.model.PrivateCodeStructure;

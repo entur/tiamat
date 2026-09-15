@@ -1,4 +1,4 @@
-package org.rutebanken.tiamat.writer.async;
+package org.rutebanken.tiamat.gcp.writer;
 
 import org.springframework.boot.autoconfigure.condition.AllNestedConditions;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -11,8 +11,9 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
  * <p>
  * The transport alone is not enough. A broker delivers work whether or not this deployment wants
  * it. So a subscriber gated only on the transport keeps writing after
- * {@code tiamat.write-api.enabled} goes to false. {@link WriteJobTimeoutSweeper} is gated on
- * {@code enabled}, so by then nothing guarantees that a job reaches a terminal state.
+ * {@code tiamat.write-api.enabled} goes to false.
+ * {@link org.rutebanken.tiamat.writer.async.WriteJobTimeoutSweeper} is gated on {@code enabled},
+ * so by then nothing guarantees that a job reaches a terminal state.
  */
 public class OnPubSubWriteTransport extends AllNestedConditions {
 
