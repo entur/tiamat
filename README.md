@@ -219,7 +219,7 @@ Starts up PostGIS server with settings matching the ones in [`application-local.
 
 Starts up [LocalStack](https://www.localstack.cloud/) meant for developing AWS specific features.
 
-See also [Disable AWS S3 Autoconfiguration](#disable-aws-s3-autoconfiguration), [NeTEx Export](#netex-export).
+See also [NeTEx Export](#netex-export).
 
 #### Run It!
 
@@ -565,31 +565,6 @@ Commit the migration together with code changes that requires this schema change
 ## Metrics
 
 Tiamat uses Micrometer for application metrics.
-
-### CloudWatch
-
-`micrometer-registry-cloudwatch2` is included as a dependency but is **only activated when the
-`management.cloudwatch.metrics.export.namespace` property is set**. Without this property
-the CloudWatch registry is not injected and no metrics are exported to CloudWatch.
-
-Example configuration:
-
-```properties
-management.cloudwatch.metrics.export.namespace=tiamat
-management.cloudwatch.metrics.export.step=1m
-
-spring.cloud.aws.cloudwatch.region=eu-north-1
-# Optional: override endpoint, e.g. for LocalStack in development
-#spring.cloud.aws.cloudwatch.endpoint=http://localhost:4566
-```
-
-AWS credentials are resolved through the standard AWS credential chain.
-For local development with LocalStack you can supply static credentials:
-
-```properties
-spring.cloud.aws.credentials.access-key=localstack
-spring.cloud.aws.credentials.secret-key=localstack
-```
 
 ## Tiamat scripts
 Various queries and scripts related to tiamat, has been collected here:
