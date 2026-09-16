@@ -8,7 +8,7 @@ import org.rutebanken.tiamat.writer.JobService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Conditional;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
@@ -41,7 +41,8 @@ import java.util.concurrent.TimeoutException;
  * whose outcome its own worker cannot yet report.
  */
 @Component
-@Conditional(OnPubSubWriteTransport.class)
+@ConditionalOnProperty(name = "tiamat.write-api.enabled", havingValue = "true")
+@ConditionalOnProperty(name = "tiamat.write-api.transport", havingValue = "pubsub")
 public class PubSubWriteJobPublisher implements WriteJobPublisher {
 
     private static final Logger logger = LoggerFactory.getLogger(PubSubWriteJobPublisher.class);

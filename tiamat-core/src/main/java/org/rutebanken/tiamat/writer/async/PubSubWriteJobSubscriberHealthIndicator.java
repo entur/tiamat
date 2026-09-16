@@ -1,9 +1,9 @@
 package org.rutebanken.tiamat.writer.async;
 
 import com.google.api.core.ApiService;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.health.contributor.Health;
 import org.springframework.boot.health.contributor.HealthIndicator;
-import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
 
 /**
@@ -22,7 +22,8 @@ import org.springframework.stereotype.Component;
  * take the pod out of service for this stops the reads as well.
  */
 @Component
-@Conditional(OnPubSubWriteTransport.class)
+@ConditionalOnProperty(name = "tiamat.write-api.enabled", havingValue = "true")
+@ConditionalOnProperty(name = "tiamat.write-api.transport", havingValue = "pubsub")
 public class PubSubWriteJobSubscriberHealthIndicator implements HealthIndicator {
 
     private final PubSubWriteJobSubscriber subscriber;
