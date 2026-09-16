@@ -70,8 +70,12 @@ public class PubSubWriteJobPublisher implements WriteJobPublisher {
                             + "PROCESSING until it completes or times out.",
                     message.jobId(), topic, publishTimeoutSeconds, e);
         } catch (InterruptedException e) {
+            // An interrupt says nothing about whether the broker has the message, the same as a
+            // timeout. Rejecting here can deny a write that the broker still goes on to accept.
             Thread.currentThread().interrupt();
-            throw new WriteJobRejectedException("Interrupted while publishing the write job.", e);
+            logger.warn("Interrupted while publishing write job {} to {}. The job stays "
+                            + "PROCESSING until it completes or times out.",
+                    message.jobId(), topic, e);
         } catch (ExecutionException e) {
             // The broker answered and refused, so nothing has the message. Reported as a full
             // queue, so the caller does not learn which transport failed to take the job.
