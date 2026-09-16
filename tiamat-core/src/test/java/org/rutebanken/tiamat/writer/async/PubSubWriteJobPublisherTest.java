@@ -4,18 +4,26 @@ import com.google.cloud.spring.pubsub.core.PubSubTemplate;
 import com.google.pubsub.v1.PubsubMessage;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.rutebanken.tiamat.writer.JobService;
 
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.after;
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -26,111 +34,126 @@ class PubSubWriteJobPublisherTest {
     @Mock
     private PubSubTemplate pubSubTemplate;
 
+    @Mock
+    private JobService jobService;
+
     private PubSubWriteJobPublisher publisherWithTimeout(long seconds) {
-        return new PubSubWriteJobPublisher(pubSubTemplate, "write-jobs", seconds, 10);
+        return new PubSubWriteJobPublisher(pubSubTemplate, jobService, "write-jobs", seconds, 10);
     }
 
     private PubSubWriteJobPublisher publisherWithCapacity(int maxConcurrentPublishes) {
-        return new PubSubWriteJobPublisher(pubSubTemplate, "write-jobs", 10, maxConcurrentPublishes);
+        return new PubSubWriteJobPublisher(pubSubTemplate, jobService, "write-jobs", 10, maxConcurrentPublishes);
     }
 
     /**
-     * A timeout says nothing about whether the broker has the message, so a rejection here can
-     * deny a write that happened.
+     * The point of running the publish call on its own executor: a request thread must not sit
+     * blocked on a broker that never answers, since that thread comes from the pool that also
+     * serves unrelated GraphQL and REST traffic.
      */
     @Test
-    void aTimeoutDoesNotRejectTheJob() {
+    void doesNotBlockTheCallingThread() throws InterruptedException {
+        CountDownLatch neverReleased = new CountDownLatch(1);
+        when(pubSubTemplate.publish(anyString(), any(PubsubMessage.class)))
+                .thenAnswer(invocation -> {
+                    neverReleased.await();
+                    return CompletableFuture.completedFuture("message-1");
+                });
+
+        long start = System.nanoTime();
+        publisherWithCapacity(1).publish(WriteJobMessage.create(42L, PAYLOAD));
+        long elapsedMillis = (System.nanoTime() - start) / 1_000_000;
+
+        assertThat(elapsedMillis).as("publish() must return before the broker call finishes").isLessThan(1000);
+        neverReleased.countDown();
+    }
+
+    /**
+     * A timeout says nothing about whether the broker has the message, so failing the job here
+     * can deny a write that happened. The worker leaves the job PROCESSING for the sweeper.
+     */
+    @Test
+    void aTimeoutDoesNotFailTheJob() {
         // A future that never completes is a broker that has not answered yet.
         when(pubSubTemplate.publish(anyString(), any(PubsubMessage.class)))
                 .thenReturn(new CompletableFuture<>());
 
-        assertThatCode(() -> publisherWithTimeout(1)
-                .publish(WriteJobMessage.create(42L, PAYLOAD)))
-                .doesNotThrowAnyException();
+        publisherWithTimeout(1).publish(WriteJobMessage.create(42L, PAYLOAD));
+
+        verify(jobService, after(1500).never()).fail(anyLong(), any());
     }
 
     /**
-     * An interrupt says nothing about whether the broker has the message, the same as a timeout.
-     * The status is restored rather than swallowed, so callers upstream still see it.
+     * An interrupt says nothing about whether the broker has the message, the same as a timeout,
+     * so it must not fail the job either.
      */
     @Test
-    void anInterruptDoesNotRejectTheJob() {
+    void anInterruptDoesNotFailTheJob() {
         when(pubSubTemplate.publish(anyString(), any(PubsubMessage.class)))
-                .thenReturn(new CompletableFuture<>());
+                .thenAnswer(invocation -> {
+                    // The worker thread that is about to block on Future.get() is interrupted,
+                    // not the test thread, so this reaches the same catch block a real interrupt
+                    // during the wait would.
+                    Thread.currentThread().interrupt();
+                    return new CompletableFuture<>();
+                });
 
-        Thread.currentThread().interrupt();
-        try {
-            assertThatCode(() -> publisherWithTimeout(10)
-                    .publish(WriteJobMessage.create(42L, PAYLOAD)))
-                    .doesNotThrowAnyException();
-            assertThat(Thread.currentThread().isInterrupted())
-                    .as("the interrupt status is restored, not swallowed")
-                    .isTrue();
-        } finally {
-            Thread.interrupted();
-        }
+        publisherWithTimeout(10).publish(WriteJobMessage.create(42L, PAYLOAD));
+
+        verify(jobService, after(300).never()).fail(anyLong(), any());
     }
 
-    /** A refusal is different: the broker answered, and nothing has the message. */
+    /**
+     * A refusal is different: the broker answered, and nothing has the message. No request
+     * thread is waiting for this outcome any more, so the worker records it itself, the way
+     * {@link DefaultWriteJobHandler} already records the outcome of the write it performs.
+     */
     @Test
-    void aRefusalFromTheBrokerRejectsTheJob() {
+    void aRefusalFromTheBrokerFailsTheJob() {
         when(pubSubTemplate.publish(anyString(), any(PubsubMessage.class)))
                 .thenReturn(CompletableFuture.failedFuture(new IllegalStateException("topic not found")));
 
-        assertThatThrownBy(() -> publisherWithTimeout(10)
-                .publish(WriteJobMessage.create(42L, PAYLOAD)))
-                .isInstanceOf(WriteJobRejectedException.class);
+        publisherWithTimeout(10).publish(WriteJobMessage.create(42L, PAYLOAD));
+
+        verify(jobService, timeout(1000)).fail(eq(42L), any());
     }
 
     @Test
-    void anAcknowledgedMessageReturnsNormally() {
+    void anAcknowledgedMessageDoesNotFailTheJob() {
         when(pubSubTemplate.publish(anyString(), any(PubsubMessage.class)))
                 .thenReturn(CompletableFuture.completedFuture("message-1"));
 
-        assertThatCode(() -> publisherWithTimeout(10)
-                .publish(WriteJobMessage.create(42L, PAYLOAD)))
-                .doesNotThrowAnyException();
+        publisherWithTimeout(10).publish(WriteJobMessage.create(42L, PAYLOAD));
+
+        verify(jobService, after(300).never()).fail(anyLong(), any());
     }
 
     /**
-     * Pub/Sub itself has no problem with concurrency, but a request thread blocked on
-     * {@code Future.get()} is a resource this deployment does have to bound.
+     * Pub/Sub itself has no problem with concurrency, but each in-flight publish holds a worker
+     * from this transport's own bounded pool, and that pool is what protects the shared request
+     * thread pool from a slow or degraded broker.
      */
     @Test
-    void rejectsWhenNoPublishPermitIsAvailable() {
-        assertThatThrownBy(() -> publisherWithCapacity(0)
-                .publish(WriteJobMessage.create(42L, PAYLOAD)))
+    void rejectsWhenAllWorkersAreBusy() throws InterruptedException {
+        CountDownLatch workerStarted = new CountDownLatch(1);
+        CountDownLatch releaseWorker = new CountDownLatch(1);
+        when(pubSubTemplate.publish(anyString(), any(PubsubMessage.class)))
+                .thenAnswer(invocation -> {
+                    workerStarted.countDown();
+                    releaseWorker.await();
+                    return CompletableFuture.completedFuture("message-1");
+                });
+
+        PubSubWriteJobPublisher publisher = publisherWithCapacity(1);
+        publisher.publish(WriteJobMessage.create(1L, PAYLOAD));
+        assertThat(workerStarted.await(1, TimeUnit.SECONDS))
+                .as("the sole worker must have picked up the first job")
+                .isTrue();
+
+        assertThatThrownBy(() -> publisher.publish(WriteJobMessage.create(2L, PAYLOAD)))
                 .isInstanceOf(WriteJobRejectedException.class)
                 .hasCauseInstanceOf(RejectedExecutionException.class);
-    }
 
-    /** A permit taken for one publish must not stay taken once that publish is done. */
-    @Test
-    void releasesThePermitAfterEachPublish() {
-        when(pubSubTemplate.publish(anyString(), any(PubsubMessage.class)))
-                .thenReturn(CompletableFuture.completedFuture("message-1"));
-
-        PubSubWriteJobPublisher publisher = publisherWithCapacity(1);
-
-        assertThatCode(() -> {
-            publisher.publish(WriteJobMessage.create(1L, PAYLOAD));
-            publisher.publish(WriteJobMessage.create(2L, PAYLOAD));
-        }).doesNotThrowAnyException();
-    }
-
-    /** A permit taken for a publish that fails must also come back, not leak. */
-    @Test
-    void releasesThePermitEvenWhenTheBrokerRefuses() {
-        when(pubSubTemplate.publish(anyString(), any(PubsubMessage.class)))
-                .thenReturn(CompletableFuture.failedFuture(new IllegalStateException("topic not found")))
-                .thenReturn(CompletableFuture.completedFuture("message-1"));
-
-        PubSubWriteJobPublisher publisher = publisherWithCapacity(1);
-
-        assertThatThrownBy(() -> publisher.publish(WriteJobMessage.create(1L, PAYLOAD)))
-                .isInstanceOf(WriteJobRejectedException.class);
-        assertThatCode(() -> publisher.publish(WriteJobMessage.create(2L, PAYLOAD)))
-                .doesNotThrowAnyException();
+        releaseWorker.countDown();
     }
 
     /** Nothing reads the payload to route the message. */
@@ -141,8 +164,8 @@ class PubSubWriteJobPublisherTest {
 
         publisherWithTimeout(10).publish(WriteJobMessage.update(7L, PAYLOAD));
 
-        var captor = org.mockito.ArgumentCaptor.forClass(PubsubMessage.class);
-        org.mockito.Mockito.verify(pubSubTemplate).publish(anyString(), captor.capture());
+        ArgumentCaptor<PubsubMessage> captor = ArgumentCaptor.forClass(PubsubMessage.class);
+        verify(pubSubTemplate, timeout(1000)).publish(anyString(), captor.capture());
         assertThat(captor.getValue().getAttributesMap())
                 .containsEntry("jobId", "7")
                 .containsEntry("operation", "UPDATE");
