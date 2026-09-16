@@ -9,8 +9,8 @@ import org.rutebanken.tiamat.writer.JobService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.SmartLifecycle;
-import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -43,9 +43,16 @@ import static org.rutebanken.tiamat.writer.async.PubSubWriteJobPublisher.ATTRIBU
  * before the beans it needs exist. {@code @PreDestroy} runs during bean destruction, so the pool
  * a running write holds can close underneath it. A lifecycle starts after the refresh finishes
  * and stops before anything is destroyed.
+ * <p>
+ * Gated on both the transport and {@code tiamat.write-api.enabled}. The transport alone is not
+ * enough: a broker delivers work whether or not this deployment wants it, so a subscriber gated
+ * only on the transport keeps writing after {@code enabled} goes to false.
+ * {@link WriteJobTimeoutSweeper} is gated on {@code enabled}, so by then nothing guarantees that a
+ * job reaches a terminal state.
  */
 @Component
-@Conditional(OnPubSubWriteTransport.class)
+@ConditionalOnProperty(name = "tiamat.write-api.enabled", havingValue = "true")
+@ConditionalOnProperty(name = "tiamat.write-api.transport", havingValue = "pubsub")
 public class PubSubWriteJobSubscriber implements SmartLifecycle {
 
     private static final Logger logger = LoggerFactory.getLogger(PubSubWriteJobSubscriber.class);
