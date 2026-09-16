@@ -44,6 +44,28 @@ class PubSubWriteJobPublisherTest {
                 .doesNotThrowAnyException();
     }
 
+    /**
+     * An interrupt says nothing about whether the broker has the message, the same as a timeout.
+     * The status is restored rather than swallowed, so callers upstream still see it.
+     */
+    @Test
+    void anInterruptDoesNotRejectTheJob() {
+        when(pubSubTemplate.publish(anyString(), any(PubsubMessage.class)))
+                .thenReturn(new CompletableFuture<>());
+
+        Thread.currentThread().interrupt();
+        try {
+            assertThatCode(() -> publisherWithTimeout(10)
+                    .publish(WriteJobMessage.create(42L, PAYLOAD)))
+                    .doesNotThrowAnyException();
+            assertThat(Thread.currentThread().isInterrupted())
+                    .as("the interrupt status is restored, not swallowed")
+                    .isTrue();
+        } finally {
+            Thread.interrupted();
+        }
+    }
+
     /** A refusal is different: the broker answered, and nothing has the message. */
     @Test
     void aRefusalFromTheBrokerRejectsTheJob() {
