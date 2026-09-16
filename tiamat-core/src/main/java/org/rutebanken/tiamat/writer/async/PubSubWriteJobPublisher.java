@@ -11,6 +11,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -25,6 +27,10 @@ import java.util.concurrent.TimeoutException;
  * Waits for the broker to acknowledge the message. Not to wait is faster. But the client treats a
  * return from this method as acceptance, and a job that no transport took stays untouched until
  * {@link WriteJobTimeoutSweeper} times it out.
+ * <p>
+ * Bounds how many calls may block in that wait at once. Pub/Sub itself has no trouble with
+ * concurrency, but each waiting call holds a request thread from the pool that also serves
+ * unrelated traffic, and that pool is the resource this class has to protect.
  */
 @Component
 @Conditional(OnPubSubWriteTransport.class)
@@ -38,19 +44,36 @@ public class PubSubWriteJobPublisher implements WriteJobPublisher {
     private final PubSubTemplate pubSubTemplate;
     private final String topic;
     private final long publishTimeoutSeconds;
+    private final Semaphore publishPermits;
 
     public PubSubWriteJobPublisher(
             PubSubTemplate pubSubTemplate,
             @Value("${tiamat.write-api.pubsub.topic:tiamat-write-jobs}") String topic,
-            @Value("${tiamat.write-api.pubsub.publish-timeout-seconds:10}") long publishTimeoutSeconds
+            @Value("${tiamat.write-api.pubsub.publish-timeout-seconds:10}") long publishTimeoutSeconds,
+            @Value("${tiamat.write-api.pubsub.max-concurrent-publishes:50}") int maxConcurrentPublishes
     ) {
         this.pubSubTemplate = pubSubTemplate;
         this.topic = topic;
         this.publishTimeoutSeconds = publishTimeoutSeconds;
+        this.publishPermits = new Semaphore(maxConcurrentPublishes);
     }
 
     @Override
     public void publish(WriteJobMessage message) {
+        if (!publishPermits.tryAcquire()) {
+            // The same shape of rejection the in-memory transport reports for its own bound, so
+            // JobService classifies it the same way: QUEUE_FULL, safe to resubmit unchanged.
+            throw new WriteJobRejectedException("Too many write jobs are already waiting on Pub/Sub.",
+                    new RejectedExecutionException("No publish permit available."));
+        }
+        try {
+            publishToBroker(message);
+        } finally {
+            publishPermits.release();
+        }
+    }
+
+    private void publishToBroker(WriteJobMessage message) {
         PubsubMessage pubsubMessage = PubsubMessage.newBuilder()
                 .setData(ByteString.copyFrom(message.payload()))
                 .putAllAttributes(Map.of(

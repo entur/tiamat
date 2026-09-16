@@ -9,6 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.RejectedExecutionException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -26,7 +27,11 @@ class PubSubWriteJobPublisherTest {
     private PubSubTemplate pubSubTemplate;
 
     private PubSubWriteJobPublisher publisherWithTimeout(long seconds) {
-        return new PubSubWriteJobPublisher(pubSubTemplate, "write-jobs", seconds);
+        return new PubSubWriteJobPublisher(pubSubTemplate, "write-jobs", seconds, 10);
+    }
+
+    private PubSubWriteJobPublisher publisherWithCapacity(int maxConcurrentPublishes) {
+        return new PubSubWriteJobPublisher(pubSubTemplate, "write-jobs", 10, maxConcurrentPublishes);
     }
 
     /**
@@ -84,6 +89,47 @@ class PubSubWriteJobPublisherTest {
 
         assertThatCode(() -> publisherWithTimeout(10)
                 .publish(WriteJobMessage.create(42L, PAYLOAD)))
+                .doesNotThrowAnyException();
+    }
+
+    /**
+     * Pub/Sub itself has no problem with concurrency, but a request thread blocked on
+     * {@code Future.get()} is a resource this deployment does have to bound.
+     */
+    @Test
+    void rejectsWhenNoPublishPermitIsAvailable() {
+        assertThatThrownBy(() -> publisherWithCapacity(0)
+                .publish(WriteJobMessage.create(42L, PAYLOAD)))
+                .isInstanceOf(WriteJobRejectedException.class)
+                .hasCauseInstanceOf(RejectedExecutionException.class);
+    }
+
+    /** A permit taken for one publish must not stay taken once that publish is done. */
+    @Test
+    void releasesThePermitAfterEachPublish() {
+        when(pubSubTemplate.publish(anyString(), any(PubsubMessage.class)))
+                .thenReturn(CompletableFuture.completedFuture("message-1"));
+
+        PubSubWriteJobPublisher publisher = publisherWithCapacity(1);
+
+        assertThatCode(() -> {
+            publisher.publish(WriteJobMessage.create(1L, PAYLOAD));
+            publisher.publish(WriteJobMessage.create(2L, PAYLOAD));
+        }).doesNotThrowAnyException();
+    }
+
+    /** A permit taken for a publish that fails must also come back, not leak. */
+    @Test
+    void releasesThePermitEvenWhenTheBrokerRefuses() {
+        when(pubSubTemplate.publish(anyString(), any(PubsubMessage.class)))
+                .thenReturn(CompletableFuture.failedFuture(new IllegalStateException("topic not found")))
+                .thenReturn(CompletableFuture.completedFuture("message-1"));
+
+        PubSubWriteJobPublisher publisher = publisherWithCapacity(1);
+
+        assertThatThrownBy(() -> publisher.publish(WriteJobMessage.create(1L, PAYLOAD)))
+                .isInstanceOf(WriteJobRejectedException.class);
+        assertThatCode(() -> publisher.publish(WriteJobMessage.create(2L, PAYLOAD)))
                 .doesNotThrowAnyException();
     }
 
