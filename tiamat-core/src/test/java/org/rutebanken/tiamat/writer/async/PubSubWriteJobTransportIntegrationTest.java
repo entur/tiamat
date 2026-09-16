@@ -190,7 +190,7 @@ public class PubSubWriteJobTransportIntegrationTest extends TiamatIntegrationTes
                 .getWrittenStopPlaces().getFirst().netexId();
 
         assertThat(stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(netexId).getChangedBy())
-                .as("a write with no principal is attributed to nobody")
+                .as("the submitter's principal crosses the broker and attributes the write, not the empty context on the subscriber thread")
                 .isEqualTo(SUBMITTER);
     }
 
