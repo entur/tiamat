@@ -52,10 +52,12 @@ class PubSubWriteJobPublisherTest {
      */
     @Test
     void doesNotBlockTheCallingThread() throws InterruptedException {
-        CountDownLatch neverReleased = new CountDownLatch(1);
+        CountDownLatch workerStarted = new CountDownLatch(1);
+        CountDownLatch releaseWorker = new CountDownLatch(1);
         when(pubSubTemplate.publish(anyString(), any(PubsubMessage.class)))
                 .thenAnswer(invocation -> {
-                    neverReleased.await();
+                    workerStarted.countDown();
+                    releaseWorker.await();
                     return CompletableFuture.completedFuture("message-1");
                 });
 
@@ -64,7 +66,12 @@ class PubSubWriteJobPublisherTest {
         long elapsedMillis = (System.nanoTime() - start) / 1_000_000;
 
         assertThat(elapsedMillis).as("publish() must return before the broker call finishes").isLessThan(1000);
-        neverReleased.countDown();
+        // Waited out here, not left to race the end of the test: otherwise the worker can still
+        // be on its way to the stub when Mockito checks for unused stubbings and calls it unused.
+        assertThat(workerStarted.await(1, TimeUnit.SECONDS))
+                .as("the worker must actually reach the broker call")
+                .isTrue();
+        releaseWorker.countDown();
     }
 
     /**
