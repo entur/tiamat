@@ -420,6 +420,55 @@ public class NetexMapperTest extends TiamatIntegrationTest {
                 org.rutebanken.tiamat.model.AccessModeEnumeration.BICYCLE);
     }
 
+    /**
+     * Tiamat can only persist entrances supplied inline; one supplied as a reference has nothing to
+     * map. Dropping it is expected, but it must be logged so the loss is visible in the import log.
+     */
+    @Test
+    public void mapNetexParkingVehicleEntranceSuppliedByReferenceIsDroppedAndLogged() {
+        ch.qos.logback.classic.Logger mapperLogger = (ch.qos.logback.classic.Logger)
+                org.slf4j.LoggerFactory.getLogger(org.rutebanken.tiamat.netex.mapping.mapper.ParkingMapper.class);
+        ch.qos.logback.core.read.ListAppender<ch.qos.logback.classic.spi.ILoggingEvent> appender =
+                new ch.qos.logback.core.read.ListAppender<>();
+        appender.start();
+        mapperLogger.addAppender(appender);
+
+        try {
+            org.rutebanken.netex.model.ParkingEntranceForVehicles inlineEntrance = new org.rutebanken.netex.model.ParkingEntranceForVehicles();
+            inlineEntrance.setId("NSR:ParkingEntranceForVehicles:1");
+            inlineEntrance.setVersion("1");
+            inlineEntrance.setEntranceType(org.rutebanken.netex.model.EntranceEnumeration.GATE);
+
+            org.rutebanken.netex.model.ParkingEntranceForVehiclesRefStructure entranceRef =
+                    new org.rutebanken.netex.model.ParkingEntranceForVehiclesRefStructure();
+            entranceRef.setRef("NSR:ParkingEntranceForVehicles:2");
+
+            org.rutebanken.netex.model.ParkingEntrancesForVehicles_RelStructure rel = new org.rutebanken.netex.model.ParkingEntrancesForVehicles_RelStructure();
+            rel.getParkingEntranceForVehiclesRefOrParkingEntranceForVehicles().add(inlineEntrance);
+            rel.getParkingEntranceForVehiclesRefOrParkingEntranceForVehicles().add(entranceRef);
+
+            org.rutebanken.netex.model.Parking netexParking = new org.rutebanken.netex.model.Parking();
+            netexParking.setId("NSR:Parking:1");
+            netexParking.setVersion("1");
+            netexParking.setVehicleEntrances(rel);
+
+            org.rutebanken.tiamat.model.Parking tiamatParking = netexMapper.mapToTiamatModel(netexParking);
+
+            assertThat(tiamatParking.getVehicleEntrances()).hasSize(1);
+            assertThat(tiamatParking.getVehicleEntrances().get(0).getNetexId()).isEqualTo("NSR:ParkingEntranceForVehicles:1");
+
+            assertThat(appender.list)
+                    .filteredOn(event -> event.getLevel() == ch.qos.logback.classic.Level.WARN)
+                    .extracting(ch.qos.logback.classic.spi.ILoggingEvent::getFormattedMessage)
+                    .anySatisfy(message -> assertThat(message)
+                            .contains("NSR:Parking:1")
+                            .contains("ParkingEntranceForVehiclesRefStructure")
+                            .contains("dropped on import"));
+        } finally {
+            mapperLogger.detachAppender(appender);
+        }
+    }
+
     @Test
     public void mapInternalParkingVehicleEntrancesToNetex() {
         org.rutebanken.tiamat.model.ParkingEntranceForVehicles tiamatEntrance = new org.rutebanken.tiamat.model.ParkingEntranceForVehicles();

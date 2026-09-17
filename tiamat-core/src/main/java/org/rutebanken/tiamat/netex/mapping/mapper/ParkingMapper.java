@@ -145,8 +145,15 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
                 || source.getVehicleEntrances().getParkingEntranceForVehiclesRefOrParkingEntranceForVehicles().isEmpty()) {
             return;
         }
-        List<ParkingEntranceForVehicles> netexEntrances = source.getVehicleEntrances()
-                .getParkingEntranceForVehiclesRefOrParkingEntranceForVehicles().stream()
+        List<Object> refOrEntrances = source.getVehicleEntrances()
+                .getParkingEntranceForVehiclesRefOrParkingEntranceForVehicles();
+        refOrEntrances.stream()
+                .filter(entrance -> !(entrance instanceof ParkingEntranceForVehicles))
+                .forEach(entrance -> LOGGER.warn("Parking {}: vehicle entrance supplied as a reference ({}) instead of " +
+                                "an inline ParkingEntranceForVehicles and was dropped on import.",
+                        source.getId(), entrance == null ? "null" : entrance.getClass().getSimpleName()));
+
+        List<ParkingEntranceForVehicles> netexEntrances = refOrEntrances.stream()
                 .filter(ParkingEntranceForVehicles.class::isInstance)
                 .map(ParkingEntranceForVehicles.class::cast)
                 .toList();
@@ -183,7 +190,8 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
     private void mapAccessModesFromNetex(List<ParkingEntranceForVehicles> netexEntrances,
                                           List<org.rutebanken.tiamat.model.ParkingEntranceForVehicles> entrances) {
         for (int i = 0; i < netexEntrances.size() && i < entrances.size(); i++) {
-            List<org.rutebanken.netex.model.AccessModeEnumeration> netexAccessModes = netexEntrances.get(i).getAccessModes();
+            ParkingEntranceForVehicles netexEntrance = netexEntrances.get(i);
+            List<org.rutebanken.netex.model.AccessModeEnumeration> netexAccessModes = netexEntrance.getAccessModes();
             if (netexAccessModes == null || netexAccessModes.isEmpty()) {
                 continue;
             }
@@ -192,6 +200,9 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
                         try {
                             return org.rutebanken.tiamat.model.AccessModeEnumeration.fromValue(mode.value());
                         } catch (IllegalArgumentException ignored) {
+                            LOGGER.warn("Vehicle entrance {}: NeTEx access mode '{}' has no equivalent in the internal " +
+                                            "AccessModeEnumeration and was dropped on import.",
+                                    netexEntrance.getId(), mode.value());
                             return null;
                         }
                     })
@@ -204,7 +215,8 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
     private void mapAccessModesToNetex(List<org.rutebanken.tiamat.model.ParkingEntranceForVehicles> source,
                                         List<ParkingEntranceForVehicles> entrances) {
         for (int i = 0; i < source.size() && i < entrances.size(); i++) {
-            List<org.rutebanken.tiamat.model.AccessModeEnumeration> accessModes = source.get(i).getAccessModesList();
+            org.rutebanken.tiamat.model.ParkingEntranceForVehicles sourceEntrance = source.get(i);
+            List<org.rutebanken.tiamat.model.AccessModeEnumeration> accessModes = sourceEntrance.getAccessModesList();
             if (accessModes.isEmpty()) {
                 continue;
             }
@@ -213,6 +225,9 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
                         try {
                             return org.rutebanken.netex.model.AccessModeEnumeration.fromValue(mode.value());
                         } catch (IllegalArgumentException ignored) {
+                            LOGGER.warn("Vehicle entrance {}: internal access mode '{}' has no equivalent in the NeTEx " +
+                                            "AccessModeEnumeration and was dropped on export.",
+                                    sourceEntrance.getNetexId(), mode.value());
                             return null;
                         }
                     })
