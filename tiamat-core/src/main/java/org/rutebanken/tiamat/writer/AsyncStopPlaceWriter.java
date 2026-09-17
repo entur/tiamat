@@ -33,10 +33,19 @@ public class AsyncStopPlaceWriter {
     private final WriteJobPublisher writeJobPublisher;
     private final int maxPayloadSize;
 
+    /**
+     * Below the smallest limit any transport imposes. A Pub/Sub message holds 10 000 000 bytes,
+     * and that has to carry the attributes and the framing as well as the payload.
+     */
+    static final String DEFAULT_MAX_PAYLOAD_SIZE = "9437184";
+
+    /** What Pub/Sub accepts in one message, in bytes. */
+    static final int PUBSUB_MESSAGE_LIMIT = 10_000_000;
+
     public AsyncStopPlaceWriter(
             JobService jobService,
             WriteJobPublisher writeJobPublisher,
-            @Value("${tiamat.write-api.max-payload-size-bytes:10485760}") int maxPayloadSize) {
+            @Value("${tiamat.write-api.max-payload-size-bytes:" + DEFAULT_MAX_PAYLOAD_SIZE + "}") int maxPayloadSize) {
         this.jobService = jobService;
         this.writeJobPublisher = writeJobPublisher;
         this.maxPayloadSize = maxPayloadSize;

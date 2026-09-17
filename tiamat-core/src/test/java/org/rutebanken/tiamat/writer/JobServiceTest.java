@@ -11,6 +11,7 @@ import org.rutebanken.tiamat.model.job.WrittenStopPlace;
 import org.rutebanken.tiamat.repository.AsyncStopPlaceJobRepository;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.rutebanken.tiamat.writer.async.WriteJobNotOwnedException;
+import org.rutebanken.tiamat.writer.async.WriteJobRejectedException;
 
 import java.time.Instant;
 import java.util.Optional;
@@ -227,6 +228,23 @@ public class JobServiceTest {
         when(repository.findById(1L)).thenReturn(Optional.of(job));
 
         jobService.fail(1L, exception);
+
+        assertThat(recordedReason()).isEqualTo("The job queue is full. Please try again later.");
+        assertThat(recordedReasonCode()).isEqualTo(JobFailureReason.QUEUE_FULL);
+    }
+
+    /**
+     * The Pub/Sub transport reports its own capacity bound this way, wrapped in the exception the
+     * write API contract declares. It must reach the caller as the same QUEUE_FULL that the
+     * in-memory transport reports for its bound, not a generic error.
+     */
+    @Test
+    public void shouldFormatQueueFullReasonForAPubSubCapacityRejection() {
+        AsyncStopPlaceJob job = new AsyncStopPlaceJob();
+        when(repository.findById(1L)).thenReturn(Optional.of(job));
+
+        jobService.fail(1L, new WriteJobRejectedException("Too many write jobs are already waiting on Pub/Sub.",
+                new RejectedExecutionException("No publish permit available.")));
 
         assertThat(recordedReason()).isEqualTo("The job queue is full. Please try again later.");
         assertThat(recordedReasonCode()).isEqualTo(JobFailureReason.QUEUE_FULL);
