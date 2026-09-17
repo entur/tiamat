@@ -24,6 +24,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @Entity
@@ -55,14 +56,27 @@ public class ParkingEntranceForVehicles
         this.accessModes = accessModes;
     }
 
-    /** Parsed view of {@link #getAccessModes()} as individual {@link AccessModeEnumeration} values. */
+    /**
+     * Parsed view of {@link #getAccessModes()} as individual {@link AccessModeEnumeration} values.
+     * Tokens that no longer correspond to a known enum value are skipped rather than thrown on,
+     * so a stored value written by an older revision cannot break every read of this entrance.
+     */
     public List<AccessModeEnumeration> getAccessModesList() {
         if (accessModes == null || accessModes.isBlank()) {
             return List.of();
         }
         return Arrays.stream(accessModes.trim().split("\\s+"))
-                .map(AccessModeEnumeration::fromValue)
+                .map(ParkingEntranceForVehicles::toAccessMode)
+                .filter(Objects::nonNull)
                 .toList();
+    }
+
+    private static AccessModeEnumeration toAccessMode(String token) {
+        try {
+            return AccessModeEnumeration.fromValue(token);
+        } catch (IllegalArgumentException ignored) {
+            return null;
+        }
     }
 
     public void setAccessModesList(List<AccessModeEnumeration> values) {
