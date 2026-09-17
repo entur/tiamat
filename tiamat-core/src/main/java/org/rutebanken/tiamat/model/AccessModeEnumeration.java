@@ -15,11 +15,35 @@
 
 package org.rutebanken.tiamat.model;
 
-import jakarta.persistence.MappedSuperclass;
+public enum AccessModeEnumeration {
 
-@MappedSuperclass
-public class ParkingEntranceForVehicles__VersionStructure
-        extends SiteEntrance {
+    FOOT("foot"),
+    BICYCLE("bicycle"),
+    BOAT("boat"),
+    CAR("car"),
+    TAXI("taxi"),
+    SHUTTLE("shuttle"),
+    SKI("ski"),
+    SKATE("skate"),
+    MOTORCYCLE("motorcycle"),
+    SCOOTER("scooter");
+    private final String value;
 
+    AccessModeEnumeration(String v) {
+        value = v;
+    }
+
+    public static AccessModeEnumeration fromValue(String v) {
+        for (AccessModeEnumeration c : AccessModeEnumeration.values()) {
+            if (c.value.equals(v)) {
+                return c;
+            }
+        }
+        throw new IllegalArgumentException(v);
+    }
+
+    public String value() {
+        return value;
+    }
 
 }
