@@ -60,6 +60,13 @@ public class ParkingInitialImportTest extends TiamatIntegrationTest {
     private static final String PARENT_STOP_PLACE_ID = "NSR:StopPlace:1000";
     private static final String IMPORTED_ID_KEY = "imported-id";
 
+    /**
+     * Batch size for {@link #initialImportOfMultipleParkingsImportsAll}. Keep it well below
+     * {@code spring.datasource.hikari.maximumPoolSize}, which is 10 in the test profile, because an import
+     * needs about one connection per element plus one for the enclosing transaction. See that test's javadoc.
+     */
+    private static final int MULTI_IMPORT_BATCH_SIZE = 4;
+
     private void persistParentStopPlace() {
         org.rutebanken.tiamat.model.StopPlace stopPlace = new org.rutebanken.tiamat.model.StopPlace();
         stopPlace.setNetexId(PARENT_STOP_PLACE_ID);
@@ -227,12 +234,28 @@ public class ParkingInitialImportTest extends TiamatIntegrationTest {
                 .isEmpty();
     }
 
-    /** A batch of several parkings sharing a parent stop place all import successfully. */
+    /**
+     * A batch of several parkings sharing a parent stop place all import successfully.
+     *
+     * <p>The batch size is deliberately kept well below the connection pool size.
+     * {@link org.rutebanken.tiamat.importer.initial.ParallelInitialParkingImporter} carries
+     * {@code @Transactional} on the class, so the calling thread holds one connection for the whole batch.
+     * It then maps the batch over a {@code parallelStream()}, so each element that runs on a worker thread
+     * opens a second transaction and takes another connection. Elements that the stream runs on the calling
+     * thread join the transaction that is already open there and need no extra connection.
+     * {@code spring.datasource.hikari.maximumPoolSize} is 10 in the test profile. A batch of 10 was observed
+     * holding all 10 connections at once ({@code active=10, idle=0, waiting=1}) and then failing with a 30 s
+     * connection timeout.
+     *
+     * <p>Pinning {@code ForkJoinPool.common.parallelism} to 2 did not prevent that failure, which is worth
+     * recording because it is the obvious thing to try. This test does not establish why it did not help, so
+     * do not treat that setting as a bound. The element count is the lever that was shown to work.
+     */
     @Test
     public void initialImportOfMultipleParkingsImportsAll() throws JAXBException, IOException, SAXException {
         persistParentStopPlace();
 
-        Parking[] parkings = new Parking[10];
+        Parking[] parkings = new Parking[MULTI_IMPORT_BATCH_SIZE];
         for (int i = 0; i < parkings.length; i++) {
             parkings[i] = netexParking("NSR:Parking:" + (100 + i), "Parking facility " + i);
         }
@@ -240,7 +263,7 @@ public class ParkingInitialImportTest extends TiamatIntegrationTest {
         PublicationDeliveryStructure response = importInitial(parkings);
 
         List<Parking> imported = extractParkings(response);
-        assertThat(imported).hasSize(10);
+        assertThat(imported).hasSize(MULTI_IMPORT_BATCH_SIZE);
         for (int i = 0; i < parkings.length; i++) {
             String expectedId = "NSR:Parking:" + (100 + i);
             assertThat(parkingRepository.findFirstByNetexIdOrderByVersionDesc(expectedId))
