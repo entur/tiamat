@@ -30,6 +30,7 @@ import org.rutebanken.tiamat.model.EntranceEnumeration;
 import org.rutebanken.tiamat.model.InfoLink;
 import org.rutebanken.tiamat.model.LightingEnumeration;
 import org.rutebanken.tiamat.model.LimitationStatusEnumeration;
+import org.rutebanken.tiamat.model.OrganisationRefStructure;
 import org.rutebanken.tiamat.model.Parking;
 import org.rutebanken.tiamat.model.ParkingArea;
 import org.rutebanken.tiamat.model.ParkingCapacity;
@@ -98,6 +99,7 @@ import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.LIGHTING;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.NAME;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.NUMBER_OF_SPACES;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.NUMBER_OF_SPACES_WITH_RECHARGE_POINT;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ORGANISATION_REF;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.OUTPUT_TYPE_PARKING;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.OVERNIGHT_PARKING_PERMITTED;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PARENT_SITE_REF;
@@ -230,6 +232,14 @@ class ParkingUpdater implements DataFetcher {
             isUpdated = isUpdated || (!parentSiteRef.equals(updatedParking.getParentSiteRef()));
 
             updatedParking.setParentSiteRef(parentSiteRef);
+        }
+        if (input.get(ORGANISATION_REF) != null) {
+            OrganisationRefStructure organisationRef = new OrganisationRefStructure();
+            organisationRef.setRef((String) input.get(ORGANISATION_REF));
+
+            isUpdated = isUpdated || (!organisationRef.equals(updatedParking.getOrganisationRef()));
+
+            updatedParking.setOrganisationRef(organisationRef);
         }
         if (input.get(PRINCIPAL_CAPACITY) != null) {
             BigInteger principalCapacity = (BigInteger) input.get(PRINCIPAL_CAPACITY);

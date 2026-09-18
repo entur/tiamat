@@ -16,8 +16,12 @@
 package org.rutebanken.tiamat.model;
 
 import com.google.common.base.MoreObjects;
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -37,6 +41,13 @@ public class Parking
     protected String publicCode;
     @Transient
     protected MultilingualStringEntity label;
+
+    @AttributeOverrides({
+            @AttributeOverride(name = "ref", column = @Column(name = "organisation_ref")),
+            @AttributeOverride(name = "version", column = @Column(name = "organisation_ref_version"))
+    })
+    @Embedded
+    protected OrganisationRefStructure organisationRef;
 
     @ElementCollection(targetClass = PaymentMethodEnumeration.class, fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
@@ -241,6 +252,16 @@ public class Parking
     }
 
     @Override
+    public OrganisationRefStructure getOrganisationRef() {
+        return organisationRef;
+    }
+
+    @Override
+    public void setOrganisationRef(OrganisationRefStructure organisationRef) {
+        this.organisationRef = organisationRef;
+    }
+
+    @Override
     public LightingEnumeration getLighting() {
         return lighting;
     }
@@ -366,6 +387,7 @@ public class Parking
                 .add("changed", changed)
                 .add("centroid", centroid)
                 .add("parentSiteRef", parentSiteRef)
+                .add("organisationRef", organisationRef)
                 .add("publicCode", publicCode)
                 .add("label", label)
                 .add("parkingPaymentProcess", parkingPaymentProcess)

@@ -160,8 +160,18 @@ public class MergingParkingImporter {
             vehicleType = true;
         }
 
+        boolean organisationRefChanged = false;
+        if ((copy.getOrganisationRef() == null && incomingParking.getOrganisationRef() != null) ||
+            (copy.getOrganisationRef() != null && incomingParking.getOrganisationRef() != null
+                    && !copy.getOrganisationRef().equals(incomingParking.getOrganisationRef()))) {
 
-        if (keyValuesChanged || typeChanged || centroidChanged || vehicleType) {
+            copy.setOrganisationRef(incomingParking.getOrganisationRef());
+            logger.info("Updated organisationRef to {} for parking {}", copy.getOrganisationRef(), copy);
+            organisationRefChanged = true;
+        }
+
+
+        if (keyValuesChanged || typeChanged || centroidChanged || vehicleType || organisationRefChanged) {
             logger.info("Updated existing parking {}. ", copy);
             copy = parkingVersionedSaverService.saveNewVersion(copy);
             return updateCache(copy);

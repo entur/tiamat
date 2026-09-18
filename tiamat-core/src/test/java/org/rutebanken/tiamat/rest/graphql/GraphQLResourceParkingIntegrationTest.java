@@ -613,6 +613,59 @@ public class GraphQLResourceParkingIntegrationTest extends AbstractGraphQLResour
     }
 
     @Test
+    public void testMutateParkingWithOrganisationRefShouldPersistAndReturn() throws Exception {
+
+        StopPlace stopPlace = stopPlaceRepository.save(new StopPlace());
+
+        String graphQlQuery = "{\n" +
+                "\"query\": \"mutation { " +
+                "  parking: " + GraphQLNames.MUTATE_PARKING + " (Parking : {" +
+                "    geometry: { type:Point coordinates:[10.5, 59.0] } " +
+                "    parentSiteRef:\\\"" + stopPlace.getNetexId() + "\\\" " +
+                "    organisationRef:\\\"FSR:Operator:1234567-8\\\" " +
+                "  }) {" +
+                "    id " +
+                "    organisationRef " +
+                "  }" +
+                "}\",\"variables\": \"\"}";
+
+        String parkingId = executeGraphQL(graphQlQuery)
+                .body("data.parking[0].id", notNullValue())
+                .body("data.parking[0].organisationRef", equalTo("FSR:Operator:1234567-8"))
+                .extract()
+                .path("data.parking[0].id");
+
+        String findParkingQuery = "{" +
+                "\"query\":\"{" +
+                "  parking: " + GraphQLNames.FIND_PARKING + " (id:\\\"" + parkingId + "\\\") { " +
+                "    id " +
+                "    organisationRef " +
+                "  } " +
+                "}\"," +
+                "\"variables\":\"\"}";
+
+        executeGraphQL(findParkingQuery)
+                .body("data.parking[0].id", equalTo(parkingId))
+                .body("data.parking[0].organisationRef", equalTo("FSR:Operator:1234567-8"));
+
+        String updateQuery = "{" +
+                "\"query\":\"mutation { " +
+                "  parking:" + GraphQLNames.MUTATE_PARKING + " (Parking: {" +
+                "        id:\\\"" + parkingId + "\\\" " +
+                "        organisationRef:\\\"FSR:Operator:7654321-8\\\" " +
+                "       }) { " +
+                "      id " +
+                "      organisationRef " +
+                "    } " +
+                "}\"," +
+                "\"variables\":\"\"}";
+
+        executeGraphQL(updateQuery)
+                .body("data.parking[0].id", equalTo(parkingId))
+                .body("data.parking[0].organisationRef", equalTo("FSR:Operator:7654321-8"));
+    }
+
+    @Test
     public void testMutateParkingWithVehicleEntrancesShouldPersistAndReplaceOnUpdate() throws Exception {
 
         StopPlace stopPlace = stopPlaceRepository.save(new StopPlace());
