@@ -23,6 +23,8 @@ import org.rutebanken.netex.model.DayTypeRefStructure;
 import org.rutebanken.netex.model.DayTypes_RelStructure;
 import org.rutebanken.netex.model.InfoLinkStructure;
 import org.rutebanken.netex.model.ObjectFactory;
+import org.rutebanken.netex.model.OperatorRefStructure;
+import org.rutebanken.netex.model.OrganisationRefStructure;
 import org.rutebanken.netex.model.Parking;
 import org.rutebanken.netex.model.ParkingArea;
 import org.rutebanken.netex.model.ParkingAreas_RelStructure;
@@ -64,6 +66,7 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
         mapInfoLinksFromNetex(parking, parking2);
         mapAvailabilityConditionsFromNetex(parking, parking2);
         mapAlternativeNamesFromNetex(parking, parking2);
+        mapOrganisationRefFromNetex(parking, parking2);
     }
 
     @Override
@@ -89,6 +92,7 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
         mapInfoLinksToNetex(tiamatParking, netexParking);
         mapAvailabilityConditionsToNetex(tiamatParking, netexParking);
         mapAlternativeNamesToNetex(tiamatParking, netexParking);
+        mapOrganisationRefToNetex(tiamatParking, netexParking);
     }
 
     /**
@@ -514,5 +518,41 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
             alternativeNamesRelStructure.getAlternativeName().addAll(netexAlternativeNames);
             target.setAlternativeNames(alternativeNamesRelStructure);
         }
+    }
+
+    /**
+     * {@code organisationRef} is excluded from the default Orika class map (see
+     * {@code NetexMapper}) because the NeTEx side is a {@code JAXBElement<? extends
+     * OrganisationRefStructure>} — the operating organisation may be substituted as an
+     * {@code OperatorRef}, {@code AuthorityRef}, {@code GeneralOrganisationRef} or
+     * {@code OnlineServiceOperatorRef} — while the Tiamat side is a plain
+     * {@code OrganisationRefStructure}. Any substitution is accepted on import; only the
+     * {@code ref}/{@code version} values are kept, not which element carried them.
+     */
+    private void mapOrganisationRefFromNetex(Parking source, org.rutebanken.tiamat.model.Parking target) {
+        if (source.getOrganisationRef() == null || source.getOrganisationRef().getValue() == null) {
+            return;
+        }
+
+        OrganisationRefStructure netexOrganisationRef = source.getOrganisationRef().getValue();
+        target.setOrganisationRef(new org.rutebanken.tiamat.model.OrganisationRefStructure(
+                netexOrganisationRef.getRef(), netexOrganisationRef.getVersion()));
+    }
+
+    /**
+     * Rebuilds the reference as an {@code OperatorRef} on export, regardless of which
+     * substitution the import carried (D3) — a parking facility's operating organisation is
+     * always an {@code Operator} in NeTEx terms. Emits no element when the ref is null, so an
+     * unresolved import never produces an empty {@code <OperatorRef/>}.
+     */
+    private void mapOrganisationRefToNetex(org.rutebanken.tiamat.model.Parking source, Parking target) {
+        if (source.getOrganisationRef() == null || source.getOrganisationRef().getRef() == null) {
+            return;
+        }
+
+        OperatorRefStructure operatorRef = new OperatorRefStructure()
+                .withRef(source.getOrganisationRef().getRef())
+                .withVersion(source.getOrganisationRef().getVersion());
+        target.setOrganisationRef(OBJECT_FACTORY.createOperatorRef(operatorRef));
     }
 }

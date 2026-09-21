@@ -49,6 +49,7 @@ import org.rutebanken.tiamat.model.GeneralSign;
 import org.rutebanken.tiamat.model.GroupOfStopPlaces;
 import org.rutebanken.tiamat.model.GroupOfTariffZones;
 import org.rutebanken.tiamat.model.Link;
+import org.rutebanken.tiamat.model.OrganisationRefStructure;
 import org.rutebanken.tiamat.model.Parking;
 import org.rutebanken.tiamat.model.ParkingEntranceForVehicles;
 import org.rutebanken.tiamat.model.PostalAddress;
@@ -832,6 +833,13 @@ public class StopPlaceRegisterGraphQLSchema {
             SiteRefStructure parentSiteRef = ((Parking) env.getSource()).getParentSiteRef();
             if (parentSiteRef != null) {
                 return parentSiteRef.getRef();
+            }
+            return null;
+        });
+        registerDataFetcher(codeRegistryBuilder,OUTPUT_TYPE_PARKING,ORGANISATION_REF,env -> {
+            OrganisationRefStructure organisationRef = ((Parking) env.getSource()).getOrganisationRef();
+            if (organisationRef != null) {
+                return organisationRef.getRef();
             }
             return null;
         });
