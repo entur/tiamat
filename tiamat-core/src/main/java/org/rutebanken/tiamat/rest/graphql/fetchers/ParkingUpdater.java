@@ -234,12 +234,15 @@ class ParkingUpdater implements DataFetcher {
             updatedParking.setParentSiteRef(parentSiteRef);
         }
         if (input.get(ORGANISATION_REF) != null) {
-            OrganisationRefStructure organisationRef = new OrganisationRefStructure();
-            organisationRef.setRef((String) input.get(ORGANISATION_REF));
+            String submittedRef = (String) input.get(ORGANISATION_REF);
+            OrganisationRefStructure existingOrganisationRef = updatedParking.getOrganisationRef();
 
-            isUpdated = isUpdated || (!organisationRef.equals(updatedParking.getOrganisationRef()));
-
-            updatedParking.setOrganisationRef(organisationRef);
+            if (existingOrganisationRef == null || !submittedRef.equals(existingOrganisationRef.getRef())) {
+                OrganisationRefStructure organisationRef = new OrganisationRefStructure();
+                organisationRef.setRef(submittedRef);
+                updatedParking.setOrganisationRef(organisationRef);
+                isUpdated = true;
+            }
         }
         if (input.get(PRINCIPAL_CAPACITY) != null) {
             BigInteger principalCapacity = (BigInteger) input.get(PRINCIPAL_CAPACITY);

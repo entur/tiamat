@@ -18,6 +18,7 @@ package org.rutebanken.tiamat.rest.graphql;
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
+import org.rutebanken.tiamat.model.OrganisationRefStructure;
 import org.rutebanken.tiamat.model.Parking;
 import org.rutebanken.tiamat.model.ParkingTypeEnumeration;
 import org.rutebanken.tiamat.model.SiteRefStructure;
@@ -29,6 +30,7 @@ import java.util.List;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class GraphQLResourceParkingIntegrationTest extends AbstractGraphQLResourceIntegrationTest {
 
@@ -663,6 +665,41 @@ public class GraphQLResourceParkingIntegrationTest extends AbstractGraphQLResour
         executeGraphQL(updateQuery)
                 .body("data.parking[0].id", equalTo(parkingId))
                 .body("data.parking[0].organisationRef", equalTo("FSR:Operator:7654321-8"));
+    }
+
+    @Test
+    public void testMutateParkingWithUnchangedOrganisationRefShouldPreserveVersion() throws Exception {
+
+        Parking parking = new Parking();
+        parking.setCentroid(geometryFactory.createPoint(new Coordinate(10.5, 59.0)));
+        parking.setParentSiteRef(new SiteRefStructure(stopPlaceRepository.save(new StopPlace()).getNetexId()));
+        OrganisationRefStructure organisationRef = new OrganisationRefStructure();
+        organisationRef.setRef("FSR:Operator:1234567-8");
+        organisationRef.setVersion("7");
+        parking.setOrganisationRef(organisationRef);
+
+        parkingVersionedSaverService.saveNewVersion(parking);
+        String parkingId = parking.getNetexId();
+
+        String resubmitSameRef = "{" +
+                "\"query\":\"mutation { " +
+                "  parking:" + GraphQLNames.MUTATE_PARKING + " (Parking: {" +
+                "        id:\\\"" + parkingId + "\\\" " +
+                "        organisationRef:\\\"FSR:Operator:1234567-8\\\" " +
+                "       }) { " +
+                "      id " +
+                "      version " +
+                "      organisationRef " +
+                "    } " +
+                "}\"," +
+                "\"variables\":\"\"}";
+
+        executeGraphQL(resubmitSameRef)
+                .body("data.parking[0].organisationRef", equalTo("FSR:Operator:1234567-8"))
+                .body("data.parking[0].version", equalTo("1"));
+
+        Parking reloaded = parkingRepository.findFirstByNetexIdOrderByVersionDesc(parkingId);
+        assertThat(reloaded.getOrganisationRef().getVersion()).isEqualTo("7");
     }
 
     @Test
