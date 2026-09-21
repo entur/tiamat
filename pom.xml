@@ -62,11 +62,11 @@
           silently fall back to the superpom's own default instead.
         -->
         <java.version>25</java.version>
-        <hazelcast.version>5.2.5</hazelcast.version>
+        <hazelcast.version>5.7.0</hazelcast.version>
         <hazelcast-hibernate53.version>5.2.0</hazelcast-hibernate53.version>
         <graphql-java.version>20.9</graphql-java.version>
         <graphql-java-extended-scalars.version>20.2</graphql-java-extended-scalars.version>
-        <awssdk.version>2.42.36</awssdk.version>
+        <awssdk.version>2.54.20</awssdk.version>
         <!-- Overrides the version pinned by the Spring Boot BOM (4.2.12.Final), which is
              vulnerable to CVE-2026-75595 (GHSA-c4c3-7fpv-j4q5), fixed in 4.2.17.Final.
              TODO remove once superpom moves to Boot ≥ 4.0.8 / ≥ 4.1.1
