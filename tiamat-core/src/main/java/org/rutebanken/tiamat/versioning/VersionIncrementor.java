@@ -21,14 +21,13 @@ import org.rutebanken.tiamat.model.AlternativeName;
 import org.rutebanken.tiamat.model.BoardingPosition;
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
 import org.rutebanken.tiamat.model.Parking;
-import org.rutebanken.tiamat.model.ParkingArea;
-import org.rutebanken.tiamat.model.ParkingEntranceForVehicles;
-import org.rutebanken.tiamat.model.ParkingProperties;
 import org.rutebanken.tiamat.model.PlaceEquipment;
 import org.rutebanken.tiamat.model.SiteElement;
 import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.versioning.util.ParkingVersionedElements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -39,6 +38,13 @@ public class VersionIncrementor {
     public static final long INITIAL_VERSION = 1;
 
     private static final Logger logger = LoggerFactory.getLogger(VersionIncrementor.class);
+
+    private final ParkingVersionedElements parkingVersionedElements;
+
+    @Autowired
+    public VersionIncrementor(ParkingVersionedElements parkingVersionedElements) {
+        this.parkingVersionedElements = parkingVersionedElements;
+    }
 
     public void incrementVersion(EntityInVersionStructure entity) {
         Long version = entity.getVersion();
@@ -132,44 +138,28 @@ public class VersionIncrementor {
      * @return modified Parking
      */
     public Parking initiateOrIncrementVersions(Parking parking) {
-        initiateOrIncrementSiteElementVersion(parking);
-        initiateOrIncrementPlaceEquipment(parking.getPlaceEquipments());
-
-        if (parking.getParkingProperties() != null) {
-            parking.getParkingProperties().forEach(this::initiateOrIncrementParkingProperties);
-        }
-
-        if (parking.getParkingAreas() != null) {
-            parking.getParkingAreas().forEach(this::initiateOrIncrementParkingArea);
-        }
-
-        if (parking.getVehicleEntrances() != null) {
-            parking.getVehicleEntrances().forEach(this::initiateOrIncrementParkingEntranceForVehicles);
-        }
-
+        parkingVersionedElements.forEach(parking, this::initiateOrIncrement);
         return parking;
     }
 
-    private void initiateOrIncrementParkingProperties(ParkingProperties parkingProperties) {
-        initiateOrIncrement(parkingProperties);
-
-        if (parkingProperties.getSpaces() != null) {
-            parkingProperties.getSpaces().forEach(this::initiateOrIncrement);
-        }
-    }
-
-    private void initiateOrIncrementParkingArea(ParkingArea parkingArea) {
-        initiateOrIncrementSiteElementVersion(parkingArea);
-        initiateOrIncrementPlaceEquipment(parkingArea.getPlaceEquipments());
-
-        if (parkingArea.getParkingProperties() != null) {
-            initiateOrIncrementParkingProperties(parkingArea.getParkingProperties());
-        }
-    }
-
-    private void initiateOrIncrementParkingEntranceForVehicles(ParkingEntranceForVehicles entrance) {
-        initiateOrIncrementSiteElementVersion(entrance);
-        initiateOrIncrementPlaceEquipment(entrance.getPlaceEquipments());
+    /**
+     * Set the version of every versioned child of a parking to the given version.
+     * Call this before {@link #initiateOrIncrementVersions(Parking)} when a parking replaces a
+     * stored version, and pass the version of that stored parking.
+     * <p>
+     * A child keeps the version that the caller gave it. A caller that gives the same version on
+     * each save makes every save target the same child version, and each child table has a unique
+     * constraint on (netex_id, version). Children must follow the version of their parking.
+     *
+     * @param parking the new version of the parking
+     * @param version the version of the stored parking that this version replaces
+     */
+    public void alignChildVersions(Parking parking, long version) {
+        parkingVersionedElements.forEach(parking, element -> {
+            if (element != parking && element.getNetexId() != null) {
+                element.setVersion(version);
+            }
+        });
     }
 
     public void initiateOrIncrementPlaceEquipment(PlaceEquipment placeEquipment) {

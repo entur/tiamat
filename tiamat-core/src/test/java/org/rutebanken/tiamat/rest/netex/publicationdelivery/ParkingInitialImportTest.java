@@ -15,12 +15,19 @@
 
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
+import jakarta.persistence.EntityManager;
 import jakarta.xml.bind.JAXBException;
 import org.junit.Test;
 import org.rutebanken.netex.model.KeyListStructure;
 import org.rutebanken.netex.model.KeyValueStructure;
 import org.rutebanken.netex.model.MultilingualString;
 import org.rutebanken.netex.model.Parking;
+import org.rutebanken.netex.model.ParkingCapacities_RelStructure;
+import org.rutebanken.netex.model.ParkingCapacity;
+import org.rutebanken.netex.model.ParkingProperties;
+import org.rutebanken.netex.model.ParkingProperties_RelStructure;
+import org.rutebanken.netex.model.ParkingUserEnumeration;
+import org.rutebanken.netex.model.ParkingVehicleEnumeration;
 import org.rutebanken.netex.model.ParkingsInFrame_RelStructure;
 import org.rutebanken.netex.model.PaymentMethodEnumeration;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
@@ -90,6 +97,33 @@ public class ParkingInitialImportTest extends TiamatIntegrationTest {
     private Parking withImportedId(Parking parking, String importedId) {
         return parking.withKeyList(new KeyListStructure()
                 .withKeyValue(new KeyValueStructure().withKey(IMPORTED_ID_KEY).withValue(importedId)));
+    }
+
+    /**
+     * Adds a versioned {@link ParkingProperties} child, with one {@link ParkingCapacity} of its own,
+     * to a parking.
+     *
+     * <p>This is the shape a bulk migration produces. The source document declares every element at
+     * version 1, parent and child alike, because the source system has no version of its own to map
+     * from. The child therefore arrives with the same version on each import, while the parent's
+     * stored version keeps increasing.
+     */
+    private Parking withVersionedChild(Parking parking, String propertiesId) {
+        ParkingCapacity capacity = new ParkingCapacity()
+                .withParkingUserType(ParkingUserEnumeration.ALL_USERS)
+                .withParkingVehicleType(ParkingVehicleEnumeration.CAR)
+                .withNumberOfSpaces(BigInteger.valueOf(20));
+        capacity.setVersion("1");
+        capacity.setId("NSR:ParkingCapacity:11");
+
+        ParkingProperties properties = new ParkingProperties()
+                .withSpaces(new ParkingCapacities_RelStructure()
+                        .withParkingCapacityRefOrParkingCapacity(capacity));
+        properties.setId(propertiesId);
+        properties.setVersion("1");
+
+        return parking.withParkingProperties(new ParkingProperties_RelStructure()
+                .withParkingProperties(properties));
     }
 
     private PublicationDeliveryStructure importInitial(Parking... parkings) throws JAXBException, IOException, SAXException {
@@ -208,6 +242,60 @@ public class ParkingInitialImportTest extends TiamatIntegrationTest {
         // set (1 -> 2 on the first import, 2 -> 3 on the second).
         assertThat(parkingRepository.findFirstByNetexIdOrderByVersionDesc("NSR:Parking:7").getVersion())
                 .isEqualTo(3);
+    }
+
+    /**
+     * A re-import of a parking that carries a versioned child must succeed.
+     *
+     * <p>This is the same re-import as {@link #initialReImportCreatesNoDuplicateRowAndBumpsVersion},
+     * with one difference: the parking carries a {@link ParkingProperties} child. That difference is
+     * what the earlier test cannot reach, because its fixture has no child at all.
+     *
+     * <p>The parent and the child get their new version from different places.
+     * {@code ParkingVersionedSaverService} reads the parent's version from the database. The child
+     * gets its version from the document, which declares every child at version 1. Without
+     * alignment the child therefore targets version 2 on every import, and the second import writes
+     * a {@code (netex_id, version)} pair that the first import already wrote.
+     */
+    @Test
+    public void initialReImportOfParkingWithVersionedChildSucceeds() throws JAXBException, IOException, SAXException {
+        persistParentStopPlace();
+
+        importInitial(withVersionedChild(netexParking("NSR:Parking:11", "Parking facility"), "NSR:ParkingProperties:11"));
+        importInitial(withVersionedChild(netexParking("NSR:Parking:11", "Parking facility"), "NSR:ParkingProperties:11"));
+
+        List<String> netexIds = parkingRepository.findAll().stream()
+                .map(org.rutebanken.tiamat.model.Parking::getNetexId)
+                .toList();
+        assertThat(netexIds)
+                .as("the re-import must update the existing row, not add a second one under a new id")
+                .containsExactly("NSR:Parking:11");
+        assertThat(parkingRepository.findFirstByNetexIdOrderByVersionDesc("NSR:Parking:11").getVersion())
+                .as("the parent must continue the stored sequence, as it does without a child")
+                .isEqualTo(3);
+
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
+        try {
+            List<Long> propertiesVersions = entityManager.createQuery(
+                            "select p.version from ParkingProperties p where p.netexId = :netexId order by p.version",
+                            Long.class)
+                    .setParameter("netexId", "NSR:ParkingProperties:11")
+                    .getResultList();
+            assertThat(propertiesVersions)
+                    .as("the child must keep one row, on the version of its parking")
+                    .containsExactly(3L);
+
+            List<Long> capacityVersions = entityManager.createQuery(
+                            "select c.version from ParkingCapacity c where c.netexId = :netexId order by c.version",
+                            Long.class)
+                    .setParameter("netexId", "NSR:ParkingCapacity:11")
+                    .getResultList();
+            assertThat(capacityVersions)
+                    .as("the capacity must keep one row, on the version of its parking")
+                    .containsExactly(3L);
+        } finally {
+            entityManager.close();
+        }
     }
 
     /** A field present in the first import but absent from the second is dropped (full-replace). */
