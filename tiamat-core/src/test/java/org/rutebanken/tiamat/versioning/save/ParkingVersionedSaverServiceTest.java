@@ -204,6 +204,128 @@ public class ParkingVersionedSaverServiceTest extends TiamatIntegrationTest {
     }
 
     /**
+     * A child must follow the version of its parking even when it arrives with a stale version.
+     * An import declares every child at version 1, because the source document has no version to
+     * map from. A child that keeps that version always moves to version 2 and collides with the
+     * row that the previous import wrote.
+     *
+     * <p>The parking carries one child of each shape that the traversal reaches: properties
+     * directly on the parking, a parking area with properties of its own, and a vehicle entrance.
+     */
+    @Test
+    public void saveExistingParkingIncrementsVersionsOfChildrenThatArriveWithAStaleVersion() {
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlaceRepository.save(stopPlace);
+
+        Point point = geometryFactory.createPoint(new Coordinate(9.84, 59.26));
+
+        ParkingArea firstArea = new ParkingArea();
+        firstArea.setTotalCapacity(new BigInteger("10"));
+        firstArea.setParkingProperties(newProperties());
+
+        Parking firstVersion = new Parking();
+        firstVersion.setCentroid(point);
+        firstVersion.setParentSiteRef(new SiteRefStructure(stopPlace.getNetexId()));
+        firstVersion.setParkingProperties(List.of(newProperties()));
+        firstVersion.setParkingAreas(List.of(firstArea));
+        firstVersion.getVehicleEntrances().add(entrance("A"));
+
+        Parking saved = parkingVersionedSaverService.saveNewVersion(firstVersion);
+        assertThat(saved.getParkingProperties().getFirst().getVersion()).as("properties version").isEqualTo(1L);
+
+        // The second import repeats the same document. Each child keeps the netexId that the first
+        // import assigned, and carries the version from the document, which is 1 again.
+        Parking secondSaved = parkingVersionedSaverService.saveNewVersion(
+                staleImportOf(saved, stopPlace.getNetexId(), point));
+
+        assertThat(secondSaved.getVersion()).as("parking version").isEqualTo(2L);
+
+        // A third import repeats it once more. Without alignment each child targets version 2
+        // again, and collides with the row that the second import wrote.
+        Parking thirdSaved = parkingVersionedSaverService.saveNewVersion(
+                staleImportOf(secondSaved, stopPlace.getNetexId(), point));
+
+        assertThat(thirdSaved.getVersion()).as("parking version").isEqualTo(3L);
+
+        ParkingProperties thirdProperties = thirdSaved.getParkingProperties().getFirst();
+        assertThat(thirdProperties.getVersion())
+                .as("properties version follows the parking version, not the version in the document")
+                .isEqualTo(3L);
+        assertThat(thirdProperties.getSpaces().getFirst().getVersion())
+                .as("capacity version follows the parking version, not the version in the document")
+                .isEqualTo(3L);
+
+        ParkingArea thirdArea = thirdSaved.getParkingAreas().getFirst();
+        assertThat(thirdArea.getVersion())
+                .as("area version follows the parking version")
+                .isEqualTo(3L);
+        assertThat(thirdArea.getParkingProperties().getVersion())
+                .as("area properties version follows the parking version")
+                .isEqualTo(3L);
+        assertThat(thirdArea.getParkingProperties().getSpaces().getFirst().getVersion())
+                .as("area capacity version follows the parking version")
+                .isEqualTo(3L);
+
+        assertThat(thirdSaved.getVehicleEntrances().iterator().next().getVersion())
+                .as("vehicle entrance version follows the parking version")
+                .isEqualTo(3L);
+    }
+
+    private ParkingProperties newProperties() {
+        ParkingCapacity capacity = new ParkingCapacity();
+        capacity.setNumberOfSpaces(new BigInteger("10"));
+
+        ParkingProperties properties = new ParkingProperties();
+        properties.getParkingUserTypes().add(ParkingUserEnumeration.ALL);
+        properties.setSpaces(List.of(capacity));
+        return properties;
+    }
+
+    /**
+     * Builds the next import of a parking that is already stored. Each child keeps the netexId
+     * that the previous import gave it, and carries version 1, which is the version an import
+     * document declares for every element.
+     */
+    private Parking staleImportOf(Parking stored, String stopPlaceNetexId, Point point) {
+
+        ParkingArea storedArea = stored.getParkingAreas().getFirst();
+        ParkingArea area = new ParkingArea();
+        area.setNetexId(storedArea.getNetexId());
+        area.setVersion(1L);
+        area.setTotalCapacity(new BigInteger("10"));
+        area.setParkingProperties(stalePropertiesOf(storedArea.getParkingProperties()));
+
+        ParkingEntranceForVehicles storedEntrance = stored.getVehicleEntrances().iterator().next();
+        ParkingEntranceForVehicles vehicleEntrance = entrance("A");
+        vehicleEntrance.setNetexId(storedEntrance.getNetexId());
+        vehicleEntrance.setVersion(1L);
+
+        Parking next = new Parking();
+        next.setNetexId(stored.getNetexId());
+        next.setCentroid(point);
+        next.setParentSiteRef(new SiteRefStructure(stopPlaceNetexId));
+        next.setParkingProperties(List.of(stalePropertiesOf(stored.getParkingProperties().getFirst())));
+        next.setParkingAreas(List.of(area));
+        next.getVehicleEntrances().add(vehicleEntrance);
+        return next;
+    }
+
+    private ParkingProperties stalePropertiesOf(ParkingProperties stored) {
+        ParkingCapacity capacity = new ParkingCapacity();
+        capacity.setNetexId(stored.getSpaces().getFirst().getNetexId());
+        capacity.setVersion(1L);
+        capacity.setNumberOfSpaces(new BigInteger("10"));
+
+        ParkingProperties properties = new ParkingProperties();
+        properties.setNetexId(stored.getNetexId());
+        properties.setVersion(1L);
+        properties.getParkingUserTypes().add(ParkingUserEnumeration.ALL);
+        properties.setSpaces(List.of(capacity));
+        return properties;
+    }
+
+    /**
      * A ParkingArea carries its own ParkingProperties, which in turn carries its own spaces.
      * Both are versioned and have the same unique constraint on (netex_id, version) as the
      * properties hanging directly off the Parking, so they clash the same way when re-attached.
