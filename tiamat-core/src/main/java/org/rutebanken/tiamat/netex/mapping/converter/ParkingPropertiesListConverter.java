@@ -21,7 +21,9 @@ import ma.glasnost.orika.metadata.Type;
 import org.rutebanken.netex.model.ParkingCapacities_RelStructure;
 import org.rutebanken.netex.model.ParkingCapacity;
 import org.rutebanken.netex.model.ParkingProperties_RelStructure;
+import org.rutebanken.netex.model.ParkingStayEnumeration;
 import org.rutebanken.netex.model.ParkingUserEnumeration;
+import org.rutebanken.netex.model.ParkingVehicleEnumeration;
 import org.rutebanken.tiamat.model.ParkingProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,23 +37,61 @@ public class ParkingPropertiesListConverter extends BidirectionalConverter<List<
 
     private static final Logger logger = LoggerFactory.getLogger(ParkingPropertiesListConverter.class);
 
+    /**
+     * Maps an enum constant to the matching constant of another enum, by name. Orika maps
+     * enums the same way, through {@link Enum#valueOf}. Orika throws when the target enum
+     * does not define the name. This method returns null instead.
+     * <p>
+     * The two enums are not the same size. The NeTEx vehicle enumeration defines seven
+     * constants that the Tiamat enumeration does not. A file that carries one of them
+     * imports without an error today, because this converter ignored the attribute. That
+     * must stay true.
+     *
+     * @param source     the constant to map, or null
+     * @param targetType the enum class to map into
+     * @param capacityId the NeTEx id of the capacity group, for the log line
+     * @return the matching constant, or null when the source is null or has no match
+     */
+    private static <T extends Enum<T>> T mapEnumByName(Enum<?> source, Class<T> targetType, String capacityId) {
+        if (source == null) {
+            return null;
+        }
+        try {
+            return Enum.valueOf(targetType, source.name());
+        } catch (IllegalArgumentException e) {
+            logger.warn("Parking capacity {}: dropped the value {}, because {} does not define it. "
+                            + "The source type is {}.",
+                    capacityId, source.name(), targetType.getName(), source.getClass().getName());
+            return null;
+        }
+    }
+
     @Override
     public ParkingProperties_RelStructure convertTo(List<ParkingProperties> parkingPropertiesList, Type<ParkingProperties_RelStructure> destinationType, MappingContext mappingContext) {
         if(parkingPropertiesList == null || parkingPropertiesList.isEmpty()) {
             return null;
         }
         ParkingProperties_RelStructure parkingProperties_relStructure = new ParkingProperties_RelStructure();
-        ParkingCapacities_RelStructure parkingCapacities_relStructure = new ParkingCapacities_RelStructure();
 
         logger.debug("Mapping {} parkingPropertiesList to netex", parkingPropertiesList.size());
 
         parkingPropertiesList.forEach(parkingProperties -> {
+            // One relation structure per parking properties group. A structure shared across
+            // the groups collects every capacity of every group, and each emitted group then
+            // claims all of them.
+            ParkingCapacities_RelStructure parkingCapacities_relStructure = new ParkingCapacities_RelStructure();
             List<ParkingCapacity> parkingCapacityList = new ArrayList<>();
             parkingProperties.getSpaces().forEach(
                     space -> {
                         ParkingCapacity parkingCapacity = new ParkingCapacity();
+                        // parkingUserType keeps the Orika path, which throws for a NeTEx name
+                        // that Tiamat does not define. The two mappings below tolerate such a
+                        // name instead. Do not route this line through mapEnumByName without a
+                        // decision: it changes the behaviour of the user type on import.
                         ParkingUserEnumeration netexParkingUserType = mapperFacade.map(space.getParkingUserType(), ParkingUserEnumeration.class);
                         parkingCapacity.withParkingUserType(netexParkingUserType);
+                        parkingCapacity.withParkingVehicleType(mapEnumByName(space.getParkingVehicleType(), ParkingVehicleEnumeration.class, space.getNetexId()));
+                        parkingCapacity.withParkingStayType(mapEnumByName(space.getParkingStayType(), ParkingStayEnumeration.class, space.getNetexId()));
                         parkingCapacity.withNumberOfSpaces(space.getNumberOfSpaces());
                         parkingCapacity.withNumberOfSpacesWithRechargePoint(space.getNumberOfSpacesWithRechargePoint());
                         parkingCapacity.setId(space.getNetexId());
@@ -94,6 +134,8 @@ public class ParkingPropertiesListConverter extends BidirectionalConverter<List<
                                 parkingCapacity.setNumberOfSpaces(netexParkingCapacity.getNumberOfSpaces());
                                 parkingCapacity.setNumberOfSpacesWithRechargePoint(netexParkingCapacity.getNumberOfSpacesWithRechargePoint());
                                 parkingCapacity.setParkingUserType(mapperFacade.map(netexParkingCapacity.getParkingUserType(), org.rutebanken.tiamat.model.ParkingUserEnumeration.class));
+                                parkingCapacity.setParkingVehicleType(mapEnumByName(netexParkingCapacity.getParkingVehicleType(), org.rutebanken.tiamat.model.ParkingVehicleEnumeration.class, netexParkingCapacity.getId()));
+                                parkingCapacity.setParkingStayType(mapEnumByName(netexParkingCapacity.getParkingStayType(), org.rutebanken.tiamat.model.ParkingStayEnumeration.class, netexParkingCapacity.getId()));
                             }
                             parkingCapacityList.add(parkingCapacity);
                         });
