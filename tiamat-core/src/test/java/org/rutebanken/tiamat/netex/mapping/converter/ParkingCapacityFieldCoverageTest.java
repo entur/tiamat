@@ -33,9 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * <p>
  * {@code ParkingNetexMapperFieldCoverageTest} guards the same drift one level higher, on
  * {@code Parking}. That guard lists {@code parkingProperties} as mapped and stops there. It
- * never looks inside a capacity group, which is how {@code parkingVehicleType} and
- * {@code parkingStayType} stayed unmapped in both directions. A NeTEx file named the vehicle
- * of each count, and the import dropped the name before the data reached the database.
+ * never looks inside a capacity group.
  * <p>
  * Orika does not map a capacity group generically. {@link ParkingPropertiesListConverter}
  * names every field, so the converter loses a new field until somebody adds a line to it.
@@ -109,10 +107,6 @@ public class ParkingCapacityFieldCoverageTest {
                 .isEmpty();
     }
 
-    /**
-     * Catches the opposite drift. A name left behind after somebody renamed or removed the
-     * field weakens the guard without failing it.
-     */
     @Test
     public void declaredFieldNamesAllExistOnParkingCapacity() {
         Set<String> declared = new LinkedHashSet<>();

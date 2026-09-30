@@ -37,9 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Covers the two attributes that identify a NeTEx parking capacity group together with the
- * user type: the vehicle type and the stay type. Both directions dropped them, so a
- * migrated car count and a migrated motorcycle count reached the database as the same
- * unlabelled number.
+ * user type: the vehicle type and the stay type.
  */
 public class ParkingPropertiesListConverterTest extends TiamatIntegrationTest {
 
@@ -87,10 +85,6 @@ public class ParkingPropertiesListConverterTest extends TiamatIntegrationTest {
         assertThat(capacity.getParkingStayType()).isEqualTo(org.rutebanken.tiamat.model.ParkingStayEnumeration.SHORT_STAY);
     }
 
-    /**
-     * Every capacity group that the Liipi migration writes for a disabled-user place
-     * carries no vehicle type, and no migrated group carries a stay type.
-     */
     @Test
     public void convertFromAcceptsACapacityThatCarriesNeitherAttribute() {
         ParkingCapacity capacity = convertFromSingleCapacity(netexCapacity());
@@ -118,12 +112,6 @@ public class ParkingPropertiesListConverterTest extends TiamatIntegrationTest {
         assertThat(capacity.getNumberOfSpaces()).isEqualTo(BigInteger.valueOf(42));
     }
 
-    /**
-     * Each parking properties group owns its capacities. The converter built one relation
-     * structure for the whole list until DPO-5046, and attached that one structure to every
-     * emitted group, so each group claimed the capacities of all the other groups. A vehicle
-     * type makes the defect visible: a car group and a bicycle group both listed both counts.
-     */
     @Test
     public void convertToGivesEachGroupOnlyItsOwnCapacities() {
         ParkingCapacity carSpaces = tiamatCapacity();
@@ -153,10 +141,6 @@ public class ParkingPropertiesListConverterTest extends TiamatIntegrationTest {
         assertThat(vehicleTypesOf(relStructure, 1)).containsExactly(ParkingVehicleEnumeration.PEDAL_CYCLE);
     }
 
-    /**
-     * The recharge point count has a NeTEx attribute and a database column, and the Liipi
-     * migration writes it for every electric car group.
-     */
     @Test
     public void bothDirectionsKeepTheRechargePointCount() {
         ParkingCapacity capacity = tiamatCapacity();
