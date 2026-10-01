@@ -24,7 +24,11 @@ public enum ParkingLayoutEnumeration {
     ROADSIDE("roadside"),
     UNDEFINED("undefined"),
     OTHER("other"),
-    CYCLE_HIRE("cycleHire");
+    CYCLE_HIRE("cycleHire"),
+    // JPA stores this enum by ordinal, so a new constant goes at the end. A constant in any
+    // other position changes the meaning of the rows that are already stored. This is why the
+    // order differs from the NeTEx enumeration, which places ON_PAVEMENT before CYCLE_HIRE.
+    ON_PAVEMENT("onPavement");
     private final String value;
 
     ParkingLayoutEnumeration(String v) {
