@@ -31,6 +31,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Component
 public class ParkingPropertiesListConverter extends BidirectionalConverter<List<ParkingProperties>, ParkingProperties_RelStructure> {
@@ -42,28 +43,49 @@ public class ParkingPropertiesListConverter extends BidirectionalConverter<List<
      * enums the same way, through {@link Enum#valueOf}. Orika throws when the target enum
      * does not define the name. This method returns null instead.
      * <p>
-     * The two enums are not the same size. The NeTEx vehicle enumeration defines seven
-     * constants that the Tiamat enumeration does not. A file that carries one of them
-     * imports without an error today, because this converter ignored the attribute. That
-     * must stay true.
+     * The Tiamat parking enumerations that this converter reads mirror the NeTEx ones, so
+     * no name is unmatched today. This method guards against a later NeTEx version that
+     * adds a constant. An unknown name must drop a single attribute, and must not fail the
+     * whole import. The guard covers this converter only. A parking enum that Orika maps by
+     * default still fails an import on an unmatched name.
      *
      * @param source     the constant to map, or null
      * @param targetType the enum class to map into
-     * @param capacityId the NeTEx id of the capacity group, for the log line
+     * @param recordId   the NeTEx id of the record, for the log line
      * @return the matching constant, or null when the source is null or has no match
      */
-    private static <T extends Enum<T>> T mapEnumByName(Enum<?> source, Class<T> targetType, String capacityId) {
+    static <T extends Enum<T>> T mapEnumByName(Enum<?> source, Class<T> targetType, String recordId) {
         if (source == null) {
             return null;
         }
         try {
             return Enum.valueOf(targetType, source.name());
         } catch (IllegalArgumentException e) {
-            logger.warn("Parking capacity {}: dropped the value {}, because {} does not define it. "
+            logger.warn("Parking record {}: dropped the value {}, because {} does not define it. "
                             + "The source type is {}.",
-                    capacityId, source.name(), targetType.getName(), source.getClass().getName());
+                    recordId, source.name(), targetType.getName(), source.getClass().getName());
             return null;
         }
+    }
+
+    /**
+     * Maps each constant of a list to the matching constant of another enum, by name.
+     * Drops a constant that the target enum does not define, under the rule that
+     * {@link #mapEnumByName} states.
+     *
+     * @param source     the constants to map, or null
+     * @param targetType the enum class to map into
+     * @param recordId   the NeTEx id of the record, for the log line
+     * @return the matching constants, never null
+     */
+    static <T extends Enum<T>> List<T> mapEnumListByName(List<? extends Enum<?>> source, Class<T> targetType, String recordId) {
+        if (source == null) {
+            return List.of();
+        }
+        return source.stream()
+                .map(value -> mapEnumByName(value, targetType, recordId))
+                .filter(Objects::nonNull)
+                .toList();
     }
 
     @Override
@@ -84,12 +106,7 @@ public class ParkingPropertiesListConverter extends BidirectionalConverter<List<
             parkingProperties.getSpaces().forEach(
                     space -> {
                         ParkingCapacity parkingCapacity = new ParkingCapacity();
-                        // parkingUserType keeps the Orika path, which throws for a NeTEx name
-                        // that Tiamat does not define. The two mappings below tolerate such a
-                        // name instead. Do not route this line through mapEnumByName without a
-                        // decision: it changes the behaviour of the user type on import.
-                        ParkingUserEnumeration netexParkingUserType = mapperFacade.map(space.getParkingUserType(), ParkingUserEnumeration.class);
-                        parkingCapacity.withParkingUserType(netexParkingUserType);
+                        parkingCapacity.withParkingUserType(mapEnumByName(space.getParkingUserType(), ParkingUserEnumeration.class, space.getNetexId()));
                         parkingCapacity.withParkingVehicleType(mapEnumByName(space.getParkingVehicleType(), ParkingVehicleEnumeration.class, space.getNetexId()));
                         parkingCapacity.withParkingStayType(mapEnumByName(space.getParkingStayType(), ParkingStayEnumeration.class, space.getNetexId()));
                         parkingCapacity.withNumberOfSpaces(space.getNumberOfSpaces());
@@ -100,7 +117,7 @@ public class ParkingPropertiesListConverter extends BidirectionalConverter<List<
 
                     }
             );
-           final List<ParkingUserEnumeration> parkingUserEnumerations = mapperFacade.mapAsList(parkingProperties.getParkingUserTypes(), ParkingUserEnumeration.class);
+           final List<ParkingUserEnumeration> parkingUserEnumerations = mapEnumListByName(parkingProperties.getParkingUserTypes(), ParkingUserEnumeration.class, parkingProperties.getNetexId());
             parkingCapacities_relStructure.getParkingCapacityRefOrParkingCapacity().addAll(parkingCapacityList);
             final org.rutebanken.netex.model.ParkingProperties netexParkingProperties = new org.rutebanken.netex.model.ParkingProperties();
             netexParkingProperties.setId(parkingProperties.getNetexId());
@@ -122,7 +139,7 @@ public class ParkingPropertiesListConverter extends BidirectionalConverter<List<
                         ParkingProperties parkingProperties = new ParkingProperties();
                         parkingProperties.setNetexId(netexParkingProperty.getId());
                         parkingProperties.setVersion(Integer.parseInt(netexParkingProperty.getVersion()));
-                        final List<org.rutebanken.tiamat.model.ParkingUserEnumeration> parkingUserEnumeration = mapperFacade.mapAsList(netexParkingProperty.getParkingUserTypes(), org.rutebanken.tiamat.model.ParkingUserEnumeration.class);
+                        final List<org.rutebanken.tiamat.model.ParkingUserEnumeration> parkingUserEnumeration = mapEnumListByName(netexParkingProperty.getParkingUserTypes(), org.rutebanken.tiamat.model.ParkingUserEnumeration.class, netexParkingProperty.getId());
 
                         parkingProperties.getParkingUserTypes().addAll(parkingUserEnumeration);
                         List<org.rutebanken.tiamat.model.ParkingCapacity> parkingCapacityList = new ArrayList<>();
@@ -133,7 +150,7 @@ public class ParkingPropertiesListConverter extends BidirectionalConverter<List<
                                 parkingCapacity.setVersion(Integer.parseInt(netexParkingCapacity.getVersion()));
                                 parkingCapacity.setNumberOfSpaces(netexParkingCapacity.getNumberOfSpaces());
                                 parkingCapacity.setNumberOfSpacesWithRechargePoint(netexParkingCapacity.getNumberOfSpacesWithRechargePoint());
-                                parkingCapacity.setParkingUserType(mapperFacade.map(netexParkingCapacity.getParkingUserType(), org.rutebanken.tiamat.model.ParkingUserEnumeration.class));
+                                parkingCapacity.setParkingUserType(mapEnumByName(netexParkingCapacity.getParkingUserType(), org.rutebanken.tiamat.model.ParkingUserEnumeration.class, netexParkingCapacity.getId()));
                                 parkingCapacity.setParkingVehicleType(mapEnumByName(netexParkingCapacity.getParkingVehicleType(), org.rutebanken.tiamat.model.ParkingVehicleEnumeration.class, netexParkingCapacity.getId()));
                                 parkingCapacity.setParkingStayType(mapEnumByName(netexParkingCapacity.getParkingStayType(), org.rutebanken.tiamat.model.ParkingStayEnumeration.class, netexParkingCapacity.getId()));
                             }
