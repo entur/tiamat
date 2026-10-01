@@ -15,6 +15,10 @@
 
 package org.rutebanken.tiamat.model;
 
+/**
+ * Persisted as an ordinal, so values must only ever be <em>appended</em>. Inserting or reordering
+ * silently reinterprets every existing row.
+ */
 public enum CycleStorageEnumeration {
 
     RACKS("racks"),
