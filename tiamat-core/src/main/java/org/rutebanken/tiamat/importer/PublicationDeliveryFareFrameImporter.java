@@ -30,7 +30,6 @@ import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -114,17 +113,19 @@ public class PublicationDeliveryFareFrameImporter {
             FareFrame responseFareFrame = new FareFrame();
             responseFareFrame.withId(requestId + "-response").withVersion("1");
 
-            // Import fare zones from FareFrame and collect imported netexIds
-            Set<String> importedNetexIds = tariffZoneImportHandler.handleFareZonesFromFareFrame(
+            // Import fare zones from FareFrame
+            FareZoneImportResult importResult = tariffZoneImportHandler.handleFareZonesFromFareFrame(
                     netexFareFrame,
                     importParams,
                     fareZoneCounter,
                     responseFareFrame
             );
 
-            // Cleanup orphaned FareZones when the import is a replica (external versioning or register import)
-            if (fareZoneConfig.isReplicaImport() && !importedNetexIds.isEmpty()) {
-                int deletedCount = fareZoneSaverService.deleteAllExcept(importedNetexIds);
+            // Cleanup orphaned FareZones when the import is a replica (external versioning or register import).
+            // Keep every declared zone, including one that failed to save, so a rejected zone's existing version
+            // is not pruned as an orphan.
+            if (fareZoneConfig.isReplicaImport() && !importResult.getDeclaredNetexIds().isEmpty()) {
+                int deletedCount = fareZoneSaverService.deleteAllExcept(importResult.getDeclaredNetexIds());
                 logger.info("External versioning cleanup: deleted {} orphaned FareZones", deletedCount);
             }
 

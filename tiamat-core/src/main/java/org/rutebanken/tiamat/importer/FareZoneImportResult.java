@@ -21,24 +21,38 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Result of FareZone import operation.
- * Contains the imported FareZones and their netexIds for cleanup tracking.
+ * Result of a FareZone import.
+ *
+ * <p>Two id sets, because replica cleanup and reference validation need different answers:
+ * <ul>
+ *   <li>{@code declaredNetexIds} - every zone the delivery carried, including one that failed to save.
+ *       Used as the replica cleanup keep-set so a rejected zone's existing version is not pruned as an orphan.</li>
+ *   <li>{@code savedNetexIds} - only zones actually persisted this round. Used to validate group-of-tariff-zones
+ *       members, so a rejected new zone does not satisfy a member reference (a dangling ref); a rejected
+ *       pre-existing zone still resolves from the database.</li>
+ * </ul>
  */
 public class FareZoneImportResult {
 
     private final List<FareZone> importedFareZones;
-    private final Set<String> importedNetexIds;
+    private final Set<String> savedNetexIds;
+    private final Set<String> declaredNetexIds;
 
-    public FareZoneImportResult(List<FareZone> importedFareZones, Set<String> importedNetexIds) {
+    public FareZoneImportResult(List<FareZone> importedFareZones, Set<String> savedNetexIds, Set<String> declaredNetexIds) {
         this.importedFareZones = importedFareZones;
-        this.importedNetexIds = importedNetexIds;
+        this.savedNetexIds = savedNetexIds;
+        this.declaredNetexIds = declaredNetexIds;
     }
 
     public List<FareZone> getImportedFareZones() {
         return importedFareZones;
     }
 
-    public Set<String> getImportedNetexIds() {
-        return importedNetexIds;
+    public Set<String> getSavedNetexIds() {
+        return savedNetexIds;
+    }
+
+    public Set<String> getDeclaredNetexIds() {
+        return declaredNetexIds;
     }
 }

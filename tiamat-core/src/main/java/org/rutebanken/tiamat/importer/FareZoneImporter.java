@@ -48,7 +48,8 @@ public class FareZoneImporter {
 
 
     public FareZoneImportResult importFareZones(List<org.rutebanken.tiamat.model.FareZone> fareZones) {
-        Set<String> importedNetexIds = new HashSet<>();
+        Set<String> savedNetexIds = new HashSet<>();
+        Set<String> declaredNetexIds = new HashSet<>();
 
         List<FareZone> importedFareZones = fareZones
                 .stream()
@@ -70,11 +71,15 @@ public class FareZoneImporter {
                         logger.debug("Saved FareZone {} with default versioning", saved.getNetexId());
                     }
 
-                    // Keep every zone the delivery declares, including one that failed to save, so the
-                    // replica cleanup (deleteAllExcept) does not prune a rejected zone's existing version
-                    // as an orphan. In replica mode the netexId is the source's, preserved across the save.
+                    // Every declared zone, including a rejected one, is kept so the replica cleanup does not
+                    // prune its existing version as an orphan. Only persisted zones count as saved, so a
+                    // rejected zone cannot satisfy a group member reference. In replica mode the netexId is
+                    // the source's, preserved across the save, so the incoming id matches the saved one.
                     if (incomingFareZone.getNetexId() != null) {
-                        importedNetexIds.add(incomingFareZone.getNetexId());
+                        declaredNetexIds.add(incomingFareZone.getNetexId());
+                    }
+                    if (saved != null && saved.getNetexId() != null) {
+                        savedNetexIds.add(saved.getNetexId());
                     }
 
                     return saved;
@@ -83,7 +88,7 @@ public class FareZoneImporter {
                 .map(savedFareZone -> netexMapper.getFacade().map(savedFareZone, FareZone.class))
                 .toList();
 
-        return new FareZoneImportResult(importedFareZones, importedNetexIds);
+        return new FareZoneImportResult(importedFareZones, savedNetexIds, declaredNetexIds);
     }
 
 }

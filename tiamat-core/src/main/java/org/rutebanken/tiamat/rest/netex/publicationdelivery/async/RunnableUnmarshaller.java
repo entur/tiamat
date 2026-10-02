@@ -51,6 +51,10 @@ public class RunnableUnmarshaller implements Runnable {
     @Override
     public void run() {
         final XMLInputFactory xmlInputFactory = XMLInputFactory.newFactory();
+        // Second unmarshal pass: disable DTDs and external entities, matching the first pass, so an untrusted
+        // publication delivery cannot use XXE here either. NeTEx carries no DOCTYPE, so this rejects nothing valid.
+        xmlInputFactory.setProperty(XMLInputFactory.SUPPORT_DTD, false);
+        xmlInputFactory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
         AtomicInteger stops = new AtomicInteger();
         AtomicInteger parkings = new AtomicInteger();
 

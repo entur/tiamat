@@ -28,6 +28,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.rutebanken.tiamat.rest.netex.publicationdelivery.async.RunnableUnmarshaller.POISON_PARKING;
 import static org.rutebanken.tiamat.rest.netex.publicationdelivery.async.RunnableUnmarshaller.POISON_STOP_PLACE;
 
@@ -135,6 +136,29 @@ public class PublicationDeliveryPartialUnmarshallerTest {
 
 
         readAndVerifyStops(unmarshalResult, 1);
+    }
+
+    @Test
+    public void rejectsDoctypeToPreventXxe() {
+        String withDoctype = """
+                <?xml version="1.0" encoding="UTF-8"?>
+                <!DOCTYPE PublicationDelivery [ <!ENTITY xxe SYSTEM "file:///etc/passwd"> ]>
+                <PublicationDelivery xmlns="http://www.netex.org.uk/netex">
+                    <PublicationTimestamp>2026-01-01T00:00:00</PublicationTimestamp>
+                    <ParticipantRef>&xxe;</ParticipantRef>
+                    <dataObjects/>
+                </PublicationDelivery>""";
+
+        InputStream inputStream = new ByteArrayInputStream(withDoctype.getBytes());
+
+        // With SUPPORT_DTD=false the (Woodstox) parser does not process the DTD, so the external entity is
+        // never declared and never resolved; referencing it fails as an undeclared entity rather than reading
+        // the file. The second unmarshal pass is hardened the same way, so an entity used only inside a
+        // filtered-out section (stopPlaces/parkings) cannot be resolved there either.
+        assertThatThrownBy(() -> publicationDeliveryPartialUnmarshaller.unmarshal(inputStream))
+                .rootCause()
+                .isInstanceOf(javax.xml.stream.XMLStreamException.class)
+                .hasMessageContaining("entity");
     }
 
     @Test

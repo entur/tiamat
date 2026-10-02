@@ -19,9 +19,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Fetches farezone-resolver's fare zone register artifact ({@code _stops_farezones.xml}) from GCS and
@@ -59,8 +63,10 @@ public class FareZoneMembershipArtifactImporter {
     static final String IMPORT_LOCK = "farezone-register-import-lock";
     // Skip the run if another pod is already importing, rather than queue behind it.
     private static final int LOCK_WAIT_SECONDS = 5;
-    // Ceiling for one import; the lease is released as soon as the import returns.
-    private static final int LOCK_MAX_LEASE_SECONDS = 1800;
+    // Hard ceiling for one import. TimeoutMaxLeaseTimeLock does not enforce a lease (it only bounds lock
+    // acquisition), so a hung fetch/import would otherwise hold the CP lock and make every pod skip forever.
+    // Bounding the work with this timeout caps how long the lock can be held.
+    private static final int IMPORT_TIMEOUT_SECONDS = 1800;
 
     private final PublicationDeliveryUnmarshaller publicationDeliveryUnmarshaller;
     private final PublicationDeliveryFareFrameImporter fareFrameImporter;
@@ -131,19 +137,42 @@ public class FareZoneMembershipArtifactImporter {
         try {
             // One pod imports at a time; another holding the lock means it is already importing, so skip.
             lock.executeInLock(() -> {
-                try {
-                    importArtifact();
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
+                runBoundedImport();
                 return null;
-            }, IMPORT_LOCK, LOCK_WAIT_SECONDS, LOCK_MAX_LEASE_SECONDS);
+            }, IMPORT_LOCK, LOCK_WAIT_SECONDS, IMPORT_TIMEOUT_SECONDS);
         } catch (LockException e) {
             logger.info("Another instance holds {}; skipping this fare zone register import run", IMPORT_LOCK);
         } catch (Exception e) {
             // A scheduled task that throws stops repeating, so failures are swallowed and logged.
             logger.error("Could not import fare zone register artifact {} from bucket {}; previous zones kept",
                     objectName, bucketName, e);
+        }
+    }
+
+    /**
+     * Run the import on a worker thread bounded by {@link #IMPORT_TIMEOUT_SECONDS}. On timeout the worker is
+     * interrupted and this returns (throwing), so the caller releases the lock instead of holding it on a hung
+     * fetch or import.
+     */
+    private void runBoundedImport() {
+        ExecutorService worker = Executors.newSingleThreadExecutor(r -> new Thread(r, "farezone-artifact-import-worker"));
+        Future<?> future = worker.submit(() -> {
+            importArtifact();
+            return null;
+        });
+        try {
+            future.get(IMPORT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+        } catch (TimeoutException e) {
+            future.cancel(true);
+            throw new RuntimeException("Fare zone register import exceeded " + IMPORT_TIMEOUT_SECONDS + "s; aborted", e);
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e.getCause());
+        } catch (InterruptedException e) {
+            future.cancel(true);
+            Thread.currentThread().interrupt();
+            throw new RuntimeException(e);
+        } finally {
+            worker.shutdownNow();
         }
     }
 

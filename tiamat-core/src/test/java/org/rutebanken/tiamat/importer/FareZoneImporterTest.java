@@ -33,12 +33,13 @@ import static org.mockito.Mockito.when;
 public class FareZoneImporterTest {
 
     /**
-     * A replica import is a full replace: the keep-set handed to the cleanup must contain every zone the
-     * delivery declares, including one that fails to save. Otherwise the subsequent deleteAllExcept would
-     * prune the rejected zone's existing version as an orphan - silent data loss from a single bad zone.
+     * A replica import is a full replace: the declared set (cleanup keep-set) must contain every zone the
+     * delivery declares, including one that fails to save, so deleteAllExcept does not prune the rejected
+     * zone's existing version as an orphan. The saved set, used for group member validation, must contain
+     * only persisted zones, so a rejected new zone cannot satisfy a dangling member reference.
      */
     @Test
-    public void keepsRejectedZoneInTheImportedIdsSoCleanupDoesNotPruneIt() {
+    public void declaredSetKeepsRejectedZoneButSavedSetDoesNot() {
         FareZoneSaverService saver = mock(FareZoneSaverService.class);
         NetexMapper netexMapper = mock(NetexMapper.class);
         MapperFacade facade = mock(MapperFacade.class);
@@ -65,8 +66,12 @@ public class FareZoneImporterTest {
 
         FareZoneImportResult result = importer.importFareZones(List.of(good, rejected));
 
-        assertThat(result.getImportedNetexIds())
+        // Cleanup keeps both, so the rejected zone's existing version is not pruned.
+        assertThat(result.getDeclaredNetexIds())
                 .containsExactlyInAnyOrder("NSR:FareZone:good", "NSR:FareZone:rejected");
+        // Reference validation sees only the saved zone, so the rejected one cannot resolve a member ref.
+        assertThat(result.getSavedNetexIds())
+                .containsExactly("NSR:FareZone:good");
         // Only the saved zone makes it into the response frame.
         assertThat(result.getImportedFareZones()).hasSize(1);
     }
