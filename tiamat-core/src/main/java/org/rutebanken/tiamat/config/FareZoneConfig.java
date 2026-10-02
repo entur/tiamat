@@ -24,7 +24,24 @@ public class FareZoneConfig {
     @Value("${fareZone.externalVersioning:false}")
     private boolean externalVersioning;
 
+    @Value("${fareZone.register.import.enabled:false}")
+    private boolean registerImportEnabled;
+
     public boolean isExternalVersioning() {
         return externalVersioning;
+    }
+
+    public boolean isRegisterImportEnabled() {
+        return registerImportEnabled;
+    }
+
+    /**
+     * Whether fare zones are managed by an external source, so the import runs as a replica: update by
+     * netexId and prune zones absent from the delivery. True for the legacy distance-api/papsukkal POST
+     * (externalVersioning) and for the farezone-resolver register import - separate sources, same
+     * replica semantics.
+     */
+    public boolean isReplicaImport() {
+        return externalVersioning || registerImportEnabled;
     }
 }

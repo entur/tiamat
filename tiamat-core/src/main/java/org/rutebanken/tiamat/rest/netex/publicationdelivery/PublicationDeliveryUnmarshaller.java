@@ -25,9 +25,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
 
-import javax.xml.transform.stream.StreamSource;
+import javax.xml.XMLConstants;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParserFactory;
+import javax.xml.transform.sax.SAXSource;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -77,9 +82,29 @@ public class PublicationDeliveryUnmarshaller {
 
         logger.debug("Unmarshalling incoming publication delivery structure. Schema validation enabled: {}", validateAgainstSchema);
 
-        JAXBElement<PublicationDeliveryStructure> jaxbElement = jaxbUnmarshaller.unmarshal(new StreamSource(inputStream), PublicationDeliveryStructure.class);
+        SAXSource saxSource = new SAXSource(hardenedXmlReader(), new InputSource(inputStream));
+        JAXBElement<PublicationDeliveryStructure> jaxbElement = jaxbUnmarshaller.unmarshal(saxSource, PublicationDeliveryStructure.class);
         PublicationDeliveryStructure publicationDeliveryStructure = jaxbElement.getValue();
         logger.debug("Done unmarshalling incoming publication delivery structure with schema validation enabled: {}", validateAgainstSchema);
         return publicationDeliveryStructure;
+    }
+
+    /**
+     * A namespace-aware SAX reader with DOCTYPE and external entities disabled, so a publication delivery
+     * from an untrusted source (an import, or the fare zone membership artifact from a bucket) cannot use
+     * XXE to read local files or reach internal hosts. NeTEx carries no DOCTYPE, so this rejects nothing valid.
+     */
+    private XMLReader hardenedXmlReader() throws SAXException {
+        try {
+            SAXParserFactory factory = SAXParserFactory.newInstance();
+            factory.setNamespaceAware(true);
+            factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+            factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+            factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+            return factory.newSAXParser().getXMLReader();
+        } catch (ParserConfigurationException e) {
+            throw new SAXException("Could not configure a secure XML parser", e);
+        }
     }
 }

@@ -48,7 +48,8 @@ public class FareZoneImporter {
 
 
     public FareZoneImportResult importFareZones(List<org.rutebanken.tiamat.model.FareZone> fareZones) {
-        Set<String> importedNetexIds = new HashSet<>();
+        Set<String> savedNetexIds = new HashSet<>();
+        Set<String> declaredNetexIds = new HashSet<>();
 
         List<FareZone> importedFareZones = fareZones
                 .stream()
@@ -58,7 +59,7 @@ public class FareZoneImporter {
                 .map(incomingFareZone -> {
                     org.rutebanken.tiamat.model.FareZone saved;
 
-                    if (fareZoneConfig.isExternalVersioning()) {
+                    if (fareZoneConfig.isReplicaImport()) {
                         saved = fareZoneSaverService.saveWithExternalVersioning(incomingFareZone);
                         if (saved != null) {
                             logger.debug("Saved FareZone {} with external versioning", saved.getNetexId());
@@ -70,8 +71,15 @@ public class FareZoneImporter {
                         logger.debug("Saved FareZone {} with default versioning", saved.getNetexId());
                     }
 
+                    // Every declared zone, including a rejected one, is kept so the replica cleanup does not
+                    // prune its existing version as an orphan. Only persisted zones count as saved, so a
+                    // rejected zone cannot satisfy a group member reference. In replica mode the netexId is
+                    // the source's, preserved across the save, so the incoming id matches the saved one.
+                    if (incomingFareZone.getNetexId() != null) {
+                        declaredNetexIds.add(incomingFareZone.getNetexId());
+                    }
                     if (saved != null && saved.getNetexId() != null) {
-                        importedNetexIds.add(saved.getNetexId());
+                        savedNetexIds.add(saved.getNetexId());
                     }
 
                     return saved;
@@ -80,7 +88,7 @@ public class FareZoneImporter {
                 .map(savedFareZone -> netexMapper.getFacade().map(savedFareZone, FareZone.class))
                 .toList();
 
-        return new FareZoneImportResult(importedFareZones, importedNetexIds);
+        return new FareZoneImportResult(importedFareZones, savedNetexIds, declaredNetexIds);
     }
 
 }

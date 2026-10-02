@@ -104,6 +104,10 @@ public class PublicationDeliveryPartialUnmarshaller {
         }
 
         XMLInputFactory xmlInputFactory = XMLInputFactory.newFactory();
+        // Disable DTDs and external entities so an untrusted publication delivery cannot use XXE.
+        // NeTEx carries no DOCTYPE, so this rejects nothing valid.
+        xmlInputFactory.setProperty(XMLInputFactory.SUPPORT_DTD, false);
+        xmlInputFactory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
 
         logger.debug("Unmarshalling incoming publication delivery structure. Schema validation enabled: {}", validateAgainstSchema);
 

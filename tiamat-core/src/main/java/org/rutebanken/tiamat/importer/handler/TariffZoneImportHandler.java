@@ -147,9 +147,10 @@ public class TariffZoneImportHandler {
      * @param importParams Import parameters
      * @param tariffZoneImportedCounter Counter for imported zones
      * @param responseFareFrame Response FareFrame to populate with imported zones
-     * @return Set of imported FareZone netexIds (for external versioning cleanup)
+     * @return the import result, carrying both the declared ids (cleanup keep-set) and the saved ids
+     *         (reference validation); see {@link org.rutebanken.tiamat.importer.FareZoneImportResult}
      */
-    public java.util.Set<String> handleFareZonesFromFareFrame(
+    public org.rutebanken.tiamat.importer.FareZoneImportResult handleFareZonesFromFareFrame(
             FareFrame netexFareFrame,
             ImportParams importParams,
             AtomicInteger tariffZoneImportedCounter,
@@ -157,12 +158,12 @@ public class TariffZoneImportHandler {
 
         if (!publicationDeliveryHelper.hasFareZonesInFareFrame(netexFareFrame)) {
             logger.debug("No fare zones found in FareFrame");
-            return java.util.Collections.emptySet();
+            return emptyFareZoneImportResult();
         }
 
         if (importParams.importType == ImportType.ID_MATCH) {
             logger.debug("Skipping fare zone import for ID_MATCH import type");
-            return java.util.Collections.emptySet();
+            return emptyFareZoneImportResult();
         }
 
         logger.info("Processing {} fare zones from FareFrame",
@@ -193,7 +194,12 @@ public class TariffZoneImportHandler {
             responseFareFrame.setFareZones(fareZonesInFrame);
         }
 
-        return importResult.getImportedNetexIds();
+        return importResult;
+    }
+
+    private static org.rutebanken.tiamat.importer.FareZoneImportResult emptyFareZoneImportResult() {
+        return new org.rutebanken.tiamat.importer.FareZoneImportResult(
+                java.util.List.of(), java.util.Collections.emptySet(), java.util.Collections.emptySet());
     }
 
     private boolean isTariffZone(JAXBElement<? extends Zone_VersionStructure> jaxbElement) {
