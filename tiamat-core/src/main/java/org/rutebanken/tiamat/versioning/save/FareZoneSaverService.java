@@ -85,16 +85,19 @@ public class FareZoneSaverService {
      * Used when Tiamat acts as a replica of a master FareZone register.
      *
      * @param incomingFareZone The fare zone to save/update
+     * @param registerImport true for the scheduled register import, a system job with no user to authorize
      * @return The saved fare zone, or null if validation fails
      */
-    public FareZone saveWithExternalVersioning(FareZone incomingFareZone) {
+    public FareZone saveWithExternalVersioning(FareZone incomingFareZone, boolean registerImport) {
         FareZone existingFareZone = null;
 
         if (incomingFareZone.getNetexId() != null) {
             existingFareZone = fareZoneRepository.findFirstByNetexIdOrderByVersionDesc(incomingFareZone.getNetexId());
         }
 
-        authorizationService.verifyCanEditEntities(Arrays.asList(existingFareZone, incomingFareZone));
+        if (!registerImport) {
+            authorizationService.verifyCanEditEntities(Arrays.asList(existingFareZone, incomingFareZone));
+        }
 
         // Validate ValidBetween constraints
         if (!validateValidBetween(incomingFareZone)) {
@@ -117,7 +120,9 @@ public class FareZoneSaverService {
             List<FareZone> olderVersions = olderVersionsOf(existingFareZone);
             if (!olderVersions.isEmpty()) {
                 // Authorized only once validation passed, so a rejected zone cannot fail the delivery over them.
-                authorizationService.verifyCanEditEntities(olderVersions);
+                if (!registerImport) {
+                    authorizationService.verifyCanEditEntities(olderVersions);
+                }
                 logger.info("Deleting {} older versions of FareZone {}", olderVersions.size(), incomingFareZone.getNetexId());
                 fareZoneRepository.deleteAll(olderVersions);
             }
@@ -215,9 +220,10 @@ public class FareZoneSaverService {
      * Respects user permissions and logs all deleted netexIds.
      *
      * @param netexIdsToKeep Set of netexIds to preserve
+     * @param registerImport true for the scheduled register import, a system job with no user to authorize
      * @return Number of FareZones deleted
      */
-    public int deleteAllExcept(Set<String> netexIdsToKeep) {
+    public int deleteAllExcept(Set<String> netexIdsToKeep, boolean registerImport) {
         List<FareZone> allFareZones = fareZoneRepository.findAll();
 
         List<FareZone> toDelete = allFareZones.stream()
@@ -229,7 +235,9 @@ public class FareZoneSaverService {
             return 0;
         }
 
-        authorizationService.verifyCanEditEntities(toDelete);
+        if (!registerImport) {
+            authorizationService.verifyCanEditEntities(toDelete);
+        }
 
         String deletedIds = toDelete.stream()
                 .map(FareZone::getNetexId)
