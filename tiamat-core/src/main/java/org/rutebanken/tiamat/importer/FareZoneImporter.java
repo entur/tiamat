@@ -48,7 +48,8 @@ public class FareZoneImporter {
 
 
     public FareZoneImportResult importFareZones(List<org.rutebanken.tiamat.model.FareZone> fareZones) {
-        Set<String> importedNetexIds = new HashSet<>();
+        Set<String> savedNetexIds = new HashSet<>();
+        Set<String> declaredNetexIds = new HashSet<>();
 
         List<FareZone> importedFareZones = fareZones
                 .stream()
@@ -70,8 +71,11 @@ public class FareZoneImporter {
                         logger.debug("Saved FareZone {} with default versioning", saved.getNetexId());
                     }
 
+                    if (incomingFareZone.getNetexId() != null) {
+                        declaredNetexIds.add(incomingFareZone.getNetexId());
+                    }
                     if (saved != null && saved.getNetexId() != null) {
-                        importedNetexIds.add(saved.getNetexId());
+                        savedNetexIds.add(saved.getNetexId());
                     }
 
                     return saved;
@@ -80,7 +84,7 @@ public class FareZoneImporter {
                 .map(savedFareZone -> netexMapper.getFacade().map(savedFareZone, FareZone.class))
                 .toList();
 
-        return new FareZoneImportResult(importedFareZones, importedNetexIds);
+        return new FareZoneImportResult(importedFareZones, savedNetexIds, declaredNetexIds);
     }
 
 }

@@ -163,12 +163,16 @@ public class PublicationDeliveryImporter {
 
             // Import fare zones carried in an accompanying FareFrame, so that a GroupOfTariffZones
             // in the SiteFrame can reference them within the same delivery.
-            final Set<String> fareFrameZoneIds;
+            final Set<String> declaredFareZoneIds;
+            final Set<String> savedFareZoneIds;
             if (netexFareFrame != null) {
                 FareFrame responseFareFrame = new FareFrame().withId(requestId + "-fareframe-response").withVersion("1");
-                fareFrameZoneIds = tariffZoneImportHandler.handleFareZonesFromFareFrame(netexFareFrame, importParams, tariffZoneCounter, responseFareFrame);
-                } else {
-                fareFrameZoneIds = Collections.emptySet();
+                FareZoneImportResult fareZoneImportResult = tariffZoneImportHandler.handleFareZonesFromFareFrame(netexFareFrame, importParams, tariffZoneCounter, responseFareFrame);
+                declaredFareZoneIds = fareZoneImportResult.getDeclaredNetexIds();
+                savedFareZoneIds = fareZoneImportResult.getSavedNetexIds();
+            } else {
+                declaredFareZoneIds = Collections.emptySet();
+                savedFareZoneIds = Collections.emptySet();
             }
 
             // Run the external versioning FareZone cleanup and the GroupOfTariffZones import in a single
@@ -177,12 +181,12 @@ public class PublicationDeliveryImporter {
             final ImportParams finalImportParams = importParams;
             transactionTemplate.executeWithoutResult(transactionStatus -> {
                 // With external versioning the import is a full replace: prune FareZones not present in this delivery.
-                if (fareZoneConfig.isExternalVersioning() && !fareFrameZoneIds.isEmpty()) {
-                    int deletedCount = fareZoneSaverService.deleteAllExcept(fareFrameZoneIds);
+                if (fareZoneConfig.isExternalVersioning() && !declaredFareZoneIds.isEmpty()) {
+                    int deletedCount = fareZoneSaverService.deleteAllExcept(declaredFareZoneIds);
                     logger.info("External versioning cleanup: deleted {} orphaned FareZones", deletedCount);
                 }
 
-                groupOfTariffZonesImportHandler.handleGroupOfTariffZones(netexSiteFrame, finalImportParams, responseSiteFrame, fareFrameZoneIds);
+                groupOfTariffZonesImportHandler.handleGroupOfTariffZones(netexSiteFrame, finalImportParams, responseSiteFrame, savedFareZoneIds);
             });
             stopPlaceImportHandler.handleStops(netexSiteFrame, importParams, stopPlaceCounter, responseSiteFrame);
             parkingsImportHandler.handleParkings(netexSiteFrame, importParams, parkingCounter, responseSiteFrame);
@@ -190,7 +194,7 @@ public class PublicationDeliveryImporter {
 
             if(responseSiteFrame.getTariffZones() != null
                     || responseSiteFrame.getTopographicPlaces() != null
-                    || !fareFrameZoneIds.isEmpty()) {
+                    || !declaredFareZoneIds.isEmpty()) {
                 backgroundJobs.triggerStopPlaceUpdate();
             }
             return publicationDeliveryCreator.createPublicationDelivery(responseSiteFrame);

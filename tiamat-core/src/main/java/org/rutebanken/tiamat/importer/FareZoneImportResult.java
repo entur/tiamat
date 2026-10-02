@@ -21,24 +21,31 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Result of FareZone import operation.
- * Contains the imported FareZones and their netexIds for cleanup tracking.
+ * Result of a FareZone import. {@code declaredNetexIds} includes zones that failed to save, so replica
+ * cleanup does not prune their existing versions; {@code savedNetexIds} does not, so a rejected new zone
+ * cannot satisfy a group member reference.
  */
 public class FareZoneImportResult {
 
     private final List<FareZone> importedFareZones;
-    private final Set<String> importedNetexIds;
+    private final Set<String> savedNetexIds;
+    private final Set<String> declaredNetexIds;
 
-    public FareZoneImportResult(List<FareZone> importedFareZones, Set<String> importedNetexIds) {
+    public FareZoneImportResult(List<FareZone> importedFareZones, Set<String> savedNetexIds, Set<String> declaredNetexIds) {
         this.importedFareZones = importedFareZones;
-        this.importedNetexIds = importedNetexIds;
+        this.savedNetexIds = savedNetexIds;
+        this.declaredNetexIds = declaredNetexIds;
     }
 
     public List<FareZone> getImportedFareZones() {
         return importedFareZones;
     }
 
-    public Set<String> getImportedNetexIds() {
-        return importedNetexIds;
+    public Set<String> getSavedNetexIds() {
+        return savedNetexIds;
+    }
+
+    public Set<String> getDeclaredNetexIds() {
+        return declaredNetexIds;
     }
 }
