@@ -28,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -94,7 +95,13 @@ public class FareZoneSaverService {
             existingFareZone = fareZoneRepository.findFirstByNetexIdOrderByVersionDesc(incomingFareZone.getNetexId());
         }
 
-        authorizationService.verifyCanEditEntities(Arrays.asList(existingFareZone, incomingFareZone));
+        // A replica keeps one row per netexId. Versions left over from Tiamat's own versioning would
+        // otherwise outrank the rewritten row whenever the source's version number is lower.
+        List<FareZone> olderVersions = olderVersionsOf(existingFareZone);
+
+        List<FareZone> toAuthorize = new ArrayList<>(Arrays.asList(existingFareZone, incomingFareZone));
+        toAuthorize.addAll(olderVersions);
+        authorizationService.verifyCanEditEntities(toAuthorize);
 
         // Validate ValidBetween constraints
         if (!validateValidBetween(incomingFareZone)) {
@@ -112,12 +119,6 @@ public class FareZoneSaverService {
             logger.info("Updating existing FareZone {} from version {} to version {} with external versioning",
                     incomingFareZone.getNetexId(), existingFareZone.getVersion(), incomingFareZone.getVersion());
 
-            // A replica keeps one row per netexId. Versions left over from Tiamat's own versioning would
-            // otherwise outrank the rewritten row whenever the source's version number is lower.
-            Long keptId = existingFareZone.getId();
-            List<FareZone> olderVersions = fareZoneRepository.findByNetexId(incomingFareZone.getNetexId()).stream()
-                    .filter(fareZone -> !fareZone.getId().equals(keptId))
-                    .toList();
             if (!olderVersions.isEmpty()) {
                 logger.info("Deleting {} older versions of FareZone {}", olderVersions.size(), incomingFareZone.getNetexId());
                 fareZoneRepository.deleteAll(olderVersions);
@@ -143,6 +144,15 @@ public class FareZoneSaverService {
                 saved.getNetexId(), saved.getVersion(), username);
 
         return saved;
+    }
+
+    private List<FareZone> olderVersionsOf(FareZone existingFareZone) {
+        if (existingFareZone == null) {
+            return List.of();
+        }
+        return fareZoneRepository.findByNetexId(existingFareZone.getNetexId()).stream()
+                .filter(fareZone -> !fareZone.getId().equals(existingFareZone.getId()))
+                .toList();
     }
 
     /**
