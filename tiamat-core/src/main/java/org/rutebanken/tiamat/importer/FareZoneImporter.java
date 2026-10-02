@@ -70,8 +70,11 @@ public class FareZoneImporter {
                         logger.debug("Saved FareZone {} with default versioning", saved.getNetexId());
                     }
 
-                    if (saved != null && saved.getNetexId() != null) {
-                        importedNetexIds.add(saved.getNetexId());
+                    // Keep every zone the delivery declares, including one that failed to save, so the
+                    // replica cleanup (deleteAllExcept) does not prune a rejected zone's existing version
+                    // as an orphan. In replica mode the netexId is the source's, preserved across the save.
+                    if (incomingFareZone.getNetexId() != null) {
+                        importedNetexIds.add(incomingFareZone.getNetexId());
                     }
 
                     return saved;

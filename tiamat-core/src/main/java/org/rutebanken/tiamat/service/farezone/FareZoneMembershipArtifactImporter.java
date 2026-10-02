@@ -10,6 +10,8 @@ import org.rutebanken.helper.gcp.BlobStoreHelper;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.tiamat.config.FareZoneConfig;
 import org.rutebanken.tiamat.importer.PublicationDeliveryFareFrameImporter;
+import org.rutebanken.tiamat.lock.LockException;
+import org.rutebanken.tiamat.lock.TimeoutMaxLeaseTimeLock;
 import org.rutebanken.tiamat.rest.netex.publicationdelivery.PublicationDeliveryUnmarshaller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,15 +46,26 @@ import java.util.concurrent.TimeUnit;
  *
  * <p>Self-scheduled on its own executor rather than through BackgroundJobs, to avoid a cycle: the
  * FareFrame importer already depends on BackgroundJobs to trigger the ref update after import.
+ *
+ * <p>Every pod schedules this, so the destructive import (save plus orphan cleanup) runs under a
+ * cluster-wide lock, like {@link org.rutebanken.tiamat.service.batch.StopPlaceRefUpdaterService}: one
+ * pod imports while the others skip the run instead of replacing the register concurrently.
  */
 @Component
 public class FareZoneMembershipArtifactImporter {
 
     private static final Logger logger = LoggerFactory.getLogger(FareZoneMembershipArtifactImporter.class);
 
+    static final String IMPORT_LOCK = "farezone-register-import-lock";
+    // Skip the run if another pod is already importing, rather than queue behind it.
+    private static final int LOCK_WAIT_SECONDS = 5;
+    // Ceiling for one import; the lease is released as soon as the import returns.
+    private static final int LOCK_MAX_LEASE_SECONDS = 1800;
+
     private final PublicationDeliveryUnmarshaller publicationDeliveryUnmarshaller;
     private final PublicationDeliveryFareFrameImporter fareFrameImporter;
     private final FareZoneConfig fareZoneConfig;
+    private final TimeoutMaxLeaseTimeLock lock;
 
     private final String bucketName;
     private final String objectName;
@@ -68,6 +81,7 @@ public class FareZoneMembershipArtifactImporter {
     public FareZoneMembershipArtifactImporter(PublicationDeliveryUnmarshaller publicationDeliveryUnmarshaller,
                                               PublicationDeliveryFareFrameImporter fareFrameImporter,
                                               FareZoneConfig fareZoneConfig,
+                                              TimeoutMaxLeaseTimeLock lock,
                                               @Value("${fareZone.membership.artifact.bucket:}") String bucketName,
                                               @Value("${fareZone.membership.artifact.objectName:_stops_farezones.xml}") String objectName,
                                               @Value("${fareZone.membership.artifact.projectId:}") String projectId,
@@ -77,6 +91,7 @@ public class FareZoneMembershipArtifactImporter {
         this.publicationDeliveryUnmarshaller = publicationDeliveryUnmarshaller;
         this.fareFrameImporter = fareFrameImporter;
         this.fareZoneConfig = fareZoneConfig;
+        this.lock = lock;
         this.bucketName = bucketName;
         this.objectName = objectName;
         this.projectId = projectId;
@@ -114,7 +129,17 @@ public class FareZoneMembershipArtifactImporter {
 
     private void importArtifactSafely() {
         try {
-            importArtifact();
+            // One pod imports at a time; another holding the lock means it is already importing, so skip.
+            lock.executeInLock(() -> {
+                try {
+                    importArtifact();
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+                return null;
+            }, IMPORT_LOCK, LOCK_WAIT_SECONDS, LOCK_MAX_LEASE_SECONDS);
+        } catch (LockException e) {
+            logger.info("Another instance holds {}; skipping this fare zone register import run", IMPORT_LOCK);
         } catch (Exception e) {
             // A scheduled task that throws stops repeating, so failures are swallowed and logged.
             logger.error("Could not import fare zone register artifact {} from bucket {}; previous zones kept",

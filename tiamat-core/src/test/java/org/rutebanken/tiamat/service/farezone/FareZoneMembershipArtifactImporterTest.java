@@ -4,6 +4,7 @@ import org.junit.Test;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.tiamat.config.FareZoneConfig;
 import org.rutebanken.tiamat.importer.PublicationDeliveryFareFrameImporter;
+import org.rutebanken.tiamat.lock.TimeoutMaxLeaseTimeLock;
 import org.rutebanken.tiamat.rest.netex.publicationdelivery.PublicationDeliveryUnmarshaller;
 
 import java.io.ByteArrayInputStream;
@@ -37,6 +38,7 @@ public class FareZoneMembershipArtifactImporterTest {
         PublicationDeliveryFareFrameImporter fareFrameImporter = mock(PublicationDeliveryFareFrameImporter.class);
         FareZoneMembershipArtifactImporter importer = new FareZoneMembershipArtifactImporter(
                 new PublicationDeliveryUnmarshaller(), fareFrameImporter, new FareZoneConfig(),
+                mock(TimeoutMaxLeaseTimeLock.class),
                 "", "_stops_farezones.xml", "", "", 60, 43200);
 
         importer.importFrom(new ByteArrayInputStream(ARTIFACT.getBytes(StandardCharsets.UTF_8)));
@@ -48,6 +50,7 @@ public class FareZoneMembershipArtifactImporterTest {
     public void isInertWithoutABucket() throws Exception {
         FareZoneMembershipArtifactImporter importer = new FareZoneMembershipArtifactImporter(
                 new PublicationDeliveryUnmarshaller(), mock(PublicationDeliveryFareFrameImporter.class), new FareZoneConfig(),
+                mock(TimeoutMaxLeaseTimeLock.class),
                 "", "_stops_farezones.xml", "", "", 60, 43200);
         assertThat(importer.isConfigured()).isFalse();
     }
