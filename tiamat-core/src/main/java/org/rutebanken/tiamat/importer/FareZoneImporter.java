@@ -58,7 +58,7 @@ public class FareZoneImporter {
                 .map(incomingFareZone -> {
                     org.rutebanken.tiamat.model.FareZone saved;
 
-                    if (fareZoneConfig.isExternalVersioning()) {
+                    if (fareZoneConfig.isReplicaImport()) {
                         saved = fareZoneSaverService.saveWithExternalVersioning(incomingFareZone);
                         if (saved != null) {
                             logger.debug("Saved FareZone {} with external versioning", saved.getNetexId());

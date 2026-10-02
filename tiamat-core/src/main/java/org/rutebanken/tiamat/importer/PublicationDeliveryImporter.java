@@ -176,8 +176,8 @@ public class PublicationDeliveryImporter {
             // leaving FareZones permanently removed by a rejected import.
             final ImportParams finalImportParams = importParams;
             transactionTemplate.executeWithoutResult(transactionStatus -> {
-                // With external versioning the import is a full replace: prune FareZones not present in this delivery.
-                if (fareZoneConfig.isExternalVersioning() && !fareFrameZoneIds.isEmpty()) {
+                // A replica import is a full replace: prune FareZones not present in this delivery.
+                if (fareZoneConfig.isReplicaImport() && !fareFrameZoneIds.isEmpty()) {
                     int deletedCount = fareZoneSaverService.deleteAllExcept(fareFrameZoneIds);
                     logger.info("External versioning cleanup: deleted {} orphaned FareZones", deletedCount);
                 }

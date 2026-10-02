@@ -122,8 +122,8 @@ public class PublicationDeliveryFareFrameImporter {
                     responseFareFrame
             );
 
-            // Cleanup orphaned FareZones if external versioning is enabled
-            if (fareZoneConfig.isExternalVersioning() && !importedNetexIds.isEmpty()) {
+            // Cleanup orphaned FareZones when the import is a replica (external versioning or register import)
+            if (fareZoneConfig.isReplicaImport() && !importedNetexIds.isEmpty()) {
                 int deletedCount = fareZoneSaverService.deleteAllExcept(importedNetexIds);
                 logger.info("External versioning cleanup: deleted {} orphaned FareZones", deletedCount);
             }
