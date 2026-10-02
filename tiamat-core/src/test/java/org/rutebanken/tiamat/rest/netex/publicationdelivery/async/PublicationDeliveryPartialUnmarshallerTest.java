@@ -21,6 +21,7 @@ import org.xml.sax.SAXException;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.nio.file.Files;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,6 +29,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.rutebanken.tiamat.rest.netex.publicationdelivery.async.RunnableUnmarshaller.POISON_PARKING;
 import static org.rutebanken.tiamat.rest.netex.publicationdelivery.async.RunnableUnmarshaller.POISON_STOP_PLACE;
 
@@ -135,6 +137,26 @@ public class PublicationDeliveryPartialUnmarshallerTest {
 
 
         readAndVerifyStops(unmarshalResult, 1);
+    }
+
+    @Test
+    public void doesNotResolveExternalEntities() throws Exception {
+        File secret = File.createTempFile("xxe", ".txt");
+        secret.deleteOnExit();
+        Files.writeString(secret.toPath(), "XXE-MARKER");
+        String withDoctype = """
+                <?xml version="1.0" encoding="UTF-8"?>
+                <!DOCTYPE PublicationDelivery [ <!ENTITY xxe SYSTEM "%s"> ]>
+                <PublicationDelivery xmlns="http://www.netex.org.uk/netex">
+                    <PublicationTimestamp>2026-01-01T00:00:00</PublicationTimestamp>
+                    <ParticipantRef>&xxe;</ParticipantRef>
+                    <dataObjects/>
+                </PublicationDelivery>""".formatted(secret.toURI());
+
+        // Woodstox with SUPPORT_DTD=false skips the DTD rather than rejecting it, so the entity is undeclared.
+        assertThatThrownBy(() -> publicationDeliveryPartialUnmarshaller.unmarshal(new ByteArrayInputStream(withDoctype.getBytes())))
+                .rootCause()
+                .hasMessageContaining("Undeclared general entity \"xxe\"");
     }
 
     @Test
