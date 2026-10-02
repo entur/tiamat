@@ -112,6 +112,17 @@ public class FareZoneSaverService {
             logger.info("Updating existing FareZone {} from version {} to version {} with external versioning",
                     incomingFareZone.getNetexId(), existingFareZone.getVersion(), incomingFareZone.getVersion());
 
+            // A replica keeps one row per netexId. Versions left over from Tiamat's own versioning would
+            // otherwise outrank the rewritten row whenever the source's version number is lower.
+            Long keptId = existingFareZone.getId();
+            List<FareZone> olderVersions = fareZoneRepository.findByNetexId(incomingFareZone.getNetexId()).stream()
+                    .filter(fareZone -> !fareZone.getId().equals(keptId))
+                    .toList();
+            if (!olderVersions.isEmpty()) {
+                logger.info("Deleting {} older versions of FareZone {}", olderVersions.size(), incomingFareZone.getNetexId());
+                fareZoneRepository.deleteAll(olderVersions);
+            }
+
             copyFareZoneFields(incomingFareZone, existingFareZone);
             existingFareZone.setChanged(now);
             existingFareZone.setChangedBy(username);
@@ -145,10 +156,16 @@ public class FareZoneSaverService {
         target.setDescription(source.getDescription());
         target.setPrivateCode(source.getPrivateCode());
         target.setPolygon(source.getPolygon());
+        // Replaced even when null: getGeometry() prefers multiSurface, so a stale one would win over the polygon.
+        target.setMultiSurface(source.getMultiSurface());
+        target.setCentroid(source.getCentroid());
         target.setValidBetween(source.getValidBetween());
         target.setScopingMethod(source.getScopingMethod());
         target.setZoneTopology(source.getZoneTopology());
         target.setTransportOrganisationRef(source.getTransportOrganisationRef());
+
+        target.getKeyValues().clear();
+        target.getKeyValues().putAll(source.getKeyValues());
 
         if (source.getNeighbours() != null) {
             target.getNeighbours().clear();
