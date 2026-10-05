@@ -365,6 +365,28 @@ public class NetexMapperTest extends TiamatIntegrationTest {
     }
 
     @Test
+    public void mapNetexParkingPaymentProcessRoundTripCoversEveryNetexValue() {
+        for (org.rutebanken.netex.model.ParkingPaymentProcessEnumeration netexProcess :
+                org.rutebanken.netex.model.ParkingPaymentProcessEnumeration.values()) {
+
+            org.rutebanken.netex.model.Parking netexParking = new org.rutebanken.netex.model.Parking();
+            netexParking.setId("NSR:Parking:1");
+            netexParking.getParkingPaymentProcess().add(netexProcess);
+
+            org.rutebanken.tiamat.model.Parking tiamatParking = netexMapper.mapToTiamatModel(netexParking);
+            assertThat(tiamatParking.getParkingPaymentProcess())
+                    .as("import of NeTEx parking payment process '%s'", netexProcess.value())
+                    .extracting(org.rutebanken.tiamat.model.ParkingPaymentProcessEnumeration::value)
+                    .containsExactly(netexProcess.value());
+
+            org.rutebanken.netex.model.Parking reexported = netexMapper.mapToNetexModel(tiamatParking);
+            assertThat(reexported.getParkingPaymentProcess())
+                    .as("export of internal parking payment process for NeTEx value '%s'", netexProcess.value())
+                    .containsExactly(netexProcess);
+        }
+    }
+
+    @Test
     public void mapNetexParkingLightingToInternal() {
         org.rutebanken.netex.model.Parking netexParking = new org.rutebanken.netex.model.Parking();
         netexParking.setId("NSR:Parking:1");

@@ -24,6 +24,8 @@ public enum ParkingPaymentProcessEnumeration {
     PAY_AT_MACHINE_ON_FOOT_PRIOR_TO_EXIT("payAtMachineOnFootPriorToExit"),
     PAY_BY_PREPAID_TOKEN("payByPrepaidToken"),
     PAY_BY_MOBILE_DEVICE("payByMobileDevice"),
+    PAY_BY_PLATE("payByPlate"),
+    PREPAY_FOR_PERMIT("prepayForPermit"),
     UNDEFINED("undefined"),
     OTHER("other");
     private final String value;
