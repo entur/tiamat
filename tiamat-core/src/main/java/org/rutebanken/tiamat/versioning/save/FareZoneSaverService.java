@@ -112,6 +112,16 @@ public class FareZoneSaverService {
             logger.info("Updating existing FareZone {} from version {} to version {} with external versioning",
                     incomingFareZone.getNetexId(), existingFareZone.getVersion(), incomingFareZone.getVersion());
 
+            // A replica keeps one row per netexId. Versions left over from Tiamat's own versioning would
+            // otherwise outrank the rewritten row whenever the source's version number is lower.
+            List<FareZone> olderVersions = olderVersionsOf(existingFareZone);
+            if (!olderVersions.isEmpty()) {
+                // Authorized only once validation passed, so a rejected zone cannot fail the delivery over them.
+                authorizationService.verifyCanEditEntities(olderVersions);
+                logger.info("Deleting {} older versions of FareZone {}", olderVersions.size(), incomingFareZone.getNetexId());
+                fareZoneRepository.deleteAll(olderVersions);
+            }
+
             copyFareZoneFields(incomingFareZone, existingFareZone);
             existingFareZone.setChanged(now);
             existingFareZone.setChangedBy(username);
@@ -134,6 +144,15 @@ public class FareZoneSaverService {
         return saved;
     }
 
+    private List<FareZone> olderVersionsOf(FareZone existingFareZone) {
+        if (existingFareZone == null) {
+            return List.of();
+        }
+        return fareZoneRepository.findByNetexId(existingFareZone.getNetexId()).stream()
+                .filter(fareZone -> !fareZone.getId().equals(existingFareZone.getId()))
+                .toList();
+    }
+
     /**
      * Copy all relevant fields from source to target FareZone.
      * Preserves the target's database ID.
@@ -145,20 +164,24 @@ public class FareZoneSaverService {
         target.setDescription(source.getDescription());
         target.setPrivateCode(source.getPrivateCode());
         target.setPolygon(source.getPolygon());
+        // Replaced even when null: getGeometry() prefers multiSurface, so a stale one would win over the polygon.
+        target.setMultiSurface(source.getMultiSurface());
+        target.setCentroid(source.getCentroid());
         target.setValidBetween(source.getValidBetween());
         target.setScopingMethod(source.getScopingMethod());
         target.setZoneTopology(source.getZoneTopology());
         target.setTransportOrganisationRef(source.getTransportOrganisationRef());
 
-        if (source.getNeighbours() != null) {
-            target.getNeighbours().clear();
-            target.getNeighbours().addAll(source.getNeighbours());
-        }
+        target.setVersionComment(source.getVersionComment());
 
-        if (source.getFareZoneMembers() != null) {
-            target.getFareZoneMembers().clear();
-            target.getFareZoneMembers().addAll(source.getFareZoneMembers());
-        }
+        target.getKeyValues().clear();
+        target.getKeyValues().putAll(source.getKeyValues());
+
+        target.getNeighbours().clear();
+        target.getNeighbours().addAll(source.getNeighbours());
+
+        target.getFareZoneMembers().clear();
+        target.getFareZoneMembers().addAll(source.getFareZoneMembers());
     }
 
     /**

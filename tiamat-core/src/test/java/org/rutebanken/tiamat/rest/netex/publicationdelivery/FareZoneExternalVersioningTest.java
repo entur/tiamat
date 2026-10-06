@@ -16,6 +16,8 @@
 package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
 import org.junit.Test;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Polygon;
 import org.rutebanken.netex.model.FareFrame;
 import org.rutebanken.netex.model.FareZone;
 import org.rutebanken.netex.model.FareZonesInFrame_RelStructure;
@@ -31,12 +33,17 @@ import org.rutebanken.netex.model.ValidBetween;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.config.FareZoneConfig;
 import org.rutebanken.tiamat.importer.FareZoneFrameSource;
+import org.rutebanken.tiamat.importer.FareZoneImporter;
 import org.rutebanken.tiamat.importer.ImportParams;
 import org.rutebanken.tiamat.importer.ImportType;
 import org.rutebanken.tiamat.importer.PublicationDeliveryImporter;
+import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
+import org.rutebanken.tiamat.model.Value;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -59,6 +66,12 @@ public class FareZoneExternalVersioningTest extends TiamatIntegrationTest {
 
     @Autowired
     private FareZoneConfig fareZoneConfig;
+
+    @Autowired
+    private FareZoneImporter fareZoneImporter;
+
+    @Autowired
+    private PlatformTransactionManager transactionManager;
 
     private final ObjectFactory objectFactory = new ObjectFactory();
 
@@ -699,6 +712,119 @@ public class FareZoneExternalVersioningTest extends TiamatIntegrationTest {
         } finally {
             ReflectionTestUtils.setField(fareZoneConfig, "externalVersioning", false);
         }
+    }
+
+    /**
+     * getGeometry() prefers the multiSurface, so a replica update to a single polygon must clear it,
+     * or the stale outline keeps deciding membership. The centroid scopes authorization, so it is replaced too.
+     */
+    @Test
+    public void externalVersioning_replacesMultiSurfaceWithPolygon() {
+        ReflectionTestUtils.setField(fareZoneConfig, "externalVersioning", true);
+
+        try {
+            org.rutebanken.tiamat.model.FareZone multi = tiamatFareZone("NSR:FareZone:1201", 1);
+            multi.setMultiSurface(geometryFactory.createMultiPolygon(new Polygon[]{square(0), square(5)}));
+            multi.setCentroid(geometryFactory.createPoint(new Coordinate(0.5, 0.5)));
+            fareZoneImporter.importFareZones(List.of(multi));
+
+            org.rutebanken.tiamat.model.FareZone single = tiamatFareZone("NSR:FareZone:1201", 2);
+            single.setPolygon(square(10));
+            single.setCentroid(geometryFactory.createPoint(new Coordinate(10.5, 10.5)));
+            fareZoneImporter.importFareZones(List.of(single));
+
+            new TransactionTemplate(transactionManager).executeWithoutResult(status -> {
+                org.rutebanken.tiamat.model.FareZone saved =
+                        fareZoneRepository.findFirstByNetexIdOrderByVersionDesc("NSR:FareZone:1201");
+                assertThat(saved.getMultiSurface()).isNull();
+                assertThat(saved.getGeometry()).isEqualTo(square(10));
+                assertThat(saved.getCentroid()).isEqualTo(geometryFactory.createPoint(new Coordinate(10.5, 10.5)));
+            });
+
+            org.rutebanken.tiamat.model.FareZone withoutCentroid = tiamatFareZone("NSR:FareZone:1201", 3);
+            withoutCentroid.setPolygon(square(10));
+            fareZoneImporter.importFareZones(List.of(withoutCentroid));
+
+            assertThat(fareZoneRepository.findFirstByNetexIdOrderByVersionDesc("NSR:FareZone:1201").getCentroid()).isNull();
+        } finally {
+            ReflectionTestUtils.setField(fareZoneConfig, "externalVersioning", false);
+        }
+    }
+
+    /** Key values and the version comment are replaced, not merged: entries absent from the update are removed. */
+    @Test
+    public void externalVersioning_replacesKeyValues() {
+        ReflectionTestUtils.setField(fareZoneConfig, "externalVersioning", true);
+
+        try {
+            org.rutebanken.tiamat.model.FareZone first = tiamatFareZone("NSR:FareZone:1501", 1);
+            first.getKeyValues().put("stale", new Value("a"));
+            first.getKeyValues().put("kept", new Value("b"));
+            first.setVersionComment("first");
+            fareZoneImporter.importFareZones(List.of(first));
+
+            org.rutebanken.tiamat.model.FareZone second = tiamatFareZone("NSR:FareZone:1501", 2);
+            second.getKeyValues().put("kept", new Value("c"));
+            second.setVersionComment("second");
+            fareZoneImporter.importFareZones(List.of(second));
+
+            new TransactionTemplate(transactionManager).executeWithoutResult(status -> {
+                org.rutebanken.tiamat.model.FareZone saved =
+                        fareZoneRepository.findFirstByNetexIdOrderByVersionDesc("NSR:FareZone:1501");
+                assertThat(saved.getKeyValues()).containsOnlyKeys("kept");
+                assertThat(saved.getKeyValues().get("kept").getItems()).containsExactly("c");
+                assertThat(saved.getVersionComment()).isEqualTo("second");
+            });
+
+            org.rutebanken.tiamat.model.FareZone third = tiamatFareZone("NSR:FareZone:1501", 3);
+            fareZoneImporter.importFareZones(List.of(third));
+
+            new TransactionTemplate(transactionManager).executeWithoutResult(status -> {
+                org.rutebanken.tiamat.model.FareZone saved =
+                        fareZoneRepository.findFirstByNetexIdOrderByVersionDesc("NSR:FareZone:1501");
+                assertThat(saved.getKeyValues()).isEmpty();
+                assertThat(saved.getVersionComment()).isNull();
+            });
+        } finally {
+            ReflectionTestUtils.setField(fareZoneConfig, "externalVersioning", false);
+        }
+    }
+
+    /**
+     * Tiamat's own versions of a zone must not survive the replica rewrite, or a stale one outranks the
+     * source's lower version number.
+     */
+    @Test
+    public void externalVersioning_dropsOlderTiamatVersions() {
+        for (long version = 1; version <= 5; version++) {
+            fareZoneRepository.save(tiamatFareZone("NSR:FareZone:1301", version));
+        }
+        ReflectionTestUtils.setField(fareZoneConfig, "externalVersioning", true);
+
+        try {
+            fareZoneImporter.importFareZones(List.of(tiamatFareZone("NSR:FareZone:1301", 3)));
+
+            List<org.rutebanken.tiamat.model.FareZone> versions = fareZoneRepository.findByNetexId("NSR:FareZone:1301");
+            assertThat(versions).hasSize(1);
+            assertThat(versions.getFirst().getVersion()).isEqualTo(3L);
+        } finally {
+            ReflectionTestUtils.setField(fareZoneConfig, "externalVersioning", false);
+        }
+    }
+
+    private org.rutebanken.tiamat.model.FareZone tiamatFareZone(String netexId, long version) {
+        org.rutebanken.tiamat.model.FareZone fareZone = new org.rutebanken.tiamat.model.FareZone();
+        fareZone.setNetexId(netexId);
+        fareZone.setVersion(version);
+        fareZone.setName(new EmbeddableMultilingualString(netexId));
+        return fareZone;
+    }
+
+    private Polygon square(double offset) {
+        return geometryFactory.createPolygon(new Coordinate[]{
+                new Coordinate(offset, offset), new Coordinate(offset + 1, offset),
+                new Coordinate(offset + 1, offset + 1), new Coordinate(offset, offset + 1),
+                new Coordinate(offset, offset)});
     }
 
     private FareFrame fareFrameWithFareZones(String... fareZoneIds) {
