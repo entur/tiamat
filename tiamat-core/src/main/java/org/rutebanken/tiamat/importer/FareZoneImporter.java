@@ -37,18 +37,21 @@ public class FareZoneImporter {
 
     private static final Logger logger = LoggerFactory.getLogger(FareZoneImporter.class);
 
-    @Autowired
-    private NetexMapper netexMapper;
+    private final NetexMapper netexMapper;
+    private final FareZoneSaverService fareZoneSaverService;
+    private final FareZoneConfig fareZoneConfig;
 
     @Autowired
-    private FareZoneSaverService fareZoneSaverService;
-
-    @Autowired
-    private FareZoneConfig fareZoneConfig;
+    public FareZoneImporter(NetexMapper netexMapper, FareZoneSaverService fareZoneSaverService, FareZoneConfig fareZoneConfig) {
+        this.netexMapper = netexMapper;
+        this.fareZoneSaverService = fareZoneSaverService;
+        this.fareZoneConfig = fareZoneConfig;
+    }
 
 
     public FareZoneImportResult importFareZones(List<org.rutebanken.tiamat.model.FareZone> fareZones) {
-        Set<String> importedNetexIds = new HashSet<>();
+        Set<String> savedNetexIds = new HashSet<>();
+        Set<String> declaredNetexIds = new HashSet<>();
 
         List<FareZone> importedFareZones = fareZones
                 .stream()
@@ -59,6 +62,11 @@ public class FareZoneImporter {
                     org.rutebanken.tiamat.model.FareZone saved;
 
                     if (fareZoneConfig.isExternalVersioning()) {
+                        // Cleanup keeps zones by netexId, so a replica cannot accept an id the mapper dropped.
+                        if (incomingFareZone.getNetexId() == null) {
+                            throw new IllegalArgumentException("FareZone " + incomingFareZone.getOriginalIds()
+                                    + " has no id with a prefix valid for FareZone, required with external versioning");
+                        }
                         saved = fareZoneSaverService.saveWithExternalVersioning(incomingFareZone);
                         if (saved != null) {
                             logger.debug("Saved FareZone {} with external versioning", saved.getNetexId());
@@ -70,8 +78,11 @@ public class FareZoneImporter {
                         logger.debug("Saved FareZone {} with default versioning", saved.getNetexId());
                     }
 
+                    if (incomingFareZone.getNetexId() != null) {
+                        declaredNetexIds.add(incomingFareZone.getNetexId());
+                    }
                     if (saved != null && saved.getNetexId() != null) {
-                        importedNetexIds.add(saved.getNetexId());
+                        savedNetexIds.add(saved.getNetexId());
                     }
 
                     return saved;
@@ -80,7 +91,7 @@ public class FareZoneImporter {
                 .map(savedFareZone -> netexMapper.getFacade().map(savedFareZone, FareZone.class))
                 .toList();
 
-        return new FareZoneImportResult(importedFareZones, importedNetexIds);
+        return new FareZoneImportResult(importedFareZones, savedNetexIds, declaredNetexIds);
     }
 
 }

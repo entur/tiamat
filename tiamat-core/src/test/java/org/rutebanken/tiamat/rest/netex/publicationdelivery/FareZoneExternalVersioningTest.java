@@ -358,7 +358,7 @@ public class FareZoneExternalVersioningTest extends TiamatIntegrationTest {
                             publicationDeliveryTestHelper.publicationDelivery(emptyFrame), importParams);
 
             // THEN: No cleanup should happen (empty import means no zones in import, not delete all)
-            // Since we only cleanup when importedNetexIds is not empty, empty import shouldn't trigger cleanup
+            // Since we only clean up when declaredNetexIds is not empty, empty import shouldn't trigger cleanup
             assertThat(fareZoneRepository.findAll()).hasSize(3);
 
             // Verify original zones still exist
@@ -715,6 +715,38 @@ public class FareZoneExternalVersioningTest extends TiamatIntegrationTest {
     }
 
     /**
+     * A zone the delivery declares but rejects keeps its existing version: only zones absent from the
+     * delivery are orphans.
+     */
+    @Test
+    public void externalVersioning_rejectedExistingZoneSurvivesCleanup() throws Exception {
+        ReflectionTestUtils.setField(fareZoneConfig, "externalVersioning", true);
+
+        try {
+            ImportParams importParams = new ImportParams();
+            importParams.fareZoneFrameSource = FareZoneFrameSource.FARE_FRAME;
+            importParams.importType = ImportType.INITIAL;
+
+            publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDeliveryTestHelper.publicationDelivery(
+                    fareFrameWithFareZones("NSR:FareZone:1101", "NSR:FareZone:1102", "NSR:FareZone:1103")), importParams);
+
+            FareFrame update = fareFrameWithFareZones("NSR:FareZone:1101", "NSR:FareZone:1102");
+            // Replace, not add: only the first interval is mapped.
+            update.getFareZones().getFareZone().get(1).getValidBetween().set(0, new ValidBetween()
+                    .withFromDate(LocalDateTime.now().plusDays(2))
+                    .withToDate(LocalDateTime.now().plusDays(1)));
+            publicationDeliveryTestHelper.postAndReturnPublicationDelivery(
+                    publicationDeliveryTestHelper.publicationDelivery(update), importParams);
+
+            assertThat(fareZoneRepository.findByNetexId("NSR:FareZone:1101")).isNotEmpty();
+            assertThat(fareZoneRepository.findByNetexId("NSR:FareZone:1102")).isNotEmpty();
+            assertThat(fareZoneRepository.findByNetexId("NSR:FareZone:1103")).isEmpty();
+        } finally {
+            ReflectionTestUtils.setField(fareZoneConfig, "externalVersioning", false);
+        }
+    }
+
+    /**
      * getGeometry() prefers the multiSurface, so a replica update to a single polygon must clear it,
      * or the stale outline keeps deciding membership. The centroid scopes authorization, so it is replaced too.
      */
@@ -807,6 +839,35 @@ public class FareZoneExternalVersioningTest extends TiamatIntegrationTest {
             List<org.rutebanken.tiamat.model.FareZone> versions = fareZoneRepository.findByNetexId("NSR:FareZone:1301");
             assertThat(versions).hasSize(1);
             assertThat(versions.getFirst().getVersion()).isEqualTo(3L);
+        } finally {
+            ReflectionTestUtils.setField(fareZoneConfig, "externalVersioning", false);
+        }
+    }
+
+    /**
+     * Group members are validated against saved zones only: a new zone rejected in the same delivery
+     * must not satisfy a member reference.
+     */
+    @Test
+    public void externalVersioning_groupRefToRejectedNewZoneIsRejected() {
+        ReflectionTestUtils.setField(fareZoneConfig, "externalVersioning", true);
+
+        try {
+            FareFrame fareFrame = fareFrameWithFareZones("NSR:FareZone:1401", "NSR:FareZone:1402");
+            fareFrame.getFareZones().getFareZone().get(1).getValidBetween().set(0, new ValidBetween()
+                    .withFromDate(LocalDateTime.now().plusDays(2))
+                    .withToDate(LocalDateTime.now().plusDays(1)));
+            SiteFrame siteFrame = publicationDeliveryTestHelper.siteFrame();
+            siteFrame.withGroupsOfTariffZones(new GroupsOfTariffZonesInFrame_RelStructure()
+                    .withGroupOfTariffZones(groupOfTariffZones("NSR:GroupOfTariffZones:1401", "NSR:FareZone:1402")));
+
+            ImportParams importParams = new ImportParams();
+            importParams.importType = ImportType.INITIAL;
+
+            assertThatThrownBy(() -> publicationDeliveryImporter.importPublicationDelivery(
+                    publicationDeliveryTestHelper.publicationDelivery(siteFrame, fareFrame), importParams))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("NSR:FareZone:1402");
         } finally {
             ReflectionTestUtils.setField(fareZoneConfig, "externalVersioning", false);
         }
