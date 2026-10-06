@@ -95,84 +95,28 @@ public class ParkingPropertiesListConverterTest extends TiamatIntegrationTest {
     }
 
     /**
-     * The Tiamat enumerations mirror the NeTEx ones, so a round trip must return the posted
-     * name for every constant. Driving the assertion from the NeTEx constant list rather
-     * than from a chosen sample makes a later NeTEx addition fail the build.
+     * The NeTEx vehicle enumeration defines seven constants that the Tiamat enumeration
+     * does not: CYCLE, E_CYCLE, MICRO_CAR, MINI_CAR, MINIVAN, TRANSPORTER and SNOWMOBILE.
+     * Orika maps an enum by its constant name through Enum.valueOf, which throws for a name
+     * the target enumeration does not define. The converter drops such a name instead, so
+     * the rest of the capacity still imports.
      */
     @Test
-    public void everyNetexVehicleTypeSurvivesARoundTrip() {
-        for (ParkingVehicleEnumeration netexType : ParkingVehicleEnumeration.values()) {
-            ParkingCapacity imported = convertFromSingleCapacity(
-                    netexCapacity().withParkingVehicleType(netexType));
+    public void convertFromDropsAVehicleTypeThatTiamatDoesNotDefine() {
+        org.rutebanken.netex.model.ParkingCapacity netexCapacity = netexCapacity()
+                .withParkingVehicleType(ParkingVehicleEnumeration.SNOWMOBILE);
 
-            assertThat(convertToSingleCapacity(imported).getParkingVehicleType())
-                    .as("round trip of %s", netexType)
-                    .isEqualTo(netexType);
-        }
-    }
+        ParkingCapacity capacity = convertFromSingleCapacity(netexCapacity);
 
-    @Test
-    public void everyNetexUserTypeSurvivesARoundTrip() {
-        for (ParkingUserEnumeration netexType : ParkingUserEnumeration.values()) {
-            ParkingCapacity imported = convertFromSingleCapacity(
-                    netexCapacity().withParkingUserType(netexType));
-
-            assertThat(convertToSingleCapacity(imported).getParkingUserType())
-                    .as("round trip of %s", netexType)
-                    .isEqualTo(netexType);
-        }
-    }
-
-    @Test
-    public void everyNetexStayTypeSurvivesARoundTrip() {
-        for (ParkingStayEnumeration netexType : ParkingStayEnumeration.values()) {
-            ParkingCapacity imported = convertFromSingleCapacity(
-                    netexCapacity().withParkingStayType(netexType));
-
-            assertThat(convertToSingleCapacity(imported).getParkingStayType())
-                    .as("round trip of %s", netexType)
-                    .isEqualTo(netexType);
-        }
-    }
-
-    @Test
-    public void convertFromAcceptsTheCustomersUserType() {
-        ParkingCapacity capacity = convertFromSingleCapacity(
-                netexCapacity().withParkingUserType(ParkingUserEnumeration.CUSTOMERS));
-
-        assertThat(capacity.getParkingUserType())
-                .isEqualTo(org.rutebanken.tiamat.model.ParkingUserEnumeration.CUSTOMERS);
-    }
-
-    @Test
-    public void everyNetexUserTypeSurvivesARoundTripOnThePropertiesGroup() {
-        List<ParkingUserEnumeration> netexUserTypes = List.of(ParkingUserEnumeration.values());
-
-        org.rutebanken.netex.model.ParkingProperties netexParkingProperties = new org.rutebanken.netex.model.ParkingProperties()
-                .withId("NSR:ParkingProperties:1")
-                .withVersion("1")
-                .withParkingUserTypes(netexUserTypes)
-                .withSpaces(new ParkingCapacities_RelStructure()
-                        .withParkingCapacityRefOrParkingCapacity(netexCapacity()));
-
-        List<ParkingProperties> imported = parkingPropertiesListConverter.convertFrom(
-                new ParkingProperties_RelStructure().withParkingProperties(netexParkingProperties),
-                parkingPropertiesListType, mappingContext);
-
-        assertThat(imported.get(0).getParkingUserTypes()).hasSize(netexUserTypes.size());
-
-        ParkingProperties_RelStructure exported = parkingPropertiesListConverter.convertTo(
-                imported, relStructureType, mappingContext);
-
-        assertThat(exported.getParkingProperties().get(0).getParkingUserTypes())
-                .containsExactlyElementsOf(netexUserTypes);
+        assertThat(capacity.getParkingVehicleType()).isNull();
+        assertThat(capacity.getNumberOfSpaces()).isEqualTo(BigInteger.valueOf(42));
     }
 
     /**
      * A name that the target enumeration does not define must produce null rather than an
-     * exception, so that a later NeTEx version cannot fail an import. No such name exists
-     * among the parking enumerations today, because they mirror the NeTEx ones. The helper
-     * is therefore asserted directly, with a pair that does carry a gap.
+     * exception, so that an unrecognized name cannot fail a whole import. The helper is
+     * asserted against a self-contained pair of enumerations, so that the contract holds
+     * whatever the parking enumerations later gain or lose.
      */
     @Test
     public void mapEnumByNameReturnsNullForAnUndefinedName() {

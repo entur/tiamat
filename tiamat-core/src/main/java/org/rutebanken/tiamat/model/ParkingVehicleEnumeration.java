@@ -17,9 +17,7 @@ package org.rutebanken.tiamat.model;
 
 public enum ParkingVehicleEnumeration {
 
-    CYCLE("cycle"),
     PEDAL_CYCLE("pedalCycle"),
-    E_CYCLE("eCycle"),
     MOPED("moped"),
     MOTORCYCLE("motorcycle"),
     MOTORCYCLE_WITH_SIDECAR("motorcycleWithSidecar"),
@@ -27,8 +25,6 @@ public enum ParkingVehicleEnumeration {
     TWO_WHEELED_VEHICLE("twoWheeledVehicle"),
     THREE_WHEELED_VEHICLE("threeWheeledVehicle"),
     CAR("car"),
-    MICRO_CAR("microCar"),
-    MINI_CAR("miniCar"),
     SMALL_CAR("smallCar"),
     PASSENGER_CAR("passengerCar"),
     LARGE_CAR("largeCar"),
@@ -38,10 +34,8 @@ public enum ParkingVehicleEnumeration {
     CAR_WITH_TRAILER("carWithTrailer"),
     CAR_WITH_CARAVAN("carWithCaravan"),
     MINIBUS("minibus"),
-    MINIVAN("minivan"),
     BUS("bus"),
     VAN("van"),
-    TRANSPORTER("transporter"),
     LARGE_VAN("largeVan"),
     HIGH_SIDED_VEHICLE("highSidedVehicle"),
     LIGHT_GOODS_VEHICLE("lightGoodsVehicle"),
@@ -54,7 +48,6 @@ public enum ParkingVehicleEnumeration {
     VEHICLE_WITH_TRAILER("vehicleWithTrailer"),
     LIGHT_GOODS_VEHICLE_WITH_TRAILER("lightGoodsVehicleWithTrailer"),
     HEAVY_GOODS_VEHICLE_WITH_TRAILER("heavyGoodsVehicleWithTrailer"),
-    SNOWMOBILE("snowmobile"),
     UNDEFINED("undefined"),
     OTHER("other"),
     ALL_PASSENGER_VEHICLES("allPassengerVehicles"),

@@ -43,11 +43,12 @@ public class ParkingPropertiesListConverter extends BidirectionalConverter<List<
      * enums the same way, through {@link Enum#valueOf}. Orika throws when the target enum
      * does not define the name. This method returns null instead.
      * <p>
-     * The Tiamat parking enumerations that this converter reads mirror the NeTEx ones, so
-     * no name is unmatched today. This method guards against a later NeTEx version that
-     * adds a constant. An unknown name must drop a single attribute, and must not fail the
-     * whole import. The guard covers this converter only. A parking enum that Orika maps by
-     * default still fails an import on an unmatched name.
+     * The NeTEx parking enumerations define constants that the matching Tiamat
+     * enumerations do not. None of those constants belongs to the NeTEx Nordic profile, so
+     * a conformant file never carries one. A file from outside the profile may. Such a name
+     * must drop a single attribute, and must not fail the whole import. The guard covers
+     * this converter only. A parking enum that Orika maps by default still fails an import
+     * on an unmatched name.
      *
      * @param source     the constant to map, or null
      * @param targetType the enum class to map into
