@@ -40,6 +40,20 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class FareZoneRepositoryImplTest extends TiamatIntegrationTest {
 
+    @Test
+    public void findAllNetexIdsReturnsEachIdOnce() {
+        FareZone v1 = new FareZone();
+        v1.setNetexId("RUT:FareZone:2V");
+        v1.setVersion(1L);
+        FareZone v2 = new FareZone();
+        v2.setNetexId("RUT:FareZone:2V");
+        v2.setVersion(2L);
+        FareZone other = new FareZone();
+        other.setNetexId("BRA:FareZone:412");
+        fareZoneRepository.saveAll(List.of(v1, v2, other));
+
+        assertThat(fareZoneRepository.findAllNetexIds()).containsExactlyInAnyOrder("RUT:FareZone:2V", "BRA:FareZone:412");
+    }
 
     @Test
     public void findFareZonesByName() throws Exception {
