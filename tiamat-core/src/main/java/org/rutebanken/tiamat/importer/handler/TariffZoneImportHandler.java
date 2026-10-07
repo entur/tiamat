@@ -55,6 +55,7 @@ import org.rutebanken.netex.model.TariffZone;
 import org.rutebanken.netex.model.TariffZonesInFrame_RelStructure;
 import org.rutebanken.netex.model.Zone_VersionStructure;
 import org.rutebanken.tiamat.config.TariffZoneConfig;
+import org.rutebanken.tiamat.importer.FareZoneImportResult;
 import org.rutebanken.tiamat.importer.FareZoneImporter;
 import org.rutebanken.tiamat.importer.ImportParams;
 import org.rutebanken.tiamat.importer.ImportType;
@@ -67,6 +68,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -147,9 +149,9 @@ public class TariffZoneImportHandler {
      * @param importParams Import parameters
      * @param tariffZoneImportedCounter Counter for imported zones
      * @param responseFareFrame Response FareFrame to populate with imported zones
-     * @return Set of imported FareZone netexIds (for external versioning cleanup)
+     * @return the import result
      */
-    public java.util.Set<String> handleFareZonesFromFareFrame(
+    public FareZoneImportResult handleFareZonesFromFareFrame(
             FareFrame netexFareFrame,
             ImportParams importParams,
             AtomicInteger tariffZoneImportedCounter,
@@ -157,12 +159,12 @@ public class TariffZoneImportHandler {
 
         if (!publicationDeliveryHelper.hasFareZonesInFareFrame(netexFareFrame)) {
             logger.debug("No fare zones found in FareFrame");
-            return java.util.Collections.emptySet();
+            return emptyFareZoneImportResult();
         }
 
         if (importParams.importType == ImportType.ID_MATCH) {
             logger.debug("Skipping fare zone import for ID_MATCH import type");
-            return java.util.Collections.emptySet();
+            return emptyFareZoneImportResult();
         }
 
         logger.info("Processing {} fare zones from FareFrame",
@@ -178,8 +180,7 @@ public class TariffZoneImportHandler {
 
         logger.debug("Mapped {} fare zones from NeTEx to internal model", tiamatFareZones.size());
 
-        // Import using the existing FareZoneImporter - now returns ImportResult
-        org.rutebanken.tiamat.importer.FareZoneImportResult importResult = fareZoneImporter.importFareZones(tiamatFareZones);
+        FareZoneImportResult importResult = fareZoneImporter.importFareZones(tiamatFareZones);
 
         logger.debug("Imported {} fare zones", importResult.getImportedFareZones().size());
 
@@ -193,7 +194,11 @@ public class TariffZoneImportHandler {
             responseFareFrame.setFareZones(fareZonesInFrame);
         }
 
-        return importResult.getImportedNetexIds();
+        return importResult;
+    }
+
+    private static FareZoneImportResult emptyFareZoneImportResult() {
+        return new FareZoneImportResult(List.of(), Set.of(), Set.of());
     }
 
     private boolean isTariffZone(JAXBElement<? extends Zone_VersionStructure> jaxbElement) {

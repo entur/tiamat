@@ -98,6 +98,17 @@ public class GroupOffTariffZonesSaverService {
             logger.info("Updating existing GroupOfTariffZones {} from version {} to version {} with external versioning",
                     incomingGroupOfTariffZones.getNetexId(), existingGroupOfTariffZones.getVersion(), incomingGroupOfTariffZones.getVersion());
 
+            // A replica keeps one row per netexId, as in FareZoneSaverService.
+            Long newestId = existingGroupOfTariffZones.getId();
+            List<GroupOfTariffZones> olderVersions = groupOfTariffZonesRepository.findByNetexId(incomingGroupOfTariffZones.getNetexId()).stream()
+                    .filter(group -> !group.getId().equals(newestId))
+                    .toList();
+            if (!olderVersions.isEmpty()) {
+                authorizationService.verifyCanEditEntities(olderVersions);
+                logger.info("Deleting {} older versions of GroupOfTariffZones {}", olderVersions.size(), incomingGroupOfTariffZones.getNetexId());
+                groupOfTariffZonesRepository.deleteAll(olderVersions);
+            }
+
             copyFields(incomingGroupOfTariffZones, existingGroupOfTariffZones);
             existingGroupOfTariffZones.setChanged(now);
             existingGroupOfTariffZones.setChangedBy(username);
@@ -126,7 +137,14 @@ public class GroupOffTariffZonesSaverService {
         target.setNetexId(source.getNetexId());
         target.setVersion(source.getVersion());
         target.setName(source.getName());
+        target.setShortName(source.getShortName());
+        target.setDescription(source.getDescription());
+        target.setPrivateCode(source.getPrivateCode());
         target.setValidBetween(source.getValidBetween());
+        target.setVersionComment(source.getVersionComment());
+
+        target.getKeyValues().clear();
+        target.getKeyValues().putAll(source.getKeyValues());
 
         target.getMembers().clear();
         target.getMembers().addAll(source.getMembers());

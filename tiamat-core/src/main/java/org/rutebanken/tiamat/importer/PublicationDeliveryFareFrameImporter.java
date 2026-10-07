@@ -30,7 +30,6 @@ import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -114,22 +113,21 @@ public class PublicationDeliveryFareFrameImporter {
             FareFrame responseFareFrame = new FareFrame();
             responseFareFrame.withId(requestId + "-response").withVersion("1");
 
-            // Import fare zones from FareFrame and collect imported netexIds
-            Set<String> importedNetexIds = tariffZoneImportHandler.handleFareZonesFromFareFrame(
+            FareZoneImportResult importResult = tariffZoneImportHandler.handleFareZonesFromFareFrame(
                     netexFareFrame,
                     importParams,
                     fareZoneCounter,
                     responseFareFrame
             );
 
-            // Cleanup orphaned FareZones if external versioning is enabled
-            if (fareZoneConfig.isExternalVersioning() && !importedNetexIds.isEmpty()) {
-                int deletedCount = fareZoneSaverService.deleteAllExcept(importedNetexIds);
+            int deletedCount = 0;
+            if (fareZoneConfig.isExternalVersioning() && !importResult.getDeclaredNetexIds().isEmpty()) {
+                deletedCount = fareZoneSaverService.deleteAllExcept(importResult.getDeclaredNetexIds());
                 logger.info("External versioning cleanup: deleted {} orphaned FareZones", deletedCount);
             }
 
-            // Trigger background job if zones were imported
-            if (responseFareFrame.getFareZones() != null) {
+            // Cleanup can change stop place refs even when every declared zone was rejected.
+            if (responseFareFrame.getFareZones() != null || deletedCount > 0) {
                 backgroundJobs.triggerStopPlaceUpdate();
             }
 
