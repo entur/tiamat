@@ -521,13 +521,37 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
     }
 
     /**
-     * {@code organisationRef} is excluded from the default Orika class map (see
-     * {@code NetexMapper}) because the NeTEx side is a {@code JAXBElement<? extends
-     * OrganisationRefStructure>} — the operating organisation may be substituted as an
-     * {@code OperatorRef}, {@code AuthorityRef}, {@code GeneralOrganisationRef} or
-     * {@code OnlineServiceOperatorRef} — while the Tiamat side is a plain
-     * {@code OrganisationRefStructure}. Any substitution is accepted on import; only the
-     * {@code ref}/{@code version} values are kept, not which element carried them.
+     * Reads the operating organisation of an imported parking.
+     *
+     * <p>NeTEx declares the organisation reference as a substitution group. A document can
+     * carry any of these elements:
+     *
+     * <ul>
+     *   <li>{@code OperatorRef}</li>
+     *   <li>{@code AuthorityRef}</li>
+     *   <li>{@code GeneralOrganisationRef}</li>
+     *   <li>{@code OnlineServiceOperatorRef}</li>
+     * </ul>
+     *
+     * <p>The NeTEx side is therefore a {@code JAXBElement<? extends OrganisationRefStructure>}
+     * and the Tiamat side is a plain {@code OrganisationRefStructure}. Orika cannot bridge the
+     * two shapes, so {@code NetexMapper} excludes the field and this method unwraps the
+     * {@code JAXBElement}.
+     *
+     * <p>This method accepts every substitution above. It keeps the {@code ref} value and the
+     * {@code version} value. It does not record which element carried them.
+     *
+     * <p>An accepted fragment:
+     *
+     * <pre>{@code
+     * <Parking version="1" id="NSR:Parking:1">
+     *   <Name lang="eng">Example park and ride</Name>
+     *   <OperatorRef ref="NSR:Operator:1" version="1"/>
+     * </Parking>
+     * }</pre>
+     *
+     * <p>An {@code AuthorityRef} in place of the {@code OperatorRef} gives the same stored
+     * value.
      */
     private void mapOrganisationRefFromNetex(Parking source, org.rutebanken.tiamat.model.Parking target) {
         if (source.getOrganisationRef() == null || source.getOrganisationRef().getValue() == null) {
@@ -540,10 +564,21 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
     }
 
     /**
-     * Rebuilds the reference as an {@code OperatorRef} on export, regardless of which
-     * substitution the import carried (D3) — a parking facility's operating organisation is
-     * always an {@code Operator} in NeTEx terms. Emits no element when the ref is null, so an
-     * unresolved import never produces an empty {@code <OperatorRef/>}.
+     * Writes the operating organisation as an {@code OperatorRef}, whichever substitution the
+     * import carried. A parking facility's operating organisation is always an Operator in
+     * NeTEx terms, so the export normalises every accepted form to that one element.
+     *
+     * <p>The exported fragment:
+     *
+     * <pre>{@code
+     * <Parking version="1" id="NSR:Parking:1">
+     *   <Name lang="eng">Example park and ride</Name>
+     *   <OperatorRef ref="NSR:Operator:1" version="1"/>
+     * </Parking>
+     * }</pre>
+     *
+     * <p>The method writes no element when the stored reference is null. An unresolved import
+     * therefore never produces an empty {@code OperatorRef}.
      */
     private void mapOrganisationRefToNetex(org.rutebanken.tiamat.model.Parking source, Parking target) {
         if (source.getOrganisationRef() == null || source.getOrganisationRef().getRef() == null) {
