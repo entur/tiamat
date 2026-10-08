@@ -15,6 +15,10 @@
 
 package org.rutebanken.tiamat.model.job;
 
+/**
+ * Persisted as an ordinal, so values must only ever be <em>appended</em>. Inserting or reordering
+ * silently reinterprets every existing row.
+ */
 public enum JobStatus {
     PROCESSING,
     FINISHED,
