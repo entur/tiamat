@@ -107,7 +107,6 @@ There are several options for running the service depending on what you need.
 
  - [Run locally for development](#run-locally-for-development) is for people intending to maintain, modify and improve 
    tiamat's source code
- - [Run tiamat with Docker compose](#run-tiamat-with-docker-compose) if you just need to get the service running
  - [Run with external properties file and PostgreSQL](#run-with-external-properties-file-and-postgresql) for low 
    level debugging
 
@@ -195,23 +194,6 @@ configuration.
 
 Tiamat is built from the `tiamat-app` module; the reactor builds `tiamat-core` first. Running
 `mvn spring-boot:run` from the repository root does nothing — the root is an aggregator POM.
-
-## Run tiamat with Docker compose
-
-The [`docker-compose`](./docker-compose) folder holds a self-contained setup that builds and runs Tiamat itself in
-a container, together with PostgreSQL, so no local JVM or Maven setup is needed:
-
-```shell
-cd docker-compose
-docker compose up
-```
-
-This starts Tiamat with PostgreSQL. Tiamat is available at http://localhost:1888, the database at
-http://localhost:5433, and GraphiQL at http://localhost:8777/services/stop_places/graphql. At startup, Tiamat
-copies an empty schema to the database. Setup-specific Spring properties are mounted from
-[docker-compose/spring/application.properties](./docker-compose/spring/application.properties) via
-`SPRING_CONFIG_ADDITIONAL_LOCATION`, layered on top of the defaults shipped in the jar. Security is disabled in
-this setup.
 
 ## Run with external properties file and PostgreSQL
 

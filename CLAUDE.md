@@ -35,7 +35,7 @@
 ### Infrastructure & Cloud
 - **Google Cloud Platform** (GCS for blob storage, PubSub for events)
 - **AWS** (S3 support, Secrets Manager)
-- **Docker & Docker Compose**: Local development and deployment
+- **Docker**: Local development and deployment
 - **Kubernetes**: Production deployment with Hazelcast clustering
 - **Terraform**: Infrastructure as code
 - **Helm**: Kubernetes package management
@@ -76,7 +76,6 @@ tiamat/
 │   └── application-local.properties     # Local dev configuration
 ├── src/test/                            # Integration and unit tests
 ├── api/                                 # API proxy configurations
-├── docker-compose/                      # Self-contained Tiamat + PostgreSQL compose setup
 ├── helm/                                # Kubernetes Helm charts
 ├── terraform/                           # Infrastructure definitions
 ├── scripts/                             # Utility scripts
@@ -174,7 +173,7 @@ All entities are versioned and support NeTEx format:
 ### Prerequisites
 - Java 25 JDK
 - Maven 3+
-- Docker & Docker Compose
+- Docker
 - PostgreSQL with PostGIS (via Docker)
 
 ### Local Development Steps
