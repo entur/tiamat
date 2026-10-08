@@ -181,10 +181,9 @@ public class PublicationDeliveryImporter {
             final ImportParams finalImportParams = importParams;
             int deletedFareZoneCount = transactionTemplate.execute(transactionStatus -> {
                 int deletedCount = 0;
-                // With external versioning the import is a full replace: prune FareZones not present in this delivery.
-                if (fareZoneConfig.isExternalVersioning() && !declaredFareZoneIds.isEmpty()) {
-                    deletedCount = fareZoneSaverService.deleteAllExcept(declaredFareZoneIds);
-                    logger.info("External versioning cleanup: deleted {} orphaned FareZones", deletedCount);
+                if (fareZoneConfig.isReplicaImport(finalImportParams.fareZoneRegisterReplica) && !declaredFareZoneIds.isEmpty()) {
+                    deletedCount = fareZoneSaverService.deleteAllExcept(declaredFareZoneIds, finalImportParams.fareZoneRegisterReplica);
+                    logger.info("Replica cleanup: deleted {} orphaned FareZones", deletedCount);
                 }
 
                 groupOfTariffZonesImportHandler.handleGroupOfTariffZones(netexSiteFrame, finalImportParams, responseSiteFrame, savedFareZoneIds);

@@ -69,4 +69,11 @@ public class ImportParams {
     @Parameter(description = "Disable pre and post processing steps, import raw data as is")
     @QueryParam(value = "disablePreAndPostProcessing")
     public boolean disablePreAndPostProcessing = false;
+
+    /**
+     * Import fare zones as a replica of the fare zone register: update by netexId, prune zones absent from
+     * the delivery, and skip the user edit check. Set only by the scheduled register import; deliberately
+     * not a query parameter.
+     */
+    public boolean fareZoneRegisterReplica = false;
 }

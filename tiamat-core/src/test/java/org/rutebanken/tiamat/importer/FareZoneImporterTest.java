@@ -34,10 +34,10 @@ public class FareZoneImporterTest {
         rejected.setNetexId("NSR:FareZone:rejected");
 
         // External versioning preserves the source id across the save; the rejected zone returns null.
-        when(saver.saveWithExternalVersioning(good)).thenReturn(good);
-        when(saver.saveWithExternalVersioning(rejected)).thenReturn(null);
+        when(saver.saveWithExternalVersioning(good, false)).thenReturn(good);
+        when(saver.saveWithExternalVersioning(rejected, false)).thenReturn(null);
 
-        FareZoneImportResult result = replicaImporter(saver).importFareZones(List.of(good, rejected));
+        FareZoneImportResult result = replicaImporter(saver).importFareZones(List.of(good, rejected), false);
 
         // Cleanup keeps both, so the rejected zone's existing version is not pruned.
         assertThat(result.getDeclaredNetexIds())
@@ -55,7 +55,7 @@ public class FareZoneImporterTest {
         FareZoneSaverService saver = mock(FareZoneSaverService.class);
         org.rutebanken.tiamat.model.FareZone withoutId = new org.rutebanken.tiamat.model.FareZone();
 
-        assertThatThrownBy(() -> replicaImporter(saver).importFareZones(List.of(withoutId)))
+        assertThatThrownBy(() -> replicaImporter(saver).importFareZones(List.of(withoutId), false))
                 .isInstanceOf(IllegalArgumentException.class);
         verifyNoInteractions(saver);
     }
