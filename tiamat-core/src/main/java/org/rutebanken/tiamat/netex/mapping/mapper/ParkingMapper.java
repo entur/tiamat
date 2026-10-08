@@ -23,6 +23,8 @@ import org.rutebanken.netex.model.DayTypeRefStructure;
 import org.rutebanken.netex.model.DayTypes_RelStructure;
 import org.rutebanken.netex.model.InfoLinkStructure;
 import org.rutebanken.netex.model.ObjectFactory;
+import org.rutebanken.netex.model.OperatorRefStructure;
+import org.rutebanken.netex.model.OrganisationRefStructure;
 import org.rutebanken.netex.model.Parking;
 import org.rutebanken.netex.model.ParkingArea;
 import org.rutebanken.netex.model.ParkingAreas_RelStructure;
@@ -64,6 +66,7 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
         mapInfoLinksFromNetex(parking, parking2);
         mapAvailabilityConditionsFromNetex(parking, parking2);
         mapAlternativeNamesFromNetex(parking, parking2);
+        mapOrganisationRefFromNetex(parking, parking2);
     }
 
     @Override
@@ -89,6 +92,7 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
         mapInfoLinksToNetex(tiamatParking, netexParking);
         mapAvailabilityConditionsToNetex(tiamatParking, netexParking);
         mapAlternativeNamesToNetex(tiamatParking, netexParking);
+        mapOrganisationRefToNetex(tiamatParking, netexParking);
     }
 
     /**
@@ -514,5 +518,76 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
             alternativeNamesRelStructure.getAlternativeName().addAll(netexAlternativeNames);
             target.setAlternativeNames(alternativeNamesRelStructure);
         }
+    }
+
+    /**
+     * Reads the operating organisation of an imported parking.
+     *
+     * <p>NeTEx declares the organisation reference as a substitution group. A document can
+     * carry any of these elements:
+     *
+     * <ul>
+     *   <li>{@code OperatorRef}</li>
+     *   <li>{@code AuthorityRef}</li>
+     *   <li>{@code GeneralOrganisationRef}</li>
+     *   <li>{@code OnlineServiceOperatorRef}</li>
+     * </ul>
+     *
+     * <p>The NeTEx side is therefore a {@code JAXBElement<? extends OrganisationRefStructure>}
+     * and the Tiamat side is a plain {@code OrganisationRefStructure}. Orika cannot bridge the
+     * two shapes, so {@code NetexMapper} excludes the field and this method unwraps the
+     * {@code JAXBElement}.
+     *
+     * <p>This method accepts every substitution above. It keeps the {@code ref} value and the
+     * {@code version} value. It does not record which element carried them.
+     *
+     * <p>An accepted fragment:
+     *
+     * <pre>{@code
+     * <Parking version="1" id="NSR:Parking:1">
+     *   <Name lang="eng">Example park and ride</Name>
+     *   <OperatorRef ref="NSR:Operator:1" version="1"/>
+     * </Parking>
+     * }</pre>
+     *
+     * <p>An {@code AuthorityRef} in place of the {@code OperatorRef} gives the same stored
+     * value.
+     */
+    private void mapOrganisationRefFromNetex(Parking source, org.rutebanken.tiamat.model.Parking target) {
+        if (source.getOrganisationRef() == null || source.getOrganisationRef().getValue() == null) {
+            return;
+        }
+
+        OrganisationRefStructure netexOrganisationRef = source.getOrganisationRef().getValue();
+        target.setOrganisationRef(new org.rutebanken.tiamat.model.OrganisationRefStructure(
+                netexOrganisationRef.getRef(), netexOrganisationRef.getVersion()));
+    }
+
+    /**
+     * Writes the operating organisation as an {@code OperatorRef}, whichever substitution the
+     * import carried. A parking facility's operating organisation is always an Operator in
+     * NeTEx terms, so the export normalises every accepted form to that one element.
+     *
+     * <p>The exported fragment:
+     *
+     * <pre>{@code
+     * <Parking version="1" id="NSR:Parking:1">
+     *   <Name lang="eng">Example park and ride</Name>
+     *   <OperatorRef ref="NSR:Operator:1" version="1"/>
+     * </Parking>
+     * }</pre>
+     *
+     * <p>The method writes no element when the stored reference is null. An unresolved import
+     * therefore never produces an empty {@code OperatorRef}.
+     */
+    private void mapOrganisationRefToNetex(org.rutebanken.tiamat.model.Parking source, Parking target) {
+        if (source.getOrganisationRef() == null || source.getOrganisationRef().getRef() == null) {
+            return;
+        }
+
+        OperatorRefStructure operatorRef = new OperatorRefStructure()
+                .withRef(source.getOrganisationRef().getRef())
+                .withVersion(source.getOrganisationRef().getVersion());
+        target.setOrganisationRef(OBJECT_FACTORY.createOperatorRef(operatorRef));
     }
 }

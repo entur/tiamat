@@ -15,8 +15,22 @@
 
 package org.rutebanken.tiamat.model;
 
+import jakarta.persistence.Embeddable;
+
+@Embeddable
 public class OrganisationRefStructure
         extends VersionOfObjectRefStructure {
 
+    public OrganisationRefStructure() {
+        super();
+    }
+
+    public OrganisationRefStructure(String ref, String version) {
+        super(ref, version);
+    }
+
+    public OrganisationRefStructure(String ref) {
+        super(ref);
+    }
 
 }

@@ -22,6 +22,7 @@ import org.locationtech.jts.geom.Point;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.EntranceEnumeration;
+import org.rutebanken.tiamat.model.OrganisationRefStructure;
 import org.rutebanken.tiamat.model.Parking;
 import org.rutebanken.tiamat.model.ParkingArea;
 import org.rutebanken.tiamat.model.ParkingCapacity;
@@ -100,6 +101,23 @@ public class ParkingVersionedSaverServiceTest extends TiamatIntegrationTest {
 
         Parking actual = parkingVersionedSaverService.saveNewVersion(newVersion);
         assertThat(actual.getVersion()).isOne();
+    }
+
+    @Test
+    public void saveNewParkingWithOrganisationRefPersistsAndReloadsField() {
+
+        Parking newVersion = new Parking();
+
+        Point point = geometryFactory.createPoint(new Coordinate(9.84, 59.26));
+        newVersion.setCentroid(point);
+        newVersion.setParentSiteRef(new SiteRefStructure(stopPlaceRepository.save(new StopPlace()).getNetexId()));
+        newVersion.setOrganisationRef(new OrganisationRefStructure("FSR:Operator:1234567-8", "1"));
+
+        Parking saved = parkingVersionedSaverService.saveNewVersion(newVersion);
+        assertThat(saved.getOrganisationRef()).isEqualTo(newVersion.getOrganisationRef());
+
+        Parking reloaded = inTransaction(() -> em.find(Parking.class, saved.getId()));
+        assertThat(reloaded.getOrganisationRef()).isEqualTo(newVersion.getOrganisationRef());
     }
 
 

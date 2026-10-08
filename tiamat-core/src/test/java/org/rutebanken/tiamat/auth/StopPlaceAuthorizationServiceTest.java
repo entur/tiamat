@@ -28,6 +28,8 @@ import org.rutebanken.tiamat.config.AuthorizationServiceConfig;
 import org.rutebanken.tiamat.diff.TiamatObjectDiffer;
 import org.rutebanken.tiamat.model.BusSubmodeEnumeration;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
+import org.rutebanken.tiamat.model.OrganisationRefStructure;
+import org.rutebanken.tiamat.model.Parking;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.rutebanken.tiamat.model.ValidBetween;
@@ -43,6 +45,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -356,6 +359,23 @@ public class StopPlaceAuthorizationServiceTest extends TiamatIntegrationTest {
             stopPlaceAuthorizationService.assertAuthorizedToEdit(existingVersion, newVersion, Collections.emptySet()))
                 .isInstanceOf(AccessDeniedException.class);
         }
+
+    /**
+     * Regression guard for {@link TiamatOriganisationChecker}: a Parking with a
+     * populated organisationRef that matches no role assignment must still be
+     * considered editable, since #472 removed organisation-matching entirely.
+     * If anyone ever re-introduces an organisation-matching check now that
+     * organisationRef is a live, persisted field, this must fail loudly.
+     */
+    @Test
+    public void organisationRefDoesNotReintroduceOrganisationMatchingCheck() {
+        Parking parking = new Parking();
+        parking.setOrganisationRef(new OrganisationRefStructure("FSR:Operator:nonexistent-9999999-9"));
+
+        boolean editable = tiamatOriganisationChecker.entityMatchesOrganisationRef(ADMIN, parking);
+
+        assertThat(editable).isTrue();
+    }
 
     private RoleAssignment canOnlyEdit(String stopPlaceType) {
         return RoleAssignment.builder()
