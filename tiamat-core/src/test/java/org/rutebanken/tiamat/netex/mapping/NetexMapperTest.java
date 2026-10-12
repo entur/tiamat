@@ -897,6 +897,106 @@ public class NetexMapperTest extends TiamatIntegrationTest {
         assertThat(secondCount).isEqualTo(1);
     }
 
+    private static final Instant PARKING_END = Instant.parse("2024-05-01T10:15:30Z");
+
+    private <T> T withOsloMappingContext(java.util.function.Supplier<T> action) {
+        NetexMappingContext mappingContext = new NetexMappingContext();
+        mappingContext.defaultTimeZone = ZoneId.of("Europe/Oslo");
+        NetexMappingContextThreadLocal.set(mappingContext);
+        try {
+            return action.get();
+        } finally {
+            NetexMappingContextThreadLocal.set(null);
+        }
+    }
+
+    private org.rutebanken.netex.model.ValidBetween netexEnd() {
+        return new org.rutebanken.netex.model.ValidBetween()
+                .withToDate(PARKING_END.atZone(ZoneId.of("Europe/Oslo")).toLocalDateTime());
+    }
+
+    @Test
+    public void mapNetexParkingNestedValidBetweenWithAvailabilityConditionsKeepsEndDate() {
+        org.rutebanken.netex.model.Parking netexParking = netexParkingWithConditions(netexAvailabilityCondition(
+                "NSR:Parking:1:AvailabilityCondition:1", true,
+                java.util.List.of("NSR:DayType:1"), java.util.List.of()));
+        netexParking.getValidityConditions().getValidityConditionRefOrValidBetweenOrValidityCondition_().add(netexEnd());
+
+        org.rutebanken.tiamat.model.Parking tiamatParking =
+                withOsloMappingContext(() -> netexMapper.mapToTiamatModel(netexParking));
+
+        assertThat(tiamatParking.getValidBetween()).isNotNull();
+        assertThat(tiamatParking.getValidBetween().getToDate()).isEqualTo(PARKING_END);
+        assertThat(tiamatParking.getValidBetween().getFromDate()).isNull();
+        assertThat(tiamatParking.getAvailabilityConditions()).hasSize(1);
+    }
+
+    @Test
+    public void mapNetexParkingDirectValidBetweenWinsOverNestedOne() {
+        org.rutebanken.netex.model.Parking netexParking = netexParkingWithConditions(netexAvailabilityCondition(
+                "NSR:Parking:1:AvailabilityCondition:1", true,
+                java.util.List.of("NSR:DayType:1"), java.util.List.of()));
+        netexParking.getValidityConditions().getValidityConditionRefOrValidBetweenOrValidityCondition_().add(netexEnd());
+        netexParking.getValidBetween().add(new org.rutebanken.netex.model.ValidBetween()
+                .withToDate(PARKING_END.plusSeconds(86400).atZone(ZoneId.of("Europe/Oslo")).toLocalDateTime()));
+
+        org.rutebanken.tiamat.model.Parking tiamatParking =
+                withOsloMappingContext(() -> netexMapper.mapToTiamatModel(netexParking));
+
+        assertThat(tiamatParking.getValidBetween().getToDate()).isEqualTo(PARKING_END.plusSeconds(86400));
+    }
+
+    @Test
+    public void mapInternalParkingWithAvailabilityConditionsExportsEndDateOnlyInsideValidityConditions() {
+        org.rutebanken.tiamat.model.Parking tiamatParking = new org.rutebanken.tiamat.model.Parking();
+        tiamatParking.setNetexId("NSR:Parking:1");
+        tiamatParking.setValidBetween(new ValidBetween(null, PARKING_END));
+        tiamatParking.setAvailabilityConditions(List.of(new org.rutebanken.tiamat.model.AvailabilityCondition(
+                "NSR:DayType:1", true, java.time.LocalTime.of(6, 0), java.time.LocalTime.of(22, 0))));
+
+        org.rutebanken.netex.model.Parking firstMap = withOsloMappingContext(() -> netexMapper.mapToNetexModel(tiamatParking));
+        org.rutebanken.netex.model.Parking secondMap = withOsloMappingContext(() -> netexMapper.mapToNetexModel(tiamatParking));
+
+        for (org.rutebanken.netex.model.Parking exported : List.of(firstMap, secondMap)) {
+            assertThat(exported.getValidBetween()).isEmpty();
+            List<org.rutebanken.netex.model.ValidBetween> nested = exported.getValidityConditions()
+                    .getValidityConditionRefOrValidBetweenOrValidityCondition_().stream()
+                    .filter(org.rutebanken.netex.model.ValidBetween.class::isInstance)
+                    .map(org.rutebanken.netex.model.ValidBetween.class::cast)
+                    .toList();
+            assertThat(nested).hasSize(1);
+            assertThat(nested.getFirst().getToDate())
+                    .isEqualTo(PARKING_END.atZone(ZoneId.of("Europe/Oslo")).toLocalDateTime());
+        }
+    }
+
+    @Test
+    public void mapInternalParkingWithoutAvailabilityConditionsExportsEndDateDirectly() {
+        org.rutebanken.tiamat.model.Parking tiamatParking = new org.rutebanken.tiamat.model.Parking();
+        tiamatParking.setNetexId("NSR:Parking:1");
+        tiamatParking.setValidBetween(new ValidBetween(null, PARKING_END));
+
+        org.rutebanken.netex.model.Parking exported = withOsloMappingContext(() -> netexMapper.mapToNetexModel(tiamatParking));
+
+        assertThat(exported.getValidBetween()).hasSize(1);
+        assertThat(exported.getValidityConditions()).isNull();
+    }
+
+    @Test
+    public void parkingEndDateSurvivesNetexRoundTripWithAvailabilityConditions() {
+        org.rutebanken.tiamat.model.Parking tiamatParking = new org.rutebanken.tiamat.model.Parking();
+        tiamatParking.setNetexId("NSR:Parking:1");
+        tiamatParking.setValidBetween(new ValidBetween(null, PARKING_END));
+        tiamatParking.setAvailabilityConditions(List.of(new org.rutebanken.tiamat.model.AvailabilityCondition(
+                "NSR:DayType:1", true, java.time.LocalTime.of(6, 0), java.time.LocalTime.of(22, 0))));
+
+        org.rutebanken.tiamat.model.Parking roundTripped = withOsloMappingContext(
+                () -> netexMapper.mapToTiamatModel(netexMapper.mapToNetexModel(tiamatParking)));
+
+        assertThat(roundTripped.getValidBetween().getToDate()).isEqualTo(PARKING_END);
+        assertThat(roundTripped.getAvailabilityConditions()).hasSize(1);
+    }
+
     private long countAvailabilityConditions(org.rutebanken.netex.model.Parking netexParking) {
         return netexParking.getValidityConditions().getValidityConditionRefOrValidBetweenOrValidityCondition_().stream()
                 .filter(entry -> entry instanceof JAXBElement<?>)

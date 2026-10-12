@@ -30,6 +30,7 @@ import org.rutebanken.tiamat.model.ParkingUserEnumeration;
 import org.rutebanken.tiamat.model.ParkingEntranceForVehicles;
 import org.rutebanken.tiamat.model.SiteRefStructure;
 import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.ValidBetween;
 import org.rutebanken.tiamat.repository.ParkingRepository;
 import org.rutebanken.tiamat.versioning.VersionCreator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,6 +88,34 @@ public class ParkingVersionedSaverServiceTest extends TiamatIntegrationTest {
     private long entranceRowCount() {
         return inTransaction(() -> em.createQuery("select count(e) from ParkingEntranceForVehicles e", Long.class)
                 .getSingleResult());
+    }
+
+    private Parking parkingWithEnd(Instant from, Instant to) {
+        Parking parking = new Parking();
+        parking.setCentroid(geometryFactory.createPoint(new Coordinate(9.84, 59.26)));
+        parking.setParentSiteRef(new SiteRefStructure(stopPlaceRepository.save(new StopPlace()).getNetexId()));
+        parking.setValidBetween(new ValidBetween(from, to));
+        return parking;
+    }
+
+    @Test
+    public void saveNewParkingKeepsEndDate() {
+        Instant end = Instant.parse("2024-05-01T10:15:30Z");
+
+        Parking saved = parkingVersionedSaverService.saveNewVersion(parkingWithEnd(null, end));
+
+        Parking reloaded = parkingRepository.findFirstByNetexIdOrderByVersionDesc(saved.getNetexId());
+        assertThat(reloaded.getValidBetween()).isNotNull();
+        assertThat(reloaded.getValidBetween().getToDate()).isEqualTo(end);
+    }
+
+    @Test
+    public void saveNewParkingRejectsFromDateAfterToDate() {
+        Parking parking = parkingWithEnd(Instant.parse("2024-06-01T00:00:00Z"), Instant.parse("2024-05-01T00:00:00Z"));
+
+        assertThatThrownBy(() -> parkingVersionedSaverService.saveNewVersion(parking))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("after to date");
     }
 
     @Test
