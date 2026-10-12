@@ -39,6 +39,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 @Component
 public class LocalDateTimeInstantConverter extends BidirectionalConverter<LocalDateTime, Instant> {
@@ -46,9 +47,13 @@ public class LocalDateTimeInstantConverter extends BidirectionalConverter<LocalD
     @Autowired
     private ExportTimeZone exportTimeZone;
 
+    /**
+     * Truncated to microseconds, the precision PostgreSQL stores. PostgreSQL rounds a finer value, so an
+     * imported nanosecond date could be stored later than itself and fail the version validity check on re-import.
+     */
     @Override
     public Instant convertTo(LocalDateTime localDateTime, Type<Instant> type, MappingContext mappingContext) {
-        return localDateTime.atZone(exportTimeZone.getDefaultTimeZoneId()).toInstant();
+        return localDateTime.atZone(exportTimeZone.getDefaultTimeZoneId()).toInstant().truncatedTo(ChronoUnit.MICROS);
     }
 
     @Override

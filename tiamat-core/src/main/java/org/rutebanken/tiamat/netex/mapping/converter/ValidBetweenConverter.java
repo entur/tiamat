@@ -27,7 +27,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.List;
 
@@ -55,13 +57,21 @@ public class ValidBetweenConverter extends BidirectionalConverter<List<ValidBetw
 
         org.rutebanken.tiamat.model.ValidBetween tiamatValidBetween = new org.rutebanken.tiamat.model.ValidBetween();
         if (netexValidBetween.getFromDate() != null) {
-            tiamatValidBetween.setFromDate(Instant.from(netexValidBetween.getFromDate().atZone(mappingTimeZone)));
+            tiamatValidBetween.setFromDate(toStoredInstant(netexValidBetween.getFromDate(), mappingTimeZone));
         }
         if (netexValidBetween.getToDate() != null) {
-            tiamatValidBetween.setToDate(Instant.from(netexValidBetween.getToDate().atZone(mappingTimeZone)));
+            tiamatValidBetween.setToDate(toStoredInstant(netexValidBetween.getToDate(), mappingTimeZone));
         }
 
         return tiamatValidBetween;
+    }
+
+    /**
+     * Truncated to microseconds, the precision PostgreSQL stores. PostgreSQL rounds a finer value, so a
+     * re-imported nanosecond FromDate would fall before the stored one and fail the version validity check.
+     */
+    private static Instant toStoredInstant(LocalDateTime localDateTime, ZoneId zoneId) {
+        return localDateTime.atZone(zoneId).toInstant().truncatedTo(ChronoUnit.MICROS);
     }
 
     @Override
