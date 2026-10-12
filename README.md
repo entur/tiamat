@@ -198,7 +198,6 @@ Supported extra profiles are
 |:-----------------------|------------------------------------------|
 | `local-disk-blobstore` | Similar to `local-blobstore`.            |
 | `in-memory-blobstore`  | Entirely in-memory based implementation. |
-| `s3-blobstore`         | AWS S3 implementation.                   |
 
 **Example: Activating `in-memory-blobstore` for local development**
 ```properties

@@ -34,7 +34,6 @@
 
 ### Infrastructure & Cloud
 - **Google Cloud Platform** (GCS for blob storage, PubSub for events)
-- **AWS** (S3 support, Secrets Manager)
 - **Docker & Docker Compose**: Local development and deployment
 - **Kubernetes**: Production deployment with Hazelcast clustering
 - **Terraform**: Infrastructure as code
@@ -213,7 +212,6 @@ mvn spring-boot:run
 - `rutebanken-blobstore`: With sub-profiles:
   - `in-memory-blobstore`
   - `local-disk-blobstore`
-  - `s3-blobstore`
 
 **Changelog**:
 - `local-changelog`: Log to stdout
