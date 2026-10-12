@@ -140,6 +140,7 @@ public class CustomGraphQLTypes {
     public static GraphQLEnumType passengerInformationEquipmentListEnum = createCustomEnumType("PassengerInformationEquipmentEnumerationType", PassengerInformationEquipmentEnumeration.class);
     public static GraphQLEnumType sanitaryFacilityEnumType = createCustomEnumType("SanitaryFacilityEnumeration", SanitaryFacilityEnumeration.class);
     public static GraphQLEnumType lightingEnumType = createCustomEnumType("LightingEnumeration", org.rutebanken.tiamat.model.LightingEnumeration.class);
+    public static GraphQLEnumType coveredEnumType = createCustomEnumType("CoveredEnumeration", org.rutebanken.tiamat.model.CoveredEnumeration.class);
     public static GraphQLEnumType entranceTypeEnum = createCustomEnumType("EntranceType", org.rutebanken.tiamat.model.EntranceEnumeration.class);
     public static GraphQLEnumType accessModeEnum = createCustomEnumType("AccessModeEnum", org.rutebanken.tiamat.model.AccessModeEnumeration.class);
 
@@ -1182,6 +1183,9 @@ public class CustomGraphQLTypes {
                         .name(LIGHTING)
                         .type(lightingEnumType))
                 .field(newFieldDefinition()
+                        .name(COVERED)
+                        .type(coveredEnumType))
+                .field(newFieldDefinition()
                         .name(PARKING_PROPERTIES)
                         .type(new GraphQLList(parkingPropertiesObjectType)))
                 .field(newFieldDefinition()
@@ -1268,6 +1272,9 @@ public class CustomGraphQLTypes {
                 .field(newInputObjectField()
                         .name(LIGHTING)
                         .type(lightingEnumType))
+                .field(newInputObjectField()
+                        .name(COVERED)
+                        .type(coveredEnumType))
                 .field(newInputObjectField()
                         .name(PARKING_PROPERTIES)
                         .type(new GraphQLList(parkingPropertiesInputObjectType)))
