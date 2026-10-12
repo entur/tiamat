@@ -141,6 +141,36 @@ public class FareZoneImportTest extends TiamatIntegrationTest {
 
     }
 
+    /**
+     * A nanosecond FromDate must survive storage unchanged: PostgreSQL rounds it to microseconds, which
+     * can make the stored version start after the same value imported again.
+     */
+    @Test
+    public void reimportFareZoneWithNanosecondFromDate() throws Exception {
+        LocalDateTime validFrom = LocalDateTime.now().minusDays(3).withNano(305_742_539);
+
+        FareZone fareZone = new FareZone()
+                .withName(new MultilingualString().withValue("Nanos"))
+                .withVersion("1")
+                .withValidBetween(new ValidBetween().withFromDate(validFrom))
+                .withId("RUT:FareZone:Nanos01");
+
+        SiteFrame siteFrame = publicationDeliveryTestHelper.siteFrame()
+                .withTariffZones(new TariffZonesInFrame_RelStructure()
+                        .withTariffZone(List.of(netexObjectFactory.createFareZone(fareZone))));
+        PublicationDeliveryStructure publicationDeliveryStructure = publicationDeliveryTestHelper.publicationDelivery(siteFrame);
+
+        ImportParams importParams = new ImportParams();
+        importParams.importType = ImportType.INITIAL;
+
+        publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDeliveryStructure, importParams);
+        PublicationDeliveryStructure response = publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDeliveryStructure, importParams);
+
+        List<JAXBElement<? extends Zone_VersionStructure>> actualZones = publicationDeliveryTestHelper.findSiteFrame(response)
+                .getTariffZones().getTariffZone();
+        assertThat(actualZones.getFirst().getValue().getVersion()).isEqualTo("2");
+    }
+
     @Test
     public void publicationDeliveryWithFareZoneAndStopPlaceMergeZonesImportTypeMatch() throws Exception {
 
