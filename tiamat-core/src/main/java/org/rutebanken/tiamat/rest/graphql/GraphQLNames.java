@@ -354,6 +354,7 @@ public class GraphQLNames {
     public static final String WEIGHTING = "weighting";
     public static final String URL = "url";
     public static final String LIGHTING = "lighting";
+    public static final String COVERED = "covered";
 
     // Postal address fields
     public static final String OUTPUT_TYPE_POSTAL_ADDRESS = "PostalAddress";

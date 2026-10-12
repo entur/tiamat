@@ -64,6 +64,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
+import org.rutebanken.tiamat.model.CoveredEnumeration;
 
 public class NetexMapperTest extends TiamatIntegrationTest {
 
@@ -458,6 +459,28 @@ public class NetexMapperTest extends TiamatIntegrationTest {
         assertThat(tiamatParking.getOrganisationRef()).isNotNull();
         assertThat(tiamatParking.getOrganisationRef().getRef()).isEqualTo("FSR:Authority:1234567-8");
         assertThat(tiamatParking.getOrganisationRef().getVersion()).isEqualTo("2");
+    }
+
+    @Test
+    public void mapNetexParkingCoveredToInternal() {
+        org.rutebanken.netex.model.Parking netexParking = new org.rutebanken.netex.model.Parking();
+        netexParking.setId("NSR:Parking:1");
+        netexParking.setCovered(org.rutebanken.netex.model.CoveredEnumeration.MIXED);
+
+        org.rutebanken.tiamat.model.Parking tiamatParking = netexMapper.mapToTiamatModel(netexParking);
+
+        assertThat(tiamatParking.getCovered()).isEqualTo(CoveredEnumeration.MIXED);
+    }
+
+    @Test
+    public void mapInternalParkingCoveredToNetex() {
+        org.rutebanken.tiamat.model.Parking tiamatParking = new org.rutebanken.tiamat.model.Parking();
+        tiamatParking.setNetexId("NSR:Parking:1");
+        tiamatParking.setCovered(CoveredEnumeration.OUTDOORS);
+
+        org.rutebanken.netex.model.Parking netexParking = netexMapper.mapToNetexModel(tiamatParking);
+
+        assertThat(netexParking.getCovered()).isEqualTo(org.rutebanken.netex.model.CoveredEnumeration.OUTDOORS);
     }
 
     @Test
