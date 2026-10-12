@@ -35,7 +35,7 @@
 ### Infrastructure & Cloud
 - **Google Cloud Platform** (GCS for blob storage, PubSub for events)
 - **AWS** (S3 support, Secrets Manager)
-- **Docker & Docker Compose**: Local development and deployment
+- **Docker**: Local development and deployment
 - **Kubernetes**: Production deployment with Hazelcast clustering
 - **Terraform**: Infrastructure as code
 - **Helm**: Kubernetes package management
@@ -76,12 +76,10 @@ tiamat/
 │   └── application-local.properties     # Local dev configuration
 ├── src/test/                            # Integration and unit tests
 ├── api/                                 # API proxy configurations
-├── docker-compose/                      # Docker compose setups
 ├── helm/                                # Kubernetes Helm charts
 ├── terraform/                           # Infrastructure definitions
 ├── scripts/                             # Utility scripts
-├── pom.xml                              # Maven build configuration
-└── docker-compose.yml                   # Local development environment
+└── pom.xml                              # Maven build configuration
 
 Total: ~706 Java source files across 73 packages
 ```
@@ -175,14 +173,14 @@ All entities are versioned and support NeTEx format:
 ### Prerequisites
 - Java 25 JDK
 - Maven 3+
-- Docker & Docker Compose
+- Docker
 - PostgreSQL with PostGIS (via Docker)
 
 ### Local Development Steps
 
-1. **Start Supporting Services**:
+1. **Start a PostgreSQL/PostGIS instance**:
 ```bash
-docker compose up -d
+docker run --name tiamat-postgis -e POSTGRES_USER=tiamat -e POSTGRES_PASSWORD=tiamat -p 37432:5432 -d postgis/postgis:17-master
 ```
 This starts PostgreSQL on port 37432.
 
@@ -221,16 +219,6 @@ mvn spring-boot:run
 - `google-pubsub`: GCP PubSub
 
 **Always Include**: `local` (for local development)
-
-### Docker Compose Profiles
-
-- **Default**: PostgreSQL with PostGIS
-- **`aws`**: Adds LocalStack for AWS development
-
-Example:
-```bash
-docker compose --profile aws up
-```
 
 ## Build & Test
 
@@ -460,10 +448,10 @@ Enable security context inheritance:
 Ensure Docker is running and accessible. See: https://www.testcontainers.org/supported_docker_environment/
 
 ### Database Connection Issues
-Check PostgreSQL is running via Docker Compose:
+Check the PostgreSQL/PostGIS container is running:
 ```bash
-docker compose ps
-docker compose logs postgres
+docker ps --filter name=tiamat-postgis
+docker logs tiamat-postgis
 ```
 
 ## Development Notes

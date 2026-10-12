@@ -90,7 +90,7 @@ values from the outside:
 |:-----|:-------|:---------|
 | `application.properties` | always | environment-neutral defaults: JPA/Hibernate, connection pool, `spring.flyway.table`, logging, tuning |
 | `application-entur.properties` | `entur` profile | Entur/Norway constants: NeTEx profile version, NSR ID prefix list, import types |
-| `application-local.properties` | `local` profile | local development settings matching `docker-compose.yml` |
+| `application-local.properties` | `local` profile | local development settings for running with `mvn spring-boot:run` |
 
 What must be supplied per environment/instance: active profiles, database connection,
 blobstore location, OAuth2 issuers — see the example under
@@ -107,7 +107,6 @@ There are several options for running the service depending on what you need.
 
  - [Run locally for development](#run-locally-for-development) is for people intending to maintain, modify and improve 
    tiamat's source code
- - [Run tiamat with Docker compose](#run-tiamat-with-docker-compose) if you just need to get the service running
  - [Run with external properties file and PostgreSQL](#run-with-external-properties-file-and-postgresql) for low 
    level debugging
 
@@ -116,60 +115,25 @@ There are several options for running the service depending on what you need.
 
 ## Run locally for development
 
-Local development is a combination of using Docker Compose based configuration for starting up the supporting 
-services and running Spring Boot with at least `local` profile enabled.
+Local development needs a PostgreSQL database with the PostGIS extension running, and Tiamat's Spring Boot
+application started against it with at least the `local` profile enabled.
 
 When running,
 
  - tiamat will be available at `http://localhost:37888`
  - PostGIS will be available at `localhost:37432`
 
-### 1. Start Local Environment through Docker Compose
+### 1. Start a PostgreSQL/PostGIS instance
 
-Tiamat has [docker-compose.yml](./docker-compose.yml) which contains all necessary dependent services for running tiamat in
-various configurations. It is assumed this environment is always running when the service is being run locally
-(see below).
-
-> **Note!** This uses the compose version included with modern versions of Docker, not the separately installable
-> `docker-compose` command.
-
-All Docker Compose commands run in relation to the `docker-compose.yml` file located in the same directory in which the
-command is executed.
+Start a PostgreSQL 17 instance with the PostGIS extension, matching the settings in
+[`application-local.properties`](./src/main/resources/application-local.properties) (user and password `tiamat`,
+port `37432`). For example, with plain Docker:
 
 ```shell
-# run with defaults - use ^C to shutdown containers
-docker compose up
-# run with additional profiles, e.g. with LocalStack based AWS simulator
-docker compose --profile aws up
-# run in background
-docker compose up -d # or --detach
-# shutdown containers
-docker compose down
-# shutdown containers included in specific profile
-docker compose --profile aws down
+docker run --name tiamat-postgis -e POSTGRES_USER=tiamat -e POSTGRES_PASSWORD=tiamat -p 37432:5432 -d postgis/postgis:17-master
 ```
 
-#### Supported Docker Compose profiles
-
-Docker Compose has its own profiles which start up additional supporting services to e.g. make specific feature 
-development easier. You may include any number of additional profiles when working with Docker Compose by listing 
-them in the commands with the `--profile {profile name}` argument. Multiple profiles are activated by providing the 
-same attribute multiple times, for example starting Compose environment with profiles a and b would be
-```shell
-docker compose --profile a --profile b up
-```
-
-The provided profiles for Tiamat development are
-
-
-| profile | description                                                                                       |
-|:--------|---------------------------------------------------------------------------------------------------|
-| `aws`   | Starts up [LocalStack](https://www.localstack.cloud/) meant for developing AWS specific features. |
-
-
-See [Docker Compose reference](https://docs.docker.com/compose/reference/) for more details.
-
-See [Supported Docker Compose Profiles](#supported-docker-compose-profiles) for more information on provided profiles.
+Any other way to run a matching PostgreSQL/PostGIS instance works too.
 
 ### 2. Run the Service
 
@@ -216,28 +180,6 @@ class for configuration keys and additional information.
 | `activemq`        | JMS based ActiveMQ implementation.                                 |
 | `google-pubsub`   | GCP PubSub implementation for publishing tiamat entity changes.    |
 
-#### Supported Docker Compose Profiles
-
-Tiamat's [`docker-compose.yml`](./docker-compose.yml) comes with built-in profiles for various use cases. The profiles 
-are mostly optional, default profile contains all mandatory configuration while the named profiles add features on 
-top of that. You can always activate zero or more profiles at the same time, e.g.
-
-```shell
-docker compose --profile first --profile second up
-# or
-COMPOSE_PROFILES=first,second docker compose up
-```
-
-### Default profile (no activation key)
-
-Starts up PostGIS server with settings matching the ones in [`application-local.properties`](./src/main/resources/application-local.properties).
-
-### `aws` profile
-
-Starts up [LocalStack](https://www.localstack.cloud/) meant for developing AWS specific features.
-
-See also [NeTEx Export](#netex-export).
-
 #### Run It!
 
 **IntelliJ**: Right-click on `TiamatApplication.java` (in the `tiamat-app` module) and choose Run (or 
@@ -252,17 +194,6 @@ configuration.
 
 Tiamat is built from the `tiamat-app` module; the reactor builds `tiamat-core` first. Running
 `mvn spring-boot:run` from the repository root does nothing — the root is an aggregator POM.
-
-## Run tiamat with Docker compose
-To run Tiamat with Docker compose, you need to have a docker-compose.yml file. In docker-compose folder you will find a compose.yml file.:
-
-```shell
-docker compose up
-```
-
-This will start Tiamat with PostgreSQL and Hazelcast. and you can access Tiamat on http://localhost:1888 and the database on http://localhost:5433 
-and graphiql on http://localhost:8777/services/stop_places/graphql , At start up tiamat copy empty schema to the database. Setup-specific Spring properties are mounted from [docker-compose/spring/application.properties](./docker-compose/spring/application.properties) via `SPRING_CONFIG_ADDITIONAL_LOCATION`, layered on top of the defaults shipped in the jar.
-Security is disabled in this setup.
 
 ## Run with external properties file and PostgreSQL
 
