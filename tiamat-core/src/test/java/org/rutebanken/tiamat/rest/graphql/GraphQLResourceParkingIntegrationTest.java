@@ -506,6 +506,43 @@ public class GraphQLResourceParkingIntegrationTest extends AbstractGraphQLResour
     }
 
     @Test
+    public void testMutateParkingDerivesTotalCapacityFromSpacesAndRechargeSpaces() throws Exception {
+        assertDerivedTotalCapacity("{ parkingUserType: allUsers, numberOfSpacesWithRechargePoint: 5 }", 5);
+        assertDerivedTotalCapacity("{ parkingUserType: allUsers, numberOfSpacesWithRechargePoint: 5 } " +
+                "{ parkingUserType: registeredDisabled, numberOfSpaces: 2 }", 7);
+        assertDerivedTotalCapacity("{ parkingUserType: allUsers, numberOfSpaces: 10, numberOfSpacesWithRechargePoint: 4 }", 10);
+    }
+
+    private void assertDerivedTotalCapacity(String spaces, int expectedTotalCapacity) throws Exception {
+        StopPlace stopPlace = stopPlaceRepository.save(new StopPlace());
+
+        String graphQlQuery = "{\n" +
+                "\"query\": \"mutation { " +
+                "  parking: " + GraphQLNames.MUTATE_PARKING + " (Parking : {" +
+                "    geometry: { type:Point coordinates:[10.5, 59.0] } " +
+                "    parentSiteRef:\\\"" + stopPlace.getNetexId() + "\\\" " +
+                "    parkingType:parkAndRide " +
+                "    rechargingAvailable:true " +
+                "    parkingProperties: [{ spaces: [" + spaces + "] }] " +
+                "  }) { id totalCapacity }" +
+                "}\",\"variables\": \"\"}";
+
+        String parkingId = executeGraphQL(graphQlQuery)
+                .body("data.parking[0].totalCapacity", equalTo(expectedTotalCapacity))
+                .extract()
+                .path("data.parking[0].id");
+
+        String findParkingQuery = "{" +
+                "\"query\":\"{" +
+                "  parking: " + GraphQLNames.FIND_PARKING + " (id:\\\"" + parkingId + "\\\") { totalCapacity } " +
+                "}\"," +
+                "\"variables\":\"\"}";
+
+        executeGraphQL(findParkingQuery)
+                .body("data.parking[0].totalCapacity", equalTo(expectedTotalCapacity));
+    }
+
+    @Test
     public void testMutateParkingWithPaymentMethodsShouldPersistAndReturn() throws Exception {
 
         StopPlace stopPlace = stopPlaceRepository.save(new StopPlace());

@@ -328,13 +328,7 @@ class ParkingUpdater implements DataFetcher {
 
         if (input.get(PARKING_PROPERTIES) != null) {
             List<ParkingProperties> parkingPropertiesList = resolveParkingPropertiesList((List) input.get(PARKING_PROPERTIES));
-            int total_capacity = parkingPropertiesList.stream()
-                    .map(ParkingProperties::getSpaces)
-                    .filter(Objects::nonNull)
-                    .flatMap(Collection::stream)
-                    .filter(space -> space.getNumberOfSpaces() != null)
-                    .mapToInt(space -> space.getNumberOfSpaces().intValue())
-                    .sum();
+            int total_capacity = sumCapacity(parkingPropertiesList);
             isUpdated = true;
             updatedParking.setParkingProperties(parkingPropertiesList);
             if (total_capacity > 0) {
@@ -397,6 +391,23 @@ class ParkingUpdater implements DataFetcher {
         }
 
         return isUpdated;
+    }
+
+    /**
+     * Sums the spaces of every capacity element. An element counts its number of spaces.
+     * An element without that number counts its spaces with a recharge point instead.
+     */
+    static int sumCapacity(List<ParkingProperties> parkingPropertiesList) {
+        return parkingPropertiesList.stream()
+                .map(ParkingProperties::getSpaces)
+                .filter(Objects::nonNull)
+                .flatMap(Collection::stream)
+                .map(space -> space.getNumberOfSpaces() != null
+                        ? space.getNumberOfSpaces()
+                        : space.getNumberOfSpacesWithRechargePoint())
+                .filter(Objects::nonNull)
+                .mapToInt(BigInteger::intValue)
+                .sum();
     }
 
     private List<ParkingProperties> resolveParkingPropertiesList(List propertyList) {
