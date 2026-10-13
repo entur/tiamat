@@ -24,13 +24,11 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Transient;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import java.math.BigInteger;
 
 
 @Entity
-@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class AlternativeName
         extends VersionedChildStructure {
 

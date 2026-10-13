@@ -24,12 +24,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Transient;
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.rutebanken.tiamat.model.identification.IdentifiedEntity;
 
 @Entity
-@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class PathLinkEnd extends IdentifiedEntity {
 
     @Embedded

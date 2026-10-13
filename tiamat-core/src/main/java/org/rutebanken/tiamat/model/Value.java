@@ -21,8 +21,6 @@ import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import java.io.Serializable;
 import java.util.Collections;
@@ -30,7 +28,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @Entity
 public class Value implements Serializable {
 
@@ -38,7 +35,6 @@ public class Value implements Serializable {
     @PerTableSequence
     private long id;
 
-    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     @ElementCollection
     @CollectionTable(
             name = "value_items",

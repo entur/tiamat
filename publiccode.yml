@@ -39,8 +39,8 @@ description:
       through a rich GraphQL API that supports both queries and mutations. Tiamat imports and exports NeTEx,
       validates data against the NeTEx XML schema, keeps a full version history of every entity, and maintains a
       mapping between old and newly assigned identifiers. Its web front-end is Abzu.
-      Tiamat is built with Spring Boot, Hibernate and PostGIS, and can run as multiple instances using a
-      Hazelcast in-memory data grid.
+      Tiamat is built with Spring Boot, Hibernate and PostGIS, and can run as multiple instances that share
+      one database.
     documentation: https://github.com/entur/tiamat/blob/master/README.md
     features:
       - GraphQL API for stop places with queries and mutations

@@ -26,7 +26,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.locationtech.jts.geom.Point;
 
 import java.util.ArrayList;
@@ -50,7 +49,6 @@ public class GroupOfStopPlaces extends GroupOfEntities_VersionStructure {
     private Set<StopPlaceReference> members = new HashSet<>();
     private Point centroid;
 
-    @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH)
     private PurposeOfGrouping purposeOfGrouping;
 

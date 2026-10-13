@@ -22,7 +22,6 @@
 - **PostgreSQL + PostGIS** (geographic database)
 - **Jersey** (JAX-RS REST framework)
 - **GraphQL Java 20.9** (GraphQL API)
-- **Hazelcast 5.2.5** (distributed caching and coordination)
 
 ### Key Dependencies
 - **netex-java-model 2.0.15**: NeTEx format models
@@ -36,7 +35,7 @@
 - **Google Cloud Platform** (GCS for blob storage, PubSub for events)
 - **AWS** (S3 support, Secrets Manager)
 - **Docker**: Local development and deployment
-- **Kubernetes**: Production deployment with Hazelcast clustering
+- **Kubernetes**: Production deployment
 - **Terraform**: Infrastructure as code
 - **Helm**: Kubernetes package management
 
@@ -55,7 +54,6 @@ tiamat/
 │   ├── filter/                          # Request/response filters
 │   ├── general/                         # General utilities
 │   ├── geo/                             # Geographic/spatial operations
-│   ├── hazelcast/                       # Hazelcast cache configuration
 │   ├── importer/                        # NeTEx import functionality
 │   │   ├── matching/                    # Stop place matching logic
 │   │   ├── merging/                     # Stop place/quay merging
@@ -142,14 +140,14 @@ Total: ~706 Java source files across 73 packages
 - **Spatial queries**: PostGIS-powered geographic searches
 
 ### 6. ID Management System
-- **Automatic ID generation**: Gap-less NSR IDs using distributed locks (Hazelcast)
+- **Automatic ID generation**: Gap-less NSR IDs, with state shared in the database
 - **ID mapping table**: Tracks old→new ID conversions after import
 - **Configurable prefixes**: `ValidPrefixList` controls which IDs Tiamat generates
 - **Components**:
   - `IdentifiedEntityListener`: Pre-persist hook
   - `NetexIdAssigner`: Determines if ID generation needed
   - `NetexIdProvider`: Generates or validates IDs
-  - `GaplessIdGeneratorService`: Hazelcast-based ID generation
+  - `GaplessIdGeneratorService`: ID generation through the database function `next_gapless_id`
 
 ## Domain Model (Key Entities)
 
@@ -276,13 +274,9 @@ TRUNCATE topographic_place CASCADE;
 
 ## Multi-Instance Support
 
-- **Hazelcast** distributed memory grid for:
-  - Distributed caching
-  - ID generation coordination
-  - Lock management
-  - Cross-instance communication
-- **Kubernetes-aware** configuration
-- **Performance monitoring** via Hazelcast metrics
+- Instances coordinate through the shared PostgreSQL database; nothing else needs configuring
+- **Locks**: PostgreSQL advisory locks (`AdvisoryLock`): one mutation, one import and one background stop place update at a time
+- **ID generation**: state in `id_generator` and `id_generator_position`
 
 ## Import/Export Details
 
@@ -332,9 +326,6 @@ server.port=1888
 # Validation
 publicationDeliveryUnmarshaller.validateAgainstSchema=false
 publicationDeliveryStreamingOutput.validateAgainstSchema=false
-
-# Hazelcast
-hazelcast.performance.monitoring.enabled=true
 
 # Authorization
 authorization.enabled=true
@@ -483,7 +474,7 @@ docker logs tiamat-postgis
 Entity Create → IdentifiedEntityListener (@PrePersist)
   → NetexIdAssigner.assignNetexId()
     → NetexIdProvider.getOrGenerateId()
-      → GaplessIdGeneratorService.getNextIdFor() [Hazelcast]
+      → GaplessIdGeneratorService.getNextIdForEntity() [next_gapless_id in PostgreSQL]
 ```
 
 ### Import Flow
@@ -509,7 +500,6 @@ REST/GraphQL Query → ExporterService
 ## Performance Considerations
 
 - **HikariCP**: Connection pooling (default max: 40)
-- **Hibernate Caching**: Hazelcast-backed L2 cache
 - **Batch Processing**: Configured batch sizes for bulk operations
 - **Async Exports**: Use for large datasets (>1000 stop places)
 - **Database Indexes**: On netex_id, version, parent relationships
@@ -518,7 +508,6 @@ REST/GraphQL Query → ExporterService
 
 - **Prometheus**: Metrics exposed via `/actuator/metrics`
 - **Micrometer**: Metric collection framework
-- **Hazelcast Monitoring**: Performance metrics for distributed operations
 - **Logback**: Structured logging with logstash encoder
 
 ---

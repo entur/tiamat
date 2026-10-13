@@ -13,7 +13,7 @@ import java.util.concurrent.RejectedExecutionException;
  * <p>
  * The queue lives only in the memory of a single pod, so a restart loses queued and in flight
  * writes, and backpressure is per pod: a deployment with several replicas accepts several times
- * the configured queue capacity while the Hazelcast mutate lock still serialises the actual
+ * the configured queue capacity while the mutate lock still serialises the actual
  * writes.
  * <p>
  * Production is intended to use a message broker behind {@link WriteJobPublisher}. Do not address

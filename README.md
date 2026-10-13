@@ -45,11 +45,9 @@ A frontend for Tiamat is available. It's name is Abzu.
 See https://github.com/entur/abzu
 
 ### Supports running multiple instances
-Tiamat uses a Hazelcast memory grid to communicate with other instances in Kubernetes or AWS Fargate.
-This means that you can run multiple instances. If multiple instances are running, the Hazelcast cluster **must** be 
-configured correctly. The application instances **must** be able to accept incoming connections to the configured 
-service port `tiamat.hazelcast.service-port`. Additionally, one of the properties `tiamat.hazelcast.kubernetes.enabled` 
-or `tiamat.hazelcast.aws.enabled` **must** be set to true.
+Instances coordinate through the shared PostgreSQL database, so no extra configuration is needed to run several.
+PostgreSQL advisory locks let one mutation, one import and one background stop place update run at a time across
+all instances, and the gapless ID generator keeps its state in the database.
 
 ### Mapping of IDs
 After import stop places and assigning new IDs to stop places, tiamat keeps olds IDs in a mapping table.
@@ -259,7 +257,7 @@ Please note that it is not possible to do an initial import (see ImportType) mul
 
 ### How its all connected
 It's all initiated by an entity listener annotated with `PrePersist` on the class `IdentifiedEntity` called `IdentifiedEntityListener`.
-`NetexIdAssigner` determines if the entity already has an ID or not. `NetexIdProvider` either return a new ID or handles explicity claimed IDs if the configured prefix matches. See `ValidPrefixList` for the configuration of valid prefixes, and prefixes for IDs generated elsewhere. The `GaplessIdGeneratorService` uses Hazelcast to sync state between instances and avoid conflicts.
+`NetexIdAssigner` determines if the entity already has an ID or not. `NetexIdProvider` either return a new ID or handles explicity claimed IDs if the configured prefix matches. See `ValidPrefixList` for the configuration of valid prefixes, and prefixes for IDs generated elsewhere. The `GaplessIdGeneratorService` keeps its state in the database, so all instances share it.
 
 
 ## Keycloak/Auth0

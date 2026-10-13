@@ -19,14 +19,11 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @Entity
 @Table(
         uniqueConstraints = {
