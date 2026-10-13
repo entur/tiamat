@@ -54,7 +54,7 @@ public class AdvisoryLock {
      * First key of every Tiamat lock ("tiam" in ASCII). Other users of advisory locks in the same
      * database cannot take one of these by accident.
      */
-    static final int LOCK_NAMESPACE = 0x7469616d;
+    public static final int LOCK_NAMESPACE = 0x7469616d;
 
     private static final long FIRST_POLL_INTERVAL_MILLIS = 10;
     private static final long MAX_POLL_INTERVAL_MILLIS = 200;
