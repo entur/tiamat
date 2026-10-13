@@ -15,41 +15,31 @@
 
 package org.rutebanken.tiamat.lock;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.function.Supplier;
 
 /**
- * Prevent too long running mutations.
- * Avoid parallel mutations.
+ * Runs one mutation at a time across all Tiamat instances.
+ * <p>
+ * The lock is held until the surrounding transaction commits, so the next mutation reads the
+ * committed result of the previous one.
  */
 @Component
 public class MutateLock {
 
     public static final int WAIT_FOR_LOCK_SECONDS = 15;
 
-
-    public static final int LOCK_MAX_LEASE_TIME_SECONDS = 60;
-
-    private static final Logger logger = LoggerFactory.getLogger(MutateLock.class);
-
-    private final int waitTimeoutSeconds;
     public static final String LOCK_NAME = "mutate-lock";
-    private final TimeoutMaxLeaseTimeLock timoutMaxLeaseTimeLock;
 
+    private final AdvisoryLock advisoryLock;
 
-    @Autowired
-    public MutateLock(TimeoutMaxLeaseTimeLock timeoutMaxLeaseTimeLock) {
-        this.timoutMaxLeaseTimeLock = timeoutMaxLeaseTimeLock;
-        this.waitTimeoutSeconds = WAIT_FOR_LOCK_SECONDS;
-
+    public MutateLock(AdvisoryLock advisoryLock) {
+        this.advisoryLock = advisoryLock;
     }
 
     public <T> T executeInLock(Supplier<T> supplier) {
-        return timoutMaxLeaseTimeLock.executeInLock(supplier, LOCK_NAME, waitTimeoutSeconds, LOCK_MAX_LEASE_TIME_SECONDS);
+        return advisoryLock.executeInTransactionLock(LOCK_NAME, WAIT_FOR_LOCK_SECONDS, supplier);
     }
 
 }

@@ -15,7 +15,6 @@
 
 package org.rutebanken.tiamat.importer.handler;
 
-import com.hazelcast.core.HazelcastInstance;
 import jakarta.xml.bind.JAXBElement;
 import org.apache.commons.lang3.NotImplementedException;
 import org.rutebanken.netex.model.ObjectFactory;
@@ -36,6 +35,7 @@ import org.rutebanken.tiamat.importer.matching.StopPlaceIdMatcher;
 import org.rutebanken.tiamat.importer.merging.TransactionalMergingStopPlacesImporter;
 import org.rutebanken.tiamat.importer.modifier.StopPlacePostFilterSteps;
 import org.rutebanken.tiamat.importer.modifier.StopPlacePreSteps;
+import org.rutebanken.tiamat.lock.AdvisoryLock;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.netex.mapping.PublicationDeliveryHelper;
@@ -50,7 +50,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.Lock;
 import java.util.stream.Collectors;
 
 @Component
@@ -59,7 +58,7 @@ public class StopPlaceImportHandler {
     private static final Logger logger = LoggerFactory.getLogger(StopPlaceImportHandler.class);
 
     /**
-     * Hazelcast lock key for stop place import.
+     * Lock name for stop place import. One import runs at a time across all Tiamat instances.
      */
     private static final String STOP_PLACE_IMPORT_LOCK_KEY = "STOP_PLACE_IMPORT_LOCK_KEY";
 
@@ -67,6 +66,9 @@ public class StopPlaceImportHandler {
      * Make this configurable. Export topographic places in response.
      */
     private static final boolean EXPORT_TOPOGRAPHIC_PLACES_FOR_STOPS = false;
+
+    @Autowired
+    private AdvisoryLock advisoryLock;
 
     @Autowired
     private PublicationDeliveryHelper publicationDeliveryHelper;
@@ -103,9 +105,6 @@ public class StopPlaceImportHandler {
 
     @Autowired
     private TopographicPlacesExporter topographicPlacesExporter;
-
-    @Autowired
-    private HazelcastInstance hazelcastInstance;
 
     public void handleStops(SiteFrame netexSiteFrame, ImportParams importParams, AtomicInteger stopPlacesCreatedMatchedOrUpdated, SiteFrame responseSiteframe) {
         if (publicationDeliveryHelper.hasStops(netexSiteFrame)) {
@@ -155,21 +154,9 @@ public class StopPlaceImportHandler {
             if (importParams.importType != null && importParams.importType.equals(ImportType.ID_MATCH)) {
                 importedOrMatchedNetexStopPlaces = stopPlaceIdMatcher.matchStopPlaces(tiamatStops, stopPlacesCreatedMatchedOrUpdated);
             } else {
-                final Lock lock = hazelcastInstance.getCPSubsystem().getLock(STOP_PLACE_IMPORT_LOCK_KEY);
-                lock.lock();
-                try {
-                    if (importParams.importType == null || importParams.importType.equals(ImportType.MERGE)) {
-                        importedOrMatchedNetexStopPlaces = transactionalMergingStopPlacesImporter.importStopPlaces(tiamatStops, stopPlacesCreatedMatchedOrUpdated);
-                    } else if (importParams.importType.equals(ImportType.INITIAL)) {
-                        importedOrMatchedNetexStopPlaces = parallelInitialStopPlaceImporter.importStopPlaces(tiamatStops, stopPlacesCreatedMatchedOrUpdated);
-                    } else if (importParams.importType.equals(ImportType.MATCH)) {
-                        importedOrMatchedNetexStopPlaces = matchingAppendingIdStopPlacesImporter.importStopPlaces(tiamatStops, stopPlacesCreatedMatchedOrUpdated);
-                    } else {
-                        throw new NotImplementedException("Import type " + importParams.importType + " not implemented ");
-                    }
-                } finally {
-                    lock.unlock();
-                }
+                final List<StopPlace> stopsToImport = tiamatStops;
+                importedOrMatchedNetexStopPlaces = advisoryLock.executeInSessionLock(STOP_PLACE_IMPORT_LOCK_KEY,
+                        () -> importStopPlaces(stopsToImport, importParams, stopPlacesCreatedMatchedOrUpdated));
             }
 
             // Filter uniques by StopPlace.id#version
@@ -212,6 +199,18 @@ public class StopPlaceImportHandler {
             } else {
                 logger.info("No stops in response");
             }
+        }
+    }
+
+    private Collection<org.rutebanken.netex.model.StopPlace> importStopPlaces(List<StopPlace> tiamatStops, ImportParams importParams, AtomicInteger stopPlacesCreatedMatchedOrUpdated) {
+        if (importParams.importType == null || importParams.importType.equals(ImportType.MERGE)) {
+            return transactionalMergingStopPlacesImporter.importStopPlaces(tiamatStops, stopPlacesCreatedMatchedOrUpdated);
+        } else if (importParams.importType.equals(ImportType.INITIAL)) {
+            return parallelInitialStopPlaceImporter.importStopPlaces(tiamatStops, stopPlacesCreatedMatchedOrUpdated);
+        } else if (importParams.importType.equals(ImportType.MATCH)) {
+            return matchingAppendingIdStopPlacesImporter.importStopPlaces(tiamatStops, stopPlacesCreatedMatchedOrUpdated);
+        } else {
+            throw new NotImplementedException("Import type " + importParams.importType + " not implemented ");
         }
     }
 
