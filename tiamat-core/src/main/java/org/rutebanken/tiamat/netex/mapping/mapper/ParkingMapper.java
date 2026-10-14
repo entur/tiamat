@@ -30,7 +30,9 @@ import org.rutebanken.netex.model.ParkingEntranceForVehicles;
 import org.rutebanken.netex.model.ParkingEntrancesForVehicles_RelStructure;
 import org.rutebanken.netex.model.Timeband_VersionedChildStructure;
 import org.rutebanken.netex.model.Timebands_RelStructure;
+import org.rutebanken.netex.model.ValidBetween;
 import org.rutebanken.netex.model.ValidityConditions_RelStructure;
+import org.rutebanken.tiamat.netex.mapping.converter.ValidBetweenConverter;
 import org.rutebanken.tiamat.model.InfoLink;
 import org.rutebanken.tiamat.model.PaymentMethodEnumeration;
 import org.rutebanken.tiamat.model.TypeOfInfolinkEnumeration;
@@ -48,6 +50,12 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
     private static final Logger LOGGER = LoggerFactory.getLogger(ParkingMapper.class);
     private static final ObjectFactory OBJECT_FACTORY = new ObjectFactory();
 
+    private final ValidBetweenConverter validBetweenConverter;
+
+    public ParkingMapper(ValidBetweenConverter validBetweenConverter) {
+        this.validBetweenConverter = validBetweenConverter;
+    }
+
     @Override
     public void mapAtoB(Parking parking, org.rutebanken.tiamat.model.Parking parking2, MappingContext context) {
         super.mapAtoB(parking, parking2, context);
@@ -63,6 +71,7 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
         mapVehicleEntrancesFromNetex(parking, parking2, context);
         mapInfoLinksFromNetex(parking, parking2);
         mapAvailabilityConditionsFromNetex(parking, parking2);
+        mapNestedValidBetweenFromNetex(parking, parking2);
         mapAlternativeNamesFromNetex(parking, parking2);
     }
 
@@ -88,6 +97,7 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
         mapVehicleEntrancesToNetex(tiamatParking, netexParking, context);
         mapInfoLinksToNetex(tiamatParking, netexParking);
         mapAvailabilityConditionsToNetex(tiamatParking, netexParking);
+        moveValidBetweenIntoValidityConditions(netexParking);
         mapAlternativeNamesToNetex(tiamatParking, netexParking);
     }
 
@@ -297,9 +307,9 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
 
     /**
      * {@code availabilityConditions} has no matching-named NeTEx accessor (NeTEx's field is
-     * {@code validityConditions}, already bridged for the singular {@code validBetween} via
-     * Orika's {@code validBetween[0]} field mapping and {@code ValidBetweenConverter}) — no
-     * {@code .exclude(...)} is needed in {@code NetexMapper}.
+     * {@code validityConditions}), so it needs this explicit mapping. No {@code .exclude(...)} is
+     * needed in {@code NetexMapper}. The parking's own {@code validBetween} is a separate
+     * concern, see {@link #mapNestedValidBetweenFromNetex}.
      * <p>
      * A source {@code AvailabilityCondition} may carry several {@code DayTypeRef}s and several
      * inline {@code Timeband}s. That is semantically equivalent to one condition per
@@ -360,6 +370,23 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
         }
     }
 
+    /**
+     * NeTEx allows {@code ValidBetween} either directly on the entity or inside
+     * {@code validityConditions}, but not both. Orika maps only the direct form. This method
+     * reads the nested form, which a parking with opening hours needs. A direct value wins, and
+     * the first nested value wins when there are several.
+     */
+    private void mapNestedValidBetweenFromNetex(Parking source, org.rutebanken.tiamat.model.Parking target) {
+        if (target.getValidBetween() != null || source.getValidityConditions() == null) {
+            return;
+        }
+        source.getValidityConditions().getValidityConditionRefOrValidBetweenOrValidityCondition_().stream()
+                .filter(ValidBetween.class::isInstance)
+                .map(ValidBetween.class::cast)
+                .findFirst()
+                .ifPresent(nested -> target.setValidBetween(validBetweenConverter.convertTo(List.of(nested), null, null)));
+    }
+
     private List<String> extractDayTypeRefs(AvailabilityCondition availabilityCondition) {
         DayTypes_RelStructure dayTypes = availabilityCondition.getDayTypes();
         if (dayTypes == null) {
@@ -401,10 +428,9 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
     /**
      * The NeTEx export pipeline maps the same {@code Parking} to NeTEx more than once per
      * export (e.g. once per frame that embeds it). Unlike {@code vehicleEntrances} (overwritten
-     * via a plain setter), this method appends to a list that may already carry an existing
-     * {@code ValidBetween} entry from Orika's own {@code validBetween[0]} mapping, so a repeat
-     * invocation must remove only the {@code AvailabilityCondition} entries it previously added
-     * itself — otherwise the second invocation duplicates them with identical ids, violating
+     * via a plain setter), this method appends to a list that may already carry entries, so a
+     * repeat invocation must remove only the {@code AvailabilityCondition} entries it previously
+     * added itself. Otherwise the second invocation duplicates them with identical ids, violating
      * NeTEx's {@code ValidityCondition_AnyVersionedKey} uniqueness constraint on export.
      */
     private void mapAvailabilityConditionsToNetex(org.rutebanken.tiamat.model.Parking source, Parking target) {
@@ -456,6 +482,25 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
 
             validityConditionEntries.add(OBJECT_FACTORY.createAvailabilityCondition(availabilityCondition));
             index++;
+        }
+    }
+
+    /**
+     * The NeTEx XSD makes a direct {@code ValidBetween} and {@code validityConditions} mutually
+     * exclusive, so when the parking has availability conditions the direct value moves into
+     * {@code validityConditions}. A repeated mapping of the same parking replaces the entry
+     * instead of adding another.
+     */
+    private void moveValidBetweenIntoValidityConditions(Parking target) {
+        ValidityConditions_RelStructure validityConditions = target.getValidityConditions();
+        if (validityConditions == null) {
+            return;
+        }
+        List<Object> entries = validityConditions.getValidityConditionRefOrValidBetweenOrValidityCondition_();
+        if (target.getValidBetween() != null && !target.getValidBetween().isEmpty()) {
+            entries.removeIf(ValidBetween.class::isInstance);
+            entries.addAll(0, target.getValidBetween());
+            target.getValidBetween().clear();
         }
     }
 

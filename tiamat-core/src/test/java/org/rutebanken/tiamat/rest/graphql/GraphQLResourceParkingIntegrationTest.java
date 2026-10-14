@@ -560,6 +560,45 @@ public class GraphQLResourceParkingIntegrationTest extends AbstractGraphQLResour
     }
 
     @Test
+    public void testMutateParkingWithoutValidBetweenKeepsStoredEndDate() throws Exception {
+
+        StopPlace stopPlace = stopPlaceRepository.save(new StopPlace());
+
+        String createQuery = "{\n" +
+                "\"query\": \"mutation { " +
+                "  parking: " + GraphQLNames.MUTATE_PARKING + " (Parking : {" +
+                "    geometry: { type:Point coordinates:[10.5, 59.0] } " +
+                "    parentSiteRef:\\\"" + stopPlace.getNetexId() + "\\\" " +
+                "    validBetween: { fromDate:\\\"2020-01-01T00:00:00Z\\\" toDate:\\\"2024-05-01T10:15:30Z\\\" } " +
+                "  }) {" +
+                "    id " +
+                "    validBetween { toDate } " +
+                "  }" +
+                "}\",\"variables\": \"\"}";
+
+        String parkingId = executeGraphQL(createQuery)
+                .body("data.parking[0].validBetween.toDate", notNullValue())
+                .extract()
+                .path("data.parking[0].id");
+
+        String renameQuery = "{" +
+                "\"query\":\"mutation { " +
+                "  parking:" + GraphQLNames.MUTATE_PARKING + " (Parking: {" +
+                "        id:\\\"" + parkingId + "\\\" " +
+                "        lighting: unlit " +
+                "       }) { " +
+                "      id " +
+                "      validBetween { toDate } " +
+                "    } " +
+                "}\"," +
+                "\"variables\":\"\"}";
+
+        executeGraphQL(renameQuery)
+                .body("data.parking[0].id", equalTo(parkingId))
+                .body("data.parking[0].validBetween.toDate", notNullValue());
+    }
+
+    @Test
     public void testMutateParkingWithLightingShouldPersistAndReturn() throws Exception {
 
         StopPlace stopPlace = stopPlaceRepository.save(new StopPlace());

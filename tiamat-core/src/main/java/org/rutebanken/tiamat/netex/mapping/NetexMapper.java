@@ -16,6 +16,7 @@
 package org.rutebanken.tiamat.netex.mapping;
 
 import ma.glasnost.orika.Converter;
+import org.rutebanken.tiamat.netex.mapping.converter.ValidBetweenConverter;
 import ma.glasnost.orika.MapperFacade;
 import ma.glasnost.orika.MapperFactory;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
@@ -84,6 +85,12 @@ public class NetexMapper {
         if(logger.isDebugEnabled()) {
             logger.debug("Converters: {}", converters);
         }
+
+        ValidBetweenConverter validBetweenConverter = converters.stream()
+                .filter(ValidBetweenConverter.class::isInstance)
+                .map(ValidBetweenConverter.class::cast)
+                .findFirst()
+                .orElseThrow();
 
         converters.forEach(converter -> mapperFactory.getConverterFactory().registerConverter(converter));
 
@@ -183,7 +190,7 @@ public class NetexMapper {
                 .exclude("accessModes")
                 .exclude("vehicleEntrances")
                 .exclude("infoLinks")
-                .customize(new ParkingMapper())
+                .customize(new ParkingMapper(validBetweenConverter))
                 .byDefault()
                 .register();
 
