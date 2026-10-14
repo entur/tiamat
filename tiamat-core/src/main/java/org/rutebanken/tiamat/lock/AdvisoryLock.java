@@ -107,6 +107,7 @@ public class AdvisoryLock {
      * attached as a suppressed exception.
      *
      * @throws LockException if the lock is not free within the wait timeout
+     * @throws LockCleanupException if the lock could not be released, and the session holding it may still be open
      */
     public <T> T executeInSessionLock(String lockName, int waitTimeoutSeconds, Supplier<T> supplier) {
         logger.info("Waiting for lock {}", lockName);
@@ -142,7 +143,12 @@ public class AdvisoryLock {
                 }
             } catch (SQLException | RuntimeException e) {
                 // The attempt may have taken the lock before it failed, so the session must not return to the pool.
-                evict(connection, lockName);
+                try {
+                    evict(connection, lockName);
+                } catch (LockCleanupException cleanupFailure) {
+                    cleanupFailure.addSuppressed(e);
+                    throw cleanupFailure;
+                }
                 throw e;
             }
             connection.close();
@@ -158,6 +164,7 @@ public class AdvisoryLock {
      *
      * @param workFailure the exception from the work, if it failed. A failure to release the lock is
      *                    attached to it as a suppressed exception.
+     * @throws LockCleanupException if the work succeeded but the connection could not be evicted
      */
     void releaseSessionLock(Connection connection, String lockName, Throwable workFailure) {
         LockException releaseFailure;
@@ -171,7 +178,16 @@ public class AdvisoryLock {
         } catch (SQLException e) {
             releaseFailure = new LockException("Could not release lock " + lockName, e);
         }
-        evict(connection, lockName);
+        try {
+            evict(connection, lockName);
+        } catch (LockCleanupException cleanupFailure) {
+            cleanupFailure.addSuppressed(releaseFailure);
+            if (workFailure == null) {
+                throw cleanupFailure;
+            }
+            workFailure.addSuppressed(cleanupFailure);
+            return;
+        }
         if (workFailure != null) {
             workFailure.addSuppressed(releaseFailure);
         } else {
@@ -179,6 +195,11 @@ public class AdvisoryLock {
         }
     }
 
+    /**
+     * Closes the database session of a connection, which releases any lock it holds.
+     *
+     * @throws LockCleanupException if the connection could not be evicted, so its session may still hold the lock
+     */
     private void evict(Connection connection, String lockName) {
         try {
             if (dataSource.isWrapperFor(HikariDataSource.class)) {
@@ -186,8 +207,9 @@ public class AdvisoryLock {
             } else {
                 connection.abort(Runnable::run);
             }
-        } catch (SQLException e) {
-            logger.error("Could not evict the connection for lock {}", lockName, e);
+        } catch (SQLException | RuntimeException e) {
+            throw new LockCleanupException("Could not evict the connection for lock " + lockName
+                    + ". Its database session may still hold the lock", e);
         }
     }
 

@@ -280,7 +280,46 @@ public class AdvisoryLockTest extends TiamatIntegrationTest {
         assertThat(advisoryLock.executeInSessionLock(TEST_LOCK_NAME, 1, () -> "got it")).isEqualTo("got it");
     }
 
+    @Test
+    public void failingEvictionIsThrownWhenTheWorkSucceeded() throws Exception {
+        try (HikariDataSource pool = poolThatCannotEvict()) {
+            AdvisoryLock lock = new AdvisoryLock(entityManager, pool, transactionManager);
+            Connection connection = pool.getConnection();
+
+            assertThatThrownBy(() -> lock.releaseSessionLock(connection, TEST_LOCK_NAME, null))
+                    .isInstanceOf(LockCleanupException.class)
+                    .satisfies(e -> assertThat(e.getSuppressed()).singleElement()
+                            .extracting(Throwable::getMessage).asString().contains("was not held"));
+        }
+    }
+
+    @Test
+    public void failingEvictionIsSuppressedByTheWorkFailure() throws Exception {
+        try (HikariDataSource pool = poolThatCannotEvict()) {
+            AdvisoryLock lock = new AdvisoryLock(entityManager, pool, transactionManager);
+            Connection connection = pool.getConnection();
+
+            IllegalStateException workFailure = new IllegalStateException("work failed");
+            lock.releaseSessionLock(connection, TEST_LOCK_NAME, workFailure);
+
+            assertThat(workFailure.getSuppressed()).singleElement().isInstanceOf(LockCleanupException.class);
+        }
+    }
+
+    private HikariDataSource poolThatCannotEvict() {
+        return new HikariDataSource(smallPoolConfig(1)) {
+            @Override
+            public void evictConnection(Connection connection) {
+                throw new IllegalStateException("eviction failed");
+            }
+        };
+    }
+
     private HikariDataSource smallPool(int size) {
+        return new HikariDataSource(smallPoolConfig(size));
+    }
+
+    private HikariConfig smallPoolConfig(int size) {
         HikariDataSource shared = (HikariDataSource) dataSource;
         HikariConfig config = new HikariConfig();
         config.setJdbcUrl(shared.getJdbcUrl());
@@ -288,7 +327,7 @@ public class AdvisoryLockTest extends TiamatIntegrationTest {
         config.setPassword(shared.getPassword());
         config.setMaximumPoolSize(size);
         config.setConnectionTimeout(3000);
-        return new HikariDataSource(config);
+        return config;
     }
 
     private int heldLocks(String lockName) {
