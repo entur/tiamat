@@ -15,6 +15,7 @@
 
 package org.rutebanken.tiamat.lock;
 
+import com.zaxxer.hikari.HikariDataSource;
 import jakarta.persistence.EntityManager;
 import org.hibernate.Session;
 import org.slf4j.Logger;
@@ -30,6 +31,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
 /**
@@ -39,11 +41,14 @@ import java.util.function.Supplier;
  * holder therefore always reads the committed state. Use it for work that runs in one transaction.
  * <p>
  * A session lock is held on a connection of its own until the work returns. Use it for work that
- * runs in several transactions or threads, such as imports and background jobs. A session lock is
- * not reentrant: taking the same lock again inside the work waits for itself.
+ * runs in several transactions or threads, such as imports and background jobs. A caller that
+ * waits for a session lock holds no connection between attempts, so waiting callers cannot use up
+ * the connection pool. A session lock is not reentrant: taking the same lock again inside the work
+ * waits for itself.
  * <p>
- * PostgreSQL releases both kinds when the connection closes, so a crashed instance does not keep
- * a lock.
+ * PostgreSQL releases both kinds when the database session ends, so a crashed instance does not
+ * keep a lock. A pooled connection keeps its session open after it is returned, so a session lock
+ * that cannot be released normally is released by evicting its connection from the pool.
  */
 @Component
 public class AdvisoryLock {
@@ -97,23 +102,92 @@ public class AdvisoryLock {
 
     /**
      * Runs the supplier while holding the lock on a connection of its own.
+     * <p>
+     * If the supplier throws, its exception is rethrown, with any failure to release the lock
+     * attached as a suppressed exception.
      *
      * @throws LockException if the lock is not free within the wait timeout
      */
     public <T> T executeInSessionLock(String lockName, int waitTimeoutSeconds, Supplier<T> supplier) {
-        try (Connection connection = dataSource.getConnection()) {
-            // Outside a transaction, the connection does not sit idle in transaction while the work runs.
-            connection.setAutoCommit(true);
-            logger.info("Waiting for lock {}", lockName);
-            awaitLock(lockName, waitTimeoutSeconds, () -> tryLock(connection, "pg_try_advisory_lock", lockName));
-            logger.info("Got lock {}", lockName);
+        logger.info("Waiting for lock {}", lockName);
+        Connection connection = awaitSessionLock(lockName, waitTimeoutSeconds);
+        logger.info("Got lock {}", lockName);
+        T result;
+        try {
+            result = supplier.get();
+        } catch (RuntimeException | Error workFailure) {
+            releaseSessionLock(connection, lockName, workFailure);
+            throw workFailure;
+        }
+        releaseSessionLock(connection, lockName, null);
+        return result;
+    }
+
+    /**
+     * Borrows a connection for each attempt and returns it to the pool when the lock is taken by
+     * someone else, so that waiting does not hold a connection.
+     *
+     * @return the connection that holds the lock
+     */
+    private Connection awaitSessionLock(String lockName, int waitTimeoutSeconds) {
+        AtomicReference<Connection> lockHolder = new AtomicReference<>();
+        awaitLock(lockName, waitTimeoutSeconds, () -> {
+            Connection connection = dataSource.getConnection();
             try {
-                return supplier.get();
-            } finally {
-                unlock(connection, lockName);
+                // Outside a transaction, the connection does not sit idle in transaction while the work runs.
+                connection.setAutoCommit(true);
+                if (tryLock(connection, "pg_try_advisory_lock", lockName)) {
+                    lockHolder.set(connection);
+                    return true;
+                }
+            } catch (SQLException | RuntimeException e) {
+                // The attempt may have taken the lock before it failed, so the session must not return to the pool.
+                evict(connection, lockName);
+                throw e;
+            }
+            connection.close();
+            return false;
+        });
+        return lockHolder.get();
+    }
+
+    /**
+     * Releases a session lock and returns its connection to the pool. If the lock was not held, or
+     * the release fails, the connection is evicted instead. Closing the database session releases
+     * the lock, and no later caller borrows a connection that still holds it.
+     *
+     * @param workFailure the exception from the work, if it failed. A failure to release the lock is
+     *                    attached to it as a suppressed exception.
+     */
+    void releaseSessionLock(Connection connection, String lockName, Throwable workFailure) {
+        LockException releaseFailure;
+        try {
+            if (unlock(connection, lockName)) {
+                connection.close();
+                logger.info("Released lock {}", lockName);
+                return;
+            }
+            releaseFailure = new LockException("Lock " + lockName + " was not held when it was released");
+        } catch (SQLException e) {
+            releaseFailure = new LockException("Could not release lock " + lockName, e);
+        }
+        evict(connection, lockName);
+        if (workFailure != null) {
+            workFailure.addSuppressed(releaseFailure);
+        } else {
+            logger.error("Evicted the connection for lock {} instead of releasing the lock normally", lockName, releaseFailure);
+        }
+    }
+
+    private void evict(Connection connection, String lockName) {
+        try {
+            if (dataSource.isWrapperFor(HikariDataSource.class)) {
+                dataSource.unwrap(HikariDataSource.class).evictConnection(connection);
+            } else {
+                connection.abort(Runnable::run);
             }
         } catch (SQLException e) {
-            throw new LockException("Could not use lock " + lockName, e);
+            logger.error("Could not evict the connection for lock {}", lockName, e);
         }
     }
 
@@ -147,15 +221,17 @@ public class AdvisoryLock {
         }
     }
 
-    private static void unlock(Connection connection, String lockName) {
+    /**
+     * @return false if the session did not hold the lock
+     */
+    private static boolean unlock(Connection connection, String lockName) throws SQLException {
         try (PreparedStatement statement = connection.prepareStatement("select pg_advisory_unlock(?, hashtext(?))")) {
             statement.setInt(1, LOCK_NAMESPACE);
             statement.setString(2, lockName);
-            statement.execute();
-            logger.info("Released lock {}", lockName);
-        } catch (SQLException e) {
-            // Closing the connection releases the lock as well.
-            logger.warn("Could not release lock {}", lockName, e);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                resultSet.next();
+                return resultSet.getBoolean(1);
+            }
         }
     }
 

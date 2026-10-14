@@ -15,6 +15,10 @@
 
 package org.rutebanken.tiamat.lock;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +26,14 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -39,6 +51,12 @@ public class AdvisoryLockTest extends TiamatIntegrationTest {
 
     @Autowired
     private PlatformTransactionManager transactionManager;
+
+    @Autowired
+    private DataSource dataSource;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @Test
     public void sessionLockWaitsForTheHolder() throws Exception {
@@ -154,6 +172,150 @@ public class AdvisoryLockTest extends TiamatIntegrationTest {
         } finally {
             release.countDown();
             holder.get(10, TimeUnit.SECONDS);
+        }
+    }
+
+    @Test
+    public void waitingCallersDoNotKeepConnections() throws Exception {
+        try (HikariDataSource pool = smallPool(2)) {
+            AdvisoryLock lock = new AdvisoryLock(entityManager, pool, transactionManager);
+            CountDownLatch holderHasLock = new CountDownLatch(1);
+            CountDownLatch waitersStarted = new CountDownLatch(1);
+
+            CompletableFuture<Void> holder = CompletableFuture.runAsync(() -> lock.executeInSessionLock(TEST_LOCK_NAME, 30, () -> {
+                holderHasLock.countDown();
+                await(waitersStarted);
+                sleep(500);
+                // The work needs a second connection while the waiters are waiting.
+                try (Connection connection = pool.getConnection(); Statement statement = connection.createStatement()) {
+                    statement.execute("select 1");
+                } catch (SQLException e) {
+                    throw new IllegalStateException("The holder could not get a connection while others waited", e);
+                }
+                return null;
+            }));
+            assertThat(holderHasLock.await(10, TimeUnit.SECONDS)).isTrue();
+
+            List<CompletableFuture<Void>> waiters = new ArrayList<>();
+            for (int i = 0; i < 3; i++) {
+                waiters.add(CompletableFuture.runAsync(() -> lock.executeInSessionLock(TEST_LOCK_NAME, 30, () -> null)));
+            }
+            waitersStarted.countDown();
+
+            holder.get(30, TimeUnit.SECONDS);
+            for (CompletableFuture<Void> waiter : waiters) {
+                waiter.get(30, TimeUnit.SECONDS);
+            }
+        }
+    }
+
+    @Test
+    public void failingWorkReleasesTheLock() {
+        IllegalStateException workFailure = new IllegalStateException("work failed");
+
+        assertThatThrownBy(() -> advisoryLock.executeInSessionLock(TEST_LOCK_NAME, 5, () -> {
+            throw workFailure;
+        })).isSameAs(workFailure);
+
+        assertThat(heldLocks(TEST_LOCK_NAME)).isZero();
+        assertThat(advisoryLock.executeInSessionLock(TEST_LOCK_NAME, 1, () -> "got it")).isEqualTo("got it");
+    }
+
+    @Test
+    public void releasingALockThatIsNotHeldEvictsTheConnection() throws Exception {
+        try (HikariDataSource pool = smallPool(1)) {
+            AdvisoryLock lock = new AdvisoryLock(entityManager, pool, transactionManager);
+            Connection connection = pool.getConnection();
+            int backendBefore = backendPid(connection);
+
+            IllegalStateException workFailure = new IllegalStateException("work failed");
+            lock.releaseSessionLock(connection, TEST_LOCK_NAME, workFailure);
+
+            assertThat(workFailure.getSuppressed()).singleElement()
+                    .isInstanceOf(LockException.class)
+                    .extracting(Throwable::getMessage).asString().contains("was not held");
+            try (Connection next = pool.getConnection()) {
+                assertThat(backendPid(next)).as("the connection must not go back to the pool").isNotEqualTo(backendBefore);
+            }
+        }
+    }
+
+    @Test
+    public void failingReleaseEvictsTheConnectionAndFreesTheLock() throws Exception {
+        try (HikariDataSource pool = smallPool(1)) {
+            AdvisoryLock lock = new AdvisoryLock(entityManager, pool, transactionManager);
+            Connection connection = pool.getConnection();
+            int backendBefore = backendPid(connection);
+            try (Statement statement = connection.createStatement()) {
+                statement.execute("select pg_advisory_lock(" + AdvisoryLock.LOCK_NAMESPACE + ", hashtext('" + TEST_LOCK_NAME + "'))");
+                // An aborted transaction makes the unlock statement fail while the session still holds the lock.
+                connection.setAutoCommit(false);
+                assertThatThrownBy(() -> statement.execute("select 1/0")).isInstanceOf(SQLException.class);
+            }
+            assertThat(heldLocks(TEST_LOCK_NAME)).isOne();
+
+            lock.releaseSessionLock(connection, TEST_LOCK_NAME, null);
+
+            assertThat(heldLocks(TEST_LOCK_NAME)).as("evicting the connection ends the session and its lock").isZero();
+            try (Connection next = pool.getConnection()) {
+                assertThat(backendPid(next)).isNotEqualTo(backendBefore);
+            }
+        }
+    }
+
+    @Test
+    public void releaseFailureIsSuppressedByTheWorkFailure() {
+        IllegalStateException workFailure = new IllegalStateException("work failed");
+
+        assertThatThrownBy(() -> advisoryLock.executeInSessionLock(TEST_LOCK_NAME, 5, () -> {
+            // Ends the session that holds the lock, so releasing it fails.
+            terminateBackendHolding(TEST_LOCK_NAME);
+            throw workFailure;
+        })).isSameAs(workFailure);
+
+        assertThat(workFailure.getSuppressed()).singleElement()
+                .isInstanceOf(LockException.class)
+                .extracting(Throwable::getCause).isInstanceOf(SQLException.class);
+        assertThat(heldLocks(TEST_LOCK_NAME)).isZero();
+        assertThat(advisoryLock.executeInSessionLock(TEST_LOCK_NAME, 1, () -> "got it")).isEqualTo("got it");
+    }
+
+    private HikariDataSource smallPool(int size) {
+        HikariDataSource shared = (HikariDataSource) dataSource;
+        HikariConfig config = new HikariConfig();
+        config.setJdbcUrl(shared.getJdbcUrl());
+        config.setUsername(shared.getUsername());
+        config.setPassword(shared.getPassword());
+        config.setMaximumPoolSize(size);
+        config.setConnectionTimeout(3000);
+        return new HikariDataSource(config);
+    }
+
+    private int heldLocks(String lockName) {
+        return queryInt("select count(*) from pg_locks where locktype = 'advisory' and granted and classid = "
+                + AdvisoryLock.LOCK_NAMESPACE + " and objid = (hashtext('" + lockName + "'))::oid and objsubid = 2");
+    }
+
+    private void terminateBackendHolding(String lockName) {
+        queryInt("select count(pg_terminate_backend(pid)) from pg_locks where locktype = 'advisory' and granted and classid = "
+                + AdvisoryLock.LOCK_NAMESPACE + " and objid = (hashtext('" + lockName + "'))::oid and objsubid = 2");
+    }
+
+    private int queryInt(String sql) {
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql);
+             ResultSet resultSet = statement.executeQuery()) {
+            resultSet.next();
+            return resultSet.getInt(1);
+        } catch (SQLException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    private static int backendPid(Connection connection) throws SQLException {
+        try (Statement statement = connection.createStatement(); ResultSet resultSet = statement.executeQuery("select pg_backend_pid()")) {
+            resultSet.next();
+            return resultSet.getInt(1);
         }
     }
 
