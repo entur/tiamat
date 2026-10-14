@@ -37,6 +37,7 @@ import org.rutebanken.tiamat.model.FareZone;
 import org.rutebanken.tiamat.model.GroupOfStopPlaces;
 import org.rutebanken.tiamat.model.IanaCountryTldEnumeration;
 import org.rutebanken.tiamat.model.EntranceEnumeration;
+import org.rutebanken.tiamat.model.CoveredEnumeration;
 import org.rutebanken.tiamat.model.LightingEnumeration;
 import org.rutebanken.tiamat.model.LimitationStatusEnumeration;
 import org.rutebanken.tiamat.model.NameTypeEnumeration;
@@ -384,6 +385,28 @@ public class NetexMapperTest extends TiamatIntegrationTest {
         org.rutebanken.netex.model.Parking netexParking = netexMapper.mapToNetexModel(tiamatParking);
 
         assertThat(netexParking.getLighting()).isEqualTo(org.rutebanken.netex.model.LightingEnumeration.UNLIT);
+    }
+
+    @Test
+    public void mapNetexParkingCoveredToInternal() {
+        org.rutebanken.netex.model.Parking netexParking = new org.rutebanken.netex.model.Parking();
+        netexParking.setId("NSR:Parking:1");
+        netexParking.setCovered(org.rutebanken.netex.model.CoveredEnumeration.MIXED);
+
+        org.rutebanken.tiamat.model.Parking tiamatParking = netexMapper.mapToTiamatModel(netexParking);
+
+        assertThat(tiamatParking.getCovered()).isEqualTo(CoveredEnumeration.MIXED);
+    }
+
+    @Test
+    public void mapInternalParkingCoveredToNetex() {
+        org.rutebanken.tiamat.model.Parking tiamatParking = new org.rutebanken.tiamat.model.Parking();
+        tiamatParking.setNetexId("NSR:Parking:1");
+        tiamatParking.setCovered(CoveredEnumeration.OUTDOORS);
+
+        org.rutebanken.netex.model.Parking netexParking = netexMapper.mapToNetexModel(tiamatParking);
+
+        assertThat(netexParking.getCovered()).isEqualTo(org.rutebanken.netex.model.CoveredEnumeration.OUTDOORS);
     }
 
     @Test

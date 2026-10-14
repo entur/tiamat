@@ -25,6 +25,7 @@ import org.rutebanken.tiamat.model.AccessibilityAssessment;
 import org.rutebanken.tiamat.model.AccessibilityLimitation;
 import org.rutebanken.tiamat.model.AlternativeName;
 import org.rutebanken.tiamat.model.AvailabilityCondition;
+import org.rutebanken.tiamat.model.CoveredEnumeration;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.EntranceEnumeration;
 import org.rutebanken.tiamat.model.InfoLink;
@@ -94,6 +95,7 @@ import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.IS_AVAILABLE;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.IS_ENTRY;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.IS_EXIT;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.LABEL;
+import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.COVERED;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.LIGHTING;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.NAME;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.NUMBER_OF_SPACES;
@@ -312,6 +314,12 @@ class ParkingUpdater implements DataFetcher {
             LightingEnumeration lighting = (LightingEnumeration) input.get(LIGHTING);
             isUpdated = isUpdated || (!lighting.equals(updatedParking.getLighting()));
             updatedParking.setLighting(lighting);
+        }
+
+        if (input.get(COVERED) != null) {
+            CoveredEnumeration covered = (CoveredEnumeration) input.get(COVERED);
+            isUpdated = isUpdated || (!covered.equals(updatedParking.getCovered()));
+            updatedParking.setCovered(covered);
         }
 
         if (input.get(PARKING_RESERVATION) != null) {
