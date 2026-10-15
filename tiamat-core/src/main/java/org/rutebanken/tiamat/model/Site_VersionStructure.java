@@ -26,7 +26,6 @@ import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Transient;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -41,7 +40,6 @@ public abstract class Site_VersionStructure
     @Transient
     private final List<Level> levels = new ArrayList<>();
 
-    @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH)
     protected TopographicPlace topographicPlace;
 

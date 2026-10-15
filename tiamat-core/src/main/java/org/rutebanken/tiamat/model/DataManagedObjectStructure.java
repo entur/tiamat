@@ -19,8 +19,6 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Transient;
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.rutebanken.tiamat.netex.mapping.mapper.NetexIdMapper;
 
 import java.util.HashMap;
@@ -32,7 +30,6 @@ import java.util.Set;
 public abstract class DataManagedObjectStructure
         extends EntityInVersionStructure {
 
-    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private final Map<String, Value> keyValues = new HashMap<>();
 

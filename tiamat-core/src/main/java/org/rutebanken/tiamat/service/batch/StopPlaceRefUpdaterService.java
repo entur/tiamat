@@ -8,7 +8,7 @@ import org.rutebanken.tiamat.exporter.eviction.SessionEntitiesEvictor;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.exporter.params.StopPlaceSearch;
 import org.rutebanken.tiamat.lock.LockException;
-import org.rutebanken.tiamat.lock.TimeoutMaxLeaseTimeLock;
+import org.rutebanken.tiamat.lock.AdvisoryLock;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.repository.FareZoneRepository;
 import org.rutebanken.tiamat.repository.StopPlaceRepository;
@@ -36,7 +36,6 @@ public class StopPlaceRefUpdaterService {
 
     private static final Logger logger = LoggerFactory.getLogger(StopPlaceRefUpdaterService.class);
     public static final int CLEAR_EACH = 100;
-    public static final int MAX_LEASE_TIME_SECONDS = 7200;
     public static final int WAIT_TIMEOUT_SECONDS = 10;
     public static final String BACKGROUND_UPDATE_STOPS_LOCK = "background-update-stops-lock";
 
@@ -48,7 +47,7 @@ public class StopPlaceRefUpdaterService {
     private final TariffZonesLookupService tariffZonesLookupService;
     private final TopographicPlaceLookupService topographicPlaceLookupService;
     private final EntityManager entityManager;
-    private final TimeoutMaxLeaseTimeLock timeoutMaxLeaseTimeLock;
+    private final AdvisoryLock advisoryLock;
 
     private final boolean enableLegacyUpdater;
 
@@ -60,7 +59,7 @@ public class StopPlaceRefUpdaterService {
                                       TariffZonesLookupService tariffZonesLookupService,
                                       TopographicPlaceLookupService topographicPlaceLookupService,
                                       EntityManager entityManager,
-                                      TimeoutMaxLeaseTimeLock timeoutMaxLeaseTimeLock,
+                                      AdvisoryLock advisoryLock,
                                       @Value("${stopPlaceRefUpdaterService.enableLegacyUpdater:false}") boolean enableLegacyUpdater) {
         this.stopPlaceRepository = stopPlaceRepository;
         this.tariffZoneRepository = tariffZoneRepository;
@@ -69,15 +68,15 @@ public class StopPlaceRefUpdaterService {
         this.tariffZonesLookupService = tariffZonesLookupService;
         this.topographicPlaceLookupService = topographicPlaceLookupService;
         this.entityManager = entityManager;
-        this.timeoutMaxLeaseTimeLock = timeoutMaxLeaseTimeLock;
+        this.advisoryLock = advisoryLock;
         this.enableLegacyUpdater = enableLegacyUpdater;
     }
 
     public void updateAllStopPlaces() {
 
         try {
-            // To avoid multiple hazelcast instances doing the same job
-            timeoutMaxLeaseTimeLock.executeInLock(() -> {
+            // Only one Tiamat instance runs the job at a time
+            advisoryLock.executeInSessionLock(BACKGROUND_UPDATE_STOPS_LOCK, WAIT_TIMEOUT_SECONDS, () -> {
 
                 try {
                     if (enableLegacyUpdater) {
@@ -90,7 +89,7 @@ public class StopPlaceRefUpdaterService {
                 }
 
                 return null;
-            }, BACKGROUND_UPDATE_STOPS_LOCK, WAIT_TIMEOUT_SECONDS, MAX_LEASE_TIME_SECONDS);
+            });
         } catch (LockException lockException) {
             logger.info(lockException.getMessage());
         } catch (RuntimeException e) {

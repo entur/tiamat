@@ -15,7 +15,6 @@
 
 package org.rutebanken.tiamat.netex.id;
 
-import com.hazelcast.collection.IQueue;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
@@ -26,14 +25,22 @@ import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Collections;
-import java.util.HashSet;
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.stream.Collectors;
+import java.util.stream.LongStream;
 
 import static junit.framework.TestCase.assertEquals;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.rutebanken.tiamat.netex.id.GaplessIdGeneratorService.LOW_LEVEL_AVAILABLE_IDS;
 
 public class GaplessIdGeneratorServiceTest extends TiamatIntegrationTest {
 
@@ -42,6 +49,12 @@ public class GaplessIdGeneratorServiceTest extends TiamatIntegrationTest {
 
     @Autowired
     private NetexIdHelper netexIdHelper;
+
+    @Autowired
+    private GaplessIdGeneratorService gaplessIdGeneratorService;
+
+    @Autowired
+    private DataSource dataSource;
 
     @Test
     public void verifyNetexIdAssignedToStop() {
@@ -67,46 +80,20 @@ public class GaplessIdGeneratorServiceTest extends TiamatIntegrationTest {
         long wantedId1 = 12L;
         insertQuay(wantedId1, new Quay());
 
-        // first one will be inserted as level is low
-
         long wantedId2 = 10L;
         insertQuay(wantedId2, new Quay());
 
-        // second with not be inserted because level is not low - insertion
-
-        long actualWantedId1 = selectSingleInsertedId(Quay.class.getSimpleName(), wantedId1);
-        assertThat(actualWantedId1).describedAs("Expecting to find the ID in the id_generator table").isEqualTo(wantedId1);
-
-        // We cannot check that the second value was insterted, because the first call will, because of the low level create new available IDs.
-        // But, we can check that the second claimed ID is not available anymore
-        assertThat(generatedIdState.getQueueForEntity(Quay.class.getSimpleName())).doesNotContain(wantedId2);
-    }
-
-    private long selectSingleInsertedId(String tableName, long expectedId) {
-
-        Query query = entityManager.createNativeQuery("SELECT id_value FROM id_generator WHERE table_name = '" + tableName + "' AND id_value = '" + expectedId + "'");
-
-        List list = query.getResultList();
-        assertThat(list).hasSize(1);
-        return  (Long) list.getFirst();
-    }
-
-    private Quay insertQuay(long wantedId, Quay quay) {
-        String wantedNetexIdId = netexIdHelper.getNetexId("Quay", wantedId);
-        quay.setNetexId(wantedNetexIdId);
-        quayRepository.save(quay);
-        return quay;
+        assertThat(selectSingleInsertedId(Quay.class.getSimpleName(), wantedId1)).isEqualTo(wantedId1);
+        assertThat(selectSingleInsertedId(Quay.class.getSimpleName(), wantedId2)).isEqualTo(wantedId2);
     }
 
     @Test
-    public void generateIdAfterExplicitIDs() throws InterruptedException {
+    public void generateIdAfterExplicitIDs() {
 
-        // Use first 500 IDs
         for (long explicitId = 1; explicitId <= 30; explicitId++) {
             Quay quay = new Quay();
             quay.setNetexId(netexIdHelper.getNetexId(Quay.class.getSimpleName(), explicitId));
             quayRepository.save(quay);
-            System.out.println("Saved quay: " + quay.getNetexId());
         }
 
         Quay quay = new Quay();
@@ -118,25 +105,82 @@ public class GaplessIdGeneratorServiceTest extends TiamatIntegrationTest {
     public void testIdGeneration() {
 
         final String testEntityName = "testEntityName";
-        int fetchSize = LOW_LEVEL_AVAILABLE_IDS;
-        GaplessIdGeneratorService gaplessIdGeneratorService = new GaplessIdGeneratorService(entityManagerFactory, hazelcastInstance, generatedIdState, fetchSize);
-        long actual = gaplessIdGeneratorService.getNextIdForEntity(testEntityName);
 
-        assertThat(actual).as("generated id is last id plus one").isEqualTo(1L);
+        assertThat(gaplessIdGeneratorService.getNextIdForEntity(testEntityName)).as("first generated id").isEqualTo(1L);
 
-        IQueue lastIds = generatedIdState.getQueueForEntity(testEntityName);
-        assertThat(lastIds).as("Last ids for " + testEntityName + " is fetch size minus one used").hasSize(fetchSize - 1);
+        long explicitlyClaimed = gaplessIdGeneratorService.getNextIdForEntity(testEntityName, 3L);
+        assertThat(explicitlyClaimed).isEqualTo(3L);
 
-        long lastId = generatedIdState.getLastIdForEntity(testEntityName);
-        assertThat(lastId).as("last id for entity after generation same as max value in last ids").isEqualTo(Collections.max(lastIds));
+        assertThat(gaplessIdGeneratorService.getNextIdForEntity(testEntityName)).as("hole before the claimed id is filled").isEqualTo(2L);
+        assertThat(gaplessIdGeneratorService.getNextIdForEntity(testEntityName)).as("claimed id is skipped").isEqualTo(4L);
+    }
 
-        // Verify claiming
-        long explicityClaimed = gaplessIdGeneratorService.getNextIdForEntity(testEntityName, 3L);
-        assertThat(explicityClaimed).isEqualTo(3L);
+    @Test
+    public void claimedIdsAreRecordedImmediately() {
 
-        // Verify hole filled
-        long nextGenerated = gaplessIdGeneratorService.getNextIdForEntity(testEntityName);
-        assertThat(nextGenerated).isEqualTo(2L);
+        String entityName = "testEntityName2";
+
+        for (long claimedId = 20; claimedId < 30; claimedId++) {
+            assertThat(gaplessIdGeneratorService.getNextIdForEntity(entityName, claimedId)).isEqualTo(claimedId);
+            assertThat(selectSingleInsertedId(entityName, claimedId)).as("Claimed ID found in the ID generator table").isEqualTo(claimedId);
+        }
+    }
+
+    @Test
+    public void ignoreDuplicateIdsOnInsert() {
+        String entityName = "testEntityName2";
+
+        assertThat(gaplessIdGeneratorService.getNextIdForEntity(entityName, 10L)).isEqualTo(10L);
+        assertThat(gaplessIdGeneratorService.getNextIdForEntity(entityName, 10L)).isEqualTo(10L);
+
+        assertThat(selectSingleInsertedId(entityName, 10L)).isEqualTo(10L);
+    }
+
+    @Test
+    public void searchContinuesPastAFullWindow() throws SQLException {
+        String entityName = "testEntityName3";
+        long usedIds = GaplessIdGeneratorService.SEARCH_WINDOW + 500;
+        executeSql("insert into id_generator (table_name, id_value) select '" + entityName + "', id from generate_series(1, " + usedIds + ") id");
+
+        assertThat(gaplessIdGeneratorService.getNextIdForEntity(entityName)).isEqualTo(usedIds + 1);
+    }
+
+    @Test
+    public void positionIsSharedBetweenGenerators() {
+        String entityName = "testEntityName4";
+        GaplessIdGeneratorService otherInstance = new GaplessIdGeneratorService(dataSource);
+
+        assertThat(gaplessIdGeneratorService.getNextIdForEntity(entityName)).isEqualTo(1L);
+        assertThat(otherInstance.getNextIdForEntity(entityName)).isEqualTo(2L);
+        assertThat(gaplessIdGeneratorService.getNextIdForEntity(entityName)).isEqualTo(3L);
+    }
+
+    @Test
+    public void concurrentGenerationGivesUniqueIdsWithoutGaps() throws Exception {
+        String entityName = "testEntityName5";
+        int threads = 8;
+        int idsPerThread = 50;
+        Set<Long> ids = ConcurrentHashMap.newKeySet();
+
+        ExecutorService executor = Executors.newFixedThreadPool(threads);
+        try {
+            List<Future<?>> futures = new ArrayList<>();
+            for (int thread = 0; thread < threads; thread++) {
+                futures.add(executor.submit(() -> {
+                    for (int i = 0; i < idsPerThread; i++) {
+                        assertThat(ids.add(gaplessIdGeneratorService.getNextIdForEntity(entityName))).as("id is unique").isTrue();
+                    }
+                }));
+            }
+            for (Future<?> future : futures) {
+                future.get();
+            }
+        } finally {
+            executor.shutdownNow();
+        }
+
+        Set<Long> expected = LongStream.rangeClosed(1, (long) threads * idsPerThread).boxed().collect(Collectors.toSet());
+        assertThat(ids).isEqualTo(expected);
     }
 
     /**
@@ -169,53 +213,25 @@ public class GaplessIdGeneratorServiceTest extends TiamatIntegrationTest {
         assertEquals(id, stopPlace.getNetexId());
     }
 
-    @Test
-    public void claimIds() {
+    private long selectSingleInsertedId(String tableName, long expectedId) {
 
-        String entityName = "testEntityName2";
+        Query query = entityManager.createNativeQuery("SELECT id_value FROM id_generator WHERE table_name = '" + tableName + "' AND id_value = '" + expectedId + "'");
 
-        int fetchSize = LOW_LEVEL_AVAILABLE_IDS;
-        GaplessIdGeneratorService gaplessIdGeneratorService = new GaplessIdGeneratorService(entityManagerFactory, hazelcastInstance, generatedIdState, fetchSize);
-
-        /**
-         * Offset to not claim ids that will be present in the available ids queue.
-         */
-        int offset = LOW_LEVEL_AVAILABLE_IDS + fetchSize;
-
-        Set<Long> claimedIds = new HashSet<>();
-
-        for (int excplicityClaimedId = offset; excplicityClaimedId < offset + 10; excplicityClaimedId++) {
-            System.out.println("adding explicity claimed id " + excplicityClaimedId);
-            claimedIds.add(gaplessIdGeneratorService.getNextIdForEntity(entityName, excplicityClaimedId));
-        }
-
-        assertThat(generatedIdState.getQueueForEntity(entityName)).as("available ids for entity after claiming").doesNotContainAnyElementsOf(claimedIds);
-
-        gaplessIdGeneratorService.persistClaimedIds();
-
-        assertThat(generatedIdState.getQueueForEntity(entityName)).as("available ids for entity after writing claimed ids").doesNotContainAnyElementsOf(claimedIds);
-
-        for (long excpectedId : claimedIds) {
-            long actual = selectSingleInsertedId(entityName, excpectedId);
-
-            assertThat(actual).as("Claimed ID found in the ID generator table+").isEqualTo(excpectedId);
-        }
-
-        assertThat(generatedIdState.getClaimedIdListForEntity(entityName)).as("claimed ids for entity after writing").doesNotContainAnyElementsOf(claimedIds);
+        List list = query.getResultList();
+        assertThat(list).hasSize(1);
+        return (Long) list.getFirst();
     }
 
-    @Test
-    public void ignoreDuplicateIdsOnInsert() {
-        String entityName = "testEntityName2";
-        int fetchSize = LOW_LEVEL_AVAILABLE_IDS;
-        GaplessIdGeneratorService gaplessIdGeneratorService = new GaplessIdGeneratorService(entityManagerFactory, hazelcastInstance, generatedIdState, fetchSize);
-        Set<Long> claimedIds = new HashSet<>();
-        claimedIds.add(gaplessIdGeneratorService.getNextIdForEntity(entityName, 10L));
-        gaplessIdGeneratorService.persistClaimedIds();
-        claimedIds.add(gaplessIdGeneratorService.getNextIdForEntity(entityName, 10L));
-        gaplessIdGeneratorService.persistClaimedIds();
-        assertThat(claimedIds.size()).isEqualTo(1);
-
+    private Quay insertQuay(long wantedId, Quay quay) {
+        String wantedNetexIdId = netexIdHelper.getNetexId("Quay", wantedId);
+        quay.setNetexId(wantedNetexIdId);
+        quayRepository.save(quay);
+        return quay;
     }
 
+    private void executeSql(String sql) throws SQLException {
+        try (Connection connection = dataSource.getConnection(); Statement statement = connection.createStatement()) {
+            statement.execute(sql);
+        }
+    }
 }

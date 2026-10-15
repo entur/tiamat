@@ -21,13 +21,10 @@ import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Transient;
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import java.math.BigInteger;
 
 @Entity
-@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class PathLink extends Link {
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, optional = false)

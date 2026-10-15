@@ -1,7 +1,6 @@
 package org.rutebanken.tiamat.service.batch;
 
 import jakarta.annotation.PostConstruct;
-import org.rutebanken.tiamat.netex.id.GaplessIdGeneratorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,21 +24,15 @@ public class BackgroundJobs {
     private final ScheduledExecutorService backgroundJobExecutor =
             Executors.newScheduledThreadPool(3, (runnable) -> new Thread(runnable, "background-job-"+threadNumber.incrementAndGet()));
 
-    private final GaplessIdGeneratorService gaplessIdGeneratorService;
-
     private final StopPlaceRefUpdaterService stopPlaceRefUpdaterService;
 
     @Autowired
-    public BackgroundJobs(GaplessIdGeneratorService gaplessIdGeneratorService, StopPlaceRefUpdaterService stopPlaceRefUpdaterService) {
-        this.gaplessIdGeneratorService = gaplessIdGeneratorService;
+    public BackgroundJobs(StopPlaceRefUpdaterService stopPlaceRefUpdaterService) {
         this.stopPlaceRefUpdaterService = stopPlaceRefUpdaterService;
     }
 
     @PostConstruct
     public void scheduleBackgroundJobs() {
-        logger.info("Scheduling background job for gaplessIdGeneratorService");
-        backgroundJobExecutor.scheduleAtFixedRate(gaplessIdGeneratorService::persistClaimedIds, 15, 15, TimeUnit.SECONDS);
-
         // Initial delay for the background stop place reference updater service can be good to avoid conflicts when running tests
         logger.info("Scheduling background job for updating stop places");
         backgroundJobExecutor.scheduleAtFixedRate(stopPlaceRefUpdaterService::updateAllStopPlaces, 1, 500, TimeUnit.MINUTES);

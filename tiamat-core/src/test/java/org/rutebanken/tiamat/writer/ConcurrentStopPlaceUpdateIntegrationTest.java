@@ -1,12 +1,12 @@
 package org.rutebanken.tiamat.writer;
 
-import com.hazelcast.cp.lock.FencedLock;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
+import org.rutebanken.tiamat.lock.AdvisoryLock;
 import org.rutebanken.tiamat.lock.MutateLock;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -33,7 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * the same stop place concurrently, only the first one to acquire the distributed mutate-lock
  * succeeds, and the second one is rejected with a lock-timeout error.
  *
- * Both APIs go through {@link MutateLock} (backed by Hazelcast CP "mutate-lock"), so whichever
+ * Both APIs go through {@link MutateLock} (a PostgreSQL advisory lock named "mutate-lock"), so whichever
  * request reaches the lock first will hold it, and the second request will fail after the
  * configured wait-timeout ({@link MutateLock#WAIT_FOR_LOCK_SECONDS} s).
  */
@@ -45,7 +45,10 @@ public class ConcurrentStopPlaceUpdateIntegrationTest extends TiamatIntegrationT
     @Autowired
     private TestRestTemplate restTemplate;
 
-    /** Background thread that holds the Hazelcast CP mutate-lock during a test. */
+    @Autowired
+    private AdvisoryLock advisoryLock;
+
+    /** Background thread that holds the mutate-lock during a test. */
     private Thread lockHolderThread;
 
     @Before
@@ -68,25 +71,22 @@ public class ConcurrentStopPlaceUpdateIntegrationTest extends TiamatIntegrationT
     // -------------------------------------------------------------------------
 
     /**
-     * Acquires the Hazelcast CP {@value MutateLock#LOCK_NAME} lock on a background thread.
+     * Acquires the {@value MutateLock#LOCK_NAME} lock on a background thread.
      *
      * @param lockAcquired latch signaled once the lock is held
      * @param releaseLock  latch the background thread waits on before releasing the lock
      * @return the background thread (already started)
      */
     private Thread holdLockInBackground(CountDownLatch lockAcquired, CountDownLatch releaseLock) {
-        Thread t = new Thread(() -> {
-            FencedLock lock = hazelcastInstance.getCPSubsystem().getLock(MutateLock.LOCK_NAME);
-            lock.lock();
+        Thread t = new Thread(() -> advisoryLock.executeInSessionLock(MutateLock.LOCK_NAME, () -> {
+            lockAcquired.countDown();
             try {
-                lockAcquired.countDown();
                 releaseLock.await(); // hold until the test signals release
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-            } finally {
-                lock.unlock();
             }
-        }, "mutate-lock-holder");
+            return null;
+        }), "mutate-lock-holder");
         lockHolderThread = t;
         t.setDaemon(true);
         t.start();

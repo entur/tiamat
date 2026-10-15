@@ -20,14 +20,11 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import java.io.Serializable;
 import java.time.Instant;
 
 @Entity
-@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @IdClass(TagPK.class)
 public class Tag implements Serializable {
 

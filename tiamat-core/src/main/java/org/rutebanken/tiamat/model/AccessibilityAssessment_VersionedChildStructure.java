@@ -22,7 +22,6 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Transient;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import java.util.List;
 
@@ -41,7 +40,6 @@ public class AccessibilityAssessment_VersionedChildStructure
      * It could be refactored to OneToOne.
      * NRP-2076
      */
-    @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     @OneToMany(cascade = CascadeType.ALL)
     protected List<AccessibilityLimitation> limitations;
 

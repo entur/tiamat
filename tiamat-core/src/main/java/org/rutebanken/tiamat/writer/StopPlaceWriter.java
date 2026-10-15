@@ -96,12 +96,8 @@ public class StopPlaceWriter {
             // The validator reads the current version inside the lock, so the comparison uses a
             // fresh read and not a version that the caller supplied.
             //
-            // This check narrows the window, but it does not close it. The lock sits inside the
-            // transaction, so the previous writer releases the lock before it commits. A writer
-            // that waits on the lock can still read the superseded version. The unique constraint
-            // on (netex_id, version) then refuses the second row, so the database keeps the first
-            // write. But the caller gets a constraint message instead of the stale-version
-            // reason. See #458.
+            // The lock is held until this transaction commits, so a writer that waited on it
+            // reads the committed version of the previous writer. See #458.
             var existingStopPlace = stopPlaceMutationValidator.validateStopPlaceUpdate(
                     newStopPlace.getId(),
                     false,
