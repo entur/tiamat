@@ -64,7 +64,7 @@
         <java.version>25</java.version>
         <graphql-java.version>20.9</graphql-java.version>
         <graphql-java-extended-scalars.version>20.2</graphql-java-extended-scalars.version>
-        <awssdk.version>2.42.41</awssdk.version>
+        <awssdk.version>2.55.14</awssdk.version>
     </properties>
 
     <!--
