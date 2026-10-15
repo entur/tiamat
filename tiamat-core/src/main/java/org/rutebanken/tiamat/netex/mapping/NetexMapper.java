@@ -183,6 +183,11 @@ public class NetexMapper {
                 .exclude("accessModes")
                 .exclude("vehicleEntrances")
                 .exclude("infoLinks")
+                // organisationRef is a JAXBElement<? extends OrganisationRefStructure> on the
+                // NeTEx side and a plain OrganisationRefStructure on the Tiamat side.
+                // ParkingMapper unwraps the JAXBElement by hand, because Orika's default
+                // mapping cannot bridge the two shapes.
+                .exclude("organisationRef")
                 .customize(new ParkingMapper())
                 .byDefault()
                 .register();

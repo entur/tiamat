@@ -20,6 +20,7 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Point;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
+import org.rutebanken.tiamat.model.OrganisationRefStructure;
 import org.rutebanken.tiamat.model.Parking;
 import org.rutebanken.tiamat.model.ParkingTypeEnumeration;
 import org.rutebanken.tiamat.model.ParkingVehicleEnumeration;
@@ -255,6 +256,47 @@ public class MergingParkingImporterTest extends TiamatIntegrationTest {
 
         assertThat(parking).isNotNull();
         assertThat(parking.getParkingVehicleTypes()).containsAll(Arrays.asList(ParkingVehicleEnumeration.CAR, ParkingVehicleEnumeration.PEDAL_CYCLE));
+    }
+
+    @Test
+    public void testHandleAlreadyExistingParkingNoChangeToOrganisationRefDoesNotCreateNewVersion() {
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlaceRepository.save(stopPlace);
+
+        Parking firstParking = new Parking();
+        firstParking.setOrganisationRef(new OrganisationRefStructure("FSR:Operator:1234567-8", "1"));
+        firstParking.setParentSiteRef(new SiteRefStructure(stopPlace.getNetexId()));
+
+        Parking secondParking = new Parking();
+        secondParking.setOrganisationRef(new OrganisationRefStructure("FSR:Operator:1234567-8", "1"));
+        secondParking.setParentSiteRef(new SiteRefStructure(stopPlace.getNetexId()));
+
+        Parking parking = mergingParkingImporter.handleAlreadyExistingParking(firstParking, secondParking);
+
+        assertThat(parking).isSameAs(firstParking);
+        assertThat(parking.getOrganisationRef()).isEqualTo(firstParking.getOrganisationRef());
+    }
+
+    @Test
+    public void testHandleAlreadyExistingParkingUpdatedOrganisationRefCreatesNewVersion() throws ExecutionException, InterruptedException {
+
+        StopPlace stopPlace = new StopPlace();
+        stopPlaceRepository.save(stopPlace);
+
+        Parking firstParking = createParking("Andalsnes", 10.78, 60.000, null);
+        firstParking.setParentSiteRef(new SiteRefStructure(stopPlace.getNetexId()));
+        firstParking.setOrganisationRef(new OrganisationRefStructure("FSR:Operator:1234567-8", "1"));
+        Parking firstImportResult = mergingParkingImporter.importParkingWithoutNetexMapping(firstParking);
+
+        Parking secondParking = createParking("Andalsnes", 10.78, 60.000, null);
+        secondParking.setParentSiteRef(new SiteRefStructure(stopPlace.getNetexId()));
+        secondParking.setOrganisationRef(new OrganisationRefStructure("FSR:Operator:7654321-8", "1"));
+
+        Parking parking = mergingParkingImporter.handleAlreadyExistingParking(firstImportResult, secondParking);
+
+        assertThat(parking.getVersion()).isGreaterThan(firstImportResult.getVersion());
+        assertThat(parking.getOrganisationRef()).isEqualTo(secondParking.getOrganisationRef());
     }
 
     private Point point(double longitude, double latitude) {

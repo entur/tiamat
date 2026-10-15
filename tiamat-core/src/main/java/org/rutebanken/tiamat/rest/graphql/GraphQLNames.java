@@ -491,6 +491,7 @@ public class GraphQLNames {
     public static final String END_TIME = "endTime";
     public static final String DAY_OFFSET = "dayOffset";
     public static final String PARENT_SITE_REF = "parentSiteRef";
+    public static final String ORGANISATION_REF = "organisationRef";
 
     public static final String VALID_TRANSPORT_MODES = "validTransportModes";
     public static final String TRANSPORT_MODE = "transportMode";

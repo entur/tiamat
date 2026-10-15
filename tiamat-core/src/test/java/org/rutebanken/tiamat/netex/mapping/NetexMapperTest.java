@@ -387,6 +387,80 @@ public class NetexMapperTest extends TiamatIntegrationTest {
     }
 
     @Test
+    public void mapNetexParkingOperatorRefToInternal() {
+        org.rutebanken.netex.model.Parking netexParking = new org.rutebanken.netex.model.Parking();
+        netexParking.setId("NSR:Parking:1");
+        org.rutebanken.netex.model.OperatorRefStructure operatorRef = new org.rutebanken.netex.model.OperatorRefStructure()
+                .withRef("FSR:Operator:1234567-8")
+                .withVersion("1");
+        netexParking.setOrganisationRef(new ObjectFactory().createOperatorRef(operatorRef));
+
+        org.rutebanken.tiamat.model.Parking tiamatParking = netexMapper.mapToTiamatModel(netexParking);
+
+        assertThat(tiamatParking.getOrganisationRef()).isNotNull();
+        assertThat(tiamatParking.getOrganisationRef().getRef()).isEqualTo("FSR:Operator:1234567-8");
+        assertThat(tiamatParking.getOrganisationRef().getVersion()).isEqualTo("1");
+    }
+
+    @Test
+    public void mapInternalParkingOrganisationRefToNetex() {
+        org.rutebanken.tiamat.model.Parking tiamatParking = new org.rutebanken.tiamat.model.Parking();
+        tiamatParking.setNetexId("NSR:Parking:1");
+        tiamatParking.setOrganisationRef(new org.rutebanken.tiamat.model.OrganisationRefStructure("FSR:Operator:1234567-8", "1"));
+
+        org.rutebanken.netex.model.Parking netexParking = netexMapper.mapToNetexModel(tiamatParking);
+
+        assertThat(netexParking.getOrganisationRef()).isNotNull();
+        assertThat(netexParking.getOrganisationRef().getValue()).isInstanceOf(org.rutebanken.netex.model.OperatorRefStructure.class);
+        assertThat(netexParking.getOrganisationRef().getValue().getRef()).isEqualTo("FSR:Operator:1234567-8");
+        assertThat(netexParking.getOrganisationRef().getValue().getVersion()).isEqualTo("1");
+    }
+
+    @Test
+    public void mapInternalParkingWithoutOrganisationRefEmitsNoElementOnExport() {
+        org.rutebanken.tiamat.model.Parking tiamatParking = new org.rutebanken.tiamat.model.Parking();
+        tiamatParking.setNetexId("NSR:Parking:1");
+
+        org.rutebanken.netex.model.Parking netexParking = netexMapper.mapToNetexModel(tiamatParking);
+
+        assertThat(netexParking.getOrganisationRef()).isNull();
+    }
+
+    @Test
+    public void mapParkingOrganisationRefRoundTrips() {
+        org.rutebanken.netex.model.Parking netexParking = new org.rutebanken.netex.model.Parking();
+        netexParking.setId("NSR:Parking:1");
+        org.rutebanken.netex.model.OperatorRefStructure operatorRef = new org.rutebanken.netex.model.OperatorRefStructure()
+                .withRef("FSR:Operator:1234567-8")
+                .withVersion("1");
+        netexParking.setOrganisationRef(new ObjectFactory().createOperatorRef(operatorRef));
+
+        org.rutebanken.tiamat.model.Parking tiamatParking = netexMapper.mapToTiamatModel(netexParking);
+        org.rutebanken.netex.model.Parking reexported = netexMapper.mapToNetexModel(tiamatParking);
+
+        assertThat(reexported.getOrganisationRef().getValue().getRef())
+                .isEqualTo(netexParking.getOrganisationRef().getValue().getRef());
+        assertThat(reexported.getOrganisationRef().getValue().getVersion())
+                .isEqualTo(netexParking.getOrganisationRef().getValue().getVersion());
+    }
+
+    @Test
+    public void mapNetexParkingOrganisationRefAcceptsAnySubstitution() {
+        org.rutebanken.netex.model.Parking netexParking = new org.rutebanken.netex.model.Parking();
+        netexParking.setId("NSR:Parking:1");
+        org.rutebanken.netex.model.AuthorityRef authorityRef = new org.rutebanken.netex.model.AuthorityRef()
+                .withRef("FSR:Authority:1234567-8")
+                .withVersion("2");
+        netexParking.setOrganisationRef(new ObjectFactory().createAuthorityRef(authorityRef));
+
+        org.rutebanken.tiamat.model.Parking tiamatParking = netexMapper.mapToTiamatModel(netexParking);
+
+        assertThat(tiamatParking.getOrganisationRef()).isNotNull();
+        assertThat(tiamatParking.getOrganisationRef().getRef()).isEqualTo("FSR:Authority:1234567-8");
+        assertThat(tiamatParking.getOrganisationRef().getVersion()).isEqualTo("2");
+    }
+
+    @Test
     public void mapNetexParkingVehicleEntrancesToInternal() {
         org.rutebanken.netex.model.ParkingEntranceForVehicles netexEntrance = new org.rutebanken.netex.model.ParkingEntranceForVehicles();
         netexEntrance.setId("NSR:ParkingEntranceForVehicles:1");
