@@ -74,14 +74,14 @@ public class PublicationDeliveryImporterRefUpdateTest {
 
         importer.importPublicationDelivery(delivery, new ImportParams());
 
-        verify(saver).deleteAllExcept(Set.of("NSR:FareZone:1"));
+        verify(saver).deleteAllExcept(Set.of("NSR:FareZone:1"), false);
         verify(backgroundJobs, never()).triggerStopPlaceUpdate();
     }
 
     @Test
     public void replicaCleanupThatDeletesTriggersRefUpdate() {
         givenFareZoneResult(Set.of());
-        when(saver.deleteAllExcept(Set.of("NSR:FareZone:1"))).thenReturn(1);
+        when(saver.deleteAllExcept(Set.of("NSR:FareZone:1"), false)).thenReturn(1);
         ReflectionTestUtils.setField(fareZoneConfig, "externalVersioning", true);
 
         importer.importPublicationDelivery(delivery, new ImportParams());

@@ -121,9 +121,9 @@ public class PublicationDeliveryFareFrameImporter {
             );
 
             int deletedCount = 0;
-            if (fareZoneConfig.isExternalVersioning() && !importResult.getDeclaredNetexIds().isEmpty()) {
-                deletedCount = fareZoneSaverService.deleteAllExcept(importResult.getDeclaredNetexIds());
-                logger.info("External versioning cleanup: deleted {} orphaned FareZones", deletedCount);
+            if (fareZoneConfig.isReplicaImport(importParams.fareZoneRegisterReplica) && !importResult.getDeclaredNetexIds().isEmpty()) {
+                deletedCount = fareZoneSaverService.deleteAllExcept(importResult.getDeclaredNetexIds(), importParams.fareZoneRegisterReplica);
+                logger.info("Replica cleanup: deleted {} orphaned FareZones", deletedCount);
             }
 
             // Cleanup can change stop place refs even when every declared zone was rejected.
