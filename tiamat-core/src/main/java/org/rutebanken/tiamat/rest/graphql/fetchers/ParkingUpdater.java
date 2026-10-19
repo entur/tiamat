@@ -475,9 +475,9 @@ class ParkingUpdater implements DataFetcher {
     }
 
     private void populateVehicleEntrance(Map<String, Object> input, ParkingEntranceForVehicles entrance) {
-        Object label = input.get(LABEL);
-        if (label != null) {
-            entrance.setLabel(new EmbeddableMultilingualString((String) label));
+        if (input.containsKey(LABEL)) {
+            Object label = input.get(LABEL);
+            entrance.setLabel(label == null ? null : new EmbeddableMultilingualString((String) label));
         }
         entrance.setEntranceType((EntranceEnumeration) input.get(ENTRANCE_TYPE));
         entrance.setIsEntry((Boolean) input.get(IS_ENTRY));

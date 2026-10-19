@@ -15,7 +15,6 @@
 
 package org.rutebanken.tiamat.rest.graphql.mappers;
 
-import org.locationtech.jts.geom.Point;
 import org.rutebanken.tiamat.model.BoardingPosition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -33,15 +32,14 @@ public class BoardingPositionMapper {
 
     /**
      * Copies the input fields onto a boarding position. A field that the input leaves out stays unchanged,
-     * and a {@code publicCode} that the input sets to null clears it.
+     * and a {@code publicCode} or {@code geometry} that the input sets to null clears it.
      */
     public void populateBoardingPosition(Map<String, Object> entry, BoardingPosition boardingPosition) {
         if (entry.containsKey(PUBLIC_CODE)) {
             boardingPosition.setPublicCode((String) entry.get(PUBLIC_CODE));
         }
-        Point geoJsonPoint = geometryMapper.createGeoJsonPoint((Map) entry.get(GEOMETRY));
-        if (geoJsonPoint != null) {
-            boardingPosition.setCentroid(geoJsonPoint);
+        if (entry.containsKey(GEOMETRY)) {
+            boardingPosition.setCentroid(geometryMapper.createGeoJsonPoint((Map) entry.get(GEOMETRY)));
         }
     }
 }

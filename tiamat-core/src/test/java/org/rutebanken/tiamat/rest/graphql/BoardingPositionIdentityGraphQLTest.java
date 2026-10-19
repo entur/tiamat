@@ -69,6 +69,31 @@ public class BoardingPositionIdentityGraphQLTest extends AbstractGraphQLResource
     }
 
     @Test
+    public void resentBoardingPositionWithNullGeometryClearsTheGeometry() {
+        createQuayWithPosition();
+        String quayId = readQuay().getString("id");
+        String positionId = readQuay().getString("boardingPositions[0].id");
+        executeGraphqQLQueryOnly("""
+                mutation { stopPlace: %s (StopPlace: { id: "%s"
+                  quays: [ { id: "%s" boardingPositions: [ { id: "%s" publicCode: "A" geometry: { type: Point coordinates: [10.5, 59.0] } } ] } ] }) { id } }"""
+                .formatted(GraphQLNames.MUTATE_STOPPLACE, stopPlaceId, quayId, positionId));
+        assertThat(readPositionGeometry()).isNotNull();
+
+        executeGraphqQLQueryOnly("""
+                mutation { stopPlace: %s (StopPlace: { id: "%s"
+                  quays: [ { id: "%s" boardingPositions: [ { id: "%s" publicCode: "A" geometry: null } ] } ] }) { id } }"""
+                .formatted(GraphQLNames.MUTATE_STOPPLACE, stopPlaceId, quayId, positionId));
+
+        assertThat(readPositionGeometry()).isNull();
+    }
+
+    private Object readPositionGeometry() {
+        return executeGraphqQLQueryOnly("""
+                { stopPlace: stopPlace(id: "%s") { ... on StopPlace { quays { boardingPositions { geometry { type } } } } } }"""
+                .formatted(stopPlaceId)).extract().jsonPath().get("data.stopPlace[0].quays[0].boardingPositions[0].geometry");
+    }
+
+    @Test
     public void unknownBoardingPositionIdIsRejectedWithPositionAndQuayId() {
         createQuayWithPosition();
         String quayId = readQuay().getString("id");

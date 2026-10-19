@@ -202,6 +202,30 @@ public class ParkingVehicleEntranceIdentityTest extends AbstractGraphQLResourceI
         assertThat(after.centroid().getY()).isEqualTo(59.9);
     }
 
+    @Test
+    public void resentEntranceWithNullLabelClearsTheLabel() throws Exception {
+        String parkingId = createParkingWithEntrances("Gate 1");
+        String entranceId = entrances(parkingId).getFirst().netexId();
+
+        executeGraphqQLQueryOnly(updateEntrances(parkingId, "{ id: \"" + entranceId + "\" label: null }"))
+                .body("errors", nullValue());
+
+        Object label = this.<Object>inLatestParking(parkingId, parking -> parking.getVehicleEntrances().getFirst().getLabel());
+        assertThat(label).isNull();
+    }
+
+    @Test
+    public void resentEntranceWithoutLabelKeepsTheLabel() throws Exception {
+        String parkingId = createParkingWithEntrances("Gate 1");
+        String entranceId = entrances(parkingId).getFirst().netexId();
+
+        executeGraphqQLQueryOnly(updateEntrances(parkingId, "{ id: \"" + entranceId + "\" entranceType: gate }"))
+                .body("errors", nullValue());
+
+        String label = this.<String>inLatestParking(parkingId, parking -> parking.getVehicleEntrances().getFirst().getLabel().getValue());
+        assertThat(label).isEqualTo("Gate 1");
+    }
+
     private record EntranceState(String netexId, long version, Point centroid) {
     }
 
