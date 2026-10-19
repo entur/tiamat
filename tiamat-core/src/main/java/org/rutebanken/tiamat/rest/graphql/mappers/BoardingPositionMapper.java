@@ -17,13 +17,9 @@ package org.rutebanken.tiamat.rest.graphql.mappers;
 
 import org.locationtech.jts.geom.Point;
 import org.rutebanken.tiamat.model.BoardingPosition;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.GEOMETRY;
@@ -32,34 +28,20 @@ import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.PUBLIC_CODE;
 @Component
 public class BoardingPositionMapper {
 
-    private static final Logger logger = LoggerFactory.getLogger(BoardingPositionMapper.class);
-
     @Autowired
     private GeometryMapper geometryMapper;
 
-    @SuppressWarnings("unchecked")
-    public BoardingPosition mapBoardingPosition(Map entry) {
-
-        final String publicCode = (String) entry.get(PUBLIC_CODE);
-        final Point geoJsonPoint = geometryMapper.createGeoJsonPoint((Map) entry.get(GEOMETRY));
-
-        BoardingPosition boardingPosition = new BoardingPosition();
-        boardingPosition.setPublicCode(publicCode);
-        boardingPosition.setCentroid(geoJsonPoint);
-
-        return boardingPosition;
-    }
-
-    public List<BoardingPosition> mapBoardingPositions(List boardingPositions) {
-        List<BoardingPosition> mapped =  new ArrayList<>();
-        for(Object object : boardingPositions) {
-            if (object instanceof Map) {
-                mapped.add(mapBoardingPosition((Map) object));
-            } else {
-                logger.warn("Object not instance of Map: {}", object);
-            }
+    /**
+     * Copies the input fields onto a boarding position. A field that the input leaves out stays unchanged,
+     * and a {@code publicCode} that the input sets to null clears it.
+     */
+    public void populateBoardingPosition(Map<String, Object> entry, BoardingPosition boardingPosition) {
+        if (entry.containsKey(PUBLIC_CODE)) {
+            boardingPosition.setPublicCode((String) entry.get(PUBLIC_CODE));
         }
-        return mapped;
+        Point geoJsonPoint = geometryMapper.createGeoJsonPoint((Map) entry.get(GEOMETRY));
+        if (geoJsonPoint != null) {
+            boardingPosition.setCentroid(geoJsonPoint);
+        }
     }
-
 }

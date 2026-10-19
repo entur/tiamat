@@ -16,7 +16,6 @@
 package org.rutebanken.tiamat.rest.graphql.mappers;
 
 import com.google.api.client.util.Preconditions;
-import org.rutebanken.tiamat.model.BoardingPosition;
 import org.rutebanken.tiamat.model.LightingEnumeration;
 import org.rutebanken.tiamat.model.PrivateCodeStructure;
 import org.rutebanken.tiamat.model.Quay;
@@ -55,9 +54,6 @@ public class QuayMapper {
     private GroupOfEntitiesMapper groupOfEntitiesMapper;
 
     @Autowired
-    private BoardingPositionMapper boardingPositionMapper;
-
-    @Autowired
     private BoardingPositionUpdater boardingPositionUpdater;
 
     @Autowired
@@ -89,10 +85,9 @@ public class QuayMapper {
         }
 
         if (quayInputMap.get(BOARDING_POSITIONS) != null) {
-            List boardingPositionObjects = (List) quayInputMap.get(BOARDING_POSITIONS);
+            List<Map<String, Object>> boardingPositionInputs = (List<Map<String, Object>>) quayInputMap.get(BOARDING_POSITIONS);
 
-            final List<BoardingPosition> boardingPositions = boardingPositionMapper.mapBoardingPositions(boardingPositionObjects);
-            if (boardingPositionUpdater.update(quay, boardingPositions)) {
+            if (boardingPositionUpdater.update(quay, boardingPositionInputs)) {
                 isQuayUpdated = true;
             } else {
                 logger.info("Boarding Positions not changed");
