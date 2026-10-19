@@ -93,7 +93,7 @@ public class ReadApiNetexPublicationDeliveryService {
             ValidPrefixList validPrefixList,
             ExportTimeZone exportTimeZone,
             @Value("${tiamat.locals.language.default:nor}") String defaultLanguage,
-            @Value("${netex.profile.version:1.12:NO-NeTEx-stops:1.4}") String publicationDeliveryId
+            @Value("${netex.profile.version:2.0:NO-NeTEx-stops:1.5}") String publicationDeliveryId
     ) {
         this.netexRepository = netexRepository;
         this.prefixList = validPrefixList;
