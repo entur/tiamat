@@ -18,16 +18,12 @@ package org.rutebanken.tiamat.versioning;
 import ma.glasnost.orika.MapperFacade;
 import ma.glasnost.orika.MapperFactory;
 import org.rutebanken.tiamat.model.EntityInVersionStructure;
-import org.rutebanken.tiamat.model.InstalledEquipment_VersionStructure;
-import org.rutebanken.tiamat.model.PlaceEquipment;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * Creates new version of already existing objects, by mapping with Orika and ignore primary key "id".
@@ -57,19 +53,6 @@ public class VersionCreator {
         MapperFactory mapperFactory = EntityCopyMappings.newMapperFactory();
 
         EntityCopyMappings.registerPathLinkEnd(mapperFactory);
-
-        // Equipment belongs to the entity it hangs off rather than existing in its own right, so a
-        // copy gets a fresh identity rather than sharing the original's.
-        List<Class<? extends EntityInVersionStructure>> excludeNetexIdAndVersionsForEntities =
-                Arrays.asList(PlaceEquipment.class, InstalledEquipment_VersionStructure.class);
-
-        excludeNetexIdAndVersionsForEntities.forEach(clazz -> {
-            mapperFactory.classMap(clazz, clazz)
-                    .exclude(EntityCopyMappings.NETEX_ID_FIELD)
-                    .exclude(EntityCopyMappings.VERSION_FIELD)
-                    .byDefault()
-                    .register();
-        });
 
         // A new version is the same stop place, so netexId is deliberately carried over. The
         // topographic place is referred to rather than copied.

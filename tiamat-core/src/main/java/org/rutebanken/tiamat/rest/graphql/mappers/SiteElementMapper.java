@@ -127,7 +127,7 @@ public class SiteElementMapper {
             }
         }
 
-        Optional<PlaceEquipment> placeEquipment = placeEquipmentMapper.map(input);
+        Optional<PlaceEquipment> placeEquipment = placeEquipmentMapper.map(input, existingPlaceEquipment(siteElement), siteElement.getNetexId());
 
         if (placeEquipment.isPresent()) {
             if (siteElement instanceof Site_VersionStructure siteVersionStructure) {
@@ -155,5 +155,14 @@ public class SiteElementMapper {
         }
 
         return isUpdated;
+    }
+
+    private PlaceEquipment existingPlaceEquipment(SiteElement siteElement) {
+        if (siteElement instanceof Site_VersionStructure site) {
+            return site.getPlaceEquipments();
+        } else if (siteElement instanceof SiteComponent_VersionStructure component) {
+            return component.getPlaceEquipments();
+        }
+        return null;
     }
 }
