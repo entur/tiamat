@@ -54,6 +54,7 @@ import org.rutebanken.tiamat.rest.graphql.mappers.GeometryMapper;
 import org.rutebanken.tiamat.rest.graphql.mappers.PlaceEquipmentMapper;
 import org.rutebanken.tiamat.rest.graphql.mappers.ValidBetweenMapper;
 import org.rutebanken.tiamat.service.AlternativeNameUpdater;
+import org.rutebanken.tiamat.service.ChildEntityReconciler;
 import org.rutebanken.tiamat.versioning.VersionCreator;
 import org.rutebanken.tiamat.versioning.save.ParkingVersionedSaverService;
 import org.slf4j.Logger;
@@ -163,6 +164,9 @@ class ParkingUpdater implements DataFetcher {
 
     @Autowired
     private AlternativeNameUpdater alternativeNameUpdater;
+
+    @Autowired
+    private ChildEntityReconciler childEntityReconciler;
 
     @Override
     public Object get(DataFetchingEnvironment environment) {
@@ -364,7 +368,8 @@ class ParkingUpdater implements DataFetcher {
         }
 
         if (input.get(VEHICLE_ENTRANCES) != null) {
-            List<ParkingEntranceForVehicles> vehicleEntrancesList = resolveVehicleEntrancesList((List) input.get(VEHICLE_ENTRANCES));
+            List<ParkingEntranceForVehicles> vehicleEntrancesList = resolveVehicleEntrancesList(
+                    (List) input.get(VEHICLE_ENTRANCES), updatedParking.getVehicleEntrances(), updatedParking.getNetexId());
             isUpdated = true;
             updatedParking.setVehicleEntrances(vehicleEntrancesList);
         }
@@ -463,16 +468,16 @@ class ParkingUpdater implements DataFetcher {
         return area;
     }
 
-    private List<ParkingEntranceForVehicles> resolveVehicleEntrancesList(List list) {
-        List<ParkingEntranceForVehicles> result = new ArrayList<>();
-        for (Object entrance : list) {
-            result.add(resolveSingleVehicleEntrance((Map) entrance));
-        }
-        return result;
+    private List<ParkingEntranceForVehicles> resolveVehicleEntrancesList(List<Map<String, Object>> inputs, Collection<ParkingEntranceForVehicles> existingEntrances, String parkingId) {
+        return childEntityReconciler.reconcileAll(
+                existingEntrances,
+                inputs,
+                parkingId,
+                ParkingEntranceForVehicles::new,
+                this::populateVehicleEntrance);
     }
 
-    private ParkingEntranceForVehicles resolveSingleVehicleEntrance(Map input) {
-        ParkingEntranceForVehicles entrance = new ParkingEntranceForVehicles();
+    private void populateVehicleEntrance(Map<String, Object> input, ParkingEntranceForVehicles entrance) {
         Object label = input.get(LABEL);
         if (label != null) {
             entrance.setLabel(new EmbeddableMultilingualString((String) label));
@@ -486,7 +491,6 @@ class ParkingUpdater implements DataFetcher {
         if (input.get(ACCESS_MODES) != null) {
             entrance.setAccessModesList((List<AccessModeEnumeration>) input.get(ACCESS_MODES));
         }
-        return entrance;
     }
 
     /**
