@@ -17,21 +17,19 @@ package org.rutebanken.tiamat.netex.mapping;
 
 import jakarta.xml.bind.JAXBElement;
 import org.entur.netex2.model.MultilingualString;
-import org.entur.netex2.model.ObjectFactory;
 import org.entur.netex2.model.TextType;
 
 import java.io.Serializable;
 
 /**
- * Since netex-java-model 3.0.0, {@link MultilingualString} no longer holds a single value,
- * but a list of {@link TextType} elements to support multiple language variants of the same
- * text. Tiamat's own model only ever stores a single value/lang pair, so on read we pick the
- * first {@code Text} element, and on write we produce a {@link MultilingualString} with exactly
- * one {@code Text} element.
+ * Since netex-java-model 3.0.0, {@link MultilingualString} is mixed content: either inline text
+ * ({@code <Name lang="nor">Oslo S</Name>}) or a list of {@link TextType} elements for multiple
+ * language variants. Tiamat's own model only ever stores a single value/lang pair, so on read we
+ * pick the first {@code Text} element, falling back to inline text, and on write we produce
+ * inline text. The inline form is valid NeTEx 2.0, is what the Nordic profile examples use, and
+ * stays readable for consumers still on NeTEx 1.x, whose schema rejects {@code Text} children.
  */
 public final class NetexMultilingualStringHelper {
-
-    private static final ObjectFactory OBJECT_FACTORY = new ObjectFactory();
 
     private NetexMultilingualStringHelper() {
     }
@@ -45,16 +43,7 @@ public final class NetexMultilingualStringHelper {
             return null;
         }
 
-        TextType text = new TextType().withValue(value);
-        if (lang != null) {
-            text.setLang(lang);
-        }
-
-        MultilingualString multilingualString = new MultilingualString().withContent(OBJECT_FACTORY.createMultilingualStringText(text));
-        if (lang != null) {
-            multilingualString.setLang(lang);
-        }
-        return multilingualString;
+        return new MultilingualString().withContent(value).withLang(lang);
     }
 
     public static String getValue(MultilingualString multilingualString) {
