@@ -149,7 +149,10 @@ public class PubSubWriteJobTransportIntegrationTest extends TiamatIntegrationTes
         assertThat(subscriber.isRunning())
                 .as("a lifecycle that never started consumes nothing, and every job times out")
                 .isTrue();
-        assertThat(subscriber.subscriberState()).contains(com.google.api.core.ApiService.State.RUNNING);
+        // The client reaches RUNNING asynchronously after the lifecycle has started.
+        await().atMost(Duration.ofSeconds(10))
+                .untilAsserted(() -> assertThat(subscriber.subscriberState())
+                        .contains(com.google.api.core.ApiService.State.RUNNING));
     }
 
     @Test
