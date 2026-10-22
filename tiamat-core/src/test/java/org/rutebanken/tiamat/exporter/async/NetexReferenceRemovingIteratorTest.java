@@ -17,11 +17,11 @@ package org.rutebanken.tiamat.exporter.async;
 
 import jakarta.xml.bind.JAXBElement;
 import org.junit.Test;
-import org.rutebanken.netex.model.ObjectFactory;
-import org.rutebanken.netex.model.StopPlace;
-import org.rutebanken.netex.model.TariffZoneRef;
-import org.rutebanken.netex.model.TariffZoneRefs_RelStructure;
-import org.rutebanken.netex.model.TopographicPlaceRefStructure;
+import org.entur.netex2.model.ObjectFactory;
+import org.entur.netex2.model.StopPlace;
+import org.entur.netex2.model.TariffZoneRef;
+import org.entur.netex2.model.TariffZoneRefs_RelStructure;
+import org.entur.netex2.model.TopographicPlaceRefStructure;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 
 import java.util.Collections;
@@ -39,7 +39,7 @@ public class NetexReferenceRemovingIteratorTest {
         StopPlace stopPlace = new StopPlace()
                 .withTariffZones(
                         new TariffZoneRefs_RelStructure()
-                                .withTariffZoneRef_(
+                                .withTariffZoneRef(
                                         new ObjectFactory().createTariffZoneRef(
                                             new TariffZoneRef()
                                                 .withRef("RUT:TariffZone:1")
@@ -70,11 +70,11 @@ public class NetexReferenceRemovingIteratorTest {
 
         StopPlace actual = netexReferenceRemovingIterator.next();
 
-        assertThat(actual.getTariffZones().getTariffZoneRef_().stream()
+        assertThat(actual.getTariffZones().getTariffZoneRef().stream()
                 .map(JAXBElement::getValue)
                 .toList()
                 .getFirst().getVersion()).as("TariffZoneref version").isNull();
-        assertThat(actual.getTariffZones().getTariffZoneRef_().stream()
+        assertThat(actual.getTariffZones().getTariffZoneRef().stream()
                 .map(JAXBElement::getValue)
                 .toList()
                 .getLast().getVersion()).as("TariffZoneref version").isNull();
@@ -88,7 +88,7 @@ public class NetexReferenceRemovingIteratorTest {
         StopPlace stopPlace = new StopPlace()
                 .withTariffZones(
                         new TariffZoneRefs_RelStructure()
-                                .withTariffZoneRef_(new ObjectFactory().createTariffZoneRef(
+                                .withTariffZoneRef(new ObjectFactory().createTariffZoneRef(
                                         new TariffZoneRef()
                                                 .withRef("ref")
                                                 .withVersion("version"))))
@@ -110,7 +110,7 @@ public class NetexReferenceRemovingIteratorTest {
 
         StopPlace actual = netexReferenceRemovingIterator.next();
 
-        assertThat(actual.getTariffZones().getTariffZoneRef_().stream()
+        assertThat(actual.getTariffZones().getTariffZoneRef().stream()
                 .map(JAXBElement::getValue)
                 .toList()
                 .getFirst().getVersion()).as("TariffZoneref version").isEqualTo("version");

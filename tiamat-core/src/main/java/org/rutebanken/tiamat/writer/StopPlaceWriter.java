@@ -1,8 +1,8 @@
 package org.rutebanken.tiamat.writer;
 
-import org.rutebanken.netex.model.LocaleStructure;
-import org.rutebanken.netex.model.SiteFrame;
-import org.rutebanken.netex.model.VersionFrameDefaultsStructure;
+import org.entur.netex2.model.LocaleStructure;
+import org.entur.netex2.model.SiteFrame;
+import org.entur.netex2.model.VersionFrameDefaultsStructure;
 import org.rutebanken.tiamat.lock.MutateLock;
 import org.rutebanken.tiamat.model.ModificationEnumeration;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -79,7 +79,7 @@ public class StopPlaceWriter {
     }
 
     @Transactional
-    public StopPlace createStopPlace(org.rutebanken.netex.model.StopPlace newStopPlace) {
+    public StopPlace createStopPlace(org.entur.netex2.model.StopPlace newStopPlace) {
         establishNetexMappingContext();
         var tiamatStopPlace = netexMapper.mapToTiamatModel(newStopPlace);
         var cleanStopPlace = createStopPlaceMapper.createCopy(tiamatStopPlace, StopPlace.class);
@@ -89,7 +89,7 @@ public class StopPlaceWriter {
     }
 
     @Transactional
-    public StopPlace updateStopPlace(org.rutebanken.netex.model.StopPlace newStopPlace) {
+    public StopPlace updateStopPlace(org.entur.netex2.model.StopPlace newStopPlace) {
         establishNetexMappingContext();
         long expectedVersion = requireSubmittedVersion(newStopPlace);
         return mutateLock.executeInLock(() -> {
@@ -128,7 +128,7 @@ public class StopPlaceWriter {
      * <p>
      * A create ignores the attribute, because a new stop place has no earlier version.
      */
-    private static long requireSubmittedVersion(org.rutebanken.netex.model.StopPlace submitted) {
+    private static long requireSubmittedVersion(org.entur.netex2.model.StopPlace submitted) {
         String version = submitted.getVersion();
         if (version == null || version.isBlank()) {
             throw new IllegalArgumentException(

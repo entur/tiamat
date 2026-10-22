@@ -18,15 +18,15 @@ package org.rutebanken.tiamat.netex.mapping.mapper;
 import jakarta.xml.bind.JAXBElement;
 import ma.glasnost.orika.CustomMapper;
 import ma.glasnost.orika.MappingContext;
-import org.rutebanken.netex.model.CycleStorageEquipment;
-import org.rutebanken.netex.model.GeneralSign;
-import org.rutebanken.netex.model.InstalledEquipment_VersionStructure;
-import org.rutebanken.netex.model.ObjectFactory;
-import org.rutebanken.netex.model.PlaceEquipments_RelStructure;
-import org.rutebanken.netex.model.SanitaryEquipment;
-import org.rutebanken.netex.model.ShelterEquipment;
-import org.rutebanken.netex.model.TicketingEquipment;
-import org.rutebanken.netex.model.WaitingRoomEquipment;
+import org.entur.netex2.model.CycleStorageEquipment;
+import org.entur.netex2.model.GeneralSign;
+import org.entur.netex2.model.InstalledEquipment_VersionStructure;
+import org.entur.netex2.model.ObjectFactory;
+import org.entur.netex2.model.PlaceEquipments_RelStructure;
+import org.entur.netex2.model.SanitaryEquipment;
+import org.entur.netex2.model.ShelterEquipment;
+import org.entur.netex2.model.TicketingEquipment;
+import org.entur.netex2.model.WaitingRoomEquipment;
 import org.rutebanken.tiamat.model.PlaceEquipment;
 import org.springframework.stereotype.Component;
 
@@ -44,7 +44,7 @@ public class PlaceEquipmentMapper extends CustomMapper<PlaceEquipments_RelStruct
 
         super.mapAtoB(placeEquipments_relStructure, placeEquipment, context);
 
-        List<org.rutebanken.netex.model.InstalledEquipment_VersionStructure> netexInstalledEquipmentList = placeEquipments_relStructure
+        List<org.entur.netex2.model.InstalledEquipment_VersionStructure> netexInstalledEquipmentList = placeEquipments_relStructure
                 .getInstalledEquipmentRefOrInstalledEquipment()
                 .stream()
                 .filter(jaxbElement -> {
@@ -69,9 +69,9 @@ public class PlaceEquipmentMapper extends CustomMapper<PlaceEquipments_RelStruct
     public void mapBtoA(org.rutebanken.tiamat.model.PlaceEquipment placeEquipment, PlaceEquipments_RelStructure placeEquipments_relStructure, MappingContext context) {
         mapperFacade.map(placeEquipment, placeEquipments_relStructure, context);
 
-        List<org.rutebanken.netex.model.InstalledEquipment_VersionStructure> installedEquipment_versionStructures = mapperFacade.mapAsList(placeEquipment.getInstalledEquipment(), org.rutebanken.netex.model.InstalledEquipment_VersionStructure.class, context);
+        List<org.entur.netex2.model.InstalledEquipment_VersionStructure> installedEquipment_versionStructures = mapperFacade.mapAsList(placeEquipment.getInstalledEquipment(), org.entur.netex2.model.InstalledEquipment_VersionStructure.class, context);
 
-        List<JAXBElement<? extends org.rutebanken.netex.model.InstalledEquipment_VersionStructure>> jaxbElements = installedEquipment_versionStructures
+        List<JAXBElement<? extends org.entur.netex2.model.InstalledEquipment_VersionStructure>> jaxbElements = installedEquipment_versionStructures
                 .stream()
                 .filter(equipment -> (equipment instanceof SanitaryEquipment |
                         equipment instanceof TicketingEquipment |

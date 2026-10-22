@@ -17,11 +17,12 @@ package org.rutebanken.tiamat.netex.mapping.mapper;
 
 import ma.glasnost.orika.CustomMapper;
 import ma.glasnost.orika.MappingContext;
-import org.rutebanken.netex.model.AlternativeName;
-import org.rutebanken.netex.model.AlternativeNames_RelStructure;
-import org.rutebanken.netex.model.KeyListStructure;
-import org.rutebanken.netex.model.KeyValueStructure;
-import org.rutebanken.netex.model.StopPlace;
+import org.entur.netex2.model.AlternativeName;
+import org.entur.netex2.model.AlternativeNames_RelStructure;
+import org.entur.netex2.model.KeyListStructure;
+import org.entur.netex2.model.KeyValueStructure;
+import org.entur.netex2.model.StopPlace;
+import org.rutebanken.tiamat.netex.mapping.NetexMultilingualStringHelper;
 import org.rutebanken.tiamat.netex.mapping.PublicationDeliveryHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -60,8 +61,8 @@ public class StopPlaceMapper extends CustomMapper<StopPlace, org.rutebanken.tiam
             for (AlternativeName netexAltName : netexAlternativeName) {
                 if (netexAltName != null
                         && netexAltName.getName() != null
-                        && netexAltName.getName().getValue() != null
-                        && !netexAltName.getName().getValue().isEmpty()) {
+                        && NetexMultilingualStringHelper.getValue(netexAltName.getName()) != null
+                        && !NetexMultilingualStringHelper.getValue(netexAltName.getName()).isEmpty()) {
                     //Only include non-empty alternative names
                     org.rutebanken.tiamat.model.AlternativeName tiamatAltName = new org.rutebanken.tiamat.model.AlternativeName();
                     mapperFacade.map(netexAltName, tiamatAltName);

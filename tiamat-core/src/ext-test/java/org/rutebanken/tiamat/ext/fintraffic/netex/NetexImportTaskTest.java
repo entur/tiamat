@@ -6,7 +6,7 @@ import org.junit.jupiter.api.io.TempDir;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.rutebanken.netex.model.PublicationDeliveryStructure;
+import org.entur.netex2.model.PublicationDeliveryStructure;
 import org.rutebanken.tiamat.importer.ImportParams;
 import org.rutebanken.tiamat.importer.ImportType;
 import org.rutebanken.tiamat.importer.FareZoneFrameSource;

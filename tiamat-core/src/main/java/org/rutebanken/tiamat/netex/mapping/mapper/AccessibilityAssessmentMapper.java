@@ -2,8 +2,8 @@ package org.rutebanken.tiamat.netex.mapping.mapper;
 
 import ma.glasnost.orika.CustomMapper;
 import ma.glasnost.orika.MappingContext;
-import org.rutebanken.netex.model.AccessibilityAssessment;
-import org.rutebanken.netex.model.LimitationStatusEnumeration;
+import org.entur.netex2.model.AccessibilityAssessment;
+import org.entur.netex2.model.LimitationStatusEnumeration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

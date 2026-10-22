@@ -1,18 +1,18 @@
 package org.rutebanken.tiamat.exporter;
 
 import jakarta.xml.bind.JAXBElement;
-import org.rutebanken.netex.model.EntityInVersionStructure;
-import org.rutebanken.netex.model.MultilingualString;
-import org.rutebanken.netex.model.ObjectFactory;
-import org.rutebanken.netex.model.PassengerStopAssignment;
-import org.rutebanken.netex.model.QuayRefStructure;
-import org.rutebanken.netex.model.ScheduledStopPoint;
-import org.rutebanken.netex.model.ScheduledStopPointRefStructure;
-import org.rutebanken.netex.model.StopPlaceRefStructure;
-import org.rutebanken.netex.model.ValidBetween;
+import org.entur.netex2.model.EntityInVersionStructure;
+import org.entur.netex2.model.ObjectFactory;
+import org.entur.netex2.model.PassengerStopAssignment;
+import org.entur.netex2.model.QuayRefStructure;
+import org.entur.netex2.model.ScheduledStopPoint;
+import org.entur.netex2.model.ScheduledStopPointRefStructure;
+import org.entur.netex2.model.StopPlaceRefStructure;
+import org.entur.netex2.model.ValidBetween;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.id.NetexIdHelper;
+import org.rutebanken.tiamat.netex.mapping.NetexMultilingualStringHelper;
 import org.springframework.stereotype.Component;
 
 import java.math.BigInteger;
@@ -83,10 +83,10 @@ public class ServiceFrameElementCreator {
     }
 
     private ScheduledStopPoint createNetexScheduledStopPoint(String scheduledStopPointNetexId, String stopPlaceName, long version, LocalDateTime validFrom, LocalDateTime validTo) {
-        final org.rutebanken.netex.model.ScheduledStopPoint netexScheduledStopPoint = new org.rutebanken.netex.model.ScheduledStopPoint();
+        final org.entur.netex2.model.ScheduledStopPoint netexScheduledStopPoint = new org.entur.netex2.model.ScheduledStopPoint();
         netexScheduledStopPoint.setId(scheduledStopPointNetexId);
         netexScheduledStopPoint.setVersion(String.valueOf(version));
-        netexScheduledStopPoint.withName(new MultilingualString().withValue(stopPlaceName));
+        netexScheduledStopPoint.withName(NetexMultilingualStringHelper.toNetexModel(stopPlaceName));
         ValidBetween validBetween = new ValidBetween().withFromDate(validFrom).withToDate(validTo);
 
         netexScheduledStopPoint.withValidBetween(validBetween);

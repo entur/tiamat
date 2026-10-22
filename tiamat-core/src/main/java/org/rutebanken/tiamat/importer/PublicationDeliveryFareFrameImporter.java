@@ -15,8 +15,8 @@
 
 package org.rutebanken.tiamat.importer;
 
-import org.rutebanken.netex.model.FareFrame;
-import org.rutebanken.netex.model.PublicationDeliveryStructure;
+import org.entur.netex2.model.FareFrame;
+import org.entur.netex2.model.PublicationDeliveryStructure;
 import org.rutebanken.tiamat.config.FareZoneConfig;
 import org.rutebanken.tiamat.exporter.PublicationDeliveryCreator;
 import org.rutebanken.tiamat.importer.handler.TariffZoneImportHandler;

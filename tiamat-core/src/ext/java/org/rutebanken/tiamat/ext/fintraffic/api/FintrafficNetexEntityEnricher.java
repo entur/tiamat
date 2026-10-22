@@ -1,12 +1,12 @@
 package org.rutebanken.tiamat.ext.fintraffic.api;
 
 import jakarta.xml.bind.JAXBElement;
-import org.rutebanken.netex.model.EntityInVersionStructure;
-import org.rutebanken.netex.model.KeyListStructure;
-import org.rutebanken.netex.model.KeyValueStructure;
-import org.rutebanken.netex.model.Quay;
-import org.rutebanken.netex.model.SiteElement_VersionStructure;
-import org.rutebanken.netex.model.StopPlace;
+import org.entur.netex2.model.EntityInVersionStructure;
+import org.entur.netex2.model.KeyListStructure;
+import org.entur.netex2.model.KeyValueStructure;
+import org.entur.netex2.model.Quay;
+import org.entur.netex2.model.SiteElement_VersionStructure;
+import org.entur.netex2.model.StopPlace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

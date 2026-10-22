@@ -23,24 +23,25 @@ import jakarta.xml.bind.JAXBElement;
 import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Marshaller;
 import jakarta.xml.bind.Unmarshaller;
-import org.rutebanken.netex.model.Common_VersionFrameStructure;
-import org.rutebanken.netex.model.CompositeFrame;
-import org.rutebanken.netex.model.DataManagedObjectStructure;
-import org.rutebanken.netex.model.FareFrame;
-import org.rutebanken.netex.model.GroupOfStopPlaces;
-import org.rutebanken.netex.model.LocaleStructure;
-import org.rutebanken.netex.model.ObjectFactory;
-import org.rutebanken.netex.model.Parking;
-import org.rutebanken.netex.model.PathLink;
-import org.rutebanken.netex.model.PathLinksInFrame_RelStructure;
-import org.rutebanken.netex.model.PublicationDeliveryStructure;
-import org.rutebanken.netex.model.Quay;
-import org.rutebanken.netex.model.SiteFrame;
-import org.rutebanken.netex.model.StopPlace;
-import org.rutebanken.netex.model.StopPlacesInFrame_RelStructure;
-import org.rutebanken.netex.model.TopographicPlace;
-import org.rutebanken.netex.model.TopographicPlacesInFrame_RelStructure;
-import org.rutebanken.netex.model.VersionFrameDefaultsStructure;
+import org.entur.netex2.model.Common_VersionFrameStructure;
+import org.entur.netex2.model.CompositeFrame;
+import org.entur.netex2.model.DataManagedObjectStructure;
+import org.entur.netex2.model.FareFrame;
+import org.entur.netex2.model.GroupOfStopPlaces;
+import org.entur.netex2.model.LocaleStructure;
+import org.entur.netex2.model.ObjectFactory;
+import org.entur.netex2.model.GenericPathLink_VersionStructure;
+import org.entur.netex2.model.Parking;
+import org.entur.netex2.model.PathLink;
+import org.entur.netex2.model.PublicationDeliveryStructure;
+import org.entur.netex2.model.Quay;
+import org.entur.netex2.model.SiteFrame;
+import org.entur.netex2.model.SitePathLinksInFrame_RelStructure;
+import org.entur.netex2.model.StopPlace;
+import org.entur.netex2.model.StopPlacesInFrame_RelStructure;
+import org.entur.netex2.model.TopographicPlace;
+import org.entur.netex2.model.TopographicPlacesInFrame_RelStructure;
+import org.entur.netex2.model.VersionFrameDefaultsStructure;
 import org.rutebanken.tiamat.importer.ImportParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,7 +80,7 @@ public class PublicationDeliveryTestHelper {
         try {
             // Use package name to include ObjectFactory's @XmlElementDecl mappings
             // Required for netex-java-model 2.0.15+ which uses @XmlElementRefs in structures like Quays_RelStructure
-            jaxbContext = newInstance("org.rutebanken.netex.model");
+            jaxbContext = newInstance("org.entur.netex2.model");
         } catch (JAXBException e) {
             throw new RuntimeException(e);
         }
@@ -151,10 +152,9 @@ public class PublicationDeliveryTestHelper {
 
     public PublicationDeliveryStructure createPublicationDeliveryWithStopPlace(StopPlace... stopPlace) {
         SiteFrame siteFrame = siteFrame();
-        ObjectFactory objectFactory = new ObjectFactory();
         StopPlacesInFrame_RelStructure stopPlacesStruct = new StopPlacesInFrame_RelStructure();
         for (StopPlace sp : stopPlace) {
-            stopPlacesStruct.getStopPlace_().add(objectFactory.createStopPlace(sp));
+            stopPlacesStruct.getStopPlace().add(sp);
         }
         siteFrame.withStopPlaces(stopPlacesStruct);
 
@@ -163,7 +163,8 @@ public class PublicationDeliveryTestHelper {
 
     public void addPathLinks(PublicationDeliveryStructure publicationDeliveryStructure, PathLink... pathLink) {
         findSiteFrame(publicationDeliveryStructure)
-                .withPathLinks(new PathLinksInFrame_RelStructure().withPathLink(pathLink));
+                .withPathLinks(new SitePathLinksInFrame_RelStructure()
+                        .withSitePathLinkOrOffSitePathLinkOrPathLink(new ArrayList<GenericPathLink_VersionStructure>(java.util.Arrays.asList(pathLink))));
     }
 
     public void hasOriginalId(String expectedId, DataManagedObjectStructure object) {
@@ -200,15 +201,11 @@ public class PublicationDeliveryTestHelper {
     public List<StopPlace> extractStopPlaces(SiteFrame siteFrame, boolean verifyNotNull) {
         if(verifyNotNull) {
             assertThat(siteFrame.getStopPlaces()).as("Site frame stop places").isNotNull();
-            assertThat(siteFrame.getStopPlaces().getStopPlace_()).as("Site frame stop places getStopPlace_").isNotNull();
-        } else if(siteFrame.getStopPlaces() == null || siteFrame.getStopPlaces().getStopPlace_() == null) {
+            assertThat(siteFrame.getStopPlaces().getStopPlace()).as("Site frame stop places getStopPlace").isNotNull();
+        } else if(siteFrame.getStopPlaces() == null || siteFrame.getStopPlaces().getStopPlace() == null) {
             return new ArrayList<>();
         }
-        return siteFrame.getStopPlaces().getStopPlace_().stream()
-                .map(JAXBElement::getValue)
-                .filter(site -> site instanceof StopPlace)
-                .map(site -> (StopPlace) site)
-                .collect(toList());
+        return siteFrame.getStopPlaces().getStopPlace();
     }
 
     public List<GroupOfStopPlaces> extractGroupOfStopPlaces(SiteFrame siteFrame) {
@@ -224,8 +221,11 @@ public class PublicationDeliveryTestHelper {
     public List<PathLink> extractPathLinks(PublicationDeliveryStructure publicationDeliveryStructure) {
 
         SiteFrame siteFrame = findSiteFrame(publicationDeliveryStructure);
-        if(siteFrame.getPathLinks() != null && siteFrame.getPathLinks().getPathLink() != null) {
-            return siteFrame.getPathLinks().getPathLink();
+        if(siteFrame.getPathLinks() != null && siteFrame.getPathLinks().getSitePathLinkOrOffSitePathLinkOrPathLink() != null) {
+            return siteFrame.getPathLinks().getSitePathLinkOrOffSitePathLinkOrPathLink().stream()
+                    .filter(PathLink.class::isInstance)
+                    .map(PathLink.class::cast)
+                    .collect(toList());
         } else {
             return new ArrayList<>();
         }
@@ -246,7 +246,11 @@ public class PublicationDeliveryTestHelper {
 
         SiteFrame siteFrame = findSiteFrame(publicationDeliveryStructure);
         if(siteFrame.getParkings() != null && siteFrame.getParkings().getParking() != null) {
-            return siteFrame.getParkings().getParking();
+            return siteFrame.getParkings().getParking().stream()
+                    .map(JAXBElement::getValue)
+                    .filter(Parking.class::isInstance)
+                    .map(Parking.class::cast)
+                    .collect(toList());
         } else {
             return new ArrayList<>();
         }
@@ -269,10 +273,7 @@ public class PublicationDeliveryTestHelper {
                 .stream()
                 .map(JAXBElement::getValue)
                 .filter(commonVersionFrameStructure -> commonVersionFrameStructure instanceof SiteFrame)
-                .flatMap(commonVersionFrameStructure -> ((SiteFrame) commonVersionFrameStructure).getStopPlaces().getStopPlace_().stream())
-                .map(JAXBElement::getValue)
-                .filter(site -> site instanceof StopPlace)
-                .map(site -> (StopPlace) site)
+                .flatMap(commonVersionFrameStructure -> ((SiteFrame) commonVersionFrameStructure).getStopPlaces().getStopPlace().stream())
                 .findFirst().get();
     }
 

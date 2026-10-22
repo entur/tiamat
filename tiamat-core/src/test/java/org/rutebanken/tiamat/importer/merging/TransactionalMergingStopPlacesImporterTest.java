@@ -70,24 +70,24 @@ public class TransactionalMergingStopPlacesImporterTest extends TiamatIntegratio
     @Test
     public void uniqueByIdAndVersion() {
 
-        List<org.rutebanken.netex.model.StopPlace> stopPlacesWithDuplicates = new ArrayList<>();
+        List<org.entur.netex2.model.StopPlace> stopPlacesWithDuplicates = new ArrayList<>();
 
-        org.rutebanken.netex.model.StopPlace stopPlace1 = new org.rutebanken.netex.model.StopPlace();
+        org.entur.netex2.model.StopPlace stopPlace1 = new org.entur.netex2.model.StopPlace();
         stopPlace1.setId("100");
         stopPlace1.setVersion("10");
 
-        org.rutebanken.netex.model.StopPlace stopPlace2 = new org.rutebanken.netex.model.StopPlace();
+        org.entur.netex2.model.StopPlace stopPlace2 = new org.entur.netex2.model.StopPlace();
         stopPlace2.setId("100");
         stopPlace2.setVersion("1");
 
         stopPlacesWithDuplicates.add(stopPlace2);
         stopPlacesWithDuplicates.add(stopPlace1);
 
-        Collection<org.rutebanken.netex.model.StopPlace> actual = siteFrameImporter.distinctByIdAndHighestVersion(stopPlacesWithDuplicates);
+        Collection<org.entur.netex2.model.StopPlace> actual = siteFrameImporter.distinctByIdAndHighestVersion(stopPlacesWithDuplicates);
 
         assertThat(actual).hasSize(1);
         assertThat(actual).containsOnlyOnce(stopPlace1);
-        assertThat(actual).extracting(org.rutebanken.netex.model.StopPlace::getVersion).containsOnly("10");
+        assertThat(actual).extracting(org.entur.netex2.model.StopPlace::getVersion).containsOnly("10");
 
     }
 
@@ -113,16 +113,16 @@ public class TransactionalMergingStopPlacesImporterTest extends TiamatIntegratio
         sp.add(stopPlace);
 
         AtomicInteger counter = new AtomicInteger();
-        Collection<org.rutebanken.netex.model.StopPlace> importStopPlaces = siteFrameImporter.importStopPlaces(sp, counter);
+        Collection<org.entur.netex2.model.StopPlace> importStopPlaces = siteFrameImporter.importStopPlaces(sp, counter);
 
 
         assertThat(importStopPlaces).hasSize(1);
-        org.rutebanken.netex.model.StopPlace importedStopPlace = importStopPlaces.iterator().next();
+        org.entur.netex2.model.StopPlace importedStopPlace = importStopPlaces.iterator().next();
         assertThat(importedStopPlace).isNotNull();
         assertThat(importedStopPlace.getAccessibilityAssessment()).isNotNull();
         assertThat(importedStopPlace.getAccessibilityAssessment().getLimitations()).isNotNull();
         assertThat(importedStopPlace.getAccessibilityAssessment().getLimitations().getAccessibilityLimitation()).isNotNull();
-        org.rutebanken.netex.model.AccessibilityLimitation accessibilityLimitation = importedStopPlace.getAccessibilityAssessment().getLimitations().getAccessibilityLimitation();
+        org.entur.netex2.model.AccessibilityLimitation accessibilityLimitation = importedStopPlace.getAccessibilityAssessment().getLimitations().getAccessibilityLimitation();
 
         assertThat(accessibilityLimitation).isNotNull();
         assertThat(accessibilityLimitation.getWheelchairAccess()).isNotNull();

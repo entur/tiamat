@@ -20,36 +20,36 @@ import ma.glasnost.orika.MapperFacade;
 import ma.glasnost.orika.MapperFactory;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
 import ma.glasnost.orika.metadata.ClassMapBuilder;
-import org.rutebanken.netex.model.AccessibilityAssessment;
-import org.rutebanken.netex.model.AccessibilityLimitation;
-import org.rutebanken.netex.model.AssistanceService;
-import org.rutebanken.netex.model.CycleStorageEquipment;
-import org.rutebanken.netex.model.DataManagedObjectStructure;
-import org.rutebanken.netex.model.FareFrame;
-import org.rutebanken.netex.model.FareZone;
-import org.rutebanken.netex.model.GeneralSign;
-import org.rutebanken.netex.model.GroupOfStopPlaces;
-import org.rutebanken.netex.model.GroupOfTariffZones;
-import org.rutebanken.netex.model.InstalledEquipment_VersionStructure;
-import org.rutebanken.netex.model.Parking;
-import org.rutebanken.netex.model.PathLink;
-import org.rutebanken.netex.model.PathLinkEndStructure;
-import org.rutebanken.netex.model.PlaceEquipments_RelStructure;
-import org.rutebanken.netex.model.PostalAddress;
-import org.rutebanken.netex.model.PurposeOfGrouping;
-import org.rutebanken.netex.model.Quay;
-import org.rutebanken.netex.model.ResourceFrame;
-import org.rutebanken.netex.model.SanitaryEquipment;
-import org.rutebanken.netex.model.ServiceFrame;
-import org.rutebanken.netex.model.ShelterEquipment;
-import org.rutebanken.netex.model.SiteFacilitySet;
-import org.rutebanken.netex.model.SiteFrame;
-import org.rutebanken.netex.model.StopPlace;
-import org.rutebanken.netex.model.TariffZone;
-import org.rutebanken.netex.model.LocalService_VersionStructure;
-import org.rutebanken.netex.model.TicketingEquipment;
-import org.rutebanken.netex.model.TopographicPlace;
-import org.rutebanken.netex.model.WaitingRoomEquipment;
+import org.entur.netex2.model.AccessibilityAssessment;
+import org.entur.netex2.model.AccessibilityLimitation;
+import org.entur.netex2.model.AssistanceService;
+import org.entur.netex2.model.CycleStorageEquipment;
+import org.entur.netex2.model.DataManagedObjectStructure;
+import org.entur.netex2.model.FareFrame;
+import org.entur.netex2.model.FareZone;
+import org.entur.netex2.model.GeneralSign;
+import org.entur.netex2.model.GroupOfStopPlaces;
+import org.entur.netex2.model.GroupOfTariffZones;
+import org.entur.netex2.model.InstalledEquipment_VersionStructure;
+import org.entur.netex2.model.Parking;
+import org.entur.netex2.model.PathLink;
+import org.entur.netex2.model.PlaceEquipments_RelStructure;
+import org.entur.netex2.model.PostalAddress;
+import org.entur.netex2.model.PurposeOfGrouping;
+import org.entur.netex2.model.Quay;
+import org.entur.netex2.model.ResourceFrame;
+import org.entur.netex2.model.SanitaryEquipment;
+import org.entur.netex2.model.ServiceFrame;
+import org.entur.netex2.model.ShelterEquipment;
+import org.entur.netex2.model.SiteFacilitySet;
+import org.entur.netex2.model.SiteFrame;
+import org.entur.netex2.model.SitePathLinkEndStructure;
+import org.entur.netex2.model.StopPlace;
+import org.entur.netex2.model.TariffZone;
+import org.entur.netex2.model.LocalService_VersionStructure;
+import org.entur.netex2.model.TicketingEquipment;
+import org.entur.netex2.model.TopographicPlace;
+import org.entur.netex2.model.WaitingRoomEquipment;
 import org.rutebanken.tiamat.netex.mapping.mapper.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -162,7 +162,7 @@ public class NetexMapper {
                 .register();
 
 
-        mapperFactoryWithNetexIdClassBuilder(org.rutebanken.netex.model.ParkingEntranceForVehicles.class,
+        mapperFactoryWithNetexIdClassBuilder(org.entur.netex2.model.ParkingEntranceForVehicles.class,
                         org.rutebanken.tiamat.model.ParkingEntranceForVehicles.class)
                 .exclude("accessModes")
                 // ParkingEntranceForVehicles's NeTEx ancestor (GroupOfPoints_VersionStructure)
@@ -192,7 +192,7 @@ public class NetexMapper {
                 .byDefault()
                 .register();
 
-        mapperFactory.classMap(PathLinkEndStructure.class, org.rutebanken.tiamat.model.PathLinkEnd.class)
+        mapperFactory.classMap(SitePathLinkEndStructure.class, org.rutebanken.tiamat.model.PathLinkEnd.class)
                 .byDefault()
                 .register();
 
@@ -232,7 +232,13 @@ public class NetexMapper {
                 .customize(new FacilityMapper())
                 .register();
 
-        mapperFactoryWithNetexIdClassBuilder(PlaceEquipments_RelStructure.class, org.rutebanken.tiamat.model.PlaceEquipment.class)
+        // Not using mapperFactoryWithNetexIdClassBuilder here: PlaceEquipment's netexId has no
+        // valid slot on the netex side. PlaceEquipments_RelStructure.id is a RelationshipId,
+        // restricted to a fixed enumeration of NeTEx property names - not a free-form entity id.
+        // Explicitly excluded (rather than just skipping the netexId mapping) so Orika's
+        // convention-based default mapping doesn't instead wire up tiamat's JPA primary key.
+        mapperFactory.classMap(PlaceEquipments_RelStructure.class, org.rutebanken.tiamat.model.PlaceEquipment.class)
+                .exclude("id")
                 .customize(new PlaceEquipmentMapper())
                 .byDefault()
                 .register();

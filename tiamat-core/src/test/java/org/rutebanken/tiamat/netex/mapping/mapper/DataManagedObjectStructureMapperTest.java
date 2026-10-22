@@ -17,8 +17,8 @@ package org.rutebanken.tiamat.netex.mapping.mapper;
 
 import ma.glasnost.orika.MappingContext;
 import org.junit.Test;
-import org.rutebanken.netex.model.KeyListStructure;
-import org.rutebanken.netex.model.KeyValueStructure;
+import org.entur.netex2.model.KeyListStructure;
+import org.entur.netex2.model.KeyValueStructure;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.id.NetexIdHelper;
 import org.rutebanken.tiamat.netex.id.ValidPrefixList;
@@ -53,7 +53,7 @@ public class DataManagedObjectStructureMapperTest {
         StopPlace tiamatStopPlace = new StopPlace();
         tiamatStopPlace.setChangedBy("me");
 
-        org.rutebanken.netex.model.StopPlace netexStopPlace = new org.rutebanken.netex.model.StopPlace();
+        org.entur.netex2.model.StopPlace netexStopPlace = new org.entur.netex2.model.StopPlace();
         dataManagedObjectStructureMapper.mapBtoA(tiamatStopPlace, netexStopPlace, mappingContext);
 
         assertThat(publicationDeliveryHelper.getValueByKey(netexStopPlace, CHANGED_BY)).isNull();
@@ -64,7 +64,7 @@ public class DataManagedObjectStructureMapperTest {
 
         String changedBy = "someone";
 
-        org.rutebanken.netex.model.StopPlace netexStopPlace = new org.rutebanken.netex.model.StopPlace();
+        org.entur.netex2.model.StopPlace netexStopPlace = new org.entur.netex2.model.StopPlace();
         netexStopPlace.withKeyList(new KeyListStructure()
                 .withKeyValue(new KeyValueStructure()
                         .withKey(CHANGED_BY)
@@ -83,7 +83,7 @@ public class DataManagedObjectStructureMapperTest {
         StopPlace tiamatStopPlace = new StopPlace();
         tiamatStopPlace.setVersionComment("good changes");
 
-        org.rutebanken.netex.model.StopPlace netexStopPlace = new org.rutebanken.netex.model.StopPlace();
+        org.entur.netex2.model.StopPlace netexStopPlace = new org.entur.netex2.model.StopPlace();
         dataManagedObjectStructureMapper.mapBtoA(tiamatStopPlace, netexStopPlace, mappingContext);
 
         assertThat(publicationDeliveryHelper.getValueByKey(netexStopPlace, VERSION_COMMENT)).isEqualTo(tiamatStopPlace.getVersionComment());
@@ -94,7 +94,7 @@ public class DataManagedObjectStructureMapperTest {
 
         String comment = "some change";
 
-        org.rutebanken.netex.model.StopPlace netexStopPlace = new org.rutebanken.netex.model.StopPlace();
+        org.entur.netex2.model.StopPlace netexStopPlace = new org.entur.netex2.model.StopPlace();
         netexStopPlace.withKeyList(new KeyListStructure()
                 .withKeyValue(new KeyValueStructure()
                         .withKey(VERSION_COMMENT)

@@ -1,10 +1,10 @@
 package org.rutebanken.tiamat.importer;
 
 import org.junit.Test;
-import org.rutebanken.netex.model.FareFrame;
-import org.rutebanken.netex.model.LocaleStructure;
-import org.rutebanken.netex.model.PublicationDeliveryStructure;
-import org.rutebanken.netex.model.VersionFrameDefaultsStructure;
+import org.entur.netex2.model.FareFrame;
+import org.entur.netex2.model.LocaleStructure;
+import org.entur.netex2.model.PublicationDeliveryStructure;
+import org.entur.netex2.model.VersionFrameDefaultsStructure;
 import org.rutebanken.tiamat.config.FareZoneConfig;
 import org.rutebanken.tiamat.exporter.PublicationDeliveryCreator;
 import org.rutebanken.tiamat.importer.handler.TariffZoneImportHandler;

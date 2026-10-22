@@ -1,13 +1,13 @@
 package org.rutebanken.tiamat.exporter;
 
 import jakarta.xml.bind.JAXBElement;
-import org.rutebanken.netex.model.DataManagedObjectStructure;
-import org.rutebanken.netex.model.MultilingualString;
-import org.rutebanken.netex.model.ObjectFactory;
-import org.rutebanken.netex.model.PublicationDeliveryStructure;
-import org.rutebanken.netex.model.PurposeOfGrouping;
-import org.rutebanken.netex.model.ResourceFrame;
+import org.entur.netex2.model.DataManagedObjectStructure;
+import org.entur.netex2.model.ObjectFactory;
+import org.entur.netex2.model.PublicationDeliveryStructure;
+import org.entur.netex2.model.PurposeOfGrouping;
+import org.entur.netex2.model.ResourceFrame;
 import org.rutebanken.tiamat.netex.id.ValidPrefixList;
+import org.rutebanken.tiamat.netex.mapping.NetexMultilingualStringHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,7 +24,7 @@ public class PublicationDeliveryCreator {
     private final String publicationDeliveryId;
     private final ValidPrefixList validPrefixList;
 
-    public PublicationDeliveryCreator(@Value("${netex.profile.version:1.12:NO-NeTEx-stops:1.4}") String publicationDeliveryId,
+    public PublicationDeliveryCreator(@Value("${netex.profile.version:2.0:NO-NeTEx-stops:1.5}") String publicationDeliveryId,
                                       ValidPrefixList validPrefixList) {
         this.publicationDeliveryId = publicationDeliveryId;
         this.validPrefixList = validPrefixList;
@@ -38,7 +38,7 @@ public class PublicationDeliveryCreator {
                 .withParticipantRef(validPrefixList.getValidNetexPrefix());
     }
 
-    public PublicationDeliveryStructure createPublicationDelivery(org.rutebanken.netex.model.SiteFrame siteFrame) {
+    public PublicationDeliveryStructure createPublicationDelivery(org.entur.netex2.model.SiteFrame siteFrame) {
         PublicationDeliveryStructure publicationDeliveryStructure = createPublicationDelivery();
         publicationDeliveryStructure.withDataObjects(
                 new PublicationDeliveryStructure.DataObjects()
@@ -50,9 +50,9 @@ public class PublicationDeliveryCreator {
         return publicationDeliveryStructure;
     }
 
-    public PublicationDeliveryStructure createPublicationDelivery(org.rutebanken.netex.model.SiteFrame siteFrame,
-                                                                  org.rutebanken.netex.model.ServiceFrame serviceFrame,
-                                                                  org.rutebanken.netex.model.FareFrame fareFrame,
+    public PublicationDeliveryStructure createPublicationDelivery(org.entur.netex2.model.SiteFrame siteFrame,
+                                                                  org.entur.netex2.model.ServiceFrame serviceFrame,
+                                                                  org.entur.netex2.model.FareFrame fareFrame,
                                                                   ResourceFrame netexResourceFrame
     ) {
         PublicationDeliveryStructure publicationDeliveryStructure = createPublicationDelivery();
@@ -70,9 +70,9 @@ public class PublicationDeliveryCreator {
         return publicationDeliveryStructure;
     }
 
-    public PublicationDeliveryStructure createPublicationDelivery(org.rutebanken.netex.model.SiteFrame siteFrame,
-                                                                  org.rutebanken.netex.model.ServiceFrame serviceFrame,
-                                                                  org.rutebanken.netex.model.FareFrame fareFrame
+    public PublicationDeliveryStructure createPublicationDelivery(org.entur.netex2.model.SiteFrame siteFrame,
+                                                                  org.entur.netex2.model.ServiceFrame serviceFrame,
+                                                                  org.entur.netex2.model.FareFrame fareFrame
     ) {
         PublicationDeliveryStructure publicationDeliveryStructure = createPublicationDelivery();
 
@@ -88,8 +88,8 @@ public class PublicationDeliveryCreator {
         return publicationDeliveryStructure;
     }
 
-    public PublicationDeliveryStructure createPublicationDelivery(org.rutebanken.netex.model.SiteFrame siteFrame,
-                                                                  org.rutebanken.netex.model.ServiceFrame serviceFrame,
+    public PublicationDeliveryStructure createPublicationDelivery(org.entur.netex2.model.SiteFrame siteFrame,
+                                                                  org.entur.netex2.model.ServiceFrame serviceFrame,
                                                                   ResourceFrame netexResourceFrame
     ) {
         PublicationDeliveryStructure publicationDeliveryStructure = createPublicationDelivery();
@@ -106,8 +106,8 @@ public class PublicationDeliveryCreator {
         return publicationDeliveryStructure;
     }
 
-    public PublicationDeliveryStructure createPublicationDelivery(org.rutebanken.netex.model.SiteFrame siteFrame,
-                                                                  org.rutebanken.netex.model.ServiceFrame serviceFrame
+    public PublicationDeliveryStructure createPublicationDelivery(org.entur.netex2.model.SiteFrame siteFrame,
+                                                                  org.entur.netex2.model.ServiceFrame serviceFrame
     ) {
         PublicationDeliveryStructure publicationDeliveryStructure = createPublicationDelivery();
 
@@ -122,8 +122,8 @@ public class PublicationDeliveryCreator {
         return publicationDeliveryStructure;
     }
 
-    public PublicationDeliveryStructure createPublicationDelivery(org.rutebanken.netex.model.SiteFrame siteFrame,
-                                                                  org.rutebanken.netex.model.FareFrame fareFrame
+    public PublicationDeliveryStructure createPublicationDelivery(org.entur.netex2.model.SiteFrame siteFrame,
+                                                                  org.entur.netex2.model.FareFrame fareFrame
     ) {
         PublicationDeliveryStructure publicationDeliveryStructure = createPublicationDelivery();
 
@@ -138,7 +138,7 @@ public class PublicationDeliveryCreator {
         return publicationDeliveryStructure;
     }
 
-    public PublicationDeliveryStructure createPublicationDelivery(org.rutebanken.netex.model.FareFrame fareFrame) {
+    public PublicationDeliveryStructure createPublicationDelivery(org.entur.netex2.model.FareFrame fareFrame) {
         PublicationDeliveryStructure publicationDeliveryStructure = createPublicationDelivery();
         publicationDeliveryStructure.withDataObjects(
                 new PublicationDeliveryStructure.DataObjects()
@@ -153,7 +153,7 @@ public class PublicationDeliveryCreator {
 
     private ResourceFrame createResourceFrame() {
         List<JAXBElement<? extends DataManagedObjectStructure>> purposeOfGroupingList = new ArrayList<>();
-        final PurposeOfGrouping purposeOfGrouping = new ObjectFactory().createPurposeOfGrouping().withId("NSR:PurposeOfGrouping:3").withName(new MultilingualString().withValue("generalization")).withVersion("1");
+        final PurposeOfGrouping purposeOfGrouping = new ObjectFactory().createPurposeOfGrouping().withId("NSR:PurposeOfGrouping:3").withName(NetexMultilingualStringHelper.toNetexModel("generalization")).withVersion("1");
         final JAXBElement<PurposeOfGrouping> purposeOfGroupingJAXBElement= new ObjectFactory().createPurposeOfGrouping(purposeOfGrouping);
         purposeOfGroupingList.add(purposeOfGroupingJAXBElement);
 
