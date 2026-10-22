@@ -49,7 +49,7 @@ public class FareZoneSaverServiceOlderVersionsTest {
 
     @Test
     public void olderVersionOutsideCallersScopeIsNotDeleted() {
-        assertThatThrownBy(() -> saver.saveWithExternalVersioning(fareZone(null, 3)))
+        assertThatThrownBy(() -> saver.saveWithExternalVersioning(fareZone(null, 3), false))
                 .isInstanceOf(AccessDeniedException.class);
         verify(repository, never()).deleteAll(any());
         verify(repository, never()).save(any());
@@ -61,7 +61,7 @@ public class FareZoneSaverServiceOlderVersionsTest {
         FareZone invalid = fareZone(null, 3);
         invalid.setValidBetween(new ValidBetween(Instant.now().plusSeconds(60), Instant.now()));
 
-        assertThat(saver.saveWithExternalVersioning(invalid)).isNull();
+        assertThat(saver.saveWithExternalVersioning(invalid, false)).isNull();
         verify(repository, never()).deleteAll(any());
         verify(repository, never()).save(any());
     }

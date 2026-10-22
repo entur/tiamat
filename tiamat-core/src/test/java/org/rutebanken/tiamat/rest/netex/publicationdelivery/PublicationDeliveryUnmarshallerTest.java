@@ -45,4 +45,27 @@ public class PublicationDeliveryUnmarshallerTest {
                 .isInstanceOf(UnmarshalException.class);
 
     }
+
+    @Test
+    public void rejectsDoctypeToPreventXxe() throws IOException, SAXException, JAXBException {
+
+        String withDoctype = """
+                <?xml version="1.0" encoding="UTF-8"?>
+                <!DOCTYPE PublicationDelivery [ <!ENTITY xxe SYSTEM "file:///etc/passwd"> ]>
+                <PublicationDelivery xmlns="http://www.netex.org.uk/netex">
+                    <PublicationTimestamp>2026-01-01T00:00:00</PublicationTimestamp>
+                    <ParticipantRef>&xxe;</ParticipantRef>
+                    <dataObjects/>
+                </PublicationDelivery>""";
+
+        InputStream inputStream = new ByteArrayInputStream(withDoctype.getBytes());
+
+        PublicationDeliveryUnmarshaller publicationDeliveryUnmarshaller = new PublicationDeliveryUnmarshaller();
+
+        // disallow-doctype-decl makes the parser reject the document outright, so the external entity
+        // is never resolved.
+        assertThatThrownBy(() -> publicationDeliveryUnmarshaller.unmarshal(inputStream))
+                .isInstanceOf(UnmarshalException.class)
+                .rootCause().hasMessageContaining("DOCTYPE");
+    }
 }

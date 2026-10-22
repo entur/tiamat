@@ -3,7 +3,6 @@ package org.rutebanken.tiamat.netex.mapping.mapper;
 import jakarta.xml.bind.JAXBElement;
 import ma.glasnost.orika.CustomMapper;
 import ma.glasnost.orika.MappingContext;
-import org.apache.commons.lang3.StringUtils;
 import org.rutebanken.netex.model.AuthorityRef;
 import org.rutebanken.netex.model.FareZone;
 import org.rutebanken.netex.model.FareZoneRefStructure;
@@ -84,35 +83,10 @@ public class FareZoneMapper extends CustomMapper<FareZone, org.rutebanken.tiamat
     }
 
     private String convertStopPlaceRefToScheduledStopPointRef(String netexId) {
-        if (netexId != null) {
-            if (StringUtils.countMatches(netexId, ":") != 2) {
-                throw new IllegalArgumentException("Number of colons in ID is not two: " + netexId);
-            }
-            var idPrefix = netexId.substring(0, netexId.indexOf(':'));
-            var id = netexId.substring(netexId.lastIndexOf(':') + 1).trim();
-            return String.format("%s:ScheduledStopPoint:S%s", idPrefix, id);
-        }
-
-        return null;
+        return ScheduledStopPointRefConverter.toScheduledStopPointRef(netexId);
     }
 
     private String convertScheduledStopPointRefToStopPlaceRef(String netexId) {
-        if (netexId != null) {
-            if (StringUtils.countMatches(netexId, ":") != 2) {
-                throw new IllegalArgumentException("Number of colons in ID is not two: " + netexId);
-            }
-            var idParts= netexId.split(":");
-            var refType = idParts[1];
-            if (Objects.equals(refType, "StopPlace")) {
-                return netexId;
-            } else if (Objects.equals(refType, "ScheduledStopPoint")) {
-                var id = idParts[2];
-                if (id.startsWith("S")) {
-                    id = id.substring(1);
-                }
-                return String.format("%s:StopPlace:%s", idParts[0], id);
-            }
-        }
-        return null;
+        return ScheduledStopPointRefConverter.toStopPlaceRef(netexId);
     }
 }
