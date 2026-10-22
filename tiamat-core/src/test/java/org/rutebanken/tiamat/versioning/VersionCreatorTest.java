@@ -163,45 +163,42 @@ public class VersionCreatorTest extends TiamatIntegrationTest {
 
     }
 
-    /**
-     * When copying entity with place equipments, make sure the netex id and version is removed.
-     * This is because of historical reasons where we had an issue with unique constrainst, due to inconsistent place/installed equipment versions.
-     * See NRP-2348 and relevant queries for detecting this issue here: https://github.com/entur/tiamat-scripts/tree/master/fix_inconsistent_equipment
-     */
     @Test
-    public void stopPlacePlaceEquipmentSholdBeCopiedWithoutNetexIdAndVersion() {
+    public void stopPlacePlaceEquipmentShouldBeCopiedWithNetexIdAndVersion() {
         StopPlace stopPlace = new StopPlace();
         stopPlace.setNetexId(randomizedTestNetexIdGenerator.generateRandomizedNetexId(stopPlace));
         stopPlace.setVersion(1L);
-        stopPlace.setPlaceEquipments(createPlaceEquipment());
+        PlaceEquipment original = createPlaceEquipment();
+        stopPlace.setPlaceEquipments(original);
 
         StopPlace copy = versionCreator.createCopy(stopPlace, StopPlace.class);
-        assertPlaceEquipmentIdAndVersionIsEmpty(copy.getPlaceEquipments());
+        assertPlaceEquipmentIdAndVersionIsKept(original, copy.getPlaceEquipments());
     }
 
     @Test
-    public void quayPlaceEquipmentSholdBeCopiedWithoutNetexIdAndVersion() {
+    public void quayPlaceEquipmentShouldBeCopiedWithNetexIdAndVersion() {
         Quay quay = new Quay();
         quay.setNetexId(randomizedTestNetexIdGenerator.generateRandomizedNetexId(quay));
         quay.setVersion(1L);
-        quay.setPlaceEquipments(createPlaceEquipment());
+        PlaceEquipment original = createPlaceEquipment();
+        quay.setPlaceEquipments(original);
 
         Quay copy = versionCreator.createCopy(quay, Quay.class);
-        assertPlaceEquipmentIdAndVersionIsEmpty(copy.getPlaceEquipments());
+        assertPlaceEquipmentIdAndVersionIsKept(original, copy.getPlaceEquipments());
     }
 
-    private void assertPlaceEquipmentIdAndVersionIsEmpty(PlaceEquipment placeEquipment) {
-        assertThat(placeEquipment).isNotNull();
-        assertThat(placeEquipment.getNetexId()).isNull();
-        assertThat(placeEquipment.getVersion()).isZero();
+    private void assertPlaceEquipmentIdAndVersionIsKept(PlaceEquipment original, PlaceEquipment copied) {
+        assertThat(copied).isNotNull().isNotSameAs(original);
+        assertThat(copied.getNetexId()).isEqualTo(original.getNetexId());
+        assertThat(copied.getVersion()).isEqualTo(original.getVersion());
 
-        assertThat(placeEquipment.getInstalledEquipment())
-                .isNotNull()
-                .hasSize(1);
-        InstalledEquipment_VersionStructure copiedInstalledEquipment = placeEquipment.getInstalledEquipment().getFirst();
+        assertThat(copied.getInstalledEquipment()).hasSize(1);
+        InstalledEquipment_VersionStructure copiedInstalledEquipment = copied.getInstalledEquipment().getFirst();
+        InstalledEquipment_VersionStructure originalInstalledEquipment = original.getInstalledEquipment().getFirst();
 
-        assertThat(copiedInstalledEquipment.getNetexId()).isNull();
-        assertThat(copiedInstalledEquipment.getVersion()).isZero();
+        assertThat(copiedInstalledEquipment).isNotSameAs(originalInstalledEquipment);
+        assertThat(copiedInstalledEquipment.getNetexId()).isEqualTo(originalInstalledEquipment.getNetexId());
+        assertThat(copiedInstalledEquipment.getVersion()).isEqualTo(originalInstalledEquipment.getVersion());
     }
 
     private PlaceEquipment createPlaceEquipment() {
