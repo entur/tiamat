@@ -1,0 +1,208 @@
+# Reference client for the Tiamat stop place write API.
+# Run the requests in order, from the gutter. See README.md before you start.
+#
+# The API is asynchronous. A 202 means the API took the job, not that the write happened.
+# Requests 2, 4, 6 and 8 read the outcome. Run one of them again if it says PROCESSING.
+
+### 0. Get a token
+# Skip this request if you run against a Tiamat with authorization.enabled=false, and delete the
+# Authorization header from the requests below. Otherwise this request fills in {{token}}.
+POST {{tokenUrl}}
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=client_credentials&client_id={{clientId}}&client_secret={{clientSecret}}&audience={{audience}}
+
+> {%
+    client.test("the issuer returns a token", function() {
+        client.assert(response.status === 200, "The token request answered " + response.status);
+        client.assert(response.body.access_token, "The answer carries no access_token.");
+    });
+    client.global.set("token", response.body.access_token);
+%}
+
+### 1. Create a stop place
+# The API replaces the ID you send with a generated one. You get the generated ID from request 2.
+POST {{api}}/write
+Content-Type: application/xml
+Authorization: Bearer {{token}}
+
+<stopPlaces xmlns="http://www.netex.org.uk/netex">
+  <StopPlace id="REF:StopPlace:1" version="1">
+    <Name lang="nor">Reference Client Stop</Name>
+    <Centroid>
+      <Location>
+        <Longitude>10.752245</Longitude>
+        <Latitude>59.913868</Latitude>
+      </Location>
+    </Centroid>
+    <TransportMode>bus</TransportMode>
+    <StopPlaceType>onstreetBus</StopPlaceType>
+  </StopPlace>
+</stopPlaces>
+
+> {%
+    client.test("the API accepts the create job", function() {
+        client.assert(response.status === 202, "The create answered " + response.status);
+        client.assert(response.body.jobId, "The answer carries no jobId.");
+    });
+    client.global.set("jobId", response.body.jobId);
+%}
+
+### 2. Read the outcome of the create
+# Run this again if the status is PROCESSING. A real client polls with a backoff. See README.md.
+GET {{api}}/write/jobs/{{jobId}}
+Authorization: Bearer {{token}}
+
+> {%
+    if (response.body.status === "PROCESSING") {
+        client.log("The job is still running. Run this request again.");
+    } else {
+        client.test("the create finished", function() {
+            client.assert(response.body.status === "FINISHED",
+                "The job ended as " + response.body.status + ": " + JSON.stringify(response.body.failure));
+        });
+        var written = response.body.result.stopPlaces[0];
+        client.global.set("netexId", written.netexId);
+        client.global.set("version", written.version);
+        // Kept for request 5, which sends a version that request 3 has already superseded.
+        client.global.set("staleVersion", written.version);
+        client.log("Created " + written.netexId + " at version " + written.version);
+    }
+%}
+
+### 3. Update the stop place
+# Send the version you read, and not the version you want to write. The system decides the next one.
+# {{version}} came out of request 2. This is the whole version contract, in one variable.
+PUT {{api}}/write
+Content-Type: application/xml
+Authorization: Bearer {{token}}
+
+<stopPlaces xmlns="http://www.netex.org.uk/netex">
+  <StopPlace id="{{netexId}}" version="{{version}}">
+    <Name lang="nor">Reference Client Stop, renamed</Name>
+    <Centroid>
+      <Location>
+        <Longitude>10.752245</Longitude>
+        <Latitude>59.913868</Latitude>
+      </Location>
+    </Centroid>
+    <TransportMode>bus</TransportMode>
+    <StopPlaceType>onstreetBus</StopPlaceType>
+  </StopPlace>
+</stopPlaces>
+
+> {%
+    client.test("the API accepts the update job", function() {
+        client.assert(response.status === 202, "The update answered " + response.status);
+    });
+    client.global.set("jobId", response.body.jobId);
+%}
+
+### 4. Read the outcome of the update
+# Run this again if the status is PROCESSING.
+GET {{api}}/write/jobs/{{jobId}}
+Authorization: Bearer {{token}}
+
+> {%
+    if (response.body.status === "PROCESSING") {
+        client.log("The job is still running. Run this request again.");
+    } else {
+        client.test("the update finished", function() {
+            client.assert(response.body.status === "FINISHED",
+                "The job ended as " + response.body.status + ": " + JSON.stringify(response.body.failure));
+        });
+        var written = response.body.result.stopPlaces[0];
+        client.test("the write produced a new version", function() {
+            client.assert(written.version > client.global.get("staleVersion"),
+                "The version did not move. It is still " + written.version + ".");
+        });
+        // Only {{version}} moves. {{staleVersion}} keeps the value request 5 needs.
+        client.global.set("version", written.version);
+        client.log("Now at version " + written.version + ". Version " + client.global.get("staleVersion") + " is now stale.");
+    }
+%}
+
+### 5. Update with a version that is no longer current
+# This is what happens when somebody else writes while you are editing. {{staleVersion}} is the
+# version request 2 read, and request 3 has already superseded it.
+# Note that this request is still accepted with 202. The API finds the conflict later.
+PUT {{api}}/write
+Content-Type: application/xml
+Authorization: Bearer {{token}}
+
+<stopPlaces xmlns="http://www.netex.org.uk/netex">
+  <StopPlace id="{{netexId}}" version="{{staleVersion}}">
+    <Name lang="nor">Reference Client Stop, renamed from a stale read</Name>
+    <Centroid>
+      <Location>
+        <Longitude>10.752245</Longitude>
+        <Latitude>59.913868</Latitude>
+      </Location>
+    </Centroid>
+    <TransportMode>bus</TransportMode>
+    <StopPlaceType>onstreetBus</StopPlaceType>
+  </StopPlace>
+</stopPlaces>
+
+> {%
+    client.test("the API accepts the job, even though the write cannot succeed", function() {
+        client.assert(response.status === 202, "The update answered " + response.status);
+    });
+    client.global.set("jobId", response.body.jobId);
+%}
+
+### 6. Read the outcome of the stale update
+# Run this again if the status is PROCESSING.
+GET {{api}}/write/jobs/{{jobId}}
+Authorization: Bearer {{token}}
+
+> {%
+    if (response.body.status === "PROCESSING") {
+        client.log("The job is still running. Run this request again.");
+    } else {
+        client.test("the stale write fails, and says why", function() {
+            client.assert(response.body.status === "FAILED",
+                "The job ended as " + response.body.status + ", and a stale version must fail.");
+            client.assert(response.body.failure.reasonCode === "STALE_VERSION",
+                "The reason code is " + response.body.failure.reasonCode + ".");
+            client.assert(response.body.failure.currentVersion,
+                "The failure carries no currentVersion, so a client cannot recover from it.");
+        });
+        client.log("Rejected. The stop place is now at version " + response.body.failure.currentVersion + ".");
+        client.log("A client reads the stop place again at that version, applies its change, and sends it again.");
+    }
+%}
+
+### 7. Delete the stop place
+# A delete takes no body, and it takes the NeTEx ID in the path and not a version.
+# The API does not look for the stop place before it accepts the job, so an unknown ID comes back
+# as a FAILED job and never as a 404.
+DELETE {{api}}/write/{{netexId}}
+Authorization: Bearer {{token}}
+
+> {%
+    client.test("the API accepts the delete job", function() {
+        client.assert(response.status === 202, "The delete answered " + response.status);
+    });
+    client.global.set("jobId", response.body.jobId);
+%}
+
+### 8. Read the outcome of the delete
+# Run this again if the status is PROCESSING.
+GET {{api}}/write/jobs/{{jobId}}
+Authorization: Bearer {{token}}
+
+> {%
+    if (response.body.status === "PROCESSING") {
+        client.log("The job is still running. Run this request again.");
+    } else {
+        client.test("the delete finished", function() {
+            client.assert(response.body.status === "FINISHED",
+                "The job ended as " + response.body.status + ": " + JSON.stringify(response.body.failure));
+        });
+        // A delete makes a version like any other write. This is the version that terminated it.
+        client.log("Deleted " + client.global.get("netexId")
+            + " at version " + response.body.result.stopPlaces[0].version
+            + ". Run request 1 to start again.");
+    }
+%}
