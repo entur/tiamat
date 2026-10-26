@@ -213,13 +213,12 @@ public abstract class AbstractNetexRepository implements NetexRepository {
             conn.commit();
             return response;
         } catch (SQLException e) {
-            try {
-                conn.rollback();
-                logger.error("Transaction rolled back due to error", e);
-            } catch (SQLException rollbackEx) {
-                logger.error("Failed to rollback transaction", rollbackEx);
-            }
+            rollbackAfterError(conn, e);
             throw new RuntimeException("Failed to run with isolation", e);
+        } catch (RuntimeException e) {
+            // The callbacks wrap SQLException in RuntimeException, so roll back here as well.
+            rollbackAfterError(conn, e);
+            throw e;
         } finally {
             try {
                 // Restore original auto-commit state
@@ -228,6 +227,15 @@ public abstract class AbstractNetexRepository implements NetexRepository {
                 logger.warn("Failed to restore auto-commit state", e);
             }
             DataSourceUtils.releaseConnection(conn, dataSource);
+        }
+    }
+
+    private void rollbackAfterError(Connection conn, Exception cause) {
+        try {
+            conn.rollback();
+            logger.error("Transaction rolled back due to error", cause);
+        } catch (SQLException rollbackEx) {
+            logger.error("Failed to rollback transaction", rollbackEx);
         }
     }
 
