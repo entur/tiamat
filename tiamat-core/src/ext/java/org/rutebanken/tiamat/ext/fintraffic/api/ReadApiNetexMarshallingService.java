@@ -106,14 +106,32 @@ public class ReadApiNetexMarshallingService {
      * @return true when the update succeeded, false when every attempt failed
      */
     public boolean handleEntityChange(EntityInVersionStructure entity, EntityChangedEvent event) {
-        // Try up to 3 times and then log error
+        return runWithRetries(
+                "Attempt {} to process entity change for entity id: {} failed",
+                "All attempts to process entity change for entity id: {} have failed",
+                entity.getId(),
+                () -> {
+                    Collection<ReadApiEntityInRecord> records = this.createEntityRecords(entity, crudToStatus(event.crudAction));
+                    netexRepository.upsertEntities(records);
+                });
+    }
+
+    /**
+     * Runs the operation with up to three attempts and a linear backoff between them.
+     * The method swallows a failure after the last attempt and does not rethrow it.
+     * An interrupt during the backoff restores the interrupt flag and throws a {@link RuntimeException}.
+     *
+     * @param attemptFailedMessage log format with two placeholders: the attempt number and the entity id
+     * @param allFailedMessage log format with one placeholder: the entity id
+     * @return true when an attempt succeeded, false when every attempt failed
+     */
+    private boolean runWithRetries(String attemptFailedMessage, String allFailedMessage, Object entityId, Runnable operation) {
         for (int attempt = 1; attempt <= 3; attempt++) {
             try {
-                Collection<ReadApiEntityInRecord> records = this.createEntityRecords(entity, crudToStatus(event.crudAction));
-                netexRepository.upsertEntities(records);
+                operation.run();
                 return true;
             } catch (Exception e) {
-                logger.error("Attempt {} to process entity change for entity id: {} failed", attempt, entity.getId(), e);
+                logger.error(attemptFailedMessage, attempt, entityId, e);
                 try {
                     Thread.sleep(attempt * 200L); // Exponential backoff
                 } catch (InterruptedException ie) {
@@ -122,7 +140,7 @@ public class ReadApiNetexMarshallingService {
                 }
             }
         }
-        logger.error("All attempts to process entity change for entity id: {} have failed", entity.getId());
+        logger.error(allFailedMessage, entityId);
         return false;
     }
 
@@ -134,22 +152,11 @@ public class ReadApiNetexMarshallingService {
      * @return true when the update succeeded, false when every attempt failed
      */
     public boolean handleParkingDeleted(Parking parking) {
-        for (int attempt = 1; attempt <= 3; attempt++) {
-            try {
-                netexRepository.markEntityDeleted(parking.getNetexId(), Parking.class.getSimpleName());
-                return true;
-            } catch (Exception e) {
-                logger.error("Attempt {} to mark parking id: {} as deleted failed", attempt, parking.getId(), e);
-                try {
-                    Thread.sleep(attempt * 200L);
-                } catch (InterruptedException ie) {
-                    Thread.currentThread().interrupt();
-                    throw new RuntimeException("Retry interrupted", ie);
-                }
-            }
-        }
-        logger.error("All attempts to mark parking id: {} as deleted have failed", parking.getId());
-        return false;
+        return runWithRetries(
+                "Attempt {} to mark parking id: {} as deleted failed",
+                "All attempts to mark parking id: {} as deleted have failed",
+                parking.getId(),
+                () -> netexRepository.markEntityDeleted(parking.getNetexId(), Parking.class.getSimpleName()));
     }
 
     public Collection<ReadApiEntityInRecord> createEntityRecords(EntityInVersionStructure entity, ReadApiEntityStatus status) {
