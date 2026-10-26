@@ -99,13 +99,19 @@ public class ReadApiNetexMarshallingService {
         });
     }
 
-    public void handleEntityChange(EntityInVersionStructure entity, EntityChangedEvent event) {
+    /**
+     * Writes the Read API rows of an entity, with up to three attempts.
+     * The method swallows a failure after the last attempt and does not rethrow it.
+     *
+     * @return true when the update succeeded, false when every attempt failed
+     */
+    public boolean handleEntityChange(EntityInVersionStructure entity, EntityChangedEvent event) {
         // Try up to 3 times and then log error
         for (int attempt = 1; attempt <= 3; attempt++) {
             try {
                 Collection<ReadApiEntityInRecord> records = this.createEntityRecords(entity, crudToStatus(event.crudAction));
                 netexRepository.upsertEntities(records);
-                return;
+                return true;
             } catch (Exception e) {
                 logger.error("Attempt {} to process entity change for entity id: {} failed", attempt, entity.getId(), e);
                 try {
@@ -117,18 +123,21 @@ public class ReadApiNetexMarshallingService {
             }
         }
         logger.error("All attempts to process entity change for entity id: {} have failed", entity.getId());
+        return false;
     }
 
     /**
      * Marks the stored Read API row of a deleted parking as DELETED.
      * The method does not map the parking to NeTEx.
      * The delete transaction ends before the hook runs, so the parking cannot load its lazy collections.
+     *
+     * @return true when the update succeeded, false when every attempt failed
      */
-    public void handleParkingDeleted(Parking parking) {
+    public boolean handleParkingDeleted(Parking parking) {
         for (int attempt = 1; attempt <= 3; attempt++) {
             try {
                 netexRepository.markEntityDeleted(parking.getNetexId(), Parking.class.getSimpleName());
-                return;
+                return true;
             } catch (Exception e) {
                 logger.error("Attempt {} to mark parking id: {} as deleted failed", attempt, parking.getId(), e);
                 try {
@@ -140,6 +149,7 @@ public class ReadApiNetexMarshallingService {
             }
         }
         logger.error("All attempts to mark parking id: {} as deleted have failed", parking.getId());
+        return false;
     }
 
     public Collection<ReadApiEntityInRecord> createEntityRecords(EntityInVersionStructure entity, ReadApiEntityStatus status) {

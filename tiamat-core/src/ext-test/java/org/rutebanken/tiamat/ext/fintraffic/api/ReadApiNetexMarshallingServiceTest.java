@@ -282,4 +282,25 @@ class ReadApiNetexMarshallingServiceTest {
 
         verify(netexRepository, times(2)).markEntityDeleted("FSR:Parking:1", "Parking");
     }
+
+    @Test
+    void handleParkingDeletedReturnsFalseWhenEveryAttemptFails() {
+        Parking parking = new Parking();
+        parking.setNetexId("FSR:Parking:1");
+        parking.setVersion(1L);
+        when(netexRepository.markEntityDeleted("FSR:Parking:1", "Parking"))
+                .thenThrow(new RuntimeException("db down"));
+
+        org.junit.jupiter.api.Assertions.assertFalse(marshallingService.handleParkingDeleted(parking));
+        verify(netexRepository, times(3)).markEntityDeleted("FSR:Parking:1", "Parking");
+    }
+
+    @Test
+    void handleParkingDeletedReturnsTrueOnSuccess() {
+        Parking parking = new Parking();
+        parking.setNetexId("FSR:Parking:1");
+        parking.setVersion(1L);
+
+        org.junit.jupiter.api.Assertions.assertTrue(marshallingService.handleParkingDeleted(parking));
+    }
 }
