@@ -121,7 +121,8 @@ public class ReadApiNetexMarshallingService {
 
     /**
      * Marks the stored Read API row of a deleted parking as DELETED.
-     * The method does not map the parking to NeTEx, because the deleted entity is detached and its lazy collections cannot load.
+     * The method does not map the parking to NeTEx.
+     * The delete transaction ends before the hook runs, so the parking cannot load its lazy collections.
      */
     public void handleParkingDeleted(Parking parking) {
         for (int attempt = 1; attempt <= 3; attempt++) {
