@@ -150,6 +150,25 @@ public abstract class AbstractNetexRepository implements NetexRepository {
     }
 
     @Override
+    public int markEntityDeleted(String id, String type) {
+        return runWithIsolation((conn) -> {
+            String sql = """
+            UPDATE ext_fintraffic_netex_entity
+            SET status = 'DELETED', updated_at = CURRENT_TIMESTAMP
+            WHERE id = ? AND type = ? AND status != 'DELETED'
+            """;
+
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, id);
+                stmt.setString(2, type);
+                return stmt.executeUpdate();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+    @Override
     public int markAllEntitiesAsStale() {
         return runWithIsolation((conn) -> {
             String sql = """

@@ -1,10 +1,14 @@
 package org.rutebanken.tiamat.ext.fintraffic.api;
 
+import org.hibernate.LazyInitializationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.rutebanken.tiamat.changelog.EntityChangedEvent;
+import org.rutebanken.tiamat.exporter.ServiceFrameElementCreator;
+import org.rutebanken.tiamat.ext.fintraffic.api.repository.NetexRepository;
 import org.rutebanken.tiamat.model.Parking;
 import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 
 import java.time.Instant;
 import java.util.Set;
@@ -12,6 +16,9 @@ import java.util.Set;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -97,7 +104,33 @@ class ReadApiEntityChangedPublisherTest {
     }
 
     @Test
-    void onDeleteHandlesParkingEntity() {
+    void onDeleteOfParkingMarksRowDeletedWithoutMappingToNetex() {
+        NetexMapper netexMapper = mock(NetexMapper.class);
+        when(netexMapper.mapToNetexModel(any(Parking.class)))
+                .thenThrow(new LazyInitializationException("could not initialize proxy - no Session"));
+        NetexRepository netexRepository = mock(NetexRepository.class);
+        ReadApiEntityChangedPublisher realServicePublisher = new ReadApiEntityChangedPublisher(
+                new ReadApiNetexMarshallingService(
+                        netexMapper,
+                        netexRepository,
+                        mock(ServiceFrameElementCreator.class),
+                        mock(SearchKeyService.class),
+                        mock(NetexEntityEnricher.class)));
+
+        Parking parking = new Parking();
+        parking.setNetexId("FSR:Parking:1");
+        parking.setVersion(1L);
+        parking.setChanged(Instant.now());
+
+        realServicePublisher.onDelete(parking);
+
+        verify(netexRepository, times(1)).markEntityDeleted("FSR:Parking:1", "Parking");
+        verify(netexRepository, never()).upsertEntities(any());
+        verifyNoInteractions(netexMapper);
+    }
+
+    @Test
+    void onDeleteOfParkingUsesDeletePathOnly() {
         Parking parking = new Parking();
         parking.setNetexId("FSR:Parking:1");
         parking.setVersion(1L);
@@ -105,7 +138,7 @@ class ReadApiEntityChangedPublisherTest {
 
         publisher.onDelete(parking);
 
-        verify(marshallingService, times(1)).handleEntityChange(eq(parking), any(EntityChangedEvent.class));
+        verify(marshallingService, times(1)).handleParkingDeleted(parking);
+        verify(marshallingService, never()).handleEntityChange(any(), any());
     }
 }
-

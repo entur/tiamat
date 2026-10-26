@@ -257,5 +257,29 @@ class ReadApiNetexMarshallingServiceTest {
         assertThat(xml, containsString("FareZone"));
         assertThat(xml, containsString("TKL:FareZone:A"));
     }
-}
 
+    @Test
+    void handleParkingDeletedMarksRowDeleted() {
+        Parking parking = new Parking();
+        parking.setNetexId("FSR:Parking:1");
+        parking.setVersion(1L);
+
+        marshallingService.handleParkingDeleted(parking);
+
+        verify(netexRepository, times(1)).markEntityDeleted("FSR:Parking:1", "Parking");
+    }
+
+    @Test
+    void handleParkingDeletedRetriesWhenRepositoryFails() {
+        Parking parking = new Parking();
+        parking.setNetexId("FSR:Parking:1");
+        parking.setVersion(1L);
+        when(netexRepository.markEntityDeleted("FSR:Parking:1", "Parking"))
+                .thenThrow(new RuntimeException("db down"))
+                .thenReturn(1);
+
+        marshallingService.handleParkingDeleted(parking);
+
+        verify(netexRepository, times(2)).markEntityDeleted("FSR:Parking:1", "Parking");
+    }
+}

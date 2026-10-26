@@ -119,6 +119,28 @@ public class ReadApiNetexMarshallingService {
         logger.error("All attempts to process entity change for entity id: {} have failed", entity.getId());
     }
 
+    /**
+     * Marks the stored Read API row of a deleted parking as DELETED.
+     * The method does not map the parking to NeTEx, because the deleted entity is detached and its lazy collections cannot load.
+     */
+    public void handleParkingDeleted(Parking parking) {
+        for (int attempt = 1; attempt <= 3; attempt++) {
+            try {
+                netexRepository.markEntityDeleted(parking.getNetexId(), Parking.class.getSimpleName());
+                return;
+            } catch (Exception e) {
+                logger.error("Attempt {} to mark parking id: {} as deleted failed", attempt, parking.getId(), e);
+                try {
+                    Thread.sleep(attempt * 200L);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    throw new RuntimeException("Retry interrupted", ie);
+                }
+            }
+        }
+        logger.error("All attempts to mark parking id: {} as deleted have failed", parking.getId());
+    }
+
     public Collection<ReadApiEntityInRecord> createEntityRecords(EntityInVersionStructure entity, ReadApiEntityStatus status) {
         String searchKey = searchKeyService.generateSearchKeyJSON(entity);
         if (entity instanceof StopPlace stopPlace) {
