@@ -126,7 +126,8 @@ class ReadApiEntityChangedPublisherTest {
 
         publisher.onDelete(stopPlace);
 
-        verify(marshallingService, times(1)).handleEntityChange(eq(stopPlace), any(EntityChangedEvent.class));
+        verify(marshallingService, times(1)).handleEntityDeleted(stopPlace);
+        verify(marshallingService, never()).handleEntityChange(any(), any());
     }
 
     @Test
@@ -164,7 +165,7 @@ class ReadApiEntityChangedPublisherTest {
 
         publisher.onDelete(parking);
 
-        verify(marshallingService, times(1)).handleParkingDeleted(parking);
+        verify(marshallingService, times(1)).handleEntityDeleted(parking);
         verify(marshallingService, never()).handleEntityChange(any(), any());
     }
 
@@ -179,7 +180,7 @@ class ReadApiEntityChangedPublisherTest {
     @Test
     void onDeleteLogsSuccessOnlyWhenParkingUpdateSucceeded() {
         Parking parking = parking();
-        when(marshallingService.handleParkingDeleted(parking)).thenReturn(true);
+        when(marshallingService.handleEntityDeleted(parking)).thenReturn(true);
 
         publisher.onDelete(parking);
 
@@ -190,7 +191,7 @@ class ReadApiEntityChangedPublisherTest {
     @Test
     void onDeleteLogsErrorAndNoSuccessWhenParkingUpdateFailed() {
         Parking parking = parking();
-        when(marshallingService.handleParkingDeleted(parking)).thenReturn(false);
+        when(marshallingService.handleEntityDeleted(parking)).thenReturn(false);
 
         publisher.onDelete(parking);
 
@@ -206,7 +207,7 @@ class ReadApiEntityChangedPublisherTest {
         StopPlace stopPlace = new StopPlace();
         stopPlace.setNetexId("FSR:StopPlace:1");
         stopPlace.setVersion(1L);
-        when(marshallingService.handleEntityChange(eq(stopPlace), any(EntityChangedEvent.class))).thenReturn(false);
+        when(marshallingService.handleEntityDeleted(stopPlace)).thenReturn(false);
 
         publisher.onDelete(stopPlace);
 

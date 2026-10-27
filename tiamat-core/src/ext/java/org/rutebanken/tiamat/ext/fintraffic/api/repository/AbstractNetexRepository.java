@@ -155,12 +155,17 @@ public abstract class AbstractNetexRepository implements NetexRepository {
             String sql = """
             UPDATE ext_fintraffic_netex_entity
             SET status = 'DELETED', updated_at = CURRENT_TIMESTAMP
-            WHERE id = ? AND type = ? AND status != 'DELETED'
+            WHERE status != 'DELETED'
+                AND (
+                    (id = ? AND type = ?)
+                    OR (type IN ('ScheduledStopPoint', 'PassengerStopAssignment') AND parent_refs @> ARRAY[?]::text[])
+                )
             """;
 
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setString(1, id);
                 stmt.setString(2, type);
+                stmt.setString(3, id);
                 return stmt.executeUpdate();
             } catch (SQLException e) {
                 throw new RuntimeException(e);

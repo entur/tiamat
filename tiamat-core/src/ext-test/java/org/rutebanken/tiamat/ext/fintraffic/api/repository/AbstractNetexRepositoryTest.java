@@ -3,14 +3,17 @@ package org.rutebanken.tiamat.ext.fintraffic.api.repository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
@@ -58,5 +61,28 @@ class AbstractNetexRepositoryTest {
         order.verify(connection).commit();
         order.verify(connection).setAutoCommit(true);
         verify(connection, never()).rollback();
+    }
+
+    @Test
+    void markEntityDeletedUpdatesEntityAndDependentStopPointRowsInOneStatement() throws SQLException {
+        PreparedStatement statement = mock(PreparedStatement.class);
+        when(statement.executeUpdate()).thenReturn(3);
+        ArgumentCaptor<String> sql = ArgumentCaptor.forClass(String.class);
+        when(connection.prepareStatement(sql.capture())).thenReturn(statement);
+
+        int updated = repository.markEntityDeleted("FSR:StopPlace:1", "StopPlace");
+
+        assertEquals(3, updated);
+        verify(connection).prepareStatement(org.mockito.ArgumentMatchers.anyString());
+        String text = sql.getValue();
+        assertTrue(text.contains("status != 'DELETED'"));
+        assertTrue(text.contains("id = ? AND type = ?"));
+        assertTrue(text.contains("'ScheduledStopPoint', 'PassengerStopAssignment'"));
+        assertTrue(text.contains("parent_refs @> ARRAY[?]::text[]"));
+        verify(statement).setString(1, "FSR:StopPlace:1");
+        verify(statement).setString(2, "StopPlace");
+        verify(statement).setString(3, "FSR:StopPlace:1");
+        verify(statement).executeUpdate();
+        verify(connection).commit();
     }
 }

@@ -145,18 +145,19 @@ public class ReadApiNetexMarshallingService {
     }
 
     /**
-     * Marks the stored Read API row of a deleted parking as DELETED.
-     * The method does not map the parking to NeTEx.
-     * The delete transaction ends before the hook runs, so the parking cannot load its lazy collections.
+     * Marks the stored Read API rows of a deleted entity as DELETED.
+     * The rows are the entity row and the rows of its dependent stop point elements.
+     * The method does not map the entity to NeTEx.
+     * The delete transaction ends before the hook runs, so the entity cannot load its lazy collections.
      *
      * @return true when the update succeeded, false when every attempt failed
      */
-    public boolean handleParkingDeleted(Parking parking) {
+    public boolean handleEntityDeleted(EntityInVersionStructure entity) {
         return runWithRetries(
-                "Attempt {} to mark parking id: {} as deleted failed",
-                "All attempts to mark parking id: {} as deleted have failed",
-                parking.getId(),
-                () -> netexRepository.markEntityDeleted(parking.getNetexId(), Parking.class.getSimpleName()));
+                "Attempt {} to mark entity id: {} as deleted failed",
+                "All attempts to mark entity id: {} as deleted have failed",
+                entity.getId(),
+                () -> netexRepository.markEntityDeleted(entity.getNetexId(), entity.getClass().getSimpleName()));
     }
 
     public Collection<ReadApiEntityInRecord> createEntityRecords(EntityInVersionStructure entity, ReadApiEntityStatus status) {
