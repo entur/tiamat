@@ -546,9 +546,6 @@ public class StreamingPublicationDeliveryIntegrationTest extends TiamatIntegrati
         validate(xml);
     }
 
-    /**
-     * Empty parking lists must not export as empty elements.
-     */
     @Test
     public void doesNotExportEmptyParkingLists() throws Exception {
         StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("Stop with parkings"));
