@@ -152,9 +152,10 @@ public abstract class AbstractNetexRepository implements NetexRepository {
     /**
      * Marks the entity row as DELETED, and also the ScheduledStopPoint and PassengerStopAssignment
      * rows that hold the entity id in {@code parent_refs}. Only a stop place has such rows.
-     * Parking rows never match, because each parking sends its own delete event.
-     * Only {@code status} and {@code updated_at} change. The XML stays, no row is inserted,
-     * and a row that is already DELETED stays unchanged. The Read API reads only CURRENT and STALE rows.
+     * The update does not mark a parking that references a deleted stop place,
+     * because each parking sends its own delete event.
+     * The update changes only {@code status} and {@code updated_at}. It keeps the XML and inserts no row.
+     * A row that is already DELETED stays unchanged. The Read API reads only CURRENT and STALE rows.
      * The method does not map the entity to NeTEx, because its lazy collections cannot load after the delete transaction.
      *
      * @return the number of rows that the update marked as DELETED
