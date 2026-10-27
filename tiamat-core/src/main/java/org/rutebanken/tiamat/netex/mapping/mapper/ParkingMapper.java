@@ -122,7 +122,7 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
     }
 
     /**
-     * {@code parkingVehicleTypes} and {@code parkingPaymentProcess} are mapped to NeTEx here, and
+     * ParkingMapper maps {@code parkingVehicleTypes} and {@code parkingPaymentProcess} to NeTEx
      * only when they hold a value. The NeTEx getter creates an empty list for a null field, and
      * JAXB then writes an empty element. Orika maps the values, so the enum rules stay the same.
      */

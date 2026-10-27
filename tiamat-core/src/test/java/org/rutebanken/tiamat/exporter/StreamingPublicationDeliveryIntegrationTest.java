@@ -547,9 +547,7 @@ public class StreamingPublicationDeliveryIntegrationTest extends TiamatIntegrati
     }
 
     /**
-     * The NeTEx model's collection getters turn null into an empty list, and JAXB then marshals an
-     * empty element. A consumer cannot tell that element from a missing value, and an empty user
-     * type list can read as "no user may park here".
+     * Empty parking lists must not export as empty elements.
      */
     @Test
     public void doesNotExportEmptyParkingLists() throws Exception {
