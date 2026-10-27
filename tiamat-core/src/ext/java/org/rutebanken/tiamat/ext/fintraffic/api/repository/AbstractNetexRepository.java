@@ -156,27 +156,33 @@ public abstract class AbstractNetexRepository implements NetexRepository {
      * because each parking sends its own delete event.
      * The update changes only {@code status} and {@code updated_at}. It keeps the XML and inserts no row.
      * A row that is already DELETED stays unchanged. The Read API reads only CURRENT and STALE rows.
+     * A row with a higher version or a later change time stays unchanged.
      * The method does not map the entity to NeTEx, because its lazy collections cannot load after the delete transaction.
      *
+     * @param version the version of the deleted entity
+     * @param changed the change time of the deleted entity, in epoch milliseconds
      * @return the number of rows that the update marked as DELETED
      */
     @Override
-    public int markEntityDeleted(String id, String type) {
+    public int markEntityDeleted(String id, String type, long version, long changed) {
         return runWithIsolation((conn) -> {
             String sql = """
             UPDATE ext_fintraffic_netex_entity
             SET status = 'DELETED', updated_at = CURRENT_TIMESTAMP
             WHERE status != 'DELETED'
                 AND (
-                    (id = ? AND type = ?)
-                    OR (type IN ('ScheduledStopPoint', 'PassengerStopAssignment') AND parent_refs @> ARRAY[?]::text[])
+                    (id = ? AND type = ? AND version <= ? AND changed <= ?)
+                    OR (type IN ('ScheduledStopPoint', 'PassengerStopAssignment') AND parent_refs @> ARRAY[?]::text[] AND changed <= ?)
                 )
             """;
 
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setString(1, id);
                 stmt.setString(2, type);
-                stmt.setString(3, id);
+                stmt.setLong(3, version);
+                stmt.setLong(4, changed);
+                stmt.setString(5, id);
+                stmt.setLong(6, changed);
                 return stmt.executeUpdate();
             } catch (SQLException e) {
                 throw new RuntimeException(e);

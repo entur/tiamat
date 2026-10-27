@@ -151,7 +151,7 @@ class ReadApiEntityChangedPublisherTest {
 
         realServicePublisher.onDelete(parking);
 
-        verify(netexRepository, times(1)).markEntityDeleted("FSR:Parking:1", "Parking");
+        verify(netexRepository, times(1)).markEntityDeleted("FSR:Parking:1", "Parking", 1L, parking.getChanged().toEpochMilli());
         verify(netexRepository, never()).upsertEntities(any());
         verifyNoInteractions(netexMapper);
     }

@@ -266,7 +266,7 @@ class ReadApiNetexMarshallingServiceTest {
 
         marshallingService.handleEntityDeleted(parking);
 
-        verify(netexRepository, times(1)).markEntityDeleted("FSR:Parking:1", "Parking");
+        verify(netexRepository, times(1)).markEntityDeleted("FSR:Parking:1", "Parking", 1L, 0L);
     }
 
     @Test
@@ -274,13 +274,13 @@ class ReadApiNetexMarshallingServiceTest {
         Parking parking = new Parking();
         parking.setNetexId("FSR:Parking:1");
         parking.setVersion(1L);
-        when(netexRepository.markEntityDeleted("FSR:Parking:1", "Parking"))
+        when(netexRepository.markEntityDeleted("FSR:Parking:1", "Parking", 1L, 0L))
                 .thenThrow(new RuntimeException("db down"))
                 .thenReturn(1);
 
         marshallingService.handleEntityDeleted(parking);
 
-        verify(netexRepository, times(2)).markEntityDeleted("FSR:Parking:1", "Parking");
+        verify(netexRepository, times(2)).markEntityDeleted("FSR:Parking:1", "Parking", 1L, 0L);
     }
 
     @Test
@@ -288,11 +288,11 @@ class ReadApiNetexMarshallingServiceTest {
         Parking parking = new Parking();
         parking.setNetexId("FSR:Parking:1");
         parking.setVersion(1L);
-        when(netexRepository.markEntityDeleted("FSR:Parking:1", "Parking"))
+        when(netexRepository.markEntityDeleted("FSR:Parking:1", "Parking", 1L, 0L))
                 .thenThrow(new RuntimeException("db down"));
 
         org.junit.jupiter.api.Assertions.assertFalse(marshallingService.handleEntityDeleted(parking));
-        verify(netexRepository, times(3)).markEntityDeleted("FSR:Parking:1", "Parking");
+        verify(netexRepository, times(3)).markEntityDeleted("FSR:Parking:1", "Parking", 1L, 0L);
     }
 
     @Test
@@ -312,6 +312,18 @@ class ReadApiNetexMarshallingServiceTest {
 
         org.junit.jupiter.api.Assertions.assertTrue(marshallingService.handleEntityDeleted(stopPlace));
 
-        verify(netexRepository, times(1)).markEntityDeleted("FSR:StopPlace:1", "StopPlace");
+        verify(netexRepository, times(1)).markEntityDeleted("FSR:StopPlace:1", "StopPlace", 1L, 0L);
+    }
+
+    @Test
+    void handleEntityDeletedPassesVersionAndChangedTimeToRepository() {
+        org.rutebanken.tiamat.model.StopPlace stopPlace = new org.rutebanken.tiamat.model.StopPlace();
+        stopPlace.setNetexId("FSR:StopPlace:1");
+        stopPlace.setVersion(3L);
+        stopPlace.setChanged(java.time.Instant.ofEpochMilli(5000L));
+
+        marshallingService.handleEntityDeleted(stopPlace);
+
+        verify(netexRepository, times(1)).markEntityDeleted("FSR:StopPlace:1", "StopPlace", 3L, 5000L);
     }
 }

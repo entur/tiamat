@@ -70,18 +70,21 @@ class AbstractNetexRepositoryTest {
         ArgumentCaptor<String> sql = ArgumentCaptor.forClass(String.class);
         when(connection.prepareStatement(sql.capture())).thenReturn(statement);
 
-        int updated = repository.markEntityDeleted("FSR:StopPlace:1", "StopPlace");
+        int updated = repository.markEntityDeleted("FSR:StopPlace:1", "StopPlace", 3L, 5000L);
 
         assertEquals(3, updated);
         verify(connection).prepareStatement(org.mockito.ArgumentMatchers.anyString());
         String text = sql.getValue();
         assertTrue(text.contains("status != 'DELETED'"));
-        assertTrue(text.contains("id = ? AND type = ?"));
+        assertTrue(text.contains("id = ? AND type = ? AND version <= ? AND changed <= ?"));
         assertTrue(text.contains("'ScheduledStopPoint', 'PassengerStopAssignment'"));
-        assertTrue(text.contains("parent_refs @> ARRAY[?]::text[]"));
+        assertTrue(text.contains("parent_refs @> ARRAY[?]::text[] AND changed <= ?"));
         verify(statement).setString(1, "FSR:StopPlace:1");
         verify(statement).setString(2, "StopPlace");
-        verify(statement).setString(3, "FSR:StopPlace:1");
+        verify(statement).setLong(3, 3L);
+        verify(statement).setLong(4, 5000L);
+        verify(statement).setString(5, "FSR:StopPlace:1");
+        verify(statement).setLong(6, 5000L);
         verify(statement).executeUpdate();
         verify(connection).commit();
     }

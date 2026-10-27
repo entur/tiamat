@@ -157,7 +157,11 @@ public class ReadApiNetexMarshallingService {
                 "Attempt {} to mark entity id: {} as deleted failed",
                 "All attempts to mark entity id: {} as deleted have failed",
                 entity.getId(),
-                () -> netexRepository.markEntityDeleted(entity.getNetexId(), entity.getClass().getSimpleName()));
+                () -> netexRepository.markEntityDeleted(
+                        entity.getNetexId(),
+                        entity.getClass().getSimpleName(),
+                        entity.getVersion(),
+                        entity.getChanged() != null ? entity.getChanged().toEpochMilli() : 0L));
     }
 
     public Collection<ReadApiEntityInRecord> createEntityRecords(EntityInVersionStructure entity, ReadApiEntityStatus status) {
