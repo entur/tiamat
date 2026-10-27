@@ -88,6 +88,7 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
             }
         }
         mapPaymentMethodsToNetex(tiamatParking, netexParking);
+        mapEnumListsToNetex(tiamatParking, netexParking, context);
         mapVehicleEntrancesToNetex(tiamatParking, netexParking, context);
         mapInfoLinksToNetex(tiamatParking, netexParking);
         mapAvailabilityConditionsToNetex(tiamatParking, netexParking);
@@ -117,6 +118,22 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
                                 "PaymentMethodEnumeration and was dropped on import.",
                         source.getId(), netexMethod.value());
             }
+        }
+    }
+
+    /**
+     * {@code parkingVehicleTypes} and {@code parkingPaymentProcess} are mapped to NeTEx here, and
+     * only when they hold a value. The NeTEx getter creates an empty list for a null field, and
+     * JAXB then writes an empty element. Orika maps the values, so the enum rules stay the same.
+     */
+    private void mapEnumListsToNetex(org.rutebanken.tiamat.model.Parking source, Parking target, MappingContext context) {
+        if (!source.getParkingVehicleTypes().isEmpty()) {
+            target.getParkingVehicleTypes().addAll(mapperFacade.mapAsList(source.getParkingVehicleTypes(),
+                    org.rutebanken.netex.model.ParkingVehicleEnumeration.class, context));
+        }
+        if (!source.getParkingPaymentProcess().isEmpty()) {
+            target.getParkingPaymentProcess().addAll(mapperFacade.mapAsList(source.getParkingPaymentProcess(),
+                    org.rutebanken.netex.model.ParkingPaymentProcessEnumeration.class, context));
         }
     }
 

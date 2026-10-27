@@ -188,6 +188,10 @@ public class NetexMapper {
                 // ParkingMapper unwraps the JAXBElement by hand, because Orika's default
                 // mapping cannot bridge the two shapes.
                 .exclude("organisationRef")
+                // Import only. On export the NeTEx getter turns a null list into an empty one, and
+                // JAXB then writes an empty element. ParkingMapper writes these lists when they hold a value.
+                .fieldAToB("parkingVehicleTypes", "parkingVehicleTypes")
+                .fieldAToB("parkingPaymentProcess", "parkingPaymentProcess")
                 .customize(new ParkingMapper())
                 .byDefault()
                 .register();

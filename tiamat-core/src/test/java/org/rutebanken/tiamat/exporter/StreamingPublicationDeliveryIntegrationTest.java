@@ -546,6 +546,78 @@ public class StreamingPublicationDeliveryIntegrationTest extends TiamatIntegrati
         validate(xml);
     }
 
+    /**
+     * The NeTEx model's collection getters turn null into an empty list, and JAXB then marshals an
+     * empty element. A consumer cannot tell that element from a missing value, and an empty user
+     * type list can read as "no user may park here".
+     */
+    @Test
+    public void doesNotExportEmptyParkingLists() throws Exception {
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("Stop with parkings"));
+        stopPlace.setTransportMode(VehicleModeEnumeration.BUS);
+        stopPlaceRepository.save(stopPlace);
+
+        org.rutebanken.tiamat.model.Parking emptyLists = new org.rutebanken.tiamat.model.Parking();
+        emptyLists.setNetexId("TST:Parking:1");
+        emptyLists.setVersion(1L);
+        emptyLists.setParentSiteRef(new SiteRefStructure(stopPlace.getNetexId()));
+        org.rutebanken.tiamat.model.ParkingProperties emptyProperties = new org.rutebanken.tiamat.model.ParkingProperties();
+        emptyProperties.setNetexId("TST:ParkingProperties:1");
+        emptyProperties.setVersion(1L);
+        org.rutebanken.tiamat.model.ParkingCapacity capacity1 = new org.rutebanken.tiamat.model.ParkingCapacity();
+        capacity1.setNetexId("TST:ParkingCapacity:1");
+        capacity1.setVersion(1L);
+        capacity1.setNumberOfSpaces(java.math.BigInteger.TEN);
+        emptyProperties.setSpaces(new java.util.ArrayList<>(List.of(capacity1)));
+        emptyLists.setParkingProperties(new java.util.ArrayList<>(List.of(emptyProperties)));
+        parkingRepository.save(emptyLists);
+        parkingRepository.flush();
+
+        String xml = exportAll();
+
+        assertThat(xml).contains("TST:Parking:1");
+        assertThat(xml)
+                .as("an empty list has no business being in the output")
+                .doesNotContain("ParkingVehicleTypes")
+                .doesNotContain("ParkingPaymentProcess")
+                .doesNotContain("ParkingUserTypes");
+        validate(xml);
+    }
+
+    @Test
+    public void exportsParkingListsThatHoldValues() throws Exception {
+        StopPlace stopPlace = new StopPlace(new EmbeddableMultilingualString("Stop with parkings"));
+        stopPlace.setTransportMode(VehicleModeEnumeration.BUS);
+        stopPlaceRepository.save(stopPlace);
+
+        org.rutebanken.tiamat.model.Parking parking = new org.rutebanken.tiamat.model.Parking();
+        parking.setNetexId("TST:Parking:2");
+        parking.setVersion(1L);
+        parking.setParentSiteRef(new SiteRefStructure(stopPlace.getNetexId()));
+        parking.getParkingVehicleTypes().add(org.rutebanken.tiamat.model.ParkingVehicleEnumeration.CAR);
+        parking.getParkingPaymentProcess().add(org.rutebanken.tiamat.model.ParkingPaymentProcessEnumeration.FREE);
+        org.rutebanken.tiamat.model.ParkingProperties properties = new org.rutebanken.tiamat.model.ParkingProperties();
+        properties.setNetexId("TST:ParkingProperties:2");
+        properties.setVersion(1L);
+        org.rutebanken.tiamat.model.ParkingCapacity capacity2 = new org.rutebanken.tiamat.model.ParkingCapacity();
+        capacity2.setNetexId("TST:ParkingCapacity:2");
+        capacity2.setVersion(1L);
+        capacity2.setNumberOfSpaces(java.math.BigInteger.TEN);
+        properties.setSpaces(new java.util.ArrayList<>(List.of(capacity2)));
+        properties.getParkingUserTypes().add(org.rutebanken.tiamat.model.ParkingUserEnumeration.ALL_USERS);
+        parking.setParkingProperties(new java.util.ArrayList<>(List.of(properties)));
+        parkingRepository.save(parking);
+        parkingRepository.flush();
+
+        String xml = exportAll();
+
+        assertThat(xml)
+                .contains("<ParkingVehicleTypes>car</ParkingVehicleTypes>")
+                .contains("<ParkingPaymentProcess>free</ParkingPaymentProcess>")
+                .contains("<ParkingUserTypes>allUsers</ParkingUserTypes>");
+        validate(xml);
+    }
+
     private String exportAll() throws Exception {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         streamingPublicationDelivery.stream(
