@@ -256,7 +256,7 @@ public class AdvisoryLockTest extends TiamatIntegrationTest {
 
             lock.releaseSessionLock(connection, TEST_LOCK_NAME, null);
 
-            assertThat(heldLocks(TEST_LOCK_NAME)).as("evicting the connection ends the session and its lock").isZero();
+            assertThat(awaitNoHeldLocks(TEST_LOCK_NAME)).as("evicting the connection ends the session and its lock").isZero();
             try (Connection next = pool.getConnection()) {
                 assertThat(backendPid(next)).isNotEqualTo(backendBefore);
             }
@@ -276,7 +276,7 @@ public class AdvisoryLockTest extends TiamatIntegrationTest {
         assertThat(workFailure.getSuppressed()).singleElement()
                 .isInstanceOf(LockException.class)
                 .extracting(Throwable::getCause).isInstanceOf(SQLException.class);
-        assertThat(heldLocks(TEST_LOCK_NAME)).isZero();
+        assertThat(awaitNoHeldLocks(TEST_LOCK_NAME)).isZero();
         assertThat(advisoryLock.executeInSessionLock(TEST_LOCK_NAME, 1, () -> "got it")).isEqualTo("got it");
     }
 
@@ -333,6 +333,20 @@ public class AdvisoryLockTest extends TiamatIntegrationTest {
     private int heldLocks(String lockName) {
         return queryInt("select count(*) from pg_locks where locktype = 'advisory' and granted and classid = "
                 + AdvisoryLock.LOCK_NAMESPACE + " and objid = (hashtext('" + lockName + "'))::oid and objsubid = 2");
+    }
+
+    /**
+     * Returns the held lock count once it is 0, or the last count after 5 seconds.
+     * The server frees a session lock only when the backend ends, and that happens after the client call returns.
+     */
+    private int awaitNoHeldLocks(String lockName) {
+        long deadline = System.currentTimeMillis() + 5000;
+        int held = heldLocks(lockName);
+        while (held > 0 && System.currentTimeMillis() < deadline) {
+            sleep(50);
+            held = heldLocks(lockName);
+        }
+        return held;
     }
 
     private void terminateBackendHolding(String lockName) {
