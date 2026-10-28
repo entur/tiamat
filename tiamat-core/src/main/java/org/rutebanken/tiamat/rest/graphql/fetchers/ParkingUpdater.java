@@ -55,6 +55,7 @@ import org.rutebanken.tiamat.rest.graphql.mappers.GeometryMapper;
 import org.rutebanken.tiamat.rest.graphql.mappers.PlaceEquipmentMapper;
 import org.rutebanken.tiamat.rest.graphql.mappers.ValidBetweenMapper;
 import org.rutebanken.tiamat.service.AlternativeNameUpdater;
+import org.rutebanken.tiamat.service.ChildEntityReconciler;
 import org.rutebanken.tiamat.versioning.VersionCreator;
 import org.rutebanken.tiamat.versioning.save.ParkingVersionedSaverService;
 import org.slf4j.Logger;
@@ -165,6 +166,9 @@ class ParkingUpdater implements DataFetcher {
 
     @Autowired
     private AlternativeNameUpdater alternativeNameUpdater;
+
+    @Autowired
+    private ChildEntityReconciler childEntityReconciler;
 
     @Override
     public Object get(DataFetchingEnvironment environment) {
@@ -348,7 +352,8 @@ class ParkingUpdater implements DataFetcher {
         }
 
         if (input.get(PARKING_PROPERTIES) != null) {
-            List<ParkingProperties> parkingPropertiesList = resolveParkingPropertiesList((List) input.get(PARKING_PROPERTIES));
+            List<ParkingProperties> parkingPropertiesList = resolveParkingPropertiesList(
+                    (List) input.get(PARKING_PROPERTIES), updatedParking.getParkingProperties(), updatedParking.getNetexId());
             int total_capacity = parkingPropertiesList.stream()
                     .map(ParkingProperties::getSpaces)
                     .filter(Objects::nonNull)
@@ -366,13 +371,15 @@ class ParkingUpdater implements DataFetcher {
         }
 
         if (input.get(PARKING_AREAS) != null) {
-            List<ParkingArea> parkingAreasList = resolveParkingAreasList((List) input.get(PARKING_AREAS));
+            List<ParkingArea> parkingAreasList = resolveParkingAreasList(
+                    (List) input.get(PARKING_AREAS), updatedParking.getParkingAreas(), updatedParking.getNetexId());
             isUpdated = true;
             updatedParking.setParkingAreas(parkingAreasList);
         }
 
         if (input.get(VEHICLE_ENTRANCES) != null) {
-            List<ParkingEntranceForVehicles> vehicleEntrancesList = resolveVehicleEntrancesList((List) input.get(VEHICLE_ENTRANCES));
+            List<ParkingEntranceForVehicles> vehicleEntrancesList = resolveVehicleEntrancesList(
+                    (List) input.get(VEHICLE_ENTRANCES), updatedParking.getVehicleEntrances(), updatedParking.getNetexId());
             isUpdated = true;
             updatedParking.setVehicleEntrances(vehicleEntrancesList);
         }
@@ -389,7 +396,7 @@ class ParkingUpdater implements DataFetcher {
             updatedParking.setAvailabilityConditions(availabilityConditionsList);
         }
 
-        Optional<PlaceEquipment> placeEquipment = placeEquipmentMapper.map(input);
+        Optional<PlaceEquipment> placeEquipment = placeEquipmentMapper.map(input, updatedParking.getPlaceEquipments(), updatedParking.getNetexId());
         if (placeEquipment.isPresent()) {
             // Present in the input means the client intends to write it, as in SiteElementMapper.
             isUpdated = true;
@@ -411,7 +418,7 @@ class ParkingUpdater implements DataFetcher {
             AccessibilityLimitation limitationFromInput = accessibilityLimitationMapper.map((Map<String, LimitationStatusEnumeration>) accessibilityAssessmentInput.get("limitations"));
 
             if (limitationFromInput != null) {
-                AccessibilityAssessment accessibilityAssessment = resolveAccessibilityAssessment(limitationFromInput);
+                AccessibilityAssessment accessibilityAssessment = resolveAccessibilityAssessment(updatedParking.getAccessibilityAssessment(), limitationFromInput);
                 isUpdated = true;
                 updatedParking.setAccessibilityAssessment(accessibilityAssessment);
             }
@@ -420,70 +427,65 @@ class ParkingUpdater implements DataFetcher {
         return isUpdated;
     }
 
-    private List<ParkingProperties> resolveParkingPropertiesList(List propertyList) {
-        List<ParkingProperties> result = new ArrayList<>();
-        for (Object property : propertyList) {
-            result.add(resolveSingleParkingProperties((Map) property));
+    private List<ParkingProperties> resolveParkingPropertiesList(
+            List<Map<String, Object>> inputs, Collection<ParkingProperties> existing, String parkingId) {
+        return childEntityReconciler.reconcileAll(
+                existing == null ? List.of() : existing, inputs, parkingId,
+                ParkingProperties::new, this::populateParkingProperties);
+    }
+
+    private void populateParkingProperties(Map<String, Object> input, ParkingProperties properties) {
+        List<Map<String, Object>> spaces = (List<Map<String, Object>>) input.get(SPACES);
+        if (spaces != null) {
+            Collection<ParkingCapacity> existing = properties.getSpaces() == null ? List.of() : properties.getSpaces();
+            properties.setSpaces(childEntityReconciler.reconcileAll(
+                    existing, spaces, properties.getNetexId(), ParkingCapacity::new, this::populateParkingCapacity));
+        } else if (properties.getSpaces() == null) {
+            properties.setSpaces(new ArrayList<>());
         }
-
-        return result;
     }
 
-    private ParkingProperties resolveSingleParkingProperties(Map input) {
-        ParkingProperties p = new ParkingProperties();
-        p.setSpaces(resolveParkingCapacities((List) input.get(SPACES)));
-        return p;
-    }
-
-    private List<ParkingCapacity> resolveParkingCapacities(List input) {
-        List<ParkingCapacity> result = new ArrayList<>();
-        for (Object property : input) {
-            result.add(resolveSingleParkingCapacity((Map) property));
-        }
-
-        return result;
-    }
-
-    private ParkingCapacity resolveSingleParkingCapacity(Map input) {
-        ParkingCapacity capacity = new ParkingCapacity();
+    private void populateParkingCapacity(Map<String, Object> input, ParkingCapacity capacity) {
         capacity.setParkingUserType((ParkingUserEnumeration) input.get(PARKING_USER_TYPE));
         capacity.setParkingVehicleType((ParkingVehicleEnumeration) input.get(PARKING_VEHICLE_TYPE));
         capacity.setParkingStayType((ParkingStayEnumeration) input.get(PARKING_STAY_TYPE));
         capacity.setNumberOfSpaces((BigInteger) input.get(NUMBER_OF_SPACES));
         capacity.setNumberOfSpacesWithRechargePoint((BigInteger) input.get(NUMBER_OF_SPACES_WITH_RECHARGE_POINT));
-        return capacity;
     }
 
-    private List<ParkingArea> resolveParkingAreasList(List list) {
-        List<ParkingArea> result = new ArrayList<>();
-        for (Object property : list) {
-            result.add(resolveSingleParkingArea((Map) property));
-        }
-
-        return result;
+    private List<ParkingArea> resolveParkingAreasList(
+            List<Map<String, Object>> inputs, Collection<ParkingArea> existing, String parkingId) {
+        return childEntityReconciler.reconcileAll(
+                existing == null ? List.of() : existing, inputs, parkingId,
+                ParkingArea::new, this::populateParkingArea);
     }
 
-    private ParkingArea resolveSingleParkingArea(Map input) {
-        ParkingArea area = new ParkingArea();
+    private void populateParkingArea(Map<String, Object> input, ParkingArea area) {
         area.setLabel(getEmbeddableString((Map) input.get(LABEL)));
         area.setTotalCapacity((BigInteger) input.get(TOTAL_CAPACITY));
-        area.setParkingProperties(resolveSingleParkingProperties((Map) input.get(PARKING_PROPERTIES)));
-        return area;
-    }
-
-    private List<ParkingEntranceForVehicles> resolveVehicleEntrancesList(List list) {
-        List<ParkingEntranceForVehicles> result = new ArrayList<>();
-        for (Object entrance : list) {
-            result.add(resolveSingleVehicleEntrance((Map) entrance));
+        Map<String, Object> propertiesInput = (Map<String, Object>) input.get(PARKING_PROPERTIES);
+        if (propertiesInput != null) {
+            Collection<ParkingProperties> existing = area.getParkingProperties() == null
+                    ? List.of() : List.of(area.getParkingProperties());
+            area.setParkingProperties(childEntityReconciler.reconcile(
+                    existing, propertiesInput, area.getNetexId(),
+                    ParkingProperties::new, this::populateParkingProperties));
         }
-        return result;
     }
 
-    private ParkingEntranceForVehicles resolveSingleVehicleEntrance(Map input) {
-        ParkingEntranceForVehicles entrance = new ParkingEntranceForVehicles();
-        Object label = input.get(LABEL);
-        if (label != null) {
-            entrance.setLabel(new EmbeddableMultilingualString((String) label));
+    private List<ParkingEntranceForVehicles> resolveVehicleEntrancesList(List<Map<String, Object>> inputs, Collection<ParkingEntranceForVehicles> existingEntrances, String parkingId) {
+        return childEntityReconciler.reconcileAll(
+                existingEntrances,
+                inputs,
+                parkingId,
+                ParkingEntranceForVehicles::new,
+                this::populateVehicleEntrance);
+    }
+
+    private void populateVehicleEntrance(Map<String, Object> input, ParkingEntranceForVehicles entrance) {
+        if (input.containsKey(LABEL)) {
+            Object label = input.get(LABEL);
+            entrance.setLabel(label == null ? null : new EmbeddableMultilingualString((String) label));
         }
         entrance.setEntranceType((EntranceEnumeration) input.get(ENTRANCE_TYPE));
         entrance.setIsEntry((Boolean) input.get(IS_ENTRY));
@@ -494,7 +496,6 @@ class ParkingUpdater implements DataFetcher {
         if (input.get(ACCESS_MODES) != null) {
             entrance.setAccessModesList((List<AccessModeEnumeration>) input.get(ACCESS_MODES));
         }
-        return entrance;
     }
 
     /**
@@ -609,9 +610,13 @@ class ParkingUpdater implements DataFetcher {
         }
     }
 
-    private AccessibilityAssessment resolveAccessibilityAssessment(AccessibilityLimitation limitationFromInput) {
-        AccessibilityAssessment accessibilityAssessment =  new AccessibilityAssessment();
-        AccessibilityLimitation limitation = new AccessibilityLimitation();
+    private AccessibilityAssessment resolveAccessibilityAssessment(
+            AccessibilityAssessment existing, AccessibilityLimitation limitationFromInput) {
+        AccessibilityAssessment accessibilityAssessment = existing != null ? existing : new AccessibilityAssessment();
+        AccessibilityLimitation limitation =
+                accessibilityAssessment.getLimitations() == null || accessibilityAssessment.getLimitations().isEmpty()
+                        ? new AccessibilityLimitation()
+                        : accessibilityAssessment.getLimitations().getFirst();
 
         limitation.setWheelchairAccess(limitationFromInput.getWheelchairAccess());
         limitation.setAudibleSignalsAvailable(limitationFromInput.getAudibleSignalsAvailable());
@@ -619,7 +624,7 @@ class ParkingUpdater implements DataFetcher {
         limitation.setStepFreeAccess(limitationFromInput.getStepFreeAccess());
         limitation.setLiftFreeAccess(limitationFromInput.getLiftFreeAccess());
         limitation.setEscalatorFreeAccess(limitationFromInput.getEscalatorFreeAccess());
-        accessibilityAssessment.setLimitations(List.of(limitation));
+        accessibilityAssessment.setLimitations(new ArrayList<>(List.of(limitation)));
 
         return accessibilityAssessment;
     }
