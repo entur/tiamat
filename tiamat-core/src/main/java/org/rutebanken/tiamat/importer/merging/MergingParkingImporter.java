@@ -81,7 +81,7 @@ public class MergingParkingImporter {
      * <p>
      * Attempts to use saveAndFlush or hibernate flush mode always have not been successful.
      */
-    public org.rutebanken.netex.model.Parking importParking(Parking parking) throws InterruptedException, ExecutionException {
+    public org.entur.netex2.model.Parking importParking(Parking parking) throws InterruptedException, ExecutionException {
 
         logger.debug("Transaction active: {}. Isolation level: {}", TransactionSynchronizationManager.isActualTransactionActive(), TransactionSynchronizationManager.getCurrentTransactionIsolationLevel());
 

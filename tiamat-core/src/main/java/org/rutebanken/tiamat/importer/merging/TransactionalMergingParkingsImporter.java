@@ -48,12 +48,12 @@ public class TransactionalMergingParkingsImporter {
     }
 
 
-    public Collection<org.rutebanken.netex.model.Parking> importParkings(List<Parking> parkings, AtomicInteger parkingsCreated) {
-        List<org.rutebanken.netex.model.Parking> createdParkings = parkings
+    public Collection<org.entur.netex2.model.Parking> importParkings(List<Parking> parkings, AtomicInteger parkingsCreated) {
+        List<org.entur.netex2.model.Parking> createdParkings = parkings
                 .stream()
                 .filter(Objects::nonNull)
                 .map(parking -> {
-                    org.rutebanken.netex.model.Parking importedParking = null;
+                    org.entur.netex2.model.Parking importedParking = null;
                     try {
                         importedParking = mergingParkingImporter.importParking(parking);
                     } catch (Exception e) {
@@ -74,11 +74,11 @@ public class TransactionalMergingParkingsImporter {
      * @param parkings
      * @return unique list with stop places based on ID
      */
-    public Collection<org.rutebanken.netex.model.Parking> distinctByIdAndHighestVersion(List<org.rutebanken.netex.model.Parking> parkings) {
-        Map<String, org.rutebanken.netex.model.Parking> uniqueParkings = new HashMap<>();
-        for (org.rutebanken.netex.model.Parking parking : parkings) {
+    public Collection<org.entur.netex2.model.Parking> distinctByIdAndHighestVersion(List<org.entur.netex2.model.Parking> parkings) {
+        Map<String, org.entur.netex2.model.Parking> uniqueParkings = new HashMap<>();
+        for (org.entur.netex2.model.Parking parking : parkings) {
             if (uniqueParkings.containsKey(parking.getId())) {
-                org.rutebanken.netex.model.Parking existingParking = uniqueParkings.get(parking.getId());
+                org.entur.netex2.model.Parking existingParking = uniqueParkings.get(parking.getId());
                 long existingParkingVersion = tryParseLong(existingParking.getVersion());
                 long parkingVersion = tryParseLong(parking.getVersion());
                 if (existingParkingVersion < parkingVersion) {

@@ -15,7 +15,7 @@
 
 package org.rutebanken.tiamat.importer.matching;
 
-import org.rutebanken.netex.model.StopPlace;
+import org.entur.netex2.model.StopPlace;
 import org.rutebanken.tiamat.geo.ZoneDistanceChecker;
 import org.rutebanken.tiamat.importer.AlternativeStopTypes;
 import org.rutebanken.tiamat.importer.KeyValueListAppender;

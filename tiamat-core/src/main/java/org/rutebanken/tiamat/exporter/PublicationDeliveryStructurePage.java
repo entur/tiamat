@@ -16,7 +16,7 @@
 package org.rutebanken.tiamat.exporter;
 
 import com.google.common.base.MoreObjects;
-import org.rutebanken.netex.model.PublicationDeliveryStructure;
+import org.entur.netex2.model.PublicationDeliveryStructure;
 
 public class PublicationDeliveryStructurePage {
 

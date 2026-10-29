@@ -6,7 +6,7 @@ import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBElement;
 import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Marshaller;
-import org.rutebanken.netex.model.ObjectFactory;
+import org.entur.netex2.model.ObjectFactory;
 import org.rutebanken.tiamat.changelog.EntityChangedEvent;
 import org.rutebanken.tiamat.exporter.ServiceFrameElementCreator;
 import org.rutebanken.tiamat.ext.fintraffic.api.model.ReadApiEntityInRecord;
@@ -45,13 +45,13 @@ public class ReadApiNetexMarshallingService {
     private final SearchKeyService searchKeyService;
     private final NetexEntityEnricher netexEntityEnricher;
 
-    private static final Map<Class<?>, Function<org.rutebanken.netex.model.EntityInVersionStructure, JAXBElement<?>>> JAXB_ELEMENT_FACTORIES = Map.of(
-            org.rutebanken.netex.model.StopPlace.class, e -> objectFactory.createStopPlace((org.rutebanken.netex.model.StopPlace) e),
-            org.rutebanken.netex.model.Parking.class, e -> objectFactory.createParking((org.rutebanken.netex.model.Parking) e),
-            org.rutebanken.netex.model.TopographicPlace.class, e -> objectFactory.createTopographicPlace((org.rutebanken.netex.model.TopographicPlace) e),
-            org.rutebanken.netex.model.FareZone.class, e -> objectFactory.createFareZone((org.rutebanken.netex.model.FareZone) e),
-            org.rutebanken.netex.model.ScheduledStopPoint.class, e -> objectFactory.createScheduledStopPoint((org.rutebanken.netex.model.ScheduledStopPoint) e),
-            org.rutebanken.netex.model.PassengerStopAssignment.class, e -> objectFactory.createPassengerStopAssignment((org.rutebanken.netex.model.PassengerStopAssignment) e)
+    private static final Map<Class<?>, Function<org.entur.netex2.model.EntityInVersionStructure, JAXBElement<?>>> JAXB_ELEMENT_FACTORIES = Map.of(
+            org.entur.netex2.model.StopPlace.class, e -> objectFactory.createStopPlace((org.entur.netex2.model.StopPlace) e),
+            org.entur.netex2.model.Parking.class, e -> objectFactory.createParking((org.entur.netex2.model.Parking) e),
+            org.entur.netex2.model.TopographicPlace.class, e -> objectFactory.createTopographicPlace((org.entur.netex2.model.TopographicPlace) e),
+            org.entur.netex2.model.FareZone.class, e -> objectFactory.createFareZone((org.entur.netex2.model.FareZone) e),
+            org.entur.netex2.model.ScheduledStopPoint.class, e -> objectFactory.createScheduledStopPoint((org.entur.netex2.model.ScheduledStopPoint) e),
+            org.entur.netex2.model.PassengerStopAssignment.class, e -> objectFactory.createPassengerStopAssignment((org.entur.netex2.model.PassengerStopAssignment) e)
     );
 
     private final Logger logger = LoggerFactory.getLogger(ReadApiNetexMarshallingService.class);
@@ -75,12 +75,12 @@ public class ReadApiNetexMarshallingService {
         Thread.ofVirtual().name("read-api-netex-marshalling-service-jaxb-context-cache-init").start(() -> {
             Instant start = Instant.now();
             List<Class<?>> supportedClasses = List.of(
-                    org.rutebanken.netex.model.StopPlace.class,
-                    org.rutebanken.netex.model.Parking.class,
-                    org.rutebanken.netex.model.TopographicPlace.class,
-                    org.rutebanken.netex.model.FareZone.class,
-                    org.rutebanken.netex.model.ScheduledStopPoint.class,
-                    org.rutebanken.netex.model.PassengerStopAssignment.class
+                    org.entur.netex2.model.StopPlace.class,
+                    org.entur.netex2.model.Parking.class,
+                    org.entur.netex2.model.TopographicPlace.class,
+                    org.entur.netex2.model.FareZone.class,
+                    org.entur.netex2.model.ScheduledStopPoint.class,
+                    org.entur.netex2.model.PassengerStopAssignment.class
             );
             String classNames = supportedClasses.stream()
                     .map(Class::getSimpleName)
@@ -233,7 +233,7 @@ public class ReadApiNetexMarshallingService {
         return marshaller;
     }
 
-    private org.rutebanken.netex.model.EntityInVersionStructure mapToNetexModel(EntityInVersionStructure entity) {
+    private org.entur.netex2.model.EntityInVersionStructure mapToNetexModel(EntityInVersionStructure entity) {
         // Check supported types
         return switch (entity) {
             case StopPlace stopPlace -> netexMapper.mapToNetexModel(stopPlace);
@@ -245,8 +245,8 @@ public class ReadApiNetexMarshallingService {
         };
     }
 
-    private static JAXBElement<?> createJAXBElementForEntity(org.rutebanken.netex.model.EntityInVersionStructure entity) {
-        Function<org.rutebanken.netex.model.EntityInVersionStructure, JAXBElement<?>> factory =
+    private static JAXBElement<?> createJAXBElementForEntity(org.entur.netex2.model.EntityInVersionStructure entity) {
+        Function<org.entur.netex2.model.EntityInVersionStructure, JAXBElement<?>> factory =
                 JAXB_ELEMENT_FACTORIES.get(entity.getClass());
         if (factory == null) {
             throw new IllegalArgumentException("Unsupported entity type: " + entity.getClass().getName());
@@ -258,7 +258,7 @@ public class ReadApiNetexMarshallingService {
         return this.marshallToXML(mapToNetexModel(tiamatEntity));
     }
 
-    public String marshallToXML(org.rutebanken.netex.model.EntityInVersionStructure netexEntity) {
+    public String marshallToXML(org.entur.netex2.model.EntityInVersionStructure netexEntity) {
         netexEntityEnricher.enrich(netexEntity);
         XMLOutputFactory xof = XMLOutputFactory.newInstance();
 

@@ -24,7 +24,7 @@
 - **GraphQL Java 20.9** (GraphQL API)
 
 ### Key Dependencies
-- **netex-java-model 2.0.15**: NeTEx format models
+- **netex2-java-model 3.0.0**: NeTEx 2.0 format models
 - **GeoTools 30.2**: Geospatial processing
 - **JTS (Java Topology Suite) 1.20.0**: Geometric operations
 - **Flyway**: Database migration management
@@ -314,7 +314,7 @@ spring.datasource.password=tiamat
 
 # NeTEx
 netex.validPrefix=NSR
-netex.profile.version=1.12:NO-NeTEx-stops:1.4
+netex.profile.version=2.0:NO-NeTEx-stops:1.5
 netex.import.enabled.types=MERGE,INITIAL,ID_MATCH,MATCH
 
 # Blob Storage

@@ -6,9 +6,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.rutebanken.netex.model.MultilingualString;
 import org.rutebanken.tiamat.lock.MutateLock;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
+import org.rutebanken.tiamat.netex.mapping.NetexMultilingualStringHelper;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopTypeEnumeration;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
@@ -96,7 +96,7 @@ class StopPlaceWriterTest {
         String stopPlaceId = "NSR:StopPlace:100";
         StopPlace existingStopPlace = createTiamatStopPlace(stopPlaceId, "Old Name", 1L);
         StopPlace updatedTiamatStopPlace = createTiamatStopPlace(stopPlaceId, "New Name", 1L);
-        org.rutebanken.netex.model.StopPlace updatedNetexStopPlace = createNetexStopPlace(stopPlaceId, "New Name", 1L);
+        org.entur.netex2.model.StopPlace updatedNetexStopPlace = createNetexStopPlace(stopPlaceId, "New Name", 1L);
         StopPlace savedStopPlace = createTiamatStopPlace(stopPlaceId, "New Name", 2L);
 
         when(validator.validateStopPlaceUpdate(stopPlaceId, false, 1L)).thenReturn(existingStopPlace);
@@ -115,7 +115,7 @@ class StopPlaceWriterTest {
     @Test
     void createStopPlace_Success() {
         StopPlace newTiamatStopPlace = createTiamatStopPlace(null, "New Stop", 1L);
-        org.rutebanken.netex.model.StopPlace newNetexStopPlace = createNetexStopPlace(null, "New Stop", 1L);
+        org.entur.netex2.model.StopPlace newNetexStopPlace = createNetexStopPlace(null, "New Stop", 1L);
         StopPlace savedStopPlace = createTiamatStopPlace("NSR:StopPlace:200", "New Stop", 1L);
 
         StopPlace mappedStopPlace = createTiamatStopPlace(null, "New Stop", 1L);
@@ -147,7 +147,7 @@ class StopPlaceWriterTest {
     @Test
     void updateStopPlace_ValidationFails_ThrowsException() {
         String stopPlaceId = "NSR:StopPlace:100";
-        org.rutebanken.netex.model.StopPlace updatedStopPlace = createNetexStopPlace(stopPlaceId, "Invalid Stop", 1L);
+        org.entur.netex2.model.StopPlace updatedStopPlace = createNetexStopPlace(stopPlaceId, "Invalid Stop", 1L);
 
         when(validator.validateStopPlaceUpdate(stopPlaceId, false, 1L)).thenThrow(
             new IllegalArgumentException("Stop place not found")
@@ -167,7 +167,7 @@ class StopPlaceWriterTest {
         String stopPlaceId = "NSR:StopPlace:100";
         StopPlace existingStopPlace = createTiamatStopPlace(stopPlaceId, "Old Name", 1L);
         StopPlace updatedTiamatStopPlace = createTiamatStopPlace(stopPlaceId, "", 1L);
-        org.rutebanken.netex.model.StopPlace updatedNetexStopPlace = createNetexStopPlace(stopPlaceId, "", 1L);
+        org.entur.netex2.model.StopPlace updatedNetexStopPlace = createNetexStopPlace(stopPlaceId, "", 1L);
 
         when(validator.validateStopPlaceUpdate(stopPlaceId, false, 1L)).thenReturn(existingStopPlace);
         when(versionCreator.createCopy(existingStopPlace, StopPlace.class)).thenReturn(updatedTiamatStopPlace);
@@ -194,7 +194,7 @@ class StopPlaceWriterTest {
     void createStopPlace_EstablishesNetexMappingContextBeforeMapping() {
         NetexMappingContextThreadLocal.set(null);
 
-        org.rutebanken.netex.model.StopPlace newNetexStopPlace = createNetexStopPlace(null, "New Stop", 1L);
+        org.entur.netex2.model.StopPlace newNetexStopPlace = createNetexStopPlace(null, "New Stop", 1L);
         StopPlace mappedStopPlace = createTiamatStopPlace(null, "New Stop", 1L);
         StopPlace cleanStopPlace = createTiamatStopPlace(null, "New Stop", 1L);
         StopPlace savedStopPlace = createTiamatStopPlace("NSR:StopPlace:200", "New Stop", 1L);
@@ -223,7 +223,7 @@ class StopPlaceWriterTest {
         String stopPlaceId = "NSR:StopPlace:100";
         StopPlace existingStopPlace = createTiamatStopPlace(stopPlaceId, "Old Name", 1L);
         StopPlace updatedTiamatStopPlace = createTiamatStopPlace(stopPlaceId, "New Name", 1L);
-        org.rutebanken.netex.model.StopPlace updatedNetexStopPlace = createNetexStopPlace(stopPlaceId, "New Name", 1L);
+        org.entur.netex2.model.StopPlace updatedNetexStopPlace = createNetexStopPlace(stopPlaceId, "New Name", 1L);
         StopPlace savedStopPlace = createTiamatStopPlace(stopPlaceId, "New Name", 2L);
 
         AtomicReference<NetexMappingContext> contextDuringMapping = new AtomicReference<>();
@@ -259,11 +259,11 @@ class StopPlaceWriterTest {
         return stopPlace;
     }
 
-    private org.rutebanken.netex.model.StopPlace createNetexStopPlace(String netexId, String name, Long version) {
-        org.rutebanken.netex.model.StopPlace stopPlace = new org.rutebanken.netex.model.StopPlace();
+    private org.entur.netex2.model.StopPlace createNetexStopPlace(String netexId, String name, Long version) {
+        org.entur.netex2.model.StopPlace stopPlace = new org.entur.netex2.model.StopPlace();
         stopPlace.setId(netexId);
         stopPlace.setName(
-                new MultilingualString().withValue(name)
+                NetexMultilingualStringHelper.toNetexModel(name)
         );
         stopPlace.setVersion(version.toString());
         return stopPlace;

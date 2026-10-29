@@ -17,9 +17,9 @@ package org.rutebanken.tiamat.netex.mapping.mapper;
 
 import com.google.common.collect.Sets;
 import org.junit.Test;
-import org.rutebanken.netex.model.KeyListStructure;
-import org.rutebanken.netex.model.KeyValueStructure;
-import org.rutebanken.netex.model.StopPlace;
+import org.entur.netex2.model.KeyListStructure;
+import org.entur.netex2.model.KeyValueStructure;
+import org.entur.netex2.model.StopPlace;
 import org.rutebanken.tiamat.model.tag.Tag;
 import org.rutebanken.tiamat.repository.TagRepository;
 

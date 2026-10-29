@@ -46,7 +46,7 @@ public class ParallelInitialParkingImporter {
     @Autowired
     private NetexMapper netexMapper;
 
-    public List<org.rutebanken.netex.model.Parking> importParkings(List<Parking> tiamatParkings, AtomicInteger parkingsCreated) {
+    public List<org.entur.netex2.model.Parking> importParkings(List<Parking> tiamatParkings, AtomicInteger parkingsCreated) {
 
         return tiamatParkings.parallelStream()
                 .filter(parking -> parking != null)

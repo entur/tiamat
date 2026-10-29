@@ -2,11 +2,11 @@ package org.rutebanken.tiamat.ext.fintraffic.api.repository;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.rutebanken.netex.model.EntityInVersionStructure;
-import org.rutebanken.netex.model.Parking;
-import org.rutebanken.netex.model.PassengerStopAssignment;
-import org.rutebanken.netex.model.ScheduledStopPoint;
-import org.rutebanken.netex.model.StopPlace;
+import org.entur.netex2.model.EntityInVersionStructure;
+import org.entur.netex2.model.Parking;
+import org.entur.netex2.model.PassengerStopAssignment;
+import org.entur.netex2.model.ScheduledStopPoint;
+import org.entur.netex2.model.StopPlace;
 import org.rutebanken.tiamat.ext.fintraffic.api.model.ReadApiEntityInRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

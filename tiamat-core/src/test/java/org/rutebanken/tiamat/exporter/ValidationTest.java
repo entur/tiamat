@@ -17,7 +17,7 @@ package org.rutebanken.tiamat.exporter;
 
 import org.junit.Ignore;
 import org.junit.Test;
-import org.rutebanken.netex.validation.NeTExValidator;
+import org.entur.netex2.validation.NeTExValidator;
 import org.xml.sax.SAXException;
 
 import javax.xml.transform.Source;

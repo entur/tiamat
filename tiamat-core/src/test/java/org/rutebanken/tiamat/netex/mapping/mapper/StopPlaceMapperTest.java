@@ -17,8 +17,8 @@ package org.rutebanken.tiamat.netex.mapping.mapper;
 
 import ma.glasnost.orika.MappingContext;
 import org.junit.Test;
-import org.rutebanken.netex.model.KeyListStructure;
-import org.rutebanken.netex.model.KeyValueStructure;
+import org.entur.netex2.model.KeyListStructure;
+import org.entur.netex2.model.KeyValueStructure;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.netex.mapping.PublicationDeliveryHelper;
 
@@ -40,7 +40,7 @@ public class StopPlaceMapperTest {
         StopPlace stopPlace = new StopPlace();
         stopPlace.setParentStopPlace(true);
 
-        org.rutebanken.netex.model.StopPlace netexStopPlace = new org.rutebanken.netex.model.StopPlace();
+        org.entur.netex2.model.StopPlace netexStopPlace = new org.entur.netex2.model.StopPlace();
 
 
 
@@ -54,7 +54,7 @@ public class StopPlaceMapperTest {
 
         StopPlace stopPlace = new StopPlace();
 
-        org.rutebanken.netex.model.StopPlace netexStopPlace = new org.rutebanken.netex.model.StopPlace();
+        org.entur.netex2.model.StopPlace netexStopPlace = new org.entur.netex2.model.StopPlace();
 
         netexStopPlace.setKeyList(
                 new KeyListStructure()
@@ -73,7 +73,7 @@ public class StopPlaceMapperTest {
 
         StopPlace stopPlace = new StopPlace();
 
-        org.rutebanken.netex.model.StopPlace netexStopPlace = new org.rutebanken.netex.model.StopPlace();
+        org.entur.netex2.model.StopPlace netexStopPlace = new org.entur.netex2.model.StopPlace();
 
         netexStopPlace.setKeyList(
                 new KeyListStructure()
@@ -92,7 +92,7 @@ public class StopPlaceMapperTest {
 
         StopPlace stopPlace = new StopPlace();
 
-        org.rutebanken.netex.model.StopPlace netexStopPlace = new org.rutebanken.netex.model.StopPlace();
+        org.entur.netex2.model.StopPlace netexStopPlace = new org.entur.netex2.model.StopPlace();
 
         stopPlaceMapper.mapAtoB(netexStopPlace, stopPlace, new MappingContext(new HashMap<>()));
 

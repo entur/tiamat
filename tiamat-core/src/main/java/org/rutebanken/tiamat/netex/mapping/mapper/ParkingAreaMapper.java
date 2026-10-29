@@ -17,7 +17,7 @@ package org.rutebanken.tiamat.netex.mapping.mapper;
 
 import ma.glasnost.orika.CustomMapper;
 import ma.glasnost.orika.MappingContext;
-import org.rutebanken.netex.model.ParkingAreas_RelStructure;
+import org.entur.netex2.model.ParkingAreas_RelStructure;
 import org.rutebanken.tiamat.model.ParkingArea;
 
 public class ParkingAreaMapper extends CustomMapper<ParkingAreas_RelStructure, org.rutebanken.tiamat.model.ParkingArea> {

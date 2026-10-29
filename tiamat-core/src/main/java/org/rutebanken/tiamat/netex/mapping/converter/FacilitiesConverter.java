@@ -18,7 +18,7 @@ package org.rutebanken.tiamat.netex.mapping.converter;
 import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;
-import org.rutebanken.netex.model.SiteFacilitySets_RelStructure;
+import org.entur.netex2.model.SiteFacilitySets_RelStructure;
 import org.rutebanken.tiamat.model.SiteFacilitySet;
 import org.springframework.stereotype.Component;
 
@@ -28,7 +28,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
-public class FacilitiesConverter extends BidirectionalConverter<Set<SiteFacilitySet>, org.rutebanken.netex.model.SiteFacilitySets_RelStructure> {
+public class FacilitiesConverter extends BidirectionalConverter<Set<SiteFacilitySet>, org.entur.netex2.model.SiteFacilitySets_RelStructure> {
 
     @Override
     public SiteFacilitySets_RelStructure convertTo(Set<SiteFacilitySet> facilities, Type<SiteFacilitySets_RelStructure> type, MappingContext mappingContext) {
@@ -39,8 +39,8 @@ public class FacilitiesConverter extends BidirectionalConverter<Set<SiteFacility
                 return null;
             }
 
-            List<org.rutebanken.netex.model.SiteFacilitySet> facilitiesList = facilitiesContainingData.stream().map(facility -> {
-                org.rutebanken.netex.model.SiteFacilitySet netexFacility = new org.rutebanken.netex.model.SiteFacilitySet();
+            List<org.entur.netex2.model.SiteFacilitySet> facilitiesList = facilitiesContainingData.stream().map(facility -> {
+                org.entur.netex2.model.SiteFacilitySet netexFacility = new org.entur.netex2.model.SiteFacilitySet();
                 mapperFacade.map(facility, netexFacility);
                 return netexFacility;
             }).toList();
@@ -58,7 +58,7 @@ public class FacilitiesConverter extends BidirectionalConverter<Set<SiteFacility
         }
         Set<SiteFacilitySet> tiamatFacilities = new HashSet<>();
         for (Object netexFacility : siteFacilitySets_relStructure.getSiteFacilitySetRefOrSiteFacilitySet()) {
-            if (netexFacility instanceof org.rutebanken.netex.model.SiteFacilitySet facility && isNetexFacilityContainingData(facility)) {
+            if (netexFacility instanceof org.entur.netex2.model.SiteFacilitySet facility && isNetexFacilityContainingData(facility)) {
                 final SiteFacilitySet tiamatFacility = new SiteFacilitySet();
                 mapperFacade.map(facility, tiamatFacility);
                 tiamatFacilities.add(tiamatFacility);
@@ -74,7 +74,7 @@ public class FacilitiesConverter extends BidirectionalConverter<Set<SiteFacility
         return containsNonEmptyMobilityFacilityList || containsNonEmptyPassengerInformationFacilityList || containsNonEmptyPassengerInformationEquipmentList;
     }
 
-    private boolean isNetexFacilityContainingData(org.rutebanken.netex.model.SiteFacilitySet facility) {
+    private boolean isNetexFacilityContainingData(org.entur.netex2.model.SiteFacilitySet facility) {
         boolean containsNonEmptyMobilityFacilityList = facility.getMobilityFacilityList() != null && !facility.getMobilityFacilityList().isEmpty();
         boolean containsNonEmptyPassengerInformationFacilityList = facility.getPassengerInformationFacilityList() != null && !facility.getPassengerInformationFacilityList().isEmpty();
         boolean containsNonEmptyPassengerInformationEquipmentList = facility.getPassengerInformationEquipmentList() != null && !facility.getPassengerInformationEquipmentList().isEmpty();

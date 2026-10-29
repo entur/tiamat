@@ -24,8 +24,8 @@ import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
-import org.rutebanken.netex.model.LocationStructure;
-import org.rutebanken.netex.model.SimplePoint_VersionStructure;
+import org.entur.netex2.model.LocationStructure;
+import org.entur.netex2.model.SimplePoint_VersionStructure;
 import org.rutebanken.tiamat.config.GeometryFactoryConfig;
 
 import java.math.BigDecimal;

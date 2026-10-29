@@ -46,10 +46,10 @@
 package org.rutebanken.tiamat.importer.handler;
 
 import com.google.api.client.util.Preconditions;
-import org.rutebanken.netex.model.GroupOfTariffZones;
-import org.rutebanken.netex.model.GroupsOfTariffZonesInFrame_RelStructure;
-import org.rutebanken.netex.model.SiteFrame;
-import org.rutebanken.netex.model.Zone_VersionStructure;
+import org.entur.netex2.model.GroupOfTariffZones;
+import org.entur.netex2.model.GroupsOfTariffZonesInFrame_RelStructure;
+import org.entur.netex2.model.SiteFrame;
+import org.entur.netex2.model.Zone_VersionStructure;
 import org.rutebanken.tiamat.config.GroupOfTariffZonesConfig;
 import org.rutebanken.tiamat.importer.GroupOfTariffZonesImporter;
 import org.rutebanken.tiamat.importer.GroupOfTariffZonesImportResult;

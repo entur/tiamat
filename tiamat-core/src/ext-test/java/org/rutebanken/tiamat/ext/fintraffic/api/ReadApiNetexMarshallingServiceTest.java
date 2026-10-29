@@ -60,7 +60,7 @@ class ReadApiNetexMarshallingServiceTest {
         stopPlace.setVersion(1L);
         stopPlace.setChanged(Instant.now());
 
-        org.rutebanken.netex.model.StopPlace netexStopPlace = new org.rutebanken.netex.model.StopPlace();
+        org.entur.netex2.model.StopPlace netexStopPlace = new org.entur.netex2.model.StopPlace();
         netexStopPlace.setId(stopPlace.getNetexId());
         netexStopPlace.setVersion(String.valueOf(stopPlace.getVersion()));
 
@@ -86,7 +86,7 @@ class ReadApiNetexMarshallingServiceTest {
         parking.setVersion(1L);
         parking.setChanged(Instant.now());
 
-        org.rutebanken.netex.model.Parking netexParking = new org.rutebanken.netex.model.Parking();
+        org.entur.netex2.model.Parking netexParking = new org.entur.netex2.model.Parking();
         netexParking.setId(parking.getNetexId());
         netexParking.setVersion(String.valueOf(parking.getVersion()));
 
@@ -115,7 +115,7 @@ class ReadApiNetexMarshallingServiceTest {
         parentRef.setRef("FSR:StopPlace:100");
         parking.setParentSiteRef(parentRef);
 
-        org.rutebanken.netex.model.Parking netexParking = new org.rutebanken.netex.model.Parking();
+        org.entur.netex2.model.Parking netexParking = new org.entur.netex2.model.Parking();
         netexParking.setId(parking.getNetexId());
         netexParking.setVersion(String.valueOf(parking.getVersion()));
 
@@ -136,7 +136,7 @@ class ReadApiNetexMarshallingServiceTest {
         stopPlace.setVersion(1L);
         stopPlace.setChanged(Instant.now());
 
-        org.rutebanken.netex.model.StopPlace netexStopPlace = new org.rutebanken.netex.model.StopPlace();
+        org.entur.netex2.model.StopPlace netexStopPlace = new org.entur.netex2.model.StopPlace();
         netexStopPlace.setId(stopPlace.getNetexId());
         netexStopPlace.setVersion(String.valueOf(stopPlace.getVersion()));
 
@@ -156,7 +156,7 @@ class ReadApiNetexMarshallingServiceTest {
         stopPlace.setVersion(1L);
         stopPlace.setChanged(Instant.now());
 
-        org.rutebanken.netex.model.StopPlace netexStopPlace = new org.rutebanken.netex.model.StopPlace();
+        org.entur.netex2.model.StopPlace netexStopPlace = new org.entur.netex2.model.StopPlace();
         netexStopPlace.setId(stopPlace.getNetexId());
         netexStopPlace.setVersion(String.valueOf(stopPlace.getVersion()));
 
@@ -182,7 +182,7 @@ class ReadApiNetexMarshallingServiceTest {
         stopPlace.setVersion(1L);
         stopPlace.setChanged(Instant.now());
 
-        org.rutebanken.netex.model.StopPlace netexStopPlace = new org.rutebanken.netex.model.StopPlace();
+        org.entur.netex2.model.StopPlace netexStopPlace = new org.entur.netex2.model.StopPlace();
         netexStopPlace.setId(stopPlace.getNetexId());
         netexStopPlace.setVersion(String.valueOf(stopPlace.getVersion()));
 
@@ -200,7 +200,7 @@ class ReadApiNetexMarshallingServiceTest {
         parking.setVersion(1L);
         parking.setChanged(Instant.now());
 
-        org.rutebanken.netex.model.Parking netexParking = new org.rutebanken.netex.model.Parking();
+        org.entur.netex2.model.Parking netexParking = new org.entur.netex2.model.Parking();
         netexParking.setId(parking.getNetexId());
         netexParking.setVersion(String.valueOf(parking.getVersion()));
 
@@ -220,7 +220,7 @@ class ReadApiNetexMarshallingServiceTest {
         fareZone.setVersion(1L);
         fareZone.setChanged(Instant.now());
 
-        org.rutebanken.netex.model.FareZone netexFareZone = new org.rutebanken.netex.model.FareZone();
+        org.entur.netex2.model.FareZone netexFareZone = new org.entur.netex2.model.FareZone();
         netexFareZone.setId(fareZone.getNetexId());
         netexFareZone.setVersion(String.valueOf(fareZone.getVersion()));
 
@@ -245,7 +245,7 @@ class ReadApiNetexMarshallingServiceTest {
         fareZone.setVersion(1L);
         fareZone.setChanged(Instant.now());
 
-        org.rutebanken.netex.model.FareZone netexFareZone = new org.rutebanken.netex.model.FareZone();
+        org.entur.netex2.model.FareZone netexFareZone = new org.entur.netex2.model.FareZone();
         netexFareZone.setId(fareZone.getNetexId());
         netexFareZone.setVersion(String.valueOf(fareZone.getVersion()));
 
