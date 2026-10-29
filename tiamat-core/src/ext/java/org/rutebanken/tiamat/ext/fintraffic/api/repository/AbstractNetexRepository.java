@@ -149,6 +149,47 @@ public abstract class AbstractNetexRepository implements NetexRepository {
         });
     }
 
+    /**
+     * Marks the entity row as DELETED, and also the ScheduledStopPoint and PassengerStopAssignment
+     * rows that hold the entity id in {@code parent_refs}. Only a stop place has such rows.
+     * The update does not mark a parking that references a deleted stop place,
+     * because each parking sends its own delete event.
+     * The update changes only {@code status} and {@code updated_at}. It keeps the XML and inserts no row.
+     * A row that is already DELETED stays unchanged. The Read API reads only CURRENT and STALE rows.
+     * A row with a higher version or a later change time stays unchanged.
+     * The method does not map the entity to NeTEx, because its lazy collections cannot load after the delete transaction.
+     *
+     * @param version the version of the deleted entity
+     * @param changed the change time of the deleted entity, in epoch milliseconds
+     * @return the number of rows that the update marked as DELETED
+     */
+    @Override
+    public int markEntityDeleted(String id, String type, long version, long changed) {
+        return runWithIsolation((conn) -> {
+            String sql = """
+            UPDATE ext_fintraffic_netex_entity
+            SET status = 'DELETED', updated_at = CURRENT_TIMESTAMP
+            WHERE status != 'DELETED'
+                AND (
+                    (id = ? AND type = ? AND version <= ? AND changed <= ?)
+                    OR (type IN ('ScheduledStopPoint', 'PassengerStopAssignment') AND parent_refs @> ARRAY[?]::text[] AND changed <= ?)
+                )
+            """;
+
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, id);
+                stmt.setString(2, type);
+                stmt.setLong(3, version);
+                stmt.setLong(4, changed);
+                stmt.setString(5, id);
+                stmt.setLong(6, changed);
+                return stmt.executeUpdate();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
     @Override
     public int markAllEntitiesAsStale() {
         return runWithIsolation((conn) -> {
@@ -194,13 +235,12 @@ public abstract class AbstractNetexRepository implements NetexRepository {
             conn.commit();
             return response;
         } catch (SQLException e) {
-            try {
-                conn.rollback();
-                logger.error("Transaction rolled back due to error", e);
-            } catch (SQLException rollbackEx) {
-                logger.error("Failed to rollback transaction", rollbackEx);
-            }
+            rollbackAfterError(conn, e);
             throw new RuntimeException("Failed to run with isolation", e);
+        } catch (RuntimeException e) {
+            // The callbacks wrap SQLException in RuntimeException, so roll back here as well.
+            rollbackAfterError(conn, e);
+            throw e;
         } finally {
             try {
                 // Restore original auto-commit state
@@ -209,6 +249,15 @@ public abstract class AbstractNetexRepository implements NetexRepository {
                 logger.warn("Failed to restore auto-commit state", e);
             }
             DataSourceUtils.releaseConnection(conn, dataSource);
+        }
+    }
+
+    private void rollbackAfterError(Connection conn, Exception cause) {
+        try {
+            conn.rollback();
+            logger.error("Transaction rolled back due to error", cause);
+        } catch (SQLException rollbackEx) {
+            logger.error("Failed to rollback transaction", rollbackEx);
         }
     }
 

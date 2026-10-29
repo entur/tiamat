@@ -99,15 +99,39 @@ public class ReadApiNetexMarshallingService {
         });
     }
 
-    public void handleEntityChange(EntityInVersionStructure entity, EntityChangedEvent event) {
-        // Try up to 3 times and then log error
+    /**
+     * Writes the Read API rows of an entity, with up to three attempts.
+     * The method swallows a failure after the last attempt and does not rethrow it.
+     *
+     * @return true when the update succeeded, false when every attempt failed
+     */
+    public boolean handleEntityChange(EntityInVersionStructure entity, EntityChangedEvent event) {
+        return runWithRetries(
+                "Attempt {} to process entity change for entity id: {} failed",
+                "All attempts to process entity change for entity id: {} have failed",
+                entity.getId(),
+                () -> {
+                    Collection<ReadApiEntityInRecord> records = this.createEntityRecords(entity, crudToStatus(event.crudAction));
+                    netexRepository.upsertEntities(records);
+                });
+    }
+
+    /**
+     * Runs the operation with up to three attempts and a linear backoff between them.
+     * The method swallows a failure after the last attempt and does not rethrow it.
+     * An interrupt during the backoff restores the interrupt flag and throws a {@link RuntimeException}.
+     *
+     * @param attemptFailedMessage log format with two placeholders: the attempt number and the entity id
+     * @param allFailedMessage log format with one placeholder: the entity id
+     * @return true when an attempt succeeded, false when every attempt failed
+     */
+    private boolean runWithRetries(String attemptFailedMessage, String allFailedMessage, Object entityId, Runnable operation) {
         for (int attempt = 1; attempt <= 3; attempt++) {
             try {
-                Collection<ReadApiEntityInRecord> records = this.createEntityRecords(entity, crudToStatus(event.crudAction));
-                netexRepository.upsertEntities(records);
-                return;
+                operation.run();
+                return true;
             } catch (Exception e) {
-                logger.error("Attempt {} to process entity change for entity id: {} failed", attempt, entity.getId(), e);
+                logger.error(attemptFailedMessage, attempt, entityId, e);
                 try {
                     Thread.sleep(attempt * 200L); // Exponential backoff
                 } catch (InterruptedException ie) {
@@ -116,7 +140,28 @@ public class ReadApiNetexMarshallingService {
                 }
             }
         }
-        logger.error("All attempts to process entity change for entity id: {} have failed", entity.getId());
+        logger.error(allFailedMessage, entityId);
+        return false;
+    }
+
+    /**
+     * Marks the stored Read API rows of a deleted entity as DELETED.
+     * The rows are the entity row and the rows of its dependent stop point elements.
+     * The method does not map the entity to NeTEx.
+     * The delete transaction ends before the hook runs, so the entity cannot load its lazy collections.
+     *
+     * @return true when the update succeeded, false when every attempt failed
+     */
+    public boolean handleEntityDeleted(EntityInVersionStructure entity) {
+        return runWithRetries(
+                "Attempt {} to mark entity id: {} as deleted failed",
+                "All attempts to mark entity id: {} as deleted have failed",
+                entity.getId(),
+                () -> netexRepository.markEntityDeleted(
+                        entity.getNetexId(),
+                        entity.getClass().getSimpleName(),
+                        entity.getVersion(),
+                        entity.getChanged() != null ? entity.getChanged().toEpochMilli() : 0L));
     }
 
     public Collection<ReadApiEntityInRecord> createEntityRecords(EntityInVersionStructure entity, ReadApiEntityStatus status) {

@@ -27,9 +27,9 @@ public class ReadApiEntityChangedPublisher extends EntityChangedEventPublisher i
         logger.info("Received entity changed event for entity: {} version: {}", entity.getNetexId(), entity.getVersion());
         Instant now = Instant.now();
         EntityChangedEvent event = super.toEntityChangedEvent(entity, false);
-        readApiNetexMarshallingService.handleEntityChange(entity, event);
+        boolean updated = readApiNetexMarshallingService.handleEntityChange(entity, event);
         Instant end = Instant.now();
-        logger.info("Processed entity changed event for entity: {} version: {} in {} ms", entity.getNetexId(), entity.getVersion(), end.toEpochMilli() - now.toEpochMilli());
+        logResult(updated, "changed", entity, end.toEpochMilli() - now.toEpochMilli());
         if (entity instanceof StopPlace stopPlace && stopPlace.getChildren() != null && !stopPlace.getChildren().isEmpty()) {
             // Handle child entities if needed
             stopPlace.getChildren().forEach(this::onChange);
@@ -40,9 +40,17 @@ public class ReadApiEntityChangedPublisher extends EntityChangedEventPublisher i
     public void onDelete(EntityInVersionStructure entity) {
         logger.info("Received entity deleted event for entity: {} version: {}", entity.getNetexId(), entity.getVersion());
         Instant now = Instant.now();
-        EntityChangedEvent event = super.toEntityChangedEvent(entity, true);
-        readApiNetexMarshallingService.handleEntityChange(entity, event);
+        boolean updated = readApiNetexMarshallingService.handleEntityDeleted(entity);
         Instant end = Instant.now();
-        logger.info("Processed entity deleted event for entity: {} version: {} in {} ms", entity.getNetexId(), entity.getVersion(), end.toEpochMilli() - now.toEpochMilli());
+        logResult(updated, "deleted", entity, end.toEpochMilli() - now.toEpochMilli());
+    }
+
+    private static void logResult(boolean updated, String kind, EntityInVersionStructure entity, long millis) {
+        if (updated) {
+            logger.info("Processed entity {} event for entity: {} version: {} in {} ms", kind, entity.getNetexId(), entity.getVersion(), millis);
+        } else {
+            logger.error("Failed to process entity {} event for entity: {} type: {} version: {} after {} ms",
+                    kind, entity.getNetexId(), entity.getClass().getSimpleName(), entity.getVersion(), millis);
+        }
     }
 }
