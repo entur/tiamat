@@ -404,6 +404,114 @@ public class NetexMapperTest extends TiamatIntegrationTest {
     }
 
     @Test
+    public void mapInternalParkingWithEmptyListsLeavesNetexListFieldsNull() {
+        org.rutebanken.tiamat.model.Parking tiamatParking = new org.rutebanken.tiamat.model.Parking();
+        tiamatParking.setNetexId("NSR:Parking:1");
+
+        org.rutebanken.netex.model.Parking netexParking = netexMapper.mapToNetexModel(tiamatParking);
+
+        org.assertj.core.api.SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(readField(netexParking, "parkingVehicleTypes"))
+                    .as("an empty vehicle type list must not become an empty NeTEx list")
+                    .isNull();
+            softly.assertThat(readField(netexParking, "parkingPaymentProcess"))
+                    .as("an empty payment process list must not become an empty NeTEx list")
+                    .isNull();
+        });
+    }
+
+    @Test
+    public void mapInternalParkingKeepsListValuesOnNetex() {
+        org.rutebanken.tiamat.model.Parking tiamatParking = new org.rutebanken.tiamat.model.Parking();
+        tiamatParking.setNetexId("NSR:Parking:1");
+        tiamatParking.getParkingVehicleTypes().add(org.rutebanken.tiamat.model.ParkingVehicleEnumeration.CAR);
+        tiamatParking.getParkingVehicleTypes().add(org.rutebanken.tiamat.model.ParkingVehicleEnumeration.PEDAL_CYCLE);
+        tiamatParking.getParkingPaymentProcess().add(org.rutebanken.tiamat.model.ParkingPaymentProcessEnumeration.PAY_BY_MOBILE_DEVICE);
+
+        org.rutebanken.netex.model.Parking netexParking = netexMapper.mapToNetexModel(tiamatParking);
+
+        assertThat(netexParking.getParkingVehicleTypes())
+                .containsExactly(org.rutebanken.netex.model.ParkingVehicleEnumeration.CAR,
+                        org.rutebanken.netex.model.ParkingVehicleEnumeration.PEDAL_CYCLE);
+        assertThat(netexParking.getParkingPaymentProcess())
+                .containsExactly(org.rutebanken.netex.model.ParkingPaymentProcessEnumeration.PAY_BY_MOBILE_DEVICE);
+    }
+
+    @Test
+    public void mapNetexParkingListsToInternalModel() {
+        org.rutebanken.netex.model.Parking withValues = new org.rutebanken.netex.model.Parking();
+        withValues.setId("NSR:Parking:1");
+        withValues.getParkingVehicleTypes().add(org.rutebanken.netex.model.ParkingVehicleEnumeration.CAR);
+        withValues.getParkingPaymentProcess().add(org.rutebanken.netex.model.ParkingPaymentProcessEnumeration.FREE);
+
+        org.rutebanken.tiamat.model.Parking mappedWithValues = netexMapper.mapToTiamatModel(withValues);
+
+        assertThat(mappedWithValues.getParkingVehicleTypes())
+                .containsExactly(org.rutebanken.tiamat.model.ParkingVehicleEnumeration.CAR);
+        assertThat(mappedWithValues.getParkingPaymentProcess())
+                .containsExactly(org.rutebanken.tiamat.model.ParkingPaymentProcessEnumeration.FREE);
+
+        org.rutebanken.netex.model.Parking withoutValues = new org.rutebanken.netex.model.Parking();
+        withoutValues.setId("NSR:Parking:2");
+
+        org.rutebanken.tiamat.model.Parking mappedWithoutValues = netexMapper.mapToTiamatModel(withoutValues);
+
+        assertThat(mappedWithoutValues.getParkingVehicleTypes()).isEmpty();
+        assertThat(mappedWithoutValues.getParkingPaymentProcess()).isEmpty();
+    }
+
+    @Test
+    public void mapInternalParkingPropertiesWithoutUserTypesLeavesNetexUserTypesNull() {
+        org.rutebanken.tiamat.model.Parking tiamatParking = new org.rutebanken.tiamat.model.Parking();
+        tiamatParking.setNetexId("NSR:Parking:1");
+        org.rutebanken.tiamat.model.ParkingProperties withoutUserType = new org.rutebanken.tiamat.model.ParkingProperties();
+        withoutUserType.setNetexId("NSR:ParkingProperties:1");
+        withoutUserType.setVersion(1L);
+        withoutUserType.setSpaces(new java.util.ArrayList<>());
+        org.rutebanken.tiamat.model.ParkingProperties withUserType = new org.rutebanken.tiamat.model.ParkingProperties();
+        withUserType.setNetexId("NSR:ParkingProperties:2");
+        withUserType.setVersion(1L);
+        withUserType.setSpaces(new java.util.ArrayList<>());
+        withUserType.getParkingUserTypes().add(org.rutebanken.tiamat.model.ParkingUserEnumeration.ALL_USERS);
+        tiamatParking.setParkingProperties(List.of(withoutUserType, withUserType));
+
+        org.rutebanken.netex.model.Parking netexParking = netexMapper.mapToNetexModel(tiamatParking);
+
+        List<org.rutebanken.netex.model.ParkingProperties> properties = netexParking.getParkingProperties().getParkingProperties();
+        assertThat(properties).hasSize(2);
+        assertThat(readField(properties.get(0), "parkingUserTypes"))
+                .as("an empty user type list must not become an empty NeTEx list")
+                .isNull();
+        assertThat(properties.get(1).getParkingUserTypes())
+                .containsExactly(org.rutebanken.netex.model.ParkingUserEnumeration.ALL_USERS);
+    }
+
+    /**
+     * Reads a field without its getter. The NeTEx getter creates an empty list for a null field,
+     * so the getter cannot tell a missing list from an empty one.
+     */
+    private static Object readField(Object target, String name) {
+        try {
+            java.lang.reflect.Field field = findField(target.getClass(), name);
+            field.setAccessible(true);
+            return field.get(target);
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    private static java.lang.reflect.Field findField(Class<?> type, String name) throws NoSuchFieldException {
+        for (Class<?> current = type; current != null; current = current.getSuperclass()) {
+            try {
+                return current.getDeclaredField(name);
+            } catch (NoSuchFieldException ignored) {
+                // Try the superclass.
+            }
+        }
+        throw new NoSuchFieldException(name);
+    }
+
+    @Test
     public void mapInternalParkingOrganisationRefToNetex() {
         org.rutebanken.tiamat.model.Parking tiamatParking = new org.rutebanken.tiamat.model.Parking();
         tiamatParking.setNetexId("NSR:Parking:1");

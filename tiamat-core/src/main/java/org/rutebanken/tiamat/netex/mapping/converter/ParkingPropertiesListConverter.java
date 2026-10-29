@@ -123,7 +123,10 @@ public class ParkingPropertiesListConverter extends BidirectionalConverter<List<
             final org.rutebanken.netex.model.ParkingProperties netexParkingProperties = new org.rutebanken.netex.model.ParkingProperties();
             netexParkingProperties.setId(parkingProperties.getNetexId());
             netexParkingProperties.setVersion(String.valueOf(parkingProperties.getVersion()));
-            netexParkingProperties.getParkingUserTypes().addAll(parkingUserEnumerations);
+            // The NeTEx getter creates an empty list, and JAXB then writes an empty element.
+            if (!parkingUserEnumerations.isEmpty()) {
+                netexParkingProperties.getParkingUserTypes().addAll(parkingUserEnumerations);
+            }
             netexParkingProperties.withSpaces(parkingCapacities_relStructure);
             parkingProperties_relStructure.getParkingProperties().add(netexParkingProperties);
         });
