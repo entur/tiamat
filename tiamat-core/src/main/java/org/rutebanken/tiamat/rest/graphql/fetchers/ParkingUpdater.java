@@ -245,13 +245,7 @@ class ParkingUpdater implements DataFetcher {
             String existingRef = existingOrganisationRef == null ? null : existingOrganisationRef.getRef();
 
             if (!Objects.equals(submittedRef, existingRef)) {
-                if (submittedRef == null) {
-                    updatedParking.setOrganisationRef(null);
-                } else {
-                    OrganisationRefStructure organisationRef = new OrganisationRefStructure();
-                    organisationRef.setRef(submittedRef);
-                    updatedParking.setOrganisationRef(organisationRef);
-                }
+                updatedParking.setOrganisationRef(submittedRef == null ? null : new OrganisationRefStructure(submittedRef));
                 isUpdated = true;
             }
         }
