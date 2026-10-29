@@ -1,0 +1,333 @@
+openapi: 3.0.1
+info:
+  title: Tiamat write API for stop places
+  version: draft-2026-09-10
+  description: 'DRAFT, FOR REVIEW. This document is not released, and the details can still change.
+
+
+    The API accepts a write and answers 202 with a job. It does not perform the write on the request thread.
+    Poll the job endpoint to learn the outcome.'
+  contact:
+    name: Entur AS
+    url: https://github.com/entur/tiamat
+  license:
+    name: EUPL-1.2
+    url: https://joinup.ec.europa.eu/software/page/eupl
+servers:
+- url: https://api.entur.io/stop-places/v1/services/stop_places
+  description: Path shape only. This API is not deployed anywhere yet.
+security:
+- bearerAuth: []
+paths:
+  /write/jobs/{jobId}:
+    get:
+      tags:
+      - Jobs
+      summary: Get status of a stop place write job
+      description: 'Returns the current status of a stop place write job.
+
+
+        The status is one of four values. PROCESSING means that the job is not complete, and you
+
+        must poll again. FINISHED means that the write is committed. FAILED means that the write
+
+        did not occur. TIMED_OUT means that the job did not complete in time, and that nothing was
+
+        written, so you can submit the request again.
+
+
+        The status also says which of the two outcome objects to read. A FINISHED job gives
+
+        `result`. A FAILED or TIMED_OUT job gives `failure`. A PROCESSING job gives neither.
+
+
+        `result.stopPlaces` holds one entry for every stop place that the job wrote. Each entry
+
+        gives the ID of the stop place and the version that this write produced. Send that version
+
+        with your next update of the same stop place. A create also gives `submittedId`, which is
+
+        the ID that you sent, so that you can match the entry to your request.
+
+
+        `failure.reasonCode` says why the write did not happen, and `failure.message` describes it
+
+        in English. When `reasonCode` is STALE_VERSION, `failure.currentVersion` gives the version
+
+        that the stop place is at now. Read the stop place again, apply your change to that
+
+        version, and submit it again.
+
+
+        A job is only visible to the principal that submitted it. The API reports a job from
+
+        another principal as not found, and not as forbidden, so that you cannot probe job ids.
+
+        '
+      operationId: getJobStatus
+      parameters:
+      - name: jobId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: Job status returned successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StopPlaceJobDto'
+        '404':
+          description: No such job, or the job was submitted by a different principal
+          content:
+            application/json:
+              example:
+                errors:
+                - message: Job with ID 123 not found
+  /write:
+    put:
+      tags:
+      - Stop Places write API
+      summary: Updates a stop place from a NeTEx XML representation
+      description: 'The API accepts a NeTEx StopPlace XML document as the request body.
+
+        The document must contain only one mono-modal stop place.
+
+        The API returns a job for the asynchronous update operation.
+
+
+        The document that you submit replaces the stop place, thus you must send the full
+
+        entity. The API removes the quays, the AccessibilityAssessment and the placeEquipments
+
+        that are not in your document. If a quay has an unknown NeTEx ID, the job fails. If a
+
+        quay has no ID, the API adds a new quay.
+
+
+        Set the Version attribute to the version you read, not to the version you want to
+
+        make. The system decides the next version. If the stop place is at version 4, send
+
+        version="4", and the system writes version 5.
+
+
+        This is how the API knows that nobody changed the stop place while you were editing
+
+        it. If somebody did, the job fails, and the reason gives the version that is now
+
+        current. Read the stop place again, apply your change to it, and submit it again.
+
+
+        The API reports malformed XML and unsupported elements on the job.
+
+        '
+      operationId: updateStopPlace
+      requestBody:
+        content:
+          application/xml:
+            examples:
+              Update the stop place that is currently at version 1:
+                description: Update the stop place that is currently at version 1
+                value: "                        <stopPlaces xmlns=\"http://www.netex.org.uk/netex\">\n\
+                  \                          <StopPlace id=\"MES:StopPlace:1\" version=\"1\">\n      \
+                  \                      <Name lang=\"akk\">Bīt Mīt Uruk</Name>\n                    \
+                  \        <PrivateCode>1</PrivateCode>\n                            <Centroid>\n    \
+                  \                          <Location>\n                                <Longitude>45.638803</Longitude>\n\
+                  \                                <Latitude>31.324350</Latitude>\n                  \
+                  \            </Location>\n                            </Centroid>\n                \
+                  \            <TransportMode>rail</TransportMode>\n                            <StopPlaceType>railStation</StopPlaceType>\n\
+                  \                            <Weighting>interchangeAllowed</Weighting>\n           \
+                  \                 <keyList>\n                              <KeyValue>\n            \
+                  \                    <Key>owner</Key>\n                                <Value>1</Value>\n\
+                  \                              </KeyValue>\n                            </keyList>\n\
+                  \                          </StopPlace>\n                        </stopPlaces>\n"
+        required: true
+      responses:
+        '202':
+          description: The API accepted the update job
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StopPlaceJobDto'
+        '400':
+          description: The API cannot read the request payload
+        '403':
+          description: The caller does not have the role for the write API
+        '413':
+          description: The payload is larger than the maximum size
+        '503':
+          description: The job queue is full
+    post:
+      tags:
+      - Stop Places write API
+      summary: Creates a stop place from a NeTEx XML representation
+      description: 'The API accepts a NeTEx StopPlace XML document as the request body.
+
+        The document must contain only one mono-modal stop place.
+
+        The system replaces the NeTEx ID that you submit with a generated ID.
+
+        The API returns a job for the asynchronous create operation.
+
+        If the operation is successful, the job result includes the generated NeTEx ID.
+
+        The API reports malformed XML and unsupported elements on the job.
+
+        '
+      operationId: createStopPlace
+      requestBody:
+        content:
+          application/xml:
+            examples:
+              Create StopPlace example:
+                description: Create StopPlace example
+                value: "                        <stopPlaces xmlns=\"http://www.netex.org.uk/netex\">\n\
+                  \                          <StopPlace id=\"MES:StopPlace:1\" version=\"1\">\n      \
+                  \                      <Name lang=\"akk\">Bīt Mīt Uruk</Name>\n                    \
+                  \        <PrivateCode>1</PrivateCode>\n                            <Centroid>\n    \
+                  \                          <Location>\n                                <Longitude>45.638803</Longitude>\n\
+                  \                                <Latitude>31.324350</Latitude>\n                  \
+                  \            </Location>\n                            </Centroid>\n                \
+                  \            <TransportMode>rail</TransportMode>\n                            <StopPlaceType>railStation</StopPlaceType>\n\
+                  \                            <Weighting>interchangeAllowed</Weighting>\n           \
+                  \                 <keyList>\n                              <KeyValue>\n            \
+                  \                    <Key>owner</Key>\n                                <Value>1</Value>\n\
+                  \                              </KeyValue>\n                            </keyList>\n\
+                  \                          </StopPlace>\n                        </stopPlaces>\n"
+        required: true
+      responses:
+        '202':
+          description: The API accepted the create job
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StopPlaceJobDto'
+        '400':
+          description: The API cannot read the request payload
+        '403':
+          description: The caller does not have the role for the write API
+        '413':
+          description: The payload is larger than the maximum size
+        '503':
+          description: The job queue is full
+  /write/{stopPlaceId}:
+    delete:
+      tags:
+      - Stop Places write API
+      summary: Deletes a stop place by NeTEx ID
+      description: 'The API deletes a stop place by its NeTEx ID.
+
+        The API returns a job for the asynchronous delete operation.
+
+
+        The API does not find the stop place before it accepts the job. Thus the API reports an
+
+        unknown NeTEx ID as a FAILED job with a reason, and not as a 404. The API reports these
+
+        two conditions in the same way: a stop place that is already deleted, and a child of a
+
+        multimodal stop place. You cannot delete a child stop place on its own.
+
+        '
+      operationId: deleteStopPlace
+      parameters:
+      - name: stopPlaceId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '202':
+          description: The API accepted the delete job
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StopPlaceJobDto'
+        '403':
+          description: The caller does not have the role for the write API
+        '503':
+          description: The job queue is full
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: An OAuth2 access token. Every operation needs the role that permits use of the write
+        API. A create, an update and a delete each need edit permission for the stop place as well, and
+        for its type.
+  schemas:
+    StopPlaceJobDto:
+      type: object
+      properties:
+        jobId:
+          type: integer
+          description: ID of the job. Poll the job endpoint with this ID.
+          format: int64
+          example: 88991
+        status:
+          type: string
+          description: PROCESSING while the job runs. FINISHED, FAILED or TIMED_OUT when it ends.
+          enum:
+          - PROCESSING
+          - FINISHED
+          - FAILED
+          - TIMED_OUT
+        result:
+          $ref: '#/components/schemas/WriteResult'
+        failure:
+          $ref: '#/components/schemas/WriteFailure'
+    WriteFailure:
+      type: object
+      properties:
+        reasonCode:
+          type: string
+          description: Why the job did not finish.
+          enum:
+          - INVALID_PAYLOAD
+          - STALE_VERSION
+          - ACCESS_DENIED
+          - QUEUE_FULL
+          - CONSTRAINT_VIOLATION
+          - TIMED_OUT
+          - UNEXPECTED_ERROR
+        message:
+          type: string
+          description: A description of the failure in English. The wording can change between releases.
+          example: You sent version 1. The stop place is now at version 2. Read it again, apply your
+            change to it, and submit it again.
+        currentVersion:
+          type: integer
+          description: The version that the stop place is at now. Set when reasonCode is STALE_VERSION.
+          format: int64
+          example: 2
+      description: Why a write did not happen.
+    WriteResult:
+      type: object
+      properties:
+        stopPlaces:
+          type: array
+          description: One entry for every stop place that the job wrote.
+          items:
+            $ref: '#/components/schemas/WrittenStopPlace'
+      description: What a successful write produced.
+    WrittenStopPlace:
+      type: object
+      properties:
+        submittedId:
+          type: string
+          description: The ID that you submitted. Null for an update and for a delete.
+          example: NSR:StopPlace:1
+        netexId:
+          type: string
+          description: The ID of the stop place in the system.
+          example: NSR:StopPlace:64062
+        version:
+          type: integer
+          description: The version that this write produced. Send this version with the next update.
+          format: int64
+          example: 2
+      description: A stop place that the job wrote, and the version that the write produced.
