@@ -1,4 +1,4 @@
-FROM eclipse-temurin:25-noble
+FROM bellsoft/liberica-openjre-debian:25.0.5.0.3-5
 WORKDIR /deployments
 COPY target/tiamat.jar tiamat.jar
 RUN addgroup --gid 2000 appuser && adduser --uid 2000 --disabled-password --ingroup appuser appuser

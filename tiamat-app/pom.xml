@@ -90,8 +90,9 @@
                 <configuration>
                     <skip>false</skip>
                     <from>
-                        <!-- JRE on glibc (noble), matching the runtime the Dockerfile image always ran on -->
-                        <image>eclipse-temurin:25.0.3_9-jre-noble</image>
+                        <!-- JRE on glibc (Debian), like the noble image it replaces. Liberica, because Temurin had
+                             no Docker image fixed for the eMudhra CA compromise yet. -->
+                        <image>bellsoft/liberica-openjre-debian:25.0.5.0.3-5</image>
                         <platforms>
                             <platform>
                                 <architecture>amd64</architecture>
