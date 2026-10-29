@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -39,12 +40,25 @@ public class PublicationDeliveryFareFrameImporterTest {
     @Test
     public void replicaCleanupAloneTriggersRefUpdate() {
         givenOnlyRejectedZone();
-        when(saver.deleteAllExcept(Set.of("NSR:FareZone:1"))).thenReturn(2);
+        when(saver.deleteAllExcept(Set.of("NSR:FareZone:1"), false)).thenReturn(2);
         ReflectionTestUtils.setField(fareZoneConfig, "externalVersioning", true);
 
         importer.importPublicationDelivery(delivery, new ImportParams());
 
-        verify(saver).deleteAllExcept(Set.of("NSR:FareZone:1"));
+        verify(saver).deleteAllExcept(Set.of("NSR:FareZone:1"), false);
+        verify(backgroundJobs).triggerStopPlaceUpdate();
+    }
+
+    @Test
+    public void registerReplicaPrunesWithoutExternalVersioning() {
+        givenOnlyRejectedZone();
+        when(saver.deleteAllExcept(Set.of("NSR:FareZone:1"), true)).thenReturn(1);
+        ImportParams params = new ImportParams();
+        params.fareZoneRegisterReplica = true;
+
+        importer.importPublicationDelivery(delivery, params);
+
+        verify(saver).deleteAllExcept(Set.of("NSR:FareZone:1"), true);
         verify(backgroundJobs).triggerStopPlaceUpdate();
     }
 
@@ -55,7 +69,7 @@ public class PublicationDeliveryFareFrameImporterTest {
 
         importer.importPublicationDelivery(delivery, new ImportParams());
 
-        verify(saver).deleteAllExcept(Set.of("NSR:FareZone:1"));
+        verify(saver).deleteAllExcept(Set.of("NSR:FareZone:1"), false);
         verify(backgroundJobs, never()).triggerStopPlaceUpdate();
     }
 
@@ -65,7 +79,7 @@ public class PublicationDeliveryFareFrameImporterTest {
 
         importer.importPublicationDelivery(delivery, new ImportParams());
 
-        verify(saver, never()).deleteAllExcept(any());
+        verify(saver, never()).deleteAllExcept(any(), anyBoolean());
         verify(backgroundJobs, never()).triggerStopPlaceUpdate();
     }
 

@@ -130,7 +130,7 @@ public class TariffZoneImportHandler {
                     .map(tariffZone -> new ObjectFactory().createTariffZone(tariffZone)).collect(Collectors.toList());
             logger.debug("Got {} imported tariffZones ", importedTariffZones.size());
 
-            List<JAXBElement<? extends Zone_VersionStructure>> importedFareZones = fareZoneImporter.importFareZones(tiamatFareZones).getImportedFareZones().stream()
+            List<JAXBElement<? extends Zone_VersionStructure>> importedFareZones = fareZoneImporter.importFareZones(tiamatFareZones, false).getImportedFareZones().stream()
                     .map(fareZone -> new ObjectFactory().createFareZone(fareZone)).collect(Collectors.toList());
             if (!importedTariffZones.isEmpty()) {
                 responseSiteframe.withTariffZones(new TariffZonesInFrame_RelStructure().withTariffZone(importedTariffZones));
@@ -180,7 +180,7 @@ public class TariffZoneImportHandler {
 
         logger.debug("Mapped {} fare zones from NeTEx to internal model", tiamatFareZones.size());
 
-        FareZoneImportResult importResult = fareZoneImporter.importFareZones(tiamatFareZones);
+        FareZoneImportResult importResult = fareZoneImporter.importFareZones(tiamatFareZones, importParams.fareZoneRegisterReplica);
 
         logger.debug("Imported {} fare zones", importResult.getImportedFareZones().size());
 

@@ -49,7 +49,8 @@ public class FareZoneImporter {
     }
 
 
-    public FareZoneImportResult importFareZones(List<org.rutebanken.tiamat.model.FareZone> fareZones) {
+    public FareZoneImportResult importFareZones(List<org.rutebanken.tiamat.model.FareZone> fareZones, boolean registerReplica) {
+        boolean replica = fareZoneConfig.isReplicaImport(registerReplica);
         Set<String> savedNetexIds = new HashSet<>();
         Set<String> declaredNetexIds = new HashSet<>();
 
@@ -61,13 +62,13 @@ public class FareZoneImporter {
                 .map(incomingFareZone -> {
                     org.rutebanken.tiamat.model.FareZone saved;
 
-                    if (fareZoneConfig.isExternalVersioning()) {
+                    if (replica) {
                         // Cleanup keeps zones by netexId, so a replica cannot accept an id the mapper dropped.
                         if (incomingFareZone.getNetexId() == null) {
                             throw new IllegalArgumentException("FareZone " + incomingFareZone.getOriginalIds()
-                                    + " has no id with a prefix valid for FareZone, required with external versioning");
+                                    + " has no id with a prefix valid for FareZone, required for a replica import");
                         }
-                        saved = fareZoneSaverService.saveWithExternalVersioning(incomingFareZone);
+                        saved = fareZoneSaverService.saveWithExternalVersioning(incomingFareZone, registerReplica);
                         if (saved != null) {
                             logger.debug("Saved FareZone {} with external versioning", saved.getNetexId());
                         } else {

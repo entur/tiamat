@@ -24,7 +24,22 @@ public class FareZoneConfig {
     @Value("${fareZone.externalVersioning:false}")
     private boolean externalVersioning;
 
+    @Value("${fareZone.register.import.enabled:false}")
+    private boolean registerImportEnabled;
+
     public boolean isExternalVersioning() {
         return externalVersioning;
+    }
+
+    public boolean isRegisterImportEnabled() {
+        return registerImportEnabled;
+    }
+
+    /**
+     * Whether an import runs as a replica: update by netexId and prune zones absent from the delivery.
+     * Always under externalVersioning; otherwise only when the caller asks, as the register import does.
+     */
+    public boolean isReplicaImport(boolean registerReplica) {
+        return externalVersioning || registerReplica;
     }
 }

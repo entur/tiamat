@@ -36,6 +36,7 @@ import org.rutebanken.tiamat.importer.FareZoneFrameSource;
 import org.rutebanken.tiamat.importer.FareZoneImporter;
 import org.rutebanken.tiamat.importer.ImportParams;
 import org.rutebanken.tiamat.importer.ImportType;
+import org.rutebanken.tiamat.importer.PublicationDeliveryFareFrameImporter;
 import org.rutebanken.tiamat.importer.PublicationDeliveryImporter;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
 import org.rutebanken.tiamat.model.Value;
@@ -69,6 +70,9 @@ public class FareZoneExternalVersioningTest extends TiamatIntegrationTest {
 
     @Autowired
     private FareZoneImporter fareZoneImporter;
+
+    @Autowired
+    private PublicationDeliveryFareFrameImporter publicationDeliveryFareFrameImporter;
 
     @Autowired
     private PlatformTransactionManager transactionManager;
@@ -758,12 +762,12 @@ public class FareZoneExternalVersioningTest extends TiamatIntegrationTest {
             org.rutebanken.tiamat.model.FareZone multi = tiamatFareZone("NSR:FareZone:1201", 1);
             multi.setMultiSurface(geometryFactory.createMultiPolygon(new Polygon[]{square(0), square(5)}));
             multi.setCentroid(geometryFactory.createPoint(new Coordinate(0.5, 0.5)));
-            fareZoneImporter.importFareZones(List.of(multi));
+            fareZoneImporter.importFareZones(List.of(multi), false);
 
             org.rutebanken.tiamat.model.FareZone single = tiamatFareZone("NSR:FareZone:1201", 2);
             single.setPolygon(square(10));
             single.setCentroid(geometryFactory.createPoint(new Coordinate(10.5, 10.5)));
-            fareZoneImporter.importFareZones(List.of(single));
+            fareZoneImporter.importFareZones(List.of(single), false);
 
             new TransactionTemplate(transactionManager).executeWithoutResult(status -> {
                 org.rutebanken.tiamat.model.FareZone saved =
@@ -775,7 +779,7 @@ public class FareZoneExternalVersioningTest extends TiamatIntegrationTest {
 
             org.rutebanken.tiamat.model.FareZone withoutCentroid = tiamatFareZone("NSR:FareZone:1201", 3);
             withoutCentroid.setPolygon(square(10));
-            fareZoneImporter.importFareZones(List.of(withoutCentroid));
+            fareZoneImporter.importFareZones(List.of(withoutCentroid), false);
 
             assertThat(fareZoneRepository.findFirstByNetexIdOrderByVersionDesc("NSR:FareZone:1201").getCentroid()).isNull();
         } finally {
@@ -793,12 +797,12 @@ public class FareZoneExternalVersioningTest extends TiamatIntegrationTest {
             first.getKeyValues().put("stale", new Value("a"));
             first.getKeyValues().put("kept", new Value("b"));
             first.setVersionComment("first");
-            fareZoneImporter.importFareZones(List.of(first));
+            fareZoneImporter.importFareZones(List.of(first), false);
 
             org.rutebanken.tiamat.model.FareZone second = tiamatFareZone("NSR:FareZone:1501", 2);
             second.getKeyValues().put("kept", new Value("c"));
             second.setVersionComment("second");
-            fareZoneImporter.importFareZones(List.of(second));
+            fareZoneImporter.importFareZones(List.of(second), false);
 
             new TransactionTemplate(transactionManager).executeWithoutResult(status -> {
                 org.rutebanken.tiamat.model.FareZone saved =
@@ -809,7 +813,7 @@ public class FareZoneExternalVersioningTest extends TiamatIntegrationTest {
             });
 
             org.rutebanken.tiamat.model.FareZone third = tiamatFareZone("NSR:FareZone:1501", 3);
-            fareZoneImporter.importFareZones(List.of(third));
+            fareZoneImporter.importFareZones(List.of(third), false);
 
             new TransactionTemplate(transactionManager).executeWithoutResult(status -> {
                 org.rutebanken.tiamat.model.FareZone saved =
@@ -834,7 +838,7 @@ public class FareZoneExternalVersioningTest extends TiamatIntegrationTest {
         ReflectionTestUtils.setField(fareZoneConfig, "externalVersioning", true);
 
         try {
-            fareZoneImporter.importFareZones(List.of(tiamatFareZone("NSR:FareZone:1301", 3)));
+            fareZoneImporter.importFareZones(List.of(tiamatFareZone("NSR:FareZone:1301", 3)), false);
 
             List<org.rutebanken.tiamat.model.FareZone> versions = fareZoneRepository.findByNetexId("NSR:FareZone:1301");
             assertThat(versions).hasSize(1);
@@ -871,6 +875,45 @@ public class FareZoneExternalVersioningTest extends TiamatIntegrationTest {
         } finally {
             ReflectionTestUtils.setField(fareZoneConfig, "externalVersioning", false);
         }
+    }
+
+    /**
+     * Enabling the register import must not make a REST FareFrame POST a replica: a partial delivery
+     * would otherwise prune the rest of the register until the next artifact import.
+     */
+    @Test
+    public void registerImportEnabled_restFareFrameImportDoesNotPrune() throws Exception {
+        ReflectionTestUtils.setField(fareZoneConfig, "registerImportEnabled", true);
+
+        try {
+            ImportParams importParams = new ImportParams();
+            importParams.fareZoneFrameSource = FareZoneFrameSource.FARE_FRAME;
+            importParams.importType = ImportType.INITIAL;
+
+            publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDeliveryTestHelper.publicationDelivery(
+                    fareFrameWithFareZones("NSR:FareZone:1001", "NSR:FareZone:1002")), importParams);
+            publicationDeliveryTestHelper.postAndReturnPublicationDelivery(publicationDeliveryTestHelper.publicationDelivery(
+                    fareFrameWithFareZones("NSR:FareZone:1001")), importParams);
+
+            assertThat(fareZoneRepository.findByNetexId("NSR:FareZone:1002")).isNotEmpty();
+        } finally {
+            ReflectionTestUtils.setField(fareZoneConfig, "registerImportEnabled", false);
+        }
+    }
+
+    /** The register import asks for a replica per call, so it prunes orphans without externalVersioning. */
+    @Test
+    public void registerReplica_prunesOrphansWithoutExternalVersioning() {
+        ImportParams importParams = new ImportParams();
+        importParams.fareZoneRegisterReplica = true;
+
+        publicationDeliveryFareFrameImporter.importPublicationDelivery(publicationDeliveryTestHelper.publicationDelivery(
+                fareFrameWithFareZones("NSR:FareZone:1501", "NSR:FareZone:1502")), importParams);
+        publicationDeliveryFareFrameImporter.importPublicationDelivery(publicationDeliveryTestHelper.publicationDelivery(
+                fareFrameWithFareZones("NSR:FareZone:1501")), importParams);
+
+        assertThat(fareZoneRepository.findByNetexId("NSR:FareZone:1501")).isNotEmpty();
+        assertThat(fareZoneRepository.findByNetexId("NSR:FareZone:1502")).isEmpty();
     }
 
     private org.rutebanken.tiamat.model.FareZone tiamatFareZone(String netexId, long version) {
