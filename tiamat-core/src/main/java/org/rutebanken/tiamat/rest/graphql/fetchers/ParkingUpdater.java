@@ -239,14 +239,19 @@ class ParkingUpdater implements DataFetcher {
 
             updatedParking.setParentSiteRef(parentSiteRef);
         }
-        if (input.get(ORGANISATION_REF) != null) {
+        if (input.containsKey(ORGANISATION_REF)) {
             String submittedRef = (String) input.get(ORGANISATION_REF);
             OrganisationRefStructure existingOrganisationRef = updatedParking.getOrganisationRef();
+            String existingRef = existingOrganisationRef == null ? null : existingOrganisationRef.getRef();
 
-            if (existingOrganisationRef == null || !submittedRef.equals(existingOrganisationRef.getRef())) {
-                OrganisationRefStructure organisationRef = new OrganisationRefStructure();
-                organisationRef.setRef(submittedRef);
-                updatedParking.setOrganisationRef(organisationRef);
+            if (!Objects.equals(submittedRef, existingRef)) {
+                if (submittedRef == null) {
+                    updatedParking.setOrganisationRef(null);
+                } else {
+                    OrganisationRefStructure organisationRef = new OrganisationRefStructure();
+                    organisationRef.setRef(submittedRef);
+                    updatedParking.setOrganisationRef(organisationRef);
+                }
                 isUpdated = true;
             }
         }
@@ -271,9 +276,9 @@ class ParkingUpdater implements DataFetcher {
             updatedParking.getParkingVehicleTypes().addAll(vehicleTypes);
         }
 
-        if (input.get(PARKING_LAYOUT) != null) {
+        if (input.containsKey(PARKING_LAYOUT)) {
             ParkingLayoutEnumeration parkingLayout = (ParkingLayoutEnumeration) input.get(PARKING_LAYOUT);
-            isUpdated = isUpdated || (!parkingLayout.equals(updatedParking.getParkingLayout()));
+            isUpdated = isUpdated || !Objects.equals(parkingLayout, updatedParking.getParkingLayout());
             updatedParking.setParkingLayout(parkingLayout);
         }
 
@@ -289,9 +294,9 @@ class ParkingUpdater implements DataFetcher {
             updatedParking.setRechargingAvailable(rechargingAvailable);
         }
 
-        if (input.get(SECURE) != null) {
+        if (input.containsKey(SECURE)) {
             Boolean isSecure = (Boolean) input.get(SECURE);
-            isUpdated = isUpdated || (!isSecure.equals(updatedParking.isSecure()));
+            isUpdated = isUpdated || !Objects.equals(isSecure, updatedParking.isSecure());
             updatedParking.setSecure(isSecure);
         }
 
@@ -327,15 +332,15 @@ class ParkingUpdater implements DataFetcher {
             updatedParking.getPaymentMethods().addAll(paymentMethods);
         }
 
-        if (input.get(LIGHTING) != null) {
+        if (input.containsKey(LIGHTING)) {
             LightingEnumeration lighting = (LightingEnumeration) input.get(LIGHTING);
-            isUpdated = isUpdated || (!lighting.equals(updatedParking.getLighting()));
+            isUpdated = isUpdated || !Objects.equals(lighting, updatedParking.getLighting());
             updatedParking.setLighting(lighting);
         }
 
-        if (input.get(COVERED) != null) {
+        if (input.containsKey(COVERED)) {
             CoveredEnumeration covered = (CoveredEnumeration) input.get(COVERED);
-            isUpdated = isUpdated || (!covered.equals(updatedParking.getCovered()));
+            isUpdated = isUpdated || !Objects.equals(covered, updatedParking.getCovered());
             updatedParking.setCovered(covered);
         }
 
