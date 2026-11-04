@@ -62,6 +62,12 @@ public class PublicationDeliveryUnmarshaller {
      */
     private static final int VERSION_PEEK_LIMIT = 1024 * 1024;
 
+    /**
+     * The schema every document was validated against before validation followed the declared
+     * version, so a document that does not declare a recognisable version keeps that behaviour.
+     */
+    static final NeTExValidator.NetexVersion DEFAULT_SCHEMA_VERSION = NeTExValidator.NetexVersion.v1_16;
+
     private static final XMLInputFactory XML_INPUT_FACTORY = XMLInputFactory.newFactory();
 
     static {
@@ -74,6 +80,7 @@ public class PublicationDeliveryUnmarshaller {
 
     public PublicationDeliveryUnmarshaller() throws IOException, SAXException {
         NeTExValidator.getNeTExValidator();
+        NeTExValidator.getNeTExValidator(DEFAULT_SCHEMA_VERSION);
     }
 
     public PublicationDeliveryStructure unmarshal(InputStream inputStream) throws JAXBException, IOException, SAXException {
@@ -110,21 +117,24 @@ public class PublicationDeliveryUnmarshaller {
      * as the id of a placeEquipments container, which 2.0 restricts to RelationshipId).
      * <p>
      * The version attribute has the form {netexSchemaVersion}:{profileName}:{profileVersion}, e.g.
-     * "1.15:NO-NeTEx-stops:1.5", or is just the schema version, e.g. "2.0". A missing or unknown
-     * version is validated against the latest schema.
+     * "1.15:NO-NeTEx-stops:1.5", or is just the schema version, e.g. "2.0". Only major.minor is
+     * compared, so "1.16.1" is validated as 1.16. An unknown 2.x version is validated against the
+     * latest schema, and a missing or other unknown version against {@link #DEFAULT_SCHEMA_VERSION}.
      */
     static NeTExValidator.NetexVersion schemaVersionFor(String versionAttribute) {
         if (versionAttribute == null || versionAttribute.isBlank()) {
-            return NeTExValidator.LATEST;
+            return DEFAULT_SCHEMA_VERSION;
         }
-        String declaredSchemaVersion = versionAttribute.split(":")[0].trim();
+        String[] versionParts = versionAttribute.split(":")[0].trim().split("\\.");
+        String majorMinor = versionParts.length > 1 ? versionParts[0] + "." + versionParts[1] : versionParts[0];
         for (NeTExValidator.NetexVersion netexVersion : NeTExValidator.NetexVersion.values()) {
-            if (netexVersion.toString().replaceAll("[^0-9.]", "").equals(declaredSchemaVersion)) {
+            if (netexVersion.toString().replaceAll("[^0-9.]", "").equals(majorMinor)) {
                 return netexVersion;
             }
         }
-        logger.info("Unknown NeTEx version '{}' in publication delivery, validating against NeTEx {} schema", versionAttribute, NeTExValidator.LATEST);
-        return NeTExValidator.LATEST;
+        NeTExValidator.NetexVersion fallback = versionParts[0].equals("2") ? NeTExValidator.LATEST : DEFAULT_SCHEMA_VERSION;
+        logger.info("Unknown NeTEx version '{}' in publication delivery, validating against NeTEx {} schema", versionAttribute, fallback);
+        return fallback;
     }
 
     /**

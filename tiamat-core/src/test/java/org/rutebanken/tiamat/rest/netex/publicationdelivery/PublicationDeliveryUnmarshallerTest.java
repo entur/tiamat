@@ -143,11 +143,43 @@ public class PublicationDeliveryUnmarshallerTest {
     }
 
     @Test
-    public void schemaVersionFallsBackToLatest() {
-        assertThat(PublicationDeliveryUnmarshaller.schemaVersionFor(null)).isEqualTo(NetexVersion.v2_0);
-        assertThat(PublicationDeliveryUnmarshaller.schemaVersionFor("")).isEqualTo(NetexVersion.v2_0);
-        assertThat(PublicationDeliveryUnmarshaller.schemaVersionFor("9.9:NO-NeTEx-stops:9.9")).isEqualTo(NetexVersion.v2_0);
-        assertThat(PublicationDeliveryUnmarshaller.schemaVersionFor("any")).isEqualTo(NetexVersion.v2_0);
+    public void schemaVersionIgnoresPatchLevel() {
+        assertThat(PublicationDeliveryUnmarshaller.schemaVersionFor("1.16.1")).isEqualTo(NetexVersion.v1_16);
+        assertThat(PublicationDeliveryUnmarshaller.schemaVersionFor("1.15.0:NO-NeTEx-stops:1.5")).isEqualTo(NetexVersion.v1_15);
+        assertThat(PublicationDeliveryUnmarshaller.schemaVersionFor("2.0.1")).isEqualTo(NetexVersion.v2_0);
+    }
+
+    @Test
+    public void schemaVersionFallsBackToDefaultForMissingOrUnknownVersion() {
+        assertThat(PublicationDeliveryUnmarshaller.schemaVersionFor(null)).isEqualTo(NetexVersion.v1_16);
+        assertThat(PublicationDeliveryUnmarshaller.schemaVersionFor("")).isEqualTo(NetexVersion.v1_16);
+        assertThat(PublicationDeliveryUnmarshaller.schemaVersionFor("1.0")).isEqualTo(NetexVersion.v1_16);
+        assertThat(PublicationDeliveryUnmarshaller.schemaVersionFor("1.5")).isEqualTo(NetexVersion.v1_16);
+        assertThat(PublicationDeliveryUnmarshaller.schemaVersionFor("9.9:NO-NeTEx-stops:9.9")).isEqualTo(NetexVersion.v1_16);
+        assertThat(PublicationDeliveryUnmarshaller.schemaVersionFor("any")).isEqualTo(NetexVersion.v1_16);
+    }
+
+    @Test
+    public void schemaVersionFallsBackToLatestForUnknown2xVersion() {
+        assertThat(PublicationDeliveryUnmarshaller.schemaVersionFor("2")).isEqualTo(NetexVersion.v2_0);
+        assertThat(PublicationDeliveryUnmarshaller.schemaVersionFor("2.1:NO-NeTEx-stops:1.6")).isEqualTo(NetexVersion.v2_0);
+    }
+
+    @Test
+    public void acceptsNetex1DocumentWithoutVersion() throws Exception {
+        String withoutVersion = STOP_PLACE_WITH_PLACE_EQUIPMENTS_ID.replace(" version=\"%s\"", "");
+
+        PublicationDeliveryStructure publicationDelivery = validatingUnmarshaller().unmarshal(toStream(withoutVersion));
+
+        assertThat(publicationDelivery.getDataObjects().getCompositeFrameOrCommonFrame()).hasSize(1);
+    }
+
+    @Test
+    public void acceptsNetex1DocumentWithPatchLevelVersion() throws Exception {
+        PublicationDeliveryStructure publicationDelivery = validatingUnmarshaller()
+                .unmarshal(toStream(STOP_PLACE_WITH_PLACE_EQUIPMENTS_ID.formatted("1.16.1:NO-NeTEx-stops:1.5")));
+
+        assertThat(publicationDelivery.getDataObjects().getCompositeFrameOrCommonFrame()).hasSize(1);
     }
 
     private static PublicationDeliveryUnmarshaller validatingUnmarshaller() throws IOException, SAXException {
