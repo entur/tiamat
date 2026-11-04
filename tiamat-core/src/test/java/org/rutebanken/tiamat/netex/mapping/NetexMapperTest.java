@@ -403,7 +403,7 @@ public class NetexMapperTest extends TiamatIntegrationTest {
         org.rutebanken.tiamat.model.Parking tiamatParking = new org.rutebanken.tiamat.model.Parking();
         tiamatParking.setNetexId("NSR:Parking:1");
 
-        org.rutebanken.netex.model.Parking netexParking = netexMapper.mapToNetexModel(tiamatParking);
+        org.entur.netex2.model.Parking netexParking = netexMapper.mapToNetexModel(tiamatParking);
 
         org.assertj.core.api.SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(readField(netexParking, "parkingVehicleTypes"))
@@ -423,21 +423,21 @@ public class NetexMapperTest extends TiamatIntegrationTest {
         tiamatParking.getParkingVehicleTypes().add(org.rutebanken.tiamat.model.ParkingVehicleEnumeration.PEDAL_CYCLE);
         tiamatParking.getParkingPaymentProcess().add(org.rutebanken.tiamat.model.ParkingPaymentProcessEnumeration.PAY_BY_MOBILE_DEVICE);
 
-        org.rutebanken.netex.model.Parking netexParking = netexMapper.mapToNetexModel(tiamatParking);
+        org.entur.netex2.model.Parking netexParking = netexMapper.mapToNetexModel(tiamatParking);
 
         assertThat(netexParking.getParkingVehicleTypes())
-                .containsExactly(org.rutebanken.netex.model.ParkingVehicleEnumeration.CAR,
-                        org.rutebanken.netex.model.ParkingVehicleEnumeration.PEDAL_CYCLE);
+                .containsExactly(org.entur.netex2.model.ParkingVehicleEnumeration.CAR,
+                        org.entur.netex2.model.ParkingVehicleEnumeration.PEDAL_CYCLE);
         assertThat(netexParking.getParkingPaymentProcess())
-                .containsExactly(org.rutebanken.netex.model.ParkingPaymentProcessEnumeration.PAY_BY_MOBILE_DEVICE);
+                .containsExactly(org.entur.netex2.model.ParkingPaymentProcessEnumeration.PAY_BY_MOBILE_DEVICE);
     }
 
     @Test
     public void mapNetexParkingListsToInternalModel() {
-        org.rutebanken.netex.model.Parking withValues = new org.rutebanken.netex.model.Parking();
+        org.entur.netex2.model.Parking withValues = new org.entur.netex2.model.Parking();
         withValues.setId("NSR:Parking:1");
-        withValues.getParkingVehicleTypes().add(org.rutebanken.netex.model.ParkingVehicleEnumeration.CAR);
-        withValues.getParkingPaymentProcess().add(org.rutebanken.netex.model.ParkingPaymentProcessEnumeration.FREE);
+        withValues.getParkingVehicleTypes().add(org.entur.netex2.model.ParkingVehicleEnumeration.CAR);
+        withValues.getParkingPaymentProcess().add(org.entur.netex2.model.ParkingPaymentProcessEnumeration.FREE);
 
         org.rutebanken.tiamat.model.Parking mappedWithValues = netexMapper.mapToTiamatModel(withValues);
 
@@ -446,7 +446,7 @@ public class NetexMapperTest extends TiamatIntegrationTest {
         assertThat(mappedWithValues.getParkingPaymentProcess())
                 .containsExactly(org.rutebanken.tiamat.model.ParkingPaymentProcessEnumeration.FREE);
 
-        org.rutebanken.netex.model.Parking withoutValues = new org.rutebanken.netex.model.Parking();
+        org.entur.netex2.model.Parking withoutValues = new org.entur.netex2.model.Parking();
         withoutValues.setId("NSR:Parking:2");
 
         org.rutebanken.tiamat.model.Parking mappedWithoutValues = netexMapper.mapToTiamatModel(withoutValues);
@@ -470,15 +470,15 @@ public class NetexMapperTest extends TiamatIntegrationTest {
         withUserType.getParkingUserTypes().add(org.rutebanken.tiamat.model.ParkingUserEnumeration.ALL_USERS);
         tiamatParking.setParkingProperties(List.of(withoutUserType, withUserType));
 
-        org.rutebanken.netex.model.Parking netexParking = netexMapper.mapToNetexModel(tiamatParking);
+        org.entur.netex2.model.Parking netexParking = netexMapper.mapToNetexModel(tiamatParking);
 
-        List<org.rutebanken.netex.model.ParkingProperties> properties = netexParking.getParkingProperties().getParkingProperties();
+        List<org.entur.netex2.model.ParkingProperties> properties = netexParking.getParkingProperties().getParkingProperties();
         assertThat(properties).hasSize(2);
         assertThat(readField(properties.get(0), "parkingUserTypes"))
                 .as("an empty user type list must not become an empty NeTEx list")
                 .isNull();
         assertThat(properties.get(1).getParkingUserTypes())
-                .containsExactly(org.rutebanken.netex.model.ParkingUserEnumeration.ALL_USERS);
+                .containsExactly(org.entur.netex2.model.ParkingUserEnumeration.ALL_USERS);
     }
 
     /**
@@ -566,9 +566,9 @@ public class NetexMapperTest extends TiamatIntegrationTest {
 
     @Test
     public void mapNetexParkingCoveredToInternal() {
-        org.rutebanken.netex.model.Parking netexParking = new org.rutebanken.netex.model.Parking();
+        org.entur.netex2.model.Parking netexParking = new org.entur.netex2.model.Parking();
         netexParking.setId("NSR:Parking:1");
-        netexParking.setCovered(org.rutebanken.netex.model.CoveredEnumeration.MIXED);
+        netexParking.setCovered(org.entur.netex2.model.CoveredEnumeration.MIXED);
 
         org.rutebanken.tiamat.model.Parking tiamatParking = netexMapper.mapToTiamatModel(netexParking);
 
@@ -581,9 +581,9 @@ public class NetexMapperTest extends TiamatIntegrationTest {
         tiamatParking.setNetexId("NSR:Parking:1");
         tiamatParking.setCovered(CoveredEnumeration.OUTDOORS);
 
-        org.rutebanken.netex.model.Parking netexParking = netexMapper.mapToNetexModel(tiamatParking);
+        org.entur.netex2.model.Parking netexParking = netexMapper.mapToNetexModel(tiamatParking);
 
-        assertThat(netexParking.getCovered()).isEqualTo(org.rutebanken.netex.model.CoveredEnumeration.OUTDOORS);
+        assertThat(netexParking.getCovered()).isEqualTo(org.entur.netex2.model.CoveredEnumeration.OUTDOORS);
     }
 
     @Test

@@ -130,11 +130,11 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
     private void mapEnumListsToNetex(org.rutebanken.tiamat.model.Parking source, Parking target, MappingContext context) {
         if (!source.getParkingVehicleTypes().isEmpty()) {
             target.getParkingVehicleTypes().addAll(mapperFacade.mapAsList(source.getParkingVehicleTypes(),
-                    org.rutebanken.netex.model.ParkingVehicleEnumeration.class, context));
+                    org.entur.netex2.model.ParkingVehicleEnumeration.class, context));
         }
         if (!source.getParkingPaymentProcess().isEmpty()) {
             target.getParkingPaymentProcess().addAll(mapperFacade.mapAsList(source.getParkingPaymentProcess(),
-                    org.rutebanken.netex.model.ParkingPaymentProcessEnumeration.class, context));
+                    org.entur.netex2.model.ParkingPaymentProcessEnumeration.class, context));
         }
     }
 
