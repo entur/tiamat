@@ -24,8 +24,8 @@ import org.springframework.stereotype.Component;
 /**
  * Since netex-java-model 3.0.0, {@code covered} (e.g. on CycleStorageEquipment) is a
  * {@link CoveredEnumeration} instead of a plain boolean. Tiamat's own model only ever stores a
- * boolean, so we bridge the two: {@code TRUE}/{@code FALSE} round-trip exactly, and the richer
- * values NeTEx also allows collapse to a boolean approximation on import.
+ * boolean, as does the Nordic NeTEx profile, so only {@code TRUE}/{@code FALSE} are accepted on
+ * import and any other value is rejected.
  */
 @Component
 public class CoveredEnumerationConverter extends BidirectionalConverter<Boolean, CoveredEnumeration> {
@@ -44,9 +44,10 @@ public class CoveredEnumerationConverter extends BidirectionalConverter<Boolean,
             return null;
         }
         return switch (source) {
-            case TRUE, COVERED, INDOORS, MIXED -> Boolean.TRUE;
-            case FALSE, OUTDOORS -> Boolean.FALSE;
-            case UNKNOWN -> null;
+            case TRUE -> Boolean.TRUE;
+            case FALSE -> Boolean.FALSE;
+            default -> throw new IllegalArgumentException("Covered value '" + source.value()
+                    + "' is not supported here. The Nordic NeTEx profile allows only true or false");
         };
     }
 }

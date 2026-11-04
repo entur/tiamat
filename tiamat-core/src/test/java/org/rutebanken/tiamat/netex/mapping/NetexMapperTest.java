@@ -587,6 +587,17 @@ public class NetexMapperTest extends TiamatIntegrationTest {
     }
 
     @Test
+    public void mapNetexStopPlaceCoveredTrueIsRejected() {
+        org.entur.netex2.model.StopPlace netexStopPlace = new org.entur.netex2.model.StopPlace();
+        netexStopPlace.setId("NSR:StopPlace:1");
+        netexStopPlace.setCovered(org.entur.netex2.model.CoveredEnumeration.TRUE);
+
+        assertThatThrownBy(() -> netexMapper.mapToTiamatModel(netexStopPlace))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Covered value 'true' is not supported here. The Nordic NeTEx profile allows covered, indoors, outdoors or mixed");
+    }
+
+    @Test
     public void mapNetexParkingVehicleEntrancesToInternal() {
         org.entur.netex2.model.ParkingEntranceForVehicles netexEntrance = new org.entur.netex2.model.ParkingEntranceForVehicles();
         netexEntrance.setId("NSR:ParkingEntranceForVehicles:1");

@@ -67,6 +67,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public class ImportResourceTest extends TiamatIntegrationTest {
     //todo: refactor this test and move xml files in test resources
@@ -993,6 +994,45 @@ public class ImportResourceTest extends TiamatIntegrationTest {
         assertThat(String.valueOf(longitude).split("\\.")[1].length()).as("longitude decimals length").isLessThanOrEqualTo(maxdigits);
         assertThat(String.valueOf(latitude).split("\\.")[1].length()).as("latitude decimals length").isLessThanOrEqualTo(maxdigits);
 
+    }
+
+    @Test
+    public void importStopPlaceWithCoveredTrueIsRejected() {
+        String xml = """
+                <?xml version="1.0" encoding="utf-8"?>
+                <PublicationDelivery version="2.0" xmlns="http://www.netex.org.uk/netex">
+                    <PublicationTimestamp>2016-05-18T15:00:00.0Z</PublicationTimestamp>
+                    <ParticipantRef>NHR</ParticipantRef>
+                    <dataObjects>
+                        <SiteFrame version="01" id="nhr:sf:1">
+                            <FrameDefaults>
+                               <DefaultLocale>
+                                   <TimeZone>Europe/Oslo</TimeZone>
+                               </DefaultLocale>
+                            </FrameDefaults>
+                            <stopPlaces>
+                                <StopPlace version="01" id="nhr:sp:1">
+                                    <Name lang="no">Krokstien</Name>
+                                    <Centroid>
+                                        <Location>
+                                            <Longitude>10.8577903</Longitude>
+                                            <Latitude>59.910579</Latitude>
+                                        </Location>
+                                    </Centroid>
+                                    <Covered>true</Covered>
+                                    <TransportMode>bus</TransportMode>
+                                    <StopPlaceType>onstreetBus</StopPlaceType>
+                                </StopPlace>
+                            </stopPlaces>
+                        </SiteFrame>
+                    </dataObjects>
+                </PublicationDelivery>""";
+
+        InputStream stream = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8));
+
+        assertThatThrownBy(() -> importResource.importPublicationDelivery(stream))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Covered value 'true' is not supported here");
     }
 
     @Test
