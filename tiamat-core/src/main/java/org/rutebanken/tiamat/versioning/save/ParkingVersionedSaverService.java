@@ -86,6 +86,7 @@ public class ParkingVersionedSaverService {
             newVersion.setCreated(existing.getCreated());
             newVersion.setChanged(Instant.now());
             newVersion.setVersion(existing.getVersion());
+            versionIncrementor.alignChildVersions(newVersion, existing.getVersion());
 
             parkingRepository.delete(existing);
         } else {
