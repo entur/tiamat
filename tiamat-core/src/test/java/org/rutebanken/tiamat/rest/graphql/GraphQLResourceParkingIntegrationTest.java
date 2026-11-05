@@ -17,9 +17,12 @@ package org.rutebanken.tiamat.rest.graphql;
 
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
+import org.rutebanken.tiamat.model.CoveredEnumeration;
 import org.rutebanken.tiamat.model.EmbeddableMultilingualString;
+import org.rutebanken.tiamat.model.LightingEnumeration;
 import org.rutebanken.tiamat.model.OrganisationRefStructure;
 import org.rutebanken.tiamat.model.Parking;
+import org.rutebanken.tiamat.model.ParkingLayoutEnumeration;
 import org.rutebanken.tiamat.model.ParkingTypeEnumeration;
 import org.rutebanken.tiamat.model.SiteRefStructure;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -30,6 +33,7 @@ import java.util.List;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class GraphQLResourceParkingIntegrationTest extends AbstractGraphQLResourceIntegrationTest {
@@ -1021,6 +1025,84 @@ public class GraphQLResourceParkingIntegrationTest extends AbstractGraphQLResour
 
         executeGraphQL(graphQlQuery, 400)
                 .body("errors", notNullValue());
+    }
+
+    private static final String CLEARABLE_FIELDS = "parkingLayout lighting covered secure organisationRef ";
+
+    private String saveParkingWithClearableFields(boolean populated) {
+        Parking parking = new Parking();
+        parking.setCentroid(geometryFactory.createPoint(new Coordinate(10.5, 59.0)));
+        parking.setParentSiteRef(new SiteRefStructure(stopPlaceRepository.save(new StopPlace()).getNetexId()));
+        if (populated) {
+            parking.setParkingLayout(ParkingLayoutEnumeration.MULTISTOREY);
+            parking.setLighting(LightingEnumeration.WELL_LIT);
+            parking.setCovered(CoveredEnumeration.INDOORS);
+            parking.setSecure(true);
+            OrganisationRefStructure organisationRef = new OrganisationRefStructure();
+            organisationRef.setRef("FSR:Operator:1234567-8");
+            parking.setOrganisationRef(organisationRef);
+        }
+        parkingVersionedSaverService.saveNewVersion(parking);
+        return parking.getNetexId();
+    }
+
+    private String mutateParking(String parkingId, String fieldsInput) {
+        return "{\"query\":\"mutation { " +
+                "  parking:" + GraphQLNames.MUTATE_PARKING + " (Parking: {" +
+                "        id:\\\"" + parkingId + "\\\" " + fieldsInput +
+                "       }) { id version " + CLEARABLE_FIELDS + "} " +
+                "}\",\"variables\":\"\"}";
+    }
+
+    @Test
+    public void testMutateParkingWithNullClearsOptionalFields() throws Exception {
+        String parkingId = saveParkingWithClearableFields(true);
+
+        String query = mutateParking(parkingId,
+                "parkingLayout: null lighting: null covered: null secure: null organisationRef: null ");
+
+        executeGraphQL(query)
+                .body("data.parking[0].version", equalTo("2"))
+                .body("data.parking[0].parkingLayout", nullValue())
+                .body("data.parking[0].lighting", nullValue())
+                .body("data.parking[0].covered", nullValue())
+                .body("data.parking[0].secure", nullValue())
+                .body("data.parking[0].organisationRef", nullValue());
+
+        Parking reloaded = parkingRepository.findFirstByNetexIdOrderByVersionDesc(parkingId);
+        assertThat(reloaded.getParkingLayout()).isNull();
+        assertThat(reloaded.getLighting()).isNull();
+        assertThat(reloaded.getCovered()).isNull();
+        assertThat(reloaded.isSecure()).isNull();
+        assertThat(reloaded.getOrganisationRef()).isNull();
+    }
+
+    /** Regression guard: a missing key keeps the stored value. */
+    @Test
+    public void testMutateParkingWithoutKeysKeepsOptionalFields() throws Exception {
+        String parkingId = saveParkingWithClearableFields(true);
+
+        String query = mutateParking(parkingId, "name: { value: \\\"Renamed\\\" } ");
+
+        executeGraphQL(query)
+                .body("data.parking[0].version", equalTo("2"))
+                .body("data.parking[0].parkingLayout", equalTo("multistorey"))
+                .body("data.parking[0].lighting", equalTo("wellLit"))
+                .body("data.parking[0].covered", equalTo("indoors"))
+                .body("data.parking[0].secure", equalTo(true))
+                .body("data.parking[0].organisationRef", equalTo("FSR:Operator:1234567-8"));
+    }
+
+    /** Regression guard: null for an empty field creates no new version. */
+    @Test
+    public void testMutateParkingWithNullForEmptyFieldsCreatesNoVersion() throws Exception {
+        String parkingId = saveParkingWithClearableFields(false);
+
+        String query = mutateParking(parkingId,
+                "parkingLayout: null lighting: null covered: null secure: null organisationRef: null ");
+
+        executeGraphQL(query)
+                .body("data.parking[0].version", equalTo("1"));
     }
 
 }
