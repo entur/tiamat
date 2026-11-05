@@ -15,7 +15,7 @@
 
 package org.rutebanken.tiamat.importer;
 
-import org.rutebanken.netex.model.GroupOfTariffZones;
+import org.entur.netex2.model.GroupOfTariffZones;
 import org.rutebanken.tiamat.config.GroupOfTariffZonesConfig;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.versioning.save.GroupOffTariffZonesSaverService;

@@ -16,10 +16,10 @@
 package org.rutebanken.tiamat.netex.mapping;
 
 
-import org.rutebanken.netex.model.FareFrame;
-import org.rutebanken.netex.model.LocaleStructure;
-import org.rutebanken.netex.model.SiteFrame;
-import org.rutebanken.netex.model.VersionFrameDefaultsStructure;
+import org.entur.netex2.model.FareFrame;
+import org.entur.netex2.model.LocaleStructure;
+import org.entur.netex2.model.SiteFrame;
+import org.entur.netex2.model.VersionFrameDefaultsStructure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

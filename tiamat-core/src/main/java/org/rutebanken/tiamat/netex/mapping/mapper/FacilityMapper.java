@@ -2,8 +2,8 @@ package org.rutebanken.tiamat.netex.mapping.mapper;
 
 import ma.glasnost.orika.CustomMapper;
 import ma.glasnost.orika.MappingContext;
-import org.rutebanken.netex.model.ModificationEnumeration;
-import org.rutebanken.netex.model.SiteFacilitySet;
+import org.entur.netex2.model.ModificationEnumeration;
+import org.entur.netex2.model.SiteFacilitySet;
 import org.rutebanken.tiamat.model.MobilityFacilityEnumeration;
 import org.rutebanken.tiamat.model.PassengerInformationEquipmentEnumeration;
 import org.rutebanken.tiamat.model.PassengerInformationFacilityEnumeration;
@@ -48,23 +48,23 @@ public class FacilityMapper extends CustomMapper<SiteFacilitySet, org.rutebanken
         netexSiteFacilitySet.setModification(ModificationEnumeration.fromValue(tiamatSiteFacilitySet.getModification().value()));
 
         if (tiamatSiteFacilitySet.getMobilityFacilityList() != null && !tiamatSiteFacilitySet.getMobilityFacilityList().isEmpty()) {
-            List<org.rutebanken.netex.model.MobilityFacilityEnumeration> netexMobilityFacilityList = new ArrayList<>();
+            List<org.entur.netex2.model.MobilityFacilityEnumeration> netexMobilityFacilityList = new ArrayList<>();
             tiamatSiteFacilitySet.getMobilityFacilityList().forEach(tiamatMobilityFacilityVal ->
-                    netexMobilityFacilityList.add(org.rutebanken.netex.model.MobilityFacilityEnumeration.fromValue(tiamatMobilityFacilityVal.value())));
+                    netexMobilityFacilityList.add(org.entur.netex2.model.MobilityFacilityEnumeration.fromValue(tiamatMobilityFacilityVal.value())));
             netexSiteFacilitySet.withMobilityFacilityList(netexMobilityFacilityList);
         }
 
         if (tiamatSiteFacilitySet.getPassengerInformationEquipmentList() != null && !tiamatSiteFacilitySet.getPassengerInformationEquipmentList().isEmpty()) {
-            List<org.rutebanken.netex.model.PassengerInformationEquipmentEnumeration> netexPassengerInformationEquipmentList = new ArrayList<>();
+            List<org.entur.netex2.model.PassengerInformationEquipmentEnumeration> netexPassengerInformationEquipmentList = new ArrayList<>();
             tiamatSiteFacilitySet.getPassengerInformationEquipmentList().forEach(netexPassengerInformationEquipmentVal ->
-                    netexPassengerInformationEquipmentList.add(org.rutebanken.netex.model.PassengerInformationEquipmentEnumeration.fromValue(netexPassengerInformationEquipmentVal.value())));
+                    netexPassengerInformationEquipmentList.add(org.entur.netex2.model.PassengerInformationEquipmentEnumeration.fromValue(netexPassengerInformationEquipmentVal.value())));
             netexSiteFacilitySet.withPassengerInformationEquipmentList(netexPassengerInformationEquipmentList);
         }
 
         if (tiamatSiteFacilitySet.getPassengerInformationFacilityList() != null && !tiamatSiteFacilitySet.getPassengerInformationFacilityList().isEmpty()) {
-            List<org.rutebanken.netex.model.PassengerInformationFacilityEnumeration> netexPassengerInformationFacilityList = new ArrayList<>();
+            List<org.entur.netex2.model.PassengerInformationFacilityEnumeration> netexPassengerInformationFacilityList = new ArrayList<>();
             tiamatSiteFacilitySet.getPassengerInformationFacilityList().forEach(netexPassengerInformationFacilityVal ->
-                    netexPassengerInformationFacilityList.add(org.rutebanken.netex.model.PassengerInformationFacilityEnumeration.fromValue(netexPassengerInformationFacilityVal.value())));
+                    netexPassengerInformationFacilityList.add(org.entur.netex2.model.PassengerInformationFacilityEnumeration.fromValue(netexPassengerInformationFacilityVal.value())));
             netexSiteFacilitySet.withPassengerInformationFacilityList(netexPassengerInformationFacilityList);
         }
     }

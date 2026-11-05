@@ -18,7 +18,7 @@ package org.rutebanken.tiamat.netex.mapping.converter;
 import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;
-import org.rutebanken.netex.model.AlternativeNames_RelStructure;
+import org.entur.netex2.model.AlternativeNames_RelStructure;
 import org.rutebanken.tiamat.model.AlternativeName;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -35,7 +35,7 @@ public class AlternativeNamesConverter extends BidirectionalConverter<List<Alter
 
         if (!CollectionUtils.isEmpty(alternativeNames)) {
 
-            List<org.rutebanken.netex.model.AlternativeName> netexAlternativeNames = new ArrayList<>();
+            List<org.entur.netex2.model.AlternativeName> netexAlternativeNames = new ArrayList<>();
 
             for (org.rutebanken.tiamat.model.AlternativeName alternativeName : alternativeNames) {
                 if (alternativeName != null
@@ -43,7 +43,7 @@ public class AlternativeNamesConverter extends BidirectionalConverter<List<Alter
                         && alternativeName.getName().getValue() != null
                         && !alternativeName.getName().getValue().isEmpty()) {
                     //Only include non-empty alternative names
-                    org.rutebanken.netex.model.AlternativeName netexAlternativeName = new org.rutebanken.netex.model.AlternativeName();
+                    org.entur.netex2.model.AlternativeName netexAlternativeName = new org.entur.netex2.model.AlternativeName();
                     mapperFacade.map(alternativeName, netexAlternativeName);
                     netexAlternativeName.setId(alternativeName.getNetexId());
                     netexAlternativeNames.add(netexAlternativeName);

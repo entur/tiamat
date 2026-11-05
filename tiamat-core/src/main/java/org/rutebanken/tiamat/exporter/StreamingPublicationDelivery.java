@@ -22,28 +22,28 @@ import jakarta.xml.bind.JAXBElement;
 import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Marshaller;
 import org.hibernate.internal.SessionImpl;
-import org.rutebanken.netex.model.DataManagedObjectStructure;
-import org.rutebanken.netex.model.FareZone;
-import org.rutebanken.netex.model.FareZonesInFrame_RelStructure;
-import org.rutebanken.netex.model.GroupsOfStopPlacesInFrame_RelStructure;
-import org.rutebanken.netex.model.GroupsOfTariffZonesInFrame_RelStructure;
-import org.rutebanken.netex.model.ObjectFactory;
-import org.rutebanken.netex.model.Parking;
-import org.rutebanken.netex.model.ParkingsInFrame_RelStructure;
-import org.rutebanken.netex.model.PassengerStopAssignment;
-import org.rutebanken.netex.model.PublicationDeliveryStructure;
-import org.rutebanken.netex.model.ScheduledStopPoint;
-import org.rutebanken.netex.model.ScheduledStopPointsInFrame_RelStructure;
-import org.rutebanken.netex.model.Site_VersionStructure;
-import org.rutebanken.netex.model.SiteFrame;
-import org.rutebanken.netex.model.StopAssignmentsInFrame_RelStructure;
-import org.rutebanken.netex.model.StopPlace;
-import org.rutebanken.netex.model.StopPlacesInFrame_RelStructure;
-import org.rutebanken.netex.model.TariffZone;
-import org.rutebanken.netex.model.TariffZonesInFrame_RelStructure;
-import org.rutebanken.netex.model.TopographicPlacesInFrame_RelStructure;
-import org.rutebanken.netex.model.Zone_VersionStructure;
-import org.rutebanken.netex.validation.NeTExValidator;
+import org.entur.netex2.model.DataManagedObjectStructure;
+import org.entur.netex2.model.FareZone;
+import org.entur.netex2.model.FareZonesInFrame_RelStructure;
+import org.entur.netex2.model.GroupsOfStopPlacesInFrame_RelStructure;
+import org.entur.netex2.model.GroupsOfTariffZonesInFrame_RelStructure;
+import org.entur.netex2.model.ObjectFactory;
+import org.entur.netex2.model.Parking;
+import org.entur.netex2.model.ParkingsInFrame_RelStructure;
+import org.entur.netex2.model.PassengerStopAssignment;
+import org.entur.netex2.model.PublicationDeliveryStructure;
+import org.entur.netex2.model.ScheduledStopPoint;
+import org.entur.netex2.model.ScheduledStopPointsInFrame_RelStructure;
+import org.entur.netex2.model.Site_VersionStructure;
+import org.entur.netex2.model.SiteFrame;
+import org.entur.netex2.model.StopAssignmentsInFrame_RelStructure;
+import org.entur.netex2.model.StopPlace;
+import org.entur.netex2.model.StopPlacesInFrame_RelStructure;
+import org.entur.netex2.model.TariffZone;
+import org.entur.netex2.model.TariffZonesInFrame_RelStructure;
+import org.entur.netex2.model.TopographicPlacesInFrame_RelStructure;
+import org.entur.netex2.model.Zone_VersionStructure;
+import org.entur.netex2.validation.NeTExValidator;
 import org.rutebanken.tiamat.exporter.async.NetexMappingIterator;
 import org.rutebanken.tiamat.exporter.async.NetexMappingIteratorList;
 import org.rutebanken.tiamat.exporter.async.NetexReferenceRemovingIterator;
@@ -224,15 +224,15 @@ public class StreamingPublicationDelivery {
 
 
         logger.info("Mapping site frame to netex model");
-        org.rutebanken.netex.model.SiteFrame netexSiteFrame = netexMapper.mapToNetexModel(siteFrame);
+        org.entur.netex2.model.SiteFrame netexSiteFrame = netexMapper.mapToNetexModel(siteFrame);
         logger.info("Mapping service frame to netex model");
-        final org.rutebanken.netex.model.ServiceFrame netexServiceFrame = netexMapper.mapToNetexModel(serviceFrame);
+        final org.entur.netex2.model.ServiceFrame netexServiceFrame = netexMapper.mapToNetexModel(serviceFrame);
 
         logger.info("Mapping fare frame to netex model");
-        final org.rutebanken.netex.model.FareFrame netexFareFrame = netexMapper.mapToNetexModel(fareFrame);
+        final org.entur.netex2.model.FareFrame netexFareFrame = netexMapper.mapToNetexModel(fareFrame);
 
         logger.info("Mapping resource frame to netex model");
-        final org.rutebanken.netex.model.ResourceFrame netexResourceFrame = netexMapper.mapToNetexModel(resourceFrame);
+        final org.entur.netex2.model.ResourceFrame netexResourceFrame = netexMapper.mapToNetexModel(resourceFrame);
 
 
         logger.info("Preparing scrollable iterators");
@@ -274,7 +274,7 @@ public class StreamingPublicationDelivery {
 
     }
 
-    private void prepareFareZones(ExportParams exportParams,Set<Long> stopPlacePrimaryIds, AtomicInteger mappedFareZonesCount, AtomicInteger mappedGroupOfTariffZonesCount, SiteFrame netexSiteFrame, org.rutebanken.netex.model.FareFrame netexFareFrame, EntitiesEvictor evictor) {
+    private void prepareFareZones(ExportParams exportParams,Set<Long> stopPlacePrimaryIds, AtomicInteger mappedFareZonesCount, AtomicInteger mappedGroupOfTariffZonesCount, SiteFrame netexSiteFrame, org.entur.netex2.model.FareFrame netexFareFrame, EntitiesEvictor evictor) {
 
         boolean exportGroupOfTariffZones = false;
 
@@ -364,8 +364,28 @@ public class StreamingPublicationDelivery {
             ParkingsInFrame_RelStructure parkingsInFrame_relStructure = new ParkingsInFrame_RelStructure();
             List<Parking> parkings = new NetexMappingIteratorList<>(() -> new NetexMappingIterator<>(netexMapper, parkingRepository.scrollParkings(stopPlacePrimaryIds),
                     Parking.class, mappedParkingCount, evicter));
+            //todo may be use netex mapper??
+            // Wrap Parking objects in JAXBElement for JAXB marshalling (required by @XmlElementRef)
+            // Use custom ArrayList that wraps elements in JAXBElement during iteration
+            List<JAXBElement<? extends Site_VersionStructure>> wrappedParkings = new ArrayList<>() {
+                @Override
+                public Iterator<JAXBElement<? extends Site_VersionStructure>> iterator() {
+                    Iterator<Parking> innerIterator = parkings.iterator();
+                    return new Iterator<>() {
+                        @Override
+                        public boolean hasNext() {
+                            return innerIterator.hasNext();
+                        }
 
-            setField(ParkingsInFrame_RelStructure.class, "parking", parkingsInFrame_relStructure, parkings);
+                        @Override
+                        public JAXBElement<? extends Site_VersionStructure> next() {
+                            return netexObjectFactory.createParking(innerIterator.next());
+                        }
+                    };
+                }
+            };
+
+            setField(ParkingsInFrame_RelStructure.class, "parking", parkingsInFrame_relStructure, wrappedParkings);
             netexSiteFrame.setParkings(parkingsInFrame_relStructure);
         } else {
             logger.info("No parkings to export based on stop places");
@@ -384,33 +404,22 @@ public class StreamingPublicationDelivery {
             ParentStopFetchingIterator parentStopFetchingIterator = new ParentStopFetchingIterator(stopPlaceIterator, stopPlaceRepository);
             NetexMappingIterator<org.rutebanken.tiamat.model.StopPlace, StopPlace> netexMappingIterator = new NetexMappingIterator<>(netexMapper, parentStopFetchingIterator, StopPlace.class, mappedStopPlaceCount, evicter);
 
-            // Wrap StopPlace objects in JAXBElement for JAXB marshalling (required by @XmlElementRef)
-            // Use custom ArrayList that wraps elements in JAXBElement during iteration
-            List<JAXBElement<? extends Site_VersionStructure>> stopPlaces = new ArrayList<>() {
+            // Use custom ArrayList backed by a lazily-scrolling iterator, so the marshaller streams
+            // stop places without materializing the full list in memory.
+            List<StopPlace> stopPlaces = new ArrayList<>() {
                 @Override
-                public Iterator<JAXBElement<? extends Site_VersionStructure>> iterator() {
-                    Iterator<StopPlace> innerIterator = new NetexReferenceRemovingIterator(netexMappingIterator, exportParams);
-                    return new Iterator<>() {
-                        @Override
-                        public boolean hasNext() {
-                            return innerIterator.hasNext();
-                        }
-
-                        @Override
-                        public JAXBElement<? extends Site_VersionStructure> next() {
-                            return netexObjectFactory.createStopPlace(innerIterator.next());
-                        }
-                    };
+                public Iterator<StopPlace> iterator() {
+                    return new NetexReferenceRemovingIterator(netexMappingIterator, exportParams);
                 }
             };
-            setField(StopPlacesInFrame_RelStructure.class, "stopPlace_", stopPlacesInFrame_relStructure, stopPlaces);
+            setField(StopPlacesInFrame_RelStructure.class, "stopPlace", stopPlacesInFrame_relStructure, stopPlaces);
             netexSiteFrame.setStopPlaces(stopPlacesInFrame_relStructure);
         } else {
             logger.info("No stop places to export");
         }
     }
 
-    private void prepareScheduledStopPoints(Set<Long> stopPlacePrimaryIds, org.rutebanken.netex.model.ServiceFrame netexServiceFrame) {
+    private void prepareScheduledStopPoints(Set<Long> stopPlacePrimaryIds, org.entur.netex2.model.ServiceFrame netexServiceFrame) {
         if (!stopPlacePrimaryIds.isEmpty()) {
             logger.info("There are stop places to export");
 
@@ -457,10 +466,10 @@ public class StreamingPublicationDelivery {
             relevantTopographicPlacesIterator = Collections.emptyIterator();
         }
 
-        List<org.rutebanken.netex.model.TopographicPlace> topographicPlaces = new ArrayList<>();
+        List<org.entur.netex2.model.TopographicPlace> topographicPlaces = new ArrayList<>();
         while (relevantTopographicPlacesIterator.hasNext()) {
             final TopographicPlace tiamatTopographicPlace = relevantTopographicPlacesIterator.next();
-            final org.rutebanken.netex.model.TopographicPlace netexTopographicPlace = netexMapper.mapToNetexModel(tiamatTopographicPlace, exportParams.isExportMultiSurface());
+            final org.entur.netex2.model.TopographicPlace netexTopographicPlace = netexMapper.mapToNetexModel(tiamatTopographicPlace, exportParams.isExportMultiSurface());
             topographicPlaces.add(netexTopographicPlace);
             mappedTopographicPlacesCount.incrementAndGet();
             evicter.evictKnownEntitiesFromSession(tiamatTopographicPlace);
@@ -475,7 +484,7 @@ public class StreamingPublicationDelivery {
         }
     }
 
-    private void prepareGroupOfStopPlaces(ExportParams exportParams, Set<Long> stopPlacePrimaryIds, AtomicInteger mappedGroupOfStopPlacesCount, SiteFrame netexSiteFrame, org.rutebanken.netex.model.ResourceFrame netexResourceFrame, EntitiesEvictor evicter) {
+    private void prepareGroupOfStopPlaces(ExportParams exportParams, Set<Long> stopPlacePrimaryIds, AtomicInteger mappedGroupOfStopPlacesCount, SiteFrame netexSiteFrame, org.entur.netex2.model.ResourceFrame netexResourceFrame, EntitiesEvictor evicter) {
 
         Iterator<GroupOfStopPlaces> groupOfStopPlacesIterator;
 
@@ -495,22 +504,22 @@ public class StreamingPublicationDelivery {
 
         if (groupOfStopPlacesIterator.hasNext()) {
 
-            NetexMappingIterator<GroupOfStopPlaces, org.rutebanken.netex.model.GroupOfStopPlaces> netexMappingIterator = new NetexMappingIterator<>(
-                    netexMapper, groupOfStopPlacesIterator, org.rutebanken.netex.model.GroupOfStopPlaces.class, mappedGroupOfStopPlacesCount, evicter);
+            NetexMappingIterator<GroupOfStopPlaces, org.entur.netex2.model.GroupOfStopPlaces> netexMappingIterator = new NetexMappingIterator<>(
+                    netexMapper, groupOfStopPlacesIterator, org.entur.netex2.model.GroupOfStopPlaces.class, mappedGroupOfStopPlacesCount, evicter);
 
-            List<org.rutebanken.netex.model.GroupOfStopPlaces> groupOfStopPlacesList = new NetexMappingIteratorList<>(() -> netexMappingIterator);
+            List<org.entur.netex2.model.GroupOfStopPlaces> groupOfStopPlacesList = new NetexMappingIteratorList<>(() -> netexMappingIterator);
 
             GroupsOfStopPlacesInFrame_RelStructure groupsOfStopPlacesInFrame_relStructure = new GroupsOfStopPlacesInFrame_RelStructure();
             setField(GroupsOfStopPlacesInFrame_RelStructure.class, "groupOfStopPlaces", groupsOfStopPlacesInFrame_relStructure, groupOfStopPlacesList);
             netexSiteFrame.setGroupsOfStopPlaces(groupsOfStopPlacesInFrame_relStructure);
 
             if (purposeOfGroupingIterator.hasNext()){
-                NetexMappingIterator<PurposeOfGrouping, org.rutebanken.netex.model.PurposeOfGrouping>  pogNetexMapingIterator = new NetexMappingIterator<>(
-                        netexMapper,purposeOfGroupingIterator,org.rutebanken.netex.model.PurposeOfGrouping.class,new AtomicInteger(),evicter);
-                final NetexMappingIteratorList<org.rutebanken.netex.model.PurposeOfGrouping> netexPurposeOfGroupingList = new NetexMappingIteratorList<>(() -> pogNetexMapingIterator);
+                NetexMappingIterator<PurposeOfGrouping, org.entur.netex2.model.PurposeOfGrouping>  pogNetexMapingIterator = new NetexMappingIterator<>(
+                        netexMapper,purposeOfGroupingIterator,org.entur.netex2.model.PurposeOfGrouping.class,new AtomicInteger(),evicter);
+                final NetexMappingIteratorList<org.entur.netex2.model.PurposeOfGrouping> netexPurposeOfGroupingList = new NetexMappingIteratorList<>(() -> pogNetexMapingIterator);
                 List<JAXBElement<? extends DataManagedObjectStructure>> netexPurposeOfGroupingList2 = new ArrayList<>();
-                for( org.rutebanken.netex.model.PurposeOfGrouping netexPurposeOfGrouping: netexPurposeOfGroupingList) {
-                    final JAXBElement<org.rutebanken.netex.model.PurposeOfGrouping> purposeOfGrouping2= new ObjectFactory().createPurposeOfGrouping(netexPurposeOfGrouping);
+                for( org.entur.netex2.model.PurposeOfGrouping netexPurposeOfGrouping: netexPurposeOfGroupingList) {
+                    final JAXBElement<org.entur.netex2.model.PurposeOfGrouping> purposeOfGrouping2= new ObjectFactory().createPurposeOfGrouping(netexPurposeOfGrouping);
                     netexPurposeOfGroupingList2.add(purposeOfGrouping2);
                 }
 
@@ -537,10 +546,10 @@ public class StreamingPublicationDelivery {
         }
 
         if (groupOfTariffZonesIterator.hasNext()) {
-            NetexMappingIterator<GroupOfTariffZones, org.rutebanken.netex.model.GroupOfTariffZones> netexMappingIterator = new NetexMappingIterator<>(
-                    netexMapper, groupOfTariffZonesIterator, org.rutebanken.netex.model.GroupOfTariffZones.class,mappedGroupOfTariffZonesCount,evicter);
+            NetexMappingIterator<GroupOfTariffZones, org.entur.netex2.model.GroupOfTariffZones> netexMappingIterator = new NetexMappingIterator<>(
+                    netexMapper, groupOfTariffZonesIterator, org.entur.netex2.model.GroupOfTariffZones.class,mappedGroupOfTariffZonesCount,evicter);
 
-            List<org.rutebanken.netex.model.GroupOfTariffZones> groupOfTariffZonesList = new NetexMappingIteratorList<>(() -> netexMappingIterator);
+            List<org.entur.netex2.model.GroupOfTariffZones> groupOfTariffZonesList = new NetexMappingIteratorList<>(() -> netexMappingIterator);
 
             final GroupsOfTariffZonesInFrame_RelStructure groupsOfTariffZonesInFrame_relStructure = new GroupsOfTariffZonesInFrame_RelStructure();
             setField(GroupsOfTariffZonesInFrame_RelStructure.class,"groupOfTariffZones", groupsOfTariffZonesInFrame_relStructure,groupOfTariffZonesList);

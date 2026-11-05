@@ -18,15 +18,15 @@ package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 import net.opengis.gml._3.DirectPositionListType;
 import net.opengis.gml._3.LineStringType;
 import org.junit.Test;
-import org.rutebanken.netex.model.LocationStructure;
-import org.rutebanken.netex.model.PathDirectionEnumeration;
-import org.rutebanken.netex.model.PathLink;
-import org.rutebanken.netex.model.PathLinkEndStructure;
-import org.rutebanken.netex.model.PlaceRefStructure;
-import org.rutebanken.netex.model.PublicationDeliveryStructure;
-import org.rutebanken.netex.model.SimplePoint_VersionStructure;
-import org.rutebanken.netex.model.StopPlace;
-import org.rutebanken.netex.model.TransferDurationStructure;
+import org.entur.netex2.model.LocationStructure;
+import org.entur.netex2.model.PathDirectionEnumeration;
+import org.entur.netex2.model.PathLink;
+import org.entur.netex2.model.PlaceRefStructure;
+import org.entur.netex2.model.PublicationDeliveryStructure;
+import org.entur.netex2.model.SimplePoint_VersionStructure;
+import org.entur.netex2.model.SitePathLinkEndStructure;
+import org.entur.netex2.model.StopPlace;
+import org.entur.netex2.model.TransferDurationStructure;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.config.GeometryFactoryConfig;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,12 +82,12 @@ public class PathLinkImportTest extends TiamatIntegrationTest {
                         .withDefaultDuration(duration))
                 .withLineString(lineStringType)
                 .withFrom(
-                        new PathLinkEndStructure()
+                        new SitePathLinkEndStructure()
                                 .withPlaceRef(
                                         new PlaceRefStructure()
                                                 .withRef(fromStopPlace.getId())))
                 .withTo(
-                        new PathLinkEndStructure()
+                        new SitePathLinkEndStructure()
                                 .withPlaceRef(
                                         new PlaceRefStructure()
                                                 .withRef(toStopPlace.getId())

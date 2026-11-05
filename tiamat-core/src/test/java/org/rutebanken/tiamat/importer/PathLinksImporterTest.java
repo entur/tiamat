@@ -39,10 +39,10 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
     @Test
     public void importPathLinks() throws Exception {
         PathLink pathLink = new PathLink(new PathLinkEnd(new AddressablePlaceRefStructure(quayRepository.save(new Quay()))), new PathLinkEnd(new AddressablePlaceRefStructure(quayRepository.save(new Quay()))));
-        List<org.rutebanken.netex.model.PathLink> netexPathLinks =  pathLinksImporter.importPathLinks(Arrays.asList(pathLink), pathLinkCounter);
+        List<org.entur.netex2.model.PathLink> netexPathLinks =  pathLinksImporter.importPathLinks(Arrays.asList(pathLink), pathLinkCounter);
         assertThat(netexPathLinks).isNotEmpty();
         assertThat(netexPathLinks).hasSize(1);
-        org.rutebanken.netex.model.PathLink actualNetexPathLink = netexPathLinks.getFirst();
+        org.entur.netex2.model.PathLink actualNetexPathLink = netexPathLinks.getFirst();
         assertThat(actualNetexPathLink.getId()).isNotEmpty();
         assertThat(actualNetexPathLink.getFrom().getPlaceRef()).isNotNull();
         assertThat(actualNetexPathLink.getTo().getPlaceRef()).isNotNull();
@@ -53,11 +53,11 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
         PathLink pathLink = new PathLink(new PathLinkEnd(new AddressablePlaceRefStructure(quayRepository.save(new Quay()))), new PathLinkEnd(new AddressablePlaceRefStructure(quayRepository.save(new Quay()))));
 
         pathLink.getOriginalIds().add("originalID");
-        List<org.rutebanken.netex.model.PathLink> firsts = pathLinksImporter.importPathLinks(Arrays.asList(pathLink), pathLinkCounter);
+        List<org.entur.netex2.model.PathLink> firsts = pathLinksImporter.importPathLinks(Arrays.asList(pathLink), pathLinkCounter);
 
         PathLink pathLink2 = new PathLink(new PathLinkEnd(new AddressablePlaceRefStructure(quayRepository.save(new Quay()))), new PathLinkEnd(new AddressablePlaceRefStructure(quayRepository.save(new Quay()))));
         pathLink2.getOriginalIds().add("originalID");
-        List<org.rutebanken.netex.model.PathLink> seconds = pathLinksImporter.importPathLinks(Arrays.asList(pathLink2), pathLinkCounter);
+        List<org.entur.netex2.model.PathLink> seconds = pathLinksImporter.importPathLinks(Arrays.asList(pathLink2), pathLinkCounter);
 
         assertThat(firsts).hasSize(1);
         assertThat(seconds).hasSize(1);
@@ -87,9 +87,9 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
         PathLink pathLink = new PathLink(pathLinkEndFrom, pathLinkEndTo);
 
-        List<org.rutebanken.netex.model.PathLink> result = pathLinksImporter.importPathLinks(Arrays.asList(pathLink), pathLinkCounter);
+        List<org.entur.netex2.model.PathLink> result = pathLinksImporter.importPathLinks(Arrays.asList(pathLink), pathLinkCounter);
 
-        org.rutebanken.netex.model.PathLink actual = result.getFirst();
+        org.entur.netex2.model.PathLink actual = result.getFirst();
         assertThat(actual.getFrom().getPlaceRef().getRef()).contains("NSR:Quay:");
         assertThat(actual.getTo().getPlaceRef().getRef()).contains("NSR:Quay:");
 

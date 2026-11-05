@@ -15,7 +15,7 @@
 
 package org.rutebanken.tiamat.importer;
 
-import org.rutebanken.netex.model.TariffZone;
+import org.entur.netex2.model.TariffZone;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.versioning.save.TariffZoneSaverService;
 import org.slf4j.Logger;

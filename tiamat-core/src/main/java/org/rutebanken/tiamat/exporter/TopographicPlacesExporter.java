@@ -15,7 +15,7 @@
 
 package org.rutebanken.tiamat.exporter;
 
-import org.rutebanken.netex.model.TopographicPlace;
+import org.entur.netex2.model.TopographicPlace;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.model.StopPlace;
 import org.rutebanken.tiamat.model.StopPlacesInFrame_RelStructure;

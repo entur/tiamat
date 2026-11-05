@@ -15,7 +15,7 @@
 
 package org.rutebanken.tiamat.importer.matching;
 
-import org.rutebanken.netex.model.StopPlace;
+import org.entur.netex2.model.StopPlace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

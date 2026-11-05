@@ -20,10 +20,10 @@ import ma.glasnost.orika.metadata.Type;
 import ma.glasnost.orika.metadata.TypeBuilder;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
-import org.rutebanken.netex.model.MobilityFacilityEnumeration;
-import org.rutebanken.netex.model.PassengerInformationEquipmentEnumeration;
-import org.rutebanken.netex.model.PassengerInformationFacilityEnumeration;
-import org.rutebanken.netex.model.SiteFacilitySets_RelStructure;
+import org.entur.netex2.model.MobilityFacilityEnumeration;
+import org.entur.netex2.model.PassengerInformationEquipmentEnumeration;
+import org.entur.netex2.model.PassengerInformationFacilityEnumeration;
+import org.entur.netex2.model.SiteFacilitySets_RelStructure;
 import org.rutebanken.tiamat.TiamatIntegrationTest;
 import org.rutebanken.tiamat.model.SiteFacilitySet;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,11 +59,11 @@ public class FacilitiesConverterTest extends TiamatIntegrationTest {
     @Test
     public void convertFromNetexStructure() {
         SiteFacilitySets_RelStructure relStructure = new SiteFacilitySets_RelStructure();
-        org.rutebanken.netex.model.SiteFacilitySet netexFacility1 = new org.rutebanken.netex.model.SiteFacilitySet();
+        org.entur.netex2.model.SiteFacilitySet netexFacility1 = new org.entur.netex2.model.SiteFacilitySet();
         netexFacility1.withMobilityFacilityList(MobilityFacilityEnumeration.TACTILE_GUIDING_STRIPS, MobilityFacilityEnumeration.TACTILE_PLATFORM_EDGES);
         netexFacility1.withPassengerInformationFacilityList(PassengerInformationFacilityEnumeration.PASSENGER_INFORMATION_DISPLAY);
         netexFacility1.withPassengerInformationEquipmentList(PassengerInformationEquipmentEnumeration.INFORMATION_DESK);
-        org.rutebanken.netex.model.SiteFacilitySet netexFacility2 = new org.rutebanken.netex.model.SiteFacilitySet();
+        org.entur.netex2.model.SiteFacilitySet netexFacility2 = new org.entur.netex2.model.SiteFacilitySet();
         netexFacility2.withMobilityFacilityList(MobilityFacilityEnumeration.UNKNOWN);
         netexFacility2.withPassengerInformationEquipmentList(PassengerInformationEquipmentEnumeration.INFORMATION_DESK);
         relStructure.withSiteFacilitySetRefOrSiteFacilitySet(Arrays.asList(netexFacility1, netexFacility2).toArray());

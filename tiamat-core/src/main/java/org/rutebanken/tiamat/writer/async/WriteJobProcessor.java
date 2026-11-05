@@ -1,6 +1,6 @@
 package org.rutebanken.tiamat.writer.async;
 
-import org.rutebanken.netex.model.StopPlace;
+import org.entur.netex2.model.StopPlace;
 import org.rutebanken.tiamat.model.job.WrittenStopPlace;
 import org.rutebanken.tiamat.writer.JobService;
 import org.rutebanken.tiamat.writer.StopPlaceWriter;

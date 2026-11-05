@@ -48,7 +48,7 @@ public class ParallelInitialStopPlaceImporter {
     @Autowired
     private StopPlaceParentCreator parentStopPlaceCreator;
 
-    public List<org.rutebanken.netex.model.StopPlace> importStopPlaces(List<StopPlace> tiamatStops, AtomicInteger stopPlacesCreated) {
+    public List<org.entur.netex2.model.StopPlace> importStopPlaces(List<StopPlace> tiamatStops, AtomicInteger stopPlacesCreated) {
         if (publishChangelog) {
             throw new IllegalStateException("Initial import not allowed with changelog publishing enabled! Set changelog.publish.enabled=false");
         }
@@ -59,13 +59,13 @@ public class ParallelInitialStopPlaceImporter {
                 stopPlacesCreated
         );
 
-        List<org.rutebanken.netex.model.StopPlace> stops = tiamatStops.parallelStream()
+        List<org.entur.netex2.model.StopPlace> stops = tiamatStops.parallelStream()
                 .map(this::clearTariffZoneVersions)
                 .map(stopPlaceTopographicPlaceReferenceUpdater::updateTopographicReference)
                 .flatMap(stopPlace ->  processor.processStopPlace(stopPlace).map(netexMapper::mapToNetexModel))
                 .toList();
 
-        List<org.rutebanken.netex.model.StopPlace> parents = processor.createAndSaveParentStopPlaces()
+        List<org.entur.netex2.model.StopPlace> parents = processor.createAndSaveParentStopPlaces()
                 .parallelStream()
                 .map(netexMapper::mapToNetexModel).toList();
 

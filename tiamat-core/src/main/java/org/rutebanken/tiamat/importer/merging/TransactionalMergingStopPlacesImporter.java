@@ -51,13 +51,13 @@ public class TransactionalMergingStopPlacesImporter {
         this.topographicPlaceReferenceUpdater = topographicPlaceReferenceUpdater;
     }
 
-    public Collection<org.rutebanken.netex.model.StopPlace> importStopPlaces(List<StopPlace> stopPlaces, AtomicInteger stopPlacesCreated) {
+    public Collection<org.entur.netex2.model.StopPlace> importStopPlaces(List<StopPlace> stopPlaces, AtomicInteger stopPlacesCreated) {
 
-        List<org.rutebanken.netex.model.StopPlace> createdStopPlaces = stopPlaces
+        List<org.entur.netex2.model.StopPlace> createdStopPlaces = stopPlaces
                 .stream()
                 .filter(Objects::nonNull)
                 .map(stopPlace -> {
-                    org.rutebanken.netex.model.StopPlace importedStop = null;
+                    org.entur.netex2.model.StopPlace importedStop = null;
                     try {
                         StopPlace updated = topographicPlaceReferenceUpdater.updateTopographicReference(stopPlace);
                         importedStop = mergingStopPlaceImporter.importStopPlace(updated);
@@ -79,11 +79,11 @@ public class TransactionalMergingStopPlacesImporter {
      * @param stopPlaces
      * @return unique list with stop places based on ID
      */
-    public Collection<org.rutebanken.netex.model.StopPlace> distinctByIdAndHighestVersion(List<org.rutebanken.netex.model.StopPlace> stopPlaces) {
-        Map<String, org.rutebanken.netex.model.StopPlace> uniqueStopPlaces = new HashMap<>();
-        for (org.rutebanken.netex.model.StopPlace stopPlace : stopPlaces) {
+    public Collection<org.entur.netex2.model.StopPlace> distinctByIdAndHighestVersion(List<org.entur.netex2.model.StopPlace> stopPlaces) {
+        Map<String, org.entur.netex2.model.StopPlace> uniqueStopPlaces = new HashMap<>();
+        for (org.entur.netex2.model.StopPlace stopPlace : stopPlaces) {
             if (uniqueStopPlaces.containsKey(stopPlace.getId())) {
-                org.rutebanken.netex.model.StopPlace existingStopPlace = uniqueStopPlaces.get(stopPlace.getId());
+                org.entur.netex2.model.StopPlace existingStopPlace = uniqueStopPlaces.get(stopPlace.getId());
                 long existingStopVersion = tryParseLong(existingStopPlace.getVersion());
                 long stopPlaceVersion = tryParseLong(stopPlace.getVersion());
                 if (existingStopVersion < stopPlaceVersion) {

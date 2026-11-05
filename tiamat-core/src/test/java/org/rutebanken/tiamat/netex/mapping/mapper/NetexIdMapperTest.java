@@ -16,8 +16,8 @@
 package org.rutebanken.tiamat.netex.mapping.mapper;
 
 import org.junit.Test;
-import org.rutebanken.netex.model.KeyListStructure;
-import org.rutebanken.netex.model.KeyValueStructure;
+import org.entur.netex2.model.KeyListStructure;
+import org.entur.netex2.model.KeyValueStructure;
 import org.rutebanken.tiamat.model.AccessibilityAssessment;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.SiteFrame;
@@ -41,7 +41,7 @@ public class NetexIdMapperTest {
         SiteFrame siteFrame = new SiteFrame();
         siteFrame.setNetexId("NSR:SiteFrame:123123");
 
-        org.rutebanken.netex.model.SiteFrame netexSiteFrame = new org.rutebanken.netex.model.SiteFrame();
+        org.entur.netex2.model.SiteFrame netexSiteFrame = new org.entur.netex2.model.SiteFrame();
         netexIdMapper.toNetexModel(siteFrame, netexSiteFrame);
 
         assertThat(netexSiteFrame.getId()).isNotEmpty();
@@ -53,7 +53,7 @@ public class NetexIdMapperTest {
         AccessibilityAssessment accessibilityAssessment = new AccessibilityAssessment();
         accessibilityAssessment.setNetexId("NSR:AccessibilityAssesment:123124");
 
-        org.rutebanken.netex.model.AccessibilityAssessment netexAccessibilityAssesment = new org.rutebanken.netex.model.AccessibilityAssessment();
+        org.entur.netex2.model.AccessibilityAssessment netexAccessibilityAssesment = new org.entur.netex2.model.AccessibilityAssessment();
         netexIdMapper.toNetexModel(accessibilityAssessment, netexAccessibilityAssesment);
 
         assertThat(netexAccessibilityAssesment.getId()).isNotEmpty();
@@ -65,7 +65,7 @@ public class NetexIdMapperTest {
 
         String originalId = "RUT:StopPlace:1,,RUT:StopPlace:2";
 
-        org.rutebanken.netex.model.DataManagedObjectStructure netexEntity = new org.rutebanken.netex.model.StopPlace()
+        org.entur.netex2.model.DataManagedObjectStructure netexEntity = new org.entur.netex2.model.StopPlace()
                 .withKeyList(new KeyListStructure()
                         .withKeyValue(new KeyValueStructure()
                                 .withKey(ORIGINAL_ID_KEY)
@@ -83,7 +83,7 @@ public class NetexIdMapperTest {
 
         String originalId = "RUT:Quay:";
 
-        org.rutebanken.netex.model.DataManagedObjectStructure netexEntity = new org.rutebanken.netex.model.Quay()
+        org.entur.netex2.model.DataManagedObjectStructure netexEntity = new org.entur.netex2.model.Quay()
                 .withKeyList(new KeyListStructure()
                         .withKeyValue(new KeyValueStructure()
                                 .withKey(ORIGINAL_ID_KEY)
@@ -112,7 +112,7 @@ public class NetexIdMapperTest {
 
         String originalId = "RUT:StopPlace:";
 
-        org.rutebanken.netex.model.DataManagedObjectStructure netexEntity = new org.rutebanken.netex.model.StopPlace()
+        org.entur.netex2.model.DataManagedObjectStructure netexEntity = new org.entur.netex2.model.StopPlace()
                 .withKeyList(new KeyListStructure()
                         .withKeyValue(new KeyValueStructure()
                                 .withKey(ORIGINAL_ID_KEY)

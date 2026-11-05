@@ -15,7 +15,7 @@
 
 package org.rutebanken.tiamat.importer;
 
-import org.rutebanken.netex.model.FareZone;
+import org.entur.netex2.model.FareZone;
 
 import java.util.List;
 import java.util.Set;

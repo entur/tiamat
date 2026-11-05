@@ -17,7 +17,7 @@ package org.rutebanken.tiamat.rest.netex.publicationdelivery;
 
 import jakarta.ws.rs.core.StreamingOutput;
 import org.junit.Test;
-import org.rutebanken.netex.model.PublicationDeliveryStructure;
+import org.entur.netex2.model.PublicationDeliveryStructure;
 import org.xml.sax.SAXParseException;
 
 import java.io.ByteArrayOutputStream;

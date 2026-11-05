@@ -31,9 +31,9 @@
 package org.rutebanken.tiamat.importer.handler;
 
 import com.google.common.base.Strings;
-import org.rutebanken.netex.model.SiteFrame;
-import org.rutebanken.netex.model.TopographicPlace;
-import org.rutebanken.netex.model.TopographicPlacesInFrame_RelStructure;
+import org.entur.netex2.model.SiteFrame;
+import org.entur.netex2.model.TopographicPlace;
+import org.entur.netex2.model.TopographicPlacesInFrame_RelStructure;
 import org.rutebanken.tiamat.importer.ImportParams;
 import org.rutebanken.tiamat.importer.TopographicPlaceErasor;
 import org.rutebanken.tiamat.importer.TopographicPlaceImporter;

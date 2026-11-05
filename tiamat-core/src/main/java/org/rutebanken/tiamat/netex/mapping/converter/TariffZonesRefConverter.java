@@ -19,9 +19,9 @@ import jakarta.xml.bind.JAXBElement;
 import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;
-import org.rutebanken.netex.model.ObjectFactory;
-import org.rutebanken.netex.model.TariffZoneRefs_RelStructure;
-import org.rutebanken.netex.model.ZoneRefStructure;
+import org.entur.netex2.model.ObjectFactory;
+import org.entur.netex2.model.TariffZoneRefs_RelStructure;
+import org.entur.netex2.model.ZoneRefStructure;
 import org.rutebanken.tiamat.model.TariffZoneRef;
 import org.springframework.stereotype.Component;
 
@@ -41,25 +41,25 @@ public class TariffZonesRefConverter extends BidirectionalConverter<Set<TariffZo
         }
 
         final List<JAXBElement<? extends ZoneRefStructure>> wrappedTariffZoneRefList = tariffZones.stream()
-                .map(tariffZoneRef -> mapperFacade.map(tariffZoneRef, org.rutebanken.netex.model.TariffZoneRef.class))
+                .map(tariffZoneRef -> mapperFacade.map(tariffZoneRef, org.entur.netex2.model.TariffZoneRef.class))
                 .map(tariffZoneRef -> new ObjectFactory().createTariffZoneRef(tariffZoneRef))
                 .collect(toList());
 
 
-        return new TariffZoneRefs_RelStructure().withTariffZoneRef_(wrappedTariffZoneRefList);
+        return new TariffZoneRefs_RelStructure().withTariffZoneRef(wrappedTariffZoneRefList);
 
     }
 
     @Override
     public Set<TariffZoneRef> convertFrom(TariffZoneRefs_RelStructure tariffZoneRefs_relStructure, Type<Set<TariffZoneRef>> type, MappingContext mappingContext) {
         if(tariffZoneRefs_relStructure == null
-                || tariffZoneRefs_relStructure.getTariffZoneRef_() == null
-                || tariffZoneRefs_relStructure.getTariffZoneRef_().isEmpty()) {
+                || tariffZoneRefs_relStructure.getTariffZoneRef() == null
+                || tariffZoneRefs_relStructure.getTariffZoneRef().isEmpty()) {
             return null;
         }
 
         return tariffZoneRefs_relStructure
-                .getTariffZoneRef_()
+                .getTariffZoneRef()
                 .stream()
                 .map(JAXBElement::getValue)
                 .map(tariffZoneRef -> mapperFacade.map(tariffZoneRef, TariffZoneRef.class))

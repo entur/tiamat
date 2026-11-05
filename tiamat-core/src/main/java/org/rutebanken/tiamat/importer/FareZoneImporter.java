@@ -15,7 +15,7 @@
 
 package org.rutebanken.tiamat.importer;
 
-import org.rutebanken.netex.model.FareZone;
+import org.entur.netex2.model.FareZone;
 import org.rutebanken.tiamat.config.FareZoneConfig;
 import org.rutebanken.tiamat.netex.mapping.NetexMapper;
 import org.rutebanken.tiamat.versioning.save.FareZoneSaverService;

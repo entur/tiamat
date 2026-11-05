@@ -1,10 +1,10 @@
 package org.rutebanken.tiamat.ext.fintraffic.api.repository;
 
-import org.rutebanken.netex.model.EntityInVersionStructure;
-import org.rutebanken.netex.model.Parking;
-import org.rutebanken.netex.model.PassengerStopAssignment;
-import org.rutebanken.netex.model.ScheduledStopPoint;
-import org.rutebanken.netex.model.StopPlace;
+import org.entur.netex2.model.EntityInVersionStructure;
+import org.entur.netex2.model.Parking;
+import org.entur.netex2.model.PassengerStopAssignment;
+import org.entur.netex2.model.ScheduledStopPoint;
+import org.entur.netex2.model.StopPlace;
 
 class ReadApiDbConsistency {
     protected static <T extends EntityInVersionStructure> String getDbConsistencySql(Class<T> entityClass) {

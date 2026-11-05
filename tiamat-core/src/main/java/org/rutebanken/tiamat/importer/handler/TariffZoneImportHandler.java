@@ -46,14 +46,14 @@
 package org.rutebanken.tiamat.importer.handler;
 
 import jakarta.xml.bind.JAXBElement;
-import org.rutebanken.netex.model.FareFrame;
-import org.rutebanken.netex.model.FareZone;
-import org.rutebanken.netex.model.FareZonesInFrame_RelStructure;
-import org.rutebanken.netex.model.ObjectFactory;
-import org.rutebanken.netex.model.SiteFrame;
-import org.rutebanken.netex.model.TariffZone;
-import org.rutebanken.netex.model.TariffZonesInFrame_RelStructure;
-import org.rutebanken.netex.model.Zone_VersionStructure;
+import org.entur.netex2.model.FareFrame;
+import org.entur.netex2.model.FareZone;
+import org.entur.netex2.model.FareZonesInFrame_RelStructure;
+import org.entur.netex2.model.ObjectFactory;
+import org.entur.netex2.model.SiteFrame;
+import org.entur.netex2.model.TariffZone;
+import org.entur.netex2.model.TariffZonesInFrame_RelStructure;
+import org.entur.netex2.model.Zone_VersionStructure;
 import org.rutebanken.tiamat.config.TariffZoneConfig;
 import org.rutebanken.tiamat.importer.FareZoneImportResult;
 import org.rutebanken.tiamat.importer.FareZoneImporter;

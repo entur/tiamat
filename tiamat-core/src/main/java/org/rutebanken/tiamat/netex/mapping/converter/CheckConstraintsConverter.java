@@ -18,7 +18,7 @@ package org.rutebanken.tiamat.netex.mapping.converter;
 import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;
-import org.rutebanken.netex.model.CheckConstraints_RelStructure;
+import org.entur.netex2.model.CheckConstraints_RelStructure;
 import org.rutebanken.tiamat.model.CheckConstraint;
 import org.springframework.stereotype.Component;
 
