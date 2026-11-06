@@ -24,7 +24,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ALL_VERSIONS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ID;
@@ -52,7 +54,9 @@ class TopographicPlaceFetcher implements DataFetcher {
             if (allVersions) {
                 return topographicPlaceRepository.findByNetexId(netexId);
             } else {
-                return Arrays.asList(topographicPlaceRepository.findFirstByNetexIdOrderByVersionDesc(netexId));
+                return Stream.of(topographicPlaceRepository.findFirstByNetexIdOrderByVersionDesc(netexId))
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList());
             }
         }
         logger.debug("Returning topographic places with query: {} and type {}", environment.getArgument(QUERY), environment.getArgument(TOPOGRAPHIC_PLACE_TYPE));
