@@ -71,6 +71,7 @@ class PathLinkFetcher implements DataFetcher {
                             return pathLinkRepository.findFirstByNetexIdOrderByVersionDesc(netexId);
                         }
                     })
+                    .filter(Objects::nonNull)
                     .collect(Collectors.toList());
         }
 
