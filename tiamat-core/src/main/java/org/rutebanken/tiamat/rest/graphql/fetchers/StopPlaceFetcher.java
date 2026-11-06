@@ -115,8 +115,9 @@ class StopPlaceFetcher implements DataFetcher {
             try {
                 List<StopPlace> stopPlace;
                 if(version != null && version > 0) {
-                    stopPlace = Arrays.asList(stopPlaceRepository.findFirstByNetexIdAndVersion(netexId, version));
-                    stopPlacesPage = getStopPlaces(environment, stopPlace, 1L);
+                    StopPlace foundVersion = stopPlaceRepository.findFirstByNetexIdAndVersion(netexId, version);
+                    stopPlace = foundVersion != null ? Arrays.asList(foundVersion) : new ArrayList<>();
+                    stopPlacesPage = getStopPlaces(environment, stopPlace, stopPlace.size());
                 } else if (ExportParams.VersionValidity.MAX_VERSION.equals(versionValidity)) {
                     StopPlace sp = stopPlaceRepository.findFirstByNetexIdOrderByVersionDesc(netexId);
                     if (sp != null && sp.isParentStopPlace()) {

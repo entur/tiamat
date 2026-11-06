@@ -30,8 +30,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.FIND_BY_STOP_PLACE_ID;
@@ -65,18 +65,18 @@ class ParkingFetcher implements DataFetcher {
             List<Parking> parkingList = new ArrayList<>();
             if(version != null && version > 0) {
                 logger.info("Finding parking by netexid {} and version {}", parkingId, version);
-                parkingList = Arrays.asList(parkingRepository.findFirstByNetexIdAndVersion(parkingId, version));
-                allParkings = new PageImpl<>(parkingList, pageable, 1L);
+                addIfFound(parkingList, parkingRepository.findFirstByNetexIdAndVersion(parkingId, version));
             } else {
                 logger.info("Finding first parking by netexid {} and highest version", parkingId);
-                parkingList.add(parkingRepository.findFirstByNetexIdOrderByVersionDesc(parkingId));
-                allParkings = new PageImpl<>(parkingList, pageable, 1L);
+                addIfFound(parkingList, parkingRepository.findFirstByNetexIdOrderByVersionDesc(parkingId));
             }
+            allParkings = new PageImpl<>(parkingList, pageable, parkingList.size());
         } else if (stopPlaceId != null) {
             logger.info("Finding parkings by stop place netexid {}", stopPlaceId);
             return parkingRepository.findByStopPlaceNetexId(stopPlaceId).stream()
                     .peek(parkingNetexId -> logger.info("Finding parking by netexid {} and highest version", parkingNetexId))
                     .map(netexId -> parkingRepository.findFirstByNetexIdOrderByVersionDesc(netexId))
+                    .filter(Objects::nonNull)
                     .collect(Collectors.toList());
         } else {
             logger.info("Finding all parkings regardless of version and validity");
@@ -84,5 +84,11 @@ class ParkingFetcher implements DataFetcher {
         }
 
         return allParkings;
+    }
+
+    private static void addIfFound(List<Parking> parkingList, Parking parking) {
+        if (parking != null) {
+            parkingList.add(parking);
+        }
     }
 }

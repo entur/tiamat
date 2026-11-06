@@ -31,6 +31,12 @@ public class GraphQLResourceTopographicPlaceIntegrationTest extends AbstractGrap
     private TopographicPlaceRepository topographicPlaceRepository;
 
     @Test
+    public void topographicPlaceByMissingIdReturnsEmptyList() {
+        executeGraphqQLQueryOnly("{ topographicPlace(id: \"NSR:TopographicPlace:99999999\") { id } }")
+                .body("data.topographicPlace", hasSize(0));
+    }
+
+    @Test
     public void getTopographicPlaces() {
         
         TopographicPlace topographicPlace = new TopographicPlace();
