@@ -24,6 +24,7 @@ import org.rutebanken.tiamat.diff.TiamatObjectDiffer;
 import org.rutebanken.tiamat.model.DataManagedObjectStructure;
 import org.rutebanken.tiamat.model.Parking;
 import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.model.ValidBetween;
 import org.rutebanken.tiamat.repository.ParkingRepository;
 import org.rutebanken.tiamat.repository.reference.ReferenceResolver;
 import org.rutebanken.tiamat.service.metrics.PrometheusMetricsService;
@@ -93,7 +94,7 @@ public class ParkingVersionedSaverService {
         }
 
 
-        newVersion.setValidBetween(null);
+        validateValidBetween(newVersion);
         versionIncrementor.initiateOrIncrementVersions(newVersion);
         newVersion.setChangedBy(usernameFetcher.getUserNameForAuthenticatedUser());
         result = parkingRepository.save(newVersion);
@@ -151,5 +152,14 @@ public class ParkingVersionedSaverService {
             throw new IllegalArgumentException("Parking must have a parentSiteRef pointing to stop place. Parking: " + parking.toString() + " Parent site: " + parentSite);
         }
         return stopPlace;
+    }
+
+    private void validateValidBetween(Parking parking) {
+        ValidBetween validBetween = parking.getValidBetween();
+        if (validBetween != null && validBetween.getFromDate() != null && validBetween.getToDate() != null
+                && validBetween.getFromDate().isAfter(validBetween.getToDate())) {
+            throw new IllegalArgumentException("Parking " + parking.getNetexId() + " has from date "
+                    + validBetween.getFromDate() + " after to date " + validBetween.getToDate());
+        }
     }
 }
