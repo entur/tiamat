@@ -3,7 +3,6 @@ package org.rutebanken.tiamat.ext.fintraffic.netex;
 import org.rutebanken.tiamat.importer.PublicationDeliveryFareFrameImporter;
 import org.rutebanken.tiamat.importer.PublicationDeliveryImporter;
 import org.rutebanken.tiamat.importer.PublicationDeliveryTariffZoneImporter;
-import org.rutebanken.tiamat.netex.id.GaplessIdGeneratorService;
 import org.rutebanken.tiamat.rest.netex.publicationdelivery.PublicationDeliveryUnmarshaller;
 import org.rutebanken.tiamat.service.BlobStoreService;
 import org.rutebanken.tiamat.service.batch.BackgroundJobs;
@@ -49,8 +48,7 @@ public class NetexImportConfig {
      * {@code spring.main.allow-bean-definition-overriding=true}, which peti-backend-app sets.
      */
     @Bean
-    public BackgroundJobs backgroundJobs(GaplessIdGeneratorService gaplessIdGeneratorService,
-                                         StopPlaceRefUpdaterService stopPlaceRefUpdaterService) {
-        return new SynchronousBackgroundJobs(gaplessIdGeneratorService, stopPlaceRefUpdaterService);
+    public BackgroundJobs backgroundJobs(StopPlaceRefUpdaterService stopPlaceRefUpdaterService) {
+        return new SynchronousBackgroundJobs(stopPlaceRefUpdaterService);
     }
 }
