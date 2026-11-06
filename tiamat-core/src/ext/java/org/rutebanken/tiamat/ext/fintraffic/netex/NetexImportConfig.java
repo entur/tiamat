@@ -5,6 +5,8 @@ import org.rutebanken.tiamat.importer.PublicationDeliveryImporter;
 import org.rutebanken.tiamat.importer.PublicationDeliveryTariffZoneImporter;
 import org.rutebanken.tiamat.rest.netex.publicationdelivery.PublicationDeliveryUnmarshaller;
 import org.rutebanken.tiamat.service.BlobStoreService;
+import org.rutebanken.tiamat.service.batch.BackgroundJobs;
+import org.rutebanken.tiamat.service.batch.StopPlaceRefUpdaterService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -38,5 +40,15 @@ public class NetexImportConfig {
             PublicationDeliveryTariffZoneImporter tariffZoneImporter,
             PublicationDeliveryFareFrameImporter fareFrameImporter) {
         return new NetexImportTask(blobStoreService, unmarshaller, importer, tariffZoneImporter, fareFrameImporter);
+    }
+
+    /**
+     * Overrides tiamat-core's {@code backgroundJobs} bean; the method name matches the name
+     * generated for the {@code @Service}. Relies on
+     * {@code spring.main.allow-bean-definition-overriding=true}, which peti-backend-app sets.
+     */
+    @Bean
+    public BackgroundJobs backgroundJobs(StopPlaceRefUpdaterService stopPlaceRefUpdaterService) {
+        return new SynchronousBackgroundJobs(stopPlaceRefUpdaterService);
     }
 }
