@@ -450,9 +450,9 @@ public class ParkingMapper extends CustomMapper<Parking, org.rutebanken.tiamat.m
     /**
      * The NeTEx export pipeline maps the same {@code Parking} to NeTEx more than once per
      * export (e.g. once per frame that embeds it). Unlike {@code vehicleEntrances} (overwritten
-     * via a plain setter), this method appends to a list that may already carry entries, so a
-     * repeat invocation must remove only the {@code AvailabilityCondition} entries it previously
-     * added itself. Otherwise the second invocation duplicates them with identical ids, violating
+     * via a plain setter), this method appends to a list that may already carry entries. A
+     * repeat invocation must therefore remove only the {@code AvailabilityCondition} entries that
+     * it previously added itself. Otherwise the second invocation duplicates them with identical ids, violating
      * NeTEx's {@code ValidityCondition_AnyVersionedKey} uniqueness constraint on export.
      */
     private void mapAvailabilityConditionsToNetex(org.rutebanken.tiamat.model.Parking source, Parking target) {
