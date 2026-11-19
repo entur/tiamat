@@ -18,6 +18,7 @@ package org.rutebanken.tiamat.versioning;
 import org.junit.Test;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
+import org.rutebanken.tiamat.versioning.util.ParkingVersionedElements;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -35,7 +36,7 @@ public class VersionIncrementorTest {
         stopPlace.getQuays().add(quay);
 
 
-        StopPlace newVersion = new VersionIncrementor().initiateOrIncrementVersions(stopPlace);
+        StopPlace newVersion = new VersionIncrementor(new ParkingVersionedElements()).initiateOrIncrementVersions(stopPlace);
         assertThat(newVersion.getVersion()).isEqualTo(2L);
         assertThat(newVersion.getQuays()).isNotEmpty();
         assertThat(newVersion.getQuays().iterator().next().getVersion()).isEqualTo(3L);
