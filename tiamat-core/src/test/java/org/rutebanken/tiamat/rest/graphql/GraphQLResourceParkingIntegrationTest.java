@@ -39,6 +39,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class GraphQLResourceParkingIntegrationTest extends AbstractGraphQLResourceIntegrationTest {
 
     @Test
+    public void parkingByMissingIdReturnsEmptyList() {
+        executeGraphqQLQueryOnly("{ parking(id: \"NSR:Parking:99999999\") { id } }")
+                .body("data.parking", hasSize(0));
+    }
+
+    @Test
+    public void parkingByMissingIdAndVersionReturnsEmptyList() {
+        executeGraphqQLQueryOnly("{ parking(id: \"NSR:Parking:99999999\", version: 1) { id } }")
+                .body("data.parking", hasSize(0));
+    }
+
+    @Test
     public void searchForParkingById() throws Exception {
 
         Parking parking = new Parking();

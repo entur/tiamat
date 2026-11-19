@@ -101,6 +101,12 @@ import static org.rutebanken.tiamat.rest.graphql.scalars.DateScalar.DATE_TIME_PA
 
 public class GraphQLResourceStopPlaceIntegrationTest extends AbstractGraphQLResourceIntegrationTest {
 
+    @Test
+    public void stopPlaceByMissingIdAndVersionReturnsEmptyList() {
+        executeGraphqQLQueryOnly("{ stopPlace(id: \"NSR:StopPlace:99999999\", version: 1) { id } }")
+                .body("data.stopPlace", hasSize(0));
+    }
+
     @Autowired
     private EntityChangedJMSListener entityChangedJMSListener;
 

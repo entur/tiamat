@@ -23,9 +23,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.ALL_VERSIONS;
 import static org.rutebanken.tiamat.rest.graphql.GraphQLNames.FIND_BY_STOP_PLACE_ID;
@@ -52,7 +53,9 @@ class PathLinkFetcher implements DataFetcher {
             if(allVersions) {
                 return pathLinkRepository.findByNetexId(pathLinkNetexId.get());
             }
-            return Arrays.asList(pathLinkRepository.findFirstByNetexIdOrderByVersionDesc(pathLinkNetexId.get()));
+            return Stream.of(pathLinkRepository.findFirstByNetexIdOrderByVersionDesc(pathLinkNetexId.get()))
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
         }
 
         Optional<String> stopPlaceNetexId = idMapper.extractIdIfPresent(FIND_BY_STOP_PLACE_ID, environment.getArguments());
@@ -68,6 +71,7 @@ class PathLinkFetcher implements DataFetcher {
                             return pathLinkRepository.findFirstByNetexIdOrderByVersionDesc(netexId);
                         }
                     })
+                    .filter(Objects::nonNull)
                     .collect(Collectors.toList());
         }
 

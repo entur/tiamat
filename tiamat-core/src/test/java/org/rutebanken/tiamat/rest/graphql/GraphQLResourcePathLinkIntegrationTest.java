@@ -55,6 +55,12 @@ import static org.rutebanken.tiamat.versioning.VersionIncrementor.INITIAL_VERSIO
 
 public class GraphQLResourcePathLinkIntegrationTest extends AbstractGraphQLResourceIntegrationTest {
 
+    @Test
+    public void pathLinkByMissingIdReturnsEmptyList() {
+        executeGraphqQLQueryOnly("{ pathLink(id: \"NSR:PathLink:99999999\") { id } }")
+                .body("data.pathLink", org.hamcrest.Matchers.hasSize(0));
+    }
+
     @Autowired
     private QuayRepository quayRepository;
 
