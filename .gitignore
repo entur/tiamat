@@ -43,3 +43,6 @@ src/main/resources/stops/agency.txt
 
 local_config/
 node_modules
+
+# IntelliJ HTTP Client secrets for the write API reference
+http-client.private.env.json
