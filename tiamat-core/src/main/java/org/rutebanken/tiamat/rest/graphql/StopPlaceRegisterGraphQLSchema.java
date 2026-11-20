@@ -126,6 +126,7 @@ import java.util.List;
 import java.util.Map;
 
 import static graphql.Scalars.GraphQLBoolean;
+import static graphql.Scalars.GraphQLFloat;
 import static graphql.Scalars.GraphQLInt;
 import static graphql.Scalars.GraphQLString;
 import static graphql.scalars.ExtendedScalars.GraphQLBigDecimal;
@@ -245,6 +246,9 @@ public class StopPlaceRegisterGraphQLSchema {
 
     @Autowired
     DataFetcher stopPlaceFetcher;
+
+    @Autowired
+    DataFetcher stopPlaceMapFetcher;
 
     @Autowired
     private DataFetcher<Page<GroupOfStopPlaces>> groupOfStopPlacesFetcher;
@@ -538,6 +542,14 @@ public class StopPlaceRegisterGraphQLSchema {
                         .arguments(createBboxArguments())
                         )
                 .field(newFieldDefinition()
+                        .type(new GraphQLNonNull(createStopPlaceMapObjectType(stopPlaceInterface)))
+                        .name(FIND_STOPPLACE_MAP_BY_BBOX)
+                        .description("Find StopPlaces within given BoundingBox for display on a map. " +
+                                "Below a server-configured zoom level, StopPlaces are aggregated into clusters; " +
+                                "from that zoom level and in, individual StopPlaces are returned as by " + FIND_STOPPLACE_BY_BBOX + ".")
+                        .arguments(createMapBboxArguments())
+                        )
+                .field(newFieldDefinition()
                         .name(FIND_TOPOGRAPHIC_PLACE)
                         .type(new GraphQLList(new GraphQLNonNull(topographicPlaceObjectType)))
                         .description("Find topographic places")
@@ -801,6 +813,7 @@ public class StopPlaceRegisterGraphQLSchema {
 
         registerDataFetcher(codeRegistryBuilder, STOPPLACES_REGISTER, FIND_STOPPLACE, stopPlaceFetcher);
         registerDataFetcher(codeRegistryBuilder, STOPPLACES_REGISTER, FIND_STOPPLACE_BY_BBOX, stopPlaceFetcher);
+        registerDataFetcher(codeRegistryBuilder, STOPPLACES_REGISTER, FIND_STOPPLACE_MAP_BY_BBOX, stopPlaceMapFetcher);
         registerDataFetcher(codeRegistryBuilder, STOPPLACES_REGISTER, FIND_TOPOGRAPHIC_PLACE, topographicPlaceFetcher);
         registerDataFetcher(codeRegistryBuilder, STOPPLACES_REGISTER, FIND_PATH_LINK, pathLinkFetcher);
         registerDataFetcher(codeRegistryBuilder, STOPPLACES_REGISTER, FIND_PARKING, parkingFetcher);
@@ -1499,6 +1512,48 @@ public class StopPlaceRegisterGraphQLSchema {
                 .description(POINT_IN_TIME_ARG_DESCRIPTION)
                 .build());
         return arguments;
+    }
+
+    private List<GraphQLArgument> createMapBboxArguments() {
+        List<GraphQLArgument> arguments = createBboxArguments();
+        arguments.add(GraphQLArgument.newArgument()
+                .name(ZOOM)
+                .type(new GraphQLNonNull(GraphQLInt))
+                .description("Current map zoom level (Web Mercator, 256 pixel tiles). Decides whether StopPlaces are clustered and how coarsely.")
+                .build());
+        return arguments;
+    }
+
+    private GraphQLObjectType createStopPlaceMapObjectType(GraphQLInterfaceType stopPlaceInterface) {
+        GraphQLObjectType clusterObjectType = newObject()
+                .name(OUTPUT_TYPE_STOPPLACE_CLUSTER)
+                .description("StopPlaces aggregated for map display. Positioned at the mean of their centroids.")
+                .field(newFieldDefinition().name(CLUSTER_COUNT).type(new GraphQLNonNull(GraphQLInt)))
+                .field(newFieldDefinition().name(LONGITUDE).type(new GraphQLNonNull(GraphQLFloat)))
+                .field(newFieldDefinition().name(LATITUDE).type(new GraphQLNonNull(GraphQLFloat)))
+                .field(newFieldDefinition().name(LONGITUDE_MIN).type(new GraphQLNonNull(GraphQLFloat)))
+                .field(newFieldDefinition().name(LATITUDE_MIN).type(new GraphQLNonNull(GraphQLFloat)))
+                .field(newFieldDefinition().name(LONGITUDE_MAX).type(new GraphQLNonNull(GraphQLFloat)))
+                .field(newFieldDefinition().name(LATITUDE_MAX).type(new GraphQLNonNull(GraphQLFloat)))
+                .field(newFieldDefinition()
+                        .name(CLUSTER_STOP_PLACE)
+                        .description("The StopPlace when the cluster holds exactly one, otherwise null.")
+                        .type(stopPlaceInterface))
+                .build();
+
+        return newObject()
+                .name(OUTPUT_TYPE_STOPPLACE_MAP)
+                .field(newFieldDefinition()
+                        .name(CLUSTERED)
+                        .description("True when the result holds clusters, false when it holds individual StopPlaces.")
+                        .type(new GraphQLNonNull(GraphQLBoolean)))
+                .field(newFieldDefinition()
+                        .name(CLUSTERS)
+                        .type(new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(clusterObjectType)))))
+                .field(newFieldDefinition()
+                        .name(STOP_PLACES)
+                        .type(new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(stopPlaceInterface)))))
+                .build();
     }
 
     private List<GraphQLArgument> createPageAndSizeArguments() {
