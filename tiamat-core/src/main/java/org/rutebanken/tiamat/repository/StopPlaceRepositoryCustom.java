@@ -18,6 +18,7 @@ package org.rutebanken.tiamat.repository;
 import org.locationtech.jts.geom.Envelope;
 import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
 import org.rutebanken.tiamat.dtoassembling.dto.JbvCodeMappingDto;
+import org.rutebanken.tiamat.dtoassembling.dto.StopPlaceClusterDto;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -39,6 +40,8 @@ public interface StopPlaceRepositoryCustom extends DataManagedObjectStructureRep
     Page<StopPlace> findStopPlacesWithin(double xMin, double yMin, double xMax, double yMax, String ignoreStopPlaceId, Pageable pageable);
 
     Page<StopPlace> findStopPlacesWithin(double xMin, double yMin, double xMax, double yMax, String ignoreStopPlaceId, Instant pointInTime, Pageable pageable);
+
+    List<StopPlaceClusterDto> findStopPlaceClustersWithin(double xMin, double yMin, double xMax, double yMax, double cellSizeMeters, Instant pointInTime, String ignoreStopPlaceId, int maxClusters);
 
     String findNearbyStopPlace(Envelope envelope, String name, StopTypeEnumeration stopTypeEnumeration);
 

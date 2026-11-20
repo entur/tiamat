@@ -32,6 +32,7 @@ import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.rutebanken.tiamat.dtoassembling.dto.IdMappingDto;
 import org.rutebanken.tiamat.dtoassembling.dto.JbvCodeMappingDto;
+import org.rutebanken.tiamat.dtoassembling.dto.StopPlaceClusterDto;
 import org.rutebanken.tiamat.exporter.params.ExportParams;
 import org.rutebanken.tiamat.model.Quay;
 import org.rutebanken.tiamat.model.StopPlace;
@@ -203,6 +204,68 @@ public class StopPlaceRepositoryImpl implements StopPlaceRepositoryCustom {
         query.setMaxResults(pageable.getPageSize());
         List<StopPlace> stopPlaces = query.getResultList();
         return new PageImpl<>(stopPlaces, pageable, stopPlaces.size());
+    }
+
+    /**
+     * Web Mercator is only defined up to about ±85.05° latitude.
+     */
+    private static final double MAX_MERCATOR_LATITUDE = 85.05;
+
+    /**
+     * Aggregate top-level stop places (parents and stop places without a parent) within the bounding box into
+     * square Web Mercator grid cells. Snapping to a fixed grid keeps clusters stable while the map is panned.
+     * With no point in time, the highest version of each stop place is used, which includes expired stop places.
+     * A cluster holding a single stop place carries that stop place's database id.
+     */
+    @Override
+    public List<StopPlaceClusterDto> findStopPlaceClustersWithin(double xMin, double yMin, double xMax, double yMax,
+                                                                 double cellSizeMeters, Instant pointInTime, String ignoreStopPlaceId,
+                                                                 int maxClusters) {
+        Envelope envelope = new Envelope(xMin, xMax,
+                Math.max(yMin, -MAX_MERCATOR_LATITUDE), Math.min(yMax, MAX_MERCATOR_LATITUDE));
+        Geometry geometryFilter = geometryFactory.toGeometry(envelope);
+
+        String validity = pointInTime != null
+                ? "(s.from_date IS NULL OR s.from_date <= :pointInTime) AND (s.to_date IS NULL OR s.to_date > :pointInTime) "
+                : "NOT EXISTS (SELECT 1 FROM stop_place sv WHERE sv.netex_id = s.netex_id AND sv.version > s.version) ";
+
+        String queryString = "SELECT count(*), avg(ST_X(c.centroid)), avg(ST_Y(c.centroid)), " +
+                "ST_XMin(ST_Extent(c.centroid)), ST_YMin(ST_Extent(c.centroid)), " +
+                "ST_XMax(ST_Extent(c.centroid)), ST_YMax(ST_Extent(c.centroid)), " +
+                "CASE WHEN count(*) = 1 THEN min(c.id) END " +
+                "FROM (SELECT s.id, s.centroid, ST_Transform(s.centroid, 3857) AS mercator FROM stop_place s " +
+                "WHERE s.parent_site_ref IS NULL " +
+                "AND s.centroid && :filter " +
+                (ignoreStopPlaceId != null ? "AND s.netex_id <> :ignoreStopPlaceId " : "") +
+                "AND " + validity + ") c " +
+                "GROUP BY floor(ST_X(c.mercator) / :cellSize), floor(ST_Y(c.mercator) / :cellSize) " +
+                "ORDER BY count(*) DESC " +
+                "LIMIT :maxClusters";
+
+        Query query = entityManager.createNativeQuery(queryString);
+        query.setParameter("filter", geometryFilter);
+        query.setParameter("cellSize", cellSizeMeters);
+        query.setParameter("maxClusters", maxClusters);
+        if (pointInTime != null) {
+            query.setParameter("pointInTime", Date.from(pointInTime));
+        }
+        if (ignoreStopPlaceId != null) {
+            query.setParameter("ignoreStopPlaceId", ignoreStopPlaceId);
+        }
+
+        @SuppressWarnings("unchecked")
+        List<Object[]> rows = query.getResultList();
+        return rows.stream()
+                .map(row -> new StopPlaceClusterDto(
+                        ((Number) row[0]).longValue(),
+                        ((Number) row[1]).doubleValue(),
+                        ((Number) row[2]).doubleValue(),
+                        ((Number) row[3]).doubleValue(),
+                        ((Number) row[4]).doubleValue(),
+                        ((Number) row[5]).doubleValue(),
+                        ((Number) row[6]).doubleValue(),
+                        row[7] != null ? ((Number) row[7]).longValue() : null))
+                .toList();
     }
 
     private static String getSubQueryString(String ignoreStopPlaceId) {
