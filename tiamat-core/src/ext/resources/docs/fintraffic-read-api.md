@@ -83,13 +83,13 @@ The path assumes the context path `/api`, which PETI sets.
 
 **Filter logic:**
 - A request without parameters returns all current entities
-- The filters apply to Stop Places and Parkings. They do not apply to TopographicPlace and FareZone entities
-- The API joins the values of one parameter with OR
-- The API joins different parameters with AND
+- The filters apply to Stop Places and Parkings. They do not remove the municipality TopographicPlace entities or the valid FareZone entities
+- A response holds an entity when it matches any value of a parameter
+- A response holds an entity only when it matches every parameter that the request sets
 
 **Response:**
 - Content-Type: `application/xml`
-- Returns NeTEx Nordic `PublicationDelivery` containing the matching Stop Places and Parkings and their related entities. The response always holds all TopographicPlace and FareZone entities, whatever the filters are
+- Returns NeTEx Nordic `PublicationDelivery` containing the matching Stop Places and Parkings and their related entities. The filters do not remove the municipality TopographicPlace entities or the valid FareZone entities
 
 **Status Codes:**
 - `200 OK`: Successful response with NeTEx data

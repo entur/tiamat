@@ -87,7 +87,7 @@ public class FintrafficApiController {
                     name = "areaCodes",
                     in = ParameterIn.QUERY,
                     description = "Return only stop places and parkings of these competent transport authorities. "
-                            + "The response always holds all topographic places and fare zones. "
+                            + "The filters do not remove municipality topographic places or valid fare zones. "
                             + "A code has three upper-case letters, for example HSL.",
                     style = ParameterStyle.FORM,
                     explode = Explode.TRUE,
@@ -102,7 +102,7 @@ public class FintrafficApiController {
                     name = "municipalityCodes",
                     in = ParameterIn.QUERY,
                     description = "Return only stop places and parkings in these municipalities. "
-                            + "The response always holds all topographic places and fare zones. "
+                            + "The filters do not remove municipality topographic places or valid fare zones. "
                             + "A code is the municipality code of Statistics Finland, for example 091 for Helsinki.",
                     style = ParameterStyle.FORM,
                     explode = Explode.TRUE,
