@@ -86,13 +86,14 @@ public class FintrafficApiController {
             @Parameter(
                     name = "areaCodes",
                     in = ParameterIn.QUERY,
-                    description = "Return only entities of these competent transport authorities. "
+                    description = "Return only stop places and parkings of these competent transport authorities. "
+                            + "The response always holds all topographic places and fare zones. "
                             + "A code has three upper-case letters, for example HSL.",
                     style = ParameterStyle.FORM,
                     explode = Explode.TRUE,
                     array = @ArraySchema(schema = @Schema(
                             type = "string",
-                            pattern = FintrafficConstants.AREA_CODE_REGEX,
+                            pattern = "^" + FintrafficConstants.AREA_CODE_REGEX + "$",
                             example = "HSL"
                     ))
             )
@@ -100,13 +101,14 @@ public class FintrafficApiController {
             @Parameter(
                     name = "municipalityCodes",
                     in = ParameterIn.QUERY,
-                    description = "Return only entities in these municipalities. "
+                    description = "Return only stop places and parkings in these municipalities. "
+                            + "The response always holds all topographic places and fare zones. "
                             + "A code is the municipality code of Statistics Finland, for example 091 for Helsinki.",
                     style = ParameterStyle.FORM,
                     explode = Explode.TRUE,
                     array = @ArraySchema(schema = @Schema(
                             type = "string",
-                            pattern = FintrafficConstants.MUNICIPALITY_CODE_REGEX,
+                            pattern = "^" + FintrafficConstants.MUNICIPALITY_CODE_REGEX + "$",
                             example = "091"
                     ))
             )
