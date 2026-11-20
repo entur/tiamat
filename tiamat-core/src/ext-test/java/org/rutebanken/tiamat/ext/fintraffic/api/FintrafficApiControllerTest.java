@@ -2,22 +2,47 @@ package org.rutebanken.tiamat.ext.fintraffic.api;
 
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
+import io.swagger.v3.jaxrs2.Reader;
+import io.swagger.v3.oas.integration.SwaggerConfiguration;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.tags.Tag;
+import org.entur.netex2.validation.NeTExValidator;
+import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.servlet.ServletContainer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.rutebanken.tiamat.config.JerseyConfig;
 import org.rutebanken.tiamat.ext.fintraffic.api.model.ReadApiEntityOutRecord;
 import org.rutebanken.tiamat.ext.fintraffic.api.model.ReadApiSearchKey;
 import org.rutebanken.tiamat.ext.fintraffic.api.repository.NetexRepository;
+import org.rutebanken.tiamat.model.VehicleModeEnumeration;
 import org.rutebanken.tiamat.netex.id.ValidPrefixList;
 import org.rutebanken.tiamat.time.ExportTimeZone;
+import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.xml.transform.stream.StreamSource;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.StringReader;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.nio.charset.StandardCharsets;
 import java.time.ZoneId;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -158,6 +183,54 @@ class FintrafficApiControllerTest {
     void getNetexStreamRejectsFiveDigitMunicipalityCode() {
         controller.getNetexStream(null, null, new String[]{"10000"}, response);
         verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
+    }
+
+    @Test
+    void transportModesDocumentationListsEveryVehicleMode() throws Exception {
+        Method method = FintrafficApiController.class.getMethod("getNetexStream",
+                String[].class, String[].class, String[].class, HttpServletResponse.class);
+
+        Parameter transportModes = Arrays.stream(method.getParameters())
+                .filter(p -> p.isAnnotationPresent(RequestParam.class)
+                        && "transportModes".equals(p.getAnnotation(RequestParam.class).value()))
+                .findFirst()
+                .orElseThrow();
+
+        io.swagger.v3.oas.annotations.Parameter documentation =
+                transportModes.getAnnotation(io.swagger.v3.oas.annotations.Parameter.class);
+        assertThat(documentation, notNullValue());
+
+        String[] documented = documentation.array().schema().allowableValues();
+        String[] accepted = Arrays.stream(VehicleModeEnumeration.values())
+                .map(VehicleModeEnumeration::value)
+                .toArray(String[]::new);
+        assertThat(Arrays.asList(documented), containsInAnyOrder(accepted));
+    }
+
+    @Test
+    void openApiExampleValidatesAgainstNetexSchema() {
+        assertThatCode(() -> NeTExValidator.getNeTExValidator(NeTExValidator.NetexVersion.v1_15)
+                .validate(new StreamSource(new StringReader(ReadApiOpenApiExamples.PUBLICATION_DELIVERY))))
+                .doesNotThrowAnyException();
+    }
+
+    @Test
+    void readApiControllerIsNotInJerseyOpenApi() throws Exception {
+        ServletContainer container = (ServletContainer) new JerseyConfig().publicJersey().getServlet();
+        Field resourceConfigField = ServletContainer.class.getDeclaredField("resourceConfig");
+        resourceConfigField.setAccessible(true);
+        ResourceConfig resourceConfig = (ResourceConfig) resourceConfigField.get(container);
+        Set<Class<?>> classes = new HashSet<>(resourceConfig.getClasses());
+        classes.add(FintrafficApiController.class);
+
+        OpenAPI openApi = new Reader(new SwaggerConfiguration().openAPI(new OpenAPI())).read(classes);
+
+        List<String> paths = openApi.getPaths() == null ? List.of() : List.copyOf(openApi.getPaths().keySet());
+        List<String> tags = openApi.getTags() == null ? List.of() : openApi.getTags().stream().map(Tag::getName).toList();
+
+        assertThat(paths, not(empty()));
+        assertThat(paths, not(hasItem(containsString("fintraffic/v1"))));
+        assertThat(tags, not(hasItem("Read API")));
     }
 }
 
