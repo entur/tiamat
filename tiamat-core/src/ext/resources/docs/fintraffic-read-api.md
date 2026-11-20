@@ -86,9 +86,10 @@ The path assumes the context path `/api`, which PETI sets.
 - The filters apply to Stop Places. They also apply to the Parkings, ScheduledStopPoints and PassengerStopAssignments of those Stop Places. Each of these uses the search key of its Stop Place
 - A Quay has no entry of its own. It is part of its Stop Place
 - A Stop Place matches a parameter when it has any one of the values of that parameter
+- A child Stop Place matches on its own values and on the values of its parent Stop Place
 - A Stop Place is in the response only when it matches every parameter that the request sets
 - A parent Stop Place also has the transport modes of its children
-- A child Stop Place also has the transport modes of its parent
+- A Parking uses the search key of its parent Stop Place
 - A Parking without a parent Stop Place never matches a filter
 - The filters do not remove the municipality TopographicPlace entities or the valid FareZone entities
 

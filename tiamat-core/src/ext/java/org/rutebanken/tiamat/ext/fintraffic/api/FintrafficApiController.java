@@ -45,6 +45,7 @@ public class FintrafficApiController {
                     + "The filters apply to stop places, and to the parkings, scheduled stop points and "
                     + "passenger stop assignments of those stop places. "
                     + "A stop place matches a parameter when it has any one of the values of that parameter. "
+                    + "A child stop place matches on its own values and on the values of its parent stop place. "
                     + "A stop place is in the response only when it matches every parameter that the request sets. "
                     + "A parking without a parent stop place never matches a filter. "
                     + "The filters do not remove municipality topographic places or valid fare zones."
@@ -80,8 +81,7 @@ public class FintrafficApiController {
                     in = ParameterIn.QUERY,
                     description = "Return only stop places that have one of these transport modes, "
                             + "with their parkings, scheduled stop points and passenger stop assignments. "
-                            + "A parent stop place also has the modes of its children, "
-                            + "and a child stop place also has the modes of its parent.",
+                            + "A parent stop place also has the modes of its children.",
                     style = ParameterStyle.FORM,
                     explode = Explode.TRUE,
                     array = @ArraySchema(schema = @Schema(
