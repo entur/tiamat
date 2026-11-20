@@ -40,9 +40,14 @@ public class FintrafficApiController {
 
     @Operation(
             summary = "Get stop places, parkings and related entities as NeTEx Nordic",
-            description = "Without a parameter, the API returns all current entities. "
-                    + "The API joins the values of one parameter with OR, and joins different parameters with AND. "
-                    + "Each parameter takes several values as a repeated parameter."
+            description = "Without a parameter, the API returns every cached entity. "
+                    + "Each parameter takes several values as a repeated parameter. "
+                    + "The filters apply to stop places, and to the parkings, scheduled stop points and "
+                    + "passenger stop assignments of those stop places. "
+                    + "A stop place matches a parameter when it has any one of the values of that parameter. "
+                    + "A stop place is in the response only when it matches every parameter that the request sets. "
+                    + "A parking without a parent stop place never matches a filter. "
+                    + "The filters do not remove municipality topographic places or valid fare zones."
     )
     @ApiResponses({
             @ApiResponse(
@@ -73,7 +78,10 @@ public class FintrafficApiController {
             @Parameter(
                     name = "transportModes",
                     in = ParameterIn.QUERY,
-                    description = "Return only stop places with one of these transport modes.",
+                    description = "Return only stop places that have one of these transport modes, "
+                            + "with their parkings, scheduled stop points and passenger stop assignments. "
+                            + "A parent stop place also has the modes of its children, "
+                            + "and a child stop place also has the modes of its parent.",
                     style = ParameterStyle.FORM,
                     explode = Explode.TRUE,
                     array = @ArraySchema(schema = @Schema(
@@ -86,8 +94,8 @@ public class FintrafficApiController {
             @Parameter(
                     name = "areaCodes",
                     in = ParameterIn.QUERY,
-                    description = "Return only stop places and parkings of these competent transport authorities. "
-                            + "The filters do not remove municipality topographic places or valid fare zones. "
+                    description = "Return only stop places in the area of one of these competent transport authorities, "
+                            + "with their parkings, scheduled stop points and passenger stop assignments. "
                             + "A code has three upper-case letters, for example HSL.",
                     style = ParameterStyle.FORM,
                     explode = Explode.TRUE,
@@ -101,8 +109,8 @@ public class FintrafficApiController {
             @Parameter(
                     name = "municipalityCodes",
                     in = ParameterIn.QUERY,
-                    description = "Return only stop places and parkings in these municipalities. "
-                            + "The filters do not remove municipality topographic places or valid fare zones. "
+                    description = "Return only stop places in these municipalities, "
+                            + "with their parkings, scheduled stop points and passenger stop assignments. "
                             + "A code is the municipality code of Statistics Finland, for example 091 for Helsinki.",
                     style = ParameterStyle.FORM,
                     explode = Explode.TRUE,

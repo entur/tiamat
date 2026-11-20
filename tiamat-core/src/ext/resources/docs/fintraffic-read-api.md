@@ -5,7 +5,7 @@
 The Read API is an optional extension for Tiamat that provides fast, read-only access to Stop Place data in NeTEx XML format. This API is designed for external clients that need efficient access to Stop Place data without impacting Tiamat's internal data model or performance.
 
 **Key Features:**
-- Read-only REST API for querying Stop Places by transport mode and area code
+- Read-only REST API for querying Stop Places by transport mode, area code and municipality code
 - Dedicated PostgreSQL cache table for optimized read operations
 - Event-driven real-time cache updates
 - Nightly batch cache repopulation for consistency
@@ -17,7 +17,7 @@ The Read API is an optional extension for Tiamat that provides fast, read-only a
 
 The API uses a dedicated PostgreSQL cache table `ext_fintraffic_netex_entity` that stores:
 - Stop Place entities as NeTEx XML
-- Related entities (ScheduledStopPoint, PassengerStopAssignment, Parking)
+- Related entities (ScheduledStopPoint, PassengerStopAssignment, Parking, municipality TopographicPlace, FareZone)
 - Search keys (JSONB)
 - Entity status (CURRENT, STALE, DELETED)
 - Version and timestamp information for consistency checks
@@ -82,14 +82,19 @@ The path assumes the context path `/api`, which PETI sets.
 - `municipalityCodes`: Municipality code of Statistics Finland, three or four digits (e.g., `091`)
 
 **Filter logic:**
-- A request without parameters returns all current entities
-- The filters apply to Stop Places and Parkings. They do not remove the municipality TopographicPlace entities or the valid FareZone entities
-- A response holds an entity when it matches any value of a parameter
-- A response holds an entity only when it matches every parameter that the request sets
+- A request without parameters returns every cached entity
+- The filters apply to Stop Places. They also apply to the Parkings, ScheduledStopPoints and PassengerStopAssignments of those Stop Places. Each of these uses the search key of its Stop Place
+- A Quay has no entry of its own. It is part of its Stop Place
+- A Stop Place matches a parameter when it has any one of the values of that parameter
+- A Stop Place is in the response only when it matches every parameter that the request sets
+- A parent Stop Place also has the transport modes of its children
+- A child Stop Place also has the transport modes of its parent
+- A Parking without a parent Stop Place never matches a filter
+- The filters do not remove the municipality TopographicPlace entities or the valid FareZone entities
 
 **Response:**
 - Content-Type: `application/xml`
-- Returns NeTEx Nordic `PublicationDelivery` containing the matching Stop Places and Parkings and their related entities. The filters do not remove the municipality TopographicPlace entities or the valid FareZone entities
+- Returns a NeTEx Nordic `PublicationDelivery` with the Stop Places that match the filters, their related entities, and the municipality TopographicPlace and valid FareZone entities
 
 **Status Codes:**
 - `200 OK`: Successful response with NeTEx data
