@@ -1,5 +1,17 @@
 package org.rutebanken.tiamat.ext.fintraffic.api;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.Explode;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.enums.ParameterStyle;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import org.rutebanken.tiamat.ext.fintraffic.FintrafficConstants;
 import org.rutebanken.tiamat.ext.fintraffic.api.model.FintrafficReadApiSearchKey;
@@ -16,6 +28,7 @@ import java.nio.charset.StandardCharsets;
 
 @Profile("fintraffic-read-api")
 @Controller
+@Tag(name = "Read API")
 public class FintrafficApiController {
     private final ReadApiNetexPublicationDeliveryService readApiNetexPublicationDeliveryService;
 
@@ -25,12 +38,90 @@ public class FintrafficApiController {
         this.readApiNetexPublicationDeliveryService = readApiNetexPublicationDeliveryService;
     }
 
+    @Operation(
+            summary = "Get stop places, parkings and related entities as NeTEx Nordic",
+            description = "Without a parameter, the API returns every cached entity. "
+                    + "Each parameter takes several values as a repeated parameter. "
+                    + "The filters apply to stop places, and to the parkings, scheduled stop points and "
+                    + "passenger stop assignments of those stop places. "
+                    + "A stop place matches a parameter when it has any one of the values of that parameter. "
+                    + "A child stop place matches on its own values and on the values of its parent stop place. "
+                    + "A stop place is in the response only when it matches every parameter that the request sets. "
+                    + "A parking without a parent stop place never matches a filter. "
+                    + "The filters do not remove municipality topographic places or valid fare zones."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "A NeTEx Nordic PublicationDelivery document.",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_XML_VALUE,
+                            schema = @Schema(
+                                    name = "PublicationDelivery",
+                                    type = "object",
+                                    description = "The NeTEx Nordic PublicationDelivery root element. "
+                                            + "Examples of the NeTEx Nordic profile: https://github.com/entur/profile-examples/tree/master/netex"
+                            ),
+                            examples = @ExampleObject(
+                                    name = "PublicationDelivery",
+                                    value = ReadApiOpenApiExamples.PUBLICATION_DELIVERY
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "A parameter value is not valid.",
+                    content = @Content
+            )
+    })
     @GetMapping("/fintraffic/v1/stops")
     public void getNetexStream(
+            @Parameter(
+                    name = "transportModes",
+                    in = ParameterIn.QUERY,
+                    description = "Return only stop places that have one of these transport modes, "
+                            + "with their parkings, scheduled stop points and passenger stop assignments. "
+                            + "A parent stop place also has the modes of its children.",
+                    style = ParameterStyle.FORM,
+                    explode = Explode.TRUE,
+                    array = @ArraySchema(schema = @Schema(
+                            type = "string",
+                            allowableValues = {"air", "bus", "coach", "ferry", "metro", "rail", "trolleyBus",
+                                    "tram", "water", "cableway", "funicular", "lift", "other"}
+                    ))
+            )
             @RequestParam(value = "transportModes", required = false) String[] transportMode,
+            @Parameter(
+                    name = "areaCodes",
+                    in = ParameterIn.QUERY,
+                    description = "Return only stop places in the area of one of these competent transport authorities, "
+                            + "with their parkings, scheduled stop points and passenger stop assignments. "
+                            + "A code has three upper-case letters, for example HSL.",
+                    style = ParameterStyle.FORM,
+                    explode = Explode.TRUE,
+                    array = @ArraySchema(schema = @Schema(
+                            type = "string",
+                            pattern = "^" + FintrafficConstants.AREA_CODE_REGEX + "$",
+                            example = "HSL"
+                    ))
+            )
             @RequestParam(value = "areaCodes", required = false) String[] areaCode,
+            @Parameter(
+                    name = "municipalityCodes",
+                    in = ParameterIn.QUERY,
+                    description = "Return only stop places in these municipalities, "
+                            + "with their parkings, scheduled stop points and passenger stop assignments. "
+                            + "A code is the municipality code of Statistics Finland, for example 091 for Helsinki.",
+                    style = ParameterStyle.FORM,
+                    explode = Explode.TRUE,
+                    array = @ArraySchema(schema = @Schema(
+                            type = "string",
+                            pattern = "^" + FintrafficConstants.MUNICIPALITY_CODE_REGEX + "$",
+                            example = "091"
+                    ))
+            )
             @RequestParam(value = "municipalityCodes", required = false) String[] municipalityCode,
-            HttpServletResponse response
+            @Parameter(hidden = true) HttpServletResponse response
     ) {
         try {
             validateTransportModes(transportMode);

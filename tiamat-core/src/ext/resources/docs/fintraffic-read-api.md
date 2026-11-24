@@ -5,7 +5,7 @@
 The Read API is an optional extension for Tiamat that provides fast, read-only access to Stop Place data in NeTEx XML format. This API is designed for external clients that need efficient access to Stop Place data without impacting Tiamat's internal data model or performance.
 
 **Key Features:**
-- Read-only REST API for querying Stop Places by transport mode and area code
+- Read-only REST API for querying Stop Places by transport mode, area code and municipality code
 - Dedicated PostgreSQL cache table for optimized read operations
 - Event-driven real-time cache updates
 - Nightly batch cache repopulation for consistency
@@ -17,7 +17,7 @@ The Read API is an optional extension for Tiamat that provides fast, read-only a
 
 The API uses a dedicated PostgreSQL cache table `ext_fintraffic_netex_entity` that stores:
 - Stop Place entities as NeTEx XML
-- Related entities (ScheduledStopPoint, PassengerStopAssignment, Parking)
+- Related entities (ScheduledStopPoint, PassengerStopAssignment, Parking, municipality TopographicPlace, FareZone)
 - Search keys (JSONB)
 - Entity status (CURRENT, STALE, DELETED)
 - Version and timestamp information for consistency checks
@@ -71,16 +71,31 @@ The batch update task runs as an `ApplicationRunner` and operates in four distin
 ### Get Stop Places
 
 ```http
-GET /api/ext/fintraffic/stop_places/netex
+GET /api/fintraffic/v1/stops
 ```
 
-**Query Parameters:**
-- `transportMode` (optional): Transport mode filter (e.g., `bus`, `rail`, `tram`)
-- `areaCode` (optional): Three-letter area code (e.g., `ABC`, `XYZ`)
+The path assumes the context path `/api`, which PETI sets.
+
+**Query Parameters** (all optional, each takes several values as a repeated parameter):
+- `transportModes`: Transport mode filter. Values: `air`, `bus`, `coach`, `ferry`, `metro`, `rail`, `trolleyBus`, `tram`, `water`, `cableway`, `funicular`, `lift`, `other`
+- `areaCodes`: Three-letter code of a competent transport authority (e.g., `HSL`)
+- `municipalityCodes`: Municipality code of Statistics Finland, three or four digits (e.g., `091`)
+
+**Filter logic:**
+- A request without parameters returns every cached entity
+- The filters apply to Stop Places. They also apply to the Parkings, ScheduledStopPoints and PassengerStopAssignments of those Stop Places. Each of these uses the search key of its Stop Place
+- A Quay has no entry of its own. It is part of its Stop Place
+- A Stop Place matches a parameter when it has any one of the values of that parameter
+- A child Stop Place matches on its own values and on the values of its parent Stop Place
+- A Stop Place is in the response only when it matches every parameter that the request sets
+- A parent Stop Place also has the transport modes of its children
+- A Parking uses the search key of its parent Stop Place
+- A Parking without a parent Stop Place never matches a filter
+- The filters do not remove the municipality TopographicPlace entities or the valid FareZone entities
 
 **Response:**
 - Content-Type: `application/xml`
-- Returns NeTEx `PublicationDelivery` containing matching Stop Places
+- Returns a NeTEx Nordic `PublicationDelivery` with the Stop Places that match the filters, their related entities, and the municipality TopographicPlace and valid FareZone entities
 
 **Status Codes:**
 - `200 OK`: Successful response with NeTEx data
@@ -88,14 +103,16 @@ GET /api/ext/fintraffic/stop_places/netex
 
 **Example:**
 ```bash
-curl "http://localhost:8080/api/ext/fintraffic/stop_places/netex?transportMode=bus&areaCode=ABC"
+curl "http://localhost:1888/api/fintraffic/v1/stops?transportModes=bus&transportModes=rail&areaCodes=HSL"
 ```
+
+The annotations on `FintrafficApiController` hold the OpenAPI description of this endpoint. A host application can publish them as an OpenAPI document.
 
 ### Validation Rules
 
-- `transportMode`: Must be a valid transport mode string
-- `areaCode`: Must be exactly 3 uppercase letters (A-Z, including Å, Ä, Ö)
-  - Configurable via `application.properties`
+- `transportModes`: Each value must be a valid transport mode string
+- `areaCodes`: Each value must be exactly 3 uppercase letters (A-Z, including Å, Ä, Ö)
+- `municipalityCodes`: Each value must be 3 or 4 digits
 
 ## Configuration
 
@@ -133,7 +150,7 @@ To run Tiamat with the Read API enabled:
 
 3. Start the application as normal
 
-The API will be available at `/api/ext/fintraffic/stop_places/netex` and serve cached NeTEx data for read-only access.
+The API will be available at `/api/fintraffic/v1/stops` and serve cached NeTEx data for read-only access.
 
 ### Batch Update Task
 
