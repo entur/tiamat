@@ -508,6 +508,15 @@ public class GraphQLNames {
 
     /** Check if authorized to edit entity */
     public static final String FIND_STOPPLACE_BY_BBOX = "stopPlaceBBox";
+    public static final String FIND_STOPPLACE_MAP_BY_BBOX = "stopPlaceMapBBox";
+    public static final String OUTPUT_TYPE_STOPPLACE_MAP = "StopPlaceMap";
+    public static final String OUTPUT_TYPE_STOPPLACE_CLUSTER = "StopPlaceCluster";
+    public static final String ZOOM = "zoom";
+    public static final String CLUSTERED = "clustered";
+    public static final String CLUSTERS = "clusters";
+    public static final String STOP_PLACES = "stopPlaces";
+    public static final String CLUSTER_COUNT = "count";
+    public static final String CLUSTER_STOP_PLACE = "stopPlace";
     public static final String FIND_TOPOGRAPHIC_PLACE = "topographicPlace";
     public static final String FIND_PATH_LINK = "pathLink";
     public static final String FIND_PARKING = "parking";
