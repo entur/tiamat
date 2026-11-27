@@ -18,10 +18,11 @@ package org.rutebanken.tiamat.model;
 import com.google.common.base.MoreObjects;
 import jakarta.persistence.Embeddable;
 
+import java.io.Serializable;
 import java.time.Instant;
 
 @Embeddable
-public class ValidBetween {
+public class ValidBetween implements Serializable {
 
     private Instant fromDate;
 
